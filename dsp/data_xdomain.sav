@@ -1,0 +1,28 @@
+[timestart] 1125500
+[size] 1000 600
+[pos] -1 -1
+*-16.318867 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] data_xdomain_tb.
+[treeopen] data_xdomain_tb.one2two.
+@28
+data_xdomain_tb.one2two.clk_in
+data_xdomain_tb.one2two.clk_out
+@22
+data_xdomain_tb.one2two.data_in[15:0]
+@28
+data_xdomain_tb.one2two.gate_in
+@22
+data_xdomain_tb.one2two.data_out[15:0]
+@28
+data_xdomain_tb.one2two.gate_out
+data_xdomain_tb.one2two.foo.flagtoggle_clk1
+@800029
+data_xdomain_tb.one2two.foo.sync1_clk2[2:0]
+@29
+(0)data_xdomain_tb.one2two.foo.sync1_clk2[2:0]
+(1)data_xdomain_tb.one2two.foo.sync1_clk2[2:0]
+(2)data_xdomain_tb.one2two.foo.sync1_clk2[2:0]
+@1001201
+-group_end
+[pattern_trace] 1
+[pattern_trace] 0

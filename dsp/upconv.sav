@@ -1,0 +1,40 @@
+[size] 1000 600
+[pos] 2 168
+*-11.655588 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+@10420
+upconv_tb.cos[15:0]
+upconv_tb.sin[15:0]
+@22
+upconv_tb.in_d[15:0]
+@10420
+upconv_tb.out_d[15:0]
+@200
+-upconv
+@28
+upconv_tb.dut.in_strobe
+upconv_tb.dut.in_strobe1
+@22
+upconv_tb.dut.d2out[17:0]
+@28
+upconv_tb.dut.d2strobe0
+upconv_tb.dut.d2strobe1
+upconv_tb.dut.d2strobe2
+@22
+upconv_tb.dut.d2i[17:0]
+upconv_tb.dut.d2q[17:0]
+@18420
+upconv_tb.in_i[15:0]
+@20000
+-
+@10420
+upconv_tb.dut.i2i[15:0]
+@20000
+-
+@18420
+upconv_tb.in_q[15:0]
+@20000
+-
+@10420
+upconv_tb.dut.i2q[15:0]
+@20000
+-

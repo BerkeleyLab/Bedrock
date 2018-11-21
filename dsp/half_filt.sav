@@ -1,0 +1,14 @@
+[timestart] 3810
+[size] 1000 600
+[pos] -1 -1
+*-9.892243 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] half_filt_tb.
+@28
+half_filt_tb.ing
+half_filt_tb.outg
+@22
+half_filt_tb.dut.samp[8:0]
+@29
+half_filt_tb.dut.show
+[pattern_trace] 1
+[pattern_trace] 0
