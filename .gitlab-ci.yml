@@ -1,6 +1,6 @@
 test:
   before_script:
-    - cd src && make clean
+    - cd dsp && make clean
   stage: test
   script:
     - make && make checks
