@@ -1,7 +1,7 @@
 VFLAGS_DEP += -y. -I.
 VFLAGS += -I.
 
-TEST_BENCH = upconv_tb half_filt_tb vectormul_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb
 
 TGT_ := $(TEST_BENCH)
 
