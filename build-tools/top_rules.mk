@@ -1,15 +1,15 @@
-#Build flags for all targets
+# Build flags for all targets
 GCC_FLAGS = -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
 	-Wshadow -Waggregate-return -Wmissing-prototypes -Wnested-externs \
 	-Wall -W -Wno-unused -Winline -Wwrite-strings -Wundef -pedantic
 CF_ALL = -Wall -O2 -W -fPIC -g -std=c99 -D_GNU_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
 LF_ALL = -lm ${LDFLAGS_$@}
 
-ICARUS_SUFFIX=
+ICARUS_SUFFIX =
 VERILOG_VPI = iverilog-vpi$(ICARUS_SUFFIX)
 VERILOG = iverilog$(ICARUS_SUFFIX) -Wall
 VG_ALL = -DSIMULATE
-V_TB = -Wno-timescale -Wno-macro-redefinition
+V_TB = -Wno-timescale
 VFLAGS = ${VFLAGS_$@}
 VVP_FLAGS = ${VVP_FLAGS_$@}
 VVP = vvp$(ICARUS_SUFFIX) -n
@@ -17,14 +17,14 @@ GTKWAVE = gtkwave
 VPIEXT = vpi
 OCTAVE = octave
 PYTHON = python2
-AWK= awk
+AWK = awk
 VPI_CFLAGS := $(shell $(VERILOG_VPI) --cflags)
 VPI_LDFLAGS := $(shell $(VERILOG_VPI) --ldflags)
 DEPDIR = _dep
 IPX_DIR = _ipx
 AUTOGEN_DIR = _autogen
 
-#Build tools
+# Build tools
 CC = $(BUILD_DIR)/ccd-gcc
 INST = $(BUILD_DIR)/install
 COMP = $(CC) $(CF_ALL) $(CF_TGT) -o $@ -c $<
@@ -47,16 +47,16 @@ ISE_SYNTH = bash $(BUILD_DIR)/xil_syn
 VIVADO_CMD = vivado -mode batch -nojou -nolog
 VIVADO_SYNTH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(BUILD_DIR)/vivado_tcl/vivado_project.tcl -tclargs
 VIVADO_REMOTE_SYNTH = $(VIVADO_SYNTH)
-SYNTH_OPT= -DMEM_SIZE=16384
+SYNTH_OPT = -DMEM_SIZE=16384
 PLANAHEAD_SYNTH = planAhead -mode batch -nojou -nolog -source $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(BUILD_DIR)/vivado_tcl/planahead_project.tcl -tclargs
 VIVADO_FLASH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/vivado_flash.tcl -tclargs
 VIVADO_CREATE_IP = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/lbl_ip.tcl $(BUILD_DIR)/vivado_tcl/create_ip.tcl -tclargs
-OCTAVE_SILENT=$(OCTAVE) -q $<
-PS2PDF=ps2pdf -dEPSCrop $< $@
+OCTAVE_SILENT = $(OCTAVE) -q $<
+PS2PDF = ps2pdf -dEPSCrop $< $@
 CHECK = $(VVP) $< | awk -f $(filter %.awk, $^)
-BIT2RBF=bit2rbf $@ < $<
+BIT2RBF = bit2rbf $@ < $<
 
-#General directory-independent rules
+# General directory-independent implicit rules
 
 %.o: %.c
 	$(COMP)
@@ -75,7 +75,7 @@ BIT2RBF=bit2rbf $@ < $<
 
 %_live: %_tb.v
 	$(VERILOG_TB)
-#	$(VERILOG_RUN)
+#$(VERILOG_RUN)
 
 %_tb_vpi: %_tb.v
 	$(VERILOG_TB_VPI)
@@ -126,7 +126,7 @@ ifeq ($(XILINX_TOOL), VIVADO)
 # Uncomment below for remote synth
 #%.bit: VIVADO_SOURCE_ARGS=$(shell $(PYTHON) $(BUILD_DIR)/exec_remote.py $^)
 #%.bit: $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(BUILD_DIR)/vivado_tcl/vivado_project.tcl system_top.xdc %.v
-#	if test $(REMOTE_SYNTH) = 1 ; then mkdir _temp; echo $^ | xargs -J % cp % _temp; tar -zcf - _temp/* | ssh fpga "rm -rf _temp; tar -zxf - && source /home/vkvytla/software/Vivado/2015.3/settings64.sh && cd _temp ; $(VIVADO_REMOTE_SYNTH) $(HARDWARE) $* system_top.xdc $(VIVADO_SOURCE_ARGS)" ; rm -rf _temp && scp fpga":"~/_temp/*.bit .; else $(VIVADO_SYNTH) $(HARDWARE) $* $^; fi
+#if test $(REMOTE_SYNTH) = 1 ; then mkdir _temp; echo $^ | xargs -J % cp % _temp; tar -zcf - _temp/* | ssh fpga "rm -rf _temp; tar -zxf - && source /home/vkvytla/software/Vivado/2015.3/settings64.sh && cd _temp ; $(VIVADO_REMOTE_SYNTH) $(HARDWARE) $* system_top.xdc $(VIVADO_SOURCE_ARGS)" ; rm -rf _temp && scp fpga":"~/_temp/*.bit .; else $(VIVADO_SYNTH) $(HARDWARE) $* $^; fi
 
 %.mcs: %.bit
 	$(VIVADO_FLASH) $< $@ spix4
@@ -172,15 +172,19 @@ $(AUTOGEN_DIR)/regmap_%.json: %.v
 %_support.vh: $(BS_HARDWARE_DIR)/%_support.in
 	perl $(BUILD_DIR)/regmap_proc.pl $< > $@
 
-config_romx.v:
-	$(PYTHON) $(BUILD_DIR)/config_crunch.py --HARDWARE $(HARDWARE) --TOOL 2 --DSP_FLAVOR $(DSP_FLAVOR) --OUTPUT $@
+# XXX All of the above are assignments and implicit rules, which are
+# entirely appropriate for a general-purpose make includefile.
+# If there are no explicit rules given in the makefile that includes
+# this file, the first explicit rule -- and therefore the default target --
+# will be the one below.
 
 #$(IPX_DIR)/component.xml:
-#	mkdir -p $(IPX_DIR); $(VIVADO_CREATE_IP) $(IP_NAME) $(IPX_DIR) $^
+#mkdir -p $(IPX_DIR); $(VIVADO_CREATE_IP) $(IP_NAME) $(IPX_DIR) $^
 
 .PHONY: clean
 CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR)
-# The "find" commands below check that the source code satisifies:
+# The "find" commands below (embedded in check_clean) check that the
+# source code satisifies:
 #  no hidden files
 #  filenames are only alphanumeric, plus hyphen, underscore, and period
 #  files don't contain trailing spaces or tabs, space followed by tab, or non-printing-ASCII chars (.eps files excepted)
