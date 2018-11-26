@@ -1,0 +1,17 @@
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-5.634518 25 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] beam_tb.
+[sst_width] 210
+[signals_width] 126
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@24
+beam_tb.cc
+beam_tb.pulse[11:0]
+beam_tb.dut.phase[11:0]
+@28
+beam_tb.dut.carry
+[pattern_trace] 1
+[pattern_trace] 0

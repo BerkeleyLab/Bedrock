@@ -10,7 +10,7 @@ VERILOG_VPI = iverilog-vpi$(ICARUS_SUFFIX)
 VERILOG = iverilog$(ICARUS_SUFFIX) -Wall
 VG_ALL = -DSIMULATE
 V_TB = -Wno-timescale
-VFLAGS = ${VFLAGS_$@}
+VFLAGS = ${VFLAGS_$@} -y$(AUTOGEN_DIR) -I$(AUTOGEN_DIR)
 VVP_FLAGS = ${VVP_FLAGS_$@}
 VVP = vvp$(ICARUS_SUFFIX) -n
 GTKWAVE = gtkwave
@@ -70,7 +70,7 @@ BIT2RBF = bit2rbf $@ < $<
 %.a: %.o
 	$(ARCH)
 
-%_tb: %_tb.v
+%_tb: %_tb.v $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh
 	$(VERILOG_TB)
 
 %_live: %_tb.v
