@@ -9,6 +9,7 @@ NO_CHECK = piloop2_check banyan_mem_check pplimit_check cavity_check ctrace_chec
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 
 BITS_ := bandpass3.bit
+PYTHON = python3
 
 .PHONY: targets checks bits check_all clean_all
 targets: $(TGT_)
@@ -32,8 +33,9 @@ timestamp.bit: timestamp.v reg_delay.v
 	$(SYNTH) timestamp $^
 	mv _xilinx/timestamp.bit $@
 
-half_filt_check: half_filt.m half_filt.dat
+half_filt_check: half_filt.py half_filt.m half_filt.dat
 	$(OCTAVE) -q half_filt.m
+	$(PYTHON) half_filt.py
 
 # scattershot approach
 # limited to den>=12
@@ -44,7 +46,7 @@ mon_12_check: mon_12_tb $(BUILD_DIR)/testcode.awk
 	$(VVP) $< +amp=200   +den=12  +phs=0.70 | $(AWK) -f $(filter %.awk, $^)
 
 banyan_crosscheck: banyan_tb banyan_ch_find.py
-	$(VVP) banyan_tb +trace +squelch | python banyan_ch_find.py
+	$(VVP) banyan_tb +trace +squelch | $(PYTHON) banyan_ch_find.py
 
 tt800_ref.dat: tt800_ref
 	./tt800_ref > $@
