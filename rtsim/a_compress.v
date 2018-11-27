@@ -16,12 +16,11 @@ module a_compress(
 	input [15:0] sat_ctl   // external
 );
 
-`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
-
 // Pipeline match
 // "Free" spot for multiplier for overall gain setting (no added latency)
 wire signed [17:0] m1;
-reg_delay #(.dw(18), .len(9)) match(.clk(clk), .gate(1'b1), .din(d_in), .dout(m1));
+reg_delay #(.dw(18), .len(9))
+	match(.clk(clk), .reset(1'b0), .gate(1'b1), .din(d_in), .dout(m1));
 
 // Mangnitude-square of the input
 wire signed [18:0] mag2;

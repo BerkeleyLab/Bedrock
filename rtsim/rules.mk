@@ -14,8 +14,10 @@ CHK_ += a_comp_check
 
 BITS_ :=
 
+PYTHON = python3
+
 a_comp_check: a_compress.py a_compress.dat
-	python a_compress.py -c
+	$(PYTHON) a_compress.py -c
 
 CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat
 

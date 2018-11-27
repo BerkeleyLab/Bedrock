@@ -40,8 +40,8 @@ a_compress a_compress(.clk(clk), .sat_ctl(sat_ctl),
 	.iq(iq), .d_in(d_in), .d_out(d_out)
 );
 
-reg_delay #(.dw(18), .len(10)) match(.clk(clk), .gate(1'b1),
-	.din(d_in), .dout(d_check));
+reg_delay #(.dw(18), .len(10))
+	match(.clk(clk), .reset(1'b0), .gate(1'b1), .din(d_in), .dout(d_check));
 
 always @(posedge clk) if (trace) begin
 	if (cc>60 && ~iq) $display("%d %d", d_check, d_out);
