@@ -1,6 +1,13 @@
-test:
+dsp_test:
   before_script:
     - cd dsp && make clean
   stage: test
   script:
     - make && make checks
+
+cordic_test:
+  before_script:
+    - cd cordic && make clean
+  stage: test
+  script:
+    - make all

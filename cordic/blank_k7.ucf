@@ -1,0 +1,6 @@
+# Unlike previous generations, Xilinx 7-series don't have dedicated clock pins
+# use PART=xc7a100t-fgg484-2
+# or  PART=xc7k70t-fbg484-2
+# or  PART=xc7z020-clg484-1
+NET "clk" TNM_NET = "CLK_1";
+TIMESPEC "TS_CLK_1" = PERIOD "CLK_1" 3.1 ns HIGH 50%;
