@@ -1,7 +1,7 @@
 VFLAGS_DEP += -y. -I.
-VFLAGS += -I.
+VFLAGS += -I. -y.
 
-TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb
 
 TGT_ := $(TEST_BENCH)
 
@@ -51,8 +51,8 @@ banyan_crosscheck: banyan_tb banyan_ch_find.py
 tt800_ref.dat: tt800_ref
 	./tt800_ref > $@
 
-tt800_check: tt800.dat tt800_ref.dat
-	cmp $^
+tt800_check: tt800_tb tt800.dat tt800_ref.dat
+	cmp tt800.dat tt800_ref.dat
 
 ctrace_test1.out: ctrace_tb
 	$(VVP) $< +dfile=$@
