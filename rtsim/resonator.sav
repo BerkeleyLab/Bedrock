@@ -1,0 +1,49 @@
+[timestart] 0
+[size] 1289 590
+[pos] 59 79
+*-5.834694 107 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] resonator_tb.
+[sst_width] 210
+[signals_width] 228
+[sst_expanded] 1
+[sst_vpaned_height] 150
+@24
+resonator_tb.cc[31:0]
+@28
+resonator_tb.start
+@420
+resonator_tb.drive[17:0]
+resonator_tb.position[17:0]
+@28
+resonator_tb.clip
+@200
+-resonator
+@24
+resonator_tb.resonator.pc[9:0]
+@420
+resonator_tb.resonator.ab_out0[35:0]
+resonator_tb.resonator.wd_out0[17:0]
+@24
+resonator_tb.resonator.scale0[2:0]
+@420
+resonator_tb.resonator.ab_out[35:0]
+resonator_tb.resonator.wd_out[17:0]
+@28
+resonator_tb.resonator.iq
+@420
+resonator_tb.resonator.mul_result[17:0]
+resonator_tb.resonator.foo_result[18:0]
+@24
+resonator_tb.resonator.scale_d[2:0]
+@420
+resonator_tb.resonator.shf_result[32:0]
+resonator_tb.resonator.ab_del_out[35:0]
+resonator_tb.resonator.sum_result[36:0]
+@28
+resonator_tb.resonator.clip_r
+@420
+resonator_tb.resonator.sat_result[35:0]
+@24
+resonator_tb.resonator.pc_d[9:0]
+[pattern_trace] 1
+[pattern_trace] 0
