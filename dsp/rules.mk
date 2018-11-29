@@ -34,7 +34,6 @@ timestamp.bit: timestamp.v reg_delay.v
 	mv _xilinx/timestamp.bit $@
 
 half_filt_check: half_filt.py half_filt.m half_filt.dat
-	$(OCTAVE) -q half_filt.m
 	$(PYTHON) half_filt.py
 
 # scattershot approach
