@@ -1,4 +1,5 @@
 BUILD_DIR = ../build-tools
+CORDIC_DIR = ../cordic
 DSP_DIR = ../dsp
 
 .PHONY: all
