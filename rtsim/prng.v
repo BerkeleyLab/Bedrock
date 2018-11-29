@@ -20,7 +20,7 @@ module prng(
 reg iva_strobe=0; always @(posedge clk) iva_strobe <= iva_we; wire tt800_ena = random_run | iva_strobe;
 reg ivb_strobe=0; always @(posedge clk) ivb_strobe <= ivb_we; wire tt800_enb = random_run | ivb_strobe;
 
-tt800v tt800a(.clk(clk), .en(tt800_ena), .init(iva_strobe), .initv(iva), .y(rnda));
-tt800v tt800b(.clk(clk), .en(tt800_enb), .init(ivb_strobe), .initv(ivb), .y(rndb));
+tt800 tt800a(.clk(clk), .en(tt800_ena), .init(iva_strobe), .initv(iva), .y(rnda));
+tt800 tt800b(.clk(clk), .en(tt800_enb), .init(ivb_strobe), .initv(ivb), .y(rndb));
 
 endmodule

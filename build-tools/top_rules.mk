@@ -25,7 +25,8 @@ IPX_DIR = _ipx
 AUTOGEN_DIR = _autogen
 
 # Build tools
-CC = $(BUILD_DIR)/ccd-gcc
+#CC = $(BUILD_DIR)/ccd-gcc
+CC = gcc
 INST = $(BUILD_DIR)/install
 COMP = $(CC) $(CF_ALL) $(CF_TGT) -o $@ -c $<
 LINK = $(CC) $(LF_ALL) $(LF_TGT) -o $@ $^ $(LL_TGT)
