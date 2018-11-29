@@ -14,8 +14,6 @@ CHK_ += a_comp_check resonator_check cav4_mode_check
 
 BITS_ :=
 
-PYTHON = python3
-
 VFLAGS_cav4_mode_tb += -DLB_DECODE_cav4_mode
 
 cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
@@ -31,6 +29,15 @@ resonator_check: resonator_tb resonator_check.m resonator.dat
 
 cav4_mode_check: cav4_check1.m cav4_mode.dat
 	$(OCTAVE) $<
+
+$(AUTOGEN_DIR)/%_auto.vh: %.v
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -o $@ -w 14
+
+$(AUTOGEN_DIR)/addr_map_%.vh: %.v
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -a $@ -w 14
+
+$(AUTOGEN_DIR)/regmap_%.json: %.v
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -r $@ -w 14
 
 CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat cordicg_b22.v
 

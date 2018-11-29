@@ -68,7 +68,7 @@ cav4_mode #(.shift(7)) cav4_mode(.clk(clk),
 	.mech_freq(mech_freq), .v_squared(v_squared),
 	.beam_coupling(beam_coupling),
 	.drive_coupling(drive_coupling), .bw(bw),
-	.lb_data(lb_data), .lb_addr(lb_addr), .lb_write(lb_write)
+	.lb_data(lb_data), .lb_addr(lb_addr), .lb_write(lb_write), .lb_clk(clk)
 );
 
 initial begin
