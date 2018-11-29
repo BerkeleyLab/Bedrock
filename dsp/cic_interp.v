@@ -1,7 +1,7 @@
 `timescale 1ns / 1ns
 
 // First-order CIC interpolator
-module interp0(
+module cic_interp(
 	input clk,
 	input  [17:0] d_in,
 	input strobe,

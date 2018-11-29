@@ -30,7 +30,7 @@ resonator_check: resonator_tb resonator_check.m resonator.dat
 cav4_mode_check: cav4_check1.m cav4_mode.dat
 	$(OCTAVE) $<
 
-CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat cordicg_b22
+CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat cordicg_b22.v
 
 CLEAN_DIRS += _xilinx
 
