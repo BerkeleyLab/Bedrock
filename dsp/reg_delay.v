@@ -4,31 +4,34 @@ module reg_delay #(
 	parameter dw=16,  // Width of data
 	parameter len=4   // Cycles to delay
 ) (
-	input clk, // Rising edge clock input; all logic is synchronous in this domain
-	input reset,
-	input gate, // Enable processing
-	input [dw-1:0] din, // Input data
-	output [dw-1:0] dout // Output data
+	input clk,  // Rising edge clock input; all logic is synchronous in this domain
+	input reset,  // Please tie to 0 if you can; see below
+	input gate,  // Enable processing
+	input [dw-1:0] din,  // Input data
+	output [dw-1:0] dout  // Output data
 );
 
-// len clocks of delay.  Xilinx should turn this into
-//   dw*floor((len+15)/16)
-// SRL16 shift registers, when there reset is tied to 1'b0 at instantiation site.
+// When used in a Xilinx chip, ideally this logic is turned into
+// a bunch of SRL16 shift registers or similar.  That works only if
+// our reset port is tied to 1'b0 at instantiation site.
 generate if (len > 1) begin: usual
 	reg [dw*len-1:0] shifter=0;
 	always @(posedge clk) begin
-		shifter <= reset ? 0 : gate ? {shifter[dw*len-1-dw:0],din} : shifter;
+		if (gate) shifter <= {shifter[dw*len-1-dw:0],din};
+		if (reset) shifter <= 0;
 	end
 	assign dout = shifter[dw*len-1:dw*len-dw];
 end else if (len > 0) begin: degen1
 	reg [dw*len-1:0] shifter=0;
 	always @(posedge clk) begin
-		shifter <= reset ? 0 : gate ? din : shifter;
+		if (gate) shifter <= din;
+		if (reset) shifter <= 0;
 	end
 	assign dout = shifter[dw*len-1:dw*len-dw];
-end
-else begin: degen0
+end else if (len == 0) begin: degen0
 	assign dout = din;
+end else begin: bad
+	assign dout = din[-1:0];
 end
 endgenerate
 
