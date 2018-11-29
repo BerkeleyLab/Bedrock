@@ -3,14 +3,14 @@ VFLAGS += -I. -y. -y$(DSP_DIR) -I$(DSP_DIR) -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
 VVP_FLAGS += +trace
 
-TEST_BENCH = beam_tb outer_prod_tb a_compress_tb cav4_mode_tb debug_hack
+TEST_BENCH = beam_tb outer_prod_tb resonator_tb a_compress_tb cav4_mode_tb
 
 TGT_ := $(TEST_BENCH)
 
 NO_CHECK =
 
 #CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
-CHK_ += a_comp_check cav4_mode_check
+CHK_ += a_comp_check resonator_check cav4_mode_check
 
 BITS_ :=
 
@@ -21,11 +21,10 @@ VFLAGS_cav4_mode_tb += -DLB_DECODE_cav4_mode
 cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
 	$(PYTHON) $< 22 > cordicg_b22.v
 
+cav4_mode_tb: cordicg_b22.v
+
 a_comp_check: a_compress.py a_compress.dat
 	$(PYTHON) a_compress.py -c
-
-debug_hack: _autogen/resonator_tb_auto.vh
-	cat $^
 
 resonator_check: resonator_tb resonator_check.m resonator.dat
 	$(OCTAVE) resonator_check.m resonator.dat
