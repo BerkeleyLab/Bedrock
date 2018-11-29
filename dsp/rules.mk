@@ -33,7 +33,7 @@ timestamp.bit: timestamp.v reg_delay.v
 	$(SYNTH) timestamp $^
 	mv _xilinx/timestamp.bit $@
 
-half_filt_check: half_filt.py half_filt.m half_filt.dat
+half_filt_check: half_filt.py half_filt.dat
 	$(PYTHON) half_filt.py
 
 # scattershot approach
