@@ -169,7 +169,7 @@ $(AUTOGEN_DIR)/addr_map_%.vh: %.v
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -a $@ -w $(LB_AW)
 
 $(AUTOGEN_DIR)/regmap_%.json: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -r $@ -w $(LB_AW)
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -i $< -r $@ -w $(LB_AW)
 
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz

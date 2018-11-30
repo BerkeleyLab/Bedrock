@@ -3,7 +3,7 @@ VFLAGS += -I. -y. -y$(DSP_DIR) -I$(DSP_DIR) -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
 VVP_FLAGS += +trace
 
-TEST_BENCH = beam_tb outer_prod_tb resonator_tb a_compress_tb cav_mode_tb cav_elec_tb
+TEST_BENCH = beam_tb outer_prod_tb resonator_tb a_compress_tb cav_mode_tb cav_elec_tb rtsim_tb
 
 TGT_ := $(TEST_BENCH)
 
@@ -32,6 +32,14 @@ cav_mode_auto: $(AUTOGEN_DIR)/cordicg_b22.v
 cav_elec_auto: cav_mode_auto
 rtsim_auto: prng_auto cav_mech_auto station_auto cav_elec_auto
 
+rtsim_in.dat: param.py rtsim_auto $(AUTOGEN_DIR)/regmap_rtsim.json
+	$(PYTHON) $< $(AUTOGEN_DIR)/regmap_rtsim.json | sed -e 's/ *#.*//' | grep . > $@
+
+rtsim.vcd: rtsim_in.dat
+
+rtsim.dat: rtsim_tb rtsim_in.dat
+	$(VVP) $< +pfile=$@
+	$(PYTHON) rtsim_test.py
 # XXX why does this break builds?
 # .PHONY: rtsim_auto
 
@@ -46,7 +54,7 @@ cav_mode_check: cav_check1.m cav_mode.dat
 
 LB_AW = 14 # Set the Local Bus Address Width for test benches
 
-CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat cordicg_b22.v
+CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat
 
 CLEAN_DIRS += _xilinx
 
