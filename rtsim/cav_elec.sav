@@ -1,0 +1,52 @@
+[timestart] 306
+[size] 1162 610
+[pos] 253 18
+*-5.611435 390 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] cav_elec_tb.
+[treeopen] cav_elec_tb.cav_elec.
+[treeopen] cav_elec_tb.cav_elec.cav_mode[0].
+[treeopen] cav_elec_tb.cav_elec.cav_mode[0].outer_prod.
+[sst_width] 210
+[signals_width] 243
+[sst_expanded] 1
+[sst_vpaned_height] 157
+@28
+cav_elec_tb.start
+cav_elec_tb.start_eig
+cav_elec_tb.cav_elec.start_dot
+@200
+-dot_prod
+@420
+cav_elec_tb.cav_elec.cav_mode[0].dot.k_out1[17:0]
+cav_elec_tb.mech_x[17:0]
+cav_elec_tb.cav_elec.cav_mode[0].dot.mul1s[17:0]
+cav_elec_tb.cav_elec.cav_mode[0].dot.result[17:0]
+@28
+cav_elec_tb.cav_elec.cav_mode[0].dot.strobe
+@200
+-interpolation
+@420
+cav_elec_tb.cav_elec.cav_mode[0].m_fine_freq[17:0]
+cav_elec_tb.cav_elec.cav_mode[0].m_freq[27:0]
+@8420
+cav_elec_tb.cav_elec.cav_mode[0].v_squared[17:0]
+@200
+-outer_prod
+@28
+cav_elec_tb.cav_elec.cav_mode[0].outer_prod.start
+@420
+cav_elec_tb.cav_elec.cav_mode[0].outer_prod.x_hold[17:0]
+cav_elec_tb.cav_elec.cav_mode[0].outer_prod.k_out1[17:0]
+cav_elec_tb.cav_elec.cav_mode[0].outer_prod.result[17:0]
+cav_elec_tb.eig_drive[17:0]
+@24
+cav_elec_tb.cc[31:0]
+@200
+-resonator
+@28
+cav_elec_tb.resonator.iq
+@420
+cav_elec_tb.resonator.mul_result[17:0]
+cav_elec_tb.resonator.drive[17:0]
+[pattern_trace] 1
+[pattern_trace] 0

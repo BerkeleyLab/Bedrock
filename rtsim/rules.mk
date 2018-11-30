@@ -15,8 +15,7 @@ CHK_ += a_comp_check resonator_check cav_mode_check
 BITS_ :=
 
 VFLAGS_cav_mode_tb += -DLB_DECODE_cav_mode
-VFLAGS_cav_elec_tb = -DLB_DECODE_cav_elec
-
+VFLAGS_cav_elec_tb += -DLB_DECODE_cav_elec
 
 %_s6.bit: %.v $(DEPDIR)/%.bit.d blank_s6.ucf
 	PART=xc6slx45t-fgg484-3
@@ -26,10 +25,15 @@ VFLAGS_cav_elec_tb = -DLB_DECODE_cav_elec
 	PART=xc7a100t-fgg484-2
 	CLOCK_PIN=$(CLOCK_PIN) PART=$(PART) $(ISE_SYNTH) $* $(SYNTH_OPT) $^ && mv _xilinx/$@ $@
 
-cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
-	$(PYTHON) $< 22 > cordicg_b22.v
+$(AUTOGEN_DIR)/cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
+	mkdir -p $(AUTOGEN_DIR) && $(PYTHON) $< 22 > $@
 
-cav_mode_tb: cordicg_b22.v
+cav_mode_auto: $(AUTOGEN_DIR)/cordicg_b22.v
+cav_elec_auto: cav_mode_auto
+rtsim_auto: prng_auto cav_mech_auto station_auto cav_elec_auto
+
+# XXX why does this break builds?
+# .PHONY: rtsim_auto
 
 a_comp_check: a_compress.py a_compress.dat
 	$(PYTHON) a_compress.py -c

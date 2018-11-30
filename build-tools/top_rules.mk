@@ -71,12 +71,17 @@ BIT2RBF = bit2rbf $@ < $<
 %.a: %.o
 	$(ARCH)
 
-%_tb: %_tb.v $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/addr_map_%.vh $(AUTOGEN_DIR)/%_auto.vh $(AUTOGEN_DIR)/%_tb_auto.vh
+%_tb: %_tb.v %_tb_auto
 	$(VERILOG_TB)
+
+%_tb_auto: $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh %_auto
+	@echo .
+
+%_auto: $(AUTOGEN_DIR)/addr_map_%.vh $(AUTOGEN_DIR)/%_auto.vh
+	@echo .
 
 %_live: %_tb.v
 	$(VERILOG_TB)
-#$(VERILOG_RUN)
 
 %_tb_vpi: %_tb.v
 	$(VERILOG_TB_VPI)

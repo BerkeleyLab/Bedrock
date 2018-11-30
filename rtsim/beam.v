@@ -3,7 +3,7 @@
 // Closely related to common_hdl/ph_acc.v
 // ena input allows use of a 188 MHz clock while the state logic
 //   progresses at 94 MHz
-// Nominal LCLS-2 configuration: phase_step=13, modulo=-1320, see beam1_tb.v
+// Nominal LCLS-2 configuration: phase_step=13, modulo=-1320, see beam_tb.v
 // Beam pulses out last up to two cycles, have uniform integrated amplitude,
 //   and the time between each pair of pulses (computed from the centroid of
 //   each pulse) is correct (1320/13 cycles for the nominal configuration).
