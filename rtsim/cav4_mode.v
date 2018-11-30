@@ -80,7 +80,7 @@ reg [18:0] cordic_phs = 0;
 always @(posedge clk) cordic_phs <= mech_phase + (iq ? beam_phs : 0);
 
 wire signed [17:0] xout, yout;
-cordicg_b22 #(.width(18)) icordic(.clk(clk), .opin(2'b0),
+cordicg_b22 #(.nstg(20), .width(18)) icordic(.clk(clk), .opin(2'b0),
 	.xin(cordic_x), .yin(18'b0), .phasein(cordic_phs),
 	.xout(xout), .yout(yout));
 
