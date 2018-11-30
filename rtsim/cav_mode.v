@@ -23,7 +23,7 @@
 
 // Per-mode memory map:
 //   0   not used
-//   1   m_coarse_freq (see cav4_elec.v)
+//   1   m_coarse_freq (see cav_elec.v)
 //   2   drive_coupling
 //   3   bw
 //   4-7 out_couple
@@ -33,9 +33,9 @@
 // CORDIC elements.  The IIR element in lp_pair tests by itself at
 // 3.0 ns, so that's not it.
 
-`include "cav4_mode_auto.vh"
+`include "cav_mode_auto.vh"
 
-module cav4_mode(
+module cav_mode(
 	input clk,
 	// Input signal on waveguide given in IQ form
 	input iq,  // high for I, low for Q
