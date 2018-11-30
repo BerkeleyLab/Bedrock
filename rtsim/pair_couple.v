@@ -31,7 +31,7 @@ assign out_phase_offset_addr = ~iq;
 reg [18:0] out_phase=0;
 always @(posedge clk) out_phase <= lo_phase+out_phase_offset;
 wire signed [17:0] xout, yout;
-cordicg_b22 #(.width(18)) ocordic(.clk(clk), .opin(2'b0),
+cordicg_b22 #(.nstg(20), .width(18)) ocordic(.clk(clk), .opin(2'b0),
 	.xin(out_coupling), .yin(18'b0), .phasein(out_phase),
 	.xout(xout), .yout(yout));
 
