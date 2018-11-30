@@ -19,7 +19,7 @@ There are waveforms to view, and most importantly, it comes with unit tests that
 > > > `pair_couple`:  Applies a pair of complex couplings to IQ data stream
 > > > `ph_gacc`:      Gated phase accumulator adapted from ph_acc.v
 > > > `dot_prod`:     Dot product of state vector to get freq perturbation
-> > > `interp0`:       Want smooth changes in frequency
+> > > `cic_interp`:       Want smooth changes in frequency
 > > > `cav_mode`:    Represents a single cavity electromagnetic mode
 > > > > `lp_pair`:    Time-interleaved pair of low-pass filters
 > > > > `pair_couple`:  Applies a pair of complex couplings to an interleaved IQ data stream
