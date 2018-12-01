@@ -1,0 +1,36 @@
+At the end of vmod1.vcd
+piezo is 0
+pi mode state (-18925334,-5943737) [26:0]
+   (param.py peakV=1.5e6, so 1.5e6*sqrt(18925334^2+5943737^2)/2^26 = 4.43e5 V)
+   (matches 4.46e5 shown in resp.m)
+pi mode v_squared is about 5726 (param.py peakV=1.5e6)
+   (sqrt(18925334^2+5943737^2)/2^26)^2 = 0.0874
+   5726/2^16 = 0.0874, reminding us that 2^17 is twice full-scale (in the corner)
+pi mode m_eig_drive = 3470
+   (param.py outer_0_k[0] = 79639, 5726*79639/2^17 = 3479)
+resonator drive is 3470
+position 357 3670 297 98
+   (resonator DC gain 1.1782, 3470*1.1782 = 4088)
+d_result is -576  (dot product result, input to cic_interp)
+   (parem.py dot_0_k[1] = -82159, 3670*-82159/2^19 = -575)
+m_fine_freq is -504 (output of cic_interp, input to cav_freq)
+   (explainable as 576 * 7/8)
+coarse_freq is -227 (host-set, yes that's pi.coarse_freq in vmod1_in.dat)
+m_freq is -258275 (output of cav_freq, input to cav_mode)
+   (explainable as -504 << df_scale - 227, where df_scale=9)
+Comment in cav_elec is:
+   m_freq step size is 94.286 MHz / 2^32 = 0.02195 Hz
+so 94.286e6 / 2^32 * -258275 = -5670 Hz
+
+Summary:
+  4.46e5^2         # SI V^2
+  * 2^16/1.5e6^2   # scaling of v_squared
+  * 79639/2^17     # outer product
+  * 1.1109         # resonator
+  * -82159/2^19    # inner product
+  * 7/8            # interpolator
+  * 512            # df_scale
+  * 94.286e6/2^32  # m_freq step size
+  = -6027 Hz
+
+conversion is -3.03e-8 Hz/V^2, just as listed in param.py

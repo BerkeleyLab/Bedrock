@@ -1,0 +1,22 @@
+% stolen from /usr/share/texmf/tex/plain/base/cwebmac.tex
+\newif\ifpdftex
+\ifx\pdfoutput\undefined \pdftexfalse \else\ifnum\pdfoutput=0 \pdftexfalse
+\else \pdftextrue \pdfoutput=1 \input pdfcolor \let\setcolor\pdfsetcolor \fi\fi
+
+\ifpdftex
+% target is pdf
+% \input supp-pdf.tex  % definition of pdfimage
+%\def\centerfig#1#2{\centerline{\pdfimage width #1 {#2.pdf}}}
+\def\centerfig#1#2{\centerline{\pdfximage width #1 {#2.pdf}\pdfrefximage\pdflastximage}}
+\def\barefig#1#2{\pdfximage width #1 {#2.pdf}\pdfrefximage\pdflastximage}
+% Can't explain why the following two lines are needed, but the settings in
+% /usr/share/texmf-texlive/tex/generic/config/pdftexconfig.tex
+% are both wrong (A4 instead of letter) and ignored.
+\pdfpagewidth=8.5 truein
+\pdfpageheight=11.0 truein
+\else
+% target is xdvi/eps
+\input epsf
+\def\centerfig#1#2{\centerline{\epsfxsize=#1\epsffile{#2.epsa}}}
+\def\barefig#1#2{\epsfxsize=#1\epsffile{#2.epsa}}
+\fi

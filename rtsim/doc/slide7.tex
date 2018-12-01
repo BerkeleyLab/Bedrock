@@ -1,0 +1,129 @@
+\magnification=\magstep2
+\input lrdfig.tex
+\parindent=0pt
+\parskip=6pt
+\nopagenumbers
+
+{\bf Detuning Filter Bank}
+
+(from Holzbauer \& Schappert, 11/15/2016)
+
+Discrete-time State Space Realization
+
+General form for a system whose outputs and internal states
+       depend linearly on the inputs and internal states
+
+$u$ is the detuning
+
+$y$ is the piezo drive signal
+
+$x$ are estimates of the amplitudes of the cavity mechanical modes
+
+${\bf A}$ can be decomposed into a 2$\times$2 block diagonal matrix,
+      ideal for implementation in an FPGA firmware
+
+$$\eqalign{
+ x_{k+1} &= {\bf A} x_k~~~  + {\bf B} u_k\cr
+ y_{k+1} &= {\bf C} x_{k+1} + {\bf D} u_k\cr}$$
+
+$${\bf A}^{(j)} = \left[\matrix{
+   e^{-\Delta t/\tau_j} \cos\omega_j\Delta t & e^{-\Delta t/\tau_j} \sin\omega_j\Delta t \cr
+  -e^{-\Delta t/\tau_j} \sin\omega_j\Delta t & e^{-\Delta t/\tau_j} \cos\omega_j\Delta t \cr
+}\right] $$
+
+$${\bf B}^{(j)} = \left[\matrix{1\cr 0}\right]$$
+
+$${\bf C}^{(j)} = \left[\matrix{
+  G^{(j)} \cos \psi^{(j)} &
+  G^{(j)} \sin \psi^{(j)} }\right]$$
+
+\vfill\eject
+
+{\bf Filter Bank: LBNL Implementation}
+
+This exact filter bank abstraction was also implemented in LBNL's
+{\tt resonator.v}, first checked into git in June, 2014.
+
+For analysis purposes, slightly rearrange these equations.
+Use $a_R$ and $a_I$ for the real and imaginary
+parts of $\exp((-1/\tau_j + i\omega_j)\Delta t))$, and use $z$ as the
+time step operator, to get
+
+$$ \left( \matrix{z-a_R & -a_I\cr
+                  a_I & z-a_R\cr}\right)
+\left( \matrix{x_0 \cr x_1} \right)  =
+\left( \matrix{u \cr 0} \right)  $$
+
+$$ \left( \matrix{x_0 \cr x_1} \right) = {1\over D}
+\left( \matrix{z-a_R & a_I\cr
+                  -a_I & z-a_R\cr}\right)
+\left( \matrix{u \cr 0} \right)  $$
+where $D$ is the determinant $(z-a_R)^2 + a_I^2$.
+$D$ correctly has roots at $a$ and $a^*$.  Using
+$g_R$ and $g_I$ as the real and imaginary parts of $G^{(j)}\exp i\psi^{(j)}$,
+$$ y = g_R x_0 + g_I x_1 $$
+$$ y = { g_R (z-a_R) - g_I a_I \over z^2 -2a_Rz + a_R^2 + a_I^2} b_0 u ~~~.$$
+
+We also need to take note that in {\tt resonator.v},
+the value of $b$ is run
+through a pseudo-floating-point shifter shared with $1-a_R$ and $a_R$.
+To maintain precision on $1-a_R$ and $a_R$, at least for $Q > 0.5$,
+a useful value to choose for $b_0$ is that which gives unity DC gain for the
+low-pass filter (imaginary $g$) case,
+$$ b_0 = {1 - 2a_R + a_R^2 a_I^2 \over | a_I | } ~~~. $$
+% usually limits $b_0$ to something less than 1, which we can conservatively
+% claim as $\max(1-a_R, |a_I|)$
+
+Example time and frequency domain plots are shown for $a=\exp(-0.005 + 0.03i)$.
+\vfill\eject
+
+\centerfig{0.9\hsize}{filt_time}
+
+\centerfig{0.9\hsize}{filt_freq}
+
+\vfill\eject
+
+%In complex number form,
+%$$ {\bf A}^{(j)} = \exp((-1/\tau_j + i\omega_j)\Delta t) $$
+%$$ {\bf B}^{(j)} = 1 $$
+%$$ {\bf C}^{(j)} = G^{(j)}\exp(i\psi^{(j)}) $$
+%and typically ${\bf D}$ is zero.
+
+Explicitly, the iteration expression in {\tt resonator.v} is scaled according
+to
+$$ x_{k+1} = x_k + (F x_k + B v_k) \cdot 4^{s-9} $$
+where $s$ is an integer shift value, $0 \le s \le 7$.
+Hence
+$$ F = (a-1)\cdot 4^{9-s} $$
+$$ B = b\cdot 4^{9-s} $$
+and $s$ is chosen as the largest value such that the (absolute values of)
+register values $F$ and $v$ remain less than one.
+%  For strict sign agreement
+% with the preceding analysis, verified in simulation, use
+% $$ F = (a^*-1)\cdot 4^{9-s} $$
+
+In the previous example, $a-1 = -0.005435 + 0.029846i$ and $b = 0.030836$,
+so choose $s=7$, giving scaled values
+$$\eqalign{
+  F_R &= -0.08696 \cr
+  F_I &=  0.47753 \cr
+  B_R &=  0.49337 ~~~. \cr}$$
+To get physical (signed integer) 18-bit register values, scale these real
+numbers by $2^{17}$.  The full-scale negative value ($-2^{17}$) is
+not valid for any coefficient register.
+
+Absolute values of $1-a_R$, $a_I$, and $b$ $\ge$ 1/16 are not supported.
+
+The imaginary part sign convention for $g$ used in {\tt dot\_prod.v}, and
+therefore {\tt afilter\_siso.v}, is inverted compared with the rest of this document.
+
+It can be noted in the graphs above that the filter gain can exceed
+unity.  The state vector $x$ is internally saturated to stay (absolute value)
+less than one, which will corrupt the frequency response if encountered.
+This condition is detected in the hardware, and is made available for
+external monitoring via {\tt afilter\_siso}'s {\tt res\_clip} port.
+Mitigation involves reducing the value of $b$.
+
+The implementation is heavily pipelined, and quite capable of clocking
+at 200\thinspace MHz in a 7-series Xilinx chip.
+\bye
