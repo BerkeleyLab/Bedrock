@@ -32,9 +32,10 @@ def check_err(test_val, bound, err):
 
 def make_check(data):
     cav, fwd, rfl = data
-    fail_pass(check_err(cav[-1], 8739, 1) and
-              check_err(fwd[-1], 6714, 1) and
-              check_err(rfl[-1], 6022, 1))
+    err_bar = 10
+    fail_pass(check_err(cav[-1], 8739, err_bar) and
+              check_err(fwd[-1], 6714, err_bar) and
+              check_err(rfl[-1], 6022, err_bar))
 
 if __name__ == "__main__":
     import argparse
