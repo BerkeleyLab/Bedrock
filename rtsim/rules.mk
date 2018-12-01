@@ -50,12 +50,12 @@ a_comp_check: a_compress.py a_compress.dat
 resonator_check: resonator_tb resonator_check.m resonator.dat
 	$(OCTAVE) resonator_check.m resonator.dat
 
-cav_mode_check: cav_check1.m cav_mode.dat
-	$(OCTAVE) $<
+cav_mode_check: cav_check1.py cav_mode.dat
+	$(PYTHON) $<
 
 LB_AW = 14 # Set the Local Bus Address Width for test benches
 
-CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat
+CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat *.png
 
 CLEAN_DIRS += _xilinx
 
