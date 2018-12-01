@@ -40,6 +40,7 @@ rtsim.vcd: rtsim_in.dat
 rtsim.dat: rtsim_tb rtsim_in.dat
 	$(VVP) $< +pfile=$@
 	$(PYTHON) rtsim_test.py
+
 # XXX why does this break builds?
 # .PHONY: rtsim_auto
 
