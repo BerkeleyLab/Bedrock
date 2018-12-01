@@ -27,7 +27,7 @@ def fail_pass(condition):
 
 def check_err(test_val, bound, err):
     check = abs(test_val - bound) < err
-    print(test_val, bount, err, check)
+    print(test_val, bound, err, check)
     return check
 
 def make_check(data):
