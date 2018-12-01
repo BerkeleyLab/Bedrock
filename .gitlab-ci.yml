@@ -14,7 +14,7 @@ cordic_test:
 
 rtsim_test:
   before_script:
-    - cd rtsim && make clean
+    - cd rtsim && make clean && make
   stage: test
   script:
-    - make checks
+    - make clean && make checks && make rtsim.dat
