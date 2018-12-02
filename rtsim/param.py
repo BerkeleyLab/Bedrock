@@ -1,12 +1,12 @@
-from math import sin, cos, pi, sqrt, log
-from numpy import log as clog
+from math import pi, sqrt, log
 from numpy import exp as cexp
 from numpy import ceil
 
 # http://stackoverflow.com/questions/14132789/python-relative-imports-for-the-billionth-time
 # Leaves me with only one choice ... :(
 # Since I don't want to modify shell variables
-import os, sys
+import os
+import sys
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))) +
     "/build-tools")
@@ -26,7 +26,7 @@ f0 = 1300e6  # Hz
 nyquist_sign = -1  # -1 represents frequency inversion,
 # as with high-side LO or even-numbered Nyquist zones.
 
-#beam_current = 0.3e-3  # Amp
+# beam_current = 0.3e-3  # Amp
 beam_current = 0
 
 VPmax = 48.0  # V piezo drive max
@@ -122,14 +122,15 @@ def fix(x, b, msg, opt=None):
     global error_cnt
     ss = 2**(b - 1)
     # cordic_g = 1.646760258
-    if (opt is "cordic"): ss = int(ss / 1.646760258)
+    if opt is "cordic":
+        ss = int(ss / 1.646760258)
     xx = int(x * ss + 0.5)
-    #print x,b,ss,xx
-    if (xx > ss - 1):
+    # print x,b,ss,xx
+    if xx > ss - 1:
         xx = ss - 1
         print("# error: %f too big (%s)" % (x, msg))
         error_cnt += 1
-    if (xx < -ss):
+    if xx < -ss:
         xx = -ss
         print("# error: %f too small (%s)" % (x, msg))
         error_cnt += 1
@@ -157,24 +158,28 @@ def set_reg_old(offset, prefix, name, hierarchy):
         val = globals()[name]  # globals() or locals()?
     else:
         pre = hierarchy[0] + "_"
-        if name.startswith(pre): sname = name.partition(pre)[2]
-        else: return
+        if name.startswith(pre):
+            sname = name.partition(pre)[2]
+        else:
+            return
         if sname in globals():
             val = globals()[sname]
         elif len(hierarchy) == 2:
             pre = hierarchy[1] + "_"
-            if sname.startswith(pre): sname = name.partition(pre)[2]
-            else: return
+            if sname.startswith(pre):
+                sname = name.partition(pre)[2]
+            else:
+                return
             if sname in globals():
                 val = globals()[sname]
             else:
-                #print "# Key not found: %s"%(name)
+                # print "# Key not found: %s"%(name)
                 return
         else:
             # print "# Key not found: %s"%(name)
             return
     addr = regmap[name]['base_addr']
-    if (type(val) is list):
+    if type(val) is list:
         for i, v in enumerate(val):
             print('{} {} # {}'.format(addr + i, v, prefix + name + "[" + str(i)
                                       + "]"))
@@ -213,7 +218,7 @@ regmap_global = {
     get_reg_info(regmap, ['', 2], ["outer", "k_out"])["base_addr"],
     'piezo_couple_k_out':
     get_reg_info(regmap, [''], "piezo_couple")["base_addr"],
-    #'noise_couple' : get_reg_info(regmap,[''],"noise_couple")["base_addr"]
+    # 'noise_couple' : get_reg_info(regmap,[''],"noise_couple")["base_addr"]
 }  # base address of 1024 registers
 
 # ==== now start the application-specific computations
@@ -271,7 +276,7 @@ for i, m in enumerate([mmode1, mmode2]):
     a2 = a1 * 4**scale
     b2 = b1 * 4**scale
     print("# debug {} {} {} {} {} {}".format(w1, a1, b1, scale, a2, b2))
-    #c1 = -w1**2 / (k*b1)
+    # c1 = -w1**2 / (k*b1)
     resonator_prop_const.append((fix(a2, 18, "a2") & (2**18 - 1)) + ((9 - scale
                                                                       ) << 18))
     resonator_prop_const.append((fix(b2, 18, "b2") & (2**18 - 1)) + ((9 - scale
@@ -369,7 +374,7 @@ def push_seed(addr, hf):
         hf.update(chr(jx))
 
 
-if (prng_seed is not None):
+if prng_seed is not None:
     from hashlib import sha1
     print("# PRNG subsystem seed is '%s'" % prng_seed)
     hf = sha1()
@@ -378,6 +383,6 @@ if (prng_seed is not None):
     push_seed(54 + sim_base, hf)
     print("%d 1  # turn on PRNG" % (52 + sim_base))
 
-if (error_cnt > 0):
+if error_cnt > 0:
     print("# %d scaling errors found" % error_cnt)
     exit(1)

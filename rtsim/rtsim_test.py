@@ -3,12 +3,14 @@ import sys
 
 from matplotlib import pyplot as plt
 
+
 def read():
     A = np.loadtxt('rtsim.dat')
-    cav = abs(A[:,0] + 1j*A[:,1])
-    fwd = abs(A[:,2] + 1j*A[:,3])
-    rfl = abs(A[:,4] + 1j*A[:,5])
+    cav = abs(A[:, 0] + 1j*A[:, 1])
+    fwd = abs(A[:, 2] + 1j*A[:, 3])
+    rfl = abs(A[:, 4] + 1j*A[:, 5])
     return cav, fwd, rfl
+
 
 def show(data):
     cav, fwd, rfl = data
@@ -18,6 +20,7 @@ def show(data):
     plt.legend()
     plt.show()
 
+
 def fail_pass(condition):
     if not condition:
         print('FAIL')
@@ -25,10 +28,12 @@ def fail_pass(condition):
     else:
         print('PASS')
 
+
 def check_err(test_val, bound, err):
     check = abs(test_val - bound) < err
     print(test_val, bound, err, check)
     return check
+
 
 def make_check(data):
     cav, fwd, rfl = data
@@ -36,6 +41,7 @@ def make_check(data):
     fail_pass(check_err(cav[-1], 8739, err_bar) and
               check_err(fwd[-1], 6714, err_bar) and
               check_err(rfl[-1], 6022, err_bar))
+
 
 if __name__ == "__main__":
     import argparse

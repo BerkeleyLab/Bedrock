@@ -21,6 +21,7 @@ def simulate():
         plt.plot(x, y)
     plt.show()
 
+
 def make_check(show_plots=False):
     sat_ctl = 0.75
     verilog_out = np.loadtxt('a_compress.dat')
