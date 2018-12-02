@@ -1,5 +1,7 @@
 import numpy
 from numpy import exp, pi
+import matplotlib
+matplotlib.use('Agg')
 from matplotlib import pyplot
 
 # Style might look a little weird
@@ -41,7 +43,7 @@ pyplot.xlabel(u't (\u03bcsec)')
 pyplot.title('cav_mode.v pulse response')
 pyplot.savefig('cav_check1.png')
 
-pyplot.figure(2)
+pyplot.clf()
 pyplot.plot(t2, numpy.angle(rxa), label='phase simulated')
 ss = 'phase fit, slope %.2f kHz' % (detune*1e3)
 pyplot.plot(t2[kx], numpy.polyval(pp, t2[kx]), label=ss)
