@@ -40,9 +40,9 @@ always @(posedge clk) begin
    start <= mech_cnt == 0;
 end
 wire start_outer;
-reg_delay #(.dw(1), .len(0)) start_outer_g(.clk(clk), .gate(1'b1), .din(start), .dout(start_outer));
+reg_delay #(.dw(1), .len(0)) start_outer_g(.clk(clk), .gate(1'b1), .reset(1'b0), .din(start), .dout(start_outer));
 wire start_eig;
-reg_delay #(.dw(1), .len(1)) start_eig_g(.clk(clk), .gate(1'b1), .din(start), .dout(start_eig));
+reg_delay #(.dw(1), .len(1)) start_eig_g(.clk(clk), .gate(1'b1), .reset(1'b0), .din(start), .dout(start_eig));
 
 // Configure number of modes processed
 // I don't make it host-settable (at least not yet),

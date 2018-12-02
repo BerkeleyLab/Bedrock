@@ -28,7 +28,6 @@ outer_prod noise_couple  // auto
 
 
 // Instantiate the mechanical resonance computer
-wire res_clip;
 resonator resonator // auto
   (.clk(clk), .start(start_eig),
 	 .drive(eig_drive),

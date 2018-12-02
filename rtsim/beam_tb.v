@@ -27,7 +27,8 @@ reg [11:0] modulo = -12'd1320;
 wire [11:0] pulse;
 beam dut(.clk(clk), .ena(1'b1), .reset(reset),
 	.pulse(pulse),
-	.phase_step(phase_step), .modulo(modulo));
+	.phase_step(phase_step), .modulo(modulo),
+	.phase_init(12'b0));
 
 always @(posedge clk) begin
 	#1;
