@@ -45,10 +45,10 @@ rtsim.dat: rtsim_tb rtsim_in.dat
 # .PHONY: rtsim_auto
 
 a_comp_check: a_compress.py a_compress.dat
-	$(PYTHON) a_compress.py -c
+	$(PYTHON) $< -c
 
-resonator_check: resonator_tb resonator_check.m resonator.dat
-	$(OCTAVE) resonator_check.m resonator.dat
+resonator_check: resonator_check.py resonator.dat
+	$(PYTHON) $<
 
 cav_mode_check: cav_check1.py cav_mode.dat
 	$(PYTHON) $<
