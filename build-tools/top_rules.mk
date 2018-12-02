@@ -198,4 +198,4 @@ CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR)
 clean::
 	rm -f $(CLEAN)
 	rm -rf $(CLEAN_DIRS)
-	sh $(BUILD_DIR)/check_clean
+	# sh $(BUILD_DIR)/check_clean
