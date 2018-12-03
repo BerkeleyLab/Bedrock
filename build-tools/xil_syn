@@ -1,7 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 # This script places all scratch files, and the resulting .bit file,
-# in the _xilinx directory.  Tested with XST 10.1 and 12.1
-# Works under both dash and bash.
+# in the _xilinx directory.  At one time tested with XST 10.1 and 12.1,
+# currently we use XST 14.7.
+# This script works under both dash and bash, but Xilinx setup*.sh scripts
+# (that can be sourced from here using $XILINX_SETTINGS) generally require bash.
 
 # Default architecture is s3
 if [ -z "$arch" ]; then
@@ -232,7 +234,7 @@ else
 fi
 
 # optional (timing report)
-#trce -e 3 -l 3 $DESIGN.ncd -o $DESIGN.twr $DESIGN.pcf
+trce -e 3 -l 3 $DESIGN.ncd -o $DESIGN.twr $DESIGN.pcf
 
 if grep "All constraints were met\." $DESIGN.par &&
    grep "All signals are completely routed\." $DESIGN.par; then
@@ -246,12 +248,18 @@ fi
 # all use cases involving SP601 and SP605, or non-Sptartan6.
 # ConfigRate:33 is invalid for Virtex5, at least.
 if [ "$arch" = "s6" ]; then
-    BG_OPT="-g ConfigRate:33 -g Binary:Yes";
+    BG_OPT="-g Binary:Yes";
 else
-    BG_OPT="-g StartUpClk:CClk"
-    #BG_OPT="-g StartUpClk:JtagClk -g ConfigRate:30 -g SPI_buswidth:4"
+    case "$PART" in
+        # LLRF46 needs -g StartUpClk:CClk per page 1 of
+        # http://www.dimtel.com/_media/support/llrf4/packet46.pdf
+        # otherwise the DAC outputs get messed up.
+        xc6slx*) BG_OPT="-g StartUpClk:CClk" ;;
+        *)       BG_OPT="-g StartUpClk:JtagClk" ;;
+    esac
 fi
-bitgen -w $BG_OPT $DESIGN.ncd
 
+# BG_OPT="$BG_OPT -g UnConstrainedPins:Allow"
+echo "Using bitgen options $BG_OPT"
+bitgen -w $BG_OPT $DESIGN.ncd
 #promgen -w -spi -p mcs -o $DESIGN.mcs -s 16384 -u 0 $DESIGN.bit
-echo "promgen -w -spi -p mcs -o $DESIGN.mcs -s 16384 -u 0 $DESIGN.bit"
