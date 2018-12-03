@@ -50,7 +50,7 @@ a_comp_check: a_compress.py a_compress.dat
 resonator_check: resonator_check.py resonator.dat
 	$(PYTHON) $<
 
-cav_mode_check: cav_check1.py cav_mode.dat
+cav_mode_check: cav_mode_check.py cav_mode.dat
 	$(PYTHON) $<
 
 LB_AW = 14 # Set the Local Bus Address Width for test benches

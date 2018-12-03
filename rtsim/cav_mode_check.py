@@ -41,7 +41,7 @@ pyplot.plot(t2, abs(rxa), label='abs')
 pyplot.legend()
 pyplot.xlabel(u't (\u03bcsec)')
 pyplot.title('cav_mode.v pulse response')
-pyplot.savefig('cav_check1.png')
+pyplot.savefig('cav_mode_check1.png')
 
 pyplot.clf()
 pyplot.plot(t2, numpy.angle(rxa), label='phase simulated')
@@ -50,7 +50,7 @@ pyplot.plot(t2[kx], numpy.polyval(pp, t2[kx]), label=ss)
 pyplot.legend()
 pyplot.xlabel(u't (\u03bcsec)')
 pyplot.ylabel('radians')
-pyplot.savefig('cav_check2.png')
+pyplot.savefig('cav_mode_check2.png')
 
 mech_freq = 2000000  # pasted from cav_mode_tb.v
 detune_theory = -mech_freq/(2**32*dt)  # XXX negative is ugly
