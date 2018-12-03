@@ -10,21 +10,21 @@ There are waveforms to view, and most importantly, it comes with unit tests that
 
 * Summary of the hierarchy, not including test benches:
 
-> `vmod1`:             Full single-cavity physics module
-> > `resonator`:       Mechanical eigenmode state-space propagator
-> > `outer_prod`:     Scale a data stream vector by a scalar
-> > `tt800v`:          Pseudo-random number generator
-> > `adc_em`:         ADC emulator (noise, offset, delay)
-> > `cav_elec`:      Represents the electromagnetic component of a cavity
-> > > `pair_couple`:  Applies a pair of complex couplings to IQ data stream
-> > > `ph_gacc`:      Gated phase accumulator adapted from ph_acc.v
-> > > `dot_prod`:     Dot product of state vector to get freq perturbation
-> > > `cic_interp`:       Want smooth changes in frequency
-> > > `cav_mode`:    Represents a single cavity electromagnetic mode
-> > > > `lp_pair`:    Time-interleaved pair of low-pass filters
-> > > > `pair_couple`:  Applies a pair of complex couplings to an interleaved IQ data stream
-> > > > `cordicg`:     Bare CORDIC algorithm
-> > > > `vectormul`:   Multiply two IQ streams
+> `vmod1`:             Full single-cavity physics module\
+> > `resonator`:       Mechanical eigenmode state-space propagator\
+> > `outer_prod`:     Scale a data stream vector by a scalar\
+> > `tt800v`:          Pseudo-random number generator\
+> > `adc_em`:         ADC emulator (noise, offset, delay)\
+> > `cav_elec`:      Represents the electromagnetic component of a cavity\
+> > > `pair_couple`:  Applies a pair of complex couplings to IQ data stream\
+> > > `ph_gacc`:      Gated phase accumulator adapted from ph_acc.v\
+> > > `dot_prod`:     Dot product of state vector to get freq perturbation\
+> > > `cic_interp`:       Want smooth changes in frequency\
+> > > `cav_mode`:    Represents a single cavity electromagnetic mode\
+> > > > `lp_pair`:    Time-interleaved pair of low-pass filters\
+> > > > `pair_couple`:  Applies a pair of complex couplings to an interleaved IQ data stream\
+> > > > `cordicg`:     Bare CORDIC algorithm\
+> > > > `vectormul`:   Multiply two IQ streams\
 > > > > `mag_square`: Magnitude-squared of an IQ stream
 
 You can see some of this visually in the doc directory's `block.eps` and `block_mode.eps` (*xcircuit* files, that can be viewed with standard *PostScript* tools like *gv*).  The physical system that the Verilog attempts to model is described in `physics.tex`; convert that to PDF for viewing with "make physics.pdf".
