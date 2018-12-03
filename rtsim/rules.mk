@@ -18,12 +18,10 @@ VFLAGS_cav_mode_tb += -DLB_DECODE_cav_mode
 VFLAGS_cav_elec_tb += -DLB_DECODE_cav_elec
 
 %_s6.bit: %.v $(DEPDIR)/%.bit.d blank_s6.ucf
-	PART=xc6slx45t-fgg484-3
-	CLOCK_PIN=$(CLOCK_PIN) PART=$(PART) $(ISE_SYNTH) $* $(SYNTH_OPT) $^ && mv _xilinx/$@ $@
+	arch=s6 $(ISE_SYNTH) $* $(SYNTH_OPT) $^ && mv _xilinx/$@ $@
 
 %_a7.bit: %.v $(DEPDIR)/%.bit.d blank_a7.ucf
-	PART=xc7a100t-fgg484-2
-	CLOCK_PIN=$(CLOCK_PIN) PART=$(PART) $(ISE_SYNTH) $* $(SYNTH_OPT) $^ && mv _xilinx/$@ $@
+	arch=a7 $(ISE_SYNTH) $* $(SYNTH_OPT) $^ && mv _xilinx/$@ $@
 
 $(AUTOGEN_DIR)/cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
 	mkdir -p $(AUTOGEN_DIR) && $(PYTHON) $< 22 > $@

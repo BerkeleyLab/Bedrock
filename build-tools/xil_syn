@@ -50,6 +50,10 @@ CLOCK_v5t=K18
 PART_s6=xc6slx45t-fgg484-3
 CLOCK_s6=K21
 
+# AC701
+PART_a7=xc7a200t-fbg676-2
+CLOCK_a7=R3
+
 test -n "$PART"      || eval PART=\$PART_$arch
 test -n "$CLOCK_PIN" || eval CLOCK_PIN=\$CLOCK_$arch
 
