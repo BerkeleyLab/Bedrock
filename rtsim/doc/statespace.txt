@@ -1,0 +1,67 @@
+If
+z*a = a + w*b
+z*b = b - w*a
+when w is "small" and real, then
+z*[a;b]=[1 w;-w 1]*[a;b]
+has eigen-solutions when det(1-z w;-w 1-z)==0
+(1-z)^2 == -w^2
+1-z = +/- i*w
+These poles are just outside the unit circle.
+Need to add damping anyway, for a finite Q resonance.  So
+z*[a;b]=[1-d w;-w 1-d]*[a;b]
+(1-d-z)^2 == -w^2
+and poles are at z = 1 - d +/- i*w
+If a and b are kept at high precision, multiplying them by w and d
+only needs to look at their high-order (18?) bits.  At least some
+of the additions need to cover the full width of a and b.
+
+Again, with y defined as [a;b], and M is [1-d w;-w 1-d]
+z*y = M*y + B*x
+(z-M)*y = F*x
+y/x = (z-M)^{-1}*B = [z-(1-d) -w;w z-(1-d)]*F/((z-(1-d))^2+w^2)
+and if F is [f;0], we get
+y/x = f / ((z-(1-d+iw))*(z-(1-d-iw))) * [z-(1-d);-w]
+so the top element of y has a zero at (1-d), the bottom element does not.
+Both have the conjugate pair of poles at 1-d +/- iw.
+Use the bottom element for mechanical mode low-pass simulation,
+force in and displacement out.
+
+1-d + i*w = exp(p*T) where p is the s-plane pole location.
+1-d + i*w = exp(f0*(-1/(2*Q)+i)) where f0 is normalized frequency (f*2*pi*T)
+r = exp(-f0/(2*Q))
+w = r*sin(f0)
+d = 1-r*cos(f0)
+
+Want to make sure neither component of y overflows, for arbitrary x input.
+For a given b, d, and w, and choosing z=exp(i*t) for any t, find the minimum
+value of the denominator above, which can be written (z-q)^2+w^2,
+using q = 1-d.  Intermediate answers come out even simpler if I write
+w^2 as r^2-q^2, to get (z-q)^2+r^2-q^2.
+
+display2d:false;
+a:  (exp(%i*t)-q)^2+r^2-q^2;
+a2: cabs(a)^2;
+m:  ratsimp(subst(cs,cos(t),subst(1-cos(t)^2,sin(t)^2,a2)));
+/* differentiate w.r.t. cos(t), not t itself */
+d1: ratsimp(diff(m,cs));
+cs0: factor(rhs(first(solve(d1=0,cs))));
+dd: factor(ratsimp(subst(cs0,cs,m)));
+
+cs0 = q*(r^2+1)/(2*r^2)
+dd  = (r-1)^2*(r+1)^2*(r-q)*(r+q)/r^2
+dd  = (r^2-1)^2*w^2/r^2
+dd  = (r-1/r)^2*w^2
+
+And dd is the magnitude squared.  So to get a net gain guaranteed
+less than one, choose f < (1/r-r), assuming r < 1.
+
+We should also cover the other term of y!  But the answer is probably
+similar.  And the coupling derived is very weak.  I guess we need
+more drive, saturation, and a big red warning light.
+
+Note that the numerical setup is under-constrained, since the scaling of
+the mode state is arbitrary.  The product of g_ij and f_jk is set to match
+measurements, but the ratio has to be chosen to keep the amplitude of the
+mode state engine "reasonable", and the rounding errors under control.
+
+Showing cavity fratricide would be really cool.

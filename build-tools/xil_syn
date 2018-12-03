@@ -1,0 +1,269 @@
+#!/bin/bash
+# This script places all scratch files, and the resulting .bit file,
+# in the _xilinx directory.  At one time tested with XST 10.1 and 12.1,
+# currently we use XST 14.7.
+# This script works under both dash and bash, but Xilinx setup*.sh scripts
+# (that can be sourced from here using $XILINX_SETTINGS) generally require bash.
+
+# Default architecture is s3
+if [ -z "$arch" ]; then
+    arch=s3
+fi
+
+if [ -z "$XILINX" -a -z "$XILINX_SETTINGS" ]; then
+    echo "set up for Xilinx first" >&2
+    exit 1
+fi
+
+if [ -z "$1" ]; then
+    echo "missing design" >&2
+    exit 1
+fi
+
+if [ -z "$2" ]; then
+    echo "no input files" >&2
+    exit 1
+fi
+
+set -e
+
+mkdir -p _xilinx
+test -L _xilinx/root || ln -sf $PWD _xilinx/root
+cd _xilinx
+
+# First argument is the name of the design.  This both names
+# all the xilinx files, and needs to be the name of the top-level
+# Verilog module.
+DESIGN=$1
+shift
+
+# Select a part based on the architecture.  The CLOCK selection
+# is for the automatic .ucf file generation feature.
+PART_s3=xc3s1000-ft256-5
+CLOCK_s3=T9
+
+# Avnet AES-XLX-V5LXT-PCIE50-G ?
+PART_v5t=xc5vlx50t-ff1136-1
+CLOCK_v5t=K18
+
+# SP605
+PART_s6=xc6slx45t-fgg484-3
+CLOCK_s6=K21
+
+# AC701
+PART_a7=xc7a200t-fbg676-2
+CLOCK_a7=R3
+
+test -n "$PART"      || eval PART=\$PART_$arch
+test -n "$CLOCK_PIN" || eval CLOCK_PIN=\$CLOCK_$arch
+
+# Create the .xst file
+# options dropped since 10.1:
+#  -verilog2001 YES
+#  -mux_extract YES
+#  -mux_style Auto
+#  -decoder_extract YES
+#  -priority_extract YES
+#  -shift_extract YES
+#  -xor_collapse YES
+#  -slice_packing YES
+cat <<EOT >$DESIGN.xst
+set -tmpdir "."
+set -xsthdpdir "."
+run
+-ifn $DESIGN.prj
+-ifmt Verilog
+-ofn $DESIGN
+-ofmt NGC
+-p $PART
+-top $DESIGN
+-opt_mode Speed
+-opt_level 1
+-iuc NO
+-keep_hierarchy NO
+-glob_opt AllClockNets
+-read_cores YES
+-write_timing_constraints NO
+-cross_clock_analysis NO
+-hierarchy_separator _
+-bus_delimiter <>
+-case maintain
+-slice_utilization_ratio 100
+-fsm_extract YES -fsm_encoding Auto
+-safe_implementation No
+-fsm_style lut
+-ram_extract Yes
+-ram_style Auto
+-rom_extract Yes
+-rom_style Auto
+-shreg_extract YES
+-resource_sharing YES
+-mult_style auto
+-iobuf YES
+-max_fanout 100
+-bufg 8
+-register_duplication YES
+-equivalent_register_removal YES
+-register_balancing No
+-optimize_primitives NO
+-use_clock_enable Yes
+-use_sync_set Yes
+-use_sync_reset Yes
+-iob auto
+-slice_utilization_ratio_maxmargin 5
+EOT
+
+# not available on 8.2i:
+# -bram_utilization_ratio 100
+# -auto_bram_packing NO
+# -async_to_sync NO
+
+# base the UCF autogen on timespec in the first file
+toplevel=""
+
+# default UCF name will be generated later, but can also be set
+ucf=""
+
+# Parse the remaining input arguments, and generate the .prj file.
+# Important usage note: put all -Dfoo flags before the list of Verilog
+# input files!
+BOMB=""
+echo "\`define TARGET_$arch 1" >$DESIGN.prj
+for s; do
+    case $s in
+       -D*) echo "\`define ${s#-D} 1"
+            if test -n "$toplevel"; then echo "warning: $s follows .v file on $0 command line" >&2; fi
+            ;;
+       *.v) if test -r root/$s; then
+            echo "\`include \"root/$s\""
+            elif test -r $s; then
+                echo "\`include \"$s\""
+            else
+                BOMB="$BOMB $s"
+            fi
+            if test -z "$toplevel"; then toplevel=$s; fi
+            ;;
+       # foo.vh is a Verilog include file.  These don't get listed
+       # in the project file.  They do need to get found in the _xilinx
+       # directory.  This will probably break if a path is specified.
+       *.vh) if test -r root/$s; then
+                ln -sf root/$s .
+            elif test -r $s; then
+                ln -sf $s .
+            else
+                BOMB="$BOMB $s"
+            fi
+            ;;
+       # let people list .ucf files, check their presence, but don't do
+       # much about it.  The first such file listed is provided to ngdbuild.
+       *.ucf) if test -r root/$s; then
+            if test -z "$ucf"; then ucf=root/$s; fi
+            elif test -r $s; then
+            if test -z "$ucf"; then ucf=$s; fi
+            else
+                BOMB="$BOMB $s"
+             fi
+            ;;
+       default) echo "error: unknown argument $s" >&2
+            ;;
+    esac
+done >>$DESIGN.prj
+
+if [ -n "$XILINX_SETTINGS" ]; then
+    # XXX want to warn the user if bash is running in sh-compatible mode (incompatible with XST 12.2 setup script)
+    set --  # clear shell arguments to avoid confusing Xilinx
+    echo "sourcing $XILINX_SETTINGS"
+    . $XILINX_SETTINGS
+fi;
+
+if [ -z "$XILINX" ]; then
+    echo "set up for Xilinx first" >&2
+    exit 1
+fi
+
+echo "\`include \"$XILINX/verilog/src/iSE/unisim_comp.v\"" >>$DESIGN.prj
+
+# If the ${DESIGN}.ucf file doesn't exist, create one based on
+# comments in the top level Verilog.
+if test -z "$ucf"; then ucf=root/${DESIGN}.ucf; fi
+if [ ! -r $ucf ]; then
+    ucf=${DESIGN}.ucf
+    perl -ne 'if (/(\w+)[,;]\s+\/\/ timespec\s+(.+)/) {print "NET \"$1\" LOC=\"'${CLOCK_PIN}'\";\nNET \"$1\" TNM_NET = \"CLK_1\";\nTIMESPEC \"TS_CLK_1\" = PERIOD \"CLK_1\" $2 HIGH 50%;\n"}' root/$toplevel >$ucf
+fi
+test -r $ucf || BOMB="$BOMB $ucf"
+
+# Now that we have scanned for all the files we need,
+# tell the user and abort if any are missing
+if [ -n "$BOMB" ]; then
+    echo "missing files:$BOMB" >&2
+    exit 1
+fi
+
+# temporary
+# exit
+
+# I need this, or an updated substitute, on my UXO board
+# export XIL_PLACE_ALLOW_LOCAL_BUFG_ROUTING=1
+
+echo "setup complete, starting Xilinx flow"
+xst -ifn $DESIGN.xst -ofn $DESIGN.syr
+# synthesized output is in $DESIGN.ngc
+ngdbuild -dd . -uc $ucf -p $PART $DESIGN.ngc $DESIGN.ngd
+# was "-cm area"
+# add "-w" to allow overwriting ${DESIGN}_map.ncd, as of xst-9.2
+# (doesn't work for Spartan3 !)
+
+# Infrastructure to handle incremental synthesis
+# Worked sometimes, for some XST versions, but generally quirky
+if [ -f "${DESIGN}_map.ncd" ]; then
+  #mv ${DESIGN}_map.ncd guide.ncd
+  #SMART="-smartguide guide.ncd"
+  rm "${DESIGN}_map.ncd"
+  SMART=""
+else
+  SMART=""
+fi
+
+#ISE not supporting multithread for spartan3
+if [ $PART = $PART_s3 ]; then
+    # drop "-k 4 -c 100 -tx off" for XST 11.1
+    map -p $PART -timing -ol high -pr b ${SMART} -o ${DESIGN}_map.ncd $DESIGN.ngd $DESIGN.pcf
+    # drop "-t 1" for XST 12.1
+    par -w -ol high ${SMART} ${DESIGN}_map.ncd $DESIGN.ncd $DESIGN.pcf
+else
+    # drop "-k 4 -c 100 -tx off" for XST 11.1
+    map -mt 2 -p $PART -timing -ol high -pr b ${SMART} -o ${DESIGN}_map.ncd $DESIGN.ngd $DESIGN.pcf
+    # drop "-t 1" for XST 12.1
+    par -mt 4 -w -ol high ${SMART} ${DESIGN}_map.ncd $DESIGN.ncd $DESIGN.pcf
+fi
+
+# optional (timing report)
+trce -e 3 -l 3 $DESIGN.ncd -o $DESIGN.twr $DESIGN.pcf
+
+if grep "All constraints were met\." $DESIGN.par &&
+   grep "All signals are completely routed\." $DESIGN.par; then
+      echo "PAR success confirmed for $DESIGN"
+else
+      echo "PAR apparently failed for $DESIGN"
+      exit 1
+fi
+
+# Heuristic not necessarily correct, but should be OK on
+# all use cases involving SP601 and SP605, or non-Sptartan6.
+# ConfigRate:33 is invalid for Virtex5, at least.
+if [ "$arch" = "s6" ]; then
+    BG_OPT="-g Binary:Yes";
+else
+    case "$PART" in
+        # LLRF46 needs -g StartUpClk:CClk per page 1 of
+        # http://www.dimtel.com/_media/support/llrf4/packet46.pdf
+        # otherwise the DAC outputs get messed up.
+        xc6slx*) BG_OPT="-g StartUpClk:CClk" ;;
+        *)       BG_OPT="-g StartUpClk:JtagClk" ;;
+    esac
+fi
+
+# BG_OPT="$BG_OPT -g UnConstrainedPins:Allow"
+echo "Using bitgen options $BG_OPT"
+bitgen -w $BG_OPT $DESIGN.ncd
+#promgen -w -spi -p mcs -o $DESIGN.mcs -s 16384 -u 0 $DESIGN.bit

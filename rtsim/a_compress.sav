@@ -1,0 +1,42 @@
+[timestart] 0
+[size] 1038 604
+[pos] 377 205
+*-6.335498 132 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] a_compress_tb.
+[sst_width] 210
+[signals_width] 220
+[sst_expanded] 1
+[sst_vpaned_height] 155
+@24
+a_compress_tb.cc[31:0]
+@28
+a_compress_tb.iq
+@8420
+a_compress_tb.d_in[17:0]
+@20000
+-
+@8420
+a_compress_tb.d_out[17:0]
+@20000
+-
+@24
+a_compress_tb.sat_ctl[15:0]
+@200
+-internals
+@420
+a_compress_tb.a_compress.sqr2[18:0]
+a_compress_tb.a_compress.sqr3[18:0]
+a_compress_tb.a_compress.mag1[19:0]
+a_compress_tb.a_compress.mag2[18:0]
+@8420
+a_compress_tb.a_compress.mag4[18:0]
+a_compress_tb.a_compress.line1[19:0]
+@28
+a_compress_tb.a_compress.quad_sel
+@20000
+-
+@420
+a_compress_tb.a_compress.m1[17:0]
+a_compress_tb.a_compress.gain[18:0]
+[pattern_trace] 1
+[pattern_trace] 0

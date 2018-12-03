@@ -1,0 +1,181 @@
+\magnification=\magstep1
+\parindent=0pt
+\baselineskip=13.5pt
+\parskip=6pt
+
+%\input lrdfig.tex
+
+The full vector (complex) expression for cavity accelerating voltage $\vec V$,
+combining shunt impedance, detuning (primarily microphonics), and beam loading,
+is
+$$\left(1-j{\omega_d\over \omega_f}\right)\vec V +
+ {1\over\omega_f}{d\vec V\over dt} =
+ 2\vec K_1\sqrt{R_1} - R_c\vec I $$
+where $\vec K_1$ is the incident wave amplitude in $\sqrt{\rm Watts}$,
+$R_1=Q_1(R/Q)$ is the coupling impedance of port 1,
+$\vec I$ is the beam current, $R_c=Q_L(R/Q)$ is the coupling impedance
+to the beam, and $\omega_f=\omega_0/2Q_L$ is the mode's bandwidth,
+and $\omega_0$ is the nominal resonant frequency of the mode.
+$\omega_d=2\pi\Delta f$ is the (time varying) detune frequency,
+{\it i.e.}, the difference between actual eigenmode frequency and the accelerator's time base;
+%which is proportional to mechanical displacement of the cavity walls;
+that term will be discussed more later.
+The overall $Q_L$ is given as $1/Q_L=1/Q_0+1/Q_1+1/Q_2$, where $1/Q_0$
+represents losses to the cavity walls, $1/Q_1$ represents coupling
+to the input coupler, and $1/Q_2$ represents coupling to the field probe.
+$(R/Q)$ is the shunt impedance of the mode in Ohms, a pure geometry term
+computable for each particular eigenmode using E\&M codes like Superfish.
+Physically, shunt impedance relates a mode's stored energy $U$ to the
+accelerating voltage it produces, according to
+$$U = {V^2 \over (R/Q)\omega_0}~~~.$$
+
+The only assumptions in the above formulation are that the cavity losses
+are purely resistive, and thus expressible with a fixed $Q_0$, and that
+no power is launched into the cavity from the field probe.  If other
+ports have incoming power, there would be additional terms of the same
+form as $2\vec K_1\sqrt{R_1}$.
+
+The output wave $\vec E_2$ from the field probe is
+$$\vec E_2=\vec V / \sqrt{Q_2(R/Q)}~~~.$$
+%The output wave from the fundamental power port combines such a term
+%with the prompt reflection of the corresponding input wave,
+%$$\vec E_1=\vec V / \sqrt{Q_1(R/Q)} - \vec K_1~~~.$$
+The discussion so far applies independently to every cavity eigenmode.
+Each such mode has its own value of $\vec V$, $\omega_d$, $(R/Q)$, $Q_i$,
+and therefore $\omega_f$ and $R_C$.  The fields from all the eigenmodes
+superimpose.  If one assigns the subscript $\mu$
+to a particular such mode, the expression for emitted (a.k.a.~reflected)
+wave travelling outward from the fundamental port includes a prompt reflection
+term, yielding
+$$\vec E_1=\sum_\mu \vec V_\mu / \sqrt{Q_{\mu 1}(R/Q)_\mu} - \vec K_1~~~.$$
+
+It's possible to rewrite equation (1) in the frame of the eigenmode itself.
+Define $\vec S$ such that $\vec V = \vec S e^{j\theta}$,
+where $d\theta/dt = \omega_d$, then
+%$${d\vec V\over dt} = {d\vec S\over dt}e^{j\theta} +
+%  \vec S \cdot j\omega_d e^{j\theta}$$
+$$\left(1-j{\omega_d\over \omega_f}\right)\vec S e^{j\theta} +
+ {1\over\omega_f}\left({d\vec S\over dt}e^{j\theta} +
+  \vec S \cdot j\omega_d e^{j\theta}\right) =
+ 2\vec K_1\sqrt{R_c} - R_c\vec I $$
+$${d\vec S\over dt} = -\omega_f\vec S  + \omega_f e^{-j\theta}\left(
+ 2\vec K_1\sqrt{R_c} - R_c\vec I \right)$$
+This state-variable equation is a pure low-pass filter, an advantage especially
+in the FPGA implementation.
+
+%\vfill\eject
+These electromagnetic fields interact mechanically.
+Each mode's fields generate a force proportional to $V_\mu^2 = |\vec V_\mu|^2$,
+and mechanical displacements influence each mode's instantaneous
+detune frequency.  Construct the previous section's $\omega_d$ as
+a baseline $\omega_{d0}$ from the electrical mode solution
+({\it e.g.}, $-2\pi (800\thinspace {\rm kHz})$ for the TTF cavity's
+$8\pi/9$ mode), plus a perturbation
+$\omega_{\mu}$ contributed from the mechanical mode deflections.
+Consider the electrical mode index $\mu$ to include
+not only electrical eigenmodes of one cavity, but modes of all cavities in the
+mechanical assembly ({\it e.g.}, cryomodule).
+Also include the dependence on piezoelectric actuator voltages $V_\kappa$.
+Then if the assembly's mechanical eigenmodes are indexed by $\nu$,
+mechanical forces $F_\nu$ and displacements $x_\nu$ of those eigenmodes
+are related to the electrical system by
+$$F_\nu = \sum_\mu A_{\nu\mu} V_\mu^2 + \sum_\kappa B_{\nu\kappa}V_\kappa$$
+$$\omega_\mu = \sum_\nu C_{\mu\nu} x_\nu~~~,$$
+where $A$, $B$, and $C$ are constant matrices.
+These expressions are understood to apply at every time instant;
+the quantities $V$, $F$, $x$, and $\omega$ all vary with time.
+
+\hyphenation{re-phrased}
+The differential equation governing the dynamics of each mechanical eigenmode
+%are given in Laplace form as
+is that of a textbook second order low-pass filter.  In Laplace form,
+%$${1\over \omega_\nu^2}{d^2 x_\nu\over dt^2} +
+%  {1\over Q_\nu \omega_\nu} {d x_\nu\over dt} + x = {F_\nu\over k_\nu}$$
+$$k_\nu x_\nu = {F_\nu \over \displaystyle 1 + {1\over Q_\nu}{s\over \omega_\nu} + \left({s\over \omega_\nu}\right)^2}~~~,$$
+where $k_\nu$ is the spring constant.
+%That second-order Laplace equation for the dynamics of a single
+For computational purposes, we want it expressed
+%This can be rephrased
+in terms of the state-space formulation
+$${d\over dt} \left(\matrix{x\cr y}\right) =
+  \left(\matrix{a&-b\cr b&a}\right) \left(\matrix{x\cr y}\right) +
+  c\cdot\left(\matrix{0\cr F}\right)~~~,$$
+where a scaled velocity coordinate $y$ has been introduced.
+%but there is nothing physical that depends on it.
+Convert the latter equation to Laplace form and solve to get
+$$\left(\matrix{x\cr y}\right) =
+  -c\left(\matrix{a-s&-b\cr b&a-s}\right)^{-1}\cdot\left(\matrix{0\cr F}\right)~~~.$$
+Analytically invert that $2\times 2$ matrix, and multiply out to get
+$$x = {-bcF \over (a-s)^2 + b^2}~~~.$$
+Equate coefficients with the earlier low-pass filter form,
+in the case $Q > {1\over 2}$, to get
+$$a\pm jb = \omega\left( {-1\over 2Q} \pm j\sqrt{1-{1\over 4Q^2}}\right) $$
+$$c = -{1\over k}\cdot{a^2+b^2 \over b} = - {\omega^2 \over k b}~~~.$$
+All the symbols above, including the mechanical resonance frequency $\omega$,
+apply to a single mechanical eigenmode, and thus have an implied $\nu$ subscript.
+
+\def\volume{\Phi}
+A deeper understanding of the forces and responses of a single
+electrical eigenmode $\mu$ of the cavity comes from Slater's perturbation
+theory.  For an eigenmode solution $\vec H(\vec r)\sin(\omega_\mu t)$,
+$\vec E(\vec r)\cos(\omega_\mu t)$ to
+Maxwell's equations in a closed conducting cavity (volume $\volume$),
+the stored energy $U$ is given by
+$$U = \int_\volume \left[ {\mu_0    \over 4}H^2(\vec r)
+                 +  {\varepsilon_0\over 4}E^2(\vec r) \right] d\volume~~~.$$
+Suppose a mechanical eigenmode $\nu$ involves small deflections
+$x\cdot \vec\xi(\vec r)$, where $x$ gives the amount of deflection, and
+the dimensionless quantity $\xi(\vec r)$ represents the mode shape.
+Both the force on the mode and the response to a deflection $x$ are
+given in terms of the Slater integral
+$$F = \int_S \left[ {\mu_0    \over 4}H^2(\vec r)
+                 -  {\varepsilon_0\over 4}E^2(\vec r) \right]
+   \vec n(\vec r) \cdot \vec\xi(\vec r) dS ~~~,$$
+where $\vec n(\vec r)$ is the normal vector to the cavity surface $S$,
+and $F$ directly gives the force.
+Note in particular the subtraction of $E$ and $H$ terms, contrasted
+with the addition in the energy integral.  Also notice the dot product
+of the deflection shape with the surface normal.
+Then the resonance frequency shift of the electical eigenmode is given by
+$$\Delta\omega_\mu = -x\omega_\mu {F\over U}$$
+and the force by
+$$F = {F\over U} {1\over (R/Q)\omega_\mu}  V^2~~~,$$
+where $F/U$ is a property of the electrical eigenmode, independent of amplitude,
+with units of~\hbox{m$^{-1}$}.
+Thus $A_{\nu\mu} = (F/U)/((R/Q)\omega_\mu)$,
+and $C_{\mu\nu} = -\omega_\mu F/U$.
+
+%Looking at a single electrical mode $\mu$,
+%The product $C_{\mu\nu} A_{\nu\mu}/ k_\nu$
+%gives the low-frequency Lorentz response of $\omega_\mu$ to $V_\mu^2$.
+Slater's analysis above lets us express the static Lorentz response of an
+electrical mode to its own stored energy as
+$${\Delta \omega_\mu\over V^2} = {C_{\mu\nu} A_{\nu\mu}\over k_\nu} = - \left({F\over U}\right)^2 {1 \over k_\nu (R/Q)}$$
+correctly showing that this constant is always negative:
+the mode's static resonant frequency gets lower as it is filled.
+Summing over all mechanical modes $\nu$ gives the total DC response,
+often quoted in units of \hbox{Hz/(MV/m)$^2$}.
+
+Using electrical measurements alone,
+it's not possible to constrain the scaling of $x_\nu$.
+It is therefore helpful to
+rescale $x_\nu$ and $F_\nu$ each by a factor of $\sqrt{k_\nu}$,
+and eliminate $k_\nu$ from the equations.  Instead of conventional
+units (m and N) for $x$ and $F$, they now both have units
+of $\sqrt{\rm Joules}$, so that $x\cdot F$ still represents energy.
+In this rescaled no-$k$ case,
+%${F/U} = \sqrt{-(R/Q)(\Delta \omega/V^2)} $,
+$$A_{\nu\mu} = {1\over \omega_0} \sqrt{-{1\over (R/Q)} {\Delta \omega \over V^2}} $$
+$$C_{\mu\nu} = -\omega_0 \sqrt{-(R/Q){\Delta \omega \over V^2}}\rlap{~~~.}$$
+
+It is perhaps an unexpected result that the cross-coupling between
+cavity modes ({\it e.g.}, excite the $\pi$ mode, measure $\Delta\omega$
+for the $8\pi/9$ mode) is quantitatively predicted from measurements of
+each mode individually, with the exception of the choice of sign of
+the above radicals.  All that is required is confidence that mechanical
+modes are correctly identified and non-degenerate.
+
+See also
+{\it Ponderomotive Instabilities and Microphonics -- A Tutorial}, J. R. Delayen
+
+\bye

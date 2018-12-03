@@ -10,8 +10,8 @@ Ray Andraka at
 and of course see the general and long-winded background at
   https://en.wikipedia.org/wiki/CORDIC
 
-The module cordicg_b22 (in cordicg_b22.v) can be instantiated in
-application code, and it has one parameter (width) that sets the
+The module cordicg_b22 (in cordicg_b22.v) can be instantiated
+in application code.  One of its parameters (width) sets the
 bit width of the X and Y input and output ports.  The phase input
 and output are one bit wider than the X and Y ports.  See below
 for additional configuration.
@@ -65,8 +65,8 @@ where op is constant, setting def_op to match can help the synthesizer
 optimize away unused resources.
 
 Version 27 has an important API name change: the module you instantiate
-now has its data path bit-width encoded in the name; see below!  The
-generator was rewritten from Matlab/Octave to Python, tested compatible
+now has its data path bit-width encoded in the name, as described above.
+The generator was rewritten from Matlab/Octave to Python, tested compatible
 with both python2 and python3.  The resulting ports and functionality of
 the Verilog module are unchanged.  This version also gets rid of the
 Verilog include file and its hidden configuration state, that made

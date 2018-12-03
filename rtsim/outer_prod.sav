@@ -1,0 +1,32 @@
+[timestart] 0
+[size] 1000 600
+[pos] -2 -1
+*-5.605637 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] outer_prod_tb.
+[sst_width] 210
+[signals_width] 126
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@24
+outer_prod_tb.cc[31:0]
+@28
+outer_prod_tb.start
+@420
+outer_prod_tb.x[17:0]
+outer_prod_tb.result[17:0]
+@200
+-outer_prod
+@28
+outer_prod_tb.outer_prod.grab
+@420
+outer_prod_tb.outer_prod.x_hold[17:0]
+@24
+outer_prod_tb.outer_prod.pc[9:0]
+@420
+outer_prod_tb.outer_prod.k_out[17:0]
+outer_prod_tb.outer_prod.k_out1[17:0]
+outer_prod_tb.outer_prod.mul1s[17:0]
+outer_prod_tb.outer_prod.mul2[17:0]
+outer_prod_tb.outer_prod.mul3[17:0]
+[pattern_trace] 1
+[pattern_trace] 0

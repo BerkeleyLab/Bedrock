@@ -14,16 +14,16 @@ parameter len = 4;  // number of interleaved data streams
 wire signed [19:0] d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10;
 
 assign d0 = ind;
-reg_delay #(.dw(20),.len(len)) h0(clk, ing, d0, d1);
-reg_delay #(.dw(20),.len(len)) h1(clk, ing, d1, d2);
-reg_delay #(.dw(20),.len(len)) h2(clk, ing, d2, d3);
-reg_delay #(.dw(20),.len(len)) h3(clk, ing, d3, d4);
-reg_delay #(.dw(20),.len(len)) h4(clk, ing, d4, d5);
-reg_delay #(.dw(20),.len(len)) h5(clk, ing, d5, d6);
-reg_delay #(.dw(20),.len(len)) h6(clk, ing, d6, d7);
-reg_delay #(.dw(20),.len(len)) h7(clk, ing, d7, d8);
-reg_delay #(.dw(20),.len(len)) h8(clk, ing, d8, d9);
-reg_delay #(.dw(20),.len(len)) h9(clk, ing, d9, d10);
+reg_delay #(.dw(20),.len(len)) h0(clk, 1'b0, ing, d0, d1);
+reg_delay #(.dw(20),.len(len)) h1(clk, 1'b0, ing, d1, d2);
+reg_delay #(.dw(20),.len(len)) h2(clk, 1'b0, ing, d2, d3);
+reg_delay #(.dw(20),.len(len)) h3(clk, 1'b0, ing, d3, d4);
+reg_delay #(.dw(20),.len(len)) h4(clk, 1'b0, ing, d4, d5);
+reg_delay #(.dw(20),.len(len)) h5(clk, 1'b0, ing, d5, d6);
+reg_delay #(.dw(20),.len(len)) h6(clk, 1'b0, ing, d6, d7);
+reg_delay #(.dw(20),.len(len)) h7(clk, 1'b0, ing, d7, d8);
+reg_delay #(.dw(20),.len(len)) h8(clk, 1'b0, ing, d8, d9);
+reg_delay #(.dw(20),.len(len)) h9(clk, 1'b0, ing, d9, d10);
 
 reg signed [20:0] s1=0, s2=0, s3=0, s4=0;
 reg sg=0;

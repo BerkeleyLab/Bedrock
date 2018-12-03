@@ -1,0 +1,24 @@
+[timestart] 54
+[size] 1024 489
+[pos] 97 120
+*-6.601351 320 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tt800_tb.
+[sst_width] 210
+[signals_width] 191
+[sst_expanded] 1
+[sst_vpaned_height] 115
+@28
+tt800_tb.clk
+tt800_tb.en
+tt800_tb.init
+@22
+tt800_tb.initv[31:0]
+tt800_tb.y[31:0]
+@200
+-insides
+@22
+tt800_tb.tt800.new[31:0]
+tt800_tb.tt800.tap1[31:0]
+tt800_tb.tt800.tap2[31:0]
+[pattern_trace] 1
+[pattern_trace] 0

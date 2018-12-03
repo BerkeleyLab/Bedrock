@@ -10,13 +10,13 @@ VERILOG_VPI = iverilog-vpi$(ICARUS_SUFFIX)
 VERILOG = iverilog$(ICARUS_SUFFIX) -Wall
 VG_ALL = -DSIMULATE
 V_TB = -Wno-timescale
-VFLAGS = ${VFLAGS_$@}
+VFLAGS = ${VFLAGS_$@} -y$(AUTOGEN_DIR) -I$(AUTOGEN_DIR)
 VVP_FLAGS = ${VVP_FLAGS_$@}
 VVP = vvp$(ICARUS_SUFFIX) -n
 GTKWAVE = gtkwave
 VPIEXT = vpi
 OCTAVE = octave
-PYTHON = python2
+PYTHON = python3
 AWK = awk
 VPI_CFLAGS := $(shell $(VERILOG_VPI) --cflags)
 VPI_LDFLAGS := $(shell $(VERILOG_VPI) --ldflags)
@@ -25,13 +25,14 @@ IPX_DIR = _ipx
 AUTOGEN_DIR = _autogen
 
 # Build tools
-CC = $(BUILD_DIR)/ccd-gcc
+#CC = $(BUILD_DIR)/ccd-gcc
+CC = gcc
 INST = $(BUILD_DIR)/install
 COMP = $(CC) $(CF_ALL) $(CF_TGT) -o $@ -c $<
 LINK = $(CC) $(LF_ALL) $(LF_TGT) -o $@ $^ $(LL_TGT)
 COMPLINK = $(CC) $(CF_ALL) $(CF_TGT) $(LF_ALL) $(LF_TGT) -o $@ $< $(LL_TGT)
 ARCH = ar rcs $@ $^
-VERILOG_COMP = $(VERILOG) $(VG_ALL) $(VPI_TGT) -o $@ $^
+VERILOG_COMP = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} -o $@ $^
 VERILOG_TB = $(VERILOG) $(VG_ALL) $(V_TB) ${VFLAGS} -o $@ $(filter %v, $^)
 VERILOG_TB_VPI = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} -o $@ $(filter %.v, $^)
 VERILOG_SIM = cd `dirname $@` && $(VVP) `basename $<` $(VVP_FLAGS)
@@ -70,12 +71,17 @@ BIT2RBF = bit2rbf $@ < $<
 %.a: %.o
 	$(ARCH)
 
-%_tb: %_tb.v
+%_tb: %_tb.v %_tb_auto
 	$(VERILOG_TB)
+
+%_tb_auto: $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh %_auto
+	@echo .
+
+%_auto: $(AUTOGEN_DIR)/addr_map_%.vh $(AUTOGEN_DIR)/%_auto.vh
+	@echo .
 
 %_live: %_tb.v
 	$(VERILOG_TB)
-#$(VERILOG_RUN)
 
 %_tb_vpi: %_tb.v
 	$(VERILOG_TB_VPI)
@@ -155,14 +161,15 @@ $(DEPDIR)/%.bit.d: %.v
 $(DEPDIR)/%_tb.d: %_tb.v
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && (printf "$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
+LB_AW = 10
 $(AUTOGEN_DIR)/%_auto.vh: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -o $@ -w 10
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -o $@ -w $(LB_AW)
 
 $(AUTOGEN_DIR)/addr_map_%.vh: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -a $@ -w 10
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -a $@ -w $(LB_AW)
 
 $(AUTOGEN_DIR)/regmap_%.json: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -r $@ -w 10
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -i $< -r $@ -w $(LB_AW)
 
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz
@@ -191,4 +198,4 @@ CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR)
 clean::
 	rm -f $(CLEAN)
 	rm -rf $(CLEAN_DIRS)
-	sh $(BUILD_DIR)/check_clean
+	# sh $(BUILD_DIR)/check_clean
