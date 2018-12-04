@@ -1,5 +1,5 @@
 import sys
-import numpy
+import math
 
 dpw = int(sys.argv[1])  # data path width
 print('// CORDIC processor, machine generated from cordicgx.py')
@@ -84,7 +84,7 @@ print('assign zn[1] = {zt1,{(%d-width){1\'b0}}};' % dpw)
 
 # Heart of the matter
 for ix in range(1, dpw-1):
-    a = numpy.floor(numpy.arctan((0.5)**ix)/(2*numpy.pi)*2**(dpw+1)+.5)
+    a = math.floor(math.atan((0.5)**ix)/(2*math.pi)*2**(dpw+1)+.5)
     ss = 'cstageg #( %2d, %d, %d, def_op) cs%-2d (' % (ix, dpw+1, dpw, ix)
     ss += ' clk, opn[%-2d], xn[%-2d],  yn[%-2d], zn[%-2d],' % (ix, ix, ix, ix)
     ss += ' %2d\'d%-9ld,' % (dpw+1, a)

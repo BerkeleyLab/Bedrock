@@ -1,2 +1,2 @@
 * Remove dependency on gawk [Move this to Python]
-* Remove dependency on numpy (perhaps unnecessary(?))
+* Remove dependency on numpy (only numpy.loadtxt left)

@@ -1,4 +1,4 @@
-AWK = gawk
+AWK = mawk
 VERILOG = iverilog$(ICARUS_SUFFIX) -Wall -Wno-timescale
 VVP = vvp$(ICARUS_SUFFIX) -n
 SYNTH = xil_syn  # not supplied here
