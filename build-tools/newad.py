@@ -11,7 +11,6 @@
 import argparse
 import json
 import re
-import os
 from os.path import dirname, basename, isfile
 from copy import deepcopy
 try:
@@ -30,6 +29,7 @@ gch = {}
 g_flat_addr_map = {}
 g_clk_domains = {}
 file_not_found = 0
+
 
 class Port:
     def __init__(self, name, downto, direction, sign, module, signal_type,
@@ -56,6 +56,7 @@ class Port:
         s += ' ' + self.name
         s += ' //module:{}; clk_domain:{}; index:{}'.format(self.module, self.clk_domain, self.cd_index)
         return s
+
 
 def consider_port(p, fd):
     # Consider what to do with a port
@@ -227,14 +228,17 @@ def construct_map(inst, p, gcnt, mod):
         elif p.direction == 'output':
             self_map[mod].append('assign %s = %s;\\\n' % (expanded, array_el))
 
+
 INSTANTIATION_SITE = r'^\s*(\w+)\s+(#\(.*\) *)?(\w+)\s*//\s*auto(\(\w+,\d+\))?\s+((\w+)(\[(\w+)\])?)?'
 # Search for port with register width defined 'input (signed)? [%d:%d] name // <...>'
-PORT_WIDTH_MULTI = r'^\s*,?(input|output)\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+),?\s*//\s*external\s*(single-cycle|strobe|we-strobe|plus-we)?'
+PORT_WIDTH_MULTI = r'^\s*,?(input|output)\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+),?\s*'
+PORT_WIDTH_MULTI += r'//\s*external\s*(single-cycle|strobe|we-strobe|plus-we)?'
 # Search for port with register width 1 'input (signed)? name // <...>'
 PORT_WIDTH_SINGLE = r'^\s*,?(input|output)\s+(signed)?\s*(\w+),?\s*//\s*external\s*(single-cycle|strobe|we-strobe)?'
 TOP_LEVEL_REG = r'^\s*//\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*top-level\s*(single-cycle|strobe|we-strobe)?'
 
 DESCRIPTION_ATTRIBUTE = r'^\s*\(\*\s*BIDS_description\s*=\s*\"(.+?)\"\s*\*\)\s*$'
+
 
 def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
     '''
@@ -551,7 +555,8 @@ def write_regmap_file(fi, fo, low_res, base_addr, plot_map):
 
 def main(argv):
 
-    def auto_int(x): return int(x, 0)
+    def auto_int(x):
+        return int(x, 0)
     parser = argparse.ArgumentParser(description='Automatic address generator: Parses verilog lines '
                                      'and generates addresses and decoders for registers declared '
                                      'external across module instantiations')
@@ -593,6 +598,7 @@ def main(argv):
                              args.gen_mirror, args.base_addr, args.plot_map)
     if regmap_fname:
         write_regmap_file(input_fname, regmap_fname, args.low_res, args.base_addr, args.plot_map)
+
 
 if __name__ == '__main__':
     import sys

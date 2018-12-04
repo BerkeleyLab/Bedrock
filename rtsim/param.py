@@ -181,8 +181,7 @@ def set_reg_old(offset, prefix, name, hierarchy):
     addr = regmap[name]['base_addr']
     if type(val) is list:
         for i, v in enumerate(val):
-            print('{} {} # {}'.format(addr + i, v, prefix + name + "[" + str(i)
-                                      + "]"))
+            print('{} {} # {}'.format(addr + i, v, prefix + name + "[" + str(i) + "]"))
     else:
         print('{} {} # {}'.format(addr, val, prefix + name))
 

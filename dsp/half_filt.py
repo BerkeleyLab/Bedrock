@@ -2,6 +2,7 @@ import argparse
 import numpy
 from numpy import sqrt, mean
 
+
 def make_check():
     y = numpy.loadtxt("half_filt.dat")
     npt = len(y)
@@ -23,11 +24,12 @@ def make_check():
         oamp > 199800 and
         oamp < 200000 and
         abs(mean(erry)) < 0.01 and
-        err < tst_err):
+            err < tst_err):
         print("PASS")
     else:
         print("FAIL")
         exit(1)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Test a_compress')

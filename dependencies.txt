@@ -5,3 +5,4 @@ gawk [looks like mawk is the default install and isn't enough]
 python-numpy
 python-scipy
 python-matplotlib
+python-flake8

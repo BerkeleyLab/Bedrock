@@ -18,3 +18,8 @@ rtsim_test:
   stage: test
   script:
     - make clean && make checks && make rtsim.dat
+
+flake8:
+  stage: test
+  script:
+   - find . -name "*.py" | xargs flake8
