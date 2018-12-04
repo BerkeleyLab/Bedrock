@@ -1,0 +1,35 @@
+[*]
+[*] GTKWave Analyzer v3.3.79 (w)1999-2017 BSI
+[*] Tue Dec  4 23:34:38 2018
+[*]
+[dumpfile] "/home/fubar/work/lbl/bedrock/dsp/rot_dds.vcd"
+[dumpfile_mtime] "Tue Dec  4 23:33:36 2018"
+[dumpfile_size] 323669
+[savefile] "/home/fubar/work/lbl/bedrock/dsp/rot_dds.sav"
+[timestart] 0
+[size] 1920 1200
+[pos] -1 -610
+*-6.372678 196 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] rot_dds_tb.
+[sst_width] 210
+[signals_width] 174
+[sst_expanded] 1
+[sst_vpaned_height] 365
+@24
+rot_dds_tb.dut.phase_step_h[19:0]
+rot_dds_tb.dut.phase_step_l[11:0]
+rot_dds_tb.dut.modulo[11:0]
+rot_dds_tb.dut.phase_l[11:0]
+rot_dds_tb.dut.phase_h[19:0]
+@8421
+rot_dds_tb.dut.sina[17:0]
+@28001
+-
+-
+@8420
+rot_dds_tb.dut.cosa[17:0]
+@28000
+-
+-
+[pattern_trace] 1
+[pattern_trace] 0

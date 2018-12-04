@@ -1,7 +1,7 @@
 VFLAGS_DEP += -y. -I.
-VFLAGS += -I. -y.
+VFLAGS += -I. -y. -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
-TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dds_tb
 
 TGT_ := $(TEST_BENCH)
 
@@ -16,6 +16,11 @@ targets: $(TGT_)
 checks: $(CHK_)
 check_all: $(CHK_)
 bits: $(BITS_)
+
+$(AUTOGEN_DIR)/cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
+	mkdir -p $(AUTOGEN_DIR) && $(PYTHON) $< 22 > $@
+
+rot_dds_auto: $(AUTOGEN_DIR)/cordicg_b22.v
 
 VFLAGS_rx_buffer_tb = -DTARGET_s3
 
