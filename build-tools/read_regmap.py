@@ -10,7 +10,7 @@ def get_map(f='regmap_gen_vmod1.json'):
         l = l.strip()
         l = l.split()
         if len(l) != 2:
-            print ("Something wrong with the line width: ", l)
+            print("Something wrong with the line width: ", l)
             exit()
         else:
             try:
@@ -81,6 +81,7 @@ def get_reg_info(regmap, hierarchy, name):
                         (name, str(reg_names)))
     # print('Register not found : ' + str(name))
     return None
+
 
 if __name__ == '__main__':
     # test case

@@ -101,6 +101,6 @@ print('wire [%d:0] zfinal = zn[nstg-1];' % (dpw))
 print('\n// round, not truncate')
 print('assign xout     = xfinal[%d:%d-width] + xfinal[%d-width];' % (dpw-1, dpw, dpw-1))
 print('assign yout     = yfinal[%d:%d-width] + yfinal[%d-width];' % (dpw-1, dpw, dpw-1))
-print('assign phaseout = zfinal[%d:%d-width] + zfinal[%d-width];' % (dpw,   dpw, dpw-1))
+print('assign phaseout = zfinal[%d:%d-width] + zfinal[%d-width];' % (dpw, dpw, dpw-1))
 
 print('\nendmodule')
