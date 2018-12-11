@@ -1,15 +1,16 @@
 `timescale 1ns / 1ns
 
-module doublediff1(clk, d_in, g_in, d_out, g_out, reset);
+module doublediff1(
+	input clk,
+	input reset,
+	input [dw-1:0] d_in,
+	input [gw-1:0] g_in,
+	output [dw-1:0] d_out,
+	output [gw-1:0] g_out
+);
 parameter dw=28;
 parameter gw=1;
 parameter dsr_len=4;
-	input clk;
-	input reset;
-	input [dw-1:0] d_in;
-	input [gw-1:0] g_in;
-	output [dw-1:0] d_out;
-	output [gw-1:0] g_out;
 
 reg signed [dw-1:0] d1=0, d2=0;
 wire [gw-1:0] valid1, valid2;
