@@ -1,15 +1,16 @@
 `timescale 1ns / 1ns
 
-module mixer(clk,adcf,mult,mixout);
+module mixer(
+	input clk,  // timespec 8.4 ns
+	input signed [dwi-1:0] adcf,  // possibly muxed
+	input signed [dwlo-1:0] mult,
+	output signed [dwi-1+davr:0] mixout
+);
 parameter dwi=16;  // data width
 parameter davr=4;  // average width if the following cic averaging 64,
 // then the useful data increase sqrt(64), so increase 3 bits,
 // for rounding error, save 4 bits more
 parameter dwlo=18;  // lo width using 18 bits
-input clk;  // timespec 8.4 ns
-input signed [dwi-1:0] adcf;  // possibly muxed
-input signed [dwlo-1:0] mult;
-output signed [dwi-1+davr:0] mixout;
 
 reg signed [dwi-1+davr:0] mixout_r=0;
 reg signed [dwi-1:0] adcf1=0;
