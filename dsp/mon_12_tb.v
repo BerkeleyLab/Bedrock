@@ -59,6 +59,7 @@ integer ax;  // can be huge in the face of clipping.  Don't be stupid and
 	// set amplitude larger than 2^31 in ADC sine wave below.
 	// 100 X overdrive is plenty for this purpose.
 reg sample=0;
+reg iqs=1;
 always @(posedge clk) begin
 	noise = $dist_normal(nseed,0,1024);
 	th0 = (cc)*`M_TWO_PI*fnum/fden - phsi;
@@ -79,6 +80,7 @@ always @(posedge clk) begin
 	xcosb = $floor(13107.00*$cos(tha)+0.5);  cosb <= xcosb;
 	xsinb = $floor(13107.00*$sin(tha)+0.5);  sinb <= xsinb;
 	sample <= ccmod==0;
+	iqs <= ~iqs;
 end
 
 parameter dw=32;
@@ -86,7 +88,7 @@ wire [dw-1:0] sr_out;
 wire sr_val;
 cim_12x #(.dw(32)) cim(.clk(clk), .adca(adc), .adcb(adc),
 	.reset(1'b0),
-	.adcc(16'b0), .inm(16'b0), .outm(16'b0), .adcx(16'b0),
+	.adcc(16'b0), .inm(16'b0), .iqs(iqs), .outm(16'b0), .adcx(16'b0),
 	.cosa(cosa), .sina(sina), .cosb(cosb), .sinb(sinb),
 	.sample(sample),
 	.sr_out(sr_out), .sr_val(sr_val)

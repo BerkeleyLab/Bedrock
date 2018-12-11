@@ -22,6 +22,8 @@ $(AUTOGEN_DIR)/cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
 
 rot_dds_auto: $(AUTOGEN_DIR)/cordicg_b22.v
 
+mon_12_auto: $(AUTOGEN_DIR)/cordicg_b22.v
+
 VFLAGS_rx_buffer_tb = -DTARGET_s3
 
 bandpass3.dat: bandpass3_tb cset3.m
