@@ -1,11 +1,11 @@
 VFLAGS_DEP += -y. -I.
 VFLAGS += -I. -y. -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
-TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dds_tb mon_12_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb
 
 TGT_ := $(TEST_BENCH)
 
-NO_CHECK = piloop2_check banyan_mem_check pplimit_check cavity_check ctrace_check
+NO_CHECK = piloop2_check banyan_mem_check pplimit_check cavity_check ctrace_check lp_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 
 BITS_ := bandpass3.bit
@@ -43,6 +43,9 @@ timestamp.bit: timestamp.v reg_delay.v
 half_filt_check: half_filt.py half_filt.dat
 	$(PYTHON) half_filt.py -c
 
+lp_notch_check: lp_notch_test.py lp_tb lp_notch_tb
+	$(PYTHON) $<
+
 # scattershot approach
 # limited to den>=12
 mon_12_check: mon_12_tb $(BUILD_DIR)/testcode.awk
@@ -68,7 +71,7 @@ ctrace_test1.out: ctrace_tb
 	$(PYTHON) c2vcd.py $< > $@
 
 
-CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd bandpass3.dat half_filt.dat piloop2.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d ctrace_test1.out
+CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd bandpass3.dat half_filt.dat piloop2.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d ctrace_test1.out lp_out.dat notch_test.dat
 CLEAN_DIRS += _xilinx
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))

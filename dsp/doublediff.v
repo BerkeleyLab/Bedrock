@@ -1,9 +1,9 @@
 `timescale 1ns / 1ns
-
+// Differentiate when the gate is HIGH
 module doublediff(
 	input clk,
-	input [dw-1:0] d_in,
-	input g_in,
+	input [dw-1:0] d_in, // Input data
+	input g_in, // A gate when set to high differentiates input daata
 	output [dw-1:0] d_out,
 	output g_out
 );

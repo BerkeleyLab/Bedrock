@@ -86,7 +86,8 @@ reg [4-1:0] delay_v45=0;   // seems half_filter take 4 cycles?
 reg [outw*4-1:0] delay_d45=0;
 generate
 if (use_hb) begin
-	half_filt #(.len(dsr_len)) hb(.clk(clk), .ind(d4), .ing(valid4), .outd(d5), .outg(valid5),.reset(reset));
+	half_filt #(.len(dsr_len))
+		hb(.clk(clk), .ind(d4), .ing(valid4), .outd(d5), .outg(valid5), .reset(reset));
 end
 else if (use_delay) begin
 	always@(posedge clk) begin
