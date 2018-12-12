@@ -1,0 +1,50 @@
+[timestart] 476
+[size] 1129 606
+[pos] 58 5
+*-5.697296 530 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] iq_chain4_tb.
+[treeopen] iq_chain4_tb.dut.
+[sst_width] 210
+[signals_width] 142
+[sst_expanded] 1
+[sst_vpaned_height] 156
+@24
+iq_chain4_tb.cc[31:0]
+@28
+iq_chain4_tb.iq
+@420
+iq_chain4_tb.cos_r[17:0]
+iq_chain4_tb.sin_r[17:0]
+iq_chain4_tb.in1[17:0]
+iq_chain4_tb.in2[17:0]
+iq_chain4_tb.in3[17:0]
+iq_chain4_tb.in4[17:0]
+@28
+iq_chain4_tb.sync1
+@420
+iq_chain4_tb.ser_data[21:0]
+@28
+iq_chain4_tb.sync2
+@420
+iq_chain4_tb.out1[17:0]
+iq_chain4_tb.out2[17:0]
+iq_chain4_tb.out3[17:0]
+iq_chain4_tb.out4[17:0]
+@200
+-iq_chain4
+@22
+iq_chain4_tb.dut.s4[21:0]
+@200
+-iq_intrp4
+@28
+iq_chain4_tb.foo.samp
+@22
+iq_chain4_tb.foo.d_out[21:0]
+@200
+-di1
+@420
+iq_chain4_tb.dut.di1.in[17:0]
+iq_chain4_tb.dut.di1.int1[21:0]
+iq_chain4_tb.dut.di1.int2[21:0]
+[pattern_trace] 1
+[pattern_trace] 0
