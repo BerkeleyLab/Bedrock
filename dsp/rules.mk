@@ -1,7 +1,7 @@
 VFLAGS_DEP += -y. -I.
 VFLAGS += -I. -y. -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
-TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb fdbk_core_tb
 
 TGT_ := $(TEST_BENCH)
 
@@ -28,8 +28,11 @@ cordic_mux_auto: $(AUTOGEN_DIR)/cordicg_b22.v
 
 fdbk_core_auto: $(AUTOGEN_DIR)/cordicg_b22.v
 
+fdbk_core.vcd: $(AUTOGEN_DIR)/regmap_fdbk_core_tb.json
 fdbk_core.vcd: fdbk_core_tb fdbk_core_test.py
 	$(PYTHON) fdbk_core_test.py
+fdbk_core_check: fdbk_core.vcd
+	echo DONE
 
 VFLAGS_rx_buffer_tb = -DTARGET_s3
 
@@ -79,6 +82,7 @@ ctrace_test1.out: ctrace_tb
 
 
 CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd bandpass3.dat half_filt.dat piloop2.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d ctrace_test1.out lp_out.dat notch_test.dat
+CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat
 
 CLEAN_DIRS += tt800_ref.dSYM
 CLEAN_DIRS += _xilinx
