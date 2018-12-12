@@ -1,0 +1,54 @@
+[timestart] 121
+[size] 1183 678
+[pos] 244 32
+*-5.317206 198 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] xy_pi_clip_tb.
+[sst_width] 210
+[signals_width] 246
+[sst_expanded] 1
+[sst_vpaned_height] 181
+@28
+xy_pi_clip_tb.sync
+xy_pi_clip_tb.state[2:0]
+xy_pi_clip_tb.s0_addr[1:0]
+xy_pi_clip_tb.s1_addr[1:0]
+@420
+xy_pi_clip_tb.in_xy[17:0]
+xy_pi_clip_tb.out_xy[17:0]
+@200
+-config
+@420
+xy_pi_clip_tb.coeff[17:0]
+xy_pi_clip_tb.lim[17:0]
+@200
+-dut
+@420
+xy_pi_clip_tb.dut.val[17:0]
+xy_pi_clip_tb.dut.mr[35:0]
+xy_pi_clip_tb.dut.mr_sat[29:0]
+@28
+xy_pi_clip_tb.dut.clip_recirc
+xy_pi_clip_tb.dut.p_term
+@420
+xy_pi_clip_tb.dut.accum1[30:0]
+@200
+-
+-
+@28
+xy_pi_clip_tb.dut.cmp
+xy_pi_clip_tb.dut.lim_hi
+xy_pi_clip_tb.dut.sat1
+@22
+xy_pi_clip_tb.dut.clipped[3:0]
+@420
+xy_pi_clip_tb.dut.lim1[29:0]
+xy_pi_clip_tb.dut.accum2[30:0]
+@200
+-
+@420
+xy_pi_clip_tb.dut.accum3[30:0]
+xy_pi_clip_tb.dut.out_show[17:0]
+@28
+xy_pi_clip_tb.dut.o_sync
+[pattern_trace] 1
+[pattern_trace] 0
