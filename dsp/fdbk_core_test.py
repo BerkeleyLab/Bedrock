@@ -112,7 +112,7 @@ def run_test_bench(setmp_val,
         print('test_type not defined with a valid code')
         print(('test_type value supplied is ' + str(test_type)))
     else:
-        return_code = call(command, shell=True)
+        call(command, shell=True)
 
 
 def run_sp_test_bench(plot=False):
@@ -358,7 +358,7 @@ def run_prop_test_bench(plot=False):
     fdbk_out = data[:, 2] + 1j * data[:, 3]
     error = data[:, 4] + 1j * data[:, 5]
 
-    ## Scale by the appropriate scaling factor
+    # Scale by the appropriate scaling factor
     kp = coeff_val[2] * 1.646760258 / 2**6
 
     # Find latency in clock cycles
@@ -453,7 +453,7 @@ def run_prop_test_bench(plot=False):
     fdbk_out = data[:, 2] + 1j * data[:, 3]
     error = data[:, 4] + 1j * data[:, 5]
 
-    ## Scale by the appropriate scaling factor
+    # Scale by the appropriate scaling factor
     kp = coeff_val[3] * 1.646760258 / 2**6
 
     # Find latency in clock cycles
@@ -568,13 +568,13 @@ def run_int_test_bench(plot=False):
     # but real is really amplitude and imaginary is phase.
     setpoint = data[:, 0] + 1j * data[:, 1]
     fdbk_out = data[:, 2] + 1j * data[:, 3]
-    error = data[:, 4] + 1j * data[:, 5]
+    # error = data[:, 4] + 1j * data[:, 5]
 
-    ## Scale by the appropriate scaling factor
+    # Scale by the appropriate scaling factor
     ki = coeff_val[0] * 1.646760258 / 2**14
 
     out1 = np.real(fdbk_out[int(setmp_step_time / 2)])
-    out2 = np.real(fdbk_out[int(setmp_step_time / 2) + int(100 / 2)])
+    # out2 = np.real(fdbk_out[int(setmp_step_time / 2) + int(100 / 2)])
 
     edge_ind = np.where((np.real(fdbk_out) < out1 - 1500) &
                         (np.real(fdbk_out) > -limit + 1500))[0]
@@ -671,13 +671,13 @@ def run_int_test_bench(plot=False):
     # but real is really amplitude and imaginary is phase.
     setpoint = data[:, 0] + 1j * data[:, 1]
     fdbk_out = data[:, 2] + 1j * data[:, 3]
-    error = data[:, 4] + 1j * data[:, 5]
+    # error = data[:, 4] + 1j * data[:, 5]
 
-    ## Scale by the appropriate scaling factor
+    # Scale by the appropriate scaling factor
     ki = coeff_val[1] * 1.646760258 / 2**14
 
     out1 = np.imag(fdbk_out[int(setmp_step_time / 2)])
-    out2 = np.imag(fdbk_out[int(setmp_step_time / 2) + int(100 / 2)])
+    # out2 = np.imag(fdbk_out[int(setmp_step_time / 2) + int(100 / 2)])
 
     edge_ind = np.where((np.imag(fdbk_out) < out1 - 1500) &
                         (np.imag(fdbk_out) > -limit + 1500))[0]
@@ -790,7 +790,7 @@ def run_latency_test_bench(plot=False):
     # but real is really amplitude and imaginary is phase.
     fdbk_in = data[:, 0] + 1j * data[:, 1]
     fdbk_out = data[:, 2] + 1j * data[:, 3]
-    error = data[:, 4] + 1j * data[:, 5]
+    # error = data[:, 4] + 1j * data[:, 5]
 
     # Find latency in clock cycles
     input_step_idx = np.where(np.real(fdbk_in) == 35000)[0]
@@ -799,7 +799,7 @@ def run_latency_test_bench(plot=False):
     # One sample in data corresponds to two clock cycles in the test bench, thus the factor of 2
     latency_clks = 2 * (output_step_idx[0] - input_step_idx[0])
     # Latency in ns at 100 MHz
-    latency_ns = latency_clks * Tstep * 1e9
+    # latency_ns = latency_clks * Tstep * 1e9
 
     latency_text = 'Measured latency is %d clock cycles' % (latency_clks)
     print(
