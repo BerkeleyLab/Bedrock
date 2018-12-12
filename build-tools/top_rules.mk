@@ -163,13 +163,13 @@ $(DEPDIR)/%_tb.d: %_tb.v
 
 LB_AW = 10
 $(AUTOGEN_DIR)/%_auto.vh: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -o $@ -w $(LB_AW)
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -d $(NEWAD_DIRS) -i $< -o $@ -w $(LB_AW)
 
 $(AUTOGEN_DIR)/addr_map_%.vh: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -a $@ -w $(LB_AW)
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -d $(NEWAD_DIRS) -i $< -a $@ -w $(LB_AW)
 
 $(AUTOGEN_DIR)/regmap_%.json: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -i $< -r $@ -w $(LB_AW)
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -d $(NEWAD_DIRS) -i $< -r $@ -w $(LB_AW)
 
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz
