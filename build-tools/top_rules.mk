@@ -171,6 +171,8 @@ $(AUTOGEN_DIR)/addr_map_%.vh: %.v
 $(AUTOGEN_DIR)/regmap_%.json: %.v
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -d $(NEWAD_DIRS) -i $< -r $@ -w $(LB_AW)
 
+$(AUTOGEN_DIR)/config_romx.v:
+	$(PYTHON) $(BUILD_DIR)/config_crunch.py --HARDWARE $(HARDWARE) --TOOL 2 --DSP_FLAVOR $(DSP_FLAVOR) --OUTPUT $@
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz
 %.ps:   %.dot
