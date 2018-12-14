@@ -5,7 +5,7 @@ TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dd
 
 TGT_ := $(TEST_BENCH)
 
-NO_CHECK = piloop2_check banyan_mem_check pplimit_check cavity_check ctrace_check lp_check
+NO_CHECK = piloop2_check cavity_check lp_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 
 BITS_ := bandpass3.bit
@@ -38,16 +38,6 @@ fdbk_core_check: fdbk_core.vcd
 
 VFLAGS_rx_buffer_tb = -DTARGET_s3
 
-bandpass3.dat: bandpass3_tb cset3.m
-	$(VVP) $< `$(OCTAVE) -q cset3.m` > $@
-
-bandpass3_check: bpp3.m bandpass3.dat
-	$(OCTAVE) -q $(notdir $<)
-
-bandpass3.bit: bandpass3.v
-	$(SYNTH) bandpass3 $^
-	mv _xilinx/bandpass3.bit $@
-
 timestamp.bit: timestamp.v reg_delay.v
 	$(SYNTH) timestamp $^
 	mv _xilinx/timestamp.bit $@
@@ -66,24 +56,13 @@ mon_12_check: mon_12_tb $(BUILD_DIR)/testcode.awk
 	$(VVP) $< +amp=99999 +den=28  +phs=1.57 | $(AWK) -f $(filter %.awk, $^)
 	$(VVP) $< +amp=200   +den=12  +phs=0.70 | $(AWK) -f $(filter %.awk, $^)
 
-banyan_crosscheck: banyan_tb banyan_ch_find.py
-	$(VVP) banyan_tb +trace +squelch | $(PYTHON) banyan_ch_find.py
-
 tt800_ref.dat: tt800_ref
 	./tt800_ref > $@
 
 tt800_check: tt800_tb tt800.dat tt800_ref.dat
 	cmp tt800.dat tt800_ref.dat
 
-ctrace_test1.out: ctrace_tb
-	$(VVP) $< +dfile=$@
-
-# maybe generally useful, here used for testing ctrace
-%.vcd: %.out
-	$(PYTHON) c2vcd.py $< > $@
-
-
-CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd bandpass3.dat half_filt.dat piloop2.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d ctrace_test1.out lp_out.dat notch_test.dat
+CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat
 
 CLEAN_DIRS += tt800_ref.dSYM
