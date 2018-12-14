@@ -162,6 +162,7 @@ $(DEPDIR)/%_tb.d: %_tb.v
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && (printf "$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
 LB_AW = 10
+NEWAD_DIRS = .
 NEWAD_ARGS = -d $(NEWAD_DIRS) -i $< -w $(LB_AW)
 $(AUTOGEN_DIR)/%_auto.vh: %.v
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -o $@ $(NEWAD_ARGS)
