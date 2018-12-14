@@ -1,8 +1,8 @@
 VFLAGS_DEP += -y. -I. -y$(RTSIM_DIR)
 VFLAGS += -I. -y. -y$(CORDIC_DIR) -y$(DSP_DIR) -y$(RTSIM_DIR)
-NEWAD_DIRS += $(DSP_DIR),$(RTSIM_DIR)
+NEWAD_DIRS += $(DSP_DIR) $(RTSIM_DIR)
 
-TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb cryomodule_tb
+TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb xy_pi_clip_tb cryomodule_tb
 
 TGT_ := $(TEST_BENCH)
 
