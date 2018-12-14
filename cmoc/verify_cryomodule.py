@@ -12,9 +12,9 @@ else:
     fname = sys.argv[1].strip()
 
 data = numpy.loadtxt(fname)
-d1 = (data[:,0]**2 + data[:,1]**2)**0.5
-d2 = (data[:,2]**2 + data[:,3]**2)**0.5
-d3 = (data[:,4]**2 + data[:,5]**2)**0.5
+d1 = (data[:, 0]**2 + data[:, 1]**2)**0.5
+d2 = (data[:, 2]**2 + data[:, 3]**2)**0.5
+d3 = (data[:, 4]**2 + data[:, 5]**2)**0.5
 plt.plot(d1)
 plt.plot(d2)
 plt.plot(d3)
