@@ -430,8 +430,7 @@ def generate_addresses(fd,
     for k in register_names:
         bitwidth = gch[k][0]
         register_array_size = 1 << gch[k][0]
-        if (gen_mirror and mirror_base == -1
-                and register_array_size <= MIN_MIRROR_ARRAY_SIZE and fd):
+        if (gen_mirror and mirror_base == -1 and register_array_size <= MIN_MIRROR_ARRAY_SIZE and fd):
             mirror_base = base
             mirror_bit_len = mirror_size.bit_length()
             mirror_size_nearest_pow2 = 1 << mirror_bit_len
@@ -609,8 +608,7 @@ def main(argv):
         '--dir_list',
         default='.',
         type=str,
-        help=
-        'A list of directories to look for verilog source files. <dir_0>[,<dir_1>]*'
+        help='A list of directories to look for verilog source files. <dir_0>[,<dir_1>]*'
     )
     parser.add_argument(
         '-a',
@@ -633,8 +631,7 @@ def main(argv):
         '--gen_mirror',
         action='store_true',
         default=False,
-        help=
-        'Generates a mirror where all registers and register arrays with size < {}'
+        help='Generates a mirror where all registers and register arrays with size < {}'
         'are available for readback'.format(MIN_MIRROR_ARRAY_SIZE))
     parser.add_argument(
         '-pl',
@@ -647,22 +644,19 @@ def main(argv):
         '--lb_width',
         type=auto_int,
         default=10,
-        help=
-        'Set the address width of the local bus from which the generated registers are decoded'
+        help='Set the address width of the local bus from which the generated registers are decoded'
     )
     parser.add_argument(
         '-b',
         '--base_addr',
         type=auto_int,
         default=0,
-        help=
-        'Set the base address of the register map to be generated from here')
+        help='Set the base address of the register map to be generated from here')
     parser.add_argument(
         '-p',
         '--clk_prefix',
         default='lb',
-        help=
-        'Prefix of the clock domain in which decoding is done [currently ignored], appends _clk'
+        help='Prefix of the clock domain in which decoding is done [currently ignored], appends _clk'
     )
     args = parser.parse_args()
 
