@@ -6,10 +6,10 @@ TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb xy_pi_clip_tb cryo
 
 TGT_ := $(TEST_BENCH)
 
-NO_CHECK = cryomodule_check
+NO_CHECK = tgen_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 
-LB_AW = 13
+LB_AW = 15
 NEWAD_ARGS += -m -l
 vpath %.v $(RTSIM_DIR)
 vpath %.v $(DSP_DIR)
@@ -42,6 +42,8 @@ cryomodule_auto: $(AUTOGEN_DIR)/config_romx.v $(AUTOGEN_DIR)/cordicg_b22.v llrf_
 cryomodule.out: cryomodule_tb cryomodule_in.dat
 cryomodule.dat: cryomodule.out
 cryomodule.vcd: cryomodule_in.dat
+cryomodule_check: cryomodule.dat
+	$(PYTHON) verify_cryomodule.py
 
 
 CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd

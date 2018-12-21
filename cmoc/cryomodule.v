@@ -248,7 +248,7 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
 
 `define USE_TGEN
 `ifdef USE_TGEN
-   tgen tgen // auto(cavity_n,2) clk1x
+   tgen tgen // auto(cavity_n,2) lb2[cavity_n]
      (.clk(clk1x), .trig(ext_trig), .collision(collision1),
       .lb_data(clk1x_data), .lb_write(clk1x_write), .lb_addr(clk1x_addr),
       .addr_padding(1'b0),
