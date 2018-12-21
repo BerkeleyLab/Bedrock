@@ -261,7 +261,7 @@ for i, m in enumerate([mmode1, mmode2]):
     dot_2_k.append(0)
     dot_2_k.append(m.piezo_hack)
 
-for n in regmap_global:
+for n in sorted(regmap_global):
     set_reg(0, "", n, regmap_global)
 
 for i, m in enumerate([mode1, mode2]):

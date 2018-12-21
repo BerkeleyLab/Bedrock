@@ -39,7 +39,8 @@ def make_check(data):
     cav, fwd, rfl = data
     l = len(cav) // 2
     err_bar = 1
-    fail_pass(check_err(cav[l], 9.8, err_bar) and
+    print(cav[l], fwd[l], rfl[l])
+    fail_pass(check_err(cav[l], 11, err_bar) and
               check_err(fwd[l], 20, err_bar) and
               check_err(rfl[l], 17, err_bar))
 
