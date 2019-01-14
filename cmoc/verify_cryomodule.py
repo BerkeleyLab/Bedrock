@@ -1,15 +1,19 @@
 import numpy as np
+from numpy import angle as ang
 import sys
 
 from matplotlib import pyplot as plt
 
 
-def read():
+def read(mag=True):
     A = np.loadtxt('cryomodule_p.dat')
-    cav = abs(A[:, 0] + 1j*A[:, 1])
-    fwd = abs(A[:, 2] + 1j*A[:, 3])
-    rfl = abs(A[:, 4] + 1j*A[:, 5])
-    return cav, fwd, rfl
+    cav = A[:, 0] + 1j*A[:, 1]
+    fwd = A[:, 2] + 1j*A[:, 3]
+    rfl = A[:, 4] + 1j*A[:, 5]
+    if mag:
+        return abs(cav), abs(fwd), abs(rfl)
+    else:
+        return ang(cav), ang(fwd), ang(rfl)
 
 
 def show(data):
@@ -53,7 +57,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--show', action='store_true',
                         help='Show plots first and then run the check')
     args = parser.parse_args()
-    data = read()
+    data = read(mag=True)
     if args.show:
         show(data)
         make_check(data)
