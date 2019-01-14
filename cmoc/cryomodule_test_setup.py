@@ -354,7 +354,7 @@ get_ctl_reg_and_set('controller_phase_step', dds_phstep)
 get_ctl_reg_and_set('controller_modulo', dds_modulo)
 
 wave_samp_per = 1
-wave_shift = 3
+wave_shift = 0
 # The LO amplitude in the FPGA is scaled by (32/33)^2, so that yscale
 # fits nicely within the 32768 limit for small values of wave_samp_per
 lo_cheat = (32 / 33.0)**2
@@ -367,7 +367,7 @@ get_ctl_reg_and_set('sel_thresh', 5000)
 # A change to offset the DDS phase, and match the signals between
 # cryomodule_tb and larger_tb
 # get_ctl_reg_and_set('ph_offset', -150800)
-get_ctl_reg_and_set('ph_offset', -35800)
+get_ctl_reg_and_set('ph_offset', 30000)
 get_ctl_reg_and_set('sel_en', 1)
 get_ctl_reg_and_set('lp1a_kx', 20486)
 get_ctl_reg_and_set('lp1a_ky', -20486)
