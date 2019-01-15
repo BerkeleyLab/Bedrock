@@ -30,3 +30,10 @@ flake8:
   stage: test
   script:
    - find . -name "*.py" | xargs flake8
+
+badger_test:
+  before_script:
+    - cd badger/tests && make clean
+  stage: test
+  script:
+    - make
