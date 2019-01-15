@@ -3,7 +3,7 @@
 [pos] -1 -1
 *-12.449860 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] spi_flash_tb.
-[sst_width] 210
+[sst_width] 224
 [signals_width] 166
 [sst_expanded] 1
 [sst_vpaned_height] 154

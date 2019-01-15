@@ -16,8 +16,10 @@ all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanne
 	$(VVP) $< $(VCD_ARGS_$@)
 %_tb: %_tb.v
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
-%.vcd: %_tb
-	$(VVP) $< +vcd $(VCD_ARGS_$@)
+%-vpi.vpi: %-vpi.o
+	$(VERILOG_VPI) $^
+%_view: %.vcd %.gtkw
+	$(GTKWAVE) $(GTKW_OPT) $^
 
 # Setup / configuration
 BUILD_DIR = ../../build-tools
@@ -27,7 +29,12 @@ BUILD_DIR = ../../build-tools
 VERILOG += -Wno-timescale -DSIMULATE
 CFLAGS_VPI := $(shell $(VERILOG_VPI) --cflags)
 VVP = vvp$(ICARUS_SUFFIX) -N
+VCD_ARGS = $(VCD_ARGS_$@)
 VERILATOR = verilator
+PERL = perl
+# apt-get install xvfb
+# normally OK to blank out XVFB if you don't have xvfb-run and don't mind pop-ups
+XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 
 # Attention!!!!
 VPATH = ..:../../dsp:../../homeless
@@ -166,7 +173,7 @@ SYNTH_SOURCE_EXTRA = hw_test.v spi_gate.v $(LB_DEMO_V) activity.v
 SYNTH_SOURCE_SP605 = gmii_hw_test.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) sp605/gmii_clock_handle.v sp605/spartan6_clocks.v
 sp605_gmii_test_tb: $(SYNTH_SOURCE_SP605) sp605/ODDR2.v
 sp605_gmii_test.bit: $(SYNTH_SOURCE_SP605) sp605/sp605_gmii.ucf
-	PART=xc6slx45t-fgg484-3 $(SYNTH) $(notdir $(basename $<)) $^
+	PART=xc6slx45t-fgg484-3 $(ISE_SYNTH) $(notdir $(basename $<)) $^
 	mv _xilinx/gmii_hw_test.bit $@
 sp605_gmii_test_iobs: sp605_gmii_test.bit
 	grep -E "LOCATED|Direction" _xilinx/sp605_gmii_test_pad.txt | $(AWK) -F "|" '/GMII/{if (1) print $$3, $$6, $$12, $$14, $$15}' | sort
@@ -188,7 +195,7 @@ kc705_gmii_test.bit: kc705_gmii_test.tcl kc705_gmii_test.d $(SYNTH_SOURCE_KC705)
 SYNTH_SOURCE_AC701 = rgmii_hw_test.v $(SYNTH_SOURCE_KC705) gmii_to_rgmii.v
 ac701_rgmii_test_tb: $(SYNTH_SOURCE_AC701) kc705/ODDR.v kc705/BUFG.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v
 ac701_rgmii_test.bit: $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.ucf
-	PART=xc7a200t-fbg676-2 $(SYNTH) $(notdir $(basename $<)) $^
+	PART=xc7a200t-fbg676-2 $(ISE_SYNTH) $(notdir $(basename $<)) $^
 	mv _xilinx/rgmii_hw_test.bit $@
 ac701_rgmii_test.d: $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
