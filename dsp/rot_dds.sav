@@ -1,11 +1,3 @@
-[*]
-[*] GTKWave Analyzer v3.3.79 (w)1999-2017 BSI
-[*] Tue Dec  4 23:34:38 2018
-[*]
-[dumpfile] "/home/fubar/work/lbl/bedrock/dsp/rot_dds.vcd"
-[dumpfile_mtime] "Tue Dec  4 23:33:36 2018"
-[dumpfile_size] 323669
-[savefile] "/home/fubar/work/lbl/bedrock/dsp/rot_dds.sav"
 [timestart] 0
 [size] 1920 1200
 [pos] -1 -610
