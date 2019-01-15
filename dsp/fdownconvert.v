@@ -10,8 +10,8 @@
 // Compute IQ by performing the matrix muliplication described in the paper below
 // http://recycle.lbl.gov/~ldoolitt/llrf/down/reconstruct.pdf
 // Where n and n+1 are consecutive samples in time
-// | I | =  | sin[n + 1]θ 	−sin nθ |  X  | a_data[n]   |
-// | Q |    |−cos[n + 1]θ	 cos nθ |     | a_data[n+1] |
+// | I | =  |  sin[n + 1]\theta   −sin n\theta |  X  | a_data[n]   |
+// | Q |    | −cos[n + 1]\theta    cos n\theta |     | a_data[n+1] |
 // Larry Doolittle, LBNL, 2014
 module fdownconvert(
 	input clk,  // timespec 6.66 ns
