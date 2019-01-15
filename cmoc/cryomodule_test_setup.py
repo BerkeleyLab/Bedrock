@@ -347,6 +347,7 @@ def get_ctl_reg_and_set(name, value):
     addr = get_reg_info(regmap_cryomodule, [0], name)['base_addr']
     set_ctl(addr, name, value)
 
+
 get_ctl_reg_and_set('bank_next', 1)
 get_ctl_reg_and_set('bank_next', 0)
 
