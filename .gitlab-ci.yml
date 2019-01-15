@@ -1,6 +1,13 @@
 dsp_test:
   before_script:
-    - cd dsp && make clean
+    - cd dsp && export PYTHONPATH=../build-tools/
+  stage: test
+  script:
+    - make && make checks
+
+cmoc_test:
+  before_script:
+    - cd cmoc && export PYTHONPATH=../build-tools/
   stage: test
   script:
     - make && make checks

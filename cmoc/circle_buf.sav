@@ -1,0 +1,74 @@
+[timestart] 0
+[size] 1366 664
+[pos] -1 -1
+*-11.503375 1515 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] circle_buf_tb.
+[sst_width] 210
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 177
+@28
+circle_buf_tb.dut.iclk
+circle_buf_tb.dut.boundary_ok
+@22
+circle_buf_tb.dut.write_addr[5:0]
+@28
+circle_buf_tb.dut.stb_in
+circle_buf_tb.dut.buf_sync
+circle_buf_tb.mismatch
+circle_buf_tb.iclk
+circle_buf_tb.oclk
+@24
+circle_buf_tb.save_addr[5:0]
+@28
+circle_buf_tb.record_type
+circle_buf_tb.buffer_mark
+circle_buf_tb.fault
+@24
+circle_buf_tb.cc[31:0]
+@28
+circle_buf_tb.stop
+circle_buf_tb.boundary
+circle_buf_tb.stb_in
+circle_buf_tb.enable
+@200
+-source logic
+@28
+circle_buf_tb.dut.pend
+circle_buf_tb.dut.run
+@24
+circle_buf_tb.dut.write_addr[5:0]
+@28
+circle_buf_tb.dut.boundary_ok
+circle_buf_tb.dut.end_write_addr
+circle_buf_tb.dut.wbank
+@24
+circle_buf_tb.dut.save_addr[5:0]
+@28
+circle_buf_tb.dut.record_type
+circle_buf_tb.dut.eval_block
+circle_buf_tb.dut.eval_done_read
+@24
+circle_buf_tb.dut.buf_count[15:0]
+@200
+-readout logic
+@28
+circle_buf_tb.dut.stb_out
+@24
+circle_buf_tb.dut.read_addr[12:0]
+@28
+circle_buf_tb.dut.end_read_addr
+circle_buf_tb.dut.rbank
+@200
+-handshake
+@28
+circle_buf_tb.dut.flag_send_x
+circle_buf_tb.dut.wbank
+circle_buf_tb.dut.flag_return_x
+circle_buf_tb.dut.rbank
+circle_buf_tb.dut.change_req
+circle_buf_tb.dut.write_en
+circle_buf_tb.dut.done_read[1:0]
+circle_buf_tb.dut.buff_wrap
+[pattern_trace] 1
+[pattern_trace] 0

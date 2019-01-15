@@ -23,7 +23,7 @@ MIN_MIRROR_ARRAY_SIZE = 1 << MIN_MIRROR_AW  # Minimum size of an array to be mir
 port_lists = {}  # module_name: [list of ports]
 self_ports = []
 decodes = []
-use_ram = {}   # module_name : variable
+use_ram = {}  # module_name : variable
 self_map = {}
 gch = {}
 g_flat_addr_map = {}
@@ -32,8 +32,16 @@ file_not_found = 0
 
 
 class Port:
-    def __init__(self, name, downto, direction, sign, module, signal_type,
-                 clk_domain='lb', cd_indexed=False, description=''):
+    def __init__(self,
+                 name,
+                 downto,
+                 direction,
+                 sign,
+                 module,
+                 signal_type,
+                 clk_domain='lb',
+                 cd_indexed=False,
+                 description=''):
         self.name = name
         self.downto = downto
         self.direction = direction
@@ -54,7 +62,8 @@ class Port:
         s += ' signed' if self.sign else ' unsigned'
         s += ' [{}:{}]'.format(*self.downto)
         s += ' ' + self.name
-        s += ' //module:{}; clk_domain:{}; index:{}'.format(self.module, self.clk_domain, self.cd_index)
+        s += ' //module:{}; clk_domain:{}; index:{}'.format(
+            self.module, self.clk_domain, self.cd_index)
         return s
 
 
@@ -63,7 +72,8 @@ def consider_port(p, fd):
     # 5-element list is (input/output) (signed/None) lsb msb name
     if p.direction == 'output':
         bp = re.sub('_addr$', '', p.name)
-        fd.write('// found output address in module %s, base=%s\n' % (p.module, bp))
+        fd.write('// found output address in module %s, base=%s\n' % (p.module,
+                                                                      bp))
         use_ram[p.module + ':' + bp] = '[%s:%s]' % p.downto
 
 
@@ -141,8 +151,8 @@ def make_decoder_inner(inst, mod, p):
         elif p.signal_type == 'we-strobe':
             reg_def = 'wire %s = we_%s;\\\n' % (sig_name, sig_name)
             decodes.append(decode_def + reg_def)
-            gch[sig_name] = (0, mod, sign, data_width, clk_prefix, cd_index_str,
-                             p.description)
+            gch[sig_name] = (0, mod, sign, data_width, clk_prefix,
+                             cd_index_str, p.description)
         elif p.signal_type == 'plus-we-VOID':
             pass
         else:
@@ -155,8 +165,8 @@ def make_decoder_inner(inst, mod, p):
                       (msb, lsb, sig_name, clk_prefix, sig_name, sig_name,
                        clk_prefix, cd_index_str)
             decodes.append(decode_def + we_def + reg_def)
-            gch[sig_name] = (0, mod, sign, data_width, clk_prefix, cd_index_str,
-                             p.description)
+            gch[sig_name] = (0, mod, sign, data_width, clk_prefix,
+                             cd_index_str, p.description)
 
 
 def make_decoder(inst, mod, a, gcnt):
@@ -192,9 +202,8 @@ def print_instance_ports(inst, mod, gvar, gcnt, fd):
     instance_ports = port_lists[mod]
     # 'list comprehension' for the port list itself
     if fd:
-        fd.write('`define AUTOMATIC_' + inst + ' ' +
-                 ',\\\n\t'.join(one_port(inst, p.name, gvar)
-                                for p in instance_ports))
+        fd.write('`define AUTOMATIC_' + inst + ' ' + ',\\\n\t'.join(
+            one_port(inst, p.name, gvar) for p in instance_ports))
         fd.write('\n')
     #  now construct the self_ports and decoders (if any)
     for p in instance_ports:
@@ -332,8 +341,9 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
             this_port_list.append(p)
             consider_port(p, fd)
             if info[6] == 'plus-we':
-                p = Port(info[5] + '_we', (0, 0), info[1], None,
-                         this_mod, info[6] + '-VOID', clk_domain, cd_indexed, **attributes)
+                p = Port(info[5] + '_we', (0, 0), info[1], None, this_mod,
+                         info[6] + '-VOID', clk_domain, cd_indexed,
+                         **attributes)
                 this_port_list.append(p)
                 consider_port(p, fd)
             attributes = {}
@@ -353,7 +363,8 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
             if m:
                 info = [m.group(i) for i in range(6)]
                 p = Port(info[4], (info[2], info[3]), 'top_level', info[1],
-                         this_mod, info[5], clk_domain, cd_indexed, **attributes)
+                         this_mod, info[5], clk_domain, cd_indexed,
+                         **attributes)
                 this_port_list.append(p)
                 # Since these are top level registers, decoders can be generated here
                 make_decoder(None, this_mod, p, None)
@@ -399,7 +410,12 @@ def add_to_global_map(name, base_addr, sign, aw, dw, description):
     }
 
 
-def generate_addresses(fd, names, base, low_res=False, gen_mirror=False, plot_map=False):
+def generate_addresses(fd,
+                       names,
+                       base,
+                       low_res=False,
+                       gen_mirror=False,
+                       plot_map=False):
     '''
     Generate addresses with increasing bitwidth
     '''
@@ -407,8 +423,10 @@ def generate_addresses(fd, names, base, low_res=False, gen_mirror=False, plot_ma
     mirror_base = -1
     register_names = sorted(names, key=lambda x: gch.get(x)[0], reverse=True)
     if gen_mirror:
-        mirror_size = sum([1 << gch[k][0] for k in register_names
-                           if (1 << gch[k][0]) <= MIN_MIRROR_ARRAY_SIZE])
+        mirror_size = sum([
+            1 << gch[k][0] for k in register_names
+            if (1 << gch[k][0]) <= MIN_MIRROR_ARRAY_SIZE
+        ])
     for k in register_names:
         bitwidth = gch[k][0]
         register_array_size = 1 << gch[k][0]
@@ -417,11 +435,14 @@ def generate_addresses(fd, names, base, low_res=False, gen_mirror=False, plot_ma
             mirror_bit_len = mirror_size.bit_length()
             mirror_size_nearest_pow2 = 1 << mirror_bit_len
             if mirror_base & (mirror_size_nearest_pow2 - 1) != 0:
-                print('Mirror base NOT aligned.\nMirror Base: {};\nMirror Size: {};'.format(format(base, '#x'),
-                                                                                            format(mirror_size, '#x')))
-                mirror_base = ((mirror_base + mirror_size_nearest_pow2) >> mirror_bit_len) << mirror_bit_len
+                print(
+                    'Mirror base NOT aligned.\nMirror Base: {};\nMirror Size: {};'.
+                    format(format(base, '#x'), format(mirror_size, '#x')))
+                mirror_base = ((mirror_base + mirror_size_nearest_pow2) >>
+                               mirror_bit_len) << mirror_bit_len
                 base = mirror_base
-                print('Aligning mirror base. New mirror base: {}'.format(format(base, '#x')))
+                print('Aligning mirror base. New mirror base: {}'.format(
+                    format(base, '#x')))
             mirror_clk_prefix = 'lb'  # TODO: This is a hack
             s = '`define MIRROR_WIDTH %d\n'\
                 '`define ADDR_HIT_MIRROR (%s_addr[`LB_HI:`MIRROR_WIDTH]==%d)\n' %\
@@ -439,16 +460,19 @@ def generate_addresses(fd, names, base, low_res=False, gen_mirror=False, plot_ma
         if bitwidth > 0 and not low_res:
             for reg_index in range(k_aw):
                 r_name = k + '_' + str(reg_index)
-                add_to_global_map(r_name, next_addr + reg_index,
-                                  sign, bitwidth, datawidth, description)
+                add_to_global_map(r_name, next_addr + reg_index, sign,
+                                  bitwidth, datawidth, description)
         else:
-            add_to_global_map(k, next_addr, sign, bitwidth, datawidth, description)
+            add_to_global_map(k, next_addr, sign, bitwidth, datawidth,
+                              description)
         if fd:
             s = '`define ADDR_HIT_%s (%s_addr%s[`LB_HI:%d]==%d) '\
                 '// %s bitwidth: %d, base_addr: %d\n'
-            fd.write(s % (k, gch[k][4], gch[k][5], bitwidth, next_addr >> bitwidth,
-                          gch[k][1], bitwidth, next_addr))
-        (not_mirrored if mirror_base == -1 else mirrored).append((next_addr, k_aw))
+            fd.write(s %
+                     (k, gch[k][4], gch[k][5], bitwidth, next_addr >> bitwidth,
+                      gch[k][1], bitwidth, next_addr))
+        (not_mirrored
+         if mirror_base == -1 else mirrored).append((next_addr, k_aw))
         base = next_addr + k_aw
     if plot_map and (mirrored or not_mirrored):
         from matplotlib import pyplot as plt
@@ -466,8 +490,13 @@ def generate_addresses(fd, names, base, low_res=False, gen_mirror=False, plot_ma
 g_hierarchy = ['xxxx', 'station', 'cav4_elec', ['mode_', 3]]
 
 
-def address_allocation(fd, hierarchy, names, address, low_res=False,
-                       gen_mirror=False, plot_map=False):
+def address_allocation(fd,
+                       hierarchy,
+                       names,
+                       address,
+                       low_res=False,
+                       gen_mirror=False,
+                       plot_map=False):
     '''
     NOTE: The whole hierarchy thing is currently being bypassed
     TODO: Possibly remove hierarchy from here, or even make it optional
@@ -489,10 +518,9 @@ def address_allocation(fd, hierarchy, names, address, low_res=False,
         prefix = h[0]
         for hn in range(h[1]):
             hh = prefix + str(hn)
-            address = address_allocation(fd, hierarchy + 1,
-                                         [n for n in names if hh in n],
-                                         address, low_res, gen_mirror,
-                                         plot_map)
+            address = address_allocation(
+                fd, hierarchy + 1, [n for n in names if hh in n], address,
+                low_res, gen_mirror, plot_map)
         out_mod = [n for n in names if prefix not in n]
     else:
         for n in names:
@@ -526,16 +554,16 @@ def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror):
     obuf.write('`endif\n')
     # Below only applies for modules with genvar constructions
     if modname in self_map:
-        obuf.write('`define AUTOMATIC_map ' +
-                   ' '.join(self_map[modname] if modname in self_map else []) +
-                   '\n')
+        obuf.write('`define AUTOMATIC_map ' + ' '.join(
+            self_map[modname] if modname in self_map else []) + '\n')
     if fo:
         with open(fo, 'w') as fd:
             fd.write(obuf.getvalue())
     obuf.close()
 
 
-def write_address_header(fi, fo, low_res, lb_width, gen_mirror, base_addr, plot_map):
+def write_address_header(fi, fo, low_res, lb_width, gen_mirror, base_addr,
+                         plot_map):
     addr_bufs = StringIO()
     addr_bufs.write('`define LB_HI %d\n' % lb_width)
     address_allocation(addr_bufs, 0, sorted(gch.keys()), base_addr, low_res,
@@ -546,58 +574,108 @@ def write_address_header(fi, fo, low_res, lb_width, gen_mirror, base_addr, plot_
 
 
 def write_regmap_file(fi, fo, low_res, base_addr, plot_map):
-    address_allocation(0, 0, sorted(gch.keys()), base_addr, low_res=low_res, plot_map=plot_map)
+    address_allocation(
+        0,
+        0,
+        sorted(gch.keys()),
+        base_addr,
+        low_res=low_res,
+        plot_map=plot_map)
     addr_map = {x: g_flat_addr_map[x] for x in g_flat_addr_map}
     with open(fo, 'w') as fd:
-        json.dump(addr_map, fd, sort_keys=True, indent=4, separators=(',', ': '))
+        json.dump(
+            addr_map, fd, sort_keys=True, indent=4, separators=(',', ': '))
         fd.write('\n')
 
 
 def main(argv):
-
     def auto_int(x):
         return int(x, 0)
-    parser = argparse.ArgumentParser(description='Automatic address generator: Parses verilog lines '
-                                     'and generates addresses and decoders for registers declared '
-                                     'external across module instantiations')
-    parser.add_argument('-i', '--input_file', default='',
-                        help='A top level file to start the parser')
-    parser.add_argument('-o', '--output', default='',
-                        help='Outputs generated header file')
-    parser.add_argument('-d', '--dir_list', default='.', type=str,
-                        help='A list of directories to look for verilog source files. <dir_0>[,<dir_1>]*')
-    parser.add_argument('-a', '--addr_map_header', default='',
-                        help='Outputs generated address map header file')
-    parser.add_argument('-r', '--regmap', default='',
-                        help='Outputs generated address map in json format')
-    parser.add_argument('-l', '--low_res', action='store_true', default=False,
-                        help='When not selected generates a seperate address name for each')
-    parser.add_argument('-m', '--gen_mirror', action='store_true', default=False,
-                        help='Generates a mirror where all registers and register arrays with size < {}'
-                        'are available for readback'.format(MIN_MIRROR_ARRAY_SIZE))
-    parser.add_argument('-pl', '--plot_map', action='store_true', default=False,
-                        help='Plots the register map using a broken bar graph')
-    parser.add_argument('-w', '--lb_width', type=auto_int, default=10,
-                        help='Set the address width of the local bus from which the generated registers are decoded')
-    parser.add_argument('-b', '--base_addr', type=auto_int, default=0,
-                        help='Set the base address of the register map to be generated from here')
-    parser.add_argument('-p', '--clk_prefix', default='lb',
-                        help='Prefix of the clock domain in which decoding is done [currently ignored], appends _clk')
+
+    parser = argparse.ArgumentParser(
+        description='Automatic address generator: Parses verilog lines '
+        'and generates addresses and decoders for registers declared '
+        'external across module instantiations')
+    parser.add_argument(
+        '-i',
+        '--input_file',
+        default='',
+        help='A top level file to start the parser')
+    parser.add_argument(
+        '-o', '--output', default='', help='Outputs generated header file')
+    parser.add_argument(
+        '-d',
+        '--dir_list',
+        default='.',
+        type=str,
+        help='A list of directories to look for verilog source files. <dir_0>[,<dir_1>]*'
+    )
+    parser.add_argument(
+        '-a',
+        '--addr_map_header',
+        default='',
+        help='Outputs generated address map header file')
+    parser.add_argument(
+        '-r',
+        '--regmap',
+        default='',
+        help='Outputs generated address map in json format')
+    parser.add_argument(
+        '-l',
+        '--low_res',
+        action='store_true',
+        default=False,
+        help='When not selected generates a seperate address name for each')
+    parser.add_argument(
+        '-m',
+        '--gen_mirror',
+        action='store_true',
+        default=False,
+        help='Generates a mirror where all registers and register arrays with size < {}'
+        'are available for readback'.format(MIN_MIRROR_ARRAY_SIZE))
+    parser.add_argument(
+        '-pl',
+        '--plot_map',
+        action='store_true',
+        default=False,
+        help='Plots the register map using a broken bar graph')
+    parser.add_argument(
+        '-w',
+        '--lb_width',
+        type=auto_int,
+        default=10,
+        help='Set the address width of the local bus from which the generated registers are decoded'
+    )
+    parser.add_argument(
+        '-b',
+        '--base_addr',
+        type=auto_int,
+        default=0,
+        help='Set the base address of the register map to be generated from here')
+    parser.add_argument(
+        '-p',
+        '--clk_prefix',
+        default='lb',
+        help='Prefix of the clock domain in which decoding is done [currently ignored], appends _clk'
+    )
     args = parser.parse_args()
 
     input_fname = args.input_file
     modname = input_fname.split('/')[-1].split('.')[0]
-    dir_list = map(lambda x: x.strip(), args.dir_list.split(','))
+    dir_list = list(map(lambda x: x.strip(), args.dir_list.split(',')))
     addr_header_fname = args.addr_map_header
     regmap_fname = args.regmap
 
-    print_decode_header(input_fname, modname, args.output, dir_list, args.lb_width, args.gen_mirror)
+    print_decode_header(input_fname, modname, args.output, dir_list,
+                        args.lb_width, args.gen_mirror)
 
     if addr_header_fname:
-        write_address_header(input_fname, addr_header_fname, args.low_res, args.lb_width,
-                             args.gen_mirror, args.base_addr, args.plot_map)
+        write_address_header(input_fname, addr_header_fname, args.low_res,
+                             args.lb_width, args.gen_mirror, args.base_addr,
+                             args.plot_map)
     if regmap_fname:
-        write_regmap_file(input_fname, regmap_fname, args.low_res, args.base_addr, args.plot_map)
+        write_regmap_file(input_fname, regmap_fname, args.low_res,
+                          args.base_addr, args.plot_map)
 
 
 if __name__ == '__main__':

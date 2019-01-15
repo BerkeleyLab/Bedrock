@@ -1,0 +1,23 @@
+[timestart] 1428
+[size] 1225 606
+[pos] 132 6
+*-5.185491 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] rf_controller_tb.
+[treeopen] rf_controller_tb.dut.
+[sst_width] 294
+[signals_width] 203
+[sst_expanded] 1
+[sst_vpaned_height] 156
+@24
+rf_controller_tb.dut_use_fiber_iq[1:0]
+@8420
+rf_controller_tb.a_field[15:0]
+@20000
+-
+@420
+rf_controller_tb.dut.field_xy[15:0]
+rf_controller_tb.dut.fdbk_core.out_mp[17:0]
+@28
+rf_controller_tb.dut.fdbk_core.sync3
+[pattern_trace] 1
+[pattern_trace] 0

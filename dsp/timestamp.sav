@@ -1,0 +1,61 @@
+[timestart] 0
+[size] 1152 693
+[pos] 259 30
+*-12.116870 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] timestamp_tb.
+@24
+timestamp_tb.cc[31:0]
+@28
+timestamp_tb.mut.clk
+timestamp_tb.slow_op
+timestamp_tb.slow_snap
+@22
+timestamp_tb.shift_out[7:0]
+@200
+-dut
+@24
+timestamp_tb.mut.fast[2:0]
+@22
+timestamp_tb.mut.count_out[3:0]
+@28
+timestamp_tb.mut.pending
+timestamp_tb.mut.sending
+@22
+timestamp_tb.mut.snap_in[3:0]
+@28
+timestamp_tb.mut.snap_shift
+@200
+-result
+@22
+timestamp_tb.right_answer[31:0]
+timestamp_tb.upper_bits[23:0]
+timestamp_tb.sr[31:0]
+@28
+timestamp_tb.grab
+@200
+-aux
+@28
+timestamp_tb.mut.aux_trig
+timestamp_tb.mut.apending
+timestamp_tb.mut.asending
+timestamp_tb.mut.astored
+timestamp_tb.mut.abusy
+timestamp_tb.mut.axmit
+timestamp_tb.mut.asnap_shift
+@22
+timestamp_tb.mut.asnap_in[3:0]
+timestamp_tb.mut.asnap_out[3:0]
+@28
+timestamp_tb.mut.apost8
+@22
+timestamp_tb.mut.shift_in2[3:0]
+@200
+-output
+@29
+timestamp_tb.mut.slow_snap
+@28
+timestamp_tb.mut.slow_op
+@22
+timestamp_tb.mut.snap_out[3:0]
+[pattern_trace] 1
+[pattern_trace] 0

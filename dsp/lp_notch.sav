@@ -1,0 +1,19 @@
+[timestart] 0
+[size] 1000 600
+[pos] 316 45
+*-5.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 210
+[signals_width] 110
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+lp_notch_tb.clk
+lp_notch_tb.iq
+@24
+lp_notch_tb.dds
+@420
+lp_notch_tb.sint[17:0]
+lp_notch_tb.cost[17:0]
+lp_notch_tb.x[17:0]
+[pattern_trace] 1
+[pattern_trace] 0

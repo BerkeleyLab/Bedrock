@@ -1,0 +1,68 @@
+[timestart] 1168
+[size] 1205 732
+[pos] 224 40
+*-5.364307 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] mp_proc_tb.
+[treeopen] mp_proc_tb.dut.
+[sst_width] 210
+[signals_width] 205
+[sst_expanded] 1
+[sst_vpaned_height] 205
+@28
+mp_proc_tb.sync
+@420
+mp_proc_tb.in_mp[17:0]
+@28
+mp_proc_tb.dut.out_sync
+@420
+mp_proc_tb.out_xy[17:0]
+mp_proc_tb.out_ph[18:0]
+@200
+-controls
+@420
+mp_proc_tb.dut_setmp[17:0]
+mp_proc_tb.dut_coeff[17:0]
+mp_proc_tb.dut_lim[17:0]
+@200
+-dut
+@420
+mp_proc_tb.dut.mp_err[17:0]
+mp_proc_tb.dut.mp_err2[17:0]
+mp_proc_tb.dut.xy_drive[17:0]
+mp_proc_tb.dut.set1s[17:0]
+@28
+mp_proc_tb.dut.out_sync
+@200
+-pi
+@28
+mp_proc_tb.dut.pi.sync
+@420
+mp_proc_tb.dut.pi.in_xy[17:0]
+@28
+mp_proc_tb.dut.pi.o_sync
+@420
+mp_proc_tb.dut.pi.out_xy[17:0]
+@200
+-clipping
+@420
+mp_proc_tb.dut.pi.acc_show[18:0]
+mp_proc_tb.dut.pi.lim[17:0]
+@28
+mp_proc_tb.dut.pi.cmp
+mp_proc_tb.dut.pi.lim_hi
+@420
+mp_proc_tb.out_x[17:0]
+mp_proc_tb.out_y[17:0]
+@200
+-lock detect
+@420
+mp_proc_tb.dut.setmp[17:0]
+mp_proc_tb.dut.mp_err3[16:0]
+mp_proc_tb.dut.thresh1[16:0]
+mp_proc_tb.dut.thresh2[16:0]
+@28
+mp_proc_tb.dut.over_thresh
+@22
+mp_proc_tb.dut.over_event[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

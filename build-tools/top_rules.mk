@@ -162,15 +162,22 @@ $(DEPDIR)/%_tb.d: %_tb.v
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && (printf "$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
 LB_AW = 10
+EMPTY :=
+SPACE := $(EMPTY) $(EMPTY)
+COMMA := ,
+NEWAD_DIRS = .
+NEWAD_ARGS = -d $(subst $(SPACE),$(COMMA),$(NEWAD_DIRS)) -i $< -w $(LB_AW)
 $(AUTOGEN_DIR)/%_auto.vh: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -o $@ -w $(LB_AW)
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -o $@ $(NEWAD_ARGS)
 
 $(AUTOGEN_DIR)/addr_map_%.vh: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -i $< -a $@ -w $(LB_AW)
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -a $@ $(NEWAD_ARGS)
 
 $(AUTOGEN_DIR)/regmap_%.json: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -i $< -r $@ -w $(LB_AW)
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS)
 
+$(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/config_crunch.py
+	$(PYTHON) $(BUILD_DIR)/config_crunch.py --HARDWARE $(HARDWARE) --TOOL 2 --DSP_FLAVOR $(DSP_FLAVOR) --OUTPUT $@
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz
 %.ps:   %.dot

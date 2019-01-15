@@ -1,13 +1,14 @@
 `timescale 1ns / 1ns
-
-module doublediff(clk, d_in, g_in, d_out, g_out);
+// Differentiate when the gate is HIGH
+module doublediff(
+	input clk,
+	input [dw-1:0] d_in, // Input data
+	input g_in, // A gate when set to high differentiates input daata
+	output [dw-1:0] d_out,
+	output g_out
+);
 parameter dw=28;
 parameter dsr_len=4;
-	input clk;
-	input [dw-1:0] d_in;
-	input g_in;
-	output [dw-1:0] d_out;
-	output g_out;
 
 reg signed [dw-1:0] d1=0, d2=0;
 reg valid1=0, valid2=0;

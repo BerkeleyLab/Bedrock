@@ -1,0 +1,62 @@
+[timestart] 1424
+[size] 1347 659
+[pos] 20 1
+*-7.091770 -1 1415 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tgen_tb.
+[treeopen] tgen_tb.dut.
+[sst_width] 210
+[signals_width] 239
+[sst_expanded] 1
+[sst_vpaned_height] 175
+@28
+tgen_tb.trig
+tgen_tb.bank_next
+@800022
+tgen_tb.status[3:0]
+@28
+(0)tgen_tb.status[3:0]
+(1)tgen_tb.status[3:0]
+(2)tgen_tb.status[3:0]
+(3)tgen_tb.status[3:0]
+@1001200
+-group_end
+@28
+tgen_tb.control_strobe
+@22
+tgen_tb.control_addr[16:0]
+tgen_tb.control_data[31:0]
+@28
+tgen_tb.lbo_write
+@24
+tgen_tb.lbo_addr[16:0]
+@22
+tgen_tb.lbo_data[31:0]
+@28
+tgen_tb.collision
+@200
+-tgen
+@28
+tgen_tb.dut.write_thru
+@20000
+-
+@28
+tgen_tb.dut.trig1d
+tgen_tb.dut.did_work
+@22
+tgen_tb.dut.pc[9:0]
+@24
+tgen_tb.dut.subcycle[1:0]
+@22
+tgen_tb.dut.timer[15:0]
+tgen_tb.dut.mem_out[15:0]
+@28
+tgen_tb.dut.zero_addr
+@420
+tgen_tb.dut.our_data[31:0]
+@28
+tgen_tb.dut.bank
+@22
+tgen_tb.dut.addra[10:0]
+tgen_tb.dut.addrb[10:0]
+[pattern_trace] 1
+[pattern_trace] 0
