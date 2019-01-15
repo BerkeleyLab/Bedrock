@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Downloads bitfile to an SP605 board in batch, using Impact from Xilinx ISE
+
+bitfile="$1"
+if [ ! -r "$bitfile" ]; then
+  echo "Usage: $0 filename.bit" >&2
+  exit 1
+fi
+
+set -e
+if [ -n "$XILINX_SETTINGS" ]; then
+    set --  # clear shell arguments to avoid confusing Xilinx
+    echo "sourcing $XILINX_SETTINGS"
+    . "$XILINX_SETTINGS"
+fi
+
+if [ ! -d "$XILINX" ]; then
+    echo "set up for Xilinx first" >&2
+    exit 1
+fi
+
+# don't use -v switch to verify chip, since I don't create a .msk file.
+# See Xilinx Answer Record 22228.
+echo "
+setMode -bs
+setCable -port auto
+Identify
+assignFile -p 2 -file \"${bitfile}\"
+Program -p 2 -e -parallel -master -internalClk -clkFreq 40 -defaultVersion 0
+quit" | impact -batch

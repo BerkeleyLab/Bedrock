@@ -1,0 +1,24 @@
+[timestart] 129
+[size] 1002 431
+[pos] 0 0
+*-5.537728 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] badge_trace_tb.
+[sst_width] 224
+[signals_width] 174
+[sst_expanded] 1
+[sst_vpaned_height] 95
+@28
+badge_trace_tb.dut.badge_stb
+@22
+badge_trace_tb.dut.badge_data[7:0]
+@24
+badge_trace_tb.dut.tick_counter[31:0]
+badge_trace_tb.dut.badge_cnt[11:0]
+@28
+badge_trace_tb.dut.first_stb
+badge_trace_tb.dut.times_stb
+@22
+badge_trace_tb.dut.time_sr[31:0]
+badge_trace_tb.dut.write_data[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,24 @@
+[timestart] 303
+[size] 1094 540
+[pos] -1 -1
+*-5.836501 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] speed_test_tb.
+[sst_width] 224
+[signals_width] 118
+[sst_expanded] 1
+[sst_vpaned_height] 133
+@24
+speed_test_tb.len_c[10:0]
+@22
+speed_test_tb.idata[7:0]
+@28
+speed_test_tb.raw_l
+speed_test_tb.raw_s
+@22
+speed_test_tb.odata[7:0]
+@200
+-DUT
+@24
+speed_test_tb.dut.count[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

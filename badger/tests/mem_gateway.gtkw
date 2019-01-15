@@ -1,0 +1,49 @@
+[timestart] 425
+[size] 1348 577
+[pos] 34 1
+*-6.121265 708 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] mem_gateway_tb.
+[sst_width] 224
+[signals_width] 224
+[sst_expanded] 1
+[sst_vpaned_height] 147
+@24
+mem_gateway_tb.dut.len_c[10:0]
+@22
+mem_gateway_tb.dut.idata[7:0]
+@28
+mem_gateway_tb.dut.raw_l
+mem_gateway_tb.dut.raw_s
+@22
+mem_gateway_tb.dut.odata[7:0]
+@28
+mem_gateway_tb.net.txg
+@200
+-DUT
+@24
+mem_gateway_tb.dut.c8[2:0]
+@28
+mem_gateway_tb.dut.body
+@22
+mem_gateway_tb.dut.pdata[7:0]
+@28
+mem_gateway_tb.dut.capture
+@22
+mem_gateway_tb.dut.osr[31:0]
+mem_gateway_tb.dut.xdata[7:0]
+@200
+-Localbus
+@28
+mem_gateway_tb.control_strobe
+mem_gateway_tb.control_rd
+@22
+mem_gateway_tb.addr[23:0]
+mem_gateway_tb.data_out[31:0]
+@28
+mem_gateway_tb.control_rd_valid
+@22
+mem_gateway_tb.data_in[31:0]
+@820
+mem_gateway_tb.data_in[31:0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,28 @@
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-12.449860 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] spi_flash_tb.
+[sst_width] 210
+[signals_width] 166
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@22
+spi_flash_tb.idata[7:0]
+@28
+spi_flash_tb.raw_s
+@24
+spi_flash_tb.dut.eth_point[8:0]
+@28
+spi_flash_tb.dut.pack_read_done
+@24
+spi_flash_tb.dut.rx_rpoint[8:0]
+@22
+spi_flash_tb.dut.pack_data_rx[7:0]
+@28
+spi_flash_tb.dut.spi_clk
+spi_flash_tb.dut.spi_cs
+spi_flash_tb.dut.spi_miso
+spi_flash_tb.dut.spi_mosi
+[pattern_trace] 1
+[pattern_trace] 0
