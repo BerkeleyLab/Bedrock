@@ -39,7 +39,7 @@ reg [7:0] pack_data_rx=0;
 
 wire pack_read_done;
 wire pack_write;
-wire pack_write_ack=1;
+wire pack_write_ack=pack_read_ready;
 wire pack_write_strobe;
 wire [7:0] pack_data_tx;
 
@@ -89,7 +89,7 @@ end
 reg [aw-1:0] rx_rpoint=0;
 always @(posedge clk) begin
 	if (pack_read_done) rx_rpoint <= 0;
-	if (pack_read_strobe) rx_rpoint <= rx_rpoint+1;
+	if (pack_read_strobe & pack_read_ready) rx_rpoint <= rx_rpoint+1;
 	pack_data_rx <= rx_mem[rx_rpoint];
 end
 
