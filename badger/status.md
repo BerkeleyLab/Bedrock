@@ -1,6 +1,5 @@
 # Packet Badger Status / Progress
 
-[![build status](http://gitlab.lbl.gov/ldoolitt/rtefi_hack/badges/master/build.svg)](http://gitlab.lbl.gov/ldoolitt/rtefi_hack/commits/master)
 * 2018-11-02:  Input scanner (scanner.v) can properly detect
   Ethernet, ARP, IP, ICMP, and UDP.  Makefile includes useful regression tests.
 * 2018-11-13:  Simulation constructs working ARP and ICMP echo
@@ -16,6 +15,7 @@
 * 2018-12-10:  Fixed dropped-packets problem, tested with > 10^8 packets
 * 2018-12-20:  Demonstrated functional on AC701/RGMII, synthesizing with XST
 * 2018-12-21:  Demonstrated functional on AC701 when synthesizing with Vivado
+* 2019-01-15:  Merged into bedrock
 
 Synthesized by XST 14.7 for Spartan-6:
 
@@ -40,7 +40,7 @@ It has been tested using:
 
 All the .eps files here are created with and editable by xcircuit.
 
-Files in tests/sp605/, tests/ac701/, and kc705/ are only here temporarily;
+Files in tests/sp605/, tests/ac701/, and tests/kc705/ are only here temporarily;
 eventually they should be constructed by the LBNL/ATG project infrastructure.
 
 Next steps, loose but plausible order:
