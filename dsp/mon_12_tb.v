@@ -85,20 +85,20 @@ end
 
 parameter dw=32;
 wire [dw-1:0] sr_out;
-wire sr_val;
+wire sr_valid;
 cim_12x #(.dw(32)) cim(.clk(clk), .adca(adc), .adcb(adc),
 	.reset(1'b0),
 	.adcc(16'b0), .inm(16'b0), .iqs(iqs), .outm(16'b0), .adcx(16'b0),
 	.cosa(cosa), .sina(sina), .cosb(cosb), .sinb(sinb),
 	.sample(sample),
-	.sr_out(sr_out), .sr_val(sr_val)
+	.sr_out(sr_out), .sr_valid(sr_valid)
 );
 
 wire strobe;
 reg use_raw=0;
 wire signed [19:0] result;
 ccfilt #(.dsr_len(12), .dw(dw)) ccfilt(.clk(clk), .reset(1'b0),
-	.sr_out(sr_out), .sr_val(sr_val),
+	.sr_in(sr_out), .sr_valid(sr_valid),
 	.shift({shift,1'b1}),
 	.result(result), .strobe(strobe)
 );

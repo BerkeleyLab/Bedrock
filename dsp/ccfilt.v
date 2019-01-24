@@ -1,5 +1,5 @@
 // Cascaded Differentiator and post-filter
-//  also includes the barrel shifter to adjust scale to compensate
+//  also includes a barrel shifter to adjust scale to compensate
 //  for changing decimation intervals
 module ccfilt #(
 	parameter dw=32,  // data width of mon_chan output:
@@ -15,8 +15,8 @@ module ccfilt #(
 ) (
 	input clk,
 	// unprocessed double-integrator output
-	input [dw-1:0] sr_out,
-	input sr_val,
+	input [dw-1:0] sr_in,
+	input sr_valid,
 
 	// semi-static configuration
 	input [3:0] shift,  // controls scaling of result
@@ -31,7 +31,7 @@ module ccfilt #(
 wire valid2;
 wire signed [dw-1:0] d2;
 doublediff #(.dw(dw), .dsr_len(dsr_len)) diff(.clk(clk),
-	.d_in(sr_out), .g_in(sr_val), .d_out(d2), .g_out(valid2));
+	.d_in(sr_in), .g_in(sr_valid), .d_out(d2), .g_out(valid2));
 
 // Reduce bit width for entry to half-band filter
 // First get 21 bits, then see below

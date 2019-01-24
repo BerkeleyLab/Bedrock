@@ -26,7 +26,7 @@ module cim_12x #(
 
 	// unprocessed double-integrator output
 	output [dw-1:0] sr_out,
-	output sr_val,
+	output sr_valid,
 	input reset
 );
 
@@ -63,6 +63,6 @@ assign g13 = 0;
 
 // use the results of the chain
 assign sr_out = s01;  // data
-assign sr_val = g01;  // gate
+assign sr_valid = g01;  // gate
 
 endmodule
