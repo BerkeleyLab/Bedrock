@@ -3,18 +3,18 @@
 
 # =====
 # Machine generated code
-ITABLES = tx_none_table.txt tx_arp_table.txt tx_icmp_table.txt tx_udp_table.txt
-construct_tx_table.v: tx_gen.py $(ITABLES)
+ITABLES = $(BADGER_DIR)/tx_none_table.txt $(BADGER_DIR)/tx_arp_table.txt $(BADGER_DIR)/tx_icmp_table.txt $(BADGER_DIR)/tx_udp_table.txt
+construct_tx_table.v: $(BADGER_DIR)/tx_gen.py $(ITABLES)
 	$(PYTHON) $^ > $@
 
 # =====
 # Aggregation of clients with rtefi_center
 # Minor issue: if you duplicate dependencies, they're not duplicated in $^
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
-rtefi_preblob.vh: collect_clients.py $(RTEFI_CLIENT_LIST)
+rtefi_preblob.vh: $(BADGER_DIR)/collect_clients.py $(RTEFI_CLIENT_LIST)
 	$(PYTHON) $^ > $@
-rtefi_blob.v: rtefi_preblob.v rtefi_preblob.vh
-	$(VERILOG) -E $< -o $@
+rtefi_blob.v: rtefi_preblob.vh rtefi_preblob.v
+	$(VERILOG) -E $^ -o $@
 
 # =====
 # Just lists of files

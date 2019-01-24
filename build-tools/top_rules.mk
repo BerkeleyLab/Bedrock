@@ -177,7 +177,7 @@ $(AUTOGEN_DIR)/regmap_%.json: %.v
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS)
 
 $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/config_crunch.py
-	$(PYTHON) $(BUILD_DIR)/config_crunch.py --HARDWARE $(HARDWARE) --TOOL 2 --DSP_FLAVOR $(DSP_FLAVOR) --OUTPUT $@
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/config_crunch.py --HARDWARE=$(HARDWARE) --TOOL=2 --DSP_FLAVOR=$(DSP_FLAVOR) --OUTPUT=$@
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz
 %.ps:   %.dot

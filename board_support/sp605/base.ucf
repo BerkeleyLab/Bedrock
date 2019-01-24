@@ -1,0 +1,58 @@
+# Xilinx SP605 (Spartan-6 XC6SLX45T-FGG484)
+# as documented in ug526.pdf
+# http://www.xilinx.com/support/documentation/sp605.htm
+
+# Table 1-9: Ethernet PHY Connections
+# Connections to Marvell 88E1111 shown in comments
+# http://www.marvell.com/products/tranceivers/alaska_gigabit_ethernet_transceivers/Alaska_88E1111-002.pdf
+
+##------- Pin Constraints -------
+## 200 MHz Clock input
+NET "SYSCLK_P" LOC = "K21" |IOSTANDARD=LVDS_25;
+NET "SYSCLK_N" LOC = "K22" |IOSTANDARD=LVDS_25;
+#NET "CPU_RESET"       LOC = "H8" |SLEW=SLOW |IOSTANDARD=LVCMOS15;
+
+# Unused for now
+#NET ? LOC=V20    PHY_MDIO     33  MDIO
+#NET ? LOC=R19    PHY_MDC      35   MDC
+#NET ? LOC= ?     PHY_INT      32 INT_B
+#NET ? LOC=N15    PHY_CRS     115   CRS
+#NET ? LOC=M16    PHY_COL     114   COL
+
+# Table 1-19: IIC Bus Connections
+# Not yet used, but would be nice to pull in MAC and IP from 8K EEPROM
+#NET "IIC_SCL_MAIN"     LOC = "T21";  # Table 1-19, ug526
+#NET "IIC_SDA_MAIN"     LOC = "R22";  # Table 1-19, ug526
+
+# Table 1-21: FMC Debug Outputs
+# may be used for debugging
+#NET ?? LOC=A19;  # H11 on J2
+#NET ?? LOC=C19;  # H10 on J2
+#NET ?? LOC=A4;   # D12 on J2
+#NET ?? LOC=C4;   # D11 on J2
+#NET ?? LOC=D5;   # C11 on J2
+#NET ?? LOC=D4;   # C10 on J2
+#NET ?? LOC=A2;   # H14 on J2
+#NET ?? LOC=B2;   # H13 on J2
+
+# Table 1-18: User LEDs
+NET "LED<0>"     LOC = "D17"  |SLEW=SLOW |IOSTANDARD=LVCMOS25; # DS3 GPIO_LED_0 Green
+NET "LED<1>"     LOC = "AB4"  |SLEW=SLOW |IOSTANDARD=LVCMOS25; # DS4 GPIO_LED_1 Green
+NET "LED<2>"     LOC = "D21"  |SLEW=SLOW |IOSTANDARD=LVCMOS25; # DS5 GPIO_LED_2 Green
+NET "LED<3>"     LOC = "W15"  |SLEW=SLOW |IOSTANDARD=LVCMOS25; # DS6 GPIO_LED_3 Green
+# On FMC Connector
+#NET "LED<4>"       LOC = "F9";      # H8 on J2
+#NET "LED<5>"       LOC = "G8";      # H7 on J2
+#NET "LED<6>"       LOC = "A18";     # G10 on J2
+#NET "LED<7>"       LOC = "B18";     # G9 on J2
+
+#NET "DIP_SWITCH<0>"  LOC = "C18" |SLEW=SLOW |IOSTANDARD=LVCMOS25;
+#NET "DIP_SWITCH<1>"  LOC = "Y6"  |SLEW=SLOW |IOSTANDARD=LVCMOS25;
+#NET "DIP_SWITCH<2>"  LOC = "W6"  |SLEW=SLOW |IOSTANDARD=LVCMOS25;
+#NET "DIP_SWITCH<3>"  LOC = "E4"  |SLEW=SLOW |IOSTANDARD=LVCMOS15;
+
+#------- Timing constraints -------
+# 200-MHz system clock
+NET "SYSCLK_P" TNM_NET = "SYSCLK_P";
+TIMESPEC "TS_SYSCLK_P" = PERIOD "SYSCLK_P"  5.0 ns HIGH 50 %;
+

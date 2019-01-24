@@ -26,9 +26,7 @@ VFLAGS_cav_elec_tb += -DLB_DECODE_cav_elec
 $(AUTOGEN_DIR)/cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
 	mkdir -p $(AUTOGEN_DIR) && $(PYTHON) $< 22 > $@
 
-cav_mode_auto: $(AUTOGEN_DIR)/cordicg_b22.v
-cav_elec_auto: cav_mode_auto
-rtsim_auto: prng_auto cav_mech_auto station_auto cav_elec_auto
+-include $(RTSIM_DIR)/api.mk
 
 rtsim_in.dat: param.py rtsim_auto $(AUTOGEN_DIR)/regmap_rtsim.json
 	$(PYTHON) $< $(AUTOGEN_DIR)/regmap_rtsim.json | sed -e 's/ *#.*//' | grep . > $@

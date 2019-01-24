@@ -1,5 +1,5 @@
-VFLAGS_DEP += -y. -I. -y$(RTSIM_DIR)
-VFLAGS += -I. -y. -y$(CORDIC_DIR) -y$(DSP_DIR) -y$(RTSIM_DIR)
+VFLAGS_DEP += -y. -I. -y$(RTSIM_DIR) -y$(DSP_DIR) -y$(BADGER_DIR) -y$(CORDIC_DIR)
+VFLAGS += -I. -y. -y$(CORDIC_DIR) -y$(DSP_DIR) -y$(RTSIM_DIR) -y$(BADGER_DIR)
 NEWAD_DIRS += $(DSP_DIR) $(RTSIM_DIR)
 
 TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb xy_pi_clip_tb cryomodule_tb
@@ -11,9 +11,6 @@ CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 
 LB_AW = 15
 NEWAD_ARGS += -m -l
-vpath %.v $(RTSIM_DIR)
-vpath %.v $(DSP_DIR)
-#vpath %.vh $(RTSIM_DIR)
 
 .PHONY: targets checks bits check_all clean_all
 targets: $(TGT_)
@@ -45,9 +42,10 @@ cryomodule.vcd: cryomodule_in.dat
 cryomodule_check: cryomodule.dat
 	$(PYTHON) verify_cryomodule.py
 
+cryomodule_badger_auto: $(AUTOGEN_DIR)/cordicg_b22.v cryomodule_auto $(RTEFI_V)
 
 CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd
-CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cryomodule_in.dat cryomodule_p.dat cryomodule.dat config_romx.v
+CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cryomodule_in.dat cryomodule_p.dat cryomodule.dat config_romx.v $(RTEFI_CLEAN)
 
 CLEAN_DIRS += _xilinx
 
