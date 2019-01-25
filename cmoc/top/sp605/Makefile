@@ -33,8 +33,7 @@ include $(BS_HARDWARE_DIR)/rules.mk
 include $(FPGA_FAMILY_DIR)/$(FPGA_FAMILY)/rules.mk
 include $(BS_HARDWARE_DIR)/rules.mk
 include $(BOARD_SUPPORT_DIR)/rules.mk
-include $(BADGER_DIR)/rules.mk
-include $(APP_DIR)/rules.mk
+include $(APP_DIR)/api.mk
 
 system_top.ucf: larger_extra.ucf
 
@@ -48,3 +47,14 @@ SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
 VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR)/$(FPGA_FAMILY) -y$(FPGA_FAMILY_DIR)/pll -y. -y$(APP_DIR)
 
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
+
+CLEAN += *.bit
+CLEAN_DIRS += _xilinx
+
+ifneq (,$(findstring bit,$(MAKECMDGOALS)))
+    ifneq (,$(findstring bits,$(MAKECMDGOALS)))
+	-include $(BITS_:%.bit=$(DEPDIR)/%.bit.d)
+    else
+	-include $(MAKECMDGOALS:%.bit=$(DEPDIR)/%.bit.d)
+    endif
+endif

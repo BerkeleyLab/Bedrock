@@ -1,6 +1,3 @@
-VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -I$(DSP_DIR) -y$(CORDIC_DIR)
-VFLAGS += -I. -y. -y$(DSP_DIR) -I$(DSP_DIR) -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
-
 VVP_FLAGS += +trace
 
 TEST_BENCH = beam_tb outer_prod_tb resonator_tb a_compress_tb cav_mode_tb cav_elec_tb rtsim_tb
@@ -23,10 +20,7 @@ VFLAGS_cav_elec_tb += -DLB_DECODE_cav_elec
 %_a7.bit: %.v $(DEPDIR)/%.bit.d blank_a7.ucf
 	arch=a7 $(ISE_SYNTH) $* $(SYNTH_OPT) $^ && mv _xilinx/$@ $@
 
-$(AUTOGEN_DIR)/cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
-	mkdir -p $(AUTOGEN_DIR) && $(PYTHON) $< 22 > $@
-
--include $(RTSIM_DIR)/api.mk
+include $(RTSIM_DIR)/api.mk
 
 rtsim_in.dat: param.py rtsim_auto $(AUTOGEN_DIR)/regmap_rtsim.json
 	$(PYTHON) $< $(AUTOGEN_DIR)/regmap_rtsim.json | sed -e 's/ *#.*//' | grep . > $@

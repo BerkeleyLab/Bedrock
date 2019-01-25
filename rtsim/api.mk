@@ -1,3 +1,5 @@
+VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -I$(DSP_DIR) -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
+
 $(AUTOGEN_DIR)/cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
 	mkdir -p $(AUTOGEN_DIR) && $(PYTHON) $< 22 > $@
 

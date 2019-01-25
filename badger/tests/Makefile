@@ -22,6 +22,7 @@ all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanne
 	$(GTKWAVE) $(GTKW_OPT) $^
 
 # Setup / configuration
+BADGER_DIR = ..
 BUILD_DIR = ../../build-tools
 -include $(BUILD_DIR)/top_rules.mk
 
