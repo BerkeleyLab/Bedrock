@@ -4,8 +4,8 @@
 
 module piezo_control(
 	input clk,
-	input [35:0] sr_out,
-	input sr_val,
+	input [35:0] sr_in,
+	input sr_valid,
 	output [17:0] piezo_ctl,
 	output piezo_stb,
 	output [6:0] sat_count,

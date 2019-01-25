@@ -126,22 +126,22 @@ wire sample_wave = wave_cnt==1;
 // Multi-channel radio
 // Note that we no longer look at phref
 wire [43:0] sr_out;
-wire sr_val;
+wire sr_valid;
 cim_12x #(.dw(44)) cim(.clk(clk), .reset(1'b0), .sample(cic_sample),
 	.adca(a_field), .adcb(a_forward), .adcc(a_reflect),
 	.inm(iq_recv[16:1]), .outm(drive[17:2]), .iqs(~iq),
 	.adcx(16'b0),  // not much point to use this unless we set up a second DDS
 	.cosa(cosa), .sina(sina),
 	.cosb(18'b0), .sinb(18'b0),
-	.sr_out(sr_out), .sr_val(sr_val)
+	.sr_out(sr_out), .sr_valid(sr_valid)
 );
-wire [39:0] sr_out1 = sr_out[43:4];
+wire [39:0] sr_out_trunc = sr_out[43:4];  // Truncate truncated and you get trunc
 
 // Process radios for waveform monitoring
 wire signed [19:0] mon_12_result;
 wire mon_12_strobe;
 ccfilt #(.dw(40), .dsr_len(12), .shift_base(4)) ccfilt(.clk(clk),
-	.sr_out(sr_out1), .sr_val(sr_val & sample_wave),
+	.sr_in(sr_out_trunc), .sr_valid(sr_valid & sample_wave),
 	.shift({wave_shift,1'b1}), .reset(1'b0),
 	.result(mon_12_result), .strobe(mon_12_strobe)
 );
@@ -155,7 +155,7 @@ fchan_subset #(.a_dw(20), .o_dw(20), .len(12)) fchan_subset(
 // Process radios for (simple) piezo loop
 piezo_control piezo // auto
 	(.clk(clk),
-	.sr_out(sr_out1[35:0]), .sr_val(sr_val),
+	.sr_in(sr_out_trunc[35:0]), .sr_valid(sr_valid),
 	.piezo_ctl(piezo_ctl), // .piezo_stb(piezo_stb),
 	.sat_count(sat_count), .piezo_stb(trace_boundary),
 	.trace_out(trace_out), .trace_out_gate(trace_out_gate),
