@@ -7,14 +7,15 @@ COMMUNICATION = gmii
 DAUGHTER = base
 FPGA_FAMILY = spartan6
 
-APP_DIR = ../..
-BUILD_DIR = ../../../build-tools
-DSP_DIR = ../../../dsp
-RTSIM_DIR = ../../../rtsim
-CORDIC_DIR = ../../../cordic
-BOARD_SUPPORT_DIR = ../../../board_support
-FPGA_FAMILY_DIR = ../../../fpga_family
-BADGER_DIR = ../../../badger
+TOP_DIR = ../../..
+APP_DIR = $(TOP_DIR)/cmoc
+BUILD_DIR = $(TOP_DIR)/build-tools
+DSP_DIR = $(TOP_DIR)/dsp
+RTSIM_DIR = $(TOP_DIR)/rtsim
+CORDIC_DIR = $(TOP_DIR)/cordic
+BOARD_SUPPORT_DIR = $(TOP_DIR)/board_support
+FPGA_FAMILY_DIR = $(TOP_DIR)/fpga_family
+BADGER_DIR = $(TOP_DIR)/badger
 BS_HARDWARE_DIR = $(BOARD_SUPPORT_DIR)/$(HARDWARE)
 
 ifneq (,$(findstring mgt,$(COMMUNICATION)))
