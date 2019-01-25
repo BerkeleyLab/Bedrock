@@ -1,7 +1,6 @@
 BUILD_DIR = ../build-tools
 CORDIC_DIR = ../cordic
 DSP_DIR = ../dsp
-RTSIM_DIR = .
 
 .PHONY: all
 all: targets
@@ -34,7 +33,7 @@ VFLAGS_cav_elec_tb += -DLB_DECODE_cav_elec
 %_a7.bit: %.v $(DEPDIR)/%.bit.d blank_a7.ucf
 	arch=a7 $(ISE_SYNTH) $* $(SYNTH_OPT) $^ && mv _xilinx/$@ $@
 
-include $(RTSIM_DIR)/api.mk
+include api.mk
 
 rtsim_in.dat: param.py rtsim_auto $(AUTOGEN_DIR)/regmap_rtsim.json
 	$(PYTHON) $< $(AUTOGEN_DIR)/regmap_rtsim.json | sed -e 's/ *#.*//' | grep . > $@

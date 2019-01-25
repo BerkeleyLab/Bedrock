@@ -3,7 +3,6 @@ DSP_DIR = ../dsp
 CORDIC_DIR = ../cordic
 RTSIM_DIR = ../rtsim
 BADGER_DIR = ../badger/
-CMOC_DIR = ./
 
 vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
 
@@ -13,7 +12,7 @@ include $(BUILD_DIR)/top_rules.mk
 
 TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb
 
-include $(CMOC_DIR)/api.mk
+include api.mk
 
 TGT_ := $(TEST_BENCH)
 
