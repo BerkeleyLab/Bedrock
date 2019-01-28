@@ -23,6 +23,12 @@ module second_if_out(
 
 wire iq = div_state[0];
 
+// Bring input I and Q to full data rate
+wire signed [16:0] drive_i, drive_q;
+fiq_interp interp(.clk(clk),
+	.a_data(drive[17:2]), .a_gate(1'b1), .a_trig(iq),
+	.i_data(drive_i), .q_data(drive_q));
+
 // Convvert the 7/33 LO to 61/132 by (complex) multiplying by a 1/4 LO.
 // This is "cheap" and adds the minimum extra divider state.
 // Only has value because we keep the LO in complex form.
@@ -35,12 +41,6 @@ always @(posedge clk) case(div_state)
 	2'b10: begin cosb <= cosi;  sinb <= sini;  end
 	2'b11: begin cosb <= sina;  sinb <= cosi;  end
 endcase
-
-// Bring input I and Q to full data rate
-wire signed [16:0] drive_i, drive_q;
-fiq_interp interp(.clk(clk),
-	.a_data(drive[17:2]), .a_gate(1'b1), .a_trig(iq),
-	.i_data(drive_i), .q_data(drive_q));
 
 // Interpolate between points, given that we know the phase step
 // is 61/264 (image 203/264) in the double-data-rate DAC clock domain;

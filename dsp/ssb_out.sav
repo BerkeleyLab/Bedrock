@@ -1,0 +1,32 @@
+[timestart] 189
+[size] 1000 600
+[pos] 270 13
+*-7.731632 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 210
+[signals_width] 196
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+ssb_out_tb.iq
+@8420
+ssb_out_tb.drive[17:0]
+@20000
+-
+@8024
+ssb_out_tb.dac1_out0[15:0]
+@20000
+-
+@8024
+ssb_out_tb.dac1_out1[15:0]
+@20000
+-
+@8024
+ssb_out_tb.dac2_out0[15:0]
+@20000
+-
+@8024
+ssb_out_tb.dac2_out1[15:0]
+@20000
+-
+[pattern_trace] 1
+[pattern_trace] 0
