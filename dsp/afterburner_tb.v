@@ -56,7 +56,9 @@ always @(posedge clk) begin
 	if (cc==80) test_amp=75000;  // introduce a small amount of overdrive
 end
 wire [15:0] outd0, outd1;
-afterburner dut(clk, ind, outd0, outd1);
+reg [15:0] coeff = `AFTERBURNER_COEFF;
+
+afterburner dut(clk, ind, coeff, outd0, outd1);
 
 // Combine outd0 and outd1 to double-data-rate form.
 // Don't use dac_cells and FDDRRSE here, because this is
