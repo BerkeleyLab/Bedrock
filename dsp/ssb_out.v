@@ -1,5 +1,6 @@
 `timescale 1ns / 1ns
-// SSB stands for Second Side Band.
+// SSB stands for Single Side Band.
+// https://en.wikipedia.org/wiki/Single-sideband_modulation
 // Pin compatible with second_if_out,
 // but his one is tuned for close-in SSB output hardware such as built
 // at Fermilab to attach to their MFC. Thus two DAC outputs are provided.
@@ -29,6 +30,9 @@ fiq_interp interp(.clk(clk),
 
 wire signed [15:0] out1, out2;
 
+// TODO: (I+iQ) x (cos(th)+i sin(th))=(cos_th*I - sin_th*Q) + i(cos_th*Q + sin_th*I)
+// Looks like what we are generating here is the lower sideband as referred in the wiki above
+
 // Multiply drive signal backup with LO frequency to get the Real Part
 flevel_set level1(.clk(clk),
 	.cosd(cosa), .sind(sina),
@@ -51,7 +55,7 @@ wire signed [15:0] outk2 = enable ? out2 : 0;
 //   IF is 13 MHz, 16/101 = 0.1584 of ADC clock
 // This is a coefficient to correct for the linear interpolation
 // see afterburner.v for explanation
-parameter ab_coeff = 18646;  // floor(32768*0.5*sec(2*pi*16/101/2)+0.5)
+parameter [15:0] ab_coeff = 18646;  // floor(32768*0.5*sec(2*pi*16/101/2)+0.5)
 
 wire [15:0] dac1_ob0, dac1_ob1;  // offset binary outputs from afterburner
 afterburner afterburner1(.clk(clk), .data({outk1,1'b0}), .coeff(ab_coeff),
