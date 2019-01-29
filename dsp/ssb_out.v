@@ -1,5 +1,6 @@
 `timescale 1ns / 1ns
 // SSB stands for Single Side Band.
+// https://en.wikipedia.org/wiki/Single-sideband_modulation
 // Pin compatible with second_if_out,
 // but his one is tuned for close-in SSB output hardware such as built
 // at Fermilab to attach to their MFC. Thus two DAC outputs are provided.
@@ -28,6 +29,9 @@ fiq_interp interp(.clk(clk),
 	.i_data(drive_i), .q_data(drive_q));
 
 wire signed [15:0] out1, out2;
+
+// TODO: (I+iQ) x (cos(th)+i sin(th))=(cos_th*I - sin_th*Q) + i(cos_th*Q + sin_th*I)
+// Looks like what we are generating here is the lower sideband as referred in the wiki above
 
 // Multiply drive signal backup with LO frequency to get the Real Part
 flevel_set level1(.clk(clk),

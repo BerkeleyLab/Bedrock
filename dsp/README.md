@@ -22,15 +22,21 @@ Takes an interleaved IQ data stream at X samples per sec, and outputs 2 data str
 
 #### Level set
 
-Transform 2 separate I and Q data streams into a single stream A = cosx * I + sinx * Q
+Dot product of the LO signal with (I-Q) baseband data/signal. This module is used to generate the
+real or imaginary components of the upconversion.
 
 [Code](https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/master/dsp/flevel_set.v)
 
+#### Afterburner [secant interpolation]
+
+
 #### SSB Out [up-conversion]
 
+The goal here is to upconvert the feedback loop output IQ baseband stream to a DAC output stream. The IQ stream is running at half the data rate (see down-conversion above) assuming the DACs are running at the same frequency as the ADCs.
+
 1. Input of an IQ interleaved data stream.
-2. Perform IQ interpolation to bring the interleaved data stream up to regular rate.
-3. Level set
-4. DAC drive signal
+2. Perform IQ interpolation (described above) to bring the interleaved data stream up to regular rate.
+3. Upconvert the data by multiplying the IQ datastream with LO, use level set to generate Real and Imaginary components.
+4. Use afterburner.v to interpolate the mid-points of the IQ streams.
 
 [Code](https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/master/dsp/ssb_out.v)
