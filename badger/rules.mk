@@ -13,8 +13,8 @@ construct_tx_table.v: $(BADGER_DIR)/tx_gen.py $(ITABLES)
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 rtefi_preblob.vh: $(BADGER_DIR)/collect_clients.py $(RTEFI_CLIENT_LIST)
 	$(PYTHON) $^ > $@
-rtefi_blob.v: rtefi_preblob.vh rtefi_preblob.v
-	$(VERILOG) -E $^ -o $@
+rtefi_blob.v: rtefi_preblob.v rtefi_preblob.vh
+	$(VERILOG) -E $< -o $@
 
 # =====
 # Just lists of files

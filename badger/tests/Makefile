@@ -24,6 +24,8 @@ all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanne
 # Setup / configuration
 BADGER_DIR = ..
 BUILD_DIR = ../../build-tools
+DSP_DIR = ../../dsp
+HOMELESS_DIR = ../../homeless
 -include $(BUILD_DIR)/top_rules.mk
 
 # Local overrides of default rules
@@ -38,7 +40,7 @@ PERL = perl
 XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 
 # Attention!!!!
-VPATH = ..:../../dsp:../../homeless
+vpath %.v $(DSP_DIR) $(HOMELESS_DIR)
 
 # Packet Badger synthesizable code
 -include ../rules.mk
