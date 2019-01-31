@@ -40,7 +40,7 @@ PERL = perl
 XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 
 # Attention!!!!
-vpath %.v $(DSP_DIR) $(HOMELESS_DIR)
+vpath %.v $(BADGER_DIR) $(DSP_DIR) $(HOMELESS_DIR)
 
 # Packet Badger synthesizable code
 -include ../rules.mk
