@@ -1,5 +1,5 @@
 # UDP
-# should almost match tx_icmp_table.txt
+# should almost match tx_icmp_table.csv
 # see tx_path.eps and tx_gen.py
 # pc out fp_offset cf_offset chk_in template comment
   0   x    0   x    x   x    length lsb

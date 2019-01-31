@@ -3,7 +3,7 @@
 
 # =====
 # Machine generated code
-ITABLES = $(BADGER_DIR)/tx_none_table.txt $(BADGER_DIR)/tx_arp_table.txt $(BADGER_DIR)/tx_icmp_table.txt $(BADGER_DIR)/tx_udp_table.txt
+ITABLES = $(BADGER_DIR)/tx_none_table.csv $(BADGER_DIR)/tx_arp_table.csv $(BADGER_DIR)/tx_icmp_table.csv $(BADGER_DIR)/tx_udp_table.csv
 construct_tx_table.v: $(BADGER_DIR)/tx_gen.py $(ITABLES)
 	$(PYTHON) $^ > $@
 
