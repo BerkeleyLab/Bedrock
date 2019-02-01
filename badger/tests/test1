@@ -1,0 +1,4 @@
+# Very likely useless on any computer except mine.  Sorry.
+export XILINX_SETTINGS=/media/cdrom/ISE_DS/settings64.sh
+export LD_PRELOAD=$HOME/src/usb-driver-20110808/libusb-driver.so
+sp605/impact_605 sp605_gmii_test.bit

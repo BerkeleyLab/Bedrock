@@ -1,0 +1,3 @@
+PART = xc6slx45t-fgg484-3
+CLOCK_PIN = K21
+FPGA_FAMILY = spartan6

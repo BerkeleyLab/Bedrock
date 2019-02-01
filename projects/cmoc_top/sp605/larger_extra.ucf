@@ -1,0 +1,1 @@
+PIN "clocks_i_clk_1x_bufg.O" CLOCK_DEDICATED_ROUTE = FALSE;

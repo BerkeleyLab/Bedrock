@@ -32,9 +32,9 @@ COMP = $(CC) $(CF_ALL) $(CF_TGT) -o $@ -c $<
 LINK = $(CC) $(LF_ALL) $(LF_TGT) -o $@ $^ $(LL_TGT)
 COMPLINK = $(CC) $(CF_ALL) $(CF_TGT) $(LF_ALL) $(LF_TGT) -o $@ $< $(LL_TGT)
 ARCH = ar rcs $@ $^
-VERILOG_COMP = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} -o $@ $^
-VERILOG_TB = $(VERILOG) $(VG_ALL) $(V_TB) ${VFLAGS} -o $@ $(filter %v, $^)
-VERILOG_TB_VPI = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} -o $@ $(filter %.v, $^)
+VERILOG_COMP = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} $(VFLAGS_DEP) -o $@ $^
+VERILOG_TB = $(VERILOG) $(VG_ALL) $(V_TB) ${VFLAGS} $(VFLAGS_DEP) -o $@ $(filter %v, $^)
+VERILOG_TB_VPI = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} $(VFLAGS_DEP) -o $@ $(filter %.v, $^)
 VERILOG_SIM = cd `dirname $@` && $(VVP) `basename $<` $(VVP_FLAGS)
 VERILOG_VIEW = $(GTKWAVE) $^
 VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS) | $(AWK) -f $(filter %.awk, $^)
@@ -177,7 +177,7 @@ $(AUTOGEN_DIR)/regmap_%.json: %.v
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS)
 
 $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/config_crunch.py
-	$(PYTHON) $(BUILD_DIR)/config_crunch.py --HARDWARE $(HARDWARE) --TOOL 2 --DSP_FLAVOR $(DSP_FLAVOR) --OUTPUT $@
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/config_crunch.py --HARDWARE=$(HARDWARE) --TOOL=2 --DSP_FLAVOR=$(DSP_FLAVOR) --OUTPUT=$@
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz
 %.ps:   %.dot
@@ -205,4 +205,4 @@ CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR)
 clean::
 	rm -f $(CLEAN)
 	rm -rf $(CLEAN_DIRS)
-	sh $(BUILD_DIR)/check_clean
+#	sh $(BUILD_DIR)/check_clean

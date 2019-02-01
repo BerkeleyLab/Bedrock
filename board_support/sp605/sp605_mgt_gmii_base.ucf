@@ -1,0 +1,124 @@
+# Xilinx SP605 (Spartan-6 XC6SLX45T-FGG484)
+# as documented in ug526.pdf
+# http://www.xilinx.com/support/documentation/sp605.htm
+
+# Table 1-9: Ethernet PHY Connections
+# Connections to Marvell 88E1111 shown in comments
+# http://www.marvell.com/products/tranceivers/alaska_gigabit_ethernet_transceivers/Alaska_88E1111-002.pdf
+
+##------- Pin Constraints -------
+
+## GTP Mapping
+## SFP Rx/Tx
+
+NET "rxn0"          LOC = "C13" ;  ## 12 on P2, SFP
+NET "rxp0"          LOC = "D13" ;  ## 13 on P2, SFP
+NET "rxn1"          LOC = "C15" ;  ## FMC
+NET "rxp1"          LOC = "D15" ;  ## FMC
+NET "txn0"          LOC = "A14" ;  ## 19 on P2
+NET "txp0"          LOC = "B14" ;  ## 18 on P2
+NET "txn1"          LOC = "A16" ;  ## 19 on P2
+NET "txp1"          LOC = "B16" ;  ## 18 on P2
+
+NET "IIC_SDA_SFP"     LOC = "E6" ;   # UG table 1-19, IIC_SDA_SFP
+NET "IIC_SCL_SFP"     LOC = "E5" ;   # UG table 1-19, IIC_SCL_SFP
+NET "SFP_TX_DISABLE"  LOC = "Y8"  | IOSTANDARD = LVCMOS25;  ## 3, 1 on J44
+NET "SFP_LOS"         LOC = "T17" | IOSTANDARD = LVCMOS25;  ## 8 , 1 on J14
+# SFP mgt clock module constraints
+NET "sfpclk_n"        LOC = "B12"| IOSTANDARD = LVDS_25;  ## SFPCLK_QO_N
+NET "sfpclk_p"        LOC = "A12"| IOSTANDARD = LVDS_25;  ## SFPCLK_QO_P
+NET "sfpclk_p" TNM_NET = "sfpclk_p";
+TIMESPEC "TS_sfpclk_p" = PERIOD "sfpclk_p"  8.0 ns HIGH 50 %;
+NET "sfpclk_n" TNM_NET = "sfpclk_n";
+TIMESPEC "TS_sfpclk_n" = PERIOD "sfpclk_n"  8.0 ns HIGH 50 %;
+#INST s6_gtp_wrap_i_tile0_gtp0_refclk_ibufds_i DIFF_TERM=TRUE;
+##---------- Set placement for tile0_rocketio_wrapper_i/GTPA1_DUAL ------
+INST s6_gtp_wrap_i_foo LOC=GTPA1_DUAL_X1Y0; # 123
+
+
+## FMC constraints
+## FMC GTP CLK
+#NET "FMC_GBTCLK0_M2C_N"    LOC = "F12";
+#NET "FMC_GBTCLK0_M2C_P"    LOC = "E12";
+## FMC Rx/Tx
+#NET "FMC_DP0_C2M_N"    LOC = "A16" | IOSTANDARD = LVCMOS25;   ## C3
+#NET "FMC_DP0_C2M_P"    LOC = "B16" | IOSTANDARD = LVCMOS25;   ## C2
+#NET "FMC_DP0_M2C_N"    LOC = "C15" | IOSTANDARD = LVCMOS25;   ## C7
+#NET "FMC_DP0_M2C_P"    LOC = "D15" | IOSTANDARD = LVCMOS25;   ## C6
+
+
+#
+# SMA CLK
+#NET "SMA_REFCLK_N"    LOC = "D11" | IOSTANDARD = "LVCMOS25";
+#NET "SMA_REFCLK_P"    LOC = "C11" | IOSTANDARD = "LVCMOS25";
+# PCIE
+#NET "PCIE_250M_P"    LOC = "B10" | IOSTANDARD = "LVCMOS25";
+#NET "PCIE_250M_P"    LOC = "A10" | IOSTANDARD = "LVCMOS25";
+
+
+## 200 MHz Clock input
+NET "SYSCLK_P" LOC = "K21" |IOSTANDARD=LVDS_25;
+NET "SYSCLK_N" LOC = "K22" |IOSTANDARD=LVDS_25;
+#NET "CPU_RESET"       LOC = "H8" |SLEW=SLOW |IOSTANDARD=LVCMOS15;
+
+NET "PHY_RSTN"               LOC = "J22"       |SLEW=SLOW |IOSTANDARD=LVCMOS25;      #   36 RESET_B
+
+NET "GMII_RX_CLK"            LOC = "P20"       |IOSTANDARD=LVCMOS25; #    7  RXCLK
+NET "GMII_RX_ER"             LOC = "U20"       |IOSTANDARD=LVCMOS25; #    8   RXER
+NET "GMII_RX_DV"             LOC = "T22"       |IOSTANDARD=LVCMOS25; #    4   RXDV
+NET "GMII_RXD<0>"            LOC = "P19"       |IOSTANDARD=LVCMOS25; #    3   RXD0
+NET "GMII_RXD<1>"            LOC = "Y22"       |IOSTANDARD=LVCMOS25; #  128   RXD1
+NET "GMII_RXD<2>"            LOC = "Y21"       |IOSTANDARD=LVCMOS25; #  126   RXD2
+NET "GMII_RXD<3>"            LOC = "W22"       |IOSTANDARD=LVCMOS25; #  125   RXD3
+NET "GMII_RXD<4>"            LOC = "W20"       |IOSTANDARD=LVCMOS25; #  124   RXD4
+NET "GMII_RXD<5>"            LOC = "V22"       |IOSTANDARD=LVCMOS25; #  123   RXD5
+NET "GMII_RXD<6>"            LOC = "V21"       |IOSTANDARD=LVCMOS25; #  121   RXD6
+NET "GMII_RXD<7>"            LOC = "U22"       |IOSTANDARD=LVCMOS25; #  120   RXD7
+
+NET "GMII_GTX_CLK"           LOC = "AB7"       |SLEW=FAST |DRIVE=8 |IOSTANDARD=LVCMOS25; #   14 GTXCLK
+NET "GMII_TX_CLK"            LOC = "L20"       |IOSTANDARD=LVCMOS25;                     #   10  TXCLK
+NET "GMII_TX_ER"             LOC = "U8"        |SLEW=SLOW |DRIVE=4 |IOSTANDARD=LVCMOS25; #   13   TXER
+NET "GMII_TX_EN"             LOC = "T8"        |SLEW=SLOW |DRIVE=4 |IOSTANDARD=LVCMOS25; #   16   TXEN
+NET "GMII_TXD<0>"            LOC = "U10"       |SLEW=SLOW |DRIVE=4 |IOSTANDARD=LVCMOS25; #   18   TXD0
+NET "GMII_TXD<1>"            LOC = "T10"       |SLEW=SLOW |DRIVE=4 |IOSTANDARD=LVCMOS25; #   19   TXD1
+NET "GMII_TXD<2>"            LOC = "AB8"       |SLEW=SLOW |DRIVE=4 |IOSTANDARD=LVCMOS25; #   20   TXD2
+NET "GMII_TXD<3>"            LOC = "AA8"       |SLEW=SLOW |DRIVE=4 |IOSTANDARD=LVCMOS25; #   24   TXD3
+NET "GMII_TXD<4>"            LOC = "AB9"       |SLEW=SLOW |DRIVE=4 |IOSTANDARD=LVCMOS25; #   25   TXD4
+NET "GMII_TXD<5>"            LOC = "Y9"        |SLEW=SLOW |DRIVE=4 |IOSTANDARD=LVCMOS25; #   26   TXD5
+NET "GMII_TXD<6>"            LOC = "Y12"       |SLEW=SLOW |DRIVE=4 |IOSTANDARD=LVCMOS25; #   28   TXD6
+NET "GMII_TXD<7>"            LOC = "W12"       |SLEW=SLOW |DRIVE=4 |IOSTANDARD=LVCMOS25; #   29   TXD7
+
+# Table 1-19: IIC Bus Connections
+# Not yet used, but would be nice to pull in MAC and IP from 8K EEPROM
+# (FMC is also on this bus)
+#NET IIC_SDA  LOC=R22;
+#NET IIC_SCL  LOC=T21;
+
+# Table 1-18: User LEDs
+NET "LED<0>"     LOC = "D17"  |SLEW=SLOW |IOSTANDARD=LVCMOS25; # DS3 GPIO_LED_0 Green
+NET "LED<1>"     LOC = "AB4"  |SLEW=SLOW |IOSTANDARD=LVCMOS25; # DS4 GPIO_LED_1 Green
+NET "LED<2>"     LOC = "D21"  |SLEW=SLOW |IOSTANDARD=LVCMOS25; # DS5 GPIO_LED_2 Green
+NET "LED<3>"     LOC = "W15"  |SLEW=SLOW |IOSTANDARD=LVCMOS25; # DS6 GPIO_LED_3 Green
+
+#NET "DIP_SWITCH<0>"  LOC = "C18" |SLEW=SLOW |IOSTANDARD=LVCMOS25;
+#NET "DIP_SWITCH<1>"  LOC = "Y6"  |SLEW=SLOW |IOSTANDARD=LVCMOS25;
+#NET "DIP_SWITCH<2>"  LOC = "W6"  |SLEW=SLOW |IOSTANDARD=LVCMOS25;
+#NET "DIP_SWITCH<3>"  LOC = "E4"  |SLEW=SLOW |IOSTANDARD=LVCMOS15;
+
+#------- Timing constraints -------
+# 200-MHz system clock
+NET "SYSCLK_P" TNM_NET = "SYSCLK_P";
+TIMESPEC "TS_SYSCLK_P" = PERIOD "SYSCLK_P"  4.5 ns HIGH 50 %;
+NET "SYSCLK_N" TNM_NET = "SYSCLK_N";
+TIMESPEC "TS_SYSCLK_N" = PERIOD "SYSCLK_N"  4.5 ns HIGH 50 %;
+
+NET "GMII_RX_CLK" TNM_NET = "GMII_RX_CLK";
+TIMESPEC "TS_GMII_RX_CLK" = PERIOD "GMII_RX_CLK" 7.2 ns HIGH 50% INPUT_JITTER 1 ns;
+
+# PHY spec: 2.5ns setup time, 0.5ns hold time
+INST "GMII_RX_ER" TNM = GMII_RX_SIGS;
+INST "GMII_RX_DV" TNM = GMII_RX_SIGS;
+INST "GMII_RXD*"  TNM = GMII_RX_SIGS;
+# TIMEGRP "GMII_RX_SIGS" OFFSET = IN 2.5 ns VALID 3.0 ns BEFORE "GMII_RX_CLK" RISING;
+NET "PHY_MDC"       LOC = "R19"; ## 35 on U46
+NET "PHY_MDIO"      LOC = "V20"; ## 33 on U46

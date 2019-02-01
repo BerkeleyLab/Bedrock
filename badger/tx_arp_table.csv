@@ -1,0 +1,49 @@
+# ARP
+# see tx_path.eps and tx_gen.py
+# pc out fp_offset cf_offset chk_in template comment
+  0   x    0   x    x   x    length lsb
+  1   x    0   x    x   x    length msb
+  2   x    0   x    x   x    flags
+  3   x    0   x    x   x    reserved
+  4  pxd   6   x    x   x    start Dest MAC
+  5  pxd   6   x    x   x
+  6  pxd   6   x    x   x
+  7  pxd   6   x    x   x
+  8  pxd   6   x    x   x
+  9  pxd   6   x    x   x    end Dest MAC
+ 10  cfg   x  -10   x   x    start Source MAC
+ 11  cfg   x  -10   x   x
+ 12  cfg   x  -10   x   x
+ 13  cfg   x  -10   x   x
+ 14  cfg   x  -10   x   x
+ 15  cfg   x  -10   x   x    end Source MAC
+ 16  pxd   0   x    x   x    EtherType
+ 17  pxd   0   x    x   x    EtherType
+ 18  pxd   0   x    x   x    Ethernet hardware
+ 19  pxd   0   x    x   x    Ethernet hardware
+ 20  pxd   0   x    x   x    Protocol IP
+ 21  pxd   0   x    x   x    Protocol IP
+ 22  pxd   0   x    x   x    Address length
+ 23  pxd   0   x    x   x    Address length
+ 24  tem   x   x    x   0    operation
+ 25  tem   x   x    x   2    operation
+ 26  cfg   x  -26   x   x    start Source MAC
+ 27  cfg   x  -26   x   x
+ 28  cfg   x  -26   x   x
+ 29  cfg   x  -26   x   x
+ 30  cfg   x  -26   x   x
+ 31  cfg   x  -26   x   x    end Source MAC
+ 32  cfg   x  -26   x   x    start Source IP
+ 33  cfg   x  -26   x   x
+ 34  cfg   x  -26   x   x
+ 35  cfg   x  -26   x   x    end Source IP
+ 36  pxd  -10  x    x   x    start Dest MAC
+ 37  pxd  -10  x    x   x
+ 38  pxd  -10  x    x   x
+ 39  pxd  -10  x    x   x
+ 40  pxd  -10  x    x   x
+ 41  pxd  -10  x    x   x    end Dest MAC
+ 42  pxd  -10  x    x   x    start Dest IP
+ 43  pxd  -10  x    x   x
+ 44  pxd  -10  x    x   x
+ 45  pxd  -10  x    x   x    end Dest IP

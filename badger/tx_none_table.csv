@@ -1,0 +1,49 @@
+# none
+# see tx_path.eps and tx_gen.py
+# pc out fp_offset cf_offset chk_in template comment
+  0   x    0   x    x   x    length lsb
+  1   x    0   x    x   x    length msb
+  2   x    0   x    x   x    flags
+  3   x    0   x    x   x    reserved
+  4   x    x   x    x   x
+  5   x    x   x    x   x
+  6   x    x   x    x   x
+  7   x    x   x    x   x
+  8   x    x   x    x   x
+  9   x    x   x    x   x
+ 10   x    x   x    x   x
+ 11   x    x   x    x   x
+ 12   x    x   x    x   x
+ 13   x    x   x    x   x
+ 14   x    x   x    x   x
+ 15   x    x   x    x   x
+ 16   x    x   x    x   x
+ 17   x    x   x    x   x
+ 18   x    x   x    x   x
+ 19   x    x   x    x   x
+ 20   x    x   x    x   x
+ 21   x    x   x    x   x
+ 22   x    x   x    x   x
+ 23   x    x   x    x   x
+ 24   x    x   x    x   x
+ 25   x    x   x    x   x
+ 26   x    x   x    x   x
+ 27   x    x   x    x   x
+ 28   x    x   x    x   x
+ 29   x    x   x    x   x
+ 30   x    x   x    x   x
+ 31   x    x   x    x   x
+ 32   x    x   x    x   x
+ 33   x    x   x    x   x
+ 34   x    x   x    x   x
+ 35   x    x   x    x   x
+ 36   x    x   x    x   x
+ 37   x    x   x    x   x
+ 38   x    x   x    x   x
+ 39   x    x   x    x   x
+ 40   x    x   x    x   x
+ 41   x    x   x    x   x
+ 42   x    x   x    x   x
+ 43   x    x   x    x   x
+ 44   x    x   x    x   x
+ 45   x    x   x    x   x
