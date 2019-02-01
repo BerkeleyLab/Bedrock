@@ -39,6 +39,11 @@ PERL = perl
 # normally OK to blank out XVFB if you don't have xvfb-run and don't mind pop-ups
 XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 
+# used for size and speed measurements, not actual hardware
+%.bit: %.v
+	arch=s6 $(ISE_SYNTH) $(notdir $(basename $<)) $^
+	mv _xilinx/$@ $@
+
 # Attention!!!!
 vpath %.v $(BADGER_DIR) $(DSP_DIR) $(HOMELESS_DIR)
 
