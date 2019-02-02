@@ -2,7 +2,8 @@
 
 // Name: Washout (DC-reject) filter
 // track input allows freezing DC offset.
-//
+// let N = 2^cut
+// The filter has a Zero at DC [1 + 0j] and 2 poles [0 + 0j], [(N-1)/N + 0j]
 module fwashout(
 	input clk,  // timespec 8.0 ns
 	input rst,
