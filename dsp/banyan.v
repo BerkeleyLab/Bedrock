@@ -50,19 +50,29 @@ module banyan #(
 );
 
 localparam M = np/2;   // number of swap-boxes
-wire bal;  // use balance mode, when more than one bit of mask is set
-two_set #(.dw(np)) two(.d(mask_in), .two(bal));
+wire two_or_more;  // use balance mode, when more than one bit of mask is set
+two_set #(.dw(np)) two(.d(mask_in), .two(two_or_more));
 
 wire [M-1:0] mask_upper = mask_in[2*M-1:M];
 wire [M-1:0] mask_lower = mask_in[  M-1:0];
 wire any_lower = |mask_lower;
+
+// The below statement creates a Ripple-Carry chain of xors with the initial
+// bit being fed from the right (a 1'b0). The in and out refer to the circuit
 wire [M:0] imbalance_in;
 wire [M-1:0] imbalance_out = imbalance_in ^ mask_upper ^ mask_lower;
 assign imbalance_in = {imbalance_out,1'b0};
+
+// Priority set sources to Lower sinks when in Balance.
+// If currently NOT imbalanced, and lower is 0 and upper 1, Flip and route to Lower
+// If currently     imbalanced, and lower is 1 and upper 0, Flip and route to Upper
+// You can at most flip M/2 channels
 wire [M-1:0] flip_bal = imbalance_in & ~mask_upper &  mask_lower
                      | ~imbalance_in &  mask_upper & ~mask_lower;
+
+// If only single source; Alternate routing to different sink based on time
 wire [M-1:0] flip_deal = { M {~any_lower ^ time_state[rl-1]}};
-wire [M-1:0] flip_ctl = bal ? flip_bal : flip_deal;
+wire [M-1:0] flip_ctl = two_or_more ? flip_bal : flip_deal;
 
 reg [M-1:0] out_mask_upper=0, out_mask_lower=0, data_flip=0;
 reg [rl-1:0] recurse_time_state=0;  // upper bit will be ignored
