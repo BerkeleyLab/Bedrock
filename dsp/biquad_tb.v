@@ -45,7 +45,7 @@ integer xCheck, x, xOld;
 integer i;
 
 initial begin
-    $dumpfile("biquad.lxt");
+    $dumpfile("biquad_tb.lxt");
     $dumpvars(0, biquad_tb);
     #40;
 

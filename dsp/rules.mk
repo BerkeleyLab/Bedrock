@@ -1,7 +1,7 @@
 VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -I$(DSP_DIR)
 VFLAGS += -I. -y. -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
-TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb biquad_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb biquad_tb decimationLowpass_tb iirFilter_tb
 
 TGT_ := $(TEST_BENCH)
 
@@ -65,6 +65,8 @@ tt800_check: tt800_tb tt800.dat tt800_ref.dat
 	cmp tt800.dat tt800_ref.dat
 
 biquad_tb: saturateMath.v
+iirFilter_tb: saturateMath.v
+decimationLowpass_tb: saturateMath.v
 
 CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat *.lxt
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat

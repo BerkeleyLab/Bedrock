@@ -1,0 +1,271 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><title>iirFilterDoc</title></head><body>
+<h2>Introduction</h2>
+
+<p>This module implements an infinite impulse response filter as a cascaded series of biquad sections.&nbsp; Each section implements the transfer function shown below.<br>
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>Y</mi><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mn>0</mn></msub><mo>+</mo><msub><mi>b</mi><mn>1</mn></msub><msup><mi>z</mi><mrow><mo>-</mo><mn>1</mn></mrow></msup><mo>+</mo><msub><mi>b</mi><mn>2</mn></msub><msup><mi>z</mi><mrow><mo>-</mo><mn>2</mn></mrow></msup></mrow><mrow><mn>1</mn><mo>+</mo><msub><mi>a</mi><mn>1</mn></msub><msup><mi>z</mi><mrow><mo>-</mo><mn>1</mn></mrow></msup><mo>+</mo><msub><mi>a</mi><mn>2</mn></msub><msup><mi>z</mi><mrow><mo>-</mo><mn>2</mn></mrow></msup></mrow></mfrac><mi>U</mi><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo></mrow><annotation encoding="TeX">Y(z)=\frac{b_0 + b_1 z^{-1} + b_2 z^{-2}}{1 + a_1 z^{-1} + a_2 z^{-2}} U(z)</annotation></semantics></math>Filter
+ latency is five clocks per biquad section and biquad cycle time is six 
+clocks.&nbsp; Biquad sections are pipelined so a new value can be 
+written to the filter as often as every sixth clock.&nbsp; DSP blocks 
+are inferred.&nbsp; Resource consumption is minimized&nbsp; by using 
+internal DSP block registers for between-sample storage.<br>
+</p>
+<h2>Clocks</h2>
+<p>There are two clock domains.<br>
+</p>
+<ul>
+  <li>sysClk<br>
+Used for programming filter coefficients.</li>
+  <li>dataClk<br>
+Filter input and output data streams.</li>
+</ul>
+<h2>Parameters<br>
+</h2>
+<table style=" text-align: left; width: 80%;" cellspacing="2" cellpadding="2" border="1">
+  <tbody>
+    <tr>
+      <td style="text-align: center;"><span style="font-weight: bold;">Name</span><br>
+      </td>
+      <td style="text-align: center;"><span style="font-weight: bold;">Description</span><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">COEFFICIENT_WIDTH<br>
+      </td>
+      <td style="text-align: left;">Width of coefficients.&nbsp; Maximum value is 54.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">DATA_COUNT<br>
+      </td>
+      <td style="vertical-align: top;">Number of data channels.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">DATA_WIDTH<br>
+      </td>
+      <td style="text-align: left;">Width of each data channel.&nbsp; Data are signed, two's complement values.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">STAGES</td>
+      <td style="text-align: left;">Number of biquad stages.&nbsp; Filter order is 2×STAGES.</td>
+    </tr>
+  </tbody>
+</table>
+<h2>Ports</h2>
+
+
+<table style=" text-align: left; width: 80%;" cellspacing="2" cellpadding="2" border="1">
+
+
+  <tbody>
+    <tr>
+      <td style="text-align: center;"><span style="font-weight: bold;">Port</span><br>
+      </td>
+      <td style="text-align: center;"><span style="font-weight: bold;">Width</span><br>
+      </td>
+      <td style="text-align: center;"><span style="font-weight: bold;">Direct</span><span style="font-weight: bold;">ion</span><br>
+      </td>
+      <td style="text-align: center;"><span style="font-weight: bold;">Clock</span><br>
+  </td>
+<td style="text-align: center;"><span style="font-weight: bold;">Description</span><br>
+      </td>
+    </tr>
+    <tr>
+    <td style="text-align: center;">sysGPIO_Strobe</td>
+    <td style="text-align: center;">1<br>
+    </td>
+    <td style="text-align: center;">In<br>
+    </td>
+    <td style="text-align: center;">sysClk<br>
+    </td>
+    <td style="text-align: left;">Asserted to write sysGPIO_Out value into filter.</td>
+  </tr>
+  <tr>
+    <td style="text-align: center;">sysGPIO_Out</td>
+    <td style="text-align: center;">1<br>
+    </td>
+    <td style="text-align: center;">In<br>
+    </td>
+    <td style="text-align: center;">sysClk<br>
+    </td>
+    <td style="text-align: left;">Value written to filter when sysGPIO_Strobe is asserted.</td>
+  </tr>
+<tr>
+      <td style="text-align: center;">S_TDATA<br>
+      </td>
+      <td style="text-align: center;">DATA_COUNT×DATA_WIDTH<br>
+      </td>
+      <td style="text-align: center;">In<br>
+      </td>
+      <td style="vertical-align: top;">dataClk</td>
+<td style="text-align: left;">Filter input data.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">S_TVALID<br>
+      </td>
+      <td style="text-align: center;">1<br>
+      </td>
+      <td style="text-align: center;">In<br>
+      </td>
+      <td style="text-align: center;">dataClk</td>
+<td style="text-align: left;">Asserted when S_TDATA is valid.&nbsp; A 
+filter computation cycle is initiated when S_TDATA and S_TREADY are 
+asserted simultaneously.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">S_TREADY<br>
+      </td>
+      <td style="text-align: center;">1<br>
+      </td>
+      <td style="text-align: center;">Out<br>
+      </td>
+      <td style="text-align: center;">dataClk</td>
+<td style="text-align: left;">Asserted when filter is ready to accept data.&nbsp; <br>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">M_TDATA</td>
+      <td style="text-align: center;">DATA_COUNT×DATA_WIDTH</td>
+      <td style="text-align: center;">Out<br>
+      </td>
+      <td style="text-align: center;">dataClk</td>
+<td style="text-align: left;">Filter output data.<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">M_TVALID</td>
+      <td style="text-align: center;">1<br>
+      </td>
+      <td style="text-align: center;">Out<br>
+      </td>
+      <td style="text-align: center;">dataClk</td>
+<td style="text-align: left;">Asserted when M_TDATA is valid. <br>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">M_TREADY<br>
+      </td>
+      <td style="text-align: center;">1<br>
+      </td>
+      <td style="text-align: center;">In<br>
+      </td>
+      <td style="text-align: center;">dataClk</td>
+<td style="text-align: left;">Back pressure from downstream data receiver.&nbsp; 
+Asserted when downstream receiver is ready to accept data.&nbsp; A filter 
+computation cycle ends when M_TDATA and M_TREADY are asserted 
+simultaneously.</td>
+    </tr>
+  </tbody>
+</table>
+
+<br>
+AXI stream notation is used for the data port names although in the strictest sense the input 
+and output are true AXI streams only if the width of the TDATA lines is a
+ multiple of eight bits.&nbsp; In all other respects the semantics of the data ports are those 
+of AXI streams.<br>
+All outputs are registered.<br>
+<h2>Coefficient Programming</h2>
+<p>Coefficient values are two's complement fixed-point values scaled to the range [-2:2).&nbsp;&nbsp; There are two bits to the left of the binary point and COEFFICIENT_WIDTH-2 bits to the right.<br>
+</p>
+<p>When the most significant bit [31] of sysGPIO_Out is 0 the remaining bits are handled as follows:<br>
+</p>
+<ul>
+  <li>The least significant three bits [2:0] are latched and select the address of the biquad coefficient to be written:<br>
+    <table style="text-align: left; width: 300px; margin-left: 40px;" cellspacing="2" cellpadding="2" border="1">
+      <tbody>
+        <tr>
+          <td style="text-align: center;"><span style="font-weight: bold;">Address</span><br>
+          </td>
+          <td style="vertical-align: middle; text-align: center;"><span style="font-weight: bold;">Description</span><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">0<br>
+          </td>
+          <td style="text-align: center;"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mn>0</mn></msub><annotation encoding="TeX">b_0</annotation></semantics></math><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">1<br>
+          </td>
+          <td style="text-align: center;"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mn>1</mn></msub><annotation encoding="TeX">b_1</annotation></semantics></math><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">2<br>
+          </td>
+          <td style="text-align: center;"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>b</mi><mn>2</mn></msub><annotation encoding="TeX">b_2</annotation></semantics></math><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">3<br>
+          </td>
+          <td style="text-align: center;"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>-</mo><msub><mi>a</mi><mn>2</mn></msub></mrow><annotation encoding="TeX">-a_2</annotation></semantics></math><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">4<br>
+          </td>
+          <td style="text-align: center;"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>-</mo><msub><mi>a</mi><mn>1</mn></msub></mrow><annotation encoding="TeX">-a_1</annotation></semantics></math><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">7<br>
+          </td>
+          <td style="text-align: center;">Enable<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+Note the order in which the polynomial denominator coefficient values are written and that the values are negated.<br>
+Writing any coefficient clears the filter and disables filter operation 
+until address 7 is written (the actual value written is not 
+important).&nbsp; This ensures that a consistent set of coefficients is 
+used for all filter updates.</li>
+  <li>The next bits [<span style="font-style: italic;">x</span>:3] are latched and select the biquad stage to which a coefficient value will be written.</li>
+  <li>If coefficient values are wider than 31 bits then bits [<span style="font-style: italic;">y</span>:8] are latched and will be written as the most significant bits of the coefficient value.</li>
+</ul>
+&nbsp;When the most significant bit [31] of sysGPIO_Out is 1 the least 
+significant COEFFICIENT_WIDTH&nbsp; bits are the value (or least 
+significant 31 bits of the value if COEFFICIENT_WIDTH is greater than 
+31) written to the coefficient at the current biquad stage and address. <br>
+<h2>Resource Usage</h2>
+<p>A multiplier-accumulator block is allocated for each channel of each 
+biquad stage.&nbsp; The number of DSP blocks this represents depends on 
+the coefficient and data widths.&nbsp; For example, a Xilinx 7 Series 
+device multiplier-accumulator will be implemented with a single DSP 
+block if the coefficient or data width is 25 bits or fewer and the other
+ width is 18 bits or fewer.&nbsp; If one of the coefficient or data 
+widths exceeds these values then each multiplier-accumulator will 
+consume two DSP blocks.&nbsp; If both the coefficient and data widths 
+exceed these values then each multiplier-accumulator block will consume 
+four DSP blocks.<br>
+</p>
+<h2>Matlab/Octave Example</h2>
+<ol>
+  <li>Create the filter:<br>
+    <span style="font-family: Courier New,Courier,monospace;">order = 4;<br>
+Fs = 100000;</span><span style="font-family: Courier New,Courier,monospace;"><br>
+    </span><span style="font-family: Courier New,Courier,monospace;">Fc = 10000;</span><span style="font-family: Courier New,Courier,monospace;"><br>
+    </span><span style="font-family: Courier New,Courier,monospace;">[b,a] = ellip(order,1,40,2*Fc/Fs);</span></li>
+  <li>Convert the filter to second-order-sytstem representation:<br>
+    <span style="font-family: Courier New,Courier,monospace;">[sos,g] = tf2sos(b,a);</span></li>
+  <li>Distribute the gain term so that each biquad stage has unity DC gain:<br>
+    <span style="font-family: Courier New,Courier,monospace;">[rows,cols] = size(sos);</span><span style="font-family: Courier New,Courier,monospace;"><br>
+    </span><span style="font-family: Courier New,Courier,monospace;">for i=1:rows</span><span style="font-family: Courier New,Courier,monospace;"><br>
+    </span><span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp; scale = sum(sos(i,4:6)) / sum(sos(i,1:3));</span><span style="font-family: Courier New,Courier,monospace;"><br>
+    </span><span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp; sosg(i,:) = [sos(i,1:3) * scale sos(i,4:6)];</span><span style="font-family: Courier New,Courier,monospace;"><br>
+    </span><span style="font-family: Courier New,Courier,monospace;">end</span></li>
+  <li>Display the biquad coefficients (<span style="font-style: italic;">b</span><sub>0</sub>, <span style="font-style: italic;">b</span><sub>1</sub>, <span style="font-style: italic;">b</span><sub>2</sub>, 1, <span style="font-style: italic;">a</span><sub>1</sub>, <span style="font-style: italic;">a</span><sub>2</sub>)<br>
+    <span style="font-family: Courier New,Courier,monospace;">sosg</span><span style="font-family: Courier New,Courier,monospace;"><br>
+    </span><span style="font-family: Courier New,Courier,monospace;">sosg =</span><span style="font-family: Courier New,Courier,monospace;"><br>
+    </span><span style="font-family: Courier New,Courier,monospace;">&nbsp; 0.0527897140085842&nbsp; 0.0142486149708004 0.0527897140085842 1 -1.50880783628479 0.62863587927276</span><span style="font-family: Courier New,Courier,monospace;"><br>
+    </span><span style="font-family: Courier New,Courier,monospace;">&nbsp; 0.418168484605259&nbsp; -0.477106851841725&nbsp; 0.41816848460526&nbsp;&nbsp; 1 -1.52420170321401 0.883431820582802</span><br>
+  </li>
+</ol>
+</body></html>

@@ -57,7 +57,7 @@ wire [(DATA_COUNT*DATA_WIDTH)-1:0] parameterMux = (state == 1) ? u :
                                                   (state == 4) ? yOld : M_TDATA;
 
 // Computation state machine
-reg reset_m, reset;
+(* ASYNC_REG="TRUE" *) reg reset_m, reset;
 reg [2:0] state = 0;
 reg enMAC = 0, ldMAC = 0;
 

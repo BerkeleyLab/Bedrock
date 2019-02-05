@@ -2,7 +2,10 @@
 [*] GTKWave Analyzer v3.3.79 (w)1999-2017 BSI
 [*] Mon Jan 28 16:20:06 2019
 [*]
+[dumpfile] "biquad_tb.lxt"
+[dumpfile_mtime] "Mon Jan 28 16:19:40 2019"
 [dumpfile_size] 3077
+[savefile] "biquad_tb.gtkw"
 [timestart] 109
 [size] 2064 1011
 [pos] -1 -1

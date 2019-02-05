@@ -1,0 +1,29 @@
+[*]
+[*] GTKWave Analyzer v3.3.79 (w)1999-2017 BSI
+[*] Mon Feb  4 16:48:02 2019
+[*]
+[dumpfile] "decimationLowpass_tb.lxt"
+[dumpfile_mtime] "Mon Feb  4 16:44:30 2019"
+[dumpfile_size] 1539856
+[savefile] "decimationLowpass_tb.gtkw"
+[timestart] 177
+[size] 2270 728
+[pos] -1 -1
+*-5.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 193
+[signals_width] 176
+[sst_expanded] 1
+[sst_vpaned_height] 213
+@28
+decimationLowpass_tb.clk[0]
+decimationLowpass_tb.csrStrobe[0]
+@22
+decimationLowpass_tb.GPIO_OUT[31:0]
+decimationLowpass_tb.inputData[111:0]
+@28
+decimationLowpass_tb.inputToggle[0]
+decimationLowpass_tb.outputToggle[0]
+@22
+decimationLowpass_tb.outputData[111:0]
+[pattern_trace] 1
+[pattern_trace] 0
