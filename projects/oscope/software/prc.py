@@ -643,7 +643,7 @@ class c_prc(c_llrf_bmb7):
         adc_values = self.adc_reg()
         print(('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values])))
         print(('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339,
-                              adc_values[0] != 0xa19c)))
+                               adc_values[0] != 0xa19c)))
         return True
 
     def top2idelay(self, listin, LH):
@@ -763,7 +763,7 @@ class c_prc(c_llrf_bmb7):
         adc_values = self.adc_reg()
         print(('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values])))
         print(('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339,
-                              adc_values[0] != 0xa19c)))
+                               adc_values[0] != 0xa19c)))
         s1, adc_values = self.adc_bufr_reset1(adc_values, 'BUFR 1', 0,
                                               'U3_clk_reset_r',
                                               self.U3_adc_iserdes_reset)

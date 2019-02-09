@@ -89,11 +89,11 @@ def run(ip_addr='192.168.1.121',
     print(("npt = {}".format(npt)))
     pts_per_ch = npt * 8 / n_channels
 
-    chan_txt = "column assignment for banyan_mask 0x%2.2x: " % mask_int + " ".join(
-        ["%d" % x for x in channels])
+    # chan_txt = "column assignment for banyan_mask 0x%2.2x: " % mask_int + " ".join(
+    #    ["%d" % x for x in channels])
 
     # We'd normally specify a reasonable "interval" here...
-    ani = animation.FuncAnimation(fig, animate, interval=0.1, blit=True)
+    animation.FuncAnimation(fig, animate, interval=0.1, blit=True)
     plt.show()
     # for run_n in range(count):
     #     print('Run: {}'.format(run_n))

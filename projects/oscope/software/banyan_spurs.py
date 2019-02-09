@@ -7,6 +7,7 @@ import datetime
 from prc import c_prc
 from banyan_ch_find import banyan_ch_find
 
+
 def get_basis(pts_per_ch):
     '''
     Return basis vector for
@@ -15,6 +16,7 @@ def get_basis(pts_per_ch):
     theta = np.array(list(range(pts_per_ch))) * 7 * 2 * np.pi / 33
     basis = np.vstack((np.cos(theta), np.sin(theta), theta * 0 + 1)).T
     return basis
+
 
 def banyan_spurs_run(ip_addr='192.168.21.11',
                      port=50006,
@@ -39,8 +41,7 @@ def banyan_spurs_run(ip_addr='192.168.21.11',
     n_channels = len(channels)
     print((channels, 8 // n_channels))
 
-
-    # npt_wish only works correctly if mask is 0xff
+    #  npt_wish only works correctly if mask is 0xff
     if npt_wish and npt_wish < npt and mask_int == 0xff:
         npt = npt_wish
     print(("npt = {}".format(npt)))

@@ -3,11 +3,23 @@
 import bmb7_spartan as board
 import argparse
 
-parser = argparse.ArgumentParser(description='Display r1 FMC PROM data', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('-t', '--target', default='192.168.1.127', help='Current unicast IP address of board')
-parser.add_argument('--numbytes', type=int, default='27', help='Number of bytes to read')
-parser.add_argument('--promtype', default='at24', choices=['at24', 'm24'], help='Type of EEPROM to interact with')
-parser.add_argument('--bottom', action='store_true', help='EEPROM is on bottom site')
+parser = argparse.ArgumentParser(
+    description='Display r1 FMC PROM data',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument(
+    '-t',
+    '--target',
+    default='192.168.1.127',
+    help='Current unicast IP address of board')
+parser.add_argument(
+    '--numbytes', type=int, default='27', help='Number of bytes to read')
+parser.add_argument(
+    '--promtype',
+    default='at24',
+    choices=['at24', 'm24'],
+    help='Type of EEPROM to interact with')
+parser.add_argument(
+    '--bottom', action='store_true', help='EEPROM is on bottom site')
 args = parser.parse_args()
 
 assert 0 < args.numbytes <= 4096, "Number of bytes requested out of range."
@@ -38,5 +50,5 @@ for i in range(args.numbytes):
         pv = x.read_m24c02_prom(PROM_ADDRESS, i)
     else:
         pv = x.read_at24c32d_prom(PROM_ADDRESS, i, bottom_site)
-    suff = "\t"+chr(pv) if 32 <= pv < 127 else ""
-    print str(i)+'\t'+str(hex(pv))+suff
+    suff = "\t" + chr(pv) if 32 <= pv < 127 else ""
+    print(str(i) + '\t' + str(hex(pv)) + suff)

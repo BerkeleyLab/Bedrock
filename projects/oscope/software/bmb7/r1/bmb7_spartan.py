@@ -44,13 +44,12 @@ class LTC2990:
 
 
 def conv_n(x, n):
-    if x > (2**(n-1) - 1):
+    if x > (2**(n - 1) - 1):
         x = x - 2**n
     return x
 
 
 class interface():
-
     def __init__(self, target, fname=''):
 
         self.host = target
@@ -86,21 +85,26 @@ class interface():
         s = str()
         for i in d[0:32]:
             s += '{:02x}'.format(i)
-        print('SHA256 bitfile hash: '+s)
+        print('SHA256 bitfile hash: ' + s)
 
         build_date = 0
         for i in range(0, 8):
-            build_date += int(d[40+i]) * 2**(56-i*8)
-        print('Build timestamp: ' + str(build_date) + ' ('+str(datetime.utcfromtimestamp(build_date))+')')
+            build_date += int(d[40 + i]) * 2**(56 - i * 8)
+        print('Build timestamp: ' + str(build_date) + ' (' + str(
+            datetime.utcfromtimestamp(build_date)) + ')')
 
         storage_date = 0
         for i in range(0, 8):
-            storage_date += int(d[32+i]) * 2**(56-i*8)
-        print('Storage timestamp: ' + str(storage_date) + ' ('+str(datetime.utcfromtimestamp(storage_date))+')')
+            storage_date += int(d[32 + i]) * 2**(56 - i * 8)
+        print('Storage timestamp: ' + str(storage_date) + ' (' + str(
+            datetime.utcfromtimestamp(storage_date)) + ')')
 
         if False and build_date != self.BUILD_DATE:
-            raise Exception('\n\nFirmware build date ('+str(build_date)+') does not match the software build date requirement (' +
-                            str(self.BUILD_DATE)+'), please update the BMB7 Spartan-6 firmware image.\n')
+            raise Exception(
+                '\n\nFirmware build date (' + str(build_date) +
+                ') does not match the software build date requirement (' + str(
+                    self.BUILD_DATE) +
+                '), please update the BMB7 Spartan-6 firmware image.\n')
 
         if s != self.HASH:
             print("\nInvalid Spartan-6 firmware for BMB7 r1.0")
@@ -266,14 +270,18 @@ class interface():
 
         print('Standby +1.2V status:', self.get_standby_1p2v_status())
 
-        print('Top FMC present:', not(self.get_n_top_fmc_present()))
-        print('Top FMC +12V status:', int(not(self.get_n_top_fmc_12v_status())))
-        print('Top FMC +3.3V / VADJ status:', self.get_top_fmc_vadj_3p3v_status())
-        print('Bottom FMC present:', not(self.get_n_bottom_fmc_present()))
-        print('Bottom FMC +12V status:', int(not(self.get_n_bottom_fmc_12v_status())))
-        print('Bottom FMC +3.3V / VADJ status:', self.get_bottom_fmc_vadj_3p3v_status())
+        print('Top FMC present:', not (self.get_n_top_fmc_present()))
+        print('Top FMC +12V status:',
+              int(not (self.get_n_top_fmc_12v_status())))
+        print('Top FMC +3.3V / VADJ status:',
+              self.get_top_fmc_vadj_3p3v_status())
+        print('Bottom FMC present:', not (self.get_n_bottom_fmc_present()))
+        print('Bottom FMC +12V status:',
+              int(not (self.get_n_bottom_fmc_12v_status())))
+        print('Bottom FMC +3.3V / VADJ status:',
+              self.get_bottom_fmc_vadj_3p3v_status())
 
-        print('S6 QSFP present:', not(self.get_n_s6_qsfp_present()))
+        print('S6 QSFP present:', not (self.get_n_s6_qsfp_present()))
 
     def get_main_3p3v_status(self):
         return self.get_port_expander_bit(0x1, 0, 7)
@@ -429,7 +437,8 @@ class interface():
         else:
             self.pca9534_write(address, (self.pca9534_read(address) & ~i) | i)
 
-        self.pca9534_direction_set(address, (self.pca9534_direction_get(address) & ~i))
+        self.pca9534_direction_set(address,
+                                   (self.pca9534_direction_get(address) & ~i))
 
     def power_supply_disable(self, chain, address, bit):
         i = 1 << bit
@@ -437,7 +446,8 @@ class interface():
         self.i2c_chain_set(chain)
 
         # Mask out to get the correct setting
-        self.pca9534_direction_set(address, (self.pca9534_direction_get(address) & ~i) | i)
+        self.pca9534_direction_set(address, (
+            self.pca9534_direction_get(address) & ~i) | i)
 
     def pca9534_direction_get(self, address):
         address_r = ((0x20 | address) << 1) | 1
@@ -597,14 +607,18 @@ class interface():
 
         return result
 
-    def write_at24c32d_prom(self, prom_address, word_address, value, bottom_site=False):
+    def write_at24c32d_prom(self,
+                            prom_address,
+                            word_address,
+                            value,
+                            bottom_site=False):
         addr = (prom_address << 1)
         addr = int('{:08b}'.format(addr)[::-1], 2)
         wh = int('{:08b}'.format((word_address >> 8) & 0xFF)[::-1], 2)
         wl = int('{:08b}'.format((word_address) & 0xFF)[::-1], 2)
         val = int('{:08b}'.format(value)[::-1], 2)
 
-        if bottom_site == True:
+        if bottom_site is True:
             self.i2c_chain_set(1)
         else:
             self.i2c_chain_set(4)
@@ -624,7 +638,10 @@ class interface():
 
         time.sleep(0.005)
 
-    def read_at24c32d_prom(self, word_address, bottom_site=False, prom_address=0x50):
+    def read_at24c32d_prom(self,
+                           word_address,
+                           bottom_site=False,
+                           prom_address=0x50):
         address_r = (prom_address << 1) | 1
         addr = (prom_address << 1)
         address_r = int('{:08b}'.format(address_r)[::-1], 2)
@@ -632,7 +649,7 @@ class interface():
         wh = int('{:08b}'.format((word_address >> 8) & 0xFF)[::-1], 2)
         wl = int('{:08b}'.format((word_address) & 0xFF)[::-1], 2)
 
-        if bottom_site == True:
+        if bottom_site is True:
             self.i2c_chain_set(1)
         else:
             self.i2c_chain_set(4)
@@ -1005,24 +1022,26 @@ class interface():
             # V1V2V3V4 conversions
             float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V1_MSB) & 0x7F) * 256 + \
                          self.ltc2990_i2c_read(device, LTC2990.V1_LSB), 15)) * 0.00030518,
-            # float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V2_MSB) & 0x7F) * 256 + self.ltc2990_i2c_read(device, LTC2990.V2_LSB), 15)) * 0.00030518,
+            # float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V2_MSB) & 0x7F) * 256 +
+            #       self.ltc2990_i2c_read(device, LTC2990.V2_LSB), 15)) * 0.00030518,
             float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V3_MSB) & 0x7F) * 256 + \
                          self.ltc2990_i2c_read(device, LTC2990.V3_LSB), 15)) * 0.00030518,
-            # float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x7F) * 256 + self.ltc2990_i2c_read(device, LTC2990.V4_LSB), 15)) * 0.00030518,
+            # float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x7F) * 256 +
+            # self.ltc2990_i2c_read(device, LTC2990.V4_LSB), 15)) * 0.00030518,
 
             # TR2 conversions
             (float((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x1F) * 256 + \
                    self.ltc2990_i2c_read(device, LTC2990.V4_LSB)) * 0.0625) - 273.2,
             0,  # short_open1,
-            (float((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x1F) * 256 + self.ltc2990_i2c_read(device, LTC2990.V4_LSB)) * 0.0625) - 273.2,  # * 1.004 * 2.3 / 2.0) - (273.2 / (1.004 * 3.0 * (2.3 / 2.0))),
+            (float((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x1F) * 256 +
+                   self.ltc2990_i2c_read(device, LTC2990.V4_LSB)) * 0.0625) - 273.2,
+            # * 1.004 * 2.3 / 2.0) - (273.2 / (1.004 * 3.0 * (2.3 / 2.0))),
             0,  # short_open2,
-
             # Current conversions
-                float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V2_MSB) & 0x7F) * 256 + \
-                             self.ltc2990_i2c_read(device, LTC2990.V2_LSB), 15)) * (0.00001942 / 0.02),
-                float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x7F) * 256 + \
-                             self.ltc2990_i2c_read(device, LTC2990.V4_LSB), 15)) * (0.00001942 / 0.02),
-
+            float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V2_MSB) & 0x7F) * 256 + \
+                         self.ltc2990_i2c_read(device, LTC2990.V2_LSB), 15)) * (0.00001942 / 0.02),
+            float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x7F) * 256 + \
+                         self.ltc2990_i2c_read(device, LTC2990.V4_LSB), 15)) * (0.00001942 / 0.02),
         ]
 
     def get_humidity(self):
@@ -1041,7 +1060,7 @@ class interface():
         self.i2c_start()
         self.i2c_write(0x81)
 
-        while (not(self.i2c_check_ack(False))):
+        while (not (self.i2c_check_ack(False))):
             self.i2c_stop()
             self.i2c_start()
             self.i2c_write(0x81)

@@ -1,4 +1,1 @@
-__all__ = [
-    "jtag",
-    "spi"
-    ]
+__all__ = ["jtag", "spi"]

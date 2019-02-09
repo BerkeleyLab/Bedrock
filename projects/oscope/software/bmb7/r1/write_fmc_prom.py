@@ -3,10 +3,21 @@
 import bmb7_spartan as board
 import argparse
 
-parser = argparse.ArgumentParser(description='Display r1 FMC PROM data', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('-t', '--target', default='192.168.1.127', help='Current unicast IP address of board')
-parser.add_argument('--promtype', default='at24', choices=['at24', 'm24'], help='Type of EEPROM to interact with')
-parser.add_argument('--bottom', action='store_true', help='EEPROM is on bottom site')
+parser = argparse.ArgumentParser(
+    description='Display r1 FMC PROM data',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument(
+    '-t',
+    '--target',
+    default='192.168.1.127',
+    help='Current unicast IP address of board')
+parser.add_argument(
+    '--promtype',
+    default='at24',
+    choices=['at24', 'm24'],
+    help='Type of EEPROM to interact with')
+parser.add_argument(
+    '--bottom', action='store_true', help='EEPROM is on bottom site')
 parser.add_argument('data', help='String to be written')
 args = parser.parse_args()
 
@@ -35,6 +46,8 @@ PROM_ADDRESS = 0x52 if bottom_site else 0x50
 
 for i in range(0, len(args.data)):
     if args.promtype == 'm24':
-        pv = x.write_m24c02_prom(PROM_ADDRESS, i, ord(args.data[i]), bottom_site)
+        pv = x.write_m24c02_prom(PROM_ADDRESS, i,
+                                 ord(args.data[i]), bottom_site)
     else:
-        pv = x.write_at24c32d_prom(PROM_ADDRESS, i, ord(args.data[i]), bottom_site)
+        pv = x.write_at24c32d_prom(PROM_ADDRESS, i,
+                                   ord(args.data[i]), bottom_site)

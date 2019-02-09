@@ -1,14 +1,12 @@
 #!/bin/env python
 
-from socket import *
-import string
 import time
 import sys
 import bmb7_spartan
 
 # Start the class
-x = bmb7_spartan.interface(sys.argv[1])  #, sysi2c=0x4)
-print "hello"
+x = bmb7_spartan.interface(sys.argv[1])
+print("hello")
 
 # FMC
 
@@ -26,5 +24,3 @@ x.fmc_top_vadj_enable()
 x.fmc_bot_vadj_enable()
 x.fmc_top_3p3v_enable()
 x.fmc_bot_3p3v_enable()
-
-

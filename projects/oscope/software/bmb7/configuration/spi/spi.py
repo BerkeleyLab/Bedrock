@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import time, sys
-from bmb7.configuration.jtag import *
+import time
+import sys
+
+from bmb7.configuration.jtag import jtag, xilinx_bitfile_parser
 
 SUBSECTOR_SIZE = 4096
 SECTOR_SIZE = 65536
@@ -29,24 +31,27 @@ RFSR = 0x70
 RESET_ENABLE = 0x66
 RESET_MEMORY = 0x99
 
+
 class SPI_Base_Exception(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
+
 
 class interface():
     def __init__(self, chain):
         self.__target = chain
         self.__cs_b = SPI_CS_B
-        self.__dummy_cycles = 10 # Hard-coded to always work
+        self.__dummy_cycles = 10  # Hard-coded to always work
 
         # Flush the CS_B pin
         self.__target.jtag_clock([jtag.TMS])
         self.__target.state = jtag.states.SHIFT_DR
 
-        #self.write_register(RESET_ENABLE)
-        #self.write_register(RESET_MEMORY)
+        # self.write_register(RESET_ENABLE)
+        # self.write_register(RESET_MEMORY)
 
         self.__prom_size = self.read_register(RDID, 3)[2]
 
@@ -79,7 +84,7 @@ class interface():
     def prom_size(self):
         return self.__prom_size
 
-    def write_register(self, instruction, value = bytearray([])):
+    def write_register(self, instruction, value=bytearray([])):
         # MSB first
         self.__target.write(instruction, 8, False, False, True)
         self.__target.write_bytearray(value, False, True, False)
@@ -113,13 +118,9 @@ class interface():
         for i in range(0, self.__dummy_cycles):
             send += bytearray([0])
 
-        #for i in send:
-        #    print hex(i),
-        #print
-
         self.__target.jtag_clock(send)
 
-        send = bytearray([0]) * num_bytes # * 8
+        send = bytearray([0]) * num_bytes  # * 8
         result = self.__target.write_read_bytearray(send, False, False, True)
 
         self.__target.jtag_clock([jtag.TMS])
@@ -176,7 +177,7 @@ class interface():
         x = self.read_register(RDSR, 1)[0]
         y = self.read_register(RFSR, 1)[0]
         while True:
-            #print hex(x), hex(y),
+            # print hex(x), hex(y),
             if ((x & 0x1) == 0) and ((y & 0x81) == 0x81):
                 break
             x = self.read_register(RDSR, 1)[0]
@@ -205,7 +206,7 @@ class interface():
         x = self.read_register(RDSR, 1)[0]
         y = self.read_register(RFSR, 1)[0]
         while True:
-            #print hex(x), hex(y),
+            # print hex(x), hex(y),
             if ((x & 0x1) == 0) and ((y & 0x81) == 0x81):
                 break
             x = self.read_register(RDSR, 1)[0]
@@ -230,11 +231,12 @@ class interface():
             elapsed = time.time() - start_time
             left = elapsed * (num_blocks - i - 1) / (i + 1)
             total = elapsed + left
-            output = str(i+1)+' / '+str(num_blocks)+' (Elapsed: '+str(elapsed)+'s, Left: '+str(left)+'s, Total: '+str(total)+'s)'
+            output = str(i + 1) + ' / ' + str(
+                num_blocks) + ' (Elapsed: ' + str(elapsed) + 's, Left: ' + str(
+                    left) + 's, Total: ' + str(total) + 's)'
             output = '{:<100}'.format(output)
             x = str('\b' * last_length)
-            print(x, '\b'+output, end=' ')
-            #print output,
+            print(x, '\b' + output, end=' ')
             sys.stdout.flush()
             last_length = len(output) + 1
 
@@ -245,7 +247,7 @@ class interface():
                     sector_update = True
                     break
 
-            if not(sector_update):
+            if not (sector_update):
                 continue
 
             # Only erase the sector if the data that's changed is currently not set to 0xFF
@@ -262,15 +264,18 @@ class interface():
                 print('ERASED', end=' ')
 
             # Program the 256 byte blocks
-            for j in range(0, SECTOR_SIZE/256):
-                self.page_program(data[j * 256 + i * SECTOR_SIZE : (j+1) * 256 + i * SECTOR_SIZE], j * 256 + ((offset + i) * SECTOR_SIZE))
+            for j in range(0, SECTOR_SIZE / 256):
+                self.page_program(data[j * 256 + i * SECTOR_SIZE:(j + 1) * 256
+                                       + i * SECTOR_SIZE], j * 256 + (
+                                           (offset + i) * SECTOR_SIZE))
 
             # Verify
             pd = self.read_data((offset + i) * SECTOR_SIZE, SECTOR_SIZE)
             for j in range(0, SECTOR_SIZE):
                 if pd[j] != data[i * SECTOR_SIZE + j]:
                     print()
-                    raise SPI_Base_Exception('Page update', str(i * SECTOR_SIZE + j), 'failed')
+                    raise SPI_Base_Exception(
+                        'Page update', str(i * SECTOR_SIZE + j), 'failed')
 
             print('UPDATED')
 

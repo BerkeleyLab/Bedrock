@@ -1,5 +1,7 @@
-import socket, string, time
-from bmb7.configuration.jtag.idcodes import *
+import socket
+import time
+
+from bmb7.configuration.jtag.idcodes import idcodes
 import platform
 
 # TODO - When exiting TEST_LOGIC_RESET, the device can be in BYPASS or
@@ -88,7 +90,7 @@ class chain(states):
         self.__mode_two_bit = True
         self.__mode_read_endian = False  # LSB first
         self.__mode_write_endian = False  # LSB first
-        self.__bit_in_phase = 2  #1 # Normal rising-edge mode
+        self.__bit_in_phase = 2  # 1 # Normal rising-edge mode
         self.__bit_in_select = input_select
         self.__channel_enable = 1 << input_select
         self.__speed = speed
@@ -162,16 +164,16 @@ class chain(states):
     def __update_configuration(self):
 
         # Sleep maximum cycle time to ensure a clean configuration change
-        #clocks_per_cycle = 4 + self.__speed * 2
-        #clocks_per_mtu = MTU * 8 * (4 + self.__speed * 2) + 2
-        #time_per_mtu = clocks_per_mtu * 0.0000001 #0.000000005
-        #time.sleep(time_per_mtu)
+        # clocks_per_cycle = 4 + self.__speed * 2
+        # clocks_per_mtu = MTU * 8 * (4 + self.__speed * 2) + 2
+        # time_per_mtu = clocks_per_mtu * 0.0000001 #0.000000005
+        # time.sleep(time_per_mtu)
 
         # Burst size is limited to 4 in two_bit mode, 8 in tdi-only mode
         if self.__burst_size == 0:
             raise EthernetToJTAGException('Burst size of zero is not allowed')
 
-        if self.__mode_two_bit == True:
+        if self.__mode_two_bit is True:
             if self.__burst_size > 4:
                 raise EthernetToJTAGException(
                     'Burst size greater than 4 is not allowed in TMS/TDI mode')
@@ -190,9 +192,9 @@ class chain(states):
             (self.__mode_two_bit << 1) | self.__mode_rw
         ])
 
-        #for i in self.__config:
+        # for i in self.__config:
         #    print hex(i),
-        #print
+        # print
 
         # self.__config = str(self.__config)
         self.__config = self.__config
@@ -299,8 +301,7 @@ class chain(states):
              update_register=False,
              flush_first_character=False,
              reverse=False):
-        if ((self.state != states.SHIFT_IR) and
-            (self.state != states.SHIFT_DR)):
+        if (self.state != states.SHIFT_IR) and (self.state != states.SHIFT_DR):
             raise EthernetToJTAGException('Invalid state for this instruction')
 
         if flush_first_character:
@@ -335,11 +336,10 @@ class chain(states):
                         update_register=False,
                         endian=False,
                         flush_first_character=False):
-        if ((self.state != states.SHIFT_IR) and
-            (self.state != states.SHIFT_DR)):
+        if (self.state != states.SHIFT_IR) and (self.state != states.SHIFT_DR):
             raise EthernetToJTAGException('Invalid state for this instruction')
 
-        if (update_register or flush_first_character) == False:
+        if (update_register or flush_first_character) is False:
             self.jtag_clock_burst_8(data, endian)
             return
 
@@ -380,11 +380,10 @@ class chain(states):
                              write_endian=False,
                              read_endian=False,
                              flush_first_character=False):
-        if ((self.state != states.SHIFT_IR) and
-            (self.state != states.SHIFT_DR)):
+        if ((self.state != states.SHIFT_IR) and (self.state != states.SHIFT_DR)):
             raise EthernetToJTAGException('Invalid state for this instruction')
 
-        if (update_register or flush_first_character) == False:
+        if (update_register or flush_first_character) is False:
             return self.jtag_clock_with_result_burst_8(data, write_endian,
                                                        read_endian)
 
@@ -423,7 +422,7 @@ class chain(states):
         val = 0
         for j in data:
 
-            #if self.__mode_read_endian:
+            # if self.__mode_read_endian:
             #    item = int('{:08b}'.format(j)[::-1], 2)
 
             val |= (int(val) & TDO) << offset
@@ -443,8 +442,7 @@ class chain(states):
               update_register=False,
               flush_first_character=False,
               endian=False):
-        if ((self.state != states.SHIFT_IR) and
-            (self.state != states.SHIFT_DR)):
+        if ((self.state != states.SHIFT_IR) and (self.state != states.SHIFT_DR)):
             raise EthernetToJTAGException('Invalid state for this instruction')
         if (num_bits == 0):
             return
@@ -481,8 +479,7 @@ class chain(states):
                    update_register=False,
                    reverse=False,
                    flush_first_character=False):
-        if ((self.state != states.SHIFT_IR) and
-            (self.state != states.SHIFT_DR)):
+        if ((self.state != states.SHIFT_IR) and (self.state != states.SHIFT_DR)):
             raise EthernetToJTAGException('Invalid state for this instruction')
         if (num_bits == 0):
             return
@@ -560,7 +557,7 @@ class chain(states):
         # This command packs a clocked output
         # of bits from a single command and processes it
         # It returns the resulting packet
-        if (self.__mode_two_bit == True) or (self.__burst_size != 8) or (
+        if (self.__mode_two_bit is True) or (self.__burst_size != 8) or (
                 self.__mode_write_endian != endian):
             self.__mode_two_bit = False
             self.__burst_size = 8
@@ -573,7 +570,7 @@ class chain(states):
         # This command packs a clocked output
         # of bits from a single command and processes it
         # It returns the resulting packet
-        if (self.__mode_two_bit == True) or (self.__burst_size != 8) or (
+        if (self.__mode_two_bit is True) or (self.__burst_size != 8) or (
                 self.__mode_write_endian != write_endian) or (
                     self.__mode_read_endian != read_endian):
             self.__mode_two_bit = False
@@ -594,7 +591,7 @@ class chain(states):
         # This command packs a clocked output
         # of bits from a single command and processes it
         # It returns the resulting packet
-        if self.__mode_two_bit == False:
+        if self.__mode_two_bit is False:
             self.__burst_size = 4
             self.__mode_two_bit = True
             self.__update_configuration()
@@ -619,7 +616,7 @@ class chain(states):
             self.jtag_exec(bytearray([frame[3]]))
 
     def jtag_clock_with_result(self, data):
-        if self.__mode_two_bit == False:
+        if self.__mode_two_bit is False:
             self.__burst_size = 4
             self.__mode_two_bit = True
             self.__update_configuration()
@@ -663,17 +660,17 @@ class chain(states):
         return result
 
     def jtag_exec_with_result(self, data):
-        if self.__mode_rw == False:
+        if self.__mode_rw is False:
             self.__mode_rw = True
             self.__update_configuration()
 
         # TDI updates on rising edge of TCK
         # TDO updates on falling edge of TCK
 
-        #print 'S:',
-        #for i in data:
+        # print 'S:',
+        # for i in data:
         #    print hex(i),
-        #print 'burst:', self.__burst_size
+        # print 'burst:', self.__burst_size
 
         data = bytearray(data)
 
@@ -682,10 +679,10 @@ class chain(states):
         substring = data[i:i + MTU]
         return_string = b''
 
-        #self.__pre_send_time = time.time()
-        #print 'proc:',self.__pre_send_time - self.__post_send_time,
+        # self.__pre_send_time = time.time()
+        # print 'proc:',self.__pre_send_time - self.__post_send_time,
 
-        #print 'Exec with result'
+        # print 'Exec with result'
 
         while len(substring):
 
@@ -704,33 +701,33 @@ class chain(states):
             substring = data[i:i + MTU]
             return_string += data2
 
-        #self.__post_send_time = time.time()
-        #print 'send:',self.__post_send_time - self.__pre_send_time
+        # self.__post_send_time = time.time()
+        # print 'send:',self.__post_send_time - self.__pre_send_time
 
-        #print 'R:',
-        #for i in bytearray(return_string):
+        # print 'R:',
+        # for i in bytearray(return_string):
         #    print hex(i),
-        #print
+        # print
 
         return bytearray(return_string)
 
     def jtag_exec(self, data):
-        #self.jtag_exec_with_result(data)
-        #return
+        # self.jtag_exec_with_result(data)
+        # return
 
-        if self.__mode_rw == True:
+        if self.__mode_rw is True:
             self.__mode_rw = False
             self.__update_configuration()
 
         # TDI updates on rising edge of TCK
         # TDO updates on falling edge of TCK
 
-        #print 'S:',
-        #for i in bytearray(data):
+        # print 'S:',
+        # for i in bytearray(data):
         #    print hex(i),
-        #print 'burst:', self.__burst_size
+        # print 'burst:', self.__burst_size
 
-        #print 'Exec without result'
+        # print 'Exec without result'
 
         data = bytearray(data)
 
@@ -751,12 +748,12 @@ class chain(states):
             self.__speed + 1)
         time_per_mtu = clocks_per_mtu * 0.00000002  # 50MHz
         time_per_mtu += TIME_PER_MTU_OFFSET
-        #print clocks_per_mtu, time_per_mtu
+        # print clocks_per_mtu, time_per_mtu
 
-        #self.__pre_send_time = time.time()
-        #print 'proc:',self.__pre_send_time - self.__post_send_time,
+        # self.__pre_send_time = time.time()
+        # print 'proc:',self.__pre_send_time - self.__post_send_time,
 
-        #print len(self.__config)
+        # print len(self.__config)
 
         while len(substring):
 
@@ -769,12 +766,12 @@ class chain(states):
 
             time.sleep(time_per_mtu)
 
-            #data2 = self.__UDPSock.recv(len(substring))
-            #if not data2:
+            # data2 = self.__UDPSock.recv(len(substring))
+            # if not data2:
             #    raise "No data received"
 
             i = i + MTU
             substring = data[i:i + MTU]
 
-        #self.__post_send_time = time.time()
-        #print 'send:',self.__post_send_time - self.__pre_send_time
+        # self.__post_send_time = time.time()
+        # print 'send:',self.__post_send_time - self.__pre_send_time

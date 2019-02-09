@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 from __future__ import print_function
+
+import sys
+import time
+
 # JTAG codes for V7
 BYPASS = 0x3F
 IDCODE = 0x09
@@ -53,7 +57,7 @@ class interface():
         self.target.go_to_run_test_idle()
 
         # RUNTEST 10000 - debatably required
-        #self.target.jtag_clock(bytearray([0]) * 10000)
+        # self.target.jtag_clock(bytearray([0]) * 10000)
 
         tprev = time.time()
         init = 0
@@ -68,8 +72,8 @@ class interface():
             if init:
                 break
 
-            #if init == 0:
-            #raise Virtex7_JTAG_Exception('INIT_B did not go high')
+            # if init == 0:
+            # raise Virtex7_JTAG_Exception('INIT_B did not go high')
 
             # Load IR with CFG_IN
         self.target.go_to_shift_ir()
@@ -89,7 +93,10 @@ class interface():
             self.target.write_bytearray(subarray, False, True)
             i = i + 14000
             subarray = data[i:i + 14000]
-            print('\b\b\b\b\b\b\b\b\b\b' + '{:<9}'.format(str((i * 100) / len(data)) + '%'), end=' ')
+            print(
+                '\b\b\b\b\b\b\b\b\b\b' +
+                '{:<9}'.format(str((i * 100) / len(data)) + '%'),
+                end=' ')
             sys.stdout.flush()
 
         print()

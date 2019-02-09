@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import time, sys
+import sys
+import time
 
 # JTAG codes for Spartan 6
 BYPASS = 0x3F
@@ -9,16 +10,19 @@ JPROGRAM = 0x0B
 CFG_IN = 0x05
 JSTART = 0x0C
 
-#USER1 = 2
-#USER2 = 3
-#USER3 = 34
-#USER4 = 35
+# USER1 = 2
+# USER2 = 3
+# USER3 = 34
+# USER4 = 35
+
 
 class Spartan6_JTAG_Exception(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
+
 
 # TODO - decide if I'd rather put this in the main JTAG control class
 class shift_padder():
@@ -28,7 +32,7 @@ class shift_padder():
 
         self.__pre_pad_dr = 0
         self.__pre_pad_ir = 0
-        for i in range(target+1, self.__chain.num_devices()):
+        for i in range(target + 1, self.__chain.num_devices()):
             self.__pre_pad_dr += 1
             self.__pre_pad_ir += chain.idcode_resolve_irlen(chain.idcode(i))
 
@@ -112,6 +116,7 @@ class shift_padder():
 
         return data
 
+
 class interface():
     def __init__(self, chain):
         self.__chain = chain
@@ -140,8 +145,13 @@ class interface():
 
         self.__chain.go_to_shift_dr()
 
-        if padder.unpad_dr(self.__chain.write_read(padder.pad_dr(self.__chain.idcode(location), 32)[0], padder.pad_dr_len()+32, True), 32) != self.__chain.idcode(location):
-            raise Spartan6_JTAG_Exception('IDCODE doesn\'t match expected target!')
+        if padder.unpad_dr(
+                self.__chain.write_read(
+                    padder.pad_dr(self.__chain.idcode(location), 32)[0],
+                    padder.pad_dr_len() + 32, True),
+                32) != self.__chain.idcode(location):
+            raise Spartan6_JTAG_Exception(
+                'IDCODE doesn\'t match expected target!')
         self.__chain.go_to_run_test_idle()
 
         # BYPASS
@@ -169,7 +179,9 @@ class interface():
 
             # Check for init gone high
             self.__chain.go_to_shift_ir()
-            init = padder.unpad_ir(self.__chain.write_read(PADDED_BYPASS[0], PADDED_BYPASS[1], True), 6) & 0x10
+            init = padder.unpad_ir(
+                self.__chain.write_read(PADDED_BYPASS[0], PADDED_BYPASS[1],
+                                        True), 6) & 0x10
             self.__chain.go_to_run_test_idle()
             if init:
                 break
@@ -200,15 +212,18 @@ class interface():
 
         # Load the bitstream
         i = 0
-        subarray = data[i : i + 14000]
+        subarray = data[i:i + 14000]
 
         print('{:<9}'.format(''), end=' ')
 
         while i + 14000 < len(data):
             self.__chain.write_bytearray(subarray, False, True)
             i = i + 14000
-            subarray = data[i : i + 14000]
-            print('\b\b\b\b\b\b\b\b\b\b' + '{:<9}'.format(str((i * 100) / len(data)) + '%'), end=' ')
+            subarray = data[i:i + 14000]
+            print(
+                '\b\b\b\b\b\b\b\b\b\b' +
+                '{:<9}'.format(str((i * 100) / len(data)) + '%'),
+                end=' ')
             sys.stdout.flush()
 
         print()
@@ -233,7 +248,9 @@ class interface():
 
             # Check for init gone high
             self.__chain.go_to_shift_ir()
-            done = padder.unpad_ir(self.__chain.write_read(PADDED_BYPASS[0], PADDED_BYPASS[1], True), 6) & 0x20
+            done = padder.unpad_ir(
+                self.__chain.write_read(PADDED_BYPASS[0], PADDED_BYPASS[1],
+                                        True), 6) & 0x20
             self.__chain.go_to_run_test_idle()
             if done:
                 break
@@ -245,6 +262,7 @@ class interface():
         self.__chain.go_to_shift_dr()
         self.__chain.write(0, 1 + padder.pad_dr_len(), True)
         self.__chain.go_to_run_test_idle()
+
 
 #    def enter_user_1_dr(self):
 #        self.__chain.go_to_run_test_idle()

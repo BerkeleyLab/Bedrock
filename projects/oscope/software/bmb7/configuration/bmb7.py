@@ -1,18 +1,16 @@
 #!/bin/env python
 from __future__ import absolute_import
 
-from socket import *
-import string
 import argparse
 import time
 import sys
-import sys
-import time
-from bmb7.configuration.jtag import jtag, xilinx_bitfile_parser, xilinx_virtex_5, xilinx_spartan_6, xilinx_kintex_7, xilinx_virtex_7
+
+from bmb7.configuration.jtag import jtag, xilinx_bitfile_parser, xilinx_virtex_5
+from bmb7.configuration.jtag import xilinx_spartan_6, xilinx_kintex_7, xilinx_virtex_7
 from bmb7.configuration.spi import spi
 
-class c_bmb7(object):
 
+class c_bmb7(object):
     def __init__(self, host, reset=False, readdress=False):
         print(host)
         self.host = host
@@ -22,7 +20,8 @@ class c_bmb7(object):
             self.reset(host)
 
     def init_chain(self):
-        self.chain = jtag.chain(ip=self.host, stream_port=50005, input_select=1, speed=0)
+        self.chain = jtag.chain(
+            ip=self.host, stream_port=50005, input_select=1, speed=0)
         n = self.chain.num_devices()
         print('There are {} devices in the chain:'.format(n))
         for i in range(0, self.chain.num_devices()):
@@ -32,7 +31,7 @@ class c_bmb7(object):
         print('')
 
     def reset(self, host):
-        #		self.spartan_power_cycle()
+        # self.spartan_power_cycle()
         # self.spartan_power_all_enabled()
         pass
 
@@ -42,13 +41,13 @@ class c_bmb7(object):
         self.spartan.main_1p8v_enable()
         self.spartan.main_3p3v_enable()
 
-# GTX
+        # GTX
         self.spartan.spartan_1p2v_gtx_enable()
         self.spartan.kintex_1p2v_gtx_enable()
         self.spartan.kintex_1p0v_gtx_enable()
         self.spartan.kintex_1p8v_gtx_enable()
 
-# FMC
+        # FMC
         self.spartan.set_bottom_fmc_3p3v_resistor(0x0)
         self.spartan.set_top_fmc_3p3v_resistor(0x0)
         self.spartan.set_bottom_fmc_vadj_resistor(0x0)
@@ -107,18 +106,23 @@ class c_bmb7(object):
         # else:
         print('Defaulting device selection in chain from IDCODE')
 
-        print('Device selected for programming is in chain location: ' + str(device_choice))
+        print('Device selected for programming is in chain location: ' + str(
+            device_choice))
 
-        if str('Xilinx Virtex 5') in self.chain.idcode_resolve_name(self.chain.idcode(device_choice)):
+        if str('Xilinx Virtex 5') in self.chain.idcode_resolve_name(
+                self.chain.idcode(device_choice)):
             print('Xilinx Virtex 5 interface selected')
             interface = xilinx_virtex_5.interface(self.chain)
-        elif str('Xilinx Spartan 6') in self.chain.idcode_resolve_name(self.chain.idcode(device_choice)):
+        elif str('Xilinx Spartan 6') in self.chain.idcode_resolve_name(
+                self.chain.idcode(device_choice)):
             print('Xilinx Spartan 6 interface selected')
             interface = xilinx_spartan_6.interface(self.chain)
-        elif str('Xilinx Kintex 7') in self.chain.idcode_resolve_name(self.chain.idcode(device_choice)):
+        elif str('Xilinx Kintex 7') in self.chain.idcode_resolve_name(
+                self.chain.idcode(device_choice)):
             print('Xilinx Kintex 7 interface selected')
             interface = xilinx_kintex_7.interface(self.chain)
-        elif str('Xilinx Virtex 7') in self.chain.idcode_resolve_name(self.chain.idcode(device_choice)):
+        elif str('Xilinx Virtex 7') in self.chain.idcode_resolve_name(
+                self.chain.idcode(device_choice)):
             print('Xilinx Virtex 7 interface selected')
             interface = xilinx_virtex_7.interface(self.chain)
         else:
@@ -128,7 +132,7 @@ class c_bmb7(object):
         print('Programming...')
         print('')
 
-# Load the bitfile
+        # Load the bitfile
         interface.program(bitfile.data(), device_choice)
 
     def spartan_power_cycle(self):
@@ -171,19 +175,27 @@ class c_bmb7(object):
 
         return bytearray([sum1, sum2])
 
-    def program_spartan_6_configuration(self, boardmac, new_boardaddr, current_boardaddr="192.168.1.127", sha256=None):
+    def program_spartan_6_configuration(self,
+                                        boardmac,
+                                        new_boardaddr,
+                                        current_boardaddr="192.168.1.127",
+                                        sha256=None):
 
         print('start program_spartan_6_configuration')
         CONFIG_ADDRESS = 23 * 65536
-# Initialise the interface to the PROM
+        # Initialise the interface to the PROM
         # jtag.chain(ip=current_boardaddr, stream_port=50005, input_select=0, speed=0, noinit=True))
         prom = spi.interface(self.chain)
 
-# Read the VCR and VECR
-        print('PROM ID (0x20BA, Capacity=0x19, EDID+CFD length=0x10, EDID (2 bytes), CFD (14 bytes)')
+        # Read the VCR and VECR
+        print(
+            'PROM ID (0x20BA, Capacity=0x19, EDID+CFD length=0x10, EDID (2 bytes), CFD (14 bytes)'
+        )
 
-        print('VCR (should be 0xfb by default): ' + str(hex(prom.read_register(spi.RDVCR, 1)[0])))
-        print('VECR (should be 0xdf): ', str(hex(prom.read_register(spi.RDVECR, 1)[0])))
+        print('VCR (should be 0xfb by default): ' + str(
+            hex(prom.read_register(spi.RDVCR, 1)[0])))
+        print('VECR (should be 0xdf): ',
+              str(hex(prom.read_register(spi.RDVECR, 1)[0])))
 
         if prom.prom_size() != 25:
             print('PROM size incorrect, read ' + str(prom.prom_size()))
@@ -198,7 +210,7 @@ class c_bmb7(object):
         x = bytearray(85)
         x = pd[0:85]
 
-# Multicast MAC
+        # Multicast MAC
         x[0] = 0x01
         x[1] = 0x00
         x[2] = 0x5E
@@ -206,42 +218,42 @@ class c_bmb7(object):
         x[4] = 0x47
         x[5] = 0x01
 
-# Multicast IP
+        # Multicast IP
         x[6] = 0xE0
         x[7] = 0xF3
         x[8] = 0x47
         x[9] = 0x01
 
-# Multicast port
+        # Multicast port
         x[10] = 0x04
         x[11] = 0xEC
 
-# Board MAC
-        if (boardmac != None):
+        # Board MAC
+        if boardmac is not None:
             mac = boardmac.split(':')
             if (len(mac) != 6):
                 print('Bad board MAC address')
                 sys.exit(1)
             for i in range(0, 6):
-                x[12+i] = int(mac[i], 16)
+                x[12 + i] = int(mac[i], 16)
 
-# Board IP
-        if (new_boardaddr != None):
+        # Board IP
+        if new_boardaddr is not None:
             board = new_boardaddr.split('.')
             if (len(board) != 4):
                 print('Bad board IP address')
                 sys.exit(1)
             for i in range(0, 4):
-                x[18+i] = int(board[i], 10)
+                x[18 + i] = int(board[i], 10)
 
-# SHA256 for Kintex-7 bitstream
-        if (sha256 != None):
+        # SHA256 for Kintex-7 bitstream
+        if sha256 is not None:
             hash = sha256.split(' ')
             if (len(hash) != 32):
                 print('Bad Kintex7 hash')
                 sys.exit(1)
             for i in range(0, 32):
-                x[i+22] = int(hash[i], 16)
+                x[i + 22] = int(hash[i], 16)
 
         x[61] = 0x00
         x[62] = 0x01
@@ -273,10 +285,6 @@ class c_bmb7(object):
         v = self.fletcher_check(x)
         x += v
 
-# for i in x:
-#    print hex(i),
-# print
-
         if (x == pd):
             print('Values already programmed')
             exit()
@@ -295,16 +303,27 @@ class c_bmb7(object):
 if __name__ == "__main__":
     readdress = True
     if readdress:
-        parser = argparse.ArgumentParser(description='Write BMB-7 Spartan6 flash memory.',
-                                         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        parser.add_argument('-a', '--addr', default='192.168.1.127', help='IP address of board')
-        parser.add_argument('-b', '--board', help='New IP address to be written into flash')
-        parser.add_argument('-m', '--mac', help='New MAC address to be written into flash')
-        parser.add_argument('-s', '--hash', help='New Kintex7 bootstrap SHA256 hash')
+        parser = argparse.ArgumentParser(
+            description='Write BMB-7 Spartan6 flash memory.',
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser.add_argument(
+            '-a',
+            '--addr',
+            default='192.168.1.127',
+            help='IP address of board')
+        parser.add_argument(
+            '-b', '--board', help='New IP address to be written into flash')
+        parser.add_argument(
+            '-m', '--mac', help='New MAC address to be written into flash')
+        parser.add_argument(
+            '-s', '--hash', help='New Kintex7 bootstrap SHA256 hash')
         args = parser.parse_args()
         carrier = c_bmb7(args.addr, readdress=True)
-        carrier.program_spartan_6_configuration(boardmac=args.mac, new_boardaddr=args.board,
-                                                current_boardaddr=args.addr, sha256=args.hash)
+        carrier.program_spartan_6_configuration(
+            boardmac=args.mac,
+            new_boardaddr=args.board,
+            current_boardaddr=args.addr,
+            sha256=args.hash)
     else:
         ip = "192.168.21.11"
         bitfilepath = "../prc.bit"
@@ -319,4 +338,5 @@ if __name__ == "__main__":
         carrier = c_bmb7(ip)
         carrier.spartan_power_cycle()
         carrier.spartan_power_all_enabled()
-        carrier.program_direct_kintex_7(bitfilepath=bitfilepath, device_choices=None)
+        carrier.program_direct_kintex_7(
+            bitfilepath=bitfilepath, device_choices=None)

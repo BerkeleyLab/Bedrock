@@ -1,4 +1,1 @@
-__all__ = [
-    "spi",
-    "kintex_7_firmware"
-    ]
+__all__ = ["spi", "kintex_7_firmware"]
