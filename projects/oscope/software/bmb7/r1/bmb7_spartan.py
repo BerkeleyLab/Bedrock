@@ -1020,17 +1020,17 @@ class interface():
                         self.ltc2990_i2c_read(device, LTC2990.VCC_LSB)) * 0.00030518,
 
             # V1V2V3V4 conversions
-            float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V1_MSB) & 0x7F) * 256 + \
+            float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V1_MSB) & 0x7F) * 256 +
                          self.ltc2990_i2c_read(device, LTC2990.V1_LSB), 15)) * 0.00030518,
             # float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V2_MSB) & 0x7F) * 256 +
             #       self.ltc2990_i2c_read(device, LTC2990.V2_LSB), 15)) * 0.00030518,
-            float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V3_MSB) & 0x7F) * 256 + \
+            float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V3_MSB) & 0x7F) * 256 +
                          self.ltc2990_i2c_read(device, LTC2990.V3_LSB), 15)) * 0.00030518,
             # float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x7F) * 256 +
             # self.ltc2990_i2c_read(device, LTC2990.V4_LSB), 15)) * 0.00030518,
 
             # TR2 conversions
-            (float((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x1F) * 256 + \
+            (float((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x1F) * 256 +
                    self.ltc2990_i2c_read(device, LTC2990.V4_LSB)) * 0.0625) - 273.2,
             0,  # short_open1,
             (float((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x1F) * 256 +
@@ -1038,9 +1038,9 @@ class interface():
             # * 1.004 * 2.3 / 2.0) - (273.2 / (1.004 * 3.0 * (2.3 / 2.0))),
             0,  # short_open2,
             # Current conversions
-            float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V2_MSB) & 0x7F) * 256 + \
+            float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V2_MSB) & 0x7F) * 256 +
                          self.ltc2990_i2c_read(device, LTC2990.V2_LSB), 15)) * (0.00001942 / 0.02),
-            float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x7F) * 256 + \
+            float(conv_n((self.ltc2990_i2c_read(device, LTC2990.V4_MSB) & 0x7F) * 256 +
                          self.ltc2990_i2c_read(device, LTC2990.V4_LSB), 15)) * (0.00001942 / 0.02),
         ]
 

@@ -57,13 +57,15 @@ class c_mem_gateway(c_ether):
             wlist = len(adlist) * [write]
             inputvalid = True
         elif adwlist:
-            #		print adwlist
+            # print adwlist
             alist = [adwlist[i][0] for i in range(len(adwlist))]
             dlist = [adwlist[i][1] for i in range(len(adwlist))]
             wlist = [adwlist[i][2] for i in range(len(adwlist))]
             inputvalid = True
         else:
-            print('provide adwlist [(a,d,w),(a,d,w)] or adlist [(a,d),(a,d),(a,d)] or alist [a,a,a] and dlist[d,d,d]')
+            print(
+                'provide adwlist [(a,d,w),(a,d,w)] or adlist [(a,d),(a,d),(a,d)] or alist [a,a,a] and dlist[d,d,d]'
+            )
         if inputvalid:
             word1 = random.getrandbits(32) if rand else 0xdeadbeef
             word2 = random.getrandbits(32) if rand else 0xfacefeed
@@ -98,13 +100,13 @@ class c_mem_gateway(c_ether):
             write=write,
             rand=rand,
             dlist=dlist)
-        #print p.encode('hex')
+        # print p.encode('hex')
         self.socket.send(p)
         readvalue, addr = self.socket.recvfrom(
             1450)  # buffer size is 1024 bytes
         if (readvalue[0:8] != p[0:8]):
-            print(("header mismatch read: %s send: %s" % (
-                    readvalue[0:8].encode('hex'), p[0:8].encode('hex'))))
+            print(("header mismatch read: %s send: %s" %
+                   (readvalue[0:8].encode('hex'), p[0:8].encode('hex'))))
         return readvalue
 
     def parse_readvalue(self, readvalue):
@@ -118,14 +120,13 @@ class c_mem_gateway(c_ether):
             addr = readvalue[1:4]
             value = readvalue[4:8]
             result.append((cmd, addr, value))
-            #print cmd.encode('hex'),addr.encode('hex'),value.encode('hex'),value
+            # print cmd.encode('hex'),addr.encode('hex'),value.encode('hex'),value
             readvalue = readvalue[8:]
         return result
 
 
-#		print result
-
 if __name__ == "__main__":
+    import getopt
     opts, args = getopt.getopt(
         sys.argv[1:], 'ha:p:A:D:W:',
         ['help', 'addr=', 'port=', 'Addr=', 'Data=', 'Write='])
@@ -154,28 +155,13 @@ if __name__ == "__main__":
     print(adw)
     result = mg.readwrite(adwlist=adw, rand=False)
     print((mg.parse_readvalue(result)[0][2].encode('hex')))
-
-#	mg=c_mem_gateway(IP_ADDR,3000,min3=True)
-#	a=eval(sys.argv[1])
-#	d=eval(sys.argv[2])
-#	w=eval(sys.argv[3])
-#	IP_ADDR = '192.168.21.76'
-#	adw=[(0,0,0),(0,0,0)]
-#	alladwdata=[(5,0x0102,1)
-#			,(5,0x80,1)
-#			,(5,0x2,1)
-#			,(5,0x192,1)
-#			,(5,0x0,1)
-#			,(5,0x100,1)
-#			,(6,0,0)
-#			]
-'''
-	result=mg.readwrite(alist=[6],dlist=[0x80008003],write=1)
-	mg.parse_readvalue(result)
-	result=mg.readwrite(alist=[0,1,2,3,4,5,6],write=0)
-	mg.parse_readvalue(result)
-	result=mg.readwrite(adlist=[(6,0x80008003)],write=1)
-	mg.parse_readvalue(result)
-	result=mg.readwrite(adwlist=[(6,0x80008003,1),(6,0x80008001,0)],write=1)
-	mg.parse_readvalue(result)
-'''
+    '''
+    result = mg.readwrite(alist=[6],dlist=[0x80008003],write=1)
+    mg.parse_readvalue(result)
+    result=mg.readwrite(alist=[0,1,2,3,4,5,6],write=0)
+    mg.parse_readvalue(result)
+    result=mg.readwrite(adlist=[(6,0x80008003)],write=1)
+    mg.parse_readvalue(result)
+    result=mg.readwrite(adwlist=[(6,0x80008003,1),(6,0x80008001,0)],write=1)
+    mg.parse_readvalue(result)
+    '''

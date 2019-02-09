@@ -1,16 +1,14 @@
-import ad9653
 class c_llspi:
-
     def __init__(self):
         pass
 
     def ctl_bits(self, write, chipsel, read_en=0, adc_sdio_dir=0):
-        return [(write << 8)+(read_en << 7)+(adc_sdio_dir << 4)+chipsel]
+        return [(write << 8) + (read_en << 7) + (adc_sdio_dir << 4) + chipsel]
 
     def data_bytes(self, data, Nbyte):
         out = []
-        for index in range(Nbyte-1, 0-1, -1):
-            out.append((data & (0xff << (index*8))) >> (index*8))
+        for index in range(Nbyte - 1, 0 - 1, -1):
+            out.append((data & (0xff << (index * 8))) >> (index * 8))
         return out
         pass
 

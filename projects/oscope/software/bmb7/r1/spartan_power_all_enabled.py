@@ -1,8 +1,5 @@
 #!/bin/env python
 
-from socket import *
-import string
-import time
 import sys
 import bmb7_spartan
 

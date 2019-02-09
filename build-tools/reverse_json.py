@@ -8,13 +8,14 @@ entry by peeking at wire declarations in the Verilog.
 import re
 from sys import stderr
 # maketrans only works like this in python2
-#from builtins.str import maketrans
+# from builtins.str import maketrans
 from string import maketrans
 trantab = maketrans("[]", "__")
 wire_info = {}
 addr_found = {}
 name_found = {}
 fail = 0
+
 # Bugs:
 #   brittle to variations in Verilog code formatting
 #   Hard-coded filename
@@ -37,13 +38,14 @@ def ponder_int(s):
             else:
                 stderr.write('ERROR: parameter %s not found?\n' % p)
         else:
-            stderr.write("ERROR: Couldn't" + ' understand "%s", using 31\n' % s)
+            stderr.write("ERROR: Couldn't" + ' understand "%s", using 31\n' %
+                         s)
     return r
 
 
 def rprint(g, l, alias):
     global fail
-    addr = int(g(2)+g(1), 16)
+    addr = int(g(2) + g(1), 16)
     # Given g(2) that might have the form m_accum[1], construct
     # m_accum_1 for the JSON name, and
     # m_accum as the name with which to look up the wire properties.
@@ -67,7 +69,7 @@ def rprint(g, l, alias):
     if wname in wire_info:
         # print a, n, info[nn]
         sign, wid = wire_info[wname].split(':')
-        wid = ponder_int(wid)+1
+        wid = ponder_int(wid) + 1
     else:
         stderr.write('WARNING: Taking default sign and wid for "%s"\n' % wname)
     s = '''    "%s": {

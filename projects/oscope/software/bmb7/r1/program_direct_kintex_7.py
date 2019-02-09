@@ -10,8 +10,8 @@ def program(ip, bitfilepath, device_choices=None):
     print(('There are {} devices in the chain:'.format(chain.num_devices())))
     print()
     for i in range(0, chain.num_devices()):
-        print((hex(chain.idcode(i)) + ' - ' + chain.idcode_resolve_name(
-		chain.idcode(i))))
+        print((hex(chain.idcode(i)) + ' - ' +
+               chain.idcode_resolve_name(chain.idcode(i))))
     print()
 
     # Parse the bitfile and resolve the part type
@@ -41,7 +41,9 @@ def program(ip, bitfilepath, device_choices=None):
     # Override choice from argument line if there's more than one device
     if len(matching_devices) > 1:
         if not device_choices:
-            print('More than one matching FPGA in device chain - you must add a chain ID to the arguments')
+            print(
+                'More than one matching FPGA in device chain - you must add a chain ID to the arguments'
+            )
             exit()
 
         choice_made = False
@@ -50,14 +52,16 @@ def program(ip, bitfilepath, device_choices=None):
                 device_choice = i
                 choice_made = True
 
-        if choice_made == False:
-            print('No matching device selection found that corresponds to JTAG chain')
+        if choice_made is False:
+            print(
+                'No matching device selection found that corresponds to JTAG chain'
+            )
             exit()
     else:
         print('Defaulting device selection in chain from IDCODE')
 
-    print(('Device selected for programming is in chain location:', str(
-        device_choice)))
+    print(('Device selected for programming is in chain location:',
+           str(device_choice)))
 
     if str('Xilinx Virtex 5') in chain.idcode_resolve_name(
             chain.idcode(device_choice)):
@@ -84,7 +88,10 @@ def program(ip, bitfilepath, device_choices=None):
 
     # Load the bitfile
     interface.program(bitfile.data(), device_choice)
+
+
 if __name__ == "__main__":
+    import sys
     ip = "192.168.21.11"
     bitfilepath = "../prc.bit"
     device_choice = None

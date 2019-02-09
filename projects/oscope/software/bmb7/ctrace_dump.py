@@ -156,7 +156,7 @@ if __name__ == "__main__":
     if do_start:
         ctrace_start(fpga)
     if do_dump or out_file:
-        uuu = ctrace_collect(fpga, npt=1<<aw)
+        uuu = ctrace_collect(fpga, npt=1 << aw)
     if out_file:
         with open(out_file, 'w') as fh:
             write_vcd(fh, signals, uuu, tw=tw)
