@@ -137,7 +137,6 @@ if __name__ == "__main__":
     Write = 0
     for opt, arg in opts:
         if opt in ('-h', '--help'):
-            usage()
             sys.exit()
         elif opt in ('-a', '--address'):
             ip_addr = arg
