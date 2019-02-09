@@ -1,0 +1,45 @@
+[timestart] 34928
+[size] 1132 596
+[pos] 0 0
+*-9.648546 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] llspi_tb.
+[treeopen] llspi_tb.chip.
+[sst_width] 210
+[signals_width] 179
+[sst_expanded] 1
+[sst_vpaned_height] 153
+@28
+llspi_tb.chip.P2_SCLK
+llspi_tb.chip.P2_SDI
+llspi_tb.chip.P2_LMK_LEuWire
+llspi_tb.chip.P2_ADC_CSB_0
+llspi_tb.chip.P2_ADC_CSB_1
+llspi_tb.chip.P2_ADC_SDIO_DIR
+llspi_tb.chip.P2_ADC_SDIO
+llspi_tb.chip.P2_SCLK
+@22
+llspi_tb.chip.ctl_bits[5:0]
+@28
+llspi_tb.chip.result_we
+@22
+llspi_tb.chip.eater.result[7:0]
+@c00200
+-AD9653
+@24
+llspi_tb.ad9653.state[4:0]
+@28
+llspi_tb.ad9653.drive_sdio
+llspi_tb.ad9653.sdio_odata
+@1401200
+-AD9653
+@c00201
+-AD7794
+@29
+llspi_tb.ad7794.CS
+llspi_tb.ad7794.SCLK
+llspi_tb.ad7794.DIN
+llspi_tb.ad7794.DOUT_RDY
+@1401201
+-AD7794
+[pattern_trace] 1
+[pattern_trace] 0

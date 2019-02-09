@@ -26,6 +26,7 @@ def banyan_ch_find(mask):
 # computations for a single layer; note the recursion
 def banyan_layer_permute(state):
     '''
+    Given a valid state, return the order of channels after balanced permuation
     state: [(n, nth_bit), (n+1, (n+1)th_bit) ...]
     '''
     ch_count = sum(x[1] for x in state)

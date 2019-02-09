@@ -2,3 +2,8 @@
 *.o
 *.pyc
 *_tb
+*.bak
+_autogen/
+_dep/
+_xilinx/
+system_top.xdc

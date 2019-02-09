@@ -1,0 +1,291 @@
+##########################   Clocks   #####################################
+
+# Differential 50MHz system clock
+NET sys_clk_p           LOC = G11 | IOSTANDARD = LVDS_25;
+NET sys_clk_n           LOC = F10 | IOSTANDARD = LVDS_25;
+
+NET "clk_pll" TNM_NET = "clk_master";
+TIMEGRP "tgrp_clk_master" = "clk_master";
+TIMESPEC "TS_clk_master" = PERIOD "trgp_clk_master" 20 ns HIGH 50%;
+
+##########################   LEDs   #####################################
+
+NET leds<0>                 LOC = M16 | IOSTANDARD = LVCMOS25;
+NET leds<1>                 LOC = K15 | IOSTANDARD = LVCMOS25;
+
+##########################   GTX Transceivers   ###########################
+
+# Constraints are mostly in-firmware
+
+# External reference
+#NET gt_ext_clk_p LOC = F6 | IOSTANDARD = LVDS;
+#NET gt_ext_clk_n LOC = F5 | IOSTANDARD = LVDS;
+
+# SIT9121 one-time programmable oscillator (125MHz)
+#NET gt_ext_clk_p LOC = D6 | IOSTANDARD = LVDS;
+#NET gt_ext_clk_n LOC = D5 | IOSTANDARD = LVDS;
+
+# SI57X_A clock
+NET gt_ext_clk_p LOC = H6 | IOSTANDARD = LVDS;
+NET gt_ext_clk_n LOC = H5 | IOSTANDARD = LVDS;
+
+# SI57X_B clock
+#NET gt_ext_clk_p LOC = K6 | IOSTANDARD = LVDS;
+#NET gt_ext_clk_n LOC = K5 | IOSTANDARD = LVDS;
+
+##########################   Communications   #######################################
+
+NET kintex_done LOC = F14 | IOSTANDARD = LVCMOS25 | DRIVE = 4; #3p
+
+NET kintex_data_out_p LOC = J11 | IOSTANDARD = LVDS_25 | DRIVE = 4; # 1N
+NET kintex_data_out_n LOC = J10 | IOSTANDARD = LVDS_25 | DRIVE = 4; # 1P
+
+NET kintex_data_in_p LOC = J13 | IOSTANDARD = LVDS_25; # 2P
+NET kintex_data_in_n LOC = H13 | IOSTANDARD = LVDS_25; # 2N
+
+######################### FMC I/O ####################################
+
+NET top_fmc_la_p<*> IOSTANDARD = LVCMOS33 | DRIVE = 4;
+NET top_fmc_la_n<*> IOSTANDARD = LVCMOS33 | DRIVE = 4;
+NET bottom_fmc_la_p<*> IOSTANDARD = LVCMOS18 | DRIVE = 4;
+NET bottom_fmc_la_n<*> IOSTANDARD = LVCMOS18 | DRIVE = 4;
+NET bottom_fmc_ha_p<*> IOSTANDARD = LVCMOS18 | DRIVE = 4;
+NET bottom_fmc_ha_n<*> IOSTANDARD = LVCMOS18 | DRIVE = 4;
+NET bottom_fmc_hb_p<*> IOSTANDARD = LVCMOS18 | DRIVE = 4;
+NET bottom_fmc_hb_n<*> IOSTANDARD = LVCMOS18 | DRIVE = 4;
+
+NET top_fmc_la_p<0> LOC = R21;
+NET top_fmc_la_p<1> LOC = N21;
+NET top_fmc_la_p<2> LOC = R25;
+NET top_fmc_la_p<3> LOC = R26;
+NET top_fmc_la_p<4> LOC = U19;
+NET top_fmc_la_p<5> LOC = T20;
+NET top_fmc_la_p<6> LOC = N26;
+NET top_fmc_la_p<7> LOC = P23;
+NET top_fmc_la_p<8> LOC = T22;
+NET top_fmc_la_p<9> LOC = P24;
+NET top_fmc_la_p<10> LOC = P19;
+NET top_fmc_la_p<11> LOC = M21;
+NET top_fmc_la_p<12> LOC = R18;
+NET top_fmc_la_p<13> LOC = K25;
+NET top_fmc_la_p<14> LOC = U17;
+NET top_fmc_la_p<15> LOC = M24;
+NET top_fmc_la_p<16> LOC = M25;
+NET top_fmc_la_p<17> LOC = F22;
+NET top_fmc_la_p<18> LOC = G22;
+NET top_fmc_la_p<19> LOC = G25;
+NET top_fmc_la_p<20> LOC = J26;
+NET top_fmc_la_p<21> LOC = H21;
+NET top_fmc_la_p<22> LOC = H23;
+NET top_fmc_la_p<23> LOC = G24;
+NET top_fmc_la_p<24> LOC = C23;
+NET top_fmc_la_p<25> LOC = D26;
+NET top_fmc_la_p<26> LOC = E25;
+NET top_fmc_la_p<27> LOC = E21;
+NET top_fmc_la_p<28> LOC = A23;
+NET top_fmc_la_p<29> LOC = B24;
+NET top_fmc_la_p<30> LOC = B22;
+NET top_fmc_la_p<31> LOC = D21;
+NET top_fmc_la_p<32> LOC = B20;
+NET top_fmc_la_p<33> LOC = C21;
+
+NET top_fmc_la_n<0> LOC = P21;
+NET top_fmc_la_n<1> LOC = N22;
+NET top_fmc_la_n<2> LOC = P25;
+NET top_fmc_la_n<3> LOC = P26;
+NET top_fmc_la_n<4> LOC = U20;
+NET top_fmc_la_n<5> LOC = R20;
+NET top_fmc_la_n<6> LOC = M26;
+NET top_fmc_la_n<7> LOC = N23;
+NET top_fmc_la_n<8> LOC = T23;
+NET top_fmc_la_n<9> LOC = N24;
+NET top_fmc_la_n<10> LOC = P20;
+NET top_fmc_la_n<11> LOC = M22;
+NET top_fmc_la_n<12> LOC = P18;
+NET top_fmc_la_n<13> LOC = K26;
+NET top_fmc_la_n<14> LOC = T17;
+NET top_fmc_la_n<15> LOC = L24;
+NET top_fmc_la_n<16> LOC = L25;
+NET top_fmc_la_n<17> LOC = E23;
+NET top_fmc_la_n<18> LOC = F23;
+NET top_fmc_la_n<19> LOC = G26;
+NET top_fmc_la_n<20> LOC = H26;
+NET top_fmc_la_n<21> LOC = G21;
+NET top_fmc_la_n<22> LOC = H24;
+NET top_fmc_la_n<23> LOC = F24;
+NET top_fmc_la_n<24> LOC = C24;
+NET top_fmc_la_n<25> LOC = C26;
+NET top_fmc_la_n<26> LOC = D25;
+NET top_fmc_la_n<27> LOC = E22;
+NET top_fmc_la_n<28> LOC = A24;
+NET top_fmc_la_n<29> LOC = A25;
+NET top_fmc_la_n<30> LOC = A22;
+NET top_fmc_la_n<31> LOC = C22;
+NET top_fmc_la_n<32> LOC = A20;
+NET top_fmc_la_n<33> LOC = B21;
+
+NET bottom_fmc_la_p<0> LOC = AA3;
+NET bottom_fmc_la_p<1> LOC = AA4;
+NET bottom_fmc_la_p<2> LOC = AD1;
+NET bottom_fmc_la_p<3> LOC = AF5;
+NET bottom_fmc_la_p<4> LOC = V2;
+NET bottom_fmc_la_p<5> LOC = AB1;
+NET bottom_fmc_la_p<6> LOC = AB6;
+NET bottom_fmc_la_p<7> LOC = W1;
+NET bottom_fmc_la_p<8> LOC = Y3;
+NET bottom_fmc_la_p<9> LOC = AE6;
+NET bottom_fmc_la_p<10> LOC = AC4;
+NET bottom_fmc_la_p<11> LOC = V4;
+NET bottom_fmc_la_p<12> LOC = AF3;
+NET bottom_fmc_la_p<13> LOC = W6;
+NET bottom_fmc_la_p<14> LOC = U2;
+NET bottom_fmc_la_p<15> LOC = AB2;
+NET bottom_fmc_la_p<16> LOC = Y6;
+NET bottom_fmc_la_p<17> LOC = AB16;
+NET bottom_fmc_la_p<18> LOC = AC18;
+NET bottom_fmc_la_p<19> LOC = AF14;
+NET bottom_fmc_la_p<20> LOC = Y17;
+NET bottom_fmc_la_p<21> LOC = AC14;
+NET bottom_fmc_la_p<22> LOC = AF19;
+NET bottom_fmc_la_p<23> LOC = AD15;
+NET bottom_fmc_la_p<24> LOC = AB19;
+NET bottom_fmc_la_p<25> LOC = AD20;
+NET bottom_fmc_la_p<26> LOC = AE17;
+NET bottom_fmc_la_p<27> LOC = AA14;
+NET bottom_fmc_la_p<28> LOC = Y15;
+NET bottom_fmc_la_p<29> LOC = AA19;
+NET bottom_fmc_la_p<30> LOC = W15;
+NET bottom_fmc_la_p<31> LOC = V14;
+NET bottom_fmc_la_p<32> LOC = V16;
+NET bottom_fmc_la_p<33> LOC = V18;
+
+NET bottom_fmc_la_n<0> LOC = AA2;
+NET bottom_fmc_la_n<1> LOC = AB4;
+NET bottom_fmc_la_n<2> LOC = AE1;
+NET bottom_fmc_la_n<3> LOC = AF4;
+NET bottom_fmc_la_n<4> LOC = V1;
+NET bottom_fmc_la_n<5> LOC = AC1;
+NET bottom_fmc_la_n<6> LOC = AC6;
+NET bottom_fmc_la_n<7> LOC = Y1;
+NET bottom_fmc_la_n<8> LOC = Y2;
+NET bottom_fmc_la_n<9> LOC = AE5;
+NET bottom_fmc_la_n<10> LOC = AC3;
+NET bottom_fmc_la_n<11> LOC = W4;
+NET bottom_fmc_la_n<12> LOC = AF2;
+NET bottom_fmc_la_n<13> LOC = W5;
+NET bottom_fmc_la_n<14> LOC = U1;
+NET bottom_fmc_la_n<15> LOC = AC2;
+NET bottom_fmc_la_n<16> LOC = Y5;
+NET bottom_fmc_la_n<17> LOC = AC16;
+NET bottom_fmc_la_n<18> LOC = AD18;
+NET bottom_fmc_la_n<19> LOC = AF15;
+NET bottom_fmc_la_n<20> LOC = Y18;
+NET bottom_fmc_la_n<21> LOC = AD14;
+NET bottom_fmc_la_n<22> LOC = AF20;
+NET bottom_fmc_la_n<23> LOC = AE15;
+NET bottom_fmc_la_n<24> LOC = AB20;
+NET bottom_fmc_la_n<25> LOC = AE20;
+NET bottom_fmc_la_n<26> LOC = AF17;
+NET bottom_fmc_la_n<27> LOC = AA15;
+NET bottom_fmc_la_n<28> LOC = Y16;
+NET bottom_fmc_la_n<29> LOC = AA20;
+NET bottom_fmc_la_n<30> LOC = W16;
+NET bottom_fmc_la_n<31> LOC = W14;
+NET bottom_fmc_la_n<32> LOC = V17;
+NET bottom_fmc_la_n<33> LOC = V19;
+
+NET bottom_fmc_ha_p<0> LOC = AC9;
+NET bottom_fmc_ha_p<1> LOC = AA9;
+NET bottom_fmc_ha_p<2> LOC = W10;
+NET bottom_fmc_ha_p<3> LOC = Y8;
+NET bottom_fmc_ha_p<4> LOC = AE7;
+NET bottom_fmc_ha_p<5> LOC = AA8;
+NET bottom_fmc_ha_p<6> LOC = AD10;
+NET bottom_fmc_ha_p<7> LOC = AB7;
+NET bottom_fmc_ha_p<8> LOC = AC8;
+NET bottom_fmc_ha_p<9> LOC = AF10;
+NET bottom_fmc_ha_p<10> LOC = Y11;
+NET bottom_fmc_ha_p<11> LOC = Y13;
+NET bottom_fmc_ha_p<12> LOC = AD11;
+NET bottom_fmc_ha_p<13> LOC = AE8;
+NET bottom_fmc_ha_p<14> LOC = AC13;
+NET bottom_fmc_ha_p<15> LOC = AA13;
+NET bottom_fmc_ha_p<16> LOC = AB12;
+NET bottom_fmc_ha_p<17> LOC = AB11;
+NET bottom_fmc_ha_p<18> LOC = AA10;
+NET bottom_fmc_ha_p<19> LOC = AE13;
+NET bottom_fmc_ha_p<20> LOC = AE12;
+NET bottom_fmc_ha_p<21> LOC = V11;
+NET bottom_fmc_ha_p<22> LOC = V9;
+NET bottom_fmc_ha_p<23> LOC = V8;
+
+NET bottom_fmc_ha_n<0> LOC = AD9;
+NET bottom_fmc_ha_n<1> LOC = AB9;
+NET bottom_fmc_ha_n<2> LOC = W9;
+NET bottom_fmc_ha_n<3> LOC = Y7;
+NET bottom_fmc_ha_n<4> LOC = AF7;
+NET bottom_fmc_ha_n<5> LOC = AA7;
+NET bottom_fmc_ha_n<6> LOC = AE10;
+NET bottom_fmc_ha_n<7> LOC = AC7;
+NET bottom_fmc_ha_n<8> LOC = AD8;
+NET bottom_fmc_ha_n<9> LOC = AF9;
+NET bottom_fmc_ha_n<10> LOC = Y10;
+NET bottom_fmc_ha_n<11> LOC = Y12;
+NET bottom_fmc_ha_n<12> LOC = AE11;
+NET bottom_fmc_ha_n<13> LOC = AF8;
+NET bottom_fmc_ha_n<14> LOC = AD13;
+NET bottom_fmc_ha_n<15> LOC = AA12;
+NET bottom_fmc_ha_n<16> LOC = AC12;
+NET bottom_fmc_ha_n<17> LOC = AC11;
+NET bottom_fmc_ha_n<18> LOC = AB10;
+NET bottom_fmc_ha_n<19> LOC = AF13;
+NET bottom_fmc_ha_n<20> LOC = AF12;
+NET bottom_fmc_ha_n<21> LOC = W11;
+NET bottom_fmc_ha_n<22> LOC = W8;
+NET bottom_fmc_ha_n<23> LOC = V7;
+
+NET bottom_fmc_hb_p<0> LOC = Y22;
+NET bottom_fmc_hb_p<1> LOC = AD21;
+NET bottom_fmc_hb_p<2> LOC = V21;
+NET bottom_fmc_hb_p<3> LOC = U22;
+NET bottom_fmc_hb_p<4> LOC = AE23;
+NET bottom_fmc_hb_p<5> LOC = AE22;
+NET bottom_fmc_hb_p<6> LOC = AC23;
+NET bottom_fmc_hb_p<7> LOC = AB22;
+NET bottom_fmc_hb_p<8> LOC = AB21;
+NET bottom_fmc_hb_p<9> LOC = AD23;
+NET bottom_fmc_hb_p<10> LOC = AF24;
+NET bottom_fmc_hb_p<11> LOC = W23;
+NET bottom_fmc_hb_p<12> LOC = U24;
+NET bottom_fmc_hb_p<13> LOC = Y25;
+NET bottom_fmc_hb_p<14> LOC = AD26;
+NET bottom_fmc_hb_p<15> LOC = AD25;
+NET bottom_fmc_hb_p<16> LOC = AB26;
+NET bottom_fmc_hb_p<17> LOC = Y23;
+NET bottom_fmc_hb_p<18> LOC = U26;
+NET bottom_fmc_hb_p<19> LOC = AA25;
+NET bottom_fmc_hb_p<20> LOC = W25;
+NET bottom_fmc_hb_p<21> LOC = V23;
+
+NET bottom_fmc_hb_n<0> LOC = AA22;
+NET bottom_fmc_hb_n<1> LOC = AE21;
+NET bottom_fmc_hb_n<2> LOC = W21;
+NET bottom_fmc_hb_n<3> LOC = V22;
+NET bottom_fmc_hb_n<4> LOC = AF23;
+NET bottom_fmc_hb_n<5> LOC = AF22;
+NET bottom_fmc_hb_n<6> LOC = AC24;
+NET bottom_fmc_hb_n<7> LOC = AC22;
+NET bottom_fmc_hb_n<8> LOC = AC21;
+NET bottom_fmc_hb_n<9> LOC = AD24;
+NET bottom_fmc_hb_n<10> LOC = AF25;
+NET bottom_fmc_hb_n<11> LOC = W24;
+NET bottom_fmc_hb_n<12> LOC = U25;
+NET bottom_fmc_hb_n<13> LOC = Y26;
+NET bottom_fmc_hb_n<14> LOC = AE26;
+NET bottom_fmc_hb_n<15> LOC = AE25;
+NET bottom_fmc_hb_n<16> LOC = AC26;
+NET bottom_fmc_hb_n<17> LOC = AA24;
+NET bottom_fmc_hb_n<18> LOC = V26;
+NET bottom_fmc_hb_n<19> LOC = AB25;
+NET bottom_fmc_hb_n<20> LOC = W26;
+NET bottom_fmc_hb_n<21> LOC = V24;
