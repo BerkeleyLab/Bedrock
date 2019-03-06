@@ -7,8 +7,8 @@
 // ------------------------------------
 
 module eth_gtx_bridge #(
-   parameter IP       = {8'd192, 8'd168, 8'd7, 8'd4};
-   parameter MAC      = 48'h112233445566;
+   parameter IP       = {8'd192, 8'd168, 8'd7, 8'd4},
+   parameter MAC      = 48'h112233445566,
    parameter JUMBO_DW = 14)
 (
    input         gtx_tx_clk,  // Transceiver clock at half rate
@@ -22,11 +22,12 @@ module eth_gtx_bridge #(
    output        lb_rnw,
    output [23:0] lb_addr, // TODO: Something special about lb_addr[17]?
    output [31:0] lb_wdata,
-   output        lb_rvalid,
+   output        lb_renable,
    input  [31:0] lb_rdata
 );
    wire [7:0] gmii_rxd, gmii_txd;
-   wire [9:0] gtx_txd_10, gtx_rxd_10;
+   wire [9:0] gtx_txd_10;
+   reg  [9:0] gtx_rxd_10;
    wire gmii_tx_en, gmii_rx_er, gmii_rx_dv;
 
    // ----------------------------------
@@ -36,6 +37,7 @@ module eth_gtx_bridge #(
    reg  [9:0] gtx_txd_r;
    wire [9:0] gtp_rxd_l = gtx_rxd[9:0];
    wire [9:0] gtp_rxd_h = gtx_rxd[19:10];
+   reg  [19:0] gtx_txd_l;
    reg even=0;
 
    // decode incoming data @ gtp_tx_clk
@@ -50,8 +52,10 @@ module eth_gtx_bridge #(
    
    // encode outgoing data @ gmii_tx_clk
    always @(posedge gtx_tx_clk) begin
-       gtx_txd <= {gtx_txd_10, gtx_txd_r};
+       gtx_txd_l <= {gtx_txd_10, gtx_txd_r};
    end
+
+   assign gtx_txd = gtx_txd_l;
 
    // ----------------------------------
    // PCS/PMA and GMII Bridge
@@ -90,7 +94,7 @@ module eth_gtx_bridge #(
       .rx_clk              (gmii_rx_clk),
       .rxd                 (gmii_rxd),
       .rx_dv               (gmii_rx_dv),
-      .rx_er               (gmii_rx_er),
+      .rx_er               (1'b0),
       // GMII Output (Tx)
       .tx_clk              (gmii_tx_clk),
       .txd                 (gmii_txd),
@@ -108,7 +112,7 @@ module eth_gtx_bridge #(
       .p3_addr             (lb_addr),
       .p3_control_strobe   (lb_valid),
       .p3_control_rd       (lb_rnw),
-      .p3_control_rd_valid (lb_rvalid),
+      .p3_control_rd_valid (lb_renable),
       .p3_data_out         (lb_wdata),
       .p3_data_in          (lb_rdata)
    );

@@ -5,10 +5,10 @@ set_property -dict {
     CONFIG.gt1_val                          {false}
     CONFIG.gt0_val                          {true}
     CONFIG.gt0_val_drp_clock                {100}
-    CONFIG.gt0_val_rx_refclk                {REFCLK1_Q0}
-    CONFIG.gt0_val_tx_refclk                {REFCLK1_Q0}
-    CONFIG.gt1_val_rx_refclk                {REFCLK0_Q0}
-    CONFIG.gt1_val_tx_refclk                {REFCLK0_Q0}
+    CONFIG.gt0_val_rx_refclk                {REFCLK0_Q0}
+    CONFIG.gt0_val_tx_refclk                {REFCLK0_Q0}
+    CONFIG.gt1_val_rx_refclk                {REFCLK1_Q0}
+    CONFIG.gt1_val_tx_refclk                {REFCLK1_Q0}
     CONFIG.identical_val_tx_reference_clock {125.000}
     CONFIG.gt0_val_txbuf_en                 {true}
     CONFIG.gt0_val_rxbuf_en                 {true}

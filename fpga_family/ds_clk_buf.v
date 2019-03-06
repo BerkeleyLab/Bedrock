@@ -1,11 +1,11 @@
-module ds_clk #(
+module ds_clk_buf #(
    parameter USE_BUF = 0 // 0 - No buffer
                          // 1 - BUFG
                          // 2 - BUFH
 )(
    input  clk_p,
    input  clk_n,
-   output clk_out,
+   output clk_out
 );
 
    wire clk_out_i;
@@ -23,7 +23,7 @@ module ds_clk #(
    generate
       if (USE_BUF == 0) begin
          assign clk_out = clk_out_i;
-      end else if (USE_BUFG == 1) begin
+      end else if (USE_BUF == 1) begin
          BUFG refclk_buf(
             .O (clk_out),
             .I (clk_out_i)

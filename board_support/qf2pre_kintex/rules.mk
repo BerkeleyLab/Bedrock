@@ -1,0 +1,1 @@
+../bmb7_kintex/rules.mk

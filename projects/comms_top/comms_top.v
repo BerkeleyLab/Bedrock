@@ -8,8 +8,6 @@
 //       Ethernet core/local-bus gives access to other cores, which will operate in loopback mode.
 // ------------------------------------
 
-`include comms_pack.vh
-
 module comms_top
 (
    input   sys_clk_p,       // 50 MHz clock
@@ -19,17 +17,6 @@ module comms_top
    output  kintex_data_out_p,
    output  kintex_data_out_n,
    output  kintex_done,
-
-   // QSFP management pins
-   input   K7_QSFP_SCL,
-   input   K7_QSFP_SDA,
-
-   // QSFP1, bank 116
-   input   K7_QSFP1_PRSNTL,
-   input   K7_QSFP1_INTL,
-   output  K7_QSFP1_RESETL,
-   output  K7_QSFP1_MODSEL,
-   output  K7_QSFP1_LPMODE,
 
    input   K7_MGTREFCLK0_P, // D6 - Y4[2] - SIT9122
    input   K7_MGTREFCLK0_N, // D5 - Y4[1] - SIT9122
@@ -49,6 +36,8 @@ module comms_top
 
    output [1:0] LEDS
 );
+
+`include "comms_pack.vh"
 
    localparam IPADDR   = {8'd192, 8'd168, 8'd1, 8'd173};
    localparam MACADDR  = 48'h00105ad155b2;
@@ -90,14 +79,9 @@ module comms_top
    ds_clk_buf i_ds_clk (
       .clk_p     (sys_clk_p),
       .clk_n     (sys_clk_n),
-      .clk_out   (sys_clk),
-   )
+      .clk_out   (sys_clk)
+   );
    
-`ifdef SIMULATE
-   assign gmii_tx_clk = gtrefclk_p; // Use positive end of 125 MHz clk
-   assign gmii_rx_clk = gtrefclk_p;
-`else
-
    // Pass 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
 
    // Ethernet clock managers
@@ -114,7 +98,6 @@ module comms_top
       .gmii_clk    (gmii_rx_clk),
       .pll_lock    (rx_pll_lock)
    );
-`endif
 
    // ----------------------------------
    // GTX Instantiation
@@ -122,6 +105,8 @@ module comms_top
 
    // Instantiate wizard-generated GTX transceiver
    // Configured by gtx_ethernet.tcl and gtx_gen.tcl
+
+   wire [GTX_ETH_WIDTH-1:0] gtx_rxd, gtx_txd;
 
    // Status signals
    wire gt_cpll_locked;
@@ -141,7 +126,7 @@ module comms_top
       .GT0_WI (GTX_ETH_WIDTH))
    i_qgtx_wrap (
       // Common Pins
-      .drpclk_in               (sys_clk)
+      .drpclk_in               (sys_clk),
       .soft_reset              (1'b0),
 
       .gt_txrx_resetdone       (gt_txrx_resetdone),
@@ -150,39 +135,37 @@ module comms_top
       .gtrefclk0_p             (gtrefclk_p),
       .gtrefclk0_n             (gtrefclk_n),
       // GTX0 Pins
-      .GT0_txdata_in           (gtx_txd),
-      .GT0_rxdata_out          (gtx_rxd),
-      .GT0_txusrrdy_in         (tx_pll_lock),
-      .GT0_rxusrrdy_in         (rx_pll_lock),
-      .GT0_rxn_in              (sfp_rx_n),
-      .GT0_rxp_in              (sfp_rx_p),
-      .GT0_txn_out             (sfp_tx_n),
-      .GT0_txp_out             (sfp_tx_p),
-      .GT0_rxresetdone         (gt0_rxresetdone),
-      .GT0_txresetdone         (gt0_txresetdone),
-      .GT0_txfsm_resetdone_out (gt0_txfsm_resetdone),
-      .GT0_rxfsm_resetdone_out (gt0_rxfsm_resetdone),
-      .GT0_rxbufstatus         (gt0_rxbufstatus),
-      .GT0_txbufstatus         (gt0_txbufstatus),
-      .GT0_txusrclk_out        (gtx_tx_out_clk),
-      .GT0_rxusrclk_out        (gtx_rx_out_clk),
+      .gt0_txdata_in           (gtx_txd),
+      .gt0_rxdata_out          (gtx_rxd),
+      .gt0_txusrrdy_in         (tx_pll_lock),
+      .gt0_rxusrrdy_in         (rx_pll_lock),
+      .gt0_rxn_in              (sfp_rx_n),
+      .gt0_rxp_in              (sfp_rx_p),
+      .gt0_txn_out             (sfp_tx_n),
+      .gt0_txp_out             (sfp_tx_p),
+      .gt0_txfsm_resetdone_out (gt0_txfsm_resetdone),
+      .gt0_rxfsm_resetdone_out (gt0_rxfsm_resetdone),
+      .gt0_rxbufstatus         (gt0_rxbufstatus),
+      .gt0_txbufstatus         (gt0_txbufstatus),
+      .gt0_txusrclk_out        (gtx_tx_out_clk),
+      .gt0_rxusrclk_out        (gtx_rx_out_clk)
    );
    
 
    // ----------------------------------
    // GTX Ethernet to Local-Bus bridge
    // ---------------------------------
-   wire lb_valid, lb_rnw, lb_rvalid;
+   wire lb_valid, lb_rnw, lb_renable;
    wire [LBUS_ADDR_WIDTH-1:0] lb_addr;
    wire [LBUS_DATA_WIDTH-1:0] lb_wdata, lb_rdata;
 
-   wire [GTX_ETH_WIDTH-1:0] gtx_rxd, gtx_txd;
+   reg [LBUS_DATA_WIDTH-1:0] lb_rdata_r;
 
    eth_gtx_bridge #(
       .IP         (IPADDR),
       .MAC        (MACADDR),
-      .JUMBO_DW   (JUMBO_DW),
-   (
+      .JUMBO_DW   (JUMBO_DW))
+   i_eth_gtx_bridge (
       .gtx_tx_clk  (gtx_tx_usr_clk), // Transceiver clock at half rate
       .gmii_tx_clk (gmii_tx_clk), // Clock for Ethernet fabric - 125 MHz for 1GbE 
       .gmii_rx_clk (gmii_rx_clk),
@@ -194,15 +177,16 @@ module comms_top
       .lb_rnw      (lb_rnw),
       .lb_addr     (lb_addr),
       .lb_wdata    (lb_wdata),
-      .lb_rvalid   (lb_rvalid),
+      .lb_renable  (lb_renable),
       .lb_rdata    (lb_rdata)
    );
 
    // TODO: Temporary loopback code
    always @(posedge gmii_rx_clk) begin
-      lb_rvalid <= lb_valid;
-      lb_rdata  <= lb_wdata;
+      lb_rdata_r  <= lb_wdata;
    end
+
+   assign lb_rdata  = lb_rdata_r;
    
    // LED[0] GT Initialization done
    // LED[1] Received and decoded packet
