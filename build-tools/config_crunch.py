@@ -104,7 +104,7 @@ def config_romx(dsp_flavor=0, tool_rev=0, board_type=0):
     except Exception:
         code_is_dirty = 0
 
-    user = os.environ['USER']
+    user = os.getenv('USER', 'NONE')
     datatimestr = datetime.datetime.now()
     year = format(int(datatimestr.strftime('%y')), '02x')
     month = format(int(datatimestr.strftime('%m')), '02x')
