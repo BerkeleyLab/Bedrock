@@ -69,10 +69,10 @@ def vvp_parse_test(fd, verbose):
     fail = 0
     mask_seen = {}
     for ll in fd.readlines():
-        l = ll.rstrip()
-        if l == "PASS":
+        ll = ll.rstrip()
+        if ll == "PASS":
             continue
-        a = l.split(" ")
+        a = ll.split(" ")
         mask = int(a[0], 16)
         if not (mask in mask_seen):
             vvp = [int(x) for x in a[12:4:-1] if x != "."]

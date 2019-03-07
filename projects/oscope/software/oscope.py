@@ -8,6 +8,8 @@ from banyan_ch_find import banyan_ch_find
 from banyan_spurs import collect_adcs
 from prc import c_prc
 
+FOO = None
+
 
 def write_mask(prc, mask_int):
     prc.reg_write([{'banyan_mask': mask_int}])
@@ -28,7 +30,7 @@ def get_npt(prc):
 
 class ADC:
     bits = 16
-    scale = 1 << (bits-1)  # signed
+    scale = 1 << (bits - 1)  # signed
     sample_rate = 100000000.
 
 
@@ -58,7 +60,7 @@ def run(ip_addr='192.168.1.121',
     styles = ['r-', 'g-', 'y-', 'm-'][:n_channels]
 
     x = np.arange(0, pts_per_ch) / 10e3
-    x = np.fft.rfftfreq(pts_per_ch, d=1/ADC.sample_rate)
+    x = np.fft.rfftfreq(pts_per_ch, d=1 / ADC.sample_rate)
     y = np.sin(x)
 
     def plot(ax, style, ch):
@@ -67,17 +69,21 @@ def run(ip_addr='192.168.1.121',
         ax.set_xlabel('Time[us]')
         ax.legend()
         return line
-    lines = [plot(ax, style, ch) for ax, style, ch in zip(axes, styles, channels)]
+
+    lines = [
+        plot(ax, style, ch) for ax, style, ch in zip(axes, styles, channels)
+    ]
+    print(123)
 
     def animate(x):
         (block, timestamp) = collect_adcs(prc, npt, n_channels)
         nblock = get_volts(np.array(block))
         # print(x)
         for j, line in enumerate(lines, start=1):
-            ax = axes[j-1]
+            ax = axes[j - 1]
             ax.relim()
             ax.autoscale_view()
-            ch_data = nblock[j-1]
+            ch_data = nblock[j - 1]
             rfft = np.abs(np.fft.rfft(get_volts(ch_data)))
             line.set_ydata(rfft)
             # line.set_ydata()
@@ -93,7 +99,8 @@ def run(ip_addr='192.168.1.121',
     #    ["%d" % x for x in channels])
 
     # We'd normally specify a reasonable "interval" here...
-    animation.FuncAnimation(fig, animate, interval=0.1, blit=True)
+    global FOO
+    FOO = animation.FuncAnimation(fig, animate, interval=0.1, blit=True)
     plt.show()
     # for run_n in range(count):
     #     print('Run: {}'.format(run_n))
@@ -119,20 +126,33 @@ def run(ip_addr='192.168.1.121',
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Read/Write from FPGA memory')
-    parser.add_argument('-a', '--ip', help='ip_address', dest='ip', type=str,
-                        default='192.168.1.121')
-    parser.add_argument('-p', '--port', help='port', dest='port', type=int,
-                        default=50006)
-    parser.add_argument('-m', '--mask', help='mask', dest='mask', type=str,
-                        default='0x3')
-    parser.add_argument('-n', '--npt_wish', help='number of points per channel', type=int,
-                        default=4096)
-    parser.add_argument('-c', '--count', help='number of acquisitions', type=int,
-                        default=1)
-    parser.add_argument('-f', '--filewritepath', help='static file out',
-                        type=str, default="")
-    parser.add_argument("-u", "--use_spartan", action="store_true", help="use spartan",
-                        default=True)
+    parser.add_argument(
+        '-a',
+        '--ip',
+        help='ip_address',
+        dest='ip',
+        type=str,
+        default='192.168.1.121')
+    parser.add_argument(
+        '-p', '--port', help='port', dest='port', type=int, default=50006)
+    parser.add_argument(
+        '-m', '--mask', help='mask', dest='mask', type=str, default='0x3')
+    parser.add_argument(
+        '-n',
+        '--npt_wish',
+        help='number of points per channel',
+        type=int,
+        default=4096)
+    parser.add_argument(
+        '-c', '--count', help='number of acquisitions', type=int, default=1)
+    parser.add_argument(
+        '-f', '--filewritepath', help='static file out', type=str, default="")
+    parser.add_argument(
+        "-u",
+        "--use_spartan",
+        action="store_true",
+        help="use spartan",
+        default=True)
     args = parser.parse_args()
     run(ip_addr=args.ip,
         port=args.port,

@@ -25,7 +25,7 @@ fail = 0
 def ponder_int(s):
     try:
         r = int(s)
-    except:
+    except Exception:
         r = 31
         m4 = re.search('(\w+)-(\d+)', s)
         if m4:
