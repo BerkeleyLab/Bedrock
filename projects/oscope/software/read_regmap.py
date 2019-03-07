@@ -9,17 +9,17 @@ def get_map(f='regmap_gen_vmod1.json'):
     regmap = {}
     # Currently below only supports a line of length 2,
     # with format '<reg_name> <reg_addr>'
-    for l in open(f, 'r'):
-        l = l.strip()
-        l = l.split()
+    for li in open(f, 'r'):
+        li = li.strip()
+        li = li.split()
         if len(l) != 2:
-            print(("Something wrong with the line width: ", l))
+            print(("Something wrong with the line width: ", li))
             exit()
         else:
             try:
-                regmap[l[0]] = int(l[1])
+                regmap[li[0]] = int(li[1])
             except ValueError:
-                print(('Unexpected literal: %s in file: %s' % l[1], f))
+                print(('Unexpected literal: %s in file: %s' % li[1], f))
                 exit()
     return regmap
 
@@ -104,7 +104,7 @@ def get_write_address(name, regmap, hierarchy=[]):
     else:
         try:
             return int(name, 0)
-        except:
+        except Exception:
             pass
         offset = 0
         if name.endswith(']'):
@@ -114,7 +114,7 @@ def get_write_address(name, regmap, hierarchy=[]):
         r = get_reg_info(regmap, hierarchy, name)
         try:
             return r['base_addr'] + offset
-        except:
+        except Exception:
             print(("get_write_address failed on %s" % name))
 
 

@@ -68,8 +68,8 @@ def vvp_parse_test(fd, verbose):
     '''
     fail = 0
     mask_seen = {}
-    for l in fd.readlines():
-        l = l.rstrip()
+    for ll in fd.readlines():
+        l = ll.rstrip()
         if l == "PASS":
             continue
         a = l.split(" ")

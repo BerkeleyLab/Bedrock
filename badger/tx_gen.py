@@ -29,10 +29,10 @@ def convert(a, offset):
 # -   2     5          5        2      8        -
 def file_grab(fname, offset):
     with open(fname, 'r') as f:
-        for l in f.read().split('\n'):
-            if l == "" or l[0] == "#":
+        for ll in f.read().split('\n'):
+            if ll == "" or ll[0] == "#":
                 continue
-            a = l.split()
+            a = ll.split()
             if len(a) < 6:
                 continue
             print(convert(a, offset))

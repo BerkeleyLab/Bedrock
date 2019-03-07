@@ -175,7 +175,7 @@ class c_prc(c_llrf_bmb7):
                         adata = 'LBNL DIGITIZER V1.0 SN 006'
                     print(('Writing new SN: "%s"' % adata))
                     self.sn_write(adata)
-                except:
+                except Exception:
                     pass
                     print("Error: Failed to get QR code or write to EEPROM")
                     return False
@@ -232,7 +232,7 @@ class c_prc(c_llrf_bmb7):
                                                                   False)
                     if v >= 32 and v < 127:
                         r_ascii += chr(v)
-                except:
+                except Exception:
                     print("Error: Failure reading FMC EEPROM")
                     return False
         return r_ascii
@@ -954,7 +954,7 @@ class c_prc(c_llrf_bmb7):
         try:
             self.reg_write([{"clk_status_we": 1}])
             clk_status_present = 1
-        except:
+        except Exception:
             print("Please upgrade to post-commit-5a098b92 bitfile")
             clk_status_present = 0
         for kx in range(15):  # range(56*10/pstep):
