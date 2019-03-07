@@ -26,7 +26,7 @@
 `define GTi_PORT_MAP(GT) .``GT``_tx_fsm_reset_done_out (``GT``_txfsm_resetdone_out),\
                          .``GT``_rx_fsm_reset_done_out (``GT``_rxfsm_resetdone_out),\
                          .``GT``_data_valid_in         (1'b1),\
-                         .``GT``_txusrclk_out          (``GT``_txusrclk_i),\
+                         .``GT``_txusrclk_out          (``GT``_txusrclk_out),\
                          .``GT``_txusrclk2_out         (),\
                          .``GT``_rxusrclk_out          (``GT``_rxusrclk_out),\
                          .``GT``_rxusrclk2_out         (),\
@@ -48,8 +48,10 @@
                          .``GT``_gtxrxp_in             (``GT``_rxp_in),\
                          .``GT``_gtxrxn_in             (``GT``_rxn_in),\
                          .``GT``_rxdfelpmreset_in      (1'b0),\
+                         .``GT``_rxbufstatus_out       (``GT``_rxbufstatus),\
                          .``GT``_rxmonitorout_out      (),\
                          .``GT``_rxmonitorsel_in       (1'b0),\
+                         .``GT``_rxoutclkfabric_out    (),\
                          .``GT``_gtrxreset_in          (gt_txrx_reset),\
                          .``GT``_rxpmareset_in         (gt_txrx_reset),\
                          .``GT``_rxresetdone_out       (``GT``_rxresetdone),\
@@ -59,12 +61,12 @@
                          .``GT``_txdata_in             (``GT``_txdata_in),\
                          .``GT``_gtxtxn_out            (``GT``_txn_out),\
                          .``GT``_gtxtxp_out            (``GT``_txp_out),\
-                         .``GT``_txoutclkfabric_out    (``GT``_txoutclkfabric_i),\
+                         .``GT``_txoutclkfabric_out    (),\
                          .``GT``_txoutclkpcs_out       (),\
-                         .``GT``_txresetdone_out       (),
+                         .``GT``_txresetdone_out       (``GT``_txresetdone),
 
 module qgtx_wrap # (
-   parameter CPLL_RESET_WAIT = 60, // In clock cycles
+   parameter CPLL_RESET_WAIT = 60, // In clock cycles. Actual time must be >= 500 ns
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,

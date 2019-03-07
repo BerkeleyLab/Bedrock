@@ -61,9 +61,15 @@ module comms_top
    // Not using Spartan-Kintex connection
    wire kintex_data_in, kintex_data_out;
 
-   assign kintex_data_in    = kintex_data_in_p;
-   assign kintex_data_out_p = 1'b0;
-   assign kintex_data_out_n = 1'b1;
+   assign kintex_data_in = kintex_data_in_p;
+
+`ifndef SIMULATE
+   // Drive kintex_data_out with DS buffer to avoid DRC failures
+   OBUFDS kintex_dout_ds_dummy(.I(1'b0), .O(kintex_data_out_p), .OB(kintex_data_out_n));
+`else
+   assign kintex_data_out_p = 1'b1;
+   assign kintex_data_out_n = 1'b0;
+`endif
 
    // ----------------------------------
    // Clocking

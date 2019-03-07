@@ -16,16 +16,18 @@ module gtx_eth_clks (
    wire gtx_out_clk_buf;
    wire gtx_usr_clk_l, gmii_clk_l;
 
+   /* -- This is being included automatically by the Transceiver Wizard
    // Buffer for input clock (required for Kintex7, not required for Virtex7)
    BUFG i_gtx_out_clk_buf (
       .I (gtx_out_clk),
       .O (gtx_out_clk_buf)
    );
+   */
 
    // Instantiate wizard-generated clock management module
    // Configured by gtx_ethernet_clk.tcl
    gtx_eth_mmcm i_gtx_eth_mmcm (
-      .clk_in   (gtx_out_clk_buf),
+      .clk_in   (gtx_out_clk),
       .reset    (1'b0),
       .gtx_clk  (gtx_usr_clk_l),
       .gmii_clk (gmii_clk_l),
