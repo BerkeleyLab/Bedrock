@@ -35,7 +35,7 @@ NET uart_rx<0> LOC = D8 | IOSTANDARD = LVCMOS33; # 10
 NET uart_rx<1> LOC = F8 | IOSTANDARD = LVCMOS33; # 11
 
 ######################### Transmitter I/O ##################################
- 
+
 NET transmitter_s00 LOC = C14 | IOSTANDARD = LVCMOS33 | DRIVE = 4; # K7 external I/O 0
 NET transmitter_s01 LOC = C13 | IOSTANDARD = LVCMOS33 | DRIVE = 4; # K7 external I/O 1
 NET transmitter_s10 LOC = D14 | IOSTANDARD = LVCMOS33 | DRIVE = 4; # K7 external I/O 2
@@ -55,17 +55,17 @@ NET bottom_fmc_adc_cnv LOC = AA2 | IOSTANDARD = LVCMOS18 | DRIVE = 4;
 NET top_fmc_adc_clk LOC = R21 | IOSTANDARD = LVCMOS18 | DRIVE = 4;
 NET top_fmc_adc_cnv LOC = P21 | IOSTANDARD = LVCMOS18 | DRIVE = 4;
 
-NET bottom_fmc_adc_sdi<0>  LOC = V19; 
-NET bottom_fmc_adc_sdi<1>  LOC = W15; 
-NET bottom_fmc_adc_sdi<2>  LOC = V16; 
-NET bottom_fmc_adc_sdi<3>  LOC = W14; 
+NET bottom_fmc_adc_sdi<0>  LOC = V19;
+NET bottom_fmc_adc_sdi<1>  LOC = W15;
+NET bottom_fmc_adc_sdi<2>  LOC = V16;
+NET bottom_fmc_adc_sdi<3>  LOC = W14;
 NET bottom_fmc_adc_sdi<4>  LOC = AD20;
 NET bottom_fmc_adc_sdi<5>  LOC = AF20;
 NET bottom_fmc_adc_sdi<6>  LOC = AF17;
 NET bottom_fmc_adc_sdi<7>  LOC = AE15;
-NET bottom_fmc_adc_sdi<8>  LOC = Y5;  
-NET bottom_fmc_adc_sdi<9>  LOC = W5;  
-NET bottom_fmc_adc_sdi<10> LOC = W6; 
+NET bottom_fmc_adc_sdi<8>  LOC = Y5;
+NET bottom_fmc_adc_sdi<9>  LOC = W5;
+NET bottom_fmc_adc_sdi<10> LOC = W6;
 NET bottom_fmc_adc_sdi<11> LOC = AF3;
 
 NET top_fmc_adc_sdi<0>  LOC = B21; # 33N
@@ -82,15 +82,15 @@ NET top_fmc_adc_sdi<10> LOC = K25; # 13P
 NET top_fmc_adc_sdi<11> LOC = R18; # 12P
 
 NET bottom_fmc_adc_sdo<0>  LOC = V18;
-NET bottom_fmc_adc_sdo<1>  LOC = W16; 
-NET bottom_fmc_adc_sdo<2>  LOC = V17; 
-NET bottom_fmc_adc_sdo<3>  LOC = V14; 
+NET bottom_fmc_adc_sdo<1>  LOC = W16;
+NET bottom_fmc_adc_sdo<2>  LOC = V17;
+NET bottom_fmc_adc_sdo<3>  LOC = V14;
 NET bottom_fmc_adc_sdo<4>  LOC = AD14;
 NET bottom_fmc_adc_sdo<5>  LOC = AF19;
 NET bottom_fmc_adc_sdo<6>  LOC = AA15;
 NET bottom_fmc_adc_sdo<7>  LOC = AD15;
-NET bottom_fmc_adc_sdo<8>  LOC = AB2; 
-NET bottom_fmc_adc_sdo<9>  LOC = Y6;  
+NET bottom_fmc_adc_sdo<8>  LOC = AB2;
+NET bottom_fmc_adc_sdo<9>  LOC = Y6;
 NET bottom_fmc_adc_sdo<10> LOC = AF2;
 NET bottom_fmc_adc_sdo<11> LOC = AE5;
 

@@ -40,12 +40,12 @@ wire clkfb,clki0,clki1,clki2,clki3,clki4,clki5;
 
 reg int_drp_go=0, drp_enable=0;
 wire drp_ready ;
-wire [15:0] int_drp_data_out ;
+wire [15:0] int_drp_data_out;
 
 `ifndef SIMULATE
-generate 
+generate
 if (DEVICE == "SPARTAN 6") begin
-	PLL_BASE #(  
+	PLL_BASE #(
 		.BANDWIDTH ("OPTIMIZED"),   // "high", "low" or "optimized"
 		.CLKFBOUT_MULT (gmult),  // multiplication factor for all output clocks
 		.CLKFBOUT_PHASE (gphase),  // phase shift (degrees) of all output clocks
@@ -138,7 +138,7 @@ if (DEVICE == "SPARTAN 6") begin
 			.DO       (int_drp_data_out),
 			.DWE      (drp_write)
 		);
-	end 
+	end
 	endgenerate
 `else
 	assign clki0 = clkin;
@@ -149,7 +149,7 @@ if (DEVICE == "SPARTAN 6") begin
 	assign clki5 = clkin;
    assign drp_ready = 1'b0;
    assign int_drp_data_out = 16'b0000000000000000;
-        
+
 `endif // SIMULATE
 	assign clk0 = clki0;
 	assign clk1 = clki1;
@@ -162,7 +162,7 @@ if (DEVICE == "SPARTAN 6") begin
 
 	// DRP enable pulse
 	always @(posedge drp_clk) begin
-		int_drp_go <= drp_go;      
+		int_drp_go <= drp_go;
 		drp_enable <= (~(int_drp_go) & drp_go);
 
 		// DRP done latch

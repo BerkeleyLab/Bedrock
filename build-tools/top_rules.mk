@@ -198,7 +198,8 @@ $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/config_crunch.py
 #mkdir -p $(IPX_DIR); $(VIVADO_CREATE_IP) $(IP_NAME) $(IPX_DIR) $^
 
 .PHONY: clean
-CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR)
+CLEAN += *.pyc
+CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR) __pycache__
 # The "find" commands below (embedded in check_clean) check that the
 # source code satisifies:
 #  no hidden files
@@ -207,4 +208,4 @@ CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR)
 clean::
 	rm -f $(CLEAN)
 	rm -rf $(CLEAN_DIRS)
-#	sh $(BUILD_DIR)/check_clean
+	sh $(BUILD_DIR)/check_clean
