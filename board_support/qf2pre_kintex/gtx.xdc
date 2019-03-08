@@ -19,14 +19,14 @@ set_property PACKAGE_PIN C3 [get_ports {K7_QSFP1_RX0_N}]
 set_property PACKAGE_PIN B6 [get_ports {K7_QSFP1_RX1_P}]
 set_property PACKAGE_PIN B5 [get_ports {K7_QSFP1_RX1_N}]
 
-# Y4: one-time programmable oscillator (SIT9122)
+# Y4: one-time programmable oscillator (SIT9122) - Defaults to 125 MHz
 set_property PACKAGE_PIN D6 [get_ports {K7_MGTREFCLK0_P}]
 set_property PACKAGE_PIN D5 [get_ports {K7_MGTREFCLK0_N}]
 
 set_property PACKAGE_PIN F6 [get_ports {K7_MGTREFCLK1_P}]
 set_property PACKAGE_PIN F5 [get_ports {K7_MGTREFCLK1_N}]
-create_clock -period 3.200 -name K7_MGTREFCLK0_P -waveform {0.000 1.600} [get_ports K7_MGTREFCLK0_P]
-#create_clock -period 8.000 -name K7_MGTREFCLK0_P -waveform {0.000 4.000} [get_ports K7_MGTREFCLK0_P]
+#create_clock -period 3.200 -name K7_MGTREFCLK0_P -waveform {0.000 1.600} [get_ports K7_MGTREFCLK0_P]
+create_clock -period 8.000 -name K7_MGTREFCLK0_P -waveform {0.000 4.000} [get_ports K7_MGTREFCLK0_P]
 
 set_property -dict "PACKAGE_PIN  J8 IOSTANDARD LVCMOS25" [get_ports {K7_GTX_REF_CTRL}]
 # set_property -dict "PACKAGE_PIN  C9 IOSTANDARD LVCMOS33" [get_ports {K7_GTX_REF_CTRL}]

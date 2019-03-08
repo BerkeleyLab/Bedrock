@@ -17,6 +17,10 @@ module eth_gtx_bridge #(
    input  [19:0] gtx_rxd,
    output [19:0] gtx_txd,
 
+   // Status signals
+   output        rx_mon,
+   output        tx_mon,
+
    // Local Bus interface
    output        lb_valid,
    output        lb_rnw,
@@ -114,7 +118,9 @@ module eth_gtx_bridge #(
       .p3_control_rd       (lb_rnw),
       .p3_control_rd_valid (lb_renable),
       .p3_data_out         (lb_wdata),
-      .p3_data_in          (lb_rdata)
+      .p3_data_in          (lb_rdata),
+      .rx_mon              (rx_mon),
+      .tx_mon              (tx_mon)
    );
 
 endmodule

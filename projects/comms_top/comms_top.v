@@ -161,6 +161,8 @@ module comms_top
    // ----------------------------------
    // GTX Ethernet to Local-Bus bridge
    // ---------------------------------
+   wire rx_mon, tx_mon;
+
    wire lb_valid, lb_rnw, lb_renable;
    wire [LBUS_ADDR_WIDTH-1:0] lb_addr;
    wire [LBUS_DATA_WIDTH-1:0] lb_wdata, lb_rdata;
@@ -178,6 +180,10 @@ module comms_top
       .gtx_rxd     (gtx_rxd),
       .gtx_txd     (gtx_txd),
 
+      // Status signals
+      .rx_mon      (rx_mon),
+      .tx_mon      (tx_mon),
+
       // Local bus interface
       .lb_valid    (lb_valid),
       .lb_rnw      (lb_rnw),
@@ -187,16 +193,22 @@ module comms_top
       .lb_rdata    (lb_rdata)
    );
 
-   // TODO: Temporary loopback code
+   // TODO: Temporary demo code
+   reg        lbus_led = 0;
+   reg [31:0] test_msg = "QF2\n";
+
    always @(posedge gmii_rx_clk) begin
-      lb_rdata_r  <= lb_wdata;
+      // Toggle on each Local Bus transaction
+      if (lb_valid) lbus_led = ~lbus_led;
+
+      lb_rdata_r  <= test_msg;
    end
 
    assign lb_rdata  = lb_rdata_r;
    
    // LED[0] GT Initialization done
    // LED[1] Received and decoded packet
-   assign LEDS = {gt_txrx_resetdone, lb_valid};
+   assign LEDS = {gt_txrx_resetdone, lbus_led};
 
 endmodule
 
