@@ -96,7 +96,7 @@ end
 // Vector multiply drive by the time-varying vector to convert it
 // from reference coordinates to cavity-centered coordinates.
 wire signed [17:0] mul_result;
-vectormul in_couple(.clk(clk), .gate_in(1'b1), .iq(iq),
+complex_mul in_couple(.clk(clk), .gate_in(1'b1), .iq(iq),
 	.x(drive), .y(mul_coef), .z(mul_result));
 
 // Depend on the fact that when the beam loading input magnitude is zero,

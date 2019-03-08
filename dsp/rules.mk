@@ -1,7 +1,7 @@
 VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -y$(CORDIC_DIR)
 VFLAGS += -I. -y. -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
-TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb banyan_tb banyan_mem_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb complex_mul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb banyan_tb banyan_mem_tb
 
 TGT_ := $(TEST_BENCH)
 

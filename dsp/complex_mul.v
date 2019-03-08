@@ -1,6 +1,6 @@
 `timescale 1ns / 1ns
 
-module vectormul(
+module complex_mul(
 	input clk,  // Rising edge clock input; all logic is synchronous in this domain
 	input gate_in,  // Flag marking input data valid
 	input signed [17:0] x,  // Multiplicand, signed, time-interleaved real and imaginary

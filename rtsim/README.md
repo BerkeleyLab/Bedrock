@@ -4,7 +4,7 @@
 
 *(work-in-progress)*
 
-This code is supposed to be approachable.  There are 885 non-blank non-comment lines of *Verilog* (and references to a few other routines in `bedrock: cordicg vectormul dpram reg_delay`), and 286 of those lines are in test benches.  That *Verilog* also has 432 lines with comments!
+This code is supposed to be approachable.  There are 885 non-blank non-comment lines of *Verilog* (and references to a few other routines in `bedrock: cordicg complex_mul dpram reg_delay`), and 286 of those lines are in test benches.  That *Verilog* also has 432 lines with comments!
 
 There are waveforms to view, and most importantly, it comes with unit tests that exercise the code under realistic conditions -- see below.
 
@@ -24,7 +24,7 @@ There are waveforms to view, and most importantly, it comes with unit tests that
 > > > > `lp_pair`:    Time-interleaved pair of low-pass filters\
 > > > > `pair_couple`:  Applies a pair of complex couplings to an interleaved IQ data stream\
 > > > > `cordicg`:     Bare CORDIC algorithm\
-> > > > `vectormul`:   Multiply two IQ streams\
+> > > > `complex_mul`:   Multiply two IQ streams\
 > > > > `mag_square`: Magnitude-squared of an IQ stream
 
 You can see some of this visually in the doc directory's `block.eps` and `block_mode.eps` (*xcircuit* files, that can be viewed with standard *PostScript* tools like *gv*).  The physical system that the Verilog attempts to model is described in `physics.tex`; convert that to PDF for viewing with "make physics.pdf".

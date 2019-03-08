@@ -84,9 +84,9 @@ end
 
 // Complex multiply, same as matrix [-d k;-k -d]
 wire signed [17:0] mul_result;
-vectormul mul(.clk(clk), .gate_in(1'b1), .iq(iq),
+complex_mul mul(.clk(clk), .gate_in(1'b1), .iq(iq),
 	.x(ab_out[35:18]), .y(wd_out), .z(mul_result));
-// I want to take SAT out of vectormul to save a useless
+// I want to take SAT out of complex_mul to save a useless
 // pipelining step or two, see sub_mul in lp1.v
 
 // Add in the drive term, itself a dot-product of excitation sources
