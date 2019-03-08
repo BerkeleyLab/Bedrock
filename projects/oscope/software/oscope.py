@@ -68,6 +68,7 @@ def run(ip_addr='192.168.1.121',
         ax.set_ylabel('ADC data scaled to +/-1v')
         ax.set_xlabel('Time[us]')
         ax.legend()
+        ax.set_yscale('log')
         return line
 
     lines = [

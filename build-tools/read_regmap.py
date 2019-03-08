@@ -72,7 +72,8 @@ def get_reg_info(regmap, hierarchy, name):
                 n = hierarchy[1]
                 p = '_' if type(n) is int else ''
                 for h in H[1]:
-                    reg_names_2 = [x for x in reg_names_1 if (h + p + str(n)) in x]
+                    reg_names_2 = [
+                        x for x in reg_names_1 if (h + p + str(n)) in x]
                     if len(reg_names_2) == 1:
                         return add_name(regmap, reg_names_2[0])
                     elif len(reg_names_2) > 1:
@@ -95,7 +96,7 @@ def get_write_address(name, regmap, hierarchy=[]):
             pass
         offset = 0
         if name.endswith(']'):
-            x = re.search('^(\w+)\s*\[(\d+)\]', name)
+            x = re.search(r'^(\w+)\s*\[(\d+)\]', name)
             if x:
                 name, offset = x.group(1), int(x.group(2))
         r = get_reg_info(regmap, hierarchy, name)
@@ -108,6 +109,7 @@ def get_write_address(name, regmap, hierarchy=[]):
 def get_read_address(name, regmap, hierarchy=[]):
     return get_write_address(name, regmap, hierarchy)
 
+
 if __name__ == '__main__':
     # test case
     blah = {'bl': 'ah'}
@@ -115,4 +117,4 @@ if __name__ == '__main__':
     print((get_reg_info({"station_cav4_elec_modulo": blah}, [], 'ulo')))
     print((get_reg_info({"station_cav4_elec_modulo": blah}, [], 'modulo')))
     print((get_reg_info({"station_cav4_elec_modulo": blah,
-                        "station_0_cav4_elec_modulo": blah}, [], 'o')))
+                         "station_0_cav4_elec_modulo": blah}, [], 'o')))

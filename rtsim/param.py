@@ -13,7 +13,7 @@ sys.path.append(
 
 try:
     regmap_file = sys.argv[1].strip()
-except Exception as e:
+except Exception:
     regmap_file = "regmap_gen_vmod1.json"
 
 # Gang humbly requests that Q_1 be renamed Q_drive, and Q_2 as Q_probe.

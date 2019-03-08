@@ -162,7 +162,7 @@ class c_prc(c_llrf_bmb7):
                 return False
             print(('Read SN: "%s"' % snread))
             self.sn = snread
-            m = re.match('LBNL DIGITIZER V1.\d SN +(\d+)', snread)
+            m = re.match(r'LBNL DIGITIZER V1.\d SN +(\d+)', snread)
             if not m:
                 try:
                     if True:

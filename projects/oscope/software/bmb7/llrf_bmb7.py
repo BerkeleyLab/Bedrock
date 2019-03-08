@@ -119,7 +119,7 @@ class c_llrf_bmb7():
             try:
                 if isinstance(self.regmap[key]['base_addr'], str):
                     self.regmap[key]['base_addr'] = int(self.regmap[key]['base_addr'], 0)
-            except:
+            except Exception:
                 pass
 
         # Setting the old regmaps to null; Forcing an error on access

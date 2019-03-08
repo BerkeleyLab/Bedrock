@@ -14,10 +14,10 @@ class c_lmk01801:
             CLKout0_3_PD="0",
             POWERDOWN="0",
             RESET="0"):
-        return eval('0b' + "01001000" + CLKin1_MUX + CLKin1_DIV + CLKin0_MUX +
-                    CLKin0_DIV + "11" + CLKin1_BUF_TYPE + CLKin0_BUF_TYPE +
-                    CLKout12_13_PD + CLKout8_11_PD + CLKout4_7_PD +
-                    CLKout0_3_PD + POWERDOWN + RESET)
+        return eval('0b' + "01001000" + CLKin1_MUX + CLKin1_DIV + CLKin0_MUX
+                    + CLKin0_DIV + "11" + CLKin1_BUF_TYPE + CLKin0_BUF_TYPE
+                    + CLKout12_13_PD + CLKout8_11_PD + CLKout4_7_PD
+                    + CLKout0_3_PD + POWERDOWN + RESET)
 
     def R1(
             self,

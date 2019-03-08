@@ -90,7 +90,7 @@ def config_romx(dsp_flavor=0, tool_rev=0, board_type=0):
     version_number = 0
     try:
         git_version = subprocess.check_output(['git', 'describe', '--tag'])
-        m = re.match('\D*(\d*)\.[\s\S]*', git_version)
+        m = re.match(r'\D*(\d*)\.[\s\S]*', git_version)
         if m:
             version_number = eval(m.group(1))
     except subprocess.CalledProcessError:
