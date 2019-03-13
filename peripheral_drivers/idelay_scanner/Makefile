@@ -1,8 +1,6 @@
 VERILOG = iverilog$(ICARUS_SUFFIX) -DSIMULATE -Wall -Wno-timescale
-VVP = vvp$(ICARUS_SUFFIX) -n
+VVP = vvp$(ICARUS_SUFFIX) -N
 GTKWAVE = gtkwave
-AWK = awk
-TESTCODE = testcode.awk
 VVP_FLAGS = $(VVP_FLAGS_$@)
 DSP_DIR = ../../dsp
 
@@ -15,8 +13,8 @@ DSP_DIR = ../../dsp
 %.vcd: %_tb
 	$(VVP) $< $(VVP_FLAGS) +vcd
 
-%_check: %_tb $(TESTCODE)
-	$(VVP) $< $(VVP_FLAGS) | $(AWK) -f $(filter %.awk, $^)
+%_check: %_tb
+	$(VVP) $< $(VVP_FLAGS)
 
 %_view: %.vcd %.sav
 	$(GTKWAVE) $^
