@@ -1,8 +1,8 @@
-proc create_gtx_ethernet { module_name } {
+proc create_gtx_chitchat {module_name} {
    create_ip -name gtwizard -vendor xilinx.com -library ip -module_name $module_name
 
    set_property -dict {
-       CONFIG.identical_val_tx_line_rate       {1.25}
+       CONFIG.identical_val_tx_line_rate       {2.5}
        CONFIG.gt1_val                          {false}
        CONFIG.gt0_val                          {true}
        CONFIG.gt0_val_drp_clock                {50}
@@ -15,22 +15,25 @@ proc create_gtx_ethernet { module_name } {
        CONFIG.gt0_val_rxbuf_en                 {true}
        CONFIG.gt0_val_port_rxslide             {false}
        CONFIG.gt0_usesharedlogic               {0}
-       CONFIG.identical_val_rx_line_rate       {1.25}
+       CONFIG.identical_val_rx_line_rate       {2.5}
        CONFIG.gt_val_tx_pll                    {CPLL}
        CONFIG.gt_val_rx_pll                    {CPLL}
        CONFIG.identical_val_tx_reference_clock {125.000}
        CONFIG.identical_val_rx_reference_clock {125.000}
-       CONFIG.gt0_val_tx_line_rate             {1.25}
-       CONFIG.gt0_val_tx_data_width            {20}
+       CONFIG.gt0_val_encoding                 {8B/10B}
+       CONFIG.gt0_val_decoding                 {8B/10B}
+       CONFIG.gt0_val_port_tx8b10ben           {false}
+       CONFIG.gt0_val_tx_line_rate             {2.5}
+       CONFIG.gt0_val_tx_data_width            {16}
        CONFIG.gt0_val_tx_int_datawidth         {20}
        CONFIG.gt0_val_tx_reference_clock       {125.000}
-       CONFIG.gt0_val_rx_line_rate             {1.25}
-       CONFIG.gt0_val_rx_data_width            {20}
+       CONFIG.gt0_val_rx_line_rate             {2.5}
+       CONFIG.gt0_val_rx_data_width            {16}
        CONFIG.gt0_val_rx_int_datawidth         {20}
        CONFIG.gt0_val_rx_reference_clock       {125.000}
        CONFIG.gt0_val_cpll_fbdiv               {4}
-       CONFIG.gt0_val_cpll_rxout_div           {4}
-       CONFIG.gt0_val_cpll_txout_div           {4}
+       CONFIG.gt0_val_cpll_rxout_div           {2}
+       CONFIG.gt0_val_cpll_txout_div           {2}
        CONFIG.gt0_val_tx_buffer_bypass_mode    {Auto}
        CONFIG.gt0_val_txoutclk_source          {false}
        CONFIG.gt0_val_rx_buffer_bypass_mode    {Auto}

@@ -1,6 +1,16 @@
 ## MGT Mapping from BMB7_1_r42.pdf
 # set_property -dict "PACKAGE_PIN B12 IOSTANDARD LVCMOS33" [get_ports {K7_QSFP_SDA}]
 # set_property -dict "PACKAGE_PIN B14 IOSTANDARD LVCMOS33" [get_ports {K7_QSFP_SCL}]
+
+# Y4: one-time programmable oscillator (SIT9122) - Defaults to 125 MHz
+set_property -dict "PACKAGE_PIN D6 IOSTANDARD LVDS" [get_ports {K7_MGTREFCLK0_P}]
+set_property -dict "PACKAGE_PIN D5 IOSTANDARD LVDS" [get_ports {K7_MGTREFCLK0_N}]
+
+set_property PACKAGE_PIN F6 [get_ports {K7_MGTREFCLK1_P}]
+set_property PACKAGE_PIN F5 [get_ports {K7_MGTREFCLK1_N}]
+#create_clock -period 3.200 -name K7_MGTREFCLK0_P -waveform {0.000 1.600} [get_ports K7_MGTREFCLK0_P]
+create_clock -period 8.000 -name K7_MGTREFCLK0_P -waveform {0.000 4.000} [get_ports K7_MGTREFCLK0_P]
+
 # QSFP1 116
 set_property PACKAGE_PIN F2 [get_ports {K7_QSFP1_TX3_P}]
 set_property PACKAGE_PIN F1 [get_ports {K7_QSFP1_TX3_N}]
@@ -18,15 +28,6 @@ set_property PACKAGE_PIN C4 [get_ports {K7_QSFP1_RX0_P}]
 set_property PACKAGE_PIN C3 [get_ports {K7_QSFP1_RX0_N}]
 set_property PACKAGE_PIN B6 [get_ports {K7_QSFP1_RX1_P}]
 set_property PACKAGE_PIN B5 [get_ports {K7_QSFP1_RX1_N}]
-
-# Y4: one-time programmable oscillator (SIT9122) - Defaults to 125 MHz
-set_property PACKAGE_PIN D6 [get_ports {K7_MGTREFCLK0_P}]
-set_property PACKAGE_PIN D5 [get_ports {K7_MGTREFCLK0_N}]
-
-set_property PACKAGE_PIN F6 [get_ports {K7_MGTREFCLK1_P}]
-set_property PACKAGE_PIN F5 [get_ports {K7_MGTREFCLK1_N}]
-#create_clock -period 3.200 -name K7_MGTREFCLK0_P -waveform {0.000 1.600} [get_ports K7_MGTREFCLK0_P]
-create_clock -period 8.000 -name K7_MGTREFCLK0_P -waveform {0.000 4.000} [get_ports K7_MGTREFCLK0_P]
 
 set_property -dict "PACKAGE_PIN  J8 IOSTANDARD LVCMOS25" [get_ports {K7_GTX_REF_CTRL}]
 # set_property -dict "PACKAGE_PIN  C9 IOSTANDARD LVCMOS33" [get_ports {K7_GTX_REF_CTRL}]

@@ -1,4 +1,5 @@
 module ds_clk_buf #(
+   parameter GTX = 0,    // When used to feed a GTX, IBUFDS_GTE2 must be used
    parameter USE_BUF = 0 // 0 - No buffer
                          // 1 - BUFG
                          // 2 - BUFH
@@ -11,11 +12,24 @@ module ds_clk_buf #(
    wire clk_out_i;
 
 `ifndef SIMULATE
-   IBUFDS i_ibufds (
-      .O     (clk_out_i),
-      .I     (clk_p),
-      .IB    (clk_n)
-   );
+
+   generate
+      if (GTX == 0) begin
+         IBUFDS i_ibufds (
+            .O     (clk_out_i),
+            .I     (clk_p),
+            .IB    (clk_n)
+         );
+      end else begin
+         IBUFDS_GTE2 i_ibufds_gte2 (
+            .O     (clk_out_i),
+            .ODIV2 (),
+            .I     (clk_p),
+            .IB    (clk_n),
+            .CEB   (1'b0)
+         );
+      end
+   endgenerate
 `else
    assign clk_out = clk_p;
 `endif

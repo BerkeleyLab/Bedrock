@@ -29,9 +29,9 @@ include $(BS_HARDWARE_DIR)/rules.mk
 include $(BOARD_SUPPORT_DIR)/rules.mk
 include $(BADGER_DIR)/rules.mk
 
-IP_TCL = $(FPGA_FAMILY_GTX_DIR)/gtx_eth_clk.tcl $(FPGA_FAMILY_GTX_DIR)/gtx_ethernet.tcl
+IP_TCL = gtx_comms_top.tcl
 
-VERILOG_DEFINE_FLAGS = "-DGT0_ENABLE"
+VERILOG_DEFINE_FLAGS =-DGT0_ENABLE -DGT1_ENABLE
 
 SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
 
