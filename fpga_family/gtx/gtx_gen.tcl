@@ -16,7 +16,11 @@ proc add_gtx_protocol {quad_num gtx_num protocol} {
 
    set module_name "q${quad_num}_gtx${gtx_num}"
 
-   puts "Configuring ${module_name} for $protocol"
+   # Enable GTX in QGTXWRAP.v by setting define
+   set def_list {}
+   lappend def_list "GT${gtx_num}_ENABLE"
+
+   puts "\[GTX_GEN\] Configuring ${module_name} for $protocol"
    switch -nocase $protocol {
       "ethernet" {
          create_gtx_ethernet $module_name
@@ -26,14 +30,29 @@ proc add_gtx_protocol {quad_num gtx_num protocol} {
       }
       "chitchat" {
          create_gtx_chitchat $module_name
+
+         # Set 8b10b define to include required ports in GTX instance
+         lappend def_list "GT${gtx_num}_8B10B_EN"
+      }
+      "bsa_mps" {
+         # TODO
+
+         # Enable usage of GTREFCLK1
+         lappend def_list "GTREFCLK1_EN"
       }
       "default" {
-         puts "Protocol $protocol not recognized. Ignoring..."
+         puts "\[GTX_GEN\] Protocol $protocol not recognized. Ignoring..."
       }
    }
 
-   # No need to explicitly set GTX location as it can be inferred from PIN constraints
+   # Apply defines
+   puts "\[GTX_GEN\] Adding to define list: $def_list"
 
+   set cur_list [get_property verilog_define [current_fileset]]
+   set def_list [list {*}$def_list {*}$cur_list]
+   set_property verilog_define $def_list [current_fileset]
+
+   # No need to explicitly set GTX location as it can be inferred from PIN constraints
    #set PRIMITIVE_NAME     "GTXE2_CHANNEL"
    #set phys_location  	  "${PRIMITIVE_NAME}_X${quad_num}Y${gtx_num}"
    #set primitive_instance "gtxe2_i"

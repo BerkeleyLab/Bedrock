@@ -131,7 +131,14 @@ proc project_run {verilog_defines} {
     # for picorv32soc
     set baz [string map {"-D" ""} $verilog_defines]
     set args [regexp -all -inline {\S+} $baz]
+
+    # Append to existing defines, if any
+    set cur_list [get_property verilog_define [current_fileset]]
+    set args [list {*}$args {*}$cur_list]
+
     set_property verilog_define $args [current_fileset]
+    puts "DEFINES:"
+    puts [get_property verilog_define [current_fileset]]
 
     # Launch Synthesis
     launch_runs synth_1

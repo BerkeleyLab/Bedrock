@@ -92,17 +92,7 @@ module comms_top
       .clk_out (sys_clk)
    );
 
-   // Generate single-ended clock from GTREFCLK0
-   ds_clk_buf #(
-      .GTX (1)) // Use GTX-specific primitive
-   i_ds_gtrefclk0 (
-      .clk_p   (gtrefclk0_p),
-      .clk_n   (gtrefclk0_n),
-      .clk_out (gtrefclk0)
-   );
-
-   // Pass 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
-
+   // Route 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
    // Ethernet clock managers
    gtx_eth_clks i_gtx_eth_clks_tx (
       .gtx_out_clk (gtx0_tx_out_clk), // From transceiver
@@ -124,6 +114,7 @@ module comms_top
 
    // Instantiate wizard-generated GTX transceiver
    // Configured by gtx_ethernet.tcl and gtx_gen.tcl
+   // Refer to qgtx_wrap_pack.vh for port map
 
    wire [GTX_ETH_WIDTH-1:0] gtx_rxd, gtx_txd;
 
@@ -138,25 +129,17 @@ module comms_top
    wire [2:0] gt1_rxbufstatus;
    wire [1:0] gt1_txbufstatus;
 
-   //`define Q1_ENABLE
-   `define GT0_ENABLE
-   `define GT1_ENABLE
-   //`define GT2_ENABLE
-   //`define GT3_ENABLE
-   //`define GTREFCLK1
-
    qgtx_wrap #(
-      .GT0_WI (GTX_ETH_WIDTH),
-      .GT1_WI (GTX_CC_WIDTH))
+      .GT0_WI       (GTX_ETH_WIDTH),
+      .GT1_WI       (GTX_CC_WIDTH))
    i_qgtx_wrap (
       // Common Pins
       .drpclk_in               (sys_clk),
       .soft_reset              (1'b0),
-      .gtrefclk0               (gtrefclk0),
-      .gtrefclk1               (1'b0),
-      .gt_txrx_resetdone       (gt_txrx_resetdone),
-      .gt_cpll_locked          (gt_cpll_locked),
+      .gtrefclk0_n             (gtrefclk0_n),
+      .gtrefclk0_p             (gtrefclk0_p),
 
+`ifndef SIMULATE
       // GTX0 - Ethernet
       .gt0_rxoutclk_out        (gtx0_rx_out_clk),
       .gt0_rxusrclk_in         (gtx0_rx_usr_clk),
@@ -194,8 +177,14 @@ module comms_top
       .gt1_txp_out             (K7_QSFP1_TX1_P),
       .gt1_rxfsm_resetdone_out (gt1_rxfsm_resetdone),
       .gt1_txfsm_resetdone_out (gt1_txfsm_resetdone),
+      .gt1_rxcharisk_out       (),
+      .gt1_txcharisk_in        (2'b0),
       .gt1_rxbufstatus         (gt1_rxbufstatus),
-      .gt1_txbufstatus         (gt1_txbufstatus)
+      .gt1_txbufstatus         (gt1_txbufstatus),
+`endif
+
+      .gt_txrx_resetdone       (gt_txrx_resetdone),
+      .gt_cpll_locked          (gt_cpll_locked)
    );
 
 

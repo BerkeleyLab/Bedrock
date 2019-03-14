@@ -5,85 +5,7 @@
 // Low-level wrapper for Quad GTX with configurable number of GTX instances (through defines)
 //
 // ------------------------------------
-
-`define GTi_PORTS(GT, DWI) output           ``GT``_rxoutclk_out,\
-                           input            ``GT``_rxusrclk_in,\
-                           input            ``GT``_rxusrclk2_in,\
-                           output           ``GT``_txoutclk_out,\
-                           input            ``GT``_txusrclk_in,\
-                           input            ``GT``_txusrclk2_in,\
-                           input            ``GT``_rxusrrdy_in,\
-                           output [DWI-1:0] ``GT``_rxdata_out,\
-                           input            ``GT``_txusrrdy_in,\
-                           input  [DWI-1:0] ``GT``_txdata_in,\
-                           input            ``GT``_rxn_in,\
-                           input            ``GT``_rxp_in,\
-                           output           ``GT``_txn_out,\
-                           output           ``GT``_txp_out,\
-                           output           ``GT``_rxfsm_resetdone_out,\
-                           output           ``GT``_txfsm_resetdone_out,\
-                           output [2:0]     ``GT``_rxbufstatus,\
-                           output [1:0]     ``GT``_txbufstatus,
-
-`define GTi_WIRES(GT) wire ``GT``_cpll_locked, ``GT``_txresetdone, ``GT``_rxresetdone,\
-                           ``GT``_txoutclk_out_l, ``GT``_rxoutclk_out_l;
-
-`define GTi_PORT_MAP(GT) .sysclk_in                   (drpclk_in),\
-                         .soft_reset_tx_in            (soft_reset),\
-                         .soft_reset_rx_in            (soft_reset),\
-                         .dont_reset_on_data_error_in (1'b0),\
-                         .gt0_gtrefclk0_in            (gtrefclk0),\
-                         .gt0_gtrefclk1_in            (gtrefclk1),\
-                         .gt0_tx_fsm_reset_done_out   (``GT``_txfsm_resetdone_out),\
-                         .gt0_rx_fsm_reset_done_out   (``GT``_rxfsm_resetdone_out),\
-                         .gt0_data_valid_in           (1'b1),\
-                         .gt0_cpllfbclklost_out       (),\
-                         .gt0_cplllock_out            (``GT``_cpll_locked),\
-                         .gt0_cplllockdetclk_in       (drpclk_in),\
-                         .gt0_cpllreset_in            (gt_cpll_reset),\
-                         .gt0_drpaddr_in              (9'b0),\
-                         .gt0_drpclk_in               (drpclk_in),\
-                         .gt0_drpdi_in                (16'b0),\
-                         .gt0_drpdo_out               (),\
-                         .gt0_drpen_in                (1'b0),\
-                         .gt0_drprdy_out              (),\
-                         .gt0_drpwe_in                (1'b0),\
-                         .gt0_dmonitorout_out         (),\
-                         .gt0_eyescanreset_in         (1'b0),\
-                         .gt0_rxuserrdy_in            (``GT``_rxusrrdy_in),\
-                         .gt0_eyescandataerror_out    (),\
-                         .gt0_eyescantrigger_in       (1'b0),\
-                         .gt0_rxusrclk_in             (``GT``_rxusrclk_in),\
-                         .gt0_rxusrclk2_in            (``GT``_rxusrclk2_in),\
-                         .gt0_rxdata_out              (``GT``_rxdata_out),\
-                         .gt0_gtxrxp_in               (``GT``_rxp_in),\
-                         .gt0_gtxrxn_in               (``GT``_rxn_in),\
-                         .gt0_rxbufstatus_out         (``GT``_rxbufstatus),\
-                         .gt0_rxdfelpmreset_in        (1'b0),\
-                         .gt0_rxmonitorout_out        (),\
-                         .gt0_rxmonitorsel_in         (1'b0),\
-                         .gt0_rxoutclk_out            (``GT``_rxoutclk_out_l),\
-                         .gt0_rxoutclkfabric_out      (),\
-                         .gt0_gtrxreset_in            (gt_txrx_reset),\
-                         .gt0_rxpmareset_in           (gt_txrx_reset),\
-                         .gt0_rxresetdone_out         (``GT``_rxresetdone),\
-                         .gt0_gttxreset_in            (gt_txrx_reset),\
-                         .gt0_txuserrdy_in            (``GT``_txusrrdy_in),\
-                         .gt0_txusrclk_in             (``GT``_txusrclk_in),\
-                         .gt0_txusrclk2_in            (``GT``_txusrclk2_in),\
-                         .gt0_txbufstatus_out         (``GT``_txbufstatus),\
-                         .gt0_txdata_in               (``GT``_txdata_in),\
-                         .gt0_gtxtxn_out              (``GT``_txn_out),\
-                         .gt0_gtxtxp_out              (``GT``_txp_out),\
-                         .gt0_txoutclk_out            (``GT``_txoutclk_out_l),\
-                         .gt0_txoutclkfabric_out      (),\
-                         .gt0_txoutclkpcs_out         (),\
-                         .gt0_txresetdone_out         (``GT``_txresetdone),\
-                         .gt0_qplloutclk_in           (1'b0),\
-                         .gt0_qplloutrefclk_in        (1'b0)
-
-`define GTX_OUTCLK_BUF(GT) BUFG i_``GT``_txoutclk_buf (.I (``GT``_txoutclk_out_l), .O (``GT``_txoutclk_out));\
-                           BUFG i_``GT``_rxoutclk_buf (.I (``GT``_rxoutclk_out_l), .O (``GT``_rxoutclk_out));
+`include "qgtx_wrap_pack.vh"
 
 module qgtx_wrap # (
    parameter CPLL_RESET_WAIT = 60, // In clock cycles. Actual time must be >= 500 ns
@@ -94,28 +16,35 @@ module qgtx_wrap # (
 )(
    input         drpclk_in,
    input         soft_reset,
-   input         gtrefclk0,
-   input         gtrefclk1,
-`ifdef GT0_ENABLE
-   `GTi_PORTS(gt0, GT0_WI)
+   input         gtrefclk0_n,
+   input         gtrefclk0_p,
+`ifdef GTREFCLK1_EN
+   input         gtrefclk1_n,
+   input         gtrefclk1_p,
 `endif
-`ifdef GT1_ENABLE
-   `GTi_PORTS(gt1, GT1_WI)
-`endif
-`ifdef GT2_ENABLE
-   `GTi_PORTS(gt2, GT2_WI)
-`endif
-`ifdef GT3_ENABLE
-   `GTi_PORTS(gt3, GT3_WI)
+
+`ifndef SIMULATE
+   `ifdef GT0_ENABLE
+   `GTi_PORTS(0, GT0_WI)
+   `endif
+   `ifdef GT1_ENABLE
+   `GTi_PORTS(1, GT1_WI)
+   `endif
+   `ifdef GT2_ENABLE
+   `GTi_PORTS(2, GT2_WI)
+   `endif
+   `ifdef GT3_ENABLE
+   `GTi_PORTS(3, GT3_WI)
+   `endif
 `endif
    output        gt_cpll_locked,
    output        gt_txrx_resetdone
 );
 
-`ifdef GT0_ENABLE `GTi_WIRES(gt0) `endif
-`ifdef GT1_ENABLE `GTi_WIRES(gt1) `endif
-`ifdef GT2_ENABLE `GTi_WIRES(gt2) `endif
-`ifdef GT3_ENABLE `GTi_WIRES(gt3) `endif
+`ifdef GT0_ENABLE `GTi_WIRES(0) `endif
+`ifdef GT1_ENABLE `GTi_WIRES(1) `endif
+`ifdef GT2_ENABLE `GTi_WIRES(2) `endif
+`ifdef GT3_ENABLE `GTi_WIRES(3) `endif
 
    // Transceiver reset sequence:
    // 1. Reset TX and RX PLLs and wait for lock
@@ -197,6 +126,28 @@ module qgtx_wrap # (
    assign gt_cpll_locked    = gt_cpll_locked_l;
    assign gt_txrx_resetdone = gt_txrx_resetdone_r;
 
+   // Generate single-ended clocks from differential inputs
+   // This conversion must use a transceiver-specific Diff-to-Single buffer
+   wire gtrefclk0, gtrefclk1;
+
+   ds_clk_buf #(
+      .GTX (1)) // Use GTX-specific primitive
+   i_ds_gtrefclk0 (
+      .clk_p   (gtrefclk0_p),
+      .clk_n   (gtrefclk0_n),
+      .clk_out (gtrefclk0)
+   );
+
+`ifdef GTREFCLK1_EN
+   ds_clk_buf #(
+      .GTX (1))
+   i_ds_gtrefclk1 (
+      .clk_p   (gtrefclk1_p),
+      .clk_n   (gtrefclk1_n),
+      .clk_out (gtrefclk1)
+   );
+`endif
+
 `ifndef SIMULATE
    // Instantiate wizard-generated Quad GTX
    // Configured by gtx_gen.tcl
@@ -209,34 +160,34 @@ module qgtx_wrap # (
 
    `ifdef GT0_ENABLE
       `GTX_MODULE(0) i_gtx0 (
-         `GTi_PORT_MAP (gt0)
+         `GTi_PORT_MAP (0)
       );
 
-      `GTX_OUTCLK_BUF(gt0)
+      `GTX_OUTCLK_BUF(0)
    `endif
 
    `ifdef GT1_ENABLE
       `GTX_MODULE(1) i_gtx1 (
-         `GTi_PORT_MAP (gt1)
+         `GTi_PORT_MAP (1)
       );
 
-      `GTX_OUTCLK_BUF(gt1)
+      `GTX_OUTCLK_BUF(1)
    `endif
 
    `ifdef GT2_ENABLE
       `GTX_MODULE(2) i_gtx2 (
-         `GTi_PORT_MAP (gt2)
+         `GTi_PORT_MAP (2)
       );
 
-      `GTX_OUTCLK_BUF(gt2)
+      `GTX_OUTCLK_BUF(2)
    `endif
 
    `ifdef GT3_ENABLE
       `GTX_MODULE(3) i_gtx3 (
-         `GTi_PORT_MAP (gt3)
+         `GTi_PORT_MAP (3)
       );
 
-      `GTX_OUTCLK_BUF(gt3)
+      `GTX_OUTCLK_BUF(3)
    `endif
 
 `endif // `ifndef SIMULATE
