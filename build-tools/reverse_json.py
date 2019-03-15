@@ -7,10 +7,14 @@ entry by peeking at wire declarations in the Verilog.
 '''
 import re
 from sys import stderr
-# maketrans only works like this in python2
-# from builtins.str import maketrans
-from string import maketrans
-trantab = maketrans("[]", "__")
+import sys
+# feel free to find a portable way to do this
+if sys.version_info > (3,0):
+    trantab = {"[": "_", "]": "_"}
+else:
+   from string import maketrans
+   trantab = maketrans("[]", "__")
+
 wire_info = {}
 addr_found = {}
 name_found = {}
