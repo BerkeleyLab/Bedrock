@@ -42,6 +42,7 @@ VERILOG_RUN = $(VVP) $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@.$$$$ $<
+VERILOG_E = $(VERILOG) -E $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o $@ $<
 FMC_MAP = awk -F\" 'NR==FNR{a[$$2]=$$4;next}$$4 in a{printf "NET %-15s LOC = %-4s | IOSTANDARD = %10s; \# %s\n",$$2,a[$$4],$$6,$$4}'
 XDC_MAP = awk -F"[ \"\t]+" 'NR==FNR{gsub(/]/,"",$$8);a[$$8]=$$4;next}($$3 in a){printf "set_property -dict \"PACKAGE_PIN %-4s IOSTANDARD %s\" [get_ports %s]\n",a[$$3], $$4, $$2}'
 ISE_SYNTH = bash $(BUILD_DIR)/xil_syn
@@ -74,10 +75,13 @@ BIT2RBF = bit2rbf $@ < $<
 %_tb: %_tb.v %_tb_auto
 	$(VERILOG_TB)
 
-%_tb_auto: $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh %_auto
+%_tb_auto: %_tb.v $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh %_auto
 	@echo .
 
-%_auto: $(AUTOGEN_DIR)/addr_map_%.vh $(AUTOGEN_DIR)/%_auto.vh
+%_EXPAND.v: %.v %_auto
+	$(VERILOG_E)
+
+%_auto: %.v $(AUTOGEN_DIR)/addr_map_%.vh $(AUTOGEN_DIR)/%_auto.vh
 	@echo .
 
 %_live: %_tb.v
@@ -196,7 +200,9 @@ $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/config_crunch.py
 #mkdir -p $(IPX_DIR); $(VIVADO_CREATE_IP) $(IP_NAME) $(IPX_DIR) $^
 
 .PHONY: clean
-CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR)
+
+CLEAN += *_EXPAND.v *.pyc
+CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR) __pycache__
 # The "find" commands below (embedded in check_clean) check that the
 # source code satisifies:
 #  no hidden files
