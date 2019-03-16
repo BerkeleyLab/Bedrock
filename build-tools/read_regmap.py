@@ -13,7 +13,7 @@ def get_map(f='regmap_gen_vmod1.json'):
         ll = li.strip()
         ll = ll.split()
         if len(ll) != 2:
-            print("Something wrong with the line width: %d", ll)
+            print("Something wrong with the line width: %d" % ll)
             exit()
         else:
             try:
