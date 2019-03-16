@@ -1,14 +1,14 @@
 `timescale 1ns / 1ns
 
-module vectormul_tb;
+module complex_mul_tb;
 
 reg clk;
 integer cc;
 reg fail=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
-		$dumpfile("vectormul.vcd");
-		$dumpvars(5,vectormul_tb);
+		$dumpfile("complex_mul.vcd");
+		$dumpvars(5,complex_mul_tb);
 	end
 	for (cc=0; cc<50; cc=cc+1) begin
 		clk=0; #5;
@@ -42,7 +42,7 @@ always @(posedge clk) begin
 end
 
 wire g_out;
-vectormul dut(.clk(clk), .gate_in(ena), .x(x), .y(y), .iq(iq&ena),
+complex_mul dut(.clk(clk), .gate_in(ena), .x(x), .y(y), .iq(iq&ena),
 	.z(z), .gate_out(g_out));
 
 reg signed [35:0] frd, zx;

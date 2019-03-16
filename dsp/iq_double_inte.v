@@ -12,10 +12,10 @@ parameter dwo=28;  // data width out
 
 reg signed [dwo-1:0] int1=0, int1_d=0, int2=0, int2_d=0;
 always @(posedge clk) begin
-	int1 <= int1_d + in;
-	int1_d <= int1;
-	int2 <= int2_d + int1;
-	int2_d <= int2;
+	int1 <= int1_d + in;  // Add to the delayed sample
+	int1_d <= int1;  // Delay
+	int2 <= int2_d + int1; // Second addition to further delayed sample
+	int2_d <= int2;  // Delay
 end
 assign out = int2;
 
