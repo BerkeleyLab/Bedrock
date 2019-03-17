@@ -26,10 +26,10 @@ SYNTH = xil_syn
 
 all: llspi_tb
 
-COMMON_HDL = submodules/common-hdl
-PERIPH_HDL = submodules/peripheral-drivers
+COMMON_HDL = ../../../dsp
+PERIPH_HDL = ../../../peripheral_drivers
 
-llspi_tb: llspi.v $(COMMON_HDL)/spi_eater.v $(COMMON_HDL)/shortfifo.v $(PERIPH_HDL)/ad9653_sim.v $(PERIPH_HDL)/ad7794_sim.v
+llspi_tb: llspi.v $(PERIPH_HDL)/spi_eater.v $(COMMON_HDL)/shortfifo.v $(PERIPH_HDL)/ad9653_sim.v $(PERIPH_HDL)/ad7794_sim.v
 
 llspi_in.dat: llspi_in.py
 	python $< > $@
@@ -37,7 +37,7 @@ llspi_in.dat: llspi_in.py
 llspi.vcd llspi_check: llspi_in.dat
 
 # synthesis check, not meant to be useful on hardware
-llspi.bit: llspi.v $(COMMON_HDL)/spi_eater.v $(COMMON_HDL)/shortfifo.v
+llspi.bit: llspi.v $(PERIPH_HDL)/spi_eater.v $(COMMON_HDL)/shortfifo.v
 	arch=s6 $(SYNTH) llspi $^
 	mv _xilinx/$@ .
 
