@@ -22,7 +22,7 @@ parameter sim_length = 250;  // for off-line runs
 reg clk_r, log;
 integer cc;
 integer udp_port;  // non-zero to enable UDP socket mode
-reg [255:0] packet_file;  // file name
+reg [1023:0] packet_file;  // file name, fragile! limited to 128 characters
 integer data_len;
 reg [7:0] in_stream[0:msg_len-1];  // file contents
 initial begin
