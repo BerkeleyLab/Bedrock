@@ -1,0 +1,108 @@
+##########################   Clocks   #####################################
+
+###############################################################################
+### BMB7 R0
+#NET ext_clk           LOC = D10 | IOSTANDARD = LVCMOS33; # S6_TO_K7_CLK_1
+
+# Hack to bypass a routing error in the board - P terminal only!
+#NET ext_clk CLOCK_DEDICATED_ROUTE = FALSE;
+
+###############################################################################
+### BMB7 R1
+NET ext_clk           LOC = E10 | IOSTANDARD = LVCMOS33; # S6_TO_K7_CLK_1
+
+NET "clk_pll" TNM_NET = "clk_master";
+TIMESPEC "TS_clk_master" = PERIOD "clk_master" 20 ns HIGH 50%;
+
+##########################   LEDs   #######################################
+
+# Reversed to match board
+NET leds<0>                 LOC = L19  | IOSTANDARD = LVCMOS33;  # "led top r"
+NET leds<1>                 LOC = L18  | IOSTANDARD = LVCMOS33;  # "led top g"
+NET leds<2>                 LOC = L20  | IOSTANDARD = LVCMOS33;  # "led top b"
+NET leds<3>                 LOC = M17  | IOSTANDARD = LVCMOS33;  # "led bottom r"
+NET leds<4>                 LOC = L17  | IOSTANDARD = LVCMOS33;  # "led bottom g"
+NET leds<5>                 LOC = M16  | IOSTANDARD = LVCMOS33;  # "led bottom b"
+
+# Configuration and DAQ channels
+NET k7_daq_data_out LOC = H8 | IOSTANDARD = LVCMOS33 | DRIVE = 4; # 2
+NET k7_configuration_data_out LOC = J8 | IOSTANDARD = LVCMOS33 | DRIVE = 4; # 0
+#NET k7_daq_data_in LOC = G10 | IOSTANDARD = LVCMOS33; # 3
+NET k7_configuration_data_in LOC = H9 | IOSTANDARD = LVCMOS33; # 1
+
+# UART RX forwarding
+NET uart_rx<0> LOC = D8 | IOSTANDARD = LVCMOS33; # 10
+NET uart_rx<1> LOC = F8 | IOSTANDARD = LVCMOS33; # 11
+
+######################### Transmitter I/O ##################################
+
+NET transmitter_s00 LOC = C14 | IOSTANDARD = LVCMOS33 | DRIVE = 4; # K7 external I/O 0
+NET transmitter_s01 LOC = C13 | IOSTANDARD = LVCMOS33 | DRIVE = 4; # K7 external I/O 1
+NET transmitter_s10 LOC = D14 | IOSTANDARD = LVCMOS33 | DRIVE = 4; # K7 external I/O 2
+NET transmitter_s11 LOC = F14 | IOSTANDARD = LVCMOS33 | DRIVE = 4; # K7 external I/O 3
+
+######################### FMC I/O ####################################
+
+NET bottom_fmc_adc_sdi<*> IOSTANDARD = LVCMOS18 | DRIVE = 4;
+NET bottom_fmc_adc_sdo<*> IOSTANDARD = LVCMOS18 | DRIVE = 4;
+
+NET top_fmc_adc_sdi<*> IOSTANDARD = LVCMOS18 | DRIVE = 4;
+NET top_fmc_adc_sdo<*> IOSTANDARD = LVCMOS18 | DRIVE = 4;
+
+NET bottom_fmc_adc_clk LOC = AA3 | IOSTANDARD = LVCMOS18 | DRIVE = 4;
+NET bottom_fmc_adc_cnv LOC = AA2 | IOSTANDARD = LVCMOS18 | DRIVE = 4;
+
+NET top_fmc_adc_clk LOC = R21 | IOSTANDARD = LVCMOS18 | DRIVE = 4;
+NET top_fmc_adc_cnv LOC = P21 | IOSTANDARD = LVCMOS18 | DRIVE = 4;
+
+NET bottom_fmc_adc_sdi<0>  LOC = V19;
+NET bottom_fmc_adc_sdi<1>  LOC = W15;
+NET bottom_fmc_adc_sdi<2>  LOC = V16;
+NET bottom_fmc_adc_sdi<3>  LOC = W14;
+NET bottom_fmc_adc_sdi<4>  LOC = AD20;
+NET bottom_fmc_adc_sdi<5>  LOC = AF20;
+NET bottom_fmc_adc_sdi<6>  LOC = AF17;
+NET bottom_fmc_adc_sdi<7>  LOC = AE15;
+NET bottom_fmc_adc_sdi<8>  LOC = Y5;
+NET bottom_fmc_adc_sdi<9>  LOC = W5;
+NET bottom_fmc_adc_sdi<10> LOC = W6;
+NET bottom_fmc_adc_sdi<11> LOC = AF3;
+
+NET top_fmc_adc_sdi<0>  LOC = B21; # 33N
+NET top_fmc_adc_sdi<1>  LOC = B22; # 30P
+NET top_fmc_adc_sdi<2>  LOC = B20; # 32P
+NET top_fmc_adc_sdi<3>  LOC = C22; # 31N
+NET top_fmc_adc_sdi<4>  LOC = D26; # 25P
+NET top_fmc_adc_sdi<5>  LOC = H24; # 22N
+NET top_fmc_adc_sdi<6>  LOC = D25; # 26N
+NET top_fmc_adc_sdi<7>  LOC = F24; # 23N
+NET top_fmc_adc_sdi<8>  LOC = L25; # 16N
+NET top_fmc_adc_sdi<9>  LOC = K26; # 13N
+NET top_fmc_adc_sdi<10> LOC = K25; # 13P
+NET top_fmc_adc_sdi<11> LOC = R18; # 12P
+
+NET bottom_fmc_adc_sdo<0>  LOC = V18;
+NET bottom_fmc_adc_sdo<1>  LOC = W16;
+NET bottom_fmc_adc_sdo<2>  LOC = V17;
+NET bottom_fmc_adc_sdo<3>  LOC = V14;
+NET bottom_fmc_adc_sdo<4>  LOC = AD14;
+NET bottom_fmc_adc_sdo<5>  LOC = AF19;
+NET bottom_fmc_adc_sdo<6>  LOC = AA15;
+NET bottom_fmc_adc_sdo<7>  LOC = AD15;
+NET bottom_fmc_adc_sdo<8>  LOC = AB2;
+NET bottom_fmc_adc_sdo<9>  LOC = Y6;
+NET bottom_fmc_adc_sdo<10> LOC = AF2;
+NET bottom_fmc_adc_sdo<11> LOC = AE5;
+
+NET top_fmc_adc_sdo<0>  LOC = C21;  # 33P
+NET top_fmc_adc_sdo<1>  LOC = A22;  # 30N
+NET top_fmc_adc_sdo<2>  LOC = A20;  # 32N
+NET top_fmc_adc_sdo<3>  LOC = D21;  # 31P
+NET top_fmc_adc_sdo<4>  LOC = G21; # 21N
+NET top_fmc_adc_sdo<5>  LOC = H23;  # 22P
+NET top_fmc_adc_sdo<6>  LOC = E22;  # 27N
+NET top_fmc_adc_sdo<7>  LOC = G24;  # 23P
+NET top_fmc_adc_sdo<8>  LOC = M24;  # 15P
+NET top_fmc_adc_sdo<9>  LOC = M25;  # 16P
+NET top_fmc_adc_sdo<10> LOC = P18;  # 12N
+NET top_fmc_adc_sdo<11> LOC = N24;  # 9N

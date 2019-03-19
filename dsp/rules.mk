@@ -68,11 +68,11 @@ banyan_check: banyan_tb banyan_ch_find.py $(BUILD_DIR)/testcode.awk
 	$(VERILOG_CHECK)
 	$(VVP) banyan_tb +trace +squelch | $(PYTHON) banyan_ch_find.py
 
-CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat
+CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat *~
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat
 
 CLEAN_DIRS += tt800_ref.dSYM
-CLEAN_DIRS += _xilinx
+CLEAN_DIRS += _xilinx __pycache__
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))

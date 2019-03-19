@@ -37,3 +37,10 @@ badger_test:
   stage: test
   script:
     - make
+
+peripheral_test:
+  before_script:
+    - cd peripheral_drivers/idelay_scanner
+  stage: test
+  script:
+    - make
