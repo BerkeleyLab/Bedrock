@@ -1,0 +1,58 @@
+[timestart] 0
+[size] 1195 648
+[pos] 220 164
+*-9.326305 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] banyan_mem_tb.
+[treeopen] banyan_mem_tb.dut3.
+[treeopen] banyan_mem_tb.dut3.banyan.
+[treeopen] banyan_mem_tb.dut3.banyan.halvsies.
+[treeopen] banyan_mem_tb.dut3.banyan.halvsies.bot.
+[treeopen] banyan_mem_tb.dut3.banyan.halvsies.bot.halvsies.
+[treeopen] banyan_mem_tb.dut3.banyan.halvsies.top.
+[treeopen] banyan_mem_tb.dut3.banyan.halvsies.top.halvsies.
+[treeopen] banyan_mem_tb.dut3.ram_bank[0].
+[sst_width] 265
+[signals_width] 220
+[sst_expanded] 1
+[sst_vpaned_height] 171
+@22
+banyan_mem_tb.banyan_mask[7:0]
+banyan_mem_tb.cx[7:0]
+banyan_mem_tb.adc1[11:0]
+banyan_mem_tb.test[95:0]
+banyan_mem_tb.dut3.banyan_out[95:0]
+@28
+banyan_mem_tb.trig
+banyan_mem_tb.run
+banyan_mem_tb.rollover
+banyan_mem_tb.full
+banyan_mem_tb.ro_done
+banyan_mem_tb.banyan_run_s
+@22
+banyan_mem_tb.status[31:0]
+@200
+-DUT
+@28
+banyan_mem_tb.dut3.time_state[2:0]
+banyan_mem_tb.dut3.done_mask[2:0]
+@22
+banyan_mem_tb.dut3.addr_count[6:0]
+@200
+-ram_bank[0]
+@28
+banyan_mem_tb.dut3.ram_bank[0].ram.wena
+@22
+banyan_mem_tb.dut3.ram_bank[0].ram.addra[3:0]
+banyan_mem_tb.dut3.ram_bank[0].ram.dina[11:0]
+@200
+-banyan
+@28
+banyan_mem_tb.dut3.banyan.data_flip[3:0]
+banyan_mem_tb.dut3.banyan.halvsies.bot.data_flip[1:0]
+banyan_mem_tb.dut3.banyan.halvsies.top.data_flip[1:0]
+banyan_mem_tb.dut3.banyan.halvsies.bot.halvsies.bot.data_flip
+banyan_mem_tb.dut3.banyan.halvsies.bot.halvsies.top.data_flip
+banyan_mem_tb.dut3.banyan.halvsies.top.halvsies.bot.data_flip
+banyan_mem_tb.dut3.banyan.halvsies.top.halvsies.top.data_flip
+[pattern_trace] 1
+[pattern_trace] 0

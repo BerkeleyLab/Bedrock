@@ -1,11 +1,11 @@
 VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -y$(CORDIC_DIR)
 VFLAGS += -I. -y. -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
-TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb complex_mul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb banyan_tb banyan_mem_tb
 
 TGT_ := $(TEST_BENCH)
 
-NO_CHECK = piloop2_check cavity_check lp_check
+NO_CHECK = piloop2_check cavity_check lp_check banyan_mem_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 
 BITS_ := bandpass3.bit
@@ -64,11 +64,15 @@ tt800_ref.dat: tt800_ref
 tt800_check: tt800_tb tt800.dat tt800_ref.dat
 	cmp tt800.dat tt800_ref.dat
 
-CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat
+banyan_check: banyan_tb banyan_ch_find.py $(BUILD_DIR)/testcode.awk
+	$(VERILOG_CHECK)
+	$(VVP) banyan_tb +trace +squelch | $(PYTHON) banyan_ch_find.py
+
+CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat *~
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat
 
 CLEAN_DIRS += tt800_ref.dSYM
-CLEAN_DIRS += _xilinx
+CLEAN_DIRS += _xilinx __pycache__
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))

@@ -13,7 +13,7 @@ sys.path.append(
 
 try:
     regmap_file = sys.argv[1].strip()
-except Exception as e:
+except Exception:
     regmap_file = "regmap_gen_vmod1.json"
 
 # Gang humbly requests that Q_1 be renamed Q_drive, and Q_2 as Q_probe.
@@ -122,7 +122,7 @@ def fix(x, b, msg, opt=None):
     global error_cnt
     ss = 2**(b - 1)
     # cordic_g = 1.646760258
-    if opt is "cordic":
+    if opt == "cordic":
         ss = int(ss / 1.646760258)
     xx = int(x * ss + 0.5)
     # print x,b,ss,xx

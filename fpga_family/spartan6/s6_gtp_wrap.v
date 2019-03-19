@@ -267,8 +267,8 @@ GTPA1_DUAL #(
 	//------------- Transmit Ports - TX Buffer and Phase Alignment -------------
 	.TXBUFSTATUS0          (txbufstatus0_i),
 	.TXBUFSTATUS1          (txbufstatus1_i),
-	.TXDATAWIDTH0	       (2'b00),
-	.TXDATAWIDTH1	       (2'b00),
+	.TXDATAWIDTH0          (2'b00),
+	.TXDATAWIDTH1          (2'b00),
 	// Table 3-1: FPGA TX Interface Ports
 	.GTPCLKOUT0            (gtpclkout0_i),
 	.GTPCLKOUT1            (gtpclkout1_i),

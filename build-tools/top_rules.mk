@@ -159,11 +159,13 @@ else
 	promgen -w -spi -p mcs -o $@ -s 16384 -u 0 $<
 endif
 
+UNISIM_CRAP = 'BUFGCE|IOBUF|BUFG'
+
 $(DEPDIR)/%.bit.d: %.v
-	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && (printf "$*.bit $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
+	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*.bit $@: "; sort -u $@.$$$$ | grep -Ee $(UNISIM_CRAP) -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
 $(DEPDIR)/%_tb.d: %_tb.v
-	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && (printf "$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
+	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
 LB_AW = 10
 EMPTY :=
@@ -200,7 +202,6 @@ $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/config_crunch.py
 #mkdir -p $(IPX_DIR); $(VIVADO_CREATE_IP) $(IP_NAME) $(IPX_DIR) $^
 
 .PHONY: clean
-
 CLEAN += *_EXPAND.v *.pyc
 CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR) __pycache__
 # The "find" commands below (embedded in check_clean) check that the
@@ -211,4 +212,4 @@ CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR) __pycache__
 clean::
 	rm -f $(CLEAN)
 	rm -rf $(CLEAN_DIRS)
-#	sh $(BUILD_DIR)/check_clean
+	sh $(BUILD_DIR)/check_clean

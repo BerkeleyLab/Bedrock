@@ -39,21 +39,21 @@ def file_grab(fname, ix):
     global params
     param_set = [".n_lat(n_lat)"]
     with open(fname, 'r') as f:
-        for l in f.read().split('\n'):
-            if l == "":
+        for li in f.read().split('\n'):
+            if li == "":
                 continue
             # print(l)
-            m = re.search(PORT_N, l)
+            m = re.search(PORT_N, li)
             if m:
                 ll = [m.group(jx) for jx in [1, 2, 3]]
                 p = " ".join([x if x is not None else "" for x in ll])
                 handle_port(plist, p, m.group(4), ix)
-            m = re.search(PORT_0, l)
+            m = re.search(PORT_0, li)
             if m:
                 ll = [m.group(jx) for jx in [1, 2]]
                 p = " ".join([x if x is not None else "" for x in ll])
                 handle_port(plist, p, m.group(3), ix)
-            m = re.search(PARAM, l)
+            m = re.search(PARAM, li)
             if m and m.group(1) != "n_lat":
                 pn = m.group(1)
                 pv = m.group(2)

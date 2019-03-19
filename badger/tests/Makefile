@@ -48,7 +48,7 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 vpath %.v $(BADGER_DIR) $(DSP_DIR) $(HOMELESS_DIR)
 
 # Packet Badger synthesizable code
--include ../rules.mk
+include ../rules.mk
 
 # =====
 # CRC32 code verification
@@ -113,7 +113,7 @@ hello.vcd: udp-vpi.vpi
 hello_run: hello_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=3010 +vcd
 hello.out: hello_tb udp-vpi.vpi xfer1
-	$(VVP) $< +log +packet_file=xfer1 > $@
+	$(VVP) $< +log +packet_file=$(filter %xfer1, $^) > $@
 
 # =====
 # Another tangent for another client
@@ -123,7 +123,7 @@ speed_test.vcd: udp-vpi.vpi
 speed_test_run: speed_test_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=3000 +vcd
 speed_test.out: speed_test_tb udp-vpi.vpi xfer1
-	$(VVP) $< +log +packet_file=xfer1 > $@
+	$(VVP) $< +log +packet_file=$(filter %xfer1, $^) > $@
 
 # =====
 # Another tangent for another client
@@ -135,14 +135,14 @@ mem_gateway.vcd: udp-vpi.vpi
 mem_gateway_run: mem_gateway_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=3000 +vcd
 mem_gateway.out: mem_gateway_tb udp-vpi.vpi xfer1
-	$(VVP) $< +log +packet_file=xfer1 > $@
+	$(VVP) $< +log +packet_file=$(filter %xfer1, $^) > $@
 
 # ====
 # WIP client
 spi_flash_tb: client_sub.v spi_flash.v spi_flash_engine.v reg_delay.v
 VFLAGS_spi_flash_tb = -m ./udp-vpi
-spi_flash.vcd: udp-vpi.vpi
-VCD_ARGS_spi_flash.vcd = +packet_file=spi_flash_pack +data_len=14
+spi_flash.vcd: udp-vpi.vpi spi_flash_pack
+VCD_ARGS_spi_flash.vcd = +packet_file=$(filter %spi_flash_pack, $^) +data_len=14
 spi_flash.out: spi_flash_tb udp-vpi.vpi spi_flash_pack
 	$(VVP) $< +log +packet_file=spi_flash_pack > $@
 
@@ -160,8 +160,9 @@ VCD_ARGS_scanner_check = +packet_file=stests.dat
 # assembled pipeline
 rtefi_pipe_tb: $(RTEFI_V) offline.v
 rtefi_pipe.out: rtefi_pipe_tb udp4.dat
-	$(VVP) $< +trace +packet_file=$(word 2, $^) > $@
-VCD_ARGS_rtefi_pipe.vcd = +packet_file=udp4.dat
+	$(VVP) $< +trace +packet_file=$(filter %udp4.dat, $^) > $@
+rtefi_pipe.vcd: udp4.dat
+VCD_ARGS_rtefi_pipe.vcd = +packet_file=$(filter %udp4.dat, $^)
 
 # =====
 # experimental bitfiles, not for hardware
