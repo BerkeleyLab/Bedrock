@@ -42,7 +42,7 @@ VERILOG_RUN = $(VVP) $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@.$$$$ $<
-VERILOG_E = $(VERILOG) -E $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o $@ $<
+VERILOG_E = $(VERILOG) -E ${VFLAGS} $(VFLAGS_DEP) -o $@ `cat $(DEPDIR)/$*_tb.dd`
 FMC_MAP = awk -F\" 'NR==FNR{a[$$2]=$$4;next}$$4 in a{printf "NET %-15s LOC = %-4s | IOSTANDARD = %10s; \# %s\n",$$2,a[$$4],$$6,$$4}'
 XDC_MAP = awk -F"[ \"\t]+" 'NR==FNR{gsub(/]/,"",$$8);a[$$8]=$$4;next}($$3 in a){printf "set_property -dict \"PACKAGE_PIN %-4s IOSTANDARD %s\" [get_ports %s]\n",a[$$3], $$4, $$2}'
 ISE_SYNTH = bash $(BUILD_DIR)/xil_syn
@@ -78,8 +78,8 @@ BIT2RBF = bit2rbf $@ < $<
 %_tb_auto: %_tb.v $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh %_auto
 	@echo .
 
-%_EXPAND.v: %.v %_auto
-	$(VERILOG_E)
+%_EXPAND.v: %.v %_auto $(DEPDIR)/%_tb.dd
+	cat $(DEPDIR)/$*_tb.dd && $(VERILOG_E)
 
 %_auto: %.v $(AUTOGEN_DIR)/addr_map_%.vh $(AUTOGEN_DIR)/%_auto.vh
 	@echo .
@@ -163,6 +163,9 @@ UNISIM_CRAP = 'BUFGCE|IOBUF|BUFG'
 
 $(DEPDIR)/%.bit.d: %.v
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*.bit $@: "; sort -u $@.$$$$ | grep -Ee $(UNISIM_CRAP) -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
+
+$(DEPDIR)/%_tb.dd: %_tb.v
+	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( sort -u $@.$$$$ | grep -Ee _tb -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
 $(DEPDIR)/%_tb.d: %_tb.v
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
