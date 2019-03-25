@@ -16,6 +16,7 @@ from litex.soc.integration.builder import *
 
 from liteeth.frontend.etherbone import LiteEthEtherbone
 from litex.utils.litex_sim import SimSoC
+from litex.soc.cores.xadc import XADC
 
 DEADBEEF_ADDR = 0x80000
 
@@ -70,13 +71,22 @@ class Cryomodule(Module):
 
 
 class CryomoduleEthSoC(EthernetSoC):
-
+    # csr_peripherals = [
+    #     "cryo",
+    # ]
+    # csr_map_update(SoCSDRAM.csr_map, csr_peripherals)
+    mem_map = {
+        "cryo": 0x30000000,  # (shadow @0xb0000000)
+    }
+    mem_map.update(EthernetSoC.mem_map)
     def __init__(self, sim_only=True, **kwargs):
         EthernetSoC.__init__(self, **kwargs)
         self.submodules.etherbone = LiteEthEtherbone(
             self.core.udp, 1234, mode="master")
+        self.submodules.xadc = XADC(self.platform)
 
         bus = self.etherbone.wishbone.bus
+        self.add_wb_master(bus)
         stb_d1, stb_d2, stb_d3 = Signal(), Signal(), Signal()
         data_out = Signal(32)
         self.sync += [
@@ -86,7 +96,7 @@ class CryomoduleEthSoC(EthernetSoC):
         ]
         crg = self.crg
         self.submodules.cryomodule = cm = Cryomodule(self.platform, bus, crg.cd_clk1x.clk,
-                                                     crg.cd_clk200.clk, crg.cd_sys.clk)
+                        crg.cd_clk200.clk, crg.cd_sys.clk)
         self.sync += [
             If(bus.stb & (bus.we == 0),
                If((bus.adr > DEADBEEF_ADDR) & (bus.adr < DEADBEEF_ADDR + 0x1000),
@@ -101,6 +111,10 @@ class CryomoduleEthSoC(EthernetSoC):
 
 
 class CryomoduleSimSoC(SimSoC):
+    mem_map = {
+        "cryo": 0x30000000,  # (shadow @0xb0000000)
+    }
+    mem_map.update(SimSoC.mem_map)
     def __init__(self, **kwargs):
         SimSoC.__init__(self, with_etherbone=True, etherbone_ip_address="192.168.1.51", **kwargs)
         clk = self.crg.cd_sys.clk

@@ -5,6 +5,7 @@ from litex.soc.tools.remote.comm_udp import CommUDP
 
 ip = '192.168.1.50'
 base_addr = 0x10000
+base_addr = 0x30000000
 
 if len(sys.argv) > 1 and sys.argv[1] == 'sim':
     ip = '192.168.1.51'
@@ -15,12 +16,16 @@ if len(sys.argv) == 3:
     else:
         base_addr = int(inp)
 
-base_addr <<= 2
+#base_addr <<= 2
 
 c = CommUDP(server=ip)
 c.open()
 
-for i in range(100):
+XADC_BASE=0xe0009800
+temperature = (c.read(XADC_BASE) & 255) << 8 | (c.read(XADC_BASE+4) & 255)
+print(temperature, temperature * 503.975 / 4096 - 273.15)
+
+for i in range(25):
     c.write(i+base_addr, i)
     x = c.read(i+base_addr)
     print(hex(x), hex(base_addr+i))
