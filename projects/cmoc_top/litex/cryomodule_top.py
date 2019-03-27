@@ -18,7 +18,7 @@ from liteeth.frontend.etherbone import LiteEthEtherbone
 from litex.utils.litex_sim import SimSoC
 from litex.soc.cores.xadc import XADC
 
-DEADBEEF_ADDR = 0x80000
+DEADBEEF_ADDR = (0xb0000000 + 0x80000) >> 2
 
 class Cryomodule(Module):
     name = "cryomodule"
@@ -49,6 +49,7 @@ class Cryomodule(Module):
             "p_sr_length": sr_length
         }
         self.dat_r = Signal(32)
+        cry_stb  = Signal()
         self.specials += Instance(
             "cryomodule",
             **cryomodule_params,
@@ -56,11 +57,13 @@ class Cryomodule(Module):
             i_clk2x=clk2x,
             i_lb_clk=lb_clk,
             i_lb_data=bus.dat_w,
-            i_lb_addr=bus.adr,
-            i_lb_write=bus.we,
-            i_lb_read=bus.stb & (bus.we == 0),
+            i_lb_addr=bus.adr[:17],
+            i_lb_write=bus.we & cry_stb,
+            i_lb_read=bus.stb & (bus.we == 0) & cry_stb,
             o_lb_out=self.dat_r)
-        self.comb += []
+        self.comb += [
+            cry_stb.eq(bus.adr[26:] == 0xb)
+        ]
         # add verilog sources
         self.add_sources(platform)
 
