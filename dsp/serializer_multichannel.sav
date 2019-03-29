@@ -1,0 +1,28 @@
+[timestart] 0
+[size] 1525 817
+[pos] -1 -1
+*-3.938666 3 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] serializer_multichannel_tb.
+[sst_width] 246
+[signals_width] 225
+[sst_expanded] 1
+[sst_vpaned_height] 243
+@200
+-DUT
+@28
+serializer_multichannel_tb.clk
+serializer_multichannel_tb.dut.sample_in
+@22
+serializer_multichannel_tb.dut.data_in[63:0]
+@28
+serializer_multichannel_tb.dut.gate_out
+@22
+serializer_multichannel_tb.dut.stream_out[7:0]
+@200
+-Scoreboard
+@420
+serializer_multichannel_tb.sample_count
+serializer_multichannel_tb.chan_check
+serializer_multichannel_tb.errors
+[pattern_trace] 1
+[pattern_trace] 0

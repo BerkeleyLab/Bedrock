@@ -3,7 +3,12 @@
 // Name: Channel Subset
 //% Runtime-configurable selection of which data to keep within each block
 //% Typically used on the input to a waveform memory
-module fchan_subset(
+module fchan_subset #(
+	parameter KEEP_OLD = 0,
+	parameter a_dw     = 20,
+	parameter o_dw     = 20,
+	parameter len      = 16
+) (
 	input clk,
 	input [len-1:0] keep,
 	input signed [a_dw-1:0] a_data,
@@ -13,13 +18,23 @@ module fchan_subset(
 	output time_err
 );
 
-parameter a_dw=20;
-parameter o_dw=20;
-parameter len=16;
+// Reverse bit order of mask
+//   We use historical code in fchan_subset that defines its keep input in
+//   the left-to-right sense.  But for ease of documentation and consistency
+//   with banyan switch code, our keep input has its bits counted from
+//   right to left:  lsb is bit 0, corresponds to channel 0.
+wire [len-1:0] keep_use;
+genvar ix;
+generate
+	if (KEEP_OLD==1)
+		for (ix=0; ix<len; ix=ix+1) assign keep_use[ix] = keep[len-1-ix];
+	else
+		for (ix=0; ix<len; ix=ix+1) assign keep_use[ix] = keep[ix];
+endgenerate
 
 reg [len-1:0] live=0;
 always @(posedge clk) begin
-	if (a_gate | a_trig) live <= a_trig ? keep : {live[len-2:0],1'b0};
+	if (a_gate|a_trig) live <= a_trig ? keep_use : {live[len-2:0],1'b0};
 end
 
 assign o_data = a_data;

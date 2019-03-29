@@ -1,0 +1,32 @@
+[timestart] 0
+[size] 1796 913
+[pos] -1 -1
+*-4.509571 31 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] iq_deinterleaver_tb.
+[sst_width] 341
+[signals_width] 356
+[sst_expanded] 1
+[sst_vpaned_height] 251
+@200
+-DUT
+@420
+iq_deinterleaver_tb.i_dut.scale_in[17:0]
+iq_deinterleaver_tb.i_dut.iq_data_in[17:0]
+iq_deinterleaver_tb.i_dut.iq_sel
+iq_deinterleaver_tb.i_dut.valid_out
+iq_deinterleaver_tb.i_dut.i_data_out[20:0]
+iq_deinterleaver_tb.i_dut.q_data_out[20:0]
+@200
+-SCOREBOARD
+@420
+iq_deinterleaver_tb.model_data[35:0]
+iq_deinterleaver_tb.model_data_shift[20:0]
+iq_deinterleaver_tb.iq_model_valid_r
+@23
+iq_deinterleaver_tb.iq_model_in[41:0]
+@420
+iq_deinterleaver_tb.iq_valid_out
+iq_deinterleaver_tb.i_model_out[20:0]
+iq_deinterleaver_tb.q_model_out[20:0]
+[pattern_trace] 1
+[pattern_trace] 0
