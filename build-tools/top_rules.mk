@@ -94,7 +94,7 @@ BIT2RBF = bit2rbf $@ < $<
 %.vcd: %_tb
 	$(VERILOG_SIM) +vcd $(VCD_ARGS)
 
-%_view: %.vcd %.sav
+%_view: %.vcd %.gtkw
 	$(VERILOG_VIEW)
 
 %_check: %_tb $(BUILD_DIR)/testcode.awk

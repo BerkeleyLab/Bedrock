@@ -16,7 +16,7 @@ COMMON_HDL_DIR = submodules/common-hdl
 %.vcd: %_tb
 	$(VVP) $< $(VFLAGS) +vcd $(VCD_ARGS) $(VCD_ARGS_$@)
 
-%_view: %.vcd %.sav
+%_view: %.vcd %.gtkw
 	$(GTKWAVE) $^
 
 %_check: %_tb ../digit/testcode.awk
