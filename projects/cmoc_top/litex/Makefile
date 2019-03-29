@@ -13,10 +13,10 @@ cryomodule_dummy.v:
 	cd $(APP_DIR) && make cryomodule_EXPAND.v && cd - && cp $(APP_DIR)/cryomodule_EXPAND.v .
 
 bit: cryomodule_dummy.v
-	time $(PYTHON) cryomodule_top.py
+	$(PYTHON) cryomodule_top.py --cpu_type=picorv32
 
 sim: cryomodule_dummy.v
-	$(PYTHON) cryomodule_top.py --sim-only
+	$(PYTHON) cryomodule_top.py --sim-only --cpu_type=picorv32
 
 sim_trace: cryomodule_dummy.v
 	$(PYTHON) cryomodule_top.py --sim-only --trace
