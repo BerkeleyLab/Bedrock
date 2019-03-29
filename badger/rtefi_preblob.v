@@ -16,6 +16,7 @@ module rtefi_blob(
 	input tx_clk,
 	output [7:0] txd,
 	output tx_en,
+	output tx_er,
 	// Configuration
 	input enable_rx,
 	input config_clk,
@@ -59,7 +60,17 @@ wire [6:0] raw_s;
 wire [7:0] idata;
 wire [7*8-1:0] mux_data_in;
 
-rtefi_center #(.ip(ip), .mac(mac), .paw(paw), .n_lat(n_lat)) center(
+rtefi_center #(
+	.ip(ip), .mac(mac), .paw(paw), .n_lat(n_lat),
+	.udp_port0(udp_port0),
+	.udp_port1(udp_port1),
+	.udp_port2(udp_port2),
+	.udp_port3(udp_port3),
+	.udp_port4(udp_port4),
+	.udp_port5(udp_port5),
+	.udp_port6(udp_port6),
+	.udp_port7(udp_port7)
+) center(
 	.rx_clk(rx_clk), .rxd(rxd),
 	.rx_dv(rx_dv), .rx_er(rx_er),
 	.tx_clk(tx_clk) , .txd(txd),
@@ -78,6 +89,7 @@ rtefi_center #(.ip(ip), .mac(mac), .paw(paw), .n_lat(n_lat)) center(
 wire clk = tx_clk;
 wire [7:0] odata_p7, odata_p6, odata_p5, odata_p4, odata_p3, odata_p2, odata_p1;
 assign mux_data_in = {odata_p7, odata_p6, odata_p5, odata_p4, odata_p3, odata_p2, odata_p1};
+assign tx_er = 1'b0;
 
 `BLOB_INSTANCES
 

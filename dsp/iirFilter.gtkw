@@ -1,0 +1,33 @@
+[dumpfile_size] 2781
+[savefile] "iirFilter_tb.gtkw"
+[timestart] 0
+[size] 2376 785
+[pos] -1 -1
+*-4.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] iirFilter_tb.
+[treeopen] iirFilter_tb.iirFilter.
+[treeopen] iirFilter_tb.iirFilter.genblk1[0].
+[treeopen] iirFilter_tb.iirFilter.genblk1[0].biquad_i.
+[sst_width] 193
+[signals_width] 279
+[sst_expanded] 1
+[sst_vpaned_height] 329
+@28
+iirFilter_tb.iirFilter.sysClk[0]
+iirFilter_tb.iirFilter.sysCoefficientAddress[2:0]
+@22
+iirFilter_tb.iirFilter.sysCoefficientValueHigh[23:0]
+iirFilter_tb.iirFilter.sysCoefficientValue[54:0]
+iirFilter_tb.iirFilter.sysGPIO_Out[31:0]
+@28
+iirFilter_tb.iirFilter.sysGPIO_Strobe[0]
+iirFilter_tb.iirFilter.sysIsValue[0]
+iirFilter_tb.iirFilter.sysStageSelect[1:0]
+iirFilter_tb.iirFilter.genblk1[0].biquad_i.sysCoefficientAddress[2:0]
+iirFilter_tb.iirFilter.genblk1[0].biquad_i.sysCoefficientStrobe[0]
+@22
+iirFilter_tb.iirFilter.genblk1[0].biquad_i.sysCoefficientValue[24:0]
+@28
+iirFilter_tb.iirFilter.genblk1[0].biquad_i.sysReset[0]
+[pattern_trace] 1
+[pattern_trace] 0

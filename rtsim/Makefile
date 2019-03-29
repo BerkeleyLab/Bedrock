@@ -33,7 +33,7 @@ VFLAGS_cav_elec_tb += -DLB_DECODE_cav_elec
 %_a7.bit: %.v $(DEPDIR)/%.bit.d blank_a7.ucf
 	arch=a7 $(ISE_SYNTH) $* $(SYNTH_OPT) $^ && mv _xilinx/$@ $@
 
-include api.mk
+include rules.mk
 
 rtsim_in.dat: param.py rtsim_auto $(AUTOGEN_DIR)/regmap_rtsim.json
 	$(PYTHON) $< $(AUTOGEN_DIR)/regmap_rtsim.json | sed -e 's/ *#.*//' | grep . > $@
@@ -58,7 +58,7 @@ cav_mode_check: cav_mode_check.py cav_mode.dat
 
 LB_AW = 14 # Set the Local Bus Address Width for test benches
 
-CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat *.png
+CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat *.png cordicg_b22.v
 
 CLEAN_DIRS += _xilinx
 
@@ -67,3 +67,4 @@ targets: $(TGT_)
 checks: $(CHK_)
 check_all: $(CHK_)
 bits: $(BITS_)
+include $(BUILD_DIR)/bottom_rules.mk

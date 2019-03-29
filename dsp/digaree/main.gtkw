@@ -1,0 +1,44 @@
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-6.454999 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] main_tb.
+[treeopen] main_tb.dut.
+[treeopen] main_tb.dut.alu.
+@24
+main_tb.cc[31:0]
+@28
+main_tb.clk
+main_tb.collide
+main_tb.stray
+main_tb.discard
+@200
+-alu
+@22
+main_tb.dut.alu.a[17:0]
+main_tb.dut.alu.b[17:0]
+@25
+main_tb.dut.op[2:0]
+@28
+main_tb.dut.alu.vo_add
+main_tb.dut.alu.vo_inv
+main_tb.dut.alu.vo_mul
+main_tb.dut.alu.valid_s
+@22
+main_tb.dut.alu.mux[20:0]
+main_tb.dut.alu.shf[20:0]
+main_tb.dut.alu.sat[17:0]
+@28
+main_tb.dut.alu.valid_r
+@200
+-mult
+@28
+main_tb.dut.alu.mul.valid_i
+main_tb.dut.alu.mul.valid_o
+@200
+-add
+@28
+main_tb.dut.alu.add.valid_i
+main_tb.dut.alu.add.valid_o
+[pattern_trace] 1
+[pattern_trace] 0

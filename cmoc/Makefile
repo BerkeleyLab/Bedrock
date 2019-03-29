@@ -1,8 +1,4 @@
-BUILD_DIR = ../build-tools
-DSP_DIR = ../dsp
-CORDIC_DIR = ../cordic
-RTSIM_DIR = ../rtsim
-BADGER_DIR = ../badger/
+include ../dir_list.mk
 
 vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
 
@@ -12,7 +8,8 @@ include $(BUILD_DIR)/top_rules.mk
 
 TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb
 
-include api.mk
+RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
+include rules.mk
 
 TGT_ := $(TEST_BENCH)
 
@@ -39,14 +36,12 @@ VVP_FLAGS_cryomodule.dat = +pfile=cryomodule_p.dat
 cryomodule.out: cryomodule_tb cryomodule_in.dat
 cryomodule.dat: cryomodule.out
 cryomodule.vcd: cryomodule_in.dat
+cryomodule_tb: $(AUTOGEN_DIR)/config_romx.v
 cryomodule_check: cryomodule.dat
 	$(PYTHON) verify_cryomodule.py
 
-
-CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd
-CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cryomodule_in.dat cryomodule_p.dat cryomodule.dat config_romx.v $(RTEFI_CLEAN)
-
-CLEAN_DIRS += _xilinx
+$(AUTOGEN_DIR)/config_romx.v:
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/config_crunch.py --OUTPUT=$@
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))
@@ -67,3 +62,8 @@ endif
 ifeq (,$(MAKECMDGOALS))
     -include $(TEST_BENCH:%_tb=$(DEPDIR)/%_tb.d)
 endif
+
+CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd
+CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cryomodule_in.dat cryomodule_p.dat cryomodule.dat $(RTEFI_CLEAN)
+CLEAN_DIRS += _xilinx
+include $(BUILD_DIR)/bottom_rules.mk

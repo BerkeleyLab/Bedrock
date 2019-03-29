@@ -3,6 +3,7 @@
 *.pyc
 *_tb
 *.bak
+*.sav
 _autogen/
 _dep/
 _xilinx/

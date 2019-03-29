@@ -1,19 +1,10 @@
-AWK = gawk
-VERILOG = iverilog$(ICARUS_SUFFIX) -Wall -Wno-timescale
-VVP = vvp$(ICARUS_SUFFIX) -n
-SYNTH = xil_syn  # not supplied here
-PYTHON = python3
-DPW = 22
-NSTG = 20
-# data path width
+include ../dir_list.mk
+include rules.mk
 
 %_tb: %_tb.v
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
 
 all: cordic0_test cordic1_test cordic2_test cordic3_test
-
-cordicg_b$(DPW).v: cordicgx.py
-	$(PYTHON) $< $(DPW) > $@
 
 CORDIC_BASE_V = cordicg_b$(DPW).v cstageg.v addsubg.v
 cordicg_tb: $(CORDIC_BASE_V)
