@@ -1,0 +1,29 @@
+[timestart] 0
+[size] 1000 600
+[pos] 552 231
+*-22.140720 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] ds1822_tb.
+[sst_width] 210
+[signals_width] 222
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+ds1822_tb.DS1
+@22
+ds1822_tb.address[5:0]
+ds1822_tb.result[7:0]
+@200
+-driver
+@28
+ds1822_tb.mut.end_of_count
+@22
+ds1822_tb.mut.bit_count[8:0]
+ds1822_tb.mut.command_address[5:0]
+ds1822_tb.mut.command[3:0]
+ds1822_tb.mut.cmd_byte[7:0]
+ds1822_tb.mut.shifter[7:0]
+@28
+ds1822_tb.mut.consistent
+ds1822_tb.mut.send_delay
+[pattern_trace] 1
+[pattern_trace] 0

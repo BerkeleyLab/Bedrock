@@ -1,0 +1,34 @@
+##
+#NET "GMII_COL"                       LOC = "AK13" | IOSTANDARD=LVCMOS25;   ## 114 on U80
+#NET "GMII_CRS"                       LOC = "AL13" | IOSTANDARD=LVCMOS25;   ## 115 on U80
+#NET "GMII_INT"                       LOC = "AH14" | IOSTANDARD=LVCMOS25;   ## 32  on U80
+#NET "GMII_MDC"                       LOC = "AP14" | IOSTANDARD=LVCMOS25;   ## 35  on U80
+#NET "GMII_MDIO"                      LOC = "AN14" | IOSTANDARD=LVCMOS25;   ## 33  on U80
+NET "PHY_RESET"                     LOC = "AH13" | IOSTANDARD=LVCMOS25;   ## 36  on U80
+NET "GMII_RX_CLK"                     LOC = "AP11" | IOSTANDARD=LVCMOS25;   ## 7   on U80
+NET "GMII_RX_DV"                LOC = "AM13" | IOSTANDARD=LVCMOS25;   ## 4   on U80
+NET "GMII_RXD<0>"                      LOC = "AN13" | IOSTANDARD=LVCMOS25;   ## 3   on U80
+NET "GMII_RXD<1>"                      LOC = "AF14" | IOSTANDARD=LVCMOS25;   ## 128 on U80
+NET "GMII_RXD<2>"                      LOC = "AE14" | IOSTANDARD=LVCMOS25;   ## 126 on U80
+NET "GMII_RXD<3>"                      LOC = "AN12" | IOSTANDARD=LVCMOS25;   ## 125 on U80
+NET "GMII_RXD<4>"                      LOC = "AM12" | IOSTANDARD=LVCMOS25;   ## 124 on U80
+NET "GMII_RXD<5>"                      LOC = "AD11" | IOSTANDARD=LVCMOS25;   ## 123 on U80
+NET "GMII_RXD<6>"                      LOC = "AC12" | IOSTANDARD=LVCMOS25;   ## 121 on U80
+NET "GMII_RXD<7>"                      LOC = "AC13" | IOSTANDARD=LVCMOS25;   ## 120 on U80
+NET "GMII_RX_ER"                      LOC = "AG12" | IOSTANDARD=LVCMOS25;   ## 9   on U80
+NET "GMII_TX_CLK"                     LOC = "AD12" | IOSTANDARD=LVCMOS25;   ## 10  on U80
+NET "GMII_TX_EN"                LOC = "AJ10" |SLEW=SLOW |DRIVE=4 | IOSTANDARD=LVCMOS25;   ## 16  on U80
+NET "GMII_GTX_CLK"                LOC = "AH12" |SLEW=SLOW |DRIVE=8 | IOSTANDARD=LVCMOS25;   ## 14  on U80
+NET "GMII_TXD<0>"                      LOC = "AM11" |SLEW=SLOW |DRIVE=4 | IOSTANDARD=LVCMOS25;   ## 18  on U80
+NET "GMII_TXD<1>"                      LOC = "AL11" |SLEW=SLOW |DRIVE=4 | IOSTANDARD=LVCMOS25;   ## 19  on U80
+NET "GMII_TXD<2>"                      LOC = "AG10" |SLEW=SLOW |DRIVE=4 | IOSTANDARD=LVCMOS25;   ## 20  on U80
+NET "GMII_TXD<3>"                      LOC = "AG11" |SLEW=SLOW |DRIVE=4 | IOSTANDARD=LVCMOS25;   ## 24  on U80
+NET "GMII_TXD<4>"                      LOC = "AL10" |SLEW=SLOW |DRIVE=4 | IOSTANDARD=LVCMOS25;   ## 25  on U80
+NET "GMII_TXD<5>"                      LOC = "AM10" |SLEW=SLOW |DRIVE=4 | IOSTANDARD=LVCMOS25;   ## 26  on U80
+NET "GMII_TXD<6>"                      LOC = "AE11" |SLEW=SLOW |DRIVE=4 | IOSTANDARD=LVCMOS25;   ## 28  on U80
+NET "GMII_TXD<7>"                      LOC = "AF11" |SLEW=SLOW |DRIVE=4 | IOSTANDARD=LVCMOS25;   ## 29  on U80
+NET "GMII_TX_ER"                      LOC = "AH10" |SLEW=SLOW |DRIVE=4 | IOSTANDARD=LVCMOS25;   ## 13  on U80
+
+NET "GMII_RX_CLK" TNM_NET = "GMII_RX_CLK";
+TIMESPEC "TS_GMII_RX_CLK" = PERIOD "GMII_RX_CLK" 6.8 ns HIGH 50% INPUT_JITTER 0.8 ns;
+

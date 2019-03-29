@@ -10,7 +10,8 @@ construct_tx_table.v: $(BADGER_DIR)/tx_gen.py $(ITABLES)
 # =====
 # Aggregation of clients with rtefi_center
 # Minor issue: if you duplicate dependencies, they're not duplicated in $^
-RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
+# Here is an example client list typically instantiated where rtefi is being included
+# RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 rtefi_preblob.vh: $(BADGER_DIR)/collect_clients.py $(RTEFI_CLIENT_LIST)
 	$(PYTHON) $^ > $@
 rtefi_blob.v: rtefi_preblob.v rtefi_preblob.vh

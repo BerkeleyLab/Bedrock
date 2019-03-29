@@ -1,0 +1,31 @@
+[timestart] 0
+[size] 1026 377
+[pos] 985 336
+*-5.193195 36 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 229
+[signals_width] 142
+[sst_expanded] 1
+[sst_vpaned_height] 61
+@28
+lb_timing_demo_tb.lb_clk
+@22
+lb_timing_demo_tb.lb_addr[19:0]
+@800200
+-write
+@28
+lb_timing_demo_tb.lb_write
+@820
+lb_timing_demo_tb.lb_wdata[31:0]
+@1000200
+-write
+@800200
+-read
+@28
+lb_timing_demo_tb.lb_read
+lb_timing_demo_tb.lb_rvalid
+@820
+lb_timing_demo_tb.lb_rdata[31:0]
+@1000200
+-read
+[pattern_trace] 1
+[pattern_trace] 0

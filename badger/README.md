@@ -100,6 +100,28 @@ source port.
 It is strongly recommended that UDP destination port numbers get configured
 to be < 1024.
 
+## Simple Verification
+
+In one linux terminal, try:
+
+    cd tests
+    sudo tunctl -u <your_name> && sudo ifconfig tap0 192.168.7.1 up
+    make tap_start
+
+In another terminal, try the following to pull contents from `config_romx.v`
+through `mem_gateway.v` at IP address `192.168.7.4`, localbus UDP port 803:
+
+    printf "sillyoneT\x1\x0\x0yyyyT\x1\x0\x1yyyyT\x1\x0\x2yyyyT\x1\x0\x3yyyy" | nc -q 1 -u 192.168.7.4 803 | hexdump -v -e '8/1 "%2.2x " "  "' -e '8/1 "%_p" "\n"'
+
+Expected result:
+
+    73 69 6c 6c 79 6f 6e 65  sillyone
+    54 01 00 00 00 00 80 0a  T.......
+    54 01 00 01 00 00 73 34  T.....s4
+    54 01 00 02 00 00 b9 48  T......H
+    54 01 00 03 00 00 d2 76  T......v
+
+
 ## Other documentation
 
 * Design notes: [rtefi_notes.txt](rtefi_notes.txt)

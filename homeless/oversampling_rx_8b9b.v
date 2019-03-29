@@ -36,7 +36,25 @@ reg [WORD_WIDTH-1:0] int_result=0;
 reg [2:0] bit_counter=0;
 assign  inv_clk_4x = ~(clk_4x);
 `ifdef SIMULATE
-   assign pre_int_data = 4'b0000;
+	// Bare-bones model of 1:4 SerDes retimed to parallel clk
+	reg [3:0] d_in, d_out;
+	always @(clk_4x or async_reset) begin
+		if (async_reset)
+			d_in <= 0;
+		else
+			d_in <= {d_in[2:0], data_in};
+	end
+        always @(clk or async_reset) begin
+		if (async_reset)
+			d_out <= 0;
+		else if (serdes_strobe)
+			d_out <= d_in;
+	end
+
+	assign pre_int_data[0] = d_out[3];
+	assign pre_int_data[1] = d_out[2];
+	assign pre_int_data[2] = d_out[1];
+	assign pre_int_data[3] = d_out[0];
 `else
 generate
 if (DEVICE == "SPARTAN 6") begin // ISERDES2 receiver

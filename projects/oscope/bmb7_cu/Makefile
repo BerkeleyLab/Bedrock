@@ -1,4 +1,4 @@
-all: targets
+all: oscope_top.bit
 
 HARDWARE = bmb7_kintex
 DSP_FLAVOR = 7
@@ -54,6 +54,8 @@ scalar_$(APP_NAME)_regmap.json: application_top.v
 $(APP_NAME)_regmap.json: $(AUTOGEN_DIR)/regmap_application_top.json scalar_$(APP_NAME)_regmap.json static_$(APP_NAME)_regmap.json merge_json.py shorten_names.py
 	$(PYTHON) merge_json.py -o $(APP_NAME)_regmap_long.json -i $(filter %.json, $^)
 	$(PYTHON) shorten_names.py -o $@ -i $(APP_NAME)_regmap_long.json
+
+include $(BUILD_DIR)/bottom_rules.mk
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))

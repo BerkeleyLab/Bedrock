@@ -6,7 +6,9 @@
 # Down that path lies madness!  Confusion is the enemy!
 
 # =====
-all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb hello_check speed_test_check mem_gateway_check badge_trace_tb
+include ../../dir_list.mk
+
+all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb hello_check speed_test_check mem_gateway_check badge_trace_tb lb_timing_demo_tb
 
 # These go _before_ top_rules.mk
 %_check: %.out %.gold
@@ -22,14 +24,12 @@ all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanne
 	$(GTKWAVE) $(GTKW_OPT) $^
 
 # Setup / configuration
-BADGER_DIR = ..
-BUILD_DIR = ../../build-tools
-DSP_DIR = ../../dsp
-HOMELESS_DIR = ../../homeless
 -include $(BUILD_DIR)/top_rules.mk
 
 # Local overrides of default rules
 VERILOG += -Wno-timescale -DSIMULATE
+
+
 CFLAGS_VPI := $(shell $(VERILOG_VPI) --cflags)
 VVP = vvp$(ICARUS_SUFFIX) -N
 VCD_ARGS = $(VCD_ARGS_$@)
@@ -48,7 +48,9 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 vpath %.v $(BADGER_DIR) $(DSP_DIR) $(HOMELESS_DIR)
 
 # Packet Badger synthesizable code
-include ../rules.mk
+RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
+include $(BADGER_DIR)/rules.mk
+RTEFI_V += fake_config_romx.v
 
 # =====
 # CRC32 code verification
@@ -98,6 +100,7 @@ LDLIBS_pcap2v = -l pcap
 CFLAGS_tap-vpi.o = $(CFLAGS_VPI) -D_POSIX_C_SOURCE=200809L
 tap-vpi.vpi: ethernet_model.c tap_alloc.o crc32.o
 CFLAGS_udp-vpi.o = $(CFLAGS_VPI) -D_POSIX_C_SOURCE=200809L
+udp-vpi.vpi: udp_model.c
 
 # =====
 # Components
@@ -129,7 +132,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 # Another tangent for another client
 LB_DEMO_V = lb_demo_slave.v freq_count2.v
 # LB_DEMO_V += badge_trace.v
-mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V)
+mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V) lb_gateway.v
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
 mem_gateway.vcd: udp-vpi.vpi
 mem_gateway_run: mem_gateway_tb udp-vpi.vpi
@@ -214,6 +217,7 @@ ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC
 
 # =====
 # On-line test using Icarus and Linux's tun/tap feature
+
 rtefi_live: rtefi_pipe_tb.v $(RTEFI_V)
 	$(VERILOG) -m ./tap-vpi -DLINUX_TUN -o $@ $(filter %.v, $^)
 
@@ -270,6 +274,7 @@ loc: rtefi_preblob.v $(filter-out rtefi_blob.v construct_tx_table.v, $(RTEFI_V))
 locc:
 	rmccmt *.c *.cpp | tr -d ' \t' | grep -c .
 
-# So weird to not have the "clean" rule here.  See top_rules.mk.
 CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob stests.dat *3.dat pcap2v $(RTEFI_CLEAN)
 CLEAN_DIRS += obj_dir _xilinx
+# Actual "clean" rule in bottom_rules.mk
+include $(BUILD_DIR)/bottom_rules.mk
