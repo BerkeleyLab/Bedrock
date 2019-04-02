@@ -1,0 +1,20 @@
+[timestart] 229
+[size] 1000 600
+[pos] -1 -1
+*-4.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] second_if_out_tb.
+[sst_width] 210
+[signals_width] 142
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+second_if_out_tb.dut.clk
+@420
+second_if_out_tb.dut.cosa[17:0]
+second_if_out_tb.dut.sina[17:0]
+second_if_out_tb.dut.cosb[17:0]
+second_if_out_tb.dut.sinb[17:0]
+@29
+second_if_out_tb.dut.div_state[1:0]
+[pattern_trace] 1
+[pattern_trace] 0
