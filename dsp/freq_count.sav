@@ -8,8 +8,8 @@
 [sst_expanded] 1
 [sst_vpaned_height] 154
 @28
-freq_count_tb.usbclk
-freq_count_tb.clk
+freq_count_tb.sysclk
+freq_count_tb.f_in
 @22
 freq_count_tb.diff_stream[15:0]
 @28
