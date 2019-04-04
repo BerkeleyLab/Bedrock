@@ -21,7 +21,7 @@ def chunk(l, flag=1):
 
 def sixteen(ss):
     if len(ss) % 2:  # need an even number of octets
-        ss += bytes(1) # Pad with \0
+        ss += bytes(1)  # Pad with \0
     return list(struct.unpack("!" + "H" * int(len(ss) / 2), ss))
 
 
