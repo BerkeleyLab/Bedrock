@@ -86,7 +86,7 @@ class CryomoduleEthSoC(EthernetSoC):
         EthernetSoC.__init__(self, **kwargs)
         self.submodules.etherbone = LiteEthEtherbone(
             self.core.udp, 1234, mode="master")
-        self.submodules.xadc = XADC(self.platform)
+        self.submodules.xadc = XADC()
 
         bus = self.etherbone.wishbone.bus
         self.add_wb_master(bus)
