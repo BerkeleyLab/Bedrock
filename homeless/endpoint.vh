@@ -1,0 +1,11 @@
+parameter c_k28_5 = 8'b 10111100;  // bc
+parameter c_k23_7 = 8'b 11110111;  // f7
+parameter c_k27_7 = 8'b 11111011;  // fb
+parameter c_k29_7 = 8'b 11111101;  // fd
+parameter c_k30_7 = 8'b 11111110;  // fe
+parameter c_d21_5 = 8'b 10110101;  // b5
+parameter c_d2_2  = 8'b 01000010;  // 42
+parameter c_d5_6  = 8'b 11000101;  // c5
+parameter c_d16_2 = 8'b 01010000;  // 50
+parameter c_preamble_char = 8'b 01010101;
+parameter c_preamble_sfd = 8'b 11010101;

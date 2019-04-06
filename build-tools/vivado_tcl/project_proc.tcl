@@ -133,13 +133,9 @@ proc project_run {verilog_defines} {
     set args [regexp -all -inline {\S+} $baz]
     set_property verilog_define $args [current_fileset]
 
-    # Launch Synthesis
     launch_runs synth_1
     wait_on_run synth_1
-    open_run synth_1
 
-    # Launch Implementation
-    # planAhead: NGDBuild, MAP, PAR, TRCE, XDL, Bitgen
     #launch_runs impl_1 -to_step write_bitstream
     launch_runs impl_1 -to_step route_design
     wait_on_run impl_1

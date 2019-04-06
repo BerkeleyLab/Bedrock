@@ -5,6 +5,13 @@ dsp_test:
   script:
     - make && make checks
 
+digaree_test:
+  before_script:
+    - cd dsp/digaree
+  stage: test
+  script:
+    - make
+
 cmoc_test:
   before_script:
     - cd cmoc && export PYTHONPATH=../build-tools/
@@ -27,7 +34,7 @@ rtsim_test:
     - make clean && make checks && make rtsim.dat
 
 flake8:
-  stage: test
+  stage: build
   script:
    - find . -name "*.py" | xargs flake8
 
@@ -44,3 +51,15 @@ peripheral_test:
   stage: test
   script:
     - make
+
+oscope_top:
+  before_script:
+    - cd projects/oscope/bmb7_cu && ls /non-free
+  stage: deploy
+  script:
+    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH make oscope_top.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - projects/oscope/bmb7_cu/oscope_top.bit
