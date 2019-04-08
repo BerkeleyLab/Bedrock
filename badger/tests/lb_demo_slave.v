@@ -61,8 +61,8 @@ always @(posedge clk) if (xdomain_fault) xdomain_fault_count <= xdomain_fault_co
 
 // Frequency counter
 wire [31:0] tx_freq;
-freq_count2 #(.REFCNT_WIDTH(27)) f_count(.f_in(ibadge_clk),
-	.clk(clk), .frequency(tx_freq));
+freq_count #(.refcnt_width(27), .freq_width(32)) f_count(.f_in(ibadge_clk),
+	.sysclk(clk), .frequency(tx_freq));
 
 // Very basic pipelining of two-cycle read process
 reg [23:0] addr_r=0;
