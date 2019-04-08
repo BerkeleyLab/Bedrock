@@ -89,10 +89,10 @@ end
 // Second read cycle
 reg [31:0] lb_data_in=0;
 always @(posedge clk) if (do_rd_r) begin
-	casex (addr_r)
-		24'h01xxxx: lb_data_in <= ibadge_out;
-		24'h02xxxx: lb_data_in <= obadge_out;
-		24'h11xxxx: lb_data_in <= reg_bank_0;
+	casez (addr_r)
+		24'h01zzzz: lb_data_in <= ibadge_out;
+		24'h02zzzz: lb_data_in <= obadge_out;
+		24'h11zzzz: lb_data_in <= reg_bank_0;
 		default: lb_data_in <= 32'hdeadbeef;
 	endcase
 end

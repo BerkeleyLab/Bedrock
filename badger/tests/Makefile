@@ -239,6 +239,14 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	mv obj_dir/$@ $@
 
 # =====
+# WIP
+Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v lb_demo_slave.v freq_count.v mem_gateway_sim.cpp udp_model.c
+	rm -f udp_model.o  # can't leave C version around for C++ to find
+	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
+	make -C obj_dir -f Vmem_gateway_wrap.mk
+	mv obj_dir/$@ $@
+
+# =====
 # Simple syntax check
 rtefi_blob_tb: $(RTEFI_V)
 
@@ -274,7 +282,7 @@ loc: rtefi_preblob.v $(filter-out rtefi_blob.v construct_tx_table.v, $(RTEFI_V))
 locc:
 	rmccmt *.c *.cpp | tr -d ' \t' | grep -c .
 
-CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob stests.dat *3.dat pcap2v $(RTEFI_CLEAN)
+CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap stests.dat *3.dat pcap2v $(RTEFI_CLEAN)
 CLEAN_DIRS += obj_dir _xilinx
 # Actual "clean" rule in bottom_rules.mk
 include $(BUILD_DIR)/bottom_rules.mk

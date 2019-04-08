@@ -53,7 +53,9 @@ always @(posedge sysclk) begin
 	gray3 <= gray2;
 end
 
+// verilator lint_off UNOPTFLAT
 wire [gw-1:0] bin3 = gray3 ^ {1'b0, bin3[gw-1:1]}; // convert Gray to binary
+// verilator lint_on UNOPTFLAT
 
 reg [gw-1:0] bin4=0, bin5=0, diff1=0;
 always @(posedge sysclk) begin
