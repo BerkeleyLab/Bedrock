@@ -13,7 +13,7 @@ module complex_freq_wrap #(
    parameter refcnt_w   = 17
 ) (
    input              clk,         // single clock domain
-   input  [1:0]       channel_sel, // 0 - Field, 1 - Forward, 2 - Reverse
+   input  [1:0]       channel_sel, // 0 - Field, 1 - Forward, 2 - Reverse, 3 - IQ_Fiber (from PRC)
    input              sample_wave,
    input  [3:0]       wave_shift,
    input              sr_valid,
@@ -27,6 +27,7 @@ module complex_freq_wrap #(
 );
    localparam CCFILT_OUTW = 20;
    localparam CFREQ_INW   = 18;
+   localparam FIELD_CHID = 0, FWD_CHID = 1, REV_CHID = 2, IQFIB_CHID = 3;
 
    wire signed [CCFILT_OUTW-1:0] cc_result;
    wire cc_strobe;
@@ -34,7 +35,6 @@ module complex_freq_wrap #(
    wire signed [CFREQ_INW-1:0] cfreq_din;
    wire cfreq_valid;
 
-   localparam FWD_CHID = 1, REV_CHID = 2, FIELD_CHID = 0;
    reg  [n_chan-1: 0] fchan_mask, fchan_mask_r;
    wire fchan_time_err, cfreq_time_err;
 
@@ -66,9 +66,10 @@ module complex_freq_wrap #(
    always @(channel_sel) begin
       fchan_mask = 0;
       case (channel_sel)
+         FIELD_CHID : fchan_mask[1:0] = 2'b11;
          FWD_CHID   : fchan_mask[3:2] = 2'b11;
          REV_CHID   : fchan_mask[5:4] = 2'b11;
-         FIELD_CHID : fchan_mask[1:0] = 2'b11;
+         IQFIB_CHID : fchan_mask[7:6] = 2'b11;
       endcase
    end
 
