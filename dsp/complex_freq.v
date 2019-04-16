@@ -84,9 +84,9 @@ always @(posedge clk) begin
 		oldquad <= quad;
 		case (transition)
 		0: quad_cnt <= quad_cnt;
-		1: quad_cnt <= quad_cnt+1;
+		1: quad_cnt <= quad_cnt-1;
 		2: invalid <= 1;
-		3: quad_cnt <= quad_cnt-1;
+		3: quad_cnt <= quad_cnt+1;
 		endcase
 	end
 	if (sqrt_valid && rollover) begin

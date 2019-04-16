@@ -10,7 +10,7 @@ initial begin
 		$dumpfile("complex_freq.vcd");
 		$dumpvars(5, complex_freq_tb);
 	end
-	for (cc=0; cc<5000; cc=cc+1) begin
+	for (cc=0; cc<20000; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
@@ -60,13 +60,15 @@ always @(posedge clk) begin
 		new_noise;
 		ct = amp*$cos(theta) + noise;
 	end
-	if (cc==tperiod*16*3) amp = 131060;
-	if (cc==tperiod*16*4) dtheta = -0.5;
-	if (cc==tperiod*16*7) amp = 0;
+	if (cc==tperiod*32*4) dtheta = -0.75;
+	if (cc==tperiod*32*5) amp = 131060;
+	if (cc==tperiod*32*8) dtheta = 1.90;  // purposefully invalid
+	if (cc==tperiod*32*12) dtheta = 0.50;
+	if (cc==tperiod*32*17) amp = 0;
 end
 
 // Instantiate DUT
-parameter refcnt_w = 4;
+parameter refcnt_w = 5;
 wire signed [refcnt_w-1:0] freq;
 wire freq_valid, updated, timing_err;
 wire [16:0] amp_max, amp_min;
@@ -98,16 +100,30 @@ end
 // Check the output
 integer amp_d1, tmp;
 reg fault;
+integer scount=0;
 always @(negedge clk) if (updated) begin
 	fault = 0;
 	tmp = amp;  if (amp_d1 > amp) tmp = amp_d1;  // $display(tmp, amp_max);
-	tmp = amp_max - tmp - 3;  if (tmp < 0) tmp = -tmp;  if (tmp > 4) fault = 1;
+	tmp = amp_max - tmp - 2;  if (tmp < 0) tmp = -tmp;  if (tmp > 6) fault = 1;
 	tmp = amp;  if (amp_d1 < amp) tmp = amp_d1;  // $display(tmp, amp_min);
-	tmp = tmp - amp_min - 1;  if (tmp < 0) tmp = -tmp;  if (tmp > 4) fault = 1;
-	$display("%d %d %d %d %d %d %s",
-		freq, freq_valid, amp_max, amp_min, amp, amp_d1, fault ? "FAULT" : "    .");
+	tmp = tmp - amp_min - 2;  if (tmp < 0) tmp = -tmp;  if (tmp > 6) fault = 1;
+	// Expected frequency range crudely tracks dtheta
+	case (scount)
+		2: if (freq > -9 || freq < -11) fault=1;
+		3: if (freq > -9 || freq < -11) fault=1;
+		6: if (freq > 9 || freq < 7) fault=1;
+		7: if (freq > 9 || freq < 7) fault=1;
+		10: if (freq_valid) fault=1;
+		11: if (freq_valid) fault=1;
+		14: if (freq > -4 || freq < -6) fault=1;
+		15: if (freq > -4 || freq < -6) fault=1;
+		19: if (freq_valid) fault=1;
+	endcase
+	$display("%2d %d %d %d %d %d %d %s", scount, freq, freq_valid,
+	       amp_max, amp_min, amp, amp_d1, fault ? "FAULT" : "    .");
 	amp_d1 = amp;
 	if (fault) fail = 1;
+	scount = scount + 1;
 end
 
 endmodule
