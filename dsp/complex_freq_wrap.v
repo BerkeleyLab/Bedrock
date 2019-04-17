@@ -38,11 +38,6 @@ module complex_freq_wrap #(
    reg  [n_chan-1: 0] fchan_mask, fchan_mask_r;
    wire fchan_time_err, cfreq_time_err;
 
-   // TODO: Review this comment taken from piezo_control.v
-   // Use same shift_base as llrf_dsp's ccfilt
-   // Should use the same shift parameter (13) as llrf_dsp constructs
-   // from wave_shift=6, in turn based on wave_samp_per=32.
-   // Use 9 for now because ... simulations.
    ccfilt #(
       .use_hb     (0),
       .use_delay  (0),
@@ -59,7 +54,7 @@ module complex_freq_wrap #(
       .result     (cc_result),
       .strobe     (cc_strobe));
 
-   // TODO: Check that we want to truncate LSBs - Assumes that CCFILT_OUTW >= CFREQ_INW
+   // Truncate LSBs - Assumes that CCFILT_OUTW >= CFREQ_INW
    assign cfreq_data = cc_result[CCFILT_OUTW-1:CCFILT_OUTW-CFREQ_INW];
 
    // Channel selection
