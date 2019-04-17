@@ -118,7 +118,7 @@ class notch_setup:
 
     def integers(self):
         lpa = self.cl_lp.integers()
-        lpb = ([0, 0], [0, 0])
+        lpb = ([0, 0], [-20000, 0])
         if self.notch is not None:
             lpb = self.cl_bp.integers()
         return lpa, lpb
