@@ -1,10 +1,18 @@
-include ../dir_list.mk
-include rules.mk
-
-%_tb: %_tb.v
-	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
+BUILD_DIR = .
+CORDIC_DIR = .
+# In Bedrock, BUILD_DIR and CORDIC_DIR get overridden in ../dir_list.mk
+-include ../dir_list.mk
+include $(BUILD_DIR)/top_rules.mk
 
 all: cordic0_test cordic1_test cordic2_test cordic3_test
+
+# Resource exported to projects that use us
+include rules.mk
+
+# CORDIC configuration for regression tests
+# DPW == Data Path Width
+DPW = 22
+NSTG = 20
 
 CORDIC_BASE_V = cordicg_b$(DPW).v cstageg.v addsubg.v
 cordicg_tb: $(CORDIC_BASE_V)
@@ -62,12 +70,12 @@ cordic_k7.bit: cordic_wrap.v $(CORDIC_BASE_V) blank_k7.ucf
 	PART=xc7k70t-fbg484-1 $(SYNTH) cordic_wrap $^
 	mv _xilinx/cordic_wrap.bit $@
 
-perf.dat:
-	sh perf_run.sh > $@
+perf.dat: perf_run.sh
+	sh $< $(NEST_MAKE) > $@
 
 perf.png: perf_plot.py perf.dat
 	$(PYTHON) $<
 
 clean:
-	rm -rf _xilinx
+	rm -rf _xilinx _autogen
 	rm -f cordicg_b[1-9]*.v cordicg_tb cordic?.dat cordic_*.bit perf.png

@@ -6,14 +6,14 @@ vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
 all: targets
 include $(BUILD_DIR)/top_rules.mk
 
-TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb
+TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb rf_controller_tb
 
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include rules.mk
 
 TGT_ := $(TEST_BENCH)
 
-NO_CHECK = tgen_check cryomodule_badger_check
+NO_CHECK = tgen_check cryomodule_badger_check rf_controller_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 
 .PHONY: targets checks bits check_all clean_all

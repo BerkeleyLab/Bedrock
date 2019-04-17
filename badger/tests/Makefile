@@ -8,7 +8,6 @@
 # =====
 include ../../dir_list.mk
 
-all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb hello_check speed_test_check mem_gateway_check badge_trace_tb lb_timing_demo_tb
 
 # These go _before_ top_rules.mk
 %_check: %.out %.gold
@@ -23,12 +22,12 @@ all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanne
 %_view: %.vcd %.gtkw
 	$(GTKWAVE) $(GTKW_OPT) $^
 
-# Setup / configuration
--include $(BUILD_DIR)/top_rules.mk
+# =====
+# Possibly common setup / configuration
+include $(BUILD_DIR)/top_rules.mk
 
 # Local overrides of default rules
 VERILOG += -Wno-timescale -DSIMULATE
-
 
 CFLAGS_VPI := $(shell $(VERILOG_VPI) --cflags)
 VVP = vvp$(ICARUS_SUFFIX) -N
@@ -44,13 +43,15 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 	arch=s6 $(ISE_SYNTH) $(notdir $(basename $<)) $^
 	mv _xilinx/$@ $@
 
+# =====
 # Attention!!!!
 vpath %.v $(BADGER_DIR) $(DSP_DIR) $(HOMELESS_DIR)
+
+all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb hello_check speed_test_check mem_gateway_check badge_trace_tb lb_timing_demo_tb
 
 # Packet Badger synthesizable code
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include $(BADGER_DIR)/rules.mk
-RTEFI_V += fake_config_romx.v
 
 # =====
 # CRC32 code verification
@@ -130,7 +131,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 
 # =====
 # Another tangent for another client
-LB_DEMO_V = lb_demo_slave.v freq_count2.v
+LB_DEMO_V = lb_demo_slave.v freq_count.v
 # LB_DEMO_V += badge_trace.v
 mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V) lb_gateway.v
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
@@ -161,7 +162,7 @@ VCD_ARGS_scanner_check = +packet_file=stests.dat
 
 # =====
 # assembled pipeline
-rtefi_pipe_tb: $(RTEFI_V) offline.v
+rtefi_pipe_tb: $(RTEFI_V) fake_config_romx.v offline.v
 rtefi_pipe.out: rtefi_pipe_tb udp4.dat
 	$(VVP) $< +trace +packet_file=$(filter %udp4.dat, $^) > $@
 rtefi_pipe.vcd: udp4.dat
@@ -217,7 +218,6 @@ ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC
 
 # =====
 # On-line test using Icarus and Linux's tun/tap feature
-
 rtefi_live: rtefi_pipe_tb.v $(RTEFI_V)
 	$(VERILOG) -m ./tap-vpi -DLINUX_TUN -o $@ $(filter %.v, $^)
 
@@ -236,6 +236,14 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
 	make -C obj_dir -f Vrtefi_blob.mk
+	mv obj_dir/$@ $@
+
+# =====
+# WIP
+Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v lb_demo_slave.v freq_count.v mem_gateway_sim.cpp udp_model.c
+	rm -f udp_model.o  # can't leave C version around for C++ to find
+	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
+	make -C obj_dir -f Vmem_gateway_wrap.mk
 	mv obj_dir/$@ $@
 
 # =====
@@ -274,7 +282,7 @@ loc: rtefi_preblob.v $(filter-out rtefi_blob.v construct_tx_table.v, $(RTEFI_V))
 locc:
 	rmccmt *.c *.cpp | tr -d ' \t' | grep -c .
 
-CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob stests.dat *3.dat pcap2v $(RTEFI_CLEAN)
+CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap stests.dat *3.dat pcap2v $(RTEFI_CLEAN)
 CLEAN_DIRS += obj_dir _xilinx
 # Actual "clean" rule in bottom_rules.mk
 include $(BUILD_DIR)/bottom_rules.mk
