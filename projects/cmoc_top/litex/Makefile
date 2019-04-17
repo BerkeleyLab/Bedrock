@@ -1,4 +1,5 @@
 TOP_DIR = ../../..
+include $(TOP_DIR)/dir_list.mk
 APP_DIR = $(TOP_DIR)/cmoc
 BADGER_DIR = $(TOP_DIR)/badger
 BUILD_DIR = $(TOP_DIR)/build-tools
@@ -6,7 +7,7 @@ BUILD_DIR = $(TOP_DIR)/build-tools
 vpath %.v $(APP_DIR)
 
 include $(BUILD_DIR)/top_rules.mk
-include $(APP_DIR)/api.mk
+include $(APP_DIR)/rules.mk
 
 # TODO: Complete butchering of makefile. Should be fixed
 cryomodule_dummy.v:

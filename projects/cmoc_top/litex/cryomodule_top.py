@@ -119,7 +119,9 @@ class CryomoduleSimSoC(SimSoC):
     }
     mem_map.update(SimSoC.mem_map)
     def __init__(self, **kwargs):
-        SimSoC.__init__(self, with_etherbone=True, etherbone_ip_address="192.168.1.51", **kwargs)
+        SimSoC.__init__(self, with_etherbone=True,
+                        etherbone_ip_address="192.168.1.51",
+                        **kwargs)
         clk = self.crg.cd_sys.clk
         bus = self.etherbone.wishbone.bus
         # self.add_wb_master(self.etherbone.wishbone.bus)
@@ -189,8 +191,8 @@ def main():
         soc = CryomoduleEthSoC(**soc_sdram_argdict(args))
         builder = Builder(soc, **builder_argdict(args))
         builder.build()
-    # prog = soc.platform.create_programmer()
-    # prog.load_bitstream("soc_ethernetsoc_ac701/gateware/top.bit")
+    prog = soc.platform.create_programmer()
+    prog.load_bitstream("soc_cryomoduleethsoc_ac701/gateware/top.bit")
 
 
 if __name__ == "__main__":
