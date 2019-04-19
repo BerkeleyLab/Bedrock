@@ -168,7 +168,6 @@ module cic_multichannel_tb;
    i_multi_sampler (
       .clk(clk),
       .ext_trig(1'b1),
-      .enable(1'b1),
       .sample_period({den[6:0],1'b0}),
       .dsample0_period(8'h1),
       .dsample1_period(8'h1),

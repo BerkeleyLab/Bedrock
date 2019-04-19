@@ -94,7 +94,6 @@ module iq_trace #(
    i_multi_sampler (
       .clk             (clk),
       .ext_trig        (1'b1),
-      .enable          (1'b1),
       .sample_period   (cic_period),
       .dsample0_period (8'h1),
       .dsample1_period (8'h1),

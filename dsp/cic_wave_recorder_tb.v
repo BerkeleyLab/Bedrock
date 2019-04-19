@@ -135,7 +135,6 @@ module cic_wave_recorder_tb;
    i_multi_sampler (
       .clk(iclk),
       .ext_trig(1'b1),
-      .enable(1'b1),
       .sample_period(8'h2), // Sample input at half the line rate
       .dsample0_period(8'h1),
       .dsample1_period(8'h1),

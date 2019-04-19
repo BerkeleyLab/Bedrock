@@ -19,7 +19,6 @@ module multi_sampler #(
    parameter dsample2_wi=8)
 (
    input                        clk,
-   input                        enable,
    input                        ext_trig,
    input [sample_period_wi-1:0] sample_period,
    input [dsample0_wi-1:0]      dsample0_period,
