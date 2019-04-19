@@ -2,7 +2,7 @@ import argparse
 import math as M
 import os
 
-from migen import *
+from migen import Module, Signal, Instance, If
 
 from litex.soc.interconnect import wishbone
 
@@ -11,14 +11,17 @@ from litex.boards.targets.ac701 import EthernetSoC
 from litex.build.sim.config import SimConfig
 
 from litex.soc.integration.soc_core import *
-from litex.soc.integration.soc_sdram import *
-from litex.soc.integration.builder import *
+from litex.soc.integration.soc_sdram import (soc_sdram_args,
+                                             soc_sdram_argdict)
+from litex.soc.integration.builder import (builder_args, Builder,
+                                           builder_argdict)
 
 from liteeth.frontend.etherbone import LiteEthEtherbone
 from litex.utils.litex_sim import SimSoC
 from litex.soc.cores.xadc import XADC
 
 DEADBEEF_ADDR = (0xb0000000 + 0x80000) >> 2
+
 
 class Cryomodule(Module):
     name = "cryomodule"
@@ -74,14 +77,11 @@ class Cryomodule(Module):
 
 
 class CryomoduleEthSoC(EthernetSoC):
-    # csr_peripherals = [
-    #     "cryo",
-    # ]
-    # csr_map_update(SoCSDRAM.csr_map, csr_peripherals)
     mem_map = {
-        "cryo": 0x30000000,  # (shadow @0xb0000000)
+        "cryomodule": 0x30000000,  # (shadow @0xb0000000)
     }
     mem_map.update(EthernetSoC.mem_map)
+
     def __init__(self, sim_only=True, **kwargs):
         EthernetSoC.__init__(self, **kwargs)
         self.submodules.etherbone = LiteEthEtherbone(
@@ -89,7 +89,7 @@ class CryomoduleEthSoC(EthernetSoC):
         self.submodules.xadc = XADC()
 
         bus = self.etherbone.wishbone.bus
-        self.add_wb_master(bus)
+        # self.add_wb_master(bus)
         stb_d1, stb_d2, stb_d3 = Signal(), Signal(), Signal()
         data_out = Signal(32)
         self.sync += [
@@ -99,13 +99,12 @@ class CryomoduleEthSoC(EthernetSoC):
         ]
         crg = self.crg
         self.submodules.cryomodule = cm = Cryomodule(self.platform, bus, crg.cd_clk1x.clk,
-                        crg.cd_clk200.clk, crg.cd_sys.clk)
+                                                     crg.cd_clk200.clk, crg.cd_sys.clk)
         self.sync += [
             If(bus.stb & (bus.we == 0),
                If((bus.adr > DEADBEEF_ADDR) & (bus.adr < DEADBEEF_ADDR + 0x1000),
-                  data_out.eq(0xDEADBEE0 + bus.adr[0:2])
-               ).Else(
-                   data_out.eq(cm.dat_r)))
+                  data_out.eq(0xDEADBEE0 + bus.adr[0:2])).Else(
+                      data_out.eq(cm.dat_r)))
         ]
         self.comb += [
             bus.ack.eq(stb_d3),
@@ -115,14 +114,14 @@ class CryomoduleEthSoC(EthernetSoC):
 
 class CryomoduleSimSoC(SimSoC):
     mem_map = {
-        "cryo": 0x30000000,  # (shadow @0xb0000000)
+        "cryomodule": 0x30000000,  # (shadow @0xb0000000)
     }
-    mem_map.update(SimSoC.mem_map)
+    mem_map.update(EthernetSoC.mem_map)
+
     def __init__(self, **kwargs):
         SimSoC.__init__(self, with_etherbone=True,
                         etherbone_ip_address="192.168.1.51",
                         **kwargs)
-        clk = self.crg.cd_sys.clk
         bus = self.etherbone.wishbone.bus
         # self.add_wb_master(self.etherbone.wishbone.bus)
 
@@ -133,13 +132,13 @@ class CryomoduleSimSoC(SimSoC):
             stb_d2.eq(stb_d1),
             stb_d3.eq(stb_d2)
         ]
-        self.submodules.cryomodule = cm = Cryomodule(self.platform, bus, clk, clk, clk)
+        self.submodules.cryomodule = cm = Cryomodule(self.platform, bus,
+                                                     clk, clk, clk)
         self.sync += [
             If(bus.stb & (bus.we == 0),
                If((bus.adr > DEADBEEF_ADDR) & (bus.adr < DEADBEEF_ADDR + 0x1000),
-                  data_out.eq(0xDEADBEE0 + bus.adr[0:2])
-               ).Else(
-                   data_out.eq(cm.dat_r)))
+                  data_out.eq(0xDEADBEE0 + bus.adr[0:2])).Else(
+                      data_out.eq(cm.dat_r)))
         ]
         self.comb += [
             bus.ack.eq(stb_d3),
