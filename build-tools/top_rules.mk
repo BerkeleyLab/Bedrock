@@ -12,7 +12,7 @@ VG_ALL = -DSIMULATE
 V_TB = -Wno-timescale
 VFLAGS = ${VFLAGS_$@} -y$(AUTOGEN_DIR) -I$(AUTOGEN_DIR)
 VVP_FLAGS = ${VVP_FLAGS_$@}
-VVP = vvp$(ICARUS_SUFFIX) -n
+VVP = vvp$(ICARUS_SUFFIX) -N
 GTKWAVE = gtkwave
 VPIEXT = vpi
 PYTHON = python3
@@ -94,7 +94,7 @@ BIT2RBF = bit2rbf $@ < $<
 %.vcd: %_tb
 	$(VERILOG_SIM) +vcd $(VCD_ARGS)
 
-%_view: %.vcd %.sav
+%_view: %.vcd %.gtkw
 	$(VERILOG_VIEW)
 
 %_check: %_tb $(BUILD_DIR)/testcode.awk
