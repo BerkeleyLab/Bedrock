@@ -4,21 +4,19 @@ import os
 
 from migen import Module, Signal, Instance, If
 
-from litex.soc.interconnect import wishbone
-
 from litex.boards.targets.ac701 import EthernetSoC
 
 from litex.build.sim.config import SimConfig
 
-from litex.soc.integration.soc_core import *
 from litex.soc.integration.soc_sdram import (soc_sdram_args,
                                              soc_sdram_argdict)
 from litex.soc.integration.builder import (builder_args, Builder,
                                            builder_argdict)
 
-from liteeth.frontend.etherbone import LiteEthEtherbone
 from litex.utils.litex_sim import SimSoC
 from litex.soc.cores.xadc import XADC
+
+from liteeth.frontend.etherbone import LiteEthEtherbone
 
 DEADBEEF_ADDR = (0xb0000000 + 0x80000) >> 2
 
@@ -52,7 +50,7 @@ class Cryomodule(Module):
             "p_sr_length": sr_length
         }
         self.dat_r = Signal(32)
-        cry_stb  = Signal()
+        cry_stb = Signal()
         self.specials += Instance(
             "cryomodule",
             **cryomodule_params,
@@ -97,14 +95,15 @@ class CryomoduleEthSoC(EthernetSoC):
             stb_d2.eq(stb_d1),
             stb_d3.eq(stb_d2)
         ]
-        crg = self.crg
-        self.submodules.cryomodule = cm = Cryomodule(self.platform, bus, crg.cd_clk1x.clk,
-                                                     crg.cd_clk200.clk, crg.cd_sys.clk)
+        # crg = self.crg
+        # self.submodules.cryomodule = cm = Cryomodule(self.platform, bus, crg.cd_clk1x.clk,
+        #                                              crg.cd_clk200.clk, crg.cd_sys.clk)
         self.sync += [
             If(bus.stb & (bus.we == 0),
                If((bus.adr > DEADBEEF_ADDR) & (bus.adr < DEADBEEF_ADDR + 0x1000),
                   data_out.eq(0xDEADBEE0 + bus.adr[0:2])).Else(
-                      data_out.eq(cm.dat_r)))
+                      data_out.eq(0)))
+            # data_out.eq(cm.dat_r)))
         ]
         self.comb += [
             bus.ack.eq(stb_d3),
@@ -123,8 +122,7 @@ class CryomoduleSimSoC(SimSoC):
                         etherbone_ip_address="192.168.1.51",
                         **kwargs)
         bus = self.etherbone.wishbone.bus
-        # self.add_wb_master(self.etherbone.wishbone.bus)
-
+        clk = self.crg.cd_sys.clk
         stb_d1, stb_d2, stb_d3 = Signal(), Signal(), Signal()
         data_out = Signal(32)
         self.sync += [
@@ -175,11 +173,11 @@ def main():
         soc = CryomoduleSimSoC(**soc_kwargs)
         builder_kwargs["csr_csv"] = "csr.csv"
         builder = Builder(soc, **builder_kwargs)
-        vns = builder.build(
-            run=False,
-            threads=args.threads,
-            sim_config=sim_config,
-            trace=args.trace)
+        # vns = builder.build(
+        #     run=False,
+        #     threads=args.threads,
+        #     sim_config=sim_config,
+        #     trace=args.trace)
         builder.build(
             build=False,
             threads=args.threads,

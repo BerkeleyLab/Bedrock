@@ -24,3 +24,5 @@ sim_trace: cryomodule_dummy.v
 
 CLEAN += *.bit
 CLEAN_DIRS += soc_*
+
+include $(BUILD_DIR)/bottom_rules.mk
