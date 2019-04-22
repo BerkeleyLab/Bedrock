@@ -55,7 +55,7 @@ peripheral_test:
 
 oscope_top:
   before_script:
-    - cd projects/oscope/bmb7_cu && ls /non-free
+    - cd projects/oscope/bmb7_cu
   stage: deploy
   script:
     - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH make oscope_top.bit
@@ -64,3 +64,10 @@ oscope_top:
     expire_in: 1 week
     paths:
       - projects/oscope/bmb7_cu/oscope_top.bit
+
+cmoc_litex:
+  before_script:
+    - cd projects/cmoc_top/litex
+  stage: deploy
+  script:
+    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH make bit
