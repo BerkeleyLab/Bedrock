@@ -6,8 +6,13 @@
 # Down that path lies madness!  Confusion is the enemy!
 
 # =====
-include ../../dir_list.mk
+BUILD_DIR = .
+BADGER_DIR = ..
+HOMELESS_DIR = local
+# Hope this only does something when part of Bedrock
+-include ../../dir_list.mk
 
+# =====
 # These overrides go _before_ top_rules.mk
 %_check: %.out %.gold
 	cmp $^
@@ -48,8 +53,8 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 
 # =====
 # Attention!!!!
-vpath %.v $(BADGER_DIR) $(DSP_DIR) $(HOMELESS_DIR)
-vpath %.eps $(BADGER_DIR)
+vpath %.v $(DSP_DIR) $(HOMELESS_DIR)
+vpath %.eps ..
 
 all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check
 all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb rtefi_live
@@ -57,7 +62,7 @@ all: lb_timing_demo_tb
 
 # Packet Badger synthesizable code
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
-include $(BADGER_DIR)/rules.mk
+include ../rules.mk
 
 # =====
 # CRC32 code verification
