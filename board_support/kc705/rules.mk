@@ -1,0 +1,3 @@
+PART = xc7k325t-ffg900-2
+CLOCK_PIN = AD12
+FPGA_FAMILY = 7series

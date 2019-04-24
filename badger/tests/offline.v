@@ -7,7 +7,7 @@ module offline(
 );
 
 integer fd;
-reg [255:0] packet_file;
+reg [1023:0] packet_file;  // file name, fragile! limited to 128 characters
 initial begin
 	fd = 0;
 	if ($value$plusargs("packet_file=%s", packet_file)) begin

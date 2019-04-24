@@ -1,0 +1,35 @@
+[timestart] 41140
+[size] 1557 820
+[pos] -1 -1
+*-8.662539 41595 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] cic_wave_recorder_tb.
+[sst_width] 216
+[signals_width] 359
+[sst_expanded] 1
+[sst_vpaned_height] 244
+@28
+cic_wave_recorder_tb.iclk
+@8420
+cic_wave_recorder_tb.adc[15:0]
+@29
+cic_wave_recorder_tb.dut.chan_mask[1:0]
+@200
+-CIC Output
+@28
+cic_wave_recorder_tb.dut.cic_stb_out
+@8420
+cic_wave_recorder_tb.dut.cic_sr_out[19:0]
+@22
+cic_wave_recorder_tb.dut.wave_data[15:0]
+@200
+-CBUF Readout
+@28
+cic_wave_recorder_tb.dut.oclk
+cic_wave_recorder_tb.dut.buf_stb
+cic_wave_recorder_tb.dut.buf_enable
+@8420
+cic_wave_recorder_tb.dut.buf_d_out[15:0]
+@22
+cic_wave_recorder_tb.dut.buf_count[15:0]
+[pattern_trace] 1
+[pattern_trace] 0

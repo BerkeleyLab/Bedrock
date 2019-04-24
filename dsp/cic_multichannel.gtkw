@@ -1,0 +1,40 @@
+[timestart] 2
+[size] 1564 854
+[pos] -1 -1
+*-6.873309 289 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] cic_multichannel_tb.
+[treeopen] cic_multichannel_tb.dut.i_serializer_multich.g_serializer[0].
+[sst_width] 261
+[signals_width] 272
+[sst_expanded] 1
+[sst_vpaned_height] 256
+@200
+-Stimulus
+@28
+cic_multichannel_tb.clk
+@22
+cic_multichannel_tb.adc[15:0]
+cic_multichannel_tb.adc_a_cos[18:0]
+cic_multichannel_tb.adc_a_sin[18:0]
+@200
+-DUT
+@22
+cic_multichannel_tb.dut.cic_base_period[5:0]
+cic_multichannel_tb.dut.cc_samp_per[7:0]
+@28
+cic_multichannel_tb.dut.input_sample
+cic_multichannel_tb.dut.sample_cc
+@200
+-Double Int tap
+@28
+cic_multichannel_tb.dut.di_stb_out
+@22
+cic_multichannel_tb.dut.di_sr_out[31:0]
+@200
+-CCFilt output
+@28
+cic_multichannel_tb.dut.cc_stb_out
+@22
+cic_multichannel_tb.dut.cc_sr_out[19:0]
+[pattern_trace] 1
+[pattern_trace] 0

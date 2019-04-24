@@ -44,7 +44,7 @@ reg body=0;
 wire next_do_op = body & &c8;
 reg do_op=0;
 always @(posedge clk) begin
-	isr <= {isr[55:0], idata};
+	isr <= next_isr;
 	c8 <= raw_s ? c8+1 : 0;
 	if (&c8) body <= 1;
 	if (~raw_s) body <= 0;

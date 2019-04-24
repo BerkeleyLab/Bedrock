@@ -27,7 +27,7 @@ always @(posedge clk) begin
 end
 
 wire signed [17:0] prod_iq;
-vectormul mul(.clk(clk), .gate_in(1'b1), .iq(iq),
+complex_mul mul(.clk(clk), .gate_in(1'b1), .iq(iq),
 	.x(err_iq_lim), .y(gain_iq), .z(prod_iq));
 
 reg signed [25:0] prod_iq_s=0;

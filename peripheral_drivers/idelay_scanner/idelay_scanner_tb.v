@@ -14,7 +14,10 @@ initial begin
 		lb_clk=1; #5;
 	end
 	// not 16, because we overwrite lane 7 result with "software"
-	if (agreed == 15) $display("PASS"); else $display("FAIL", agreed);
+	if (agreed == 15) $display("PASS"); else begin
+		$display("FAIL", agreed);
+		$stop();
+	end
 	$finish();
 end
 

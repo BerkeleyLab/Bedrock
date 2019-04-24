@@ -12,10 +12,9 @@ VG_ALL = -DSIMULATE
 V_TB = -Wno-timescale
 VFLAGS = ${VFLAGS_$@} -y$(AUTOGEN_DIR) -I$(AUTOGEN_DIR)
 VVP_FLAGS = ${VVP_FLAGS_$@}
-VVP = vvp$(ICARUS_SUFFIX) -n
+VVP = vvp$(ICARUS_SUFFIX) -N
 GTKWAVE = gtkwave
 VPIEXT = vpi
-OCTAVE = octave
 PYTHON = python3
 AWK = awk
 VPI_CFLAGS := $(shell $(VERILOG_VPI) --cflags)
@@ -95,7 +94,7 @@ BIT2RBF = bit2rbf $@ < $<
 %.vcd: %_tb
 	$(VERILOG_SIM) +vcd $(VCD_ARGS)
 
-%_view: %.vcd %.sav
+%_view: %.vcd %.gtkw
 	$(VERILOG_VIEW)
 
 %_check: %_tb $(BUILD_DIR)/testcode.awk
@@ -157,10 +156,11 @@ endif
 
 UNISIM_CRAP = 'BUFGCE|IOBUF|BUFG'
 
-$(DEPDIR)/%.bit.d: %.v
+# Auto-generated verilog entities shall be set by globally appending to this variable
+$(DEPDIR)/%.bit.d: %.v $(VERILOG_AUTOGEN)
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*.bit $@: "; sort -u $@.$$$$ | grep -Ee $(UNISIM_CRAP) -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
-$(DEPDIR)/%_tb.d: %_tb.v
+$(DEPDIR)/%_tb.d: %_tb.v $(VERILOG_AUTOGEN)
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
 LB_AW = 10
@@ -178,8 +178,6 @@ $(AUTOGEN_DIR)/addr_map_%.vh: %.v
 $(AUTOGEN_DIR)/regmap_%.json: %.v
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS)
 
-$(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/config_crunch.py
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/config_crunch.py --HARDWARE=$(HARDWARE) --TOOL=2 --DSP_FLAVOR=$(DSP_FLAVOR) --OUTPUT=$@
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz
 %.ps:   %.dot
@@ -187,24 +185,3 @@ $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/config_crunch.py
 
 %_support.vh: $(BS_HARDWARE_DIR)/%_support.in
 	perl $(BUILD_DIR)/regmap_proc.pl $< > $@
-
-# XXX All of the above are assignments and implicit rules, which are
-# entirely appropriate for a general-purpose make includefile.
-# If there are no explicit rules given in the makefile that includes
-# this file, the first explicit rule -- and therefore the default target --
-# will be the one below.
-
-#$(IPX_DIR)/component.xml:
-#mkdir -p $(IPX_DIR); $(VIVADO_CREATE_IP) $(IP_NAME) $(IPX_DIR) $^
-
-.PHONY: clean
-CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR)
-# The "find" commands below (embedded in check_clean) check that the
-# source code satisifies:
-#  no hidden files
-#  filenames are only alphanumeric, plus hyphen, underscore, and period
-#  files don't contain trailing spaces or tabs, space followed by tab, or non-printing-ASCII chars (.eps files excepted)
-clean::
-	rm -f $(CLEAN)
-	rm -rf $(CLEAN_DIRS)
-#	sh $(BUILD_DIR)/check_clean

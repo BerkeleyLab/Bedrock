@@ -35,7 +35,7 @@ def nv_pair(s):
             return n
         else:
             raise Exception
-    except:
+    except Exception:
         raise argparse.ArgumentTypeError('<string> <,int>?')
 
 

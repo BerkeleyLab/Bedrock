@@ -7,25 +7,25 @@ def tobin(x, count=8):
     # Integer to binary; count is number of bits
     # Some credit to W.J. van der Laan in
     # http://code.activestate.com/recipes/219300/
-    return map(lambda y: (x >> y) & 1, range(count-1, -1, -1))
+    return [(x >> y) & 1 for y in range(count-1, -1, -1)]
 
 
 def vcd_header(fh, sigs, first, timescale="1ns", now=None):
     dw = len(sigs)
     if not now:
         now = datetime.isoformat(datetime.utcnow())
-    print >>fh, "$date %s $end" % now
-    print >>fh, "$version c2vcd $end"
-    print >>fh, "$timescale %s $end" % timescale
-    print >>fh, "$scope module logic $end"
+    print("$date %s $end" % now, file=fh)
+    print("$version c2vcd $end", file=fh)
+    print("$timescale %s $end" % timescale, file=fh)
+    print("$scope module logic $end", file=fh)
     for ix in range(dw):
-        print >>fh, "$var wire 1 %s %s $end" % (chr(65+ix), sigs[ix])
-    print >>fh, "$upscope $end"
-    print >>fh, "$enddefinitions $end"
-    print >>fh, "$dumpvars"
+        print("$var wire 1 %s %s $end" % (chr(65+ix), sigs[ix]), file=fh)
+    print("$upscope $end", file=fh)
+    print("$enddefinitions $end", file=fh)
+    print("$dumpvars", file=fh)
     for ix in range(dw):
-        print >>fh, "b%d %s" % (first[ix], chr(65+ix))
-    print >>fh, "$end"
+        print("b%d %s" % (first[ix], chr(65+ix)), file=fh)
+    print("$end", file=fh)
 
 
 # 50 MHz and ns time step means multiply integer time count by 20
@@ -49,8 +49,8 @@ def write_vcd(fh, sigs, data, tstep=20, tw=16):
         else:
             for ix in range(dw):
                 if vbin[ix] != old_vbin[ix]:
-                    print >>fh, "b%d %s" % (vbin[ix], chr(65+ix))
-        print >>fh, "#%d" % (t*tstep)
+                    print("b%d %s" % (vbin[ix], chr(65+ix)), file=fh)
+        print("#%d" % (t*tstep), file=fh)
         old_vbin = vbin
         pc += 1
 
@@ -67,15 +67,15 @@ def ctrace_start(fpga, index=""):
     req = ctrace_running_name, (ctrace_start_name, 1), ctrace_running_name
     a1, a2 = fpga.query_resp_list(req)
 
-    print(ctrace_running_name + " before 0x%x  after 0x%x" % (a1, a2))
+    print((ctrace_running_name + " before 0x%x  after 0x%x" % (a1, a2)))
     tc = 0
     while a2 == 0:
         time.sleep(0.001)
         a2 = fpga.query_resp_list([ctrace_running_name])[0]
-        print(ctrace_running_name + " recheck!!         0x%x" % a2)
+        print((ctrace_running_name + " recheck!!         0x%x" % a2))
         tc += 1
         if tc > 5:
-            print("No evidence " + ctrace_base + " started, aborting!")
+            print(("No evidence " + ctrace_base + " started, aborting!"))
             exit(1)
 
 
@@ -93,23 +93,23 @@ def ctrace_collect(fpga, index="", base_addr=None, npt=8192):
     wait_cnt = 0
     while True:
         a = fpga.query_resp_list([ctrace_running_name])[0]
-        print("poll ctrace_running 0x%x" % a)
+        print(("poll ctrace_running 0x%x" % a))
         if (a & 1) == 0:
             break
         wait_cnt += 1
         time.sleep(0.1)
-    print("%d wait cycles" % wait_cnt)
-    foo = fpga.reg_read_alist(range(addr, addr+npt))
+    print(("%d wait cycles" % wait_cnt))
+    foo = fpga.reg_read_alist(list(range(addr, addr+npt)))
     return [struct.unpack('!I', x[2])[0] for x in foo]
 
 
 def ctrace_dump(dw, uuu, tw=16):
     npt = len(uuu)
     # split should be made configurable
-    print("# %d %d" % (tw, dw))
+    print(("# %d %d" % (tw, dw)))
     mask = (1 << dw) - 1
     for ix in range(npt):
-        print("%d %d %x" % (ix, uuu[ix] >> dw, uuu[ix] & mask))
+        print(("%d %d %x" % (ix, uuu[ix] >> dw, uuu[ix] & mask)))
 
 
 def usage():
@@ -117,7 +117,7 @@ def usage():
 
 
 if __name__ == "__main__":
-    from llrf_bmb7 import c_llrf_bmb7
+    from .llrf_bmb7 import c_llrf_bmb7
     import sys
     import getopt
     larglist = 'help', 'addr=', 'port=', 'start', 'dump', 'verbose', 'file='

@@ -1,4 +1,5 @@
 `define LB_DECODE_application_top
+
 `include "application_top_auto.vh"
 
 module application_top(
@@ -197,17 +198,17 @@ assign trig_ext = 0;
 // wire [7:0] uart_rx_tdata;
 // wire uart_rx_tvalid;
 // uart_rx uart_rx(
-// 	.clk(lb_clk), .rst(uart_rst), .rxd(de9_rxd),
-// 	.output_axis_tdata(uart_rx_tdata),
-// 	.output_axis_tvalid(uart_rx_tvalid),
-// 	.output_axis_tready(1'b1),
-// 	.prescale(uart_prescale)
+// .clk(lb_clk), .rst(uart_rst), .rxd(de9_rxd),
+// .output_axis_tdata(uart_rx_tdata),
+// .output_axis_tvalid(uart_rx_tvalid),
+// .output_axis_tready(1'b1),
+// .prescale(uart_prescale)
 // );
 // uart_tx uart_tx(
-// 	.clk(lb_clk), .rst(uart_rst), .txd(de9_txd),
-// 	.input_axis_tdata(uart_test_out),
-// 	.input_axis_tvalid(fp_blinker_tick),
-// 	.prescale(uart_prescale)
+// .clk(lb_clk), .rst(uart_rst), .txd(de9_txd),
+// .input_axis_tdata(uart_test_out),
+// .input_axis_tvalid(fp_blinker_tick),
+// .prescale(uart_prescale)
 // );
 // always @(posedge lb_clk) if (uart_rx_tvalid) uart_rx_hold <= uart_rx_tdata;
 

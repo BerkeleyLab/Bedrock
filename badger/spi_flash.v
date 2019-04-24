@@ -17,7 +17,7 @@ module spi_flash(
 parameter n_lat = 8;  // latency of client pipeline
 
 // Try really hard to be non-fancy here, just the obvious way of
-// gatewaying the previoiusly functioning spi_flash_engine into
+// gatewaying the previously functioning spi_flash_engine into
 // the RTEFI scheme.
 
 // Longer term it would be nice if this could be re-written to
@@ -68,7 +68,7 @@ reg [1:0] raw_sr=0;
 reg [aw-1:0] eth_point=0;
 always @(posedge clk) begin
 	raw_sr <= {raw_sr[0:0], raw_s};
-        eth_point <= raw_sr[1] ? eth_point+1 : 0;
+	eth_point <= raw_sr[1] ? eth_point+1 : 0;
 end
 
 // Logic for writing Rx memory
@@ -119,6 +119,6 @@ end
 
 // choose to pipeline output
 reg_delay #(.len(n_lat-1), .dw(8)) align(.clk(clk), .gate(1'b1), .reset(1'b0),
-        .din(odata1), .dout(odata));
+	.din(odata1), .dout(odata));
 
 endmodule

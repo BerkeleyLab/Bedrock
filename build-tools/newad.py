@@ -81,7 +81,7 @@ def range_width(r):
     '''
     A utility function: string [a:b] => integer a-b+1
     '''
-    r2 = re.sub('\]', '', re.sub('\[', '', r))
+    r2 = re.sub(r'\]', '', re.sub(r'\[', '', r))
     nums = r2.split(':')
     return int(nums[0]) - int(nums[1]) + 1
 

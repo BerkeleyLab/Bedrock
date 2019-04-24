@@ -29,31 +29,31 @@ if __name__ == "__main__":
 
     IP_ADDR = "192.168.1.121"
     prc = c_prc(IP_ADDR, 50006)
-    # #addr=0x0a
-    # #def prc.amc_write(pg,saddr,val):
-    # #	#:w
-    # #	print 'amc write pg',pg, 'saddr',hex(saddr), 'val',hex(val)
-    # #	prc.reg_write([{"U15_spi_data_r,U15_spi_addr_r":dataaddr(val,cmd(rw=0,pg=pg,saddr=saddr,eaddr=0x00))}
-    # #		,{"U15_spi_read_r,U15_spi_start_r":2}
-    # #		,{"U15_spi_read_r,U15_spi_start_r":3}
-    # #		])
-    # #	#print 'after write',
-    # #	prc.reg_read_value(["U15_sdo_addr, U15_spi_rdbk"])
-    # #	time.sleep(0.2)
-    # #def prc.amc_read(pg,saddr):
-    # #	prc.reg_write([{"U15_spi_data_r,U15_spi_addr_r":dataaddr(0xaaa,cmd(rw=1,pg=pg,saddr=saddr,eaddr=0x00))}
-    # #		,{"U15_spi_read_r,U15_spi_start_r":0}
-    # #		,{"U15_spi_read_r,U15_spi_start_r":3}
-    # #		])
-    # #	time.sleep(0.2)
-    # #	result=prc.reg_read_value(["U15_sdo_addr, U15_spi_rdbk"])[0]
-    # #	[rw,pg,saddr,eaddr]=cmddecode(result>>16);
-    # #	data=result&0xffff;
-    # #	return [rw,pg,saddr,eaddr,data]
-    # #	print val.encode('hex')#,"U15_spi_ready,U15_sdio_as_sdo","U15_spi_start,U15_spi_read_r",
+    # # addr=0x0a
+    # # def prc.amc_write(pg,saddr,val):
+    # #   #
+    # #   print 'amc write pg',pg, 'saddr',hex(saddr), 'val',hex(val)
+    # #   prc.reg_write([{"U15_spi_data_r,U15_spi_addr_r":dataaddr(val,cmd(rw=0,pg=pg,saddr=saddr,eaddr=0x00))}
+    # #       ,{"U15_spi_read_r,U15_spi_start_r":2}
+    # #       ,{"U15_spi_read_r,U15_spi_start_r":3}
+    # #       ])
+    # #   # print 'after write',
+    # #   prc.reg_read_value(["U15_sdo_addr, U15_spi_rdbk"])
+    # #   time.sleep(0.2)
+    # # def prc.amc_read(pg,saddr):
+    # #   prc.reg_write([{"U15_spi_data_r,U15_spi_addr_r":dataaddr(0xaaa,cmd(rw=1,pg=pg,saddr=saddr,eaddr=0x00))}
+    # #       ,{"U15_spi_read_r,U15_spi_start_r":0}
+    # #       ,{"U15_spi_read_r,U15_spi_start_r":3}
+    # #       ])
+    # #   time.sleep(0.2)
+    # #   result=prc.reg_read_value(["U15_sdo_addr, U15_spi_rdbk"])[0]
+    # #   [rw,pg,saddr,eaddr]=cmddecode(result>>16);
+    # #   data=result&0xffff;
+    # #   return [rw,pg,saddr,eaddr,data]
+    # #   print val.encode('hex')#,"U15_spi_ready,U15_sdio_as_sdo","U15_spi_start,U15_spi_read_r",
     #                            "U15_spi_data_r,U15_spi_addr_r"])
-    # #addr=eval(sys.argv[2])
-    # #pg=eval(sys.argv[1])
+    # # addr=eval(sys.argv[2])
+    # # pg=eval(sys.argv[1])
     if 0:
         print([format(i, '04x') for i in prc.amc_read(1, 0xa)])
         prc.amc_write(1, 0xa, 0)

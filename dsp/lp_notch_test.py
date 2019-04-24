@@ -118,7 +118,7 @@ class notch_setup:
 
     def integers(self):
         lpa = self.cl_lp.integers()
-        lpb = ([0, 0], [0, 0])
+        lpb = ([0, 0], [-20000, 0])
         if self.notch is not None:
             lpb = self.cl_bp.integers()
         return lpa, lpb
@@ -132,7 +132,7 @@ class notch_setup:
 
 def lp_run(ns):
     regs = ns.integers()
-    command = 'vvp -n lp_tb +out_file=notch_test.dat'
+    command = 'vvp -N lp_tb +out_file=notch_test.dat'
     lpa = regs[0]
     command += ' +kxr=%d +kxi=%d' % (lpa[0][0], lpa[0][1])
     command += ' +kyr=%d +kyi=%d' % (lpa[1][0], lpa[1][1])
@@ -140,13 +140,15 @@ def lp_run(ns):
     return_code = call(command, shell=True)
     if return_code != 0:
         print("vvp return_code %d" % return_code)
+        print("FAIL")
+        exit(1)
     a = numpy.loadtxt('notch_test.dat').T
     return a
 
 
 def notch_run(ns, dth=0.0):
     regs = ns.integers()
-    command = 'vvp -n lp_notch_tb +out_file=notch_test.dat'
+    command = 'vvp -N lp_notch_tb +out_file=notch_test.dat'
     command += ' +dth=%f' % dth
     lpa = regs[0]
     command += ' +kaxr=%d +kaxi=%d' % (lpa[0][0], lpa[0][1])
@@ -158,6 +160,8 @@ def notch_run(ns, dth=0.0):
     return_code = call(command, shell=True)
     if return_code != 0:
         print("vvp return_code %d" % return_code)
+        print("FAIL")
+        exit(1)
     a = numpy.loadtxt('notch_test.dat').T
     return a
 

@@ -7,10 +7,14 @@ entry by peeking at wire declarations in the Verilog.
 '''
 import re
 from sys import stderr
-# maketrans only works like this in python2
-# from builtins.str import maketrans
-from string import maketrans
-trantab = maketrans("[]", "__")
+import sys
+# feel free to find a portable way to do this
+if sys.version_info > (3, 0):
+    trantab = {"[": "_", "]": "_"}
+else:
+    from string import maketrans
+    trantab = maketrans("[]", "__")
+
 wire_info = {}
 addr_found = {}
 name_found = {}
@@ -25,9 +29,15 @@ fail = 0
 def ponder_int(s):
     try:
         r = int(s)
+<<<<<<< HEAD
     except:
         r = 31
         m4 = re.search('(\w+)-(\d+)', s)
+=======
+    except Exception:
+        r = 31
+        m4 = re.search(r'(\w+)-(\d+)', s)
+>>>>>>> master
         if m4:
             p = m4.group(1)
             o = int(m4.group(2))
@@ -94,10 +104,17 @@ sl = []
 param_db = {}
 for l in f.read().split('\n'):
     if "4'h" in l and ": reg_bank_" in l:
+<<<<<<< HEAD
         m1 = re.search("4'h(\w):\s*reg_bank_(\w)\s*<=\s*(\S+);", l)
         if m1:
             alias = None
             m1a = re.search(";\s*//\s*alias:\s*(\w+)", l)
+=======
+        m1 = re.search(r"4'h(\w):\s*reg_bank_(\w)\s*<=\s*(\S+);", l)
+        if m1:
+            alias = None
+            m1a = re.search(r";\s*//\s*alias:\s*(\w+)", l)
+>>>>>>> master
             if m1a:
                 # stderr.write('INFO: alias "%s"\n' % m1a.group(1))
                 alias = m1a.group(1)
@@ -105,6 +122,7 @@ for l in f.read().split('\n'):
         else:
             stderr.write("WARNING: Surprising regexp failure: %s\n" % l)
     if "wire" in l:
+<<<<<<< HEAD
         m2 = re.search("wire\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", l)
         if m2:
             memorize(m2.group)
@@ -114,6 +132,17 @@ for l in f.read().split('\n'):
             memorize(m2.group)
     if "parameter " in l:
         m3 = re.search("parameter\s+(\w+)\s*=\s*(\d+);", l)
+=======
+        m2 = re.search(r"wire\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", l)
+        if m2:
+            memorize(m2.group)
+    if "reg " in l:
+        m2 = re.search(r"reg\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", l)
+        if m2:
+            memorize(m2.group)
+    if "parameter " in l:
+        m3 = re.search(r"parameter\s+(\w+)\s*=\s*(\d+);", l)
+>>>>>>> master
         if m3:
             p, v = m3.group(1), int(m3.group(2))
             param_db[p] = v

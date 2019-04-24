@@ -1,0 +1,5 @@
+# really stupid shell script, but it improves legibility of Makefile
+# and provides compatiblity with remote_vivado
+set -e
+test -n "$1" -a -r "$1.tcl"
+vivado -mode batch -source "$1.tcl"

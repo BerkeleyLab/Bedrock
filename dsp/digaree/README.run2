@@ -1,0 +1,17 @@
+Data in run2.dat taken from data-20170220/cw_run2
+429ddfae9f75650537ed80b5570d183fde5158a2afc3479aa54bc50097a9ff9b  run2.dat
+It's not considered part of Digaree, because it's not source code
+or editable in any way.
+
+Columns are I and Q in units of 16-bit ADC counts, as read out from the sel4v
+waveform buffer, stitched together from 32 (verified consecutive) buffers,
+total 32768 time stemps.
+  1 and 2:  Unused  I and Q
+  3 and 4:  Forward I and Q
+  5 and 6:  Reverse I and Q
+  7 and 8:  Cavity  I and Q
+Time step is wave_samp_per*2*33*14/1320e6, where wave_samp_per = 255.
+
+Although the feedback gain is low and/or quantization-limited, you can
+clearly see the system go back and forth (hundreds of times) between
+phase-locked and phase-tracking mode.

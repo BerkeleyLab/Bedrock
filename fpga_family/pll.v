@@ -1,5 +1,5 @@
 //
-// Xilinx PLL instianciation
+// Xilinx PLL instantiation
 //
 module pll (rst,clkin,locked, clk0,clk1,clk2,clk3,clk4,clk5,drp_clk,drp_write,drp_go,drp_done,drp_addr,drp_data_in,drp_data_out);
 parameter DEVICE="KINTEX 7";
@@ -36,16 +36,18 @@ input [6:0] drp_addr;
 input [15:0] drp_data_in;
 output reg [15:0] drp_data_out;
 
-wire clkfb,clki0,clki1,clki2,clki3,clki4,clki5;
 
 reg int_drp_go=0, drp_enable=0;
 wire drp_ready ;
-wire [15:0] int_drp_data_out ;
+wire [15:0] int_drp_data_out;
 
 `ifndef SIMULATE
-generate 
+
+wire clkfb,clki0,clki1,clki2,clki3,clki4,clki5;
+
+generate
 if (DEVICE == "SPARTAN 6") begin
-	PLL_BASE #(  
+	PLL_BASE #(
 		.BANDWIDTH ("OPTIMIZED"),   // "high", "low" or "optimized"
 		.CLKFBOUT_MULT (gmult),  // multiplication factor for all output clocks
 		.CLKFBOUT_PHASE (gphase),  // phase shift (degrees) of all output clocks
@@ -138,18 +140,38 @@ if (DEVICE == "SPARTAN 6") begin
 			.DO       (int_drp_data_out),
 			.DWE      (drp_write)
 		);
-	end 
+	end
 	endgenerate
 `else
-	assign clki0 = clkin;
-	assign clki1 = clkin;
-	assign clki2 = clkin;
-	assign clki3 = clkin;
-	assign clki4 = clkin;
-	assign clki5 = clkin;
-   assign drp_ready = 1'b0;
-   assign int_drp_data_out = 16'b0000000000000000;
-        
+
+reg clki0,clki1,clki2,clki3,clki4,clki5,locked_i;
+
+	// Generate in-phase clocks according to parameters
+	initial begin
+		clki0 <= 1;
+		clki1 <= 1;
+		clki2 <= 1;
+		clki3 <= 1;
+		clki4 <= 1;
+		clki5 <= 1;
+		clki5 <= 1;
+		locked_i <= 0;
+		locked_i <= #(clkin_period+0.1) 1; // Lock right after edge
+	end
+	initial begin
+	end
+	always @(*) begin
+		clki0 <= #((clkin_period*c0div/gmult)/2) ~clki0;
+		clki1 <= #((clkin_period*c1div/gmult)/2) ~clki1;
+		clki2 <= #((clkin_period*c2div/gmult)/2) ~clki2;
+		clki3 <= #((clkin_period*c3div/gmult)/2) ~clki3;
+		clki4 <= #((clkin_period*c4div/gmult)/2) ~clki4;
+		clki5 <= #((clkin_period*c5div/gmult)/2) ~clki5;
+	end
+	assign locked = locked_i;
+	assign drp_ready = 1'b0;
+	assign int_drp_data_out = 16'b0000000000000000;
+
 `endif // SIMULATE
 	assign clk0 = clki0;
 	assign clk1 = clki1;
@@ -162,7 +184,7 @@ if (DEVICE == "SPARTAN 6") begin
 
 	// DRP enable pulse
 	always @(posedge drp_clk) begin
-		int_drp_go <= drp_go;      
+		int_drp_go <= drp_go;
 		drp_enable <= (~(int_drp_go) & drp_go);
 
 		// DRP done latch

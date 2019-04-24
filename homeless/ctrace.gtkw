@@ -1,0 +1,40 @@
+[timestart] 9899
+[size] 1189 492
+[pos] 59 412
+*-7.215236 10075 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] ctrace_tb.
+[sst_width] 210
+[signals_width] 180
+[sst_expanded] 1
+[sst_vpaned_height] 117
+@800022
+ctrace_tb.data[3:0]
+@28
+(0)ctrace_tb.data[3:0]
+(1)ctrace_tb.data[3:0]
+(2)ctrace_tb.data[3:0]
+(3)ctrace_tb.data[3:0]
+@200
+-
+@1001200
+-group_end
+@28
+ctrace_tb.dut.start
+ctrace_tb.dut.running
+@22
+ctrace_tb.data[3:0]
+@28
+ctrace_tb.dut.diff
+@22
+ctrace_tb.dut.count[7:0]
+@28
+ctrace_tb.dut.of
+@22
+ctrace_tb.dut.pc[5:0]
+ctrace_tb.dut.saveme[11:0]
+@28
+ctrace_tb.dut.wen
+@22
+ctrace_tb.dut.data2[3:0]
+[pattern_trace] 1
+[pattern_trace] 0
