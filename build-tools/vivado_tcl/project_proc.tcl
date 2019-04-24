@@ -114,7 +114,6 @@ proc project_run_planahead {project_name} {
     # Launch Synthesis
     launch_runs synth_1
     wait_on_run synth_1
-    open_run synth_1
 
     # Launch Implementation
     # planAhead: NGDBuild, MAP, PAR, TRCE, XDL, Bitgen
