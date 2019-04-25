@@ -3,7 +3,7 @@ from sys import argv
 import socket
 import numpy
 import random
-import logging
+# import logging
 be32 = numpy.dtype('>u4')
 
 
@@ -58,13 +58,14 @@ class subleep:
 
 def show_trace(chip, b1):
     data = []
-    o = 0
+    # o = 0
     for ix in range(64):
         base = b1 + 64*ix
         addr_list = range(base, base+64)
         data = chip.exchange(addr_list, [None]*len(addr_list))
         # print("\n".join(["%8.8x" % x for x in data]))
-        for a1, a2, a3, a4, a5, a6, a7, a8 in zip(data[0::8], data[1::8], data[2::8], data[3::8], data[4::8], data[5::8], data[6::8], data[7::8]):
+        zz = zip(data[0::8], data[1::8], data[2::8], data[3::8], data[4::8], data[5::8], data[6::8], data[7::8])
+        for a1, a2, a3, a4, a5, a6, a7, a8 in zz:
             l = (a1 & 0x7f) + 128*(a2 & 0xf)  # length
             c = a3 & 0x3  # category
             f = (a3 >> 2) & 0x7  # flags
@@ -74,7 +75,7 @@ def show_trace(chip, b1):
             # do = l-o  # delta-length
             # print("%2x %2x %2x %2x %10d : %4d %d %x %d : %d" % (a1, a2, a3, a4, t, l, c, f, u, do))
             print("%2x %2x %2x %2x %10d : %4d %d %x %d" % (a1, a2, a3, a4, t, l, c, f, u))
-            o = l  # old
+            # o = l  # old
 
 
 def reset_trace(chip):
@@ -109,4 +110,4 @@ elif argv[1] == "rx":
 elif argv[1] == "tx":
     show_trace(foo, 0x020000)
 else:
-   print("usage: python grab.py reset|tx|rx")
+    print("usage: python grab.py reset|tx|rx")
