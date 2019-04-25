@@ -68,4 +68,4 @@ oscope_top:
 badger_ac701:
   stage: deploy
   script:
-    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH && cd badger/tests && make ac701_rgmii_vtest.bit && xc3sprog -c jtaghs1_fast ac701_rgmii_vtest.bit && echo "So far, so good" && sleep 2 && python badger_lb_io.py show
+    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH && cd badger/tests && make ac701_rgmii_vtest.bit && xc3sprog -c jtaghs1_fast ac701_rgmii_vtest.bit && echo "So far, so good" && sleep 5 && python badger_lb_io.py show
