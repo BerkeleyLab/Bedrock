@@ -66,16 +66,16 @@ def show_trace(chip, b1):
         # print("\n".join(["%8.8x" % x for x in data]))
         zz = zip(data[0::8], data[1::8], data[2::8], data[3::8], data[4::8], data[5::8], data[6::8], data[7::8])
         for a1, a2, a3, a4, a5, a6, a7, a8 in zz:
-            l = (a1 & 0x7f) + 128*(a2 & 0xf)  # length
+            ll = (a1 & 0x7f) + 128*(a2 & 0xf)  # length
             c = a3 & 0x3  # category
             f = (a3 >> 2) & 0x7  # flags
             u = (a3 >> 5) & 0x7  # udp port category
             # a4 is unused
             t = (((((a5 << 8) + a6) << 8) + a7) << 8) + a8
-            # do = l-o  # delta-length
-            # print("%2x %2x %2x %2x %10d : %4d %d %x %d : %d" % (a1, a2, a3, a4, t, l, c, f, u, do))
-            print("%2x %2x %2x %2x %10d : %4d %d %x %d" % (a1, a2, a3, a4, t, l, c, f, u))
-            # o = l  # old
+            # do = ll-o  # delta-length
+            # print("%2x %2x %2x %2x %10d : %4d %d %x %d : %d" % (a1, a2, a3, a4, t, ll, c, f, u, do))
+            print("%2x %2x %2x %2x %10d : %4d %d %x %d" % (a1, a2, a3, a4, t, ll, c, f, u))
+            # o = ll  # old
 
 
 def reset_trace(chip):
