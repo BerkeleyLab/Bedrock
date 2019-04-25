@@ -64,3 +64,15 @@ oscope_top:
     expire_in: 1 week
     paths:
       - projects/oscope/bmb7_cu/oscope_top.bit
+
+comms_top:
+  before_script:
+    - cd projects/comms_top && ls /non-free
+  stage: deploy
+  script:
+    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH make comms_top.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - projects/comms_top/comms_top.bit
