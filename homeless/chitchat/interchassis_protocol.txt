@@ -1,0 +1,159 @@
+LCLS-II LLRF Inter-chassis Communications
+Preliminary, 2016-07-06
+Larry Doolittle, LBNL
+Updated 2017-04-20
+Joshua Einstein-Curtis, FNAL
+
+Scope:
+===
+
+Real-time application-specific fiber optic communication between FPGAs
+in the RFS, Resonance, and Interlock chassis.
+The low-latency link for field control between the PRC and RFS
+uses similar concepts, but is out of scope for this document.
+Command and control (EPICS) uses other means.
+
+Goals:
+===
+
+First let's state the obvious:
+The messages from interlock chassis to RFS must give
+one bit of interlock status (permit) for each of two cavities.
+The message from RFS to resonance control chassis must give
+one detune frequency for each of two cavities, plus a bit indicating
+validity of those readings.
+
+Along with these signals come low-entropy signals that range from
+essential to frivolous:
+Heartbeat
+cycle counter
+gateware version ID
+
+Every communication packet will be validated by a CRC.
+In some sense the heartbeat feature comes ``for free'' given the
+cycle counter and CRC.
+
+In some future world where gates can be spent even more freely than today,
+these messages could be cryptographically signed by the transmitting
+FPGA's private key, and the receiver would have a database of the
+public keys of all devices it communicates with.  The goal would be
+tamper-resistance, not secrecy.
+
+Specific protocol design
+===
+
+All signalling will use 8b/10b encoded data, at 20 x 185.7 Mbaud,
+implemented in the Kintex GTX hardware and transmitted over multimode
+fiber using a QSFP.
+
+Detune frequency will be encoded as a signed 18-bit fixed-point binary number,
+with a documented frequency quantum that is between 0.01 and 0.05 Hz.
+Thus with a nominal cavity half-bandwidth of 16 Hz, this can express
+at least 80 bandwidths of detuning before reaching a saturation value.
+Saturated values are allowed and expected during the cavity turn-on process,
+and (with control system permission) will cause the resonance controller to
+march the cavity frequency in the indicated direction.  Saturated values are
+not expected in most operating conditions, including the Lorentz detuning
+caused by a cavity turning off.
+It is expected that the noise on this signal will be much more than one
+bit, but integration/averaging will yield valid results to much better
+than one Hertz.
+
+For simplicity and ease-of-documentation, the same over-the-fiber
+protocol will be used for both directions, and both the
+RFS <-> resonance and RFS <-> interlock paths.
+[The field definition below is a little fuzzy on bit and word order;
+that will be clarified when this document is typeset]
+
+8 bits    comma  K28.5
+4 bits    protocol category, always 6
+4 bits    protocol version, 1 for now
+  3    Initial version for testing on teststands
+  4    Expanded signals (Probe, Fwd, Refl available)
+3 bits    transmitting gateware type:
+  000  Invalid
+  001  RFS
+  010  Resonance
+  011  Interlock
+  100 - 111  reserved
+3 bits    location within cryomodule
+  000   cavity 1 and 2
+  001   cavity 3 and 4
+  010   cavity 5 and 6
+  011   cavity 7 and 8
+  100   unknown
+  101   benchtop
+  110   reserved
+  111   invalid
+10 bits   reserved
+
+32 bits   opaque revision ID of transmitting gateware, e.g., git commit
+
+1 bit     cavity 1 interlock permit
+1 bit     cavity 1 detune frequency valid
+12 bits   reserved for additional cavity 1 status
+18 bits   cavity 1 detune frequency
+
+1 bit     cavity 2 interlock permit
+1 bit     cavity 2 detune frequency valid
+12 bits   reserved for additional cavity 2 status
+18 bits   cavity 2 detune frequency
+
+16 bits   frame counter/heartbeat
+16 bits   echo of last received frame counter/heartbeat
+
+16 bits   CRC-16-CCITT
+
+Only the interlock chassis will ever assert the interlock permit bits.
+Only the RFS will ever assert the detune frequency valid bits.
+Messages will stream continually, repeat rate is 1300e6/7/11 = 16.88 MHz
+
+This protocol is preliminary, pending both team discussion and
+a demonstrated implementation.
+
+Implementation
+===
+
+Portable Verilog module with test bench
+
+parameters
+  gateware type for Tx
+  required gateware type of incoming packets
+  gateware revision ID code
+  clockshift  (clk2 != clk)
+input clocks
+  clk  (185.7 MHz from GTX)
+  clk2  (user domain, see above, must be > 0.5*clk)
+input ports in clk2 domain
+  enable transmit
+  location within cryomodule
+  header reserved
+  cavity 1 status
+  cavity 2 status
+  cavity 1 probe
+  cavity 1 forward
+  cavity 1 reflected
+  cavity 2 probe
+  cavity 2 forward
+  cavity 2 reflected
+output ports in clk domain
+  communication valid
+output ports in clk2 domain
+  32-bit output data
+  configuration
+  gateware ID
+  cavity 1 status
+  cavity 2 status
+  frame counters
+data connection to GTX primitive
+  not shown here
+
+The instantiating module can trivially ``explode'' as many or as few
+output bits it wants, given the data word and strobe signals provided.
+
+The implementation will require at least two successive packets with
+incrementing frame counter and valid CRC before it deems the link "up".
+
+Note that there will necessarily be about one frame latency in the
+communication path due to the need to check the CRC before the
+receiving module can provide a valid strobe.

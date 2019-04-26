@@ -1,0 +1,43 @@
+[timestart] 0
+[size] 1804 865
+[pos] -1 -1
+*-11.207970 3370 3175 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] chitchat_tb.
+[sst_width] 292
+[signals_width] 325
+[sst_expanded] 1
+[sst_vpaned_height] 245
+@22
+chitchat_tb.corrupt[15:0]
+@421
+chitchat_tb.valid_total
+@200
+-CC_TX
+@28
+chitchat_tb.dut_tx.tx_valid
+chitchat_tb.dut_tx.tx_enable
+@22
+chitchat_tb.dut_tx.tx_cavity0_status[31:0]
+@24
+chitchat_tb.dut_tx.local_frame_counter[15:0]
+@22
+chitchat_tb.dut_tx.gtx_d[15:0]
+@28
+chitchat_tb.dut_tx.gtx_k
+@200
+-CC_RX
+@22
+chitchat_tb.dut_rx.gtx_d[15:0]
+@28
+chitchat_tb.dut_rx.gtx_k
+chitchat_tb.dut_rx.ccrx_fault[2:0]
+@22
+chitchat_tb.dut_rx.ccrx_fault_cnt[15:0]
+@28
+chitchat_tb.dut_rx.ccrx_los
+chitchat_tb.dut_rx.rx_valid
+@22
+chitchat_tb.dut_rx.rx_cavity0_status[31:0]
+chitchat_tb.dut_rx.rx_frame_counter[15:0]
+[pattern_trace] 1
+[pattern_trace] 0
