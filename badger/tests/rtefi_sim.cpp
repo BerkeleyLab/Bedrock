@@ -1,7 +1,7 @@
 // Partially based on Verilator example module
 #include <verilated.h>
 
-// Include model header, generated from Verilating "rtefi_blobv"
+// Include model header, generated from Verilating "rtefi_blob.v"
 #include "Vrtefi_blob.h"
 #include <verilated_vcd_c.h>
 #include "ethernet_model.h"

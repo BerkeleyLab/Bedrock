@@ -64,3 +64,8 @@ oscope_top:
     expire_in: 1 week
     paths:
       - projects/oscope/bmb7_cu/oscope_top.bit
+
+badger_ac701:
+  stage: deploy
+  script:
+    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH && cd badger/tests && make ac701_rgmii_vtest.bit && sh teststand_ac701.sh

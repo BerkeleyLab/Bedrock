@@ -11,19 +11,34 @@ xlist = []
 params = []
 
 
-def handle_port(plist, ptype, name, ix):
-    global xlist
+def handle_port(plist, x2list, ptype, name, ix):
     special_list = {'clk': 1, 'len_c': 1, 'idata': 1,
                     'raw_l': 1, 'raw_s': 1, 'odata': 1}
     ename = name
     if name not in special_list:
         ename = "p%d_%s" % (ix, name)
-        xlist += ['\t%s %s,' % (ptype, ename)]
+        # print("adding to x2list: %s, %s" % (ptype, ename))
+        x2list += [(ptype, ename)]
     if name == "raw_l" or name == "raw_s":
         ename = "%s[%d]" % (name, ix-1)
     if name == "odata":
         ename = "%s_p%d" % (name, ix)
     plist += [".%s(%s)" % (name, ename)]
+
+
+def map_params(ix, spec, params):
+    # print("// map_params(%d, %s ..)" % (ix, spec))
+    prefix = "p%d_" % ix
+
+    # Define a function to be used as repl argument to re.sub()
+    # Ideally we'd not try to process the leading input / output string
+    def param_replace(matchobj):
+        m = matchobj.group(0)
+        # print(m)
+        return prefix+m if m in params else m
+    ss = re.sub(r'([a-zA-Z]\w*)', param_replace, spec)
+    # print("// After: %s" % ss)
+    return ss
 
 
 # regexps for I/O ports, with and without a specified width
@@ -36,7 +51,10 @@ PARAM = r'^\s*,?parameter\s+(\w+)\s*=\s*(\d+)'
 
 def file_grab(fname, ix):
     plist = []
+    x2list = []
+    global xlist
     global params
+    param_map = []
     param_set = [".n_lat(n_lat)"]
     with open(fname, 'r') as f:
         for li in f.read().split('\n'):
@@ -47,20 +65,26 @@ def file_grab(fname, ix):
             if m:
                 ll = [m.group(jx) for jx in [1, 2, 3]]
                 p = " ".join([x if x is not None else "" for x in ll])
-                handle_port(plist, p, m.group(4), ix)
+                handle_port(plist, x2list, p, m.group(4), ix)
             m = re.search(PORT_0, li)
             if m:
                 ll = [m.group(jx) for jx in [1, 2]]
                 p = " ".join([x if x is not None else "" for x in ll])
-                handle_port(plist, p, m.group(3), ix)
+                handle_port(plist, x2list, p, m.group(3), ix)
             m = re.search(PARAM, li)
             if m and m.group(1) != "n_lat":
                 pn = m.group(1)
                 pv = m.group(2)
                 params += ["parameter p%d_%s = %s;" % (ix, pn, pv)]
                 param_set += [".%s(p%d_%s)" % (pn, ix, pn)]
+                param_map += [pn]
+        for p_spec, p_name in x2list:
+            p_spec2 = map_params(ix, p_spec, param_map)
+            xlist += ['\t%s %s,' % (p_spec2, p_name)]
         # Generate the module name from the file name;
         # directories and .v suffixes aren't kept.
+        # print("// Finalizing %s" % fname)
+        # print(plist)
         mod_name = fname.split('/')[-1]
         mod_name = mod_name.split('.')[0]
         param_sets = ", ".join(param_set)
