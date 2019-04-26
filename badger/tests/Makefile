@@ -6,10 +6,14 @@
 # Down that path lies madness!  Confusion is the enemy!
 
 # =====
-include ../../dir_list.mk
+BUILD_DIR = .
+BADGER_DIR = ..
+HOMELESS_DIR = local
+# Hope this only does something when part of Bedrock
+-include ../../dir_list.mk
 
-
-# These go _before_ top_rules.mk
+# =====
+# These overrides go _before_ top_rules.mk
 %_check: %.out %.gold
 	cmp $^
 	@echo PASS
@@ -26,14 +30,18 @@ include ../../dir_list.mk
 # Possibly common setup / configuration
 include $(BUILD_DIR)/top_rules.mk
 
-# Local overrides of default rules
+# Local overrides of default variables
 VERILOG += -Wno-timescale -DSIMULATE
 
-CFLAGS_VPI := $(shell $(VERILOG_VPI) --cflags)
-VVP = vvp$(ICARUS_SUFFIX) -N
+# Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
 VERILATOR = verilator
+YOSYS = yosys
 PERL = perl
+XCIRCUIT = xcircuit
+# XXX consider converting this to something more compatible with Bedrock's VIVADO_SYNTH.
+VIVADOEXEC = vivado
+SYNTH_VIVADO = $(VIVADOEXEC) -mode batch -source
 # apt-get install xvfb
 # normally OK to blank out XVFB if you don't have xvfb-run and don't mind pop-ups
 XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
@@ -45,13 +53,16 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 
 # =====
 # Attention!!!!
-vpath %.v $(BADGER_DIR) $(DSP_DIR) $(HOMELESS_DIR)
+vpath %.v $(DSP_DIR) $(HOMELESS_DIR)
+vpath %.eps ..
 
-all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb hello_check speed_test_check mem_gateway_check badge_trace_tb lb_timing_demo_tb
+all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check
+all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb rtefi_live
+all: lb_timing_demo_tb
 
 # Packet Badger synthesizable code
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
-include $(BADGER_DIR)/rules.mk
+include ../rules.mk
 
 # =====
 # CRC32 code verification
@@ -98,9 +109,9 @@ LDLIBS_pcap2v = -l pcap
 # =====
 # VPI module support for live testing
 # https://en.wikipedia.org/wiki/TUN/TAP
-CFLAGS_tap-vpi.o = $(CFLAGS_VPI) -D_POSIX_C_SOURCE=200809L
+CFLAGS_tap-vpi.o = $(VPI_CFLAGS) -D_POSIX_C_SOURCE=200809L
 tap-vpi.vpi: ethernet_model.c tap_alloc.o crc32.o
-CFLAGS_udp-vpi.o = $(CFLAGS_VPI) -D_POSIX_C_SOURCE=200809L
+CFLAGS_udp-vpi.o = $(VPI_CFLAGS) -D_POSIX_C_SOURCE=200809L
 udp-vpi.vpi: udp_model.c
 
 # =====
@@ -133,7 +144,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 # Another tangent for another client
 LB_DEMO_V = lb_demo_slave.v freq_count.v
 # LB_DEMO_V += badge_trace.v
-mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V) lb_gateway.v
+mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V)
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
 mem_gateway.vcd: udp-vpi.vpi
 mem_gateway_run: mem_gateway_tb udp-vpi.vpi
@@ -218,7 +229,7 @@ ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC
 
 # =====
 # On-line test using Icarus and Linux's tun/tap feature
-rtefi_live: rtefi_pipe_tb.v $(RTEFI_V)
+rtefi_live: rtefi_pipe_tb.v $(RTEFI_V) fake_config_romx.v
 	$(VERILOG) -m ./tap-vpi -DLINUX_TUN -o $@ $(filter %.v, $^)
 
 # Setup for a single-user machine is pretty easy: as root do a
@@ -271,6 +282,13 @@ gtkw_refresh:
 	for f in *.gtkw; do if test $$f != rtefi_sim.gtkw; then $(XVFB) make $${f%.gtkw}_view GTKW_OPT="-r gtkwave_nosplash.rc -S resave.tcl"; tail -n +9 $$f > temp_$$$$.gtkw && mv temp_$$$$.gtkw $$f; fi; done
 
 # =====
+# Documentation processing, maybe not not the best place for these rules
+docs: rtefi.svg clients.svg memory.svg tx_path.svg
+.PHONY: docs
+%.svg: %.eps
+	echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
+
+# =====
 # Other, weirder, maintenance stuff
 spellme:
 	cat *.v ../*.v | $(PERL) -ne 's/\/\/(.*)/print $$1,"\n"/e' > $@
@@ -281,8 +299,9 @@ loc: rtefi_preblob.v $(filter-out rtefi_blob.v construct_tx_table.v, $(RTEFI_V))
 	sed -e 's,[ \t]*//.*,,' $^ | grep -c .
 locc:
 	rmccmt *.c *.cpp | tr -d ' \t' | grep -c .
+.PHONY: spellme loc locc
 
-CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap stests.dat *3.dat pcap2v $(RTEFI_CLEAN)
+CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap stests.dat *3.dat pcap2v $(RTEFI_CLEAN)
 CLEAN_DIRS += obj_dir _xilinx
 # Actual "clean" rule in bottom_rules.mk
 include $(BUILD_DIR)/bottom_rules.mk
