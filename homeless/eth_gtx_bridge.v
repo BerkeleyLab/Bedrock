@@ -12,7 +12,7 @@ module eth_gtx_bridge #(
    parameter JUMBO_DW = 14)
 (
    input         gtx_tx_clk,  // Transceiver clock at half rate
-   input         gmii_tx_clk, // Clock for Ethernet fabric - 125 MHz for 1GbE 
+   input         gmii_tx_clk, // Clock for Ethernet fabric - 125 MHz for 1GbE
    input         gmii_rx_clk,
    input  [19:0] gtx_rxd,
    output [19:0] gtx_txd,
@@ -30,7 +30,7 @@ module eth_gtx_bridge #(
    input  [31:0] lb_rdata
 );
    wire [7:0] gmii_rxd, gmii_txd;
-   wire [9:0] gtx_txd_10;
+   wire [9:0] gtx_txd_10
    reg  [9:0] gtx_rxd_10;
    wire gmii_tx_en, gmii_rx_er, gmii_rx_dv;
 
@@ -44,17 +44,15 @@ module eth_gtx_bridge #(
    reg  [19:0] gtx_txd_l;
    reg even=0;
 
-   // decode incoming data @ gtp_tx_clk
    always @(posedge gmii_tx_clk) begin
        gtx_txd_r <= gtx_txd_10;
    end
-   
+
    always @(posedge gmii_rx_clk) begin
        even       <= ~even;
        gtx_rxd_10 <= even ? gtp_rxd_l : gtp_rxd_h;
    end
-   
-   // encode outgoing data @ gmii_tx_clk
+
    always @(posedge gtx_tx_clk) begin
        gtx_txd_l <= {gtx_txd_10, gtx_txd_r};
    end
@@ -80,7 +78,7 @@ module eth_gtx_bridge #(
    	.TX_EN        (gmii_tx_en),
    	.TX_ER        (1'b0),
         // To Transceiver
-   	.txdata       (gtx_txd_10), 
+   	.txdata       (gtx_txd_10),
         .rxdata       (gtx_rxd_10),
    	.rx_err_los   (1'b0),
    	.an_bypass    (1'b1),     // Disable auto-negotiation
@@ -105,12 +103,12 @@ module eth_gtx_bridge #(
       .tx_en               (gmii_tx_en),
       // Configuration
       .enable_rx           (1'b1),
-      .config_clk          (gmii_tx_clk), 
-      .config_a            (4'd0), 
+      .config_clk          (gmii_tx_clk),
+      .config_a            (4'd0),
       .config_d            (8'd0),
-      .config_s            (1'b0), 
+      .config_s            (1'b0),
       .config_p            (1'b0),
-   
+
       // Pass-through to user modules
       .p2_nomangle         (1'b0),
       .p3_addr             (lb_addr),

@@ -4,23 +4,32 @@ module chitchat_tb;
 
 `include "chitchat_pack.vh"
 
-   reg clk;
-   integer cc;
+   localparam SIM_TIME = 100000; // ns
+   localparam CC_CLK_PERIOD = 10;
+
+   localparam MIN_OFF = 20; // Must cover gtx_k period
+   localparam MAX_OFF = 70;
+   localparam MIN_ON = 200;
+   localparam MAX_ON = 400;
+
+   reg cc_clk = 0;
    reg fail=0;
-   integer valid_total=0;
+
+   integer SEED;
+   integer tx_cnt=0;
 
    initial begin
       if ($test$plusargs("vcd")) begin
          $dumpfile("chitchat.vcd");
-         $dumpvars(5,chitchat_tb);
-      end
-      for (cc=0; cc<800; cc=cc+1) begin
-         clk=0; #5;
-         clk=1; #5;
+         $dumpvars(5, chitchat_tb);
       end
 
-      $display("%d updates received over link", valid_total);
-      if (fail || valid_total < 25) begin
+      if (!$value$plusargs("seed=%d", SEED)) SEED = 123;
+
+      while ($time < SIM_TIME) @(posedge cc_clk);
+
+      $display("%d updates received over link", tx_cnt);
+      if (fail || tx_cnt < 300) begin
          $display("FAIL");
          $stop;
       end else begin
@@ -29,95 +38,170 @@ module chitchat_tb;
       end
    end
 
-   // Instantiate transmitter
-   reg  [31:0] cavity0_status = 32'h12345678;
-   reg  [31:0] cavity1_status = 32'h2357bd11;
-   wire [15:0] loopback_frame_counter = 16'd19;
-   wire [15:0] local_frame_counter;
-   wire [15:0] gtx_d;
-   wire gtx_k;
-   reg valid = 0;
-   wire enable;
+   always begin
+      cc_clk = ~cc_clk; #(CC_CLK_PERIOD/2);
+   end
 
-   always @(posedge clk) valid <= cc>20 & cc<460 | cc>520;
+   // ----------------------
+   // Generate stimulus
+   // ----------------------
+   reg  tx_transmit_en = 0;
+   wire tx_ready;
 
-   chitchat_tx #(
-      .REV_ID        (32'hdeadbeef)
-   ) dut_tx (
-      .clk (clk),
-      .tx_valid                  (valid),
-      .tx_enable                 (enable),
-      .tx_location               (3'd2),
-      .tx_cavity0_status         (cavity0_status),
-      .tx_cavity1_status         (cavity1_status),
-      .tx_loopback_frame_counter (loopback_frame_counter),
-      .local_frame_counter       (local_frame_counter),
-      .gtx_d (gtx_d),
-      .gtx_k (gtx_k)
-   );
+   integer cnt_off = MAX_OFF;
+   integer cnt_on = 0;
+   always @(posedge cc_clk) begin
+      if (tx_transmit_en) begin
+         if (cnt_on == 0)
+            tx_transmit_en <= gtx_k; // Wait for gtx_k to ease modelling
+         else
+            cnt_on <= cnt_on - 1;
+      end else begin
+         if (cnt_off == 0) begin
+            tx_transmit_en <= 1;
+            cnt_on  = MIN_ON + $urandom(SEED) % MAX_ON;
+            cnt_off = MIN_OFF + $urandom(SEED) % MAX_OFF;
+         end else begin
+            cnt_off <= cnt_off - 1;
+         end
+      end
+   end
+
+   reg  [7:0] tx_data=0;
+   wire [31:0] tx_data0, tx_data1;
+   always @(posedge cc_clk) if (tx_transmit_en) tx_data <= tx_data + 1;
+
+   assign tx_data0 = {(32/8){tx_data}};
+   assign tx_data1 = ~tx_data0;
 
    // Add an occasional error to the transmission
    reg [15:0] corrupt=0;
+   always @(posedge cc_clk) begin
+      corrupt <= 0;
+      if (tx_transmit_en && &(cnt_on[5:3]&tx_data[4:2])) // Sporadic random pattern
+         corrupt <= $urandom(SEED) % 2**16;
+   end
 
-   always @(posedge clk) corrupt <= cc==315 | cc==550 ? 16'h0100 : 0;
+   // ----------------------
+   // DUT
+   // ----------------------
 
-   // Instantiate receiver
-   wire [15:0] test_data;
-   wire test_sync;
-   wire valid_sync;
-   wire [2:0] faults;
+   wire [15:0] local_frame_counter;
+   wire [15:0] gtx_d;
+   wire        gtx_k;
+   wire [15:0] rx_frame_counter;
+
+   wire        rx_valid;
+   wire [2:0]  faults;
    wire [15:0] fault_cnt;
-   wire       los;
-   wire [3:0] protocol_ver_rb;
-   wire [2:0] gateware_type_rb;
-   wire [2:0] location_rb;
-   wire [31:0] rev_id_rb;
-   wire [31:0] cavity0_status_rb;
-   wire [31:0] cavity1_status_rb;
-   wire [15:0] frame_counter_rb;
-   wire [15:0] loopback_frame_counter_rb;
+   wire        los;
+   wire        frame_drop;
+   wire [3:0]  rx_protocol_ver;
+   wire [2:0]  rx_gateware_type;
+   wire [2:0]  rx_location;
+   wire [31:0] rx_rev_id;
+   wire [31:0] rx_data0;
+   wire [31:0] rx_data1;
+   wire [15:0] rx_loopback_frame_counter;
 
-   chitchat_rx dut_rx (
-      .clk   (clk),
+   localparam REVID = 32'hdeadbeef;
+
+   chitchat_tx #(
+      .REV_ID (REVID)
+   ) i_dut_tx (
+      .clk                       (cc_clk),
+      .tx_transmit_en            (tx_transmit_en),
+      .tx_ready                  (tx_ready),
+      .tx_location               (tx_data0[2:0]),
+      .tx_data0                  (tx_data0),
+      .tx_data1                  (tx_data1),
+      .tx_loopback_frame_counter (rx_frame_counter),
+      .local_frame_counter       (local_frame_counter),
+      .gtx_d                     (gtx_d),
+      .gtx_k                     (gtx_k)
+   );
+
+   chitchat_rx i_dut_rx (
+      .clk   (cc_clk),
 
       .gtx_d (gtx_d^corrupt),
       .gtx_k (gtx_k),
 
-      .ccrx_fault         (faults),
-      .ccrx_fault_cnt     (fault_cnt),
-      .ccrx_los           (los),
+      .ccrx_fault        (faults),
+      .ccrx_fault_cnt    (fault_cnt),
+      .ccrx_los          (los),
+      .ccrx_frame_drop   (frame_drop),
 
-      .rx_valid          (valid_sync),
-      .rx_protocol_ver   (protocol_ver_rb),
-      .rx_gateware_type  (gateware_type_rb),
-      .rx_location       (location_rb),
-      .rx_rev_id         (rev_id_rb),
-      .rx_cavity0_status (cavity0_status_rb),
-      .rx_cavity1_status (cavity1_status_rb),
-      .rx_frame_counter  (frame_counter_rb),
-      .rx_loopback_frame_counter (loopback_frame_counter_rb)
+      .rx_valid          (rx_valid),
+      .rx_protocol_ver   (rx_protocol_ver),
+      .rx_gateware_type  (rx_gateware_type),
+      .rx_location       (rx_location),
+      .rx_rev_id         (rx_rev_id),
+      .rx_data0          (rx_data0),
+      .rx_data1          (rx_data1),
+      .rx_frame_counter  (rx_frame_counter),
+      .rx_loopback_frame_counter (rx_loopback_frame_counter)
    );
 
-   // Detect incorrect output from receiver
-   reg rb_fault=0;
-   always @(posedge clk) if (valid_sync) begin
-      valid_total <= valid_total + 1;
-      rb_fault =
-         // Of course all these magic constants are transcribed
-         // from the Tx code above.
-         faults            != 0 ||
-         protocol_ver_rb   != CC_PROTOCOL_VER  ||
-         gateware_type_rb  != CC_GATEWARE_TYPE ||
-         location_rb       != 2 ||
-         rev_id_rb         != 32'hdeadbeef ||
-         cavity0_status_rb != 32'h12345678 ||
-         cavity1_status_rb != 32'h2357bd11 ||
-         loopback_frame_counter_rb != 16'd19 ||
-         frame_counter_rb > local_frame_counter ||
-         frame_counter_rb + 3 < local_frame_counter;
-      if (rb_fault) begin
-         $display("fault on cycle %d", cc);
+   // ----------------------
+   // Scoreboarding
+   // ----------------------
+   localparam SCB_BUS_WI = 32*2 + 3 + 16*2; // Data*2 + Location + Frame*2
+   wire [SCB_BUS_WI-1: 0] scb_data_in, scb_data_out;
+   wire scb_write_en, scb_read_en, scb_full, scb_empty;
+
+   assign scb_write_en = tx_ready;
+   assign scb_data_in = {tx_data1, tx_data0, tx_data0[2:0], rx_frame_counter, local_frame_counter};
+
+   shortfifo #(
+      .aw (4), // Must cover latency of DUT
+      .dw (SCB_BUS_WI))
+   i_scb_fifo (
+      .clk         (cc_clk),
+      .din         (scb_data_in),
+      .we          (scb_write_en),
+      .dout        (scb_data_out),
+      .re          (scb_read_en),
+      .full        (scb_full), // Should never go high
+      .empty       (scb_empty),
+      .last        (),
+      .count       ()
+   );
+
+   // Pop on valid or when frame is dropped on RX side
+   // Need to check if fifo is empty because CC_RX will signal empty at start of day
+   assign scb_read_en = (rx_valid | frame_drop) & ~scb_empty;
+
+   always @(posedge cc_clk) begin
+      if (scb_full) begin
+         $display("%t, ERROR: FIFO went full", $time);
          fail <= 1;
+      end
+
+      if (rx_valid) begin
+         tx_cnt = tx_cnt + 1;
+
+         if (scb_empty) begin
+            $display("%t ERROR: FIFO empty when trying to pop", $time);
+            fail <= 1;
+         end
+
+         // Compare data
+         if (scb_data_out != {rx_data1, rx_data0, rx_location, rx_loopback_frame_counter, rx_frame_counter}) begin
+            $display("%t, ERROR: RX data comparison failed", $time);
+            fail <= 1;
+         end
+         // Compare fixed data
+         if ({rx_protocol_ver, rx_gateware_type, rx_rev_id} != {CC_PROTOCOL_VER, CC_GATEWARE_TYPE, REVID}) begin
+            $display("%t, ERROR: Version comparison failed", $time);
+            fail <= 1;
+         end
+
+         if ((rx_frame_counter > local_frame_counter) || (rx_frame_counter + 3 < local_frame_counter)) begin
+            $display("%t, ERROR: Frame comparison failed", $time);
+            fail <= 1;
+         end
+
       end
    end
 

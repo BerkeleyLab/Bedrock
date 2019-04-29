@@ -15,13 +15,15 @@ module chitchat_tx #(
 ) (
    input         clk,
 
-   // Application-specific inputs
-   input         tx_valid,    // tx cycles won't start unless tx_valid is high
-   output        tx_enable,   // tx_enable is asserted once all inputs have been sampled
+   input         tx_transmit_en, // Keeps the TX line active (with commas + data)
+                                 // RX-end only accepts data after LINK_UP_CNT
+                                 // successfully decoded data/comma pairs
 
-   input  [2:0]  tx_location, // Location in Cryomodule
-   input  [31:0] tx_cavity0_status,
-   input  [31:0] tx_cavity1_status,
+   output        tx_ready,   // Pulsed whenever chitchat_tx consumes input data
+
+   input  [2:0]  tx_location, // ID of a particular transmitter
+   input  [31:0] tx_data0,
+   input  [31:0] tx_data1,
    input  [15:0] tx_loopback_frame_counter, // intended from chitchat_rx
 
    output [15:0] local_frame_counter,
@@ -35,7 +37,7 @@ module chitchat_tx #(
    // Timing generator
    reg start=0, sync=0, sync_r=0, last=0, last_r=0, crc_time=0;
    reg [3:0] word_count=0;
-   wire increment = tx_valid | (word_count!=0);
+   wire increment = tx_transmit_en | (word_count!=0);
 
    always @(posedge clk) begin
       word_count <= word_count == 10 ? 0 : word_count + increment;
@@ -62,12 +64,12 @@ module chitchat_tx #(
 
    always @(posedge clk) begin
       frame_counter <= frame_counter + start;
-      // one full frame is 11 x 16-bit words 
+      // one full frame is 11 x 16-bit words
       frame <= start ? { protocol_cat, protocol_ver_fix, comma_pad,
                          gateware_type_fix, tx_location, reserved,
                          rev_id_fix,
-                         tx_cavity0_status,
-                         tx_cavity1_status,
+                         tx_data0,
+                         tx_data1,
                          frame_counter,
                          tx_loopback_frame_counter,
                          crc_pad } :
@@ -92,7 +94,7 @@ module chitchat_tx #(
    end
 
    // Assign output ports
-   assign tx_enable = start;
+   assign tx_ready  = start;
    assign gtx_d     = outer_data;
    assign gtx_k     = sync_r;
    assign local_frame_counter = frame_counter;
