@@ -1,3 +1,43 @@
+stages:
+  - build
+  - test
+  - deploy
+  - flake8
+
+variables:
+  CI_REGISTRY: mohs.dhcp.lbl.gov
+  CONTAINER_IMAGE: $CI_REGISTRY/testing_base
+  CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+
+image: $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
+
+services:
+  - name: docker:dind
+    entrypoint: ["dockerd-entrypoint.sh"]
+    command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
+
+build:
+  image: docker:stable
+  stage: build
+  before_script:
+    - cat /etc/hosts
+    - docker info
+    - echo $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
+    - echo $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME
+  script:
+    - docker pull $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME || true
+    - docker pull $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME || true
+    - docker build --cache-from $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME --target riscv-builder -t $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker build --cache-from $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker push $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME
+    - docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
+  only:
+    changes:
+      - Dockerfile*
+      - .gitlab-ci.yml
+
 dsp_test:
   before_script:
     - cd dsp && export PYTHONPATH=../build-tools/
@@ -34,12 +74,11 @@ rtsim_test:
     - make clean && make checks && make rtsim.dat
 
 flake8:
-  stage: build
+  stage: flake8
   script:
    - find . -name "*.py" | xargs flake8
 
 badger_test:
-  image: verilator:latest
   before_script:
     - cd badger/tests && make clean
   stage: test
