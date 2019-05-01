@@ -27,12 +27,14 @@ build:
     - echo $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
     - echo $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME
   script:
-    - docker pull $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME || true
-    - docker pull $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME || true
-    - docker build --cache-from $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME --target riscv-builder -t $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME .
-    - docker build --cache-from $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME --cache-from $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker pull $CONTAINER_IMAGE:latest || true
+    - docker pull $CONTAINER_IM_IMAGE:latest || true
+    - docker build --cache-from $CONTAINER_IM_IMAGE:latest --target riscv-builder -t $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME -t $CONTAINER_IM_IMAGE:latest .
+    - docker build --cache-from $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME --cache-from $CONTAINER_IMAGE:latest -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME -t $CONTAINER_IMAGE:latest .
     - docker push $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME
+    - docker push $CONTAINER_IM_IMAGE:latest
     - docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
+    - docker push $CONTAINER_IMAGE:latest
   only:
     changes:
       - Dockerfile*
