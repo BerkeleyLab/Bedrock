@@ -30,7 +30,7 @@ build:
     - docker pull $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME || true
     - docker pull $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME || true
     - docker build --cache-from $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME --target riscv-builder -t $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME .
-    - docker build --cache-from $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker build --cache-from $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME --cache-from $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME .
     - docker push $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME
     - docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
   only:
