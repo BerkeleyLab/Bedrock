@@ -22,7 +22,7 @@ Registered or delayed versions of a signal should use the suffix '_r' or '_d'. W
 a number should be appended to the suffix. E.g.: valid_r, valid_r2, valid_r3.
 
 #### B.2 - Internal or Local signals
-Internal or local signals that have no other purpose other than to create an internal version of a module's port should 
+Internal or local signals that have no other purpose other than to create an internal version of a module's port should
 use the port name followed by the suffix '_l' or '_i'.
 
 #### B.3 - Signal case
