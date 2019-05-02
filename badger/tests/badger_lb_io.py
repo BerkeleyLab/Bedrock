@@ -1,5 +1,10 @@
+#!/usr/bin/env python
+'''
+Access to localbus gateway, supprting testing of Packet Badger
+'''
 # mostly cribbed from FEED/src/python/leep/raw.py
-from sys import argv
+import argparse
+from sys import stdin
 import socket
 import numpy
 import random
@@ -42,7 +47,7 @@ class subleep:
                 print("Reply truncated %d %d" % (len(tosend), len(reply)))
                 continue
 
-            reply = numpy.fromstring(reply, be32)
+            reply = numpy.frombuffer(reply, be32)
             if (msg[:2] != reply[:2]).any():
                 print('Ignore reply w/o matching nonce %s %s' % (msg[:2], reply[:2]))
                 continue
@@ -95,19 +100,81 @@ def show_short(chip):
             print("%d:  %10d  %8x" % (ix, x, x))
 
 
-if len(argv) < 2:
-    print("usage: python grab.py reset|tx|rx|show")
-# foo = subleep("localhost", port=3010)
-foo = subleep("192.168.19.8")
-# foo = subleep("128.3.129.18")
-# foo = subleep("192.168.7.4")
-if argv[1] == "reset":
-    reset_trace(foo)
-elif argv[1] == "show":
-    show_short(foo)
-elif argv[1] == "rx":
-    show_trace(foo, 0x010000)
-elif argv[1] == "tx":
-    show_trace(foo, 0x020000)
-else:
-    print("usage: python grab.py reset|tx|rx")
+def process_fd(fd):
+    # Also ssee packet2txmac.py
+    addrs = []
+    values = []
+    aw = 10
+    mac_base = 0x100000  # defined in hw_test.v and rtefi_pipe_tb.v
+    mac_ctl = mac_base + (1 << aw)  # defined in mac_subset.v
+    buf_start = 16  # arbitrary
+    data_start = mac_base + buf_start + 1
+    n = 0
+    ov = None
+    addrs += [mac_ctl + 1]  # acknowledge last packet (!?)
+    values += [0]
+    for x in fd.read().split('\n'):
+        if x == "":
+            continue
+        v = int(x, 16)
+        if n % 2:
+            vv = ov + (v << 8)  # little-endian
+            addrs += [data_start + int(n/2)]
+            values += [vv]
+        n += 1
+        ov = v
+    if n % 2:
+        addrs += [data_start + int(n/2)]
+        values += [v]
+    # length of packet
+    addrs += [mac_base + buf_start]
+    values += [n]
+    # trigger send by MAC
+    addrs += [mac_ctl]
+    values += [buf_start]
+    return addrs, values
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument(
+        '--ip',
+        help='IP address of FPGA',
+        default="localhost"
+    )
+    p.add_argument(
+        '--port',
+        help="UDP port for I/O",
+        default=803
+    )
+    p.add_argument(
+        '--file',
+        help="File with R/W commands in hex",
+        default=None
+    )
+    p.add_argument(
+        'command',
+        help='reset | tx | rx | show'
+    )
+    args = p.parse_args()
+    foo = subleep(args.ip, port=args.port)
+    if not foo:
+        print("subleep setup failed")
+        exit(1)
+    if args.command == "reset":
+        reset_trace(foo)
+    elif args.command == "show":
+        show_short(foo)
+    elif args.command == "rx":
+        show_trace(foo, 0x010000)
+    elif args.command == "tx":
+        show_trace(foo, 0x020000)
+    elif args.command == "arb":
+        if args.file is None:
+            fd = stdin
+        else:
+            fd = open(args.file, "r")
+        addrs, values = process_fd(fd)
+        foo.exchange(addrs, values)
+    else:
+        print("usage: python grab.py reset|show|tx|rx")

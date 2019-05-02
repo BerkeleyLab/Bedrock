@@ -44,6 +44,16 @@ module scanner (
 	// output [9:0] key_addr,
 	// input [15:0] key_data,
 	//
+	// Two-bit summary info available to precog
+	// For a kept packet, busy has the full width of odata_s,
+	// but is delayed one cycle.  Non-keep packets can have the busy
+	// line de-asserted as soon as the dropping condition is detected.
+	// When an incoming packet is categorized as causing a response,
+	// the keep line is asserted one cycle before busy falls.
+	// Also see precog_upg.eps
+	output busy,
+	output keep,
+	//
 	// Simple flow of data to the next processing stage (pbuf_writer).
 	// somewhat conforms to AXI-stream-lite, if I adjust the names?
 	output [7:0] odata,
@@ -185,7 +195,10 @@ end
 
 // One more oddball
 reg unicast_src_mac=0;
-always @(posedge clk) if (pack_cnt==7) unicast_src_mac <= ~data_d1[0];
+always @(posedge clk) begin
+	if (pack_cnt==1) unicast_src_mac <= 1;  // optimistic, needed to make busy flag work
+	if (pack_cnt==7) unicast_src_mac <= ~data_d1[0];
+end
 
 // Summary bits don't leak irrelevant state
 wire pass_arp  = unicast_src_mac & crc_zero & pass_arp0 & pass_arpip;
@@ -199,6 +212,18 @@ wire [2:0] port_p = pass_udp ? port_p0 : 3'd0;
 assign status_vec = {port_p, pass_ip, pass_ethmac, crc_zero, category};
 assign status_valid = final_octet;
 assign pack_len = pack_len_r;
+
+// Other summary output
+wire busy_with_arp = unicast_src_mac & pass_arp0;
+wire busy_with_udp = unicast_src_mac & pass_ethmac & pass_ip0 & pass_udp0;
+wire busy_with_icmp = unicast_src_mac & pass_ethmac & pass_ip0 & pass_icmp0;
+reg busy_r=0, keep_r=0;
+always @(posedge clk) begin
+	busy_r <= odata_s & (busy_with_arp | busy_with_udp | busy_with_icmp);
+	keep_r <= odata_s & (category != 0);
+end
+assign busy = busy_r;
+assign keep = keep_r;
 
 // Output ports
 assign odata = data_d2;
@@ -359,6 +384,7 @@ reg chksum_all_ones_d=0;
 reg chksum_fail=0;
 always @(posedge clk) begin
 	chksum_all_ones_d <= chksum_all_ones;
+	if (cnt==0) chksum_fail <= 0;
 	if (cnt==35) chksum_fail <= ~chksum_all_ones | ~chksum_all_ones_d;
 end
 assign pass = pass_r & ~chksum_fail;

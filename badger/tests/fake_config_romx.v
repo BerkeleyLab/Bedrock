@@ -1,8 +1,8 @@
 // testing substitute for ROM that is often part of our build process
 module fake_config_romx(
-    input clk,
-    input [3:0] address,
-    output [15:0] data
+	input clk,
+	input [3:0] address,
+	output [15:0] data
 );
 reg [15:0] dxx = 0;
 assign data = dxx;
@@ -23,6 +23,6 @@ always @(posedge clk) case(address)
 	4'hd: dxx <= 16'h89a3;
 	4'he: dxx <= 16'h60ab;
 	4'hf: dxx <= 16'h7b8e;
-    default: dxx = 0;
+	default: dxx = 0;
 endcase
 endmodule

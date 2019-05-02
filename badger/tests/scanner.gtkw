@@ -1,7 +1,7 @@
-[timestart] 4
+[timestart] 0
 [size] 1259 621
 [pos] 116 193
-*-9.589611 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-9.996778 50964 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] scanner_tb.
 [treeopen] scanner_tb.a.
 [sst_width] 224
@@ -11,6 +11,10 @@
 @22
 scanner_tb.goal[7:0]
 scanner_tb.stat_r[7:0]
+@28
+scanner_tb.eth_in_s
+scanner_tb.busy
+scanner_tb.keep
 @800200
 -Bench
 @200
@@ -39,6 +43,11 @@ scanner_tb.a.ip_length[15:0]
 scanner_tb.a.ip_len_check
 @24
 scanner_tb.a.udp_length[15:0]
+@28
+scanner_tb.a.busy_with_arp
+scanner_tb.a.busy_with_icmp
+scanner_tb.a.busy_with_udp
+scanner_tb.a.busy_r
 @1000200
 -Bench
 @c00200

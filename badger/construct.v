@@ -10,7 +10,12 @@
 // or MAC/IP config memory, it takes up about 74 LUTs.
 
 module construct #(
-	parameter paw=11  // packet address width, 11 IRL, maybe less for simulations
+	parameter paw=11,  // packet address width, 11 IRL, maybe less for simulations
+	parameter p_offset = 480  // Keep an eye on this.
+	// Has to be at least 6 for usual fp_offset of 0, but also
+	// add -min(fp_offset)+guard.  The guard needs to include
+	// allowance Rx/Tx frequency offset.
+	// At the other end, p_offset + max(fp_offset) < (2048-MTU-guard)
 ) (
 	input clk,
 	input [paw-1:0] gray_state,
@@ -55,11 +60,6 @@ always @(posedge clk) begin
 end
 assign xdomain_fault = xdomain_fault_r;
 
-localparam p_offset = 480;  // Keep an eye on this.
-// Has to be at least 6 for usual fp_offset of 0, but also
-// add -min(fp_offset)+guard.  The guard needs to include
-// allowance Rx/Tx frequency offset.
-// At the other end, p_offset + max(fp_offset) < (2048-MTU-guard)
 
 // Construct frame pointer that tracks the one in scanner.v
 wire packet_active;
