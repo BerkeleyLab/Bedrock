@@ -1,5 +1,16 @@
 `timescale 1ns / 1ns
 
+// ------------------------------------
+// CHITCHAT TESTBENCH
+//
+// Testbench for chitchat_tx + chitchat_rx. Integrity of transferred data
+// is checked and random transmission errors are added to the TX-RX channel
+// to exercise CRC and other error detection functionality.
+//
+// See also: chitchat_txrx_wrap_tb.v
+//
+// ------------------------------------
+
 module chitchat_tb;
 
 `include "chitchat_pack.vh"
@@ -46,7 +57,7 @@ module chitchat_tb;
    // Generate stimulus
    // ----------------------
    reg  tx_transmit_en = 0;
-   wire tx_ready;
+   wire tx_send;
 
    integer cnt_off = MAX_OFF;
    integer cnt_on = 0;
@@ -111,7 +122,7 @@ module chitchat_tb;
    ) i_dut_tx (
       .clk                       (cc_clk),
       .tx_transmit_en            (tx_transmit_en),
-      .tx_ready                  (tx_ready),
+      .tx_send                   (tx_send),
       .tx_location               (tx_data0[2:0]),
       .tx_data0                  (tx_data0),
       .tx_data1                  (tx_data1),
@@ -150,7 +161,7 @@ module chitchat_tb;
    wire [SCB_BUS_WI-1: 0] scb_data_in, scb_data_out;
    wire scb_write_en, scb_read_en, scb_full, scb_empty;
 
-   assign scb_write_en = tx_ready;
+   assign scb_write_en = tx_send;
    assign scb_data_in = {tx_data1, tx_data0, tx_data0[2:0], rx_frame_counter, local_frame_counter};
 
    shortfifo #(

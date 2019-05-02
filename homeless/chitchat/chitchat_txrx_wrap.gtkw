@@ -1,0 +1,60 @@
+[timestart] 0
+[size] 1717 821
+[pos] -1 -1
+*-11.226988 1520 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] chitchat_txrx_wrap_tb.
+[treeopen] chitchat_txrx_wrap_tb.i_dut.
+[sst_width] 292
+[signals_width] 341
+[sst_expanded] 1
+[sst_vpaned_height] 195
+@28
+chitchat_txrx_wrap_tb.tx_valid
+@22
+chitchat_txrx_wrap_tb.corrupt[15:0]
+@28
+chitchat_txrx_wrap_tb.fail
+@420
+chitchat_txrx_wrap_tb.tx_cnt
+@200
+-CC_TXRX_WRAP
+@800200
+-i_cc_tx
+@1000200
+-i_cc_tx
+@28
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_tx.tx_transmit_en
+@22
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_tx.tx_data0[31:0]
+@23
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_tx.tx_data1[31:0]
+@28
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_tx.tx_location[2:0]
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_tx.tx_send
+@800200
+-i_cc_rx
+@1000200
+-i_cc_rx
+@28
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_rx.rx_valid
+@22
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_rx.rx_data0[31:0]
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_rx.rx_data1[31:0]
+@28
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_rx.ccrx_frame_drop
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_rx.ccrx_los
+@22
+chitchat_txrx_wrap_tb.i_dut.i_chitchat_rx.rx_frame_counter[15:0]
+@800200
+-LB interface
+@1000200
+-LB interface
+@28
+chitchat_txrx_wrap_tb.i_dut.lb_clk
+chitchat_txrx_wrap_tb.i_dut.rx_location[2:0]
+@22
+chitchat_txrx_wrap_tb.i_dut.rx_protocol_ver[3:0]
+chitchat_txrx_wrap_tb.i_dut.txrx_latency[15:0]
+chitchat_txrx_wrap_tb.i_dut.rx_frame_counter[15:0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -48,14 +48,13 @@ module chitchat_rx(
 
    // Timing generator
    reg [3:0] word_count=0;
-   reg last=0, last_r=0, rx_valid_r=0, frame_drop_r=0;
+   reg last=0, rx_valid_r=0, frame_drop_r=0;
 
    wire timeout   = &word_count;
    wire increment = ~timeout;  // word_count stops at 15
 
    always @(posedge clk) begin
       word_count <= gtx_k ? 0 : (word_count + increment);
-      last_r     <= last;
    end
 
    // CRC calculation

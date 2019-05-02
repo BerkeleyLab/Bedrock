@@ -5,6 +5,10 @@
 // to communicate cavity status information (e.g. detune, interlock) between two
 // FPGA chassis over fiber.
 //
+/// NOTE: There's no valid/strobe input to this module, since input data is sampled
+//        periodically, at a fixed rate. In order to control what data gets sent over the line,
+//        latching of input data with a valid/strobe must be done externally.
+//
 // See interchassis_protocol.txt for an application of this protocol and lower level
 // details.
 //
@@ -19,7 +23,8 @@ module chitchat_tx #(
                                  // RX-end only accepts data after LINK_UP_CNT
                                  // successfully decoded data/comma pairs
 
-   output        tx_ready,   // Pulsed whenever chitchat_tx consumes input data
+   output        tx_send,       // Pulsed periodically on each issued
+                                 // transaction, as long as TX line is active
 
    input  [2:0]  tx_location, // ID of a particular transmitter
    input  [31:0] tx_data0,
@@ -94,7 +99,7 @@ module chitchat_tx #(
    end
 
    // Assign output ports
-   assign tx_ready  = start;
+   assign tx_send   = start;
    assign gtx_d     = outer_data;
    assign gtx_k     = sync_r;
    assign local_frame_counter = frame_counter;
