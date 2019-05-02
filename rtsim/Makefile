@@ -13,14 +13,14 @@ endif
 
 VVP_FLAGS += +trace
 
-TEST_BENCH = beam_tb outer_prod_tb resonator_tb a_compress_tb cav_mode_tb cav_elec_tb rtsim_tb
+TEST_BENCH = beam_tb outer_prod_tb resonator_tb a_compress_tb cav_mode_tb cav_elec_tb rtsim_tb afilter_siso_tb
 
 TGT_ := $(TEST_BENCH)
 
 NO_CHECK =
 
 #CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
-CHK_ += a_comp_check resonator_check cav_mode_check
+CHK_ += a_comp_check resonator_check cav_mode_check afilter_siso_check
 
 BITS_ :=
 
@@ -44,6 +44,14 @@ rtsim.dat: rtsim_tb rtsim_in.dat
 	$(VVP) $< +pfile=$@
 	$(PYTHON) rtsim_test.py
 
+afilter_siso_in.dat: filte2.py afilter_siso_auto afilter_siso_tb_auto $(AUTOGEN_DIR)/regmap_afilter_siso.json $(AUTOGEN_DIR)/regmap_afilter_siso_tb.json
+
+	$(PYTHON) $<
+
+afilter_siso.vcd: afilter_siso_in.dat
+
+afilter_siso_check: afilter_siso_in.dat
+
 # XXX why does this break builds?
 # .PHONY: rtsim_auto
 
@@ -56,9 +64,11 @@ resonator_check: resonator_check.py resonator.dat
 cav_mode_check: cav_mode_check.py cav_mode.dat
 	$(PYTHON) $<
 
+
+
 LB_AW = 14 # Set the Local Bus Address Width for test benches
 
-CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat *.png cordicg_b22.v
+CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd *.dat *.png cordicg_b22.v *.pdf
 
 CLEAN_DIRS += _xilinx
 

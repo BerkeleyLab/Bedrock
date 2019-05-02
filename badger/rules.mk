@@ -2,9 +2,15 @@
 # The Makefile for any project that depends on RTEFI is expected to include this file
 
 # =====
+# Attention!!!!
+vpath %.v   $(BADGER_DIR)
+vpath %.py  $(BADGER_DIR)
+vpath %.csv $(BADGER_DIR)
+
+# =====
 # Machine generated code
-ITABLES = $(BADGER_DIR)/tx_none_table.csv $(BADGER_DIR)/tx_arp_table.csv $(BADGER_DIR)/tx_icmp_table.csv $(BADGER_DIR)/tx_udp_table.csv
-construct_tx_table.v: $(BADGER_DIR)/tx_gen.py $(ITABLES)
+ITABLES = tx_none_table.csv tx_arp_table.csv tx_icmp_table.csv tx_udp_table.csv
+construct_tx_table.v: tx_gen.py $(ITABLES)
 	$(PYTHON) $^ > $@
 
 # =====
@@ -12,7 +18,7 @@ construct_tx_table.v: $(BADGER_DIR)/tx_gen.py $(ITABLES)
 # Minor issue: if you duplicate dependencies, they're not duplicated in $^
 # Here is an example client list typically instantiated where rtefi is being included
 # RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
-rtefi_preblob.vh: $(BADGER_DIR)/collect_clients.py $(RTEFI_CLIENT_LIST)
+rtefi_preblob.vh: collect_clients.py $(RTEFI_CLIENT_LIST)
 	$(PYTHON) $^ > $@
 rtefi_blob.v: rtefi_preblob.v rtefi_preblob.vh
 	$(VERILOG) -E $< -o $@

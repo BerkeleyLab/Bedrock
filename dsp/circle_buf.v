@@ -2,37 +2,42 @@
 
 module circle_buf #(
 	parameter dw=16,
-	parameter aw=13,  // for each half of the double-buffered memory
-	parameter auto_flip = 1)  // default is to use a read of the last
-// memory location as acknowledgement that the buffer read is complete,
-// and read cycles need the stb_out signal set high to register.
-// Set this parameter to 0 to disable that feature, in which case you
-// need to construct the stb_out signal as a simple explicit flip command.
+	parameter aw=13,
+	parameter stat_w=16, // Width of buffer statistics
+	// For each half of the double-buffered memory, the default is to use a read of the last
+	// memory location as acknowledgement that the buffer read is complete,
+	// and read cycles need the stb_out signal set high to register.
+	// Set this parameter to 0 to disable that feature, in which case you
+	// need to construct the stb_out signal as a simple explicit flip command.
+	parameter auto_flip = 1)
 (
 	// source side
-	input iclk,
+	input          iclk,
 	input [dw-1:0] d_in,
-	input stb_in,    // d_in is valid
-	input boundary,  // between blocks of input strobes
-	input stop,      // single-cycle
-	// assume stop happens a programmable number of samples after a
-	// fault event, and we will save 1024 samples before the stop signal
-	output buf_sync, // single-cycle when buffer starts/ends
-	output buf_transferred,  // single-cycle when a buffer has been
-		// handed over for reading; one cycle delayed from buf_sync
+	input          stb_in,          // d_in is valid
+	input          boundary,        // between blocks of input strobes
+	input          stop,            // single-cycle
+	                                // assume stop happens a programmable number of samples
+	                                // after a fault event, and we will save 1024 samples
+	                                // before the stop signal
+	output         buf_sync,        // single-cycle when buffer starts/ends
+	output         buf_transferred, // single-cycle when a buffer has been
+	                                // handed over for reading;
+	                                // one cycle delayed from buf_sync
 
 	// readout side
-	input oclk,
-	output enable,
-	input [aw-1:0] read_addr,  // nominally 8192 locations
-	output [dw-1:0] d_out,
-	input stb_out,
-	output [15:0] buf_count,
-	output [aw-1:0] buf_stat2, // includes fault bit,
-	output [15:0] buf_stat   // includes fault bit,
-	// and (if set) the last valid location
-,output [aw+4:0] debug_stat
+	input                 oclk,
+	output                enable,
+	input  [aw-1:0]       read_addr, // nominally 8192 locations
+	output [dw-1:0]       d_out,
+	input                 stb_out,
+	output [stat_w-1:0]   buf_count, // number of full buffer writes
+	output [aw-1:0]       buf_stat2, // last valid location
+	output [stat_w-1:0]   buf_stat,  // includes fault bit, and (if set) the last valid location
+	output [aw+4:0]       debug_stat // {stb_in, boundary, btest, wbank, rbank, wr_addr}
 );
+
+`define MIN(a,b) a < b ? a : b
 
 // parameterized to improve testability
 
@@ -59,11 +64,9 @@ wire eval_done_read = stb_in & boundary_ok & end_write_addr;
 wire eval_block=eval_done_read & change_req;
 reg buff_wrap=0;
 reg buf_transferred_r=0;
-reg boundary_d=0;
 wire btest= boundary | ( stb_in & end_write_addr );
 assign buf_transferred = buf_transferred_r;
 always @(posedge iclk) begin
-	boundary_d <= boundary;
 	flag_return_x <= flag_return;  // Clock domain crossing
 	if (eval_done_read) done_read[wbank] <= change_req;
 	//if (boundary|(stb_in&end_write_addr)) boundary_ok <= boundary;
@@ -100,13 +103,14 @@ end
 assign flag_return = rbank;
 
 // in iclk domain
-wire [13:0] save_addr0_14 = save_addr0;  // might pad or discard upper bits
-assign buf_stat = {record_type, buff_wrap, save_addr0_14};
+wire [stat_w-2-1:0] save_addr0_ext = save_addr0[`MIN(stat_w-2,aw)-1:0]; // truncate or pad MSBs
+assign buf_stat = {record_type, buff_wrap, save_addr0_ext};
+
 assign buf_stat2 = save_addr0;
 wire write_en= stb_in & boundary_ok & run;
 
 // Count of how many buffers we have acquired
-reg [15:0] buf_count_r=0;
+reg [stat_w-1:0] buf_count_r=0;
 always @(posedge iclk) if (eval_done_read) buf_count_r <= buf_count_r+1;
 assign buf_count=buf_count_r;
 assign buf_sync=eval_done_read;

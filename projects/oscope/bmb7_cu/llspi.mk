@@ -15,7 +15,7 @@ SYNTH = xil_syn
 %.vcd: %_tb
 	$(VVP) $< $(VFLAGS) +vcd $(VCD_ARGS) $(VCD_ARGS_$@)
 
-%_view: %.vcd %.sav
+%_view: %.vcd %.gtkw
 	$(GTKWAVE) $^
 
 %_check: %_tb testcode.awk

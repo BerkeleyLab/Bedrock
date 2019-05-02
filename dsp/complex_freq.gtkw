@@ -1,0 +1,49 @@
+[timestart] 0
+[size] 1172 589
+[pos] 55 0
+*-13.816814 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] complex_freq_tb.
+[treeopen] complex_freq_tb.dut.
+[sst_width] 210
+[signals_width] 217
+[sst_expanded] 1
+[sst_vpaned_height] 150
+@420
+complex_freq_tb.cc
+@24
+complex_freq_tb.amp
+@420
+complex_freq_tb.sdata[17:0]
+@28
+complex_freq_tb.sgate
+@420
+complex_freq_tb.freq[4:0]
+@28
+complex_freq_tb.freq_valid
+complex_freq_tb.updated
+@200
+-DUT refcnt
+@24
+complex_freq_tb.dut.refcnt[4:0]
+@200
+-DUT amp
+@28
+complex_freq_tb.dut.sgate1
+complex_freq_tb.dut.sgate2
+complex_freq_tb.dut.sum_valid
+@420
+complex_freq_tb.dut.square_sum[36:0]
+@200
+-sqrt
+@28
+complex_freq_tb.dut.sqrt.en
+complex_freq_tb.dut.sqrt.dav
+@200
+-DUT phase
+@28
+complex_freq_tb.dut.quad[1:0]
+complex_freq_tb.dut.oldquad[1:0]
+@420
+complex_freq_tb.dut.quad_cnt[5:0]
+[pattern_trace] 1
+[pattern_trace] 0

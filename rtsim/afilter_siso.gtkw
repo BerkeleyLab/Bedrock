@@ -1,0 +1,62 @@
+[timestart] 1030
+[size] 1437 777
+[pos] 1 1
+*-5.546373 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] afilter_siso_tb.
+[treeopen] afilter_siso_tb.afilter_siso.
+[sst_width] 261
+[signals_width] 223
+[sst_expanded] 1
+[sst_vpaned_height] 216
+@28
+afilter_siso_tb.lb_clk
+@24
+afilter_siso_tb.lb_addr[14:0]
+@22
+afilter_siso_tb.lb_data[31:0]
+@28
+afilter_siso_tb.lb_write
+afilter_siso_tb.run_filter
+@420
+afilter_siso_tb.u_in[17:0]
+afilter_siso_tb.y_out[17:0]
+@28
+afilter_siso_tb.filter_done
+afilter_siso_tb.res_clip
+@200
+-DUT
+@420
+afilter_siso_tb.afilter_siso.x_drive[17:0]
+@28
+afilter_siso_tb.afilter_siso.start_out
+afilter_siso_tb.afilter_siso.start_res
+afilter_siso_tb.afilter_siso.start_dot
+@420
+afilter_siso_tb.afilter_siso.res_x[17:0]
+@200
+-outer
+@420
+afilter_siso_tb.afilter_siso.outer_prod.x_hold[17:0]
+afilter_siso_tb.afilter_siso.outer_prod.k_out1[17:0]
+afilter_siso_tb.afilter_siso.outer_prod.result[17:0]
+@200
+-res
+@420
+afilter_siso_tb.afilter_siso.resonator.drive[17:0]
+afilter_siso_tb.afilter_siso.resonator.wd_out[17:0]
+afilter_siso_tb.afilter_siso.resonator.ab_out[35:0]
+afilter_siso_tb.afilter_siso.resonator.mul_result[17:0]
+@24
+afilter_siso_tb.afilter_siso.resonator.scale_d[2:0]
+@420
+afilter_siso_tb.afilter_siso.resonator.sum_result[36:0]
+afilter_siso_tb.afilter_siso.resonator.position[17:0]
+@200
+-dot
+@420
+afilter_siso_tb.afilter_siso.dot.k_out1[17:0]
+afilter_siso_tb.afilter_siso.dot.x[17:0]
+afilter_siso_tb.afilter_siso.dot.mul1[35:0]
+afilter_siso_tb.afilter_siso.dot.acc1[23:0]
+[pattern_trace] 1
+[pattern_trace] 0

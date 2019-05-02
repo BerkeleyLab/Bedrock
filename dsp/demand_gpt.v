@@ -7,11 +7,13 @@ module demand_gpt(input clk, input gate, input trig, output time_err);
 parameter gpt=16;
 
 reg time_err_r=0;
+reg gate_check=0;
 reg [8:0] count=0;  // XXX generous, but not general
 
 always @(posedge clk) begin
+        gate_check <= gate;
 	count <= count + gate;
-	if (trig) begin
+	if (trig && gate_check) begin
 		time_err_r <= (count+gate) != gpt;
 		count <= 0;
 	end
