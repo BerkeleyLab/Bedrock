@@ -23,8 +23,6 @@ HOMELESS_DIR = local
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
 %-vpi.vpi: %-vpi.o
 	$(VERILOG_VPI) $^
-%_view: %.vcd %.gtkw
-	$(GTKWAVE) $(GTKW_OPT) $^
 
 # =====
 # Possibly common setup / configuration
@@ -57,8 +55,10 @@ vpath %.v $(DSP_DIR) $(HOMELESS_DIR)
 vpath %.eps ..
 
 all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check
+all: test_tx_check precog_check mac_subset_check
 all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb rtefi_live
-all: lb_timing_demo_tb
+all: lb_timing_demo.vcd
+# all: lb_timing_demo.pdf
 
 # Packet Badger synthesizable code
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
@@ -69,7 +69,7 @@ include ../rules.mk
 # These foo3.dat files are not currently used by the main test benches,
 # but generate them anyway so we can cross-check our various CRC implementations
 %3.dat: packetgen.py
-	$(PYTHON) $< $(@:3.dat=) > $@
+	$(PYTHON) $< $* > $@
 crc_selfcheck_check: crc_selfcheck udp3.dat arp3.dat icmp3.dat udp4.dat
 	./$< $(word 2, $^)
 	./$< $(word 3, $^)
@@ -246,7 +246,15 @@ tap_start: rtefi_live tap-vpi.vpi
 Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
-	make -C obj_dir -f Vrtefi_blob.mk
+	MAKEFLAGS="" make -C obj_dir -f Vrtefi_blob.mk
+	mv obj_dir/$@ $@
+
+# =====
+# Verilator, slightly larger scope
+Vhw_test: hw_test.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c freq_count.v activity.v
+	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
+	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
+	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
 	mv obj_dir/$@ $@
 
 # =====
@@ -254,7 +262,7 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v lb_demo_slave.v freq_count.v mem_gateway_sim.cpp udp_model.c
 	rm -f udp_model.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
-	make -C obj_dir -f Vmem_gateway_wrap.mk
+	MAKEFLAGS="" make -C obj_dir -f Vmem_gateway_wrap.mk
 	mv obj_dir/$@ $@
 
 # =====
@@ -275,6 +283,34 @@ ac701_rgmii_vtestx.bit: ac701_rgmii_testx.tcl ac701_rgmii_testx.d $(SYNTH_SOURCE
 	mv _xilinx/ac701_rgmii_testx.runs/impl_1/rgmii_hw_test.bit $@
 
 # =====
+# More experimental rules relating to a possible future MAC
+host_mem: host_mem_gen
+	./host_mem_gen
+test_tx_tb: test_tx_mac.v
+test_tx.vcd: host_mem
+test_tx.out: test_tx_tb host_mem
+	$(VVP) $<
+precog_tb: precog.v
+mac_subset_tb: mac_subset.v test_tx_mac.v precog.v
+host_cmds.dat: host_cmds_gen mac_subset.gold
+	./host_cmds_gen $(filter %mac_subset.gold, $^)
+mac_subset.vcd: host_cmds.dat
+mac_subset.out: mac_subset_tb host_cmds.dat
+	$(VVP) $<
+retrigger.dat: packetgen.py packet2txmac.py
+	$(PYTHON) $< flip | $(PYTHON) $(word 2, $^) > $@
+selfmac_in.dat: packetgen.py retrigger.dat
+	$(PYTHON) $< lb $(word 2, $^) > $@
+selfmac.vcd: rtefi_pipe_tb selfmac_in.dat
+	$(VVP) $< +vcd $(VCD_ARGS_$@)
+	mv rtefi_pipe.vcd $@  # horrible
+VCD_ARGS_selfmac.vcd = +packet_file=$(filter %selfmac_in.dat, $^)
+# Can also make tap_start and
+# python3 packetgen.py flip | python badger_lb_io.py --ip=192.168.7.4 arb
+# Result is at least visible to tcpdump -i tap0
+# Should make packetgen.py smarter about the dest MAC created in that case.
+
+# =====
 # If you've kept your .gtkw files up to date, this target should do nothing.
 # Still learning how window managers affect [sst_width].
 # rtefi_sim.gtkw is an oddball.
@@ -287,6 +323,10 @@ docs: rtefi.svg clients.svg memory.svg tx_path.svg
 .PHONY: docs
 %.svg: %.eps
 	echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
+
+# Documentation from Du
+lb_timing_demo.pdf: lb_timing_demo.vcd lb_timing_demo.gtkw
+	$(XVFB) $(GTKWAVE) -r gtkwave_nosplash.rc -S gtkw_print.tcl $^
 
 # =====
 # Other, weirder, maintenance stuff
@@ -301,7 +341,8 @@ locc:
 	rmccmt *.c *.cpp | tr -d ' \t' | grep -c .
 .PHONY: spellme loc locc
 
-CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap stests.dat *3.dat pcap2v $(RTEFI_CLEAN)
+CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen host_cmds.dat retrigger.dat selfmac_in.dat $(RTEFI_CLEAN)
+CLEAN += *.pdf
 CLEAN_DIRS += obj_dir _xilinx
 # Actual "clean" rule in bottom_rules.mk
 include $(BUILD_DIR)/bottom_rules.mk

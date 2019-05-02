@@ -11,10 +11,15 @@
 
 // The control_rd port (a.k.a. not write) is just a level that changes at
 // the start of each transaction, timing exactly like addr and data_out.
+//
 // control_pipe_rd is new; it's for people who want to pay attention to
 // the pipelining of each read operation.  It shows the strobe propagating
-// all the way to the cycle (marked by control_rd_valid, exactly equal to
-// control_pipe_read[read_pipe_len]) when this module latches data_in.
+// all the way from the start of the read request to the cycle (marked by
+// control_rd_valid, exactly equal to control_pipe_read[read_pipe_len]) when
+// this module latches data_in.  Note that the "active" bit(s) flow through
+// all read_pipe_len cycles of activity, plus one more at the end, and thus
+// has a possibly surprising length.
+//
 // If read_pipe_len is increased, and bus cycles are spaced close together
 // (every 8 for now, future burst modes could go down to every 4 or even
 // every 2), there can be multiple bus transactions in the pipeline
@@ -38,6 +43,7 @@ module mem_gateway(
 	output control_rd,
 	output control_write,
 	output control_rd_valid,
+	// length of control_pipe_rd is read_pipe_len+1, see above
 	output [read_pipe_len:0] control_pipe_rd,
 	output [31:0] data_out,
 	input [31:0] data_in

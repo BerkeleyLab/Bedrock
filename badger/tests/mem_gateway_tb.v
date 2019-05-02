@@ -39,6 +39,7 @@ lb_demo_slave slave(.clk(clk), .addr(addr),
 	.ibadge_clk(1'b0),
 	.ibadge_stb(1'b0), .ibadge_data(8'b0),
 	.obadge_stb(1'b0), .obadge_data(8'b0),
+	.tx_mac_done(1'b0),
 	.xdomain_fault(1'b0)
 );
 
