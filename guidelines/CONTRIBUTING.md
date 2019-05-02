@@ -1,14 +1,50 @@
 # Contributing Guidelines
 
 Entails contribution guidelines to all projects in the group hdl-libraries.
+We are actively looking for meaningful contributions to our codebase. A
+meaningful contribution can entail anything from:
+
+1. A typo
+2. A readability enhancement
+3. A code or Makefile simplification
+4. A bug report
+5. A test
+6. A new source file that you deem fits into this codebase and
+preferably a test that goes with it!
+7. Support for a new board or a chip on the existing projects
+8. A new project
+9. A new way to build code within the code base
+10. New synthesis or simulation framework
 
 ## TL;DR
 
-0. Read this document.
-1. Follow readability guidelines
-2. Add tests
-3. Make a pull request when merging into master
+### Adding a small feature?
 
+1. Create a branch, and write code following guidelines here
+2. Add tests
+3. Add them to CI, and ensure they are passing with all the other tests you may have inadvertently broken
+4. Make a pull request and have somebody else other than you merge it into master
+5. Feel free to request for help during any stage
+
+### Adding a large feature?
+
+1. Start an issue or a wiki link with a detailed feature description/request
+2. Obtain general consensus or feedback
+3. Create a branch, and start a Merge/Pull Request at an early stage, in order to get early feedback from community
+4. Add tests
+5. Add them to CI, and ensure they are passing with all the other tests you may have inadvertently broken
+6. Add documentation
+7. Feel free to request for help during any stage
+
+## Code of Conduct
+
+TODO: A link to a meaningful one on line?
+
+A few things to ensure it doesn't miss:
+
+1. Make contributors feel welcome
+2. Don't prematurely shutdown ideas
+3. Provide help
 
 ## Contents of a repository
 
@@ -21,31 +57,30 @@ for documentation purposes.  Each such file demands some note as to
 how it was generated.
 
 All checked-in files should be permissively licensed, consistent with
-the license.txt file.
+the LICENSE.txt file.
 
 If a file is needed that can be legally downloaded from the public Internet,
-but not redistributed, a Makefile rule (or similar mechanism) can be included
-to perform that download and check that the result has the expected SHA256.
+please explicitly download those files and check that the result has the expected
+SHA256. Do NOT redistribute or embed it within Bedrock without checking license.
 This step should be visibly documented, and users encouraged to take that step
-once per repository checkout.
+once per repository checkout. TODO: Example?
 
-Sometimes files that look like source are actually machine generated.
-This can be very good, when it minimizes the chances of it having
-hard-to-detect errors.  It can also be confusing, and the worst case
-is to have a long (but correct-by-construction) file checked in to
-the source repository, which has then been hand-edited such that correctness
-can no longer be guaranteed.  Usually the best approach is to use
-Makefiles to generate these files on-the-fly.  If they are checked
-in, they should be both visibly marked at the top as machine-generated,
-and have some cross-check rule that confirms they still have the
-expected contents.
+Please do NOT check-in machine generated code. If unavoidable, make it explicit.
+
+Understanding that the choice of a programming language depends on the task at hand:
+Currently, synthesizable code is written in Verilog, machine-generated Verilog
+typically comes from Python, test benches that are too complex for Verilog resort to Python,
+and network runtime support is in Python, C, or C++.
+
+Standard implementations and standard libraries are preferred for obvious reasons.
+
+Automatic generation of documentation is a topic of current discussion. Suggestions welcome!
 
 
 ## Reproducible builds
 
 All constructed files (sometimes called artifacts) should be reproducible.
-See [reproducible-builds.org](https://reproducible-builds.org).  This includes pretty much any machine-generated
-file, including pseudo-source files discussed above.
+See [reproducible-builds.org](https://reproducible-builds.org).  This includes pretty much any machine-generated file.
 
 Purposefully embedded "built-on" date stamps are deprecated; use
 a git commit ID (or similar) instead.
@@ -55,21 +90,23 @@ PDF and object files often take extra effort to make reproducible.
 FPGA bitfiles are not typically shown to be reproducible, but it would
 be great if that can change.
 
+
 ## Readability
 
 Readability is a key goal for shared software. Lowering the barrier of entry for
-a newcomer enables the codebase to flourish. Hence it is important to keep code
-readable. And this can be easily achieved by adhering to commonly accepted best
-practices. Although, it maybe impractical to adhere to every single best
-practice: reading guidelines, reviewing each others code, and having healthy
-discussions can tremendously improve the standard of software.
+a newcomer enables the codebase to flourish. This can be easily achieved by adhering
+to commonly accepted best practices. Although, it maybe impractical to adhere to
+every single best practice: reading guidelines, reviewing each others code, and
+having healthy discussions can tremendously improve the standard of software.
 
-This section contains a few rules of thumb, with some language specific
-guidelines.  We're not the first group to deal with this topic.  The
-[Linux kernel coding style guide](https://www.kernel.org/doc/html/v4.10/process/coding-style.html)
-is a useful background read; many of the concepts it discusses have
-general applicability.
+We're not the first group to deal with this topic. The following are
+useful resources:
 
+1. [Linux kernel coding style guide](https://www.kernel.org/doc/html/v4.10/process/coding-style.html) many of the concepts it discusses have general applicability.
+2. [Google python guide](http://google.github.io/styleguide/pyguide.html) and [PEP8](https://www.python.org/dev/peps/pep-0008/)
+3. TODO: Makefile REF??
+
+Please spell-check your code, comments, and documentation.
 
 ### A few rules of thumb
 
@@ -90,12 +127,12 @@ the same name for a reg and the port name of a module that receives
 that value, please do so.  Creating new and slightly different names
 for the same thing is a wasteful cognitive load.
 
-
 #### Whitespace
+
 Readability is the goal, and specialized techniques to gain readability
 (like vertical alignment of parallel semantics) is allowed and even encouraged.
 
-Trailing whitespace is pure useless entropy, just don't.
+Trailing whitespace is pure useless entropy.
 
 Unix-style line breaks, ASCII 0x0a.
 
@@ -121,8 +158,11 @@ Special case for Xcircuit PostScript files:
   See [hack_xcirc](hack_xcirc); consider creating and submitting a patch to
 avoid this in the distant future.
 
-
 ### Verilog
+
+[RTL Guidelines](rtl_guidelines.md)
+
+TODO: Reconcile the bottom two sections inside RTL?
 
 #### Of syntax
 Verilog files should always start with a human-readable description of
@@ -147,10 +187,6 @@ in constructing a new layer/module.  That is no excuse for pathologically long
 and complicated modules, that egregiously violate Linux style guide section
 "6) Functions".  Please find ways to break up and/or autogenerate those modules.
 
-Please delete the 8-line header in GtkWave config files (.sav or .gtkw), that
-contains username and absolute path info.  Consider creating and submitting a
-patch to gtkwave.
-
 #### Of semantics
 
 Most of our effort should be focused on portable synthesizable Verilog modules
@@ -174,9 +210,20 @@ We want all python files compatible with python2 and python3.
 Some legacy code can be tolerated as python2 only.
 Some new code can be tolerated as python3 only.
 
+A quick book for understanding patterns and Python in general: https://effectivepython.com/
 
 ## Testing
 
 Ideally all code will be paired with a regression test that fully exercises
 its functionality, maybe even cross-checked with a code coverage tool.
 The more complex the function, the more important are such tests.
+
+In general, file foo.v should define module foo, and have an associated
+testbench in file foo_tb.v (which defines module foo_tb).  There will be
+exceptions to this rule.  It's OK for other modules to be defined in
+file foo.v, if they will never be instantiated by by any other code.
+If possible, the testbench will give foo a thorough exercise, and print
+PASS only if everything checks out.  More complex tests may involve
+helper code in e.g., python, that will determine if the module is performing
+as expected.  In all cases, the regression tests will be automated by
+a Makefile rule called foo_check.
