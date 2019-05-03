@@ -30,7 +30,7 @@ module eth_gtx_bridge #(
    input  [31:0] lb_rdata
 );
    wire [7:0] gmii_rxd, gmii_txd;
-   wire [9:0] gtx_txd_10
+   wire [9:0] gtx_txd_10;
    reg  [9:0] gtx_rxd_10;
    wire gmii_tx_en, gmii_rx_er, gmii_rx_dv;
 

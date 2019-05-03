@@ -116,7 +116,9 @@ module comms_top
    // Configured by gtx_ethernet.tcl and gtx_gen.tcl
    // Refer to qgtx_wrap_pack.vh for port map
 
-   wire [GTX_ETH_WIDTH-1:0] gtx_rxd, gtx_txd;
+   wire [GTX_ETH_WIDTH-1:0] gtx0_rxd, gtx0_txd;
+   wire [GTX_CC_WIDTH-1:0]  gtx1_rxd, gtx1_txd;
+   wire                     gtx1_txk, gtx1_rxk;
 
    // Status signals
    wire gt_cpll_locked;
@@ -148,9 +150,9 @@ module comms_top
       .gt0_txusrclk_in         (gtx0_tx_usr_clk),
       .gt0_txusrclk2_in        (gtx0_tx_usr_clk),
       .gt0_rxusrrdy_in         (rx0_pll_lock),
-      .gt0_rxdata_out          (gtx_rxd),
+      .gt0_rxdata_out          (gtx0_rxd),
       .gt0_txusrrdy_in         (tx0_pll_lock),
-      .gt0_txdata_in           (gtx_txd),
+      .gt0_txdata_in           (gtx0_txd),
       .gt0_rxn_in              (K7_QSFP1_RX0_N),
       .gt0_rxp_in              (K7_QSFP1_RX0_P),
       .gt0_txn_out             (K7_QSFP1_TX0_N),
@@ -168,17 +170,17 @@ module comms_top
       .gt1_txusrclk_in         (gtx1_tx_out_clk),
       .gt1_txusrclk2_in        (gtx1_tx_out_clk),
       .gt1_rxusrrdy_in         (gt_cpll_locked),
-      .gt1_rxdata_out          (),
+      .gt1_rxdata_out          (gtx1_rxd),
       .gt1_txusrrdy_in         (gt_cpll_locked),
-      .gt1_txdata_in           (16'b0),
+      .gt1_txdata_in           (gtx1_txd),
       .gt1_rxn_in              (K7_QSFP1_RX1_N),
       .gt1_rxp_in              (K7_QSFP1_RX1_P),
       .gt1_txn_out             (K7_QSFP1_TX1_N),
       .gt1_txp_out             (K7_QSFP1_TX1_P),
       .gt1_rxfsm_resetdone_out (gt1_rxfsm_resetdone),
       .gt1_txfsm_resetdone_out (gt1_txfsm_resetdone),
-      .gt1_rxcharisk_out       (),
-      .gt1_txcharisk_in        (2'b0),
+      .gt1_rxcharisk_out       (gtx1_rxk),
+      .gt1_txcharisk_in        (gtx1_txk),
       .gt1_rxbufstatus         (gt1_rxbufstatus),
       .gt1_txbufstatus         (gt1_txbufstatus),
 `endif
@@ -197,8 +199,6 @@ module comms_top
    wire [LBUS_ADDR_WIDTH-1:0] lb_addr;
    wire [LBUS_DATA_WIDTH-1:0] lb_wdata, lb_rdata;
 
-   reg [LBUS_DATA_WIDTH-1:0] lb_rdata_r;
-
    eth_gtx_bridge #(
       .IP         (IPADDR),
       .MAC        (MACADDR),
@@ -207,8 +207,8 @@ module comms_top
       .gtx_tx_clk  (gtx0_tx_usr_clk), // Transceiver clock at half rate
       .gmii_tx_clk (gmii_tx_clk),     // Clock for Ethernet fabric - 125 MHz for 1GbE
       .gmii_rx_clk (gmii_rx_clk),
-      .gtx_rxd     (gtx_rxd),
-      .gtx_txd     (gtx_txd),
+      .gtx_rxd     (gtx0_rxd),
+      .gtx_txd     (gtx0_txd),
 
       // Status signals
       .rx_mon      (rx_mon),
@@ -223,18 +223,114 @@ module comms_top
       .lb_rdata    (lb_rdata)
    );
 
-   // TODO: Temporary demo code
-   reg        lbus_led = 0;
-   reg [31:0] test_msg = "QF2\n";
+   wire lb_clk = gmii_rx_clk;
 
-   always @(posedge gmii_rx_clk) begin
+   // ----------------------------------
+   // CHITCHAT TX-RX
+   // ---------------------------------
+   wire [2:0]  tx_location;
+
+   wire [15:0] rx_frame_counter;
+   wire [15:0] txrx_latency;
+
+   wire        rx_valid;
+   wire [2:0]  ccrx_fault;
+   wire [15:0] ccrx_fault_cnt;
+   wire        ccrx_los;
+
+   wire [3:0]  rx_protocol_ver;
+   wire [2:0]  rx_gateware_type;
+   wire [2:0]  rx_location;
+   wire [31:0] rx_rev_id;
+   wire [31:0] rx_data0;
+   wire [31:0] rx_data1;
+
+   chitchat_txrx_wrap #(
+      .REV_ID        (32'hdeadbeef)
+   ) i_chitchat_wrap (
+      // -------------------
+      // Data Interface
+      // -------------------
+      .tx_clk            (sys_clk),
+
+      .tx_transmit_en    (1'b1),
+      .tx_valid          (1'b1),
+      .tx_location       (tx_location),
+      .tx_data0          (32'hcafef00d),
+      .tx_data1          (32'hdeadf00d),
+
+      .rx_clk            (lb_clk),
+
+      .rx_valid          (rx_valid),
+      .rx_data0          (),
+      .rx_data1          (),
+      .ccrx_frame_drop   (),
+
+      // -------------------
+      // LB Interface
+      // -------------------
+      .lb_clk            (lb_clk),
+
+      .txrx_latency      (txrx_latency),
+      .rx_frame_counter  (rx_frame_counter),
+      .rx_protocol_ver   (rx_protocol_ver),
+      .rx_gateware_type  (rx_gateware_type),
+      .rx_location       (rx_location),
+      .rx_rev_id         (rx_rev_id),
+
+      .ccrx_fault        (ccrx_fault),
+      .ccrx_fault_cnt    (ccrx_fault_cnt),
+      .ccrx_los          (ccrx_los),
+
+      // ------------------------------------
+      // GTX Interface
+      // ------------------------------------
+      .gtx_tx_clk        (gtx1_tx_out_clk),
+      .gtx_rx_clk        (gtx1_rx_out_clk),
+
+      .gtx_tx_d          (gtx1_txd),
+      .gtx_tx_k          (gtx1_txk),
+      .gtx_rx_d          (gtx1_rxd),
+      .gtx_rx_k          (gtx1_rxk)
+   );
+
+
+   // ----------------------------------
+   // Local Bus Register Decoding
+   // ---------------------------------
+   comms_top_regbank i_comms_regbank
+   (
+      .lb_clk             (lb_clk),
+      .lb_valid           (lb_valid),
+      .lb_rnw             (lb_rnw),
+      .lb_addr            (lb_addr),
+      .lb_wdata           (lb_wdata),
+      .lb_renable         (lb_renable),
+      .lb_rdata           (lb_rdata),
+
+      .rx_frame_counter_i (rx_frame_counter),
+      .txrx_latency_i     (txrx_latency),
+      .ccrx_fault_i       (ccrx_fault),
+      .ccrx_fault_cnt_i   (ccrx_fault_cnt),
+      .ccrx_los_i         (ccrx_los),
+      .rx_protocol_ver_i  (rx_protocol_ver),
+      .rx_gateware_type_i (rx_gateware_type),
+      .rx_location_i      (rx_location),
+      .rx_rev_id_i        (rx_rev_id),
+
+      .tx_location_o      (tx_location)
+   );
+
+   // ----------------------------------
+   // Status LEDs
+   // ---------------------------------
+   // TODO: Temporary demo code
+   reg lbus_led = 0;
+
+   always @(posedge lb_clk) begin
       // Toggle on each Local Bus transaction
       if (lb_valid) lbus_led = ~lbus_led;
-
-      lb_rdata_r  <= test_msg;
    end
-
-   assign lb_rdata  = lb_rdata_r;
 
    // LED[0] GT Initialization done
    // LED[1] Received and decoded packet
