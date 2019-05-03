@@ -76,7 +76,7 @@ rtsim_test:
     - make clean && make checks && make rtsim.dat
 
 flake8:
-  stage: flake8
+  stage: deploy
   script:
    - find . -name "*.py" | xargs flake8
 
