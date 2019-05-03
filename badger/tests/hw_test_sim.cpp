@@ -1,8 +1,8 @@
 // Partially based on Verilator example module
 #include <verilated.h>
 
-// Include model header, generated from Verilating "rtefi_blob.v"
-#include "Vrtefi_blob.h"
+// Include model header, generated from Verilating "hw_test.v"
+#include "Vhw_test.h"
 #include <verilated_vcd_c.h>
 #include "ethernet_model.h"
 
@@ -18,7 +18,7 @@ int main(int argc, char** argv, char** env) {
 	Verilated::commandArgs(argc, argv);
 	Verilated::debug(0);
 
-	Vrtefi_blob* top = new Vrtefi_blob;
+	Vhw_test* top = new Vhw_test;
 
 	// Tracing (vcd)
 	VerilatedVcdC* tfp = NULL;
@@ -29,38 +29,37 @@ int main(int argc, char** argv, char** env) {
 		tfp = new VerilatedVcdC;
 		top->trace(tfp, 9);  // Trace 9 levels of hierarchy
 		// Verilated::mkdir("logs");
-		tfp->open("rtefi_sim.vcd");  // Open the dump file
+		tfp->open("hw_test_sim.vcd");  // Open the dump file
 	}
 
 	// Set some inputs
-	top->rx_clk = 0;
-	top->rxd= 0;
-	top->rx_dv = 0;
-	top->rx_er = 0;
-	top->tx_clk = 0;
-	top->enable_rx = 1;
-	top->config_clk = 0;
-	top->config_s = 0;
+	top->vgmii_rx_clk = 0;
+	top->vgmii_rxd= 0;
+	top->vgmii_rx_dv = 0;
+	top->vgmii_rx_er = 0;
+	top->vgmii_tx_clk = 0;
+	top->SCLK = 0;
+	top->CSB = 0;
 
 	while (/* main_time < 1100 && */ !Verilated::gotFinish()) {
 		main_time += 4;  // Time passes in ticks of 8ns
 		// Toggle clocks and such
-		top->rx_clk = !top->rx_clk;
-		top->tx_clk = top->rx_clk;
+		top->vgmii_rx_clk = !top->vgmii_rx_clk;
+		top->vgmii_tx_clk = top->vgmii_rx_clk;
 
 		// Run Ethernet at falling edge of rx_clk
-		if (top->rx_clk==0) {
+		if (top->vgmii_rx_clk==0) {
 			int eth_in_hold, eth_in_s_hold;
 			int r = ethernet_model(
-				top->txd, top->tx_en,
+				top->vgmii_txd, top->vgmii_tx_en,
 				&eth_in_hold, &eth_in_s_hold,
 				top->in_use);
 			if (r==1) {  // Should never happen
 				VL_PRINTF("Ethernet is dead\n");
 				exit(1);
 			}
-			top->rxd = eth_in_hold;
-			top->rx_dv = eth_in_s_hold;
+			top->vgmii_rxd = eth_in_hold;
+			top->vgmii_rx_dv = eth_in_s_hold;
 		}
 
 		// Evaluate model

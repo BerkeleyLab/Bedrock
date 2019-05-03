@@ -1,0 +1,54 @@
+[timestart] 0
+[size] 1158 602
+[pos] 152 283
+*-13.147670 28452 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] rtefi_pipe_tb.
+[treeopen] rtefi_pipe_tb.a.
+[treeopen] rtefi_pipe_tb.a.center.
+[treeopen] rtefi_pipe_tb.a.center.txmac.
+[sst_width] 238
+[signals_width] 198
+[sst_expanded] 1
+[sst_vpaned_height] 155
+@28
+rtefi_pipe_tb.eth_in_s
+@22
+rtefi_pipe_tb.eth_in[7:0]
+@28
+rtefi_pipe_tb.a.center.xraw2_l
+rtefi_pipe_tb.a.center.xraw2_s
+@22
+rtefi_pipe_tb.a.center.raw2_d[7:0]
+@28
+rtefi_pipe_tb.a.tx_en
+@22
+rtefi_pipe_tb.a.txd[7:0]
+@200
+-MAC control
+@28
+rtefi_pipe_tb.host_write
+@22
+rtefi_pipe_tb.host_waddr[10:0]
+rtefi_pipe_tb.host_wdata[15:0]
+@200
+-mac_subset
+@28
+rtefi_pipe_tb.a.center.txmac.host_start
+@22
+rtefi_pipe_tb.a.center.txmac.buf_start_addr[9:0]
+@24
+rtefi_pipe_tb.a.center.txmac.len_req[10:0]
+rtefi_pipe_tb.a.center.txmac.precog_width[10:0]
+@28
+rtefi_pipe_tb.a.center.txmac.req
+rtefi_pipe_tb.a.center.txmac.scanner_busy
+rtefi_pipe_tb.a.center.txmac.clear_to_send
+@200
+-precog
+@24
+rtefi_pipe_tb.a.center.txmac.precog.tx_packet_width[10:0]
+rtefi_pipe_tb.a.center.txmac.precog.state[1:0]
+@420
+rtefi_pipe_tb.a.center.txmac.precog.delay_cnt[11:0]
+[pattern_trace] 1
+[pattern_trace] 0

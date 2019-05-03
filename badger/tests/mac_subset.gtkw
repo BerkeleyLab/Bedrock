@@ -1,0 +1,50 @@
+[timestart] 651
+[size] 1000 600
+[pos] 365 59
+*-6.633872 796 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] mac_subset_tb.
+[treeopen] mac_subset_tb.mac.
+[sst_width] 224
+[signals_width] 198
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@420
+mac_subset_tb.gapn
+@28
+mac_subset_tb.scanner_busy
+mac_subset_tb.host_write
+@22
+mac_subset_tb.host_waddr[8:0]
+mac_subset_tb.host_wdata[15:0]
+@28
+mac_subset_tb.scanner_delayed
+mac_subset_tb.strobe_s
+mac_subset_tb.strobe_l
+@820
+mac_subset_tb.mac_data[7:0]
+@22
+mac_subset_tb.mac_data[7:0]
+@28
+mac_subset_tb.timing_error
+@200
+-DUT
+@28
+mac_subset_tb.mac.host_start_write
+mac_subset_tb.mac.host_dpram_write
+mac_subset_tb.mac.host_start
+@200
+-tx_mac
+@24
+mac_subset_tb.mac.mac.mode[2:0]
+mac_subset_tb.mac.mac.len_req[10:0]
+@200
+-precog
+@24
+mac_subset_tb.mac.precog.tx_packet_width[10:0]
+@28
+mac_subset_tb.mac.precog.scanner_busy
+mac_subset_tb.mac.precog.request_to_send
+mac_subset_tb.mac.mac_strobe
+mac_subset_tb.mac.precog.clear_to_send
+[pattern_trace] 1
+[pattern_trace] 0
