@@ -1,0 +1,57 @@
+[timestart] 46
+[size] 1271 743
+[pos] 51 53
+*-4.740286 728 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] down_5_12_tb.
+[sst_width] 210
+[signals_width] 238
+[sst_expanded] 1
+[sst_vpaned_height] 204
+@420
+down_5_12_tb.gauss
+down_5_12_tb.adc[15:0]
+@24
+down_5_12_tb.phase[3:0]
+@28
+down_5_12_tb.stb
+down_5_12_tb.sig_cl
+@420
+down_5_12_tb.sig_i[16:0]
+down_5_12_tb.sig_q[16:0]
+down_5_12_tb.sig_dc[15:0]
+@24
+down_5_12_tb.sig_rms[15:0]
+@200
+-DUT
+@28
+down_5_12_tb.dut.adc_clip1
+down_5_12_tb.dut.hold_cl
+@420
+down_5_12_tb.dut.ref_i[17:0]
+down_5_12_tb.dut.m_i[17:0]
+@28
+down_5_12_tb.dut.clear_sum
+@420
+down_5_12_tb.dut.sum_i[19:0]
+down_5_12_tb.dut.hold_i[16:0]
+down_5_12_tb.dut.tone_i[17:0]
+down_5_12_tb.dut.tmul_i[32:0]
+down_5_12_tb.dut.tmul_dc[15:0]
+down_5_12_tb.dut.adc_del[15:0]
+down_5_12_tb.dut.synth[16:0]
+down_5_12_tb.dut.resid[17:0]
+down_5_12_tb.dut.resid2[33:0]
+@24
+down_5_12_tb.dut.stupid[1:0]
+@28
+down_5_12_tb.dut.clear_sum2
+@24
+down_5_12_tb.dut.sumsq[36:0]
+down_5_12_tb.dut.hold_sumsq[31:0]
+@28
+down_5_12_tb.dut.start_sqrt
+down_5_12_tb.dut.sqrt_dv
+@24
+down_5_12_tb.dut.sqrt_y[15:0]
+[pattern_trace] 1
+[pattern_trace] 0
