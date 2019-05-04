@@ -36,6 +36,9 @@ gen : $(RTEFI_V)
 
 $(APP_NAME).bit: $(IP_TCL)
 
+hwtest:
+	cd test; ./comms_top_test.py -cf comms_test.cf ; ./runloop 30 ./comms_top_test.py -cf comms_test.cf > log.txt
+
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))
 -include $(BITS_:%.bit=$(DEPDIR)/%.bit.d)
@@ -45,5 +48,5 @@ ifneq (,$(findstring bit,$(MAKECMDGOALS)))
 endif
 
 CLEAN_DIRS += ./.Xil _xilinx
-CLEAN += $(RTEFI_CLEAN) *.bit
+CLEAN += $(RTEFI_CLEAN) *.bit test/log.txt
 include $(BUILD_DIR)/bottom_rules.mk

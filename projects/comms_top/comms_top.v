@@ -214,7 +214,7 @@ module comms_top
       .rx_mon      (rx_mon),
       .tx_mon      (tx_mon),
 
-      // Local bus interface
+      // Local bus interface in gmii_tx_clk domain
       .lb_valid    (lb_valid),
       .lb_rnw      (lb_rnw),
       .lb_addr     (lb_addr),
@@ -223,12 +223,18 @@ module comms_top
       .lb_rdata    (lb_rdata)
    );
 
-   wire lb_clk = gmii_rx_clk;
+   wire lb_clk = gmii_tx_clk;
 
    // ----------------------------------
    // CHITCHAT TX-RX
    // ---------------------------------
+
+   wire tx_transmit_en;
+
+   wire        tx_valid;
    wire [2:0]  tx_location;
+   wire [31:0] tx_data0;
+   wire [31:0] tx_data1;
 
    wire [15:0] rx_frame_counter;
    wire [15:0] txrx_latency;
@@ -245,6 +251,28 @@ module comms_top
    wire [31:0] rx_data0;
    wire [31:0] rx_data1;
 
+
+   // Generate test pattern composed of circular byte shift, interleaved
+   // with bad data that should not be sampled by chitchat_txrx_wrap
+   reg [127:0] test_data0 = "QF2PRE++CHITCHAT";
+   reg [127:0] test_data1 = "COMMS+T+ETHERNET";
+   reg [4:0] cycle_cnt = 0;
+
+
+   always @(posedge sys_clk) begin
+      cycle_cnt <= cycle_cnt + 1;
+
+      if (cycle_cnt == 6) begin
+         test_data0 <= {test_data0[119:0], test_data0[127:120]};
+         test_data1 <= {test_data1[119:0], test_data1[127:120]};
+      end
+   end
+
+   assign tx_valid = cycle_cnt[4];
+   assign tx_data0 = cycle_cnt[4] ? test_data0 : 32'hBADD;
+   assign tx_data1 = cycle_cnt[4] ? test_data1 : 32'hBADD;
+
+
    chitchat_txrx_wrap #(
       .REV_ID        (32'hdeadbeef)
    ) i_chitchat_wrap (
@@ -253,17 +281,17 @@ module comms_top
       // -------------------
       .tx_clk            (sys_clk),
 
-      .tx_transmit_en    (1'b1),
-      .tx_valid          (1'b1),
+      .tx_transmit_en    (tx_transmit_en),
+      .tx_valid          (tx_valid),
       .tx_location       (tx_location),
-      .tx_data0          (32'hcafef00d),
-      .tx_data1          (32'hdeadf00d),
+      .tx_data0          (tx_data0),
+      .tx_data1          (tx_data1),
 
       .rx_clk            (lb_clk),
 
       .rx_valid          (rx_valid),
-      .rx_data0          (),
-      .rx_data1          (),
+      .rx_data0          (rx_data0),
+      .rx_data1          (rx_data1),
       .ccrx_frame_drop   (),
 
       // -------------------
@@ -317,20 +345,18 @@ module comms_top
       .rx_gateware_type_i (rx_gateware_type),
       .rx_location_i      (rx_location),
       .rx_rev_id_i        (rx_rev_id),
+      .rx_data0_i         (rx_data0),
+      .rx_data1_i         (rx_data1),
 
-      .tx_location_o      (tx_location)
+      .tx_location_o      (tx_location),
+      .tx_transmit_en_o   (tx_transmit_en)
    );
 
    // ----------------------------------
    // Status LEDs
    // ---------------------------------
-   // TODO: Temporary demo code
-   reg lbus_led = 0;
+   wire lbus_led = rx_frame_counter[15]; // Toggle every 2**15 frames
 
-   always @(posedge lb_clk) begin
-      // Toggle on each Local Bus transaction
-      if (lb_valid) lbus_led = ~lbus_led;
-   end
 
    // LED[0] GT Initialization done
    // LED[1] Received and decoded packet

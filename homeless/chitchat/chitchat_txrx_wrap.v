@@ -81,11 +81,13 @@ module chitchat_txrx_wrap #(
    wire [31:0]           rx_data0_x_rgtx, rx_data1_x_rgtx;
    wire                  rx_valid_x_rgtx, rx_valid_l_rx;
    wire                  ccrx_frame_drop_x_rgtx;
+   reg                   ccrx_los_r_lb;
    reg  [15:0]           ccrx_fault_cnt_r_lb;
    reg  [3:0]            rx_protocol_ver_r_lb;
    reg  [2:0]            rx_gateware_type_r_lb;
    reg  [31:0]           rx_rev_id_r_lb;
    reg  [2:0]            rx_location_r_lb;
+   wire                  ccrx_los_l_rgtx;
    wire [15:0]           ccrx_fault_cnt_l_rgtx;
    wire [3:0]            rx_protocol_ver_l_rgtx;
    wire [2:0]            rx_gateware_type_l_rgtx;
@@ -94,11 +96,10 @@ module chitchat_txrx_wrap #(
    wire [15:0]           rx_lback_frame_counter_x_rgtx, rx_lback_frame_counter_x_tgtx;
 
    // LB CDC signals
-   localparam LB_PACK_WI = 16 + 3 + 1;
+   localparam LB_PACK_WI = 16 + 3;
    wire [LB_PACK_WI-1:0] lb_pack, lb_pack_x_rgtx;
    wire [15:0]           rx_frame_counter_x_rgtx;
    wire [2:0]            ccrx_fault_x_rgtx;
-   wire                  ccrx_los_x_rgtx;
 
 
    // ----------------------
@@ -160,7 +161,7 @@ module chitchat_txrx_wrap #(
    );
 
    // Compute loopback latency
-   always @(gtx_tx_clk) begin
+   always @(posedge gtx_tx_clk) begin
       if (rx_valid_x_tgtx)
          txrx_latency_x_tgtx = tx_local_frame_counter_x_tgtx - rx_lback_frame_counter_x_tgtx;
    end
@@ -171,7 +172,7 @@ module chitchat_txrx_wrap #(
       .gtx_k                     (gtx_rx_k),
       .ccrx_fault                (ccrx_fault_x_rgtx),
       .ccrx_fault_cnt            (ccrx_fault_cnt_l_rgtx),
-      .ccrx_los                  (ccrx_los_x_rgtx),
+      .ccrx_los                  (ccrx_los_l_rgtx),
       .ccrx_frame_drop           (ccrx_frame_drop_x_rgtx),
       .rx_valid                  (rx_valid_x_rgtx),
       .rx_protocol_ver           (rx_protocol_ver_l_rgtx),
@@ -212,7 +213,7 @@ module chitchat_txrx_wrap #(
    // ----------------------
    // LB CDC
    // ----------------------
-   assign lb_pack_x_rgtx = {rx_frame_counter_x_rgtx, ccrx_fault_x_rgtx, ccrx_los_x_rgtx};
+   assign lb_pack_x_rgtx = {rx_frame_counter_x_rgtx, ccrx_fault_x_rgtx};
 
    generate if (GTX_TO_LB_CDC) begin : G_LB_CDC
      data_xdomain # (.size(LB_PACK_WI)) i_lb_sync (
@@ -227,10 +228,11 @@ module chitchat_txrx_wrap #(
       assign lb_pack = lb_pack_x_rgtx;
    end endgenerate
 
-   assign {rx_frame_counter, ccrx_fault, ccrx_los} = lb_pack;
+   assign {rx_frame_counter, ccrx_fault} = lb_pack;
 
    // Quasi-static signals; Just register in destination clk domain
    always @(posedge lb_clk) begin
+      ccrx_los_r_lb         <= ccrx_los_l_rgtx;
       ccrx_fault_cnt_r_lb   <= ccrx_fault_cnt_l_rgtx;
       rx_protocol_ver_r_lb  <= rx_protocol_ver_l_rgtx;
       rx_gateware_type_r_lb <= rx_gateware_type_l_rgtx;
@@ -242,6 +244,7 @@ module chitchat_txrx_wrap #(
    // ----------------------
    // Drive output pins
    // ----------------------
+   assign ccrx_los         = ccrx_los_r_lb;
    assign ccrx_fault_cnt   = ccrx_fault_cnt_r_lb;
    assign rx_protocol_ver  = rx_protocol_ver_r_lb;
    assign rx_gateware_type = rx_gateware_type_r_lb;

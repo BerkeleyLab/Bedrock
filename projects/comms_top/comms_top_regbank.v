@@ -29,56 +29,41 @@ module comms_top_regbank #(
    input [2:0]         rx_location_i,
    input [31:0]        rx_rev_id_i,
 
+   input [31:0]        rx_data0_i,
+   input [31:0]        rx_data1_i,
+
    // Control registers out
-   output [2:0]        tx_location_o
+   output reg [2:0]    tx_location_o,
+   output reg          tx_transmit_en_o
 );
    `include "comms_pack.vh"
 
+   localparam LOCAL_AWI = 4;
+
    // Address map of read registers
-   localparam INFO0_RD_REG            = 0;
-   localparam INFO1_RD_REG            = 1;
-   localparam RX_FRAME_COUNTER_RD_REG = 2;
-   localparam TXRX_LATENCY_RD_REG     = 3;
-   localparam CCRX_FAULT_RD_REG       = 4;
-   localparam CCRX_FAULT_CNT_RD_REG   = 5;
-   localparam CCRX_LOS_RD_REG         = 6;
-   localparam RX_PROTOCOL_VER_RD_REG  = 7;
-   localparam RX_GATEWARE_TYPE_RD_REG = 8;
-   localparam RX_LOCATION_RD_REG      = 9;
-   localparam RX_REV_ID_RD_REG        = 10;
+   localparam [LOCAL_AWI-1:0] INFO0_RD_REG            = 0;
+   localparam [LOCAL_AWI-1:0] INFO1_RD_REG            = 1;
+   localparam [LOCAL_AWI-1:0] RX_FRAME_COUNTER_RD_REG = 2;
+   localparam [LOCAL_AWI-1:0] TXRX_LATENCY_RD_REG     = 3;
+   localparam [LOCAL_AWI-1:0] CCRX_FAULT_RD_REG       = 4;
+   localparam [LOCAL_AWI-1:0] CCRX_FAULT_CNT_RD_REG   = 5;
+   localparam [LOCAL_AWI-1:0] CCRX_LOS_RD_REG         = 6;
+   localparam [LOCAL_AWI-1:0] RX_PROTOCOL_VER_RD_REG  = 7;
+   localparam [LOCAL_AWI-1:0] RX_GATEWARE_TYPE_RD_REG = 8;
+   localparam [LOCAL_AWI-1:0] RX_LOCATION_RD_REG      = 9;
+   localparam [LOCAL_AWI-1:0] RX_REV_ID_RD_REG        = 10;
+   localparam [LOCAL_AWI-1:0] RX_DATA0_RD_REG         = 11;
+   localparam [LOCAL_AWI-1:0] RX_DATA1_RD_REG         = 12;
 
    // Address map of write registers
    localparam TX_LOCATION_WR_REG      = 0;
+   localparam TX_TRANSMIT_EN_WR_REG   = 1;
 
    // Size of read and write register banks
-   localparam NUM_RD_REG = RX_REV_ID_RD_REG + 1;
-   localparam NUM_WR_REG = TX_LOCATION_WR_REG + 1;
+   localparam NUM_RD_REG = RX_DATA1_RD_REG + 1;
+   localparam NUM_WR_REG = TX_TRANSMIT_EN_WR_REG + 1;
 
-   reg [LBUS_DATA_WIDTH-1:0] reg_rd_array [NUM_RD_REG-1:0];
-   reg [LBUS_DATA_WIDTH-1:0] reg_wr_array [NUM_RD_REG-1:0];
-
-   reg [LBUS_DATA_WIDTH-1:0] lb_rdata_reg;
-
-   // -------------------
-   // Register wiring
-   // -------------------
-   always @(posedge lb_clk) begin
-      reg_rd_array[INFO0_RD_REG]            <= "QF2\n";
-      reg_rd_array[INFO1_RD_REG]            <= "COM\n";
-
-      // Input registers will auto-extend to LBUS_DATA_WIDTH
-      reg_rd_array[RX_FRAME_COUNTER_RD_REG] <= rx_frame_counter_i;
-      reg_rd_array[TXRX_LATENCY_RD_REG]     <= txrx_latency_i;
-      reg_rd_array[CCRX_FAULT_RD_REG]       <= ccrx_fault_i;
-      reg_rd_array[CCRX_FAULT_CNT_RD_REG]   <= ccrx_fault_cnt_i;
-      reg_rd_array[CCRX_LOS_RD_REG]         <= ccrx_los_i;
-      reg_rd_array[RX_PROTOCOL_VER_RD_REG]  <= rx_protocol_ver_i;
-      reg_rd_array[RX_GATEWARE_TYPE_RD_REG] <= rx_gateware_type_i;
-      reg_rd_array[RX_LOCATION_RD_REG]      <= rx_location_i;
-      reg_rd_array[RX_REV_ID_RD_REG]        <= rx_rev_id_i;
-   end
-
-   assign tx_location_o = reg_wr_array[TX_LOCATION_WR_REG];
+   reg [LBUS_DATA_WIDTH-1:0] lb_rdata_reg = 0;
 
    // -------------------
    // Local Bus decoding
@@ -86,13 +71,27 @@ module comms_top_regbank #(
    always @(posedge lb_clk) begin
       if (lb_valid) begin
          if (lb_rnw) begin
-            if (lb_addr >= NUM_RD_REG)
-               lb_rdata_reg <= 32'hdeadf00d;
-            else
-               lb_rdata_reg <= reg_rd_array[lb_addr];
+            case (lb_addr[LOCAL_AWI-1:0])
+               INFO0_RD_REG:            lb_rdata_reg <= "QF2P";
+               INFO1_RD_REG:            lb_rdata_reg <= "COMM";
+               RX_FRAME_COUNTER_RD_REG: lb_rdata_reg <= rx_frame_counter_i;
+               TXRX_LATENCY_RD_REG:     lb_rdata_reg <= txrx_latency_i;
+               CCRX_FAULT_RD_REG:       lb_rdata_reg <= ccrx_fault_i;
+               CCRX_FAULT_CNT_RD_REG:   lb_rdata_reg <= ccrx_fault_cnt_i;
+               CCRX_LOS_RD_REG:         lb_rdata_reg <= ccrx_los_i;
+               RX_PROTOCOL_VER_RD_REG:  lb_rdata_reg <= rx_protocol_ver_i;
+               RX_GATEWARE_TYPE_RD_REG: lb_rdata_reg <= rx_gateware_type_i;
+               RX_LOCATION_RD_REG:      lb_rdata_reg <= rx_location_i;
+               RX_REV_ID_RD_REG:        lb_rdata_reg <= rx_rev_id_i;
+               RX_DATA0_RD_REG:         lb_rdata_reg <= rx_data0_i;
+               RX_DATA1_RD_REG:         lb_rdata_reg <= rx_data1_i;
+               default:                 lb_rdata_reg <= 32'hdeadf00d;
+            endcase
          end else begin
-            if (lb_addr < NUM_WR_REG)
-               reg_wr_array[lb_addr] <= lb_wdata;
+            case (lb_addr[LOCAL_AWI-1:0])
+               TX_LOCATION_WR_REG:      tx_location_o    <= lb_wdata;
+               default:                 tx_transmit_en_o <= lb_wdata; // TX_TRANSMIT_EN_WR_REG
+            endcase
          end
       end
    end
