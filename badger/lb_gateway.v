@@ -1,11 +1,12 @@
-// Simple wrapper from mem_gatway.v to the compatibilities of:
+// Simple wrapper of mem_gateway.v
+// Rename ports to get something more familiar to:
 // - newad.py
 // - picorv32 memory bus bridge
 // - xilinx DRP bridge
 // - potential axi-lite/wishbone bridge
 module lb_gateway #(
     parameter n_lat        =8,
-    parameter READ_PIPE_LEN=3
+    parameter read_pipe_len=3
 ) (
     input         clk,   // timespec 6.8 ns
     // client interface with RTEFI, see clients.eps
@@ -26,10 +27,11 @@ module lb_gateway #(
 );
 
 wire control_strobe, control_rd;
+wire [read_pipe_len:0] control_pipe_rd;
 
 mem_gateway #(
     .n_lat          (n_lat),
-    .read_pipe_len  (READ_PIPE_LEN)
+    .read_pipe_len  (read_pipe_len)
 ) mem_gateway_i (
     .clk             (clk),
     .len_c           (len_c),
@@ -41,16 +43,14 @@ mem_gateway #(
     .control_strobe  (control_strobe),
     .control_rd      (control_rd),
     .control_rd_valid(lb_rvalid),
+    .control_pipe_rd (control_pipe_rd),
     .data_out        (lb_wdata),
     .data_in         (lb_rdata)
 );
 
 assign lb_clk    = clk;
-assign lb_write  = control_strobe && !control_rd;
+assign lb_write  = control_strobe & ~control_rd;
 assign lb_read   = control_rd;
+assign lb_pre_rvalid = control_pipe_rd[read_pipe_len-1];
 
-reg_delay #(.len(READ_PIPE_LEN-1), .dw(1)) sync (
-    .clk(lb_clk), .gate(1'b1), .reset(1'b0),
-	.din(lb_read), .dout(lb_pre_rvalid)
-);
 endmodule

@@ -35,7 +35,7 @@ VERILOG_COMP = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} $(VFLAGS_DEP) -o $@ $^
 VERILOG_TB = $(VERILOG) $(VG_ALL) $(V_TB) ${VFLAGS} $(VFLAGS_DEP) -o $@ $(filter %v, $^)
 VERILOG_TB_VPI = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} $(VFLAGS_DEP) -o $@ $(filter %.v, $^)
 VERILOG_SIM = cd `dirname $@` && $(VVP) `basename $<` $(VVP_FLAGS)
-VERILOG_VIEW = $(GTKWAVE) $^
+VERILOG_VIEW = $(GTKWAVE) $(GTKW_OPT) $^
 VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS) | $(AWK) -f $(filter %.awk, $^)
 VERILOG_RUN = $(VVP) $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)

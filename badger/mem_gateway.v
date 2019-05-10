@@ -9,6 +9,26 @@
 
 // Software and local-bus compatible with mem_gateway in ethernet-core
 
+// The control_rd port (a.k.a. not write) is just a level that changes at
+// the start of each transaction, timing exactly like addr and data_out.
+//
+// control_pipe_rd is new; it's for people who want to pay attention to
+// the pipelining of each read operation.  It shows the strobe propagating
+// all the way from the start of the read request to the cycle (marked by
+// control_rd_valid, exactly equal to control_pipe_read[read_pipe_len]) when
+// this module latches data_in.  Note that the "active" bit(s) flow through
+// all read_pipe_len cycles of activity, plus one more at the end, and thus
+// has a possibly surprising length.
+//
+// If read_pipe_len is increased, and bus cycles are spaced close together
+// (every 8 for now, future burst modes could go down to every 4 or even
+// every 2), there can be multiple bus transactions in the pipeline
+// simultaneously.
+
+// Write operations start on the cycle marked by control_write.
+// At the moment, there is no check that they complete, so any pipelining
+// that takes place is outside the purview of this module.
+
 module mem_gateway(
 	input clk,   // timespec 6.8 ns
 	// client interface with RTEFI, see clients.eps
@@ -21,12 +41,15 @@ module mem_gateway(
 	output [23:0] addr,
 	output control_strobe,
 	output control_rd,
+	output control_write,
 	output control_rd_valid,
+	// length of control_pipe_rd is read_pipe_len+1, see above
+	output [read_pipe_len:0] control_pipe_rd,
 	output [31:0] data_out,
 	input [31:0] data_in
 );
 
-parameter read_pipe_len=3;
+parameter read_pipe_len=3;  // minimum allowed value is 1
 parameter n_lat=8;  // minimum allowed value is 5 + read_pipe_len
 
 // Pipeline match
@@ -55,21 +78,25 @@ assign addr = big_r[23+32:32];
 assign data_out = big_r[31:0];
 assign control_rd = big_r[28+32];
 assign control_strobe = do_op;
+assign control_write = control_strobe & ~control_rd;
 
-// Synchronize and capture result
-wire capture;
-reg_delay #(.len(read_pipe_len), .dw(1)) sync(.clk(clk),
-	.gate(1'b1), .reset(1'b0),
-	.din(do_op & control_rd), .dout(capture));
+// Keep track of the read pipeline
+reg [read_pipe_len-1:0] read_pipe_markers=0;
+wire read_op = control_strobe & control_rd;
+always @(posedge clk) read_pipe_markers <= {read_pipe_markers[read_pipe_len-2:0], read_op};
+assign control_pipe_rd = {read_pipe_markers, read_op};
+wire capture = control_pipe_rd[read_pipe_len];
+assign control_rd_valid = capture;
+
+// capture result
 reg [31:0] osr=0;
 always @(posedge clk) begin
 	osr <= {osr[23:0], pdata};
 	if (capture) osr <= data_in;
 end
-wire [7:0] xdata = osr[31:24];
-assign control_rd_valid = capture;
+wire [7:0] xdata = osr[31:24];  // Data to be transmitted
 
-// Final alignment
+// Final alignment of the Tx data with that of all the other clients
 reg_delay #(.len(n_lat-read_pipe_len-5), .dw(8)) finale(.clk(clk),
 	.gate(1'b1), .reset(1'b0),
 	.din(xdata), .dout(odata));

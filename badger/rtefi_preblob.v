@@ -24,6 +24,12 @@ module rtefi_blob(
 	input [7:0] config_d,
 	input config_s,  // MAC/IP address write
 	input config_p,  // UDP port number write
+	// Host side of Tx MAC
+	input host_clk,
+	input [mac_aw:0] host_waddr,
+	input host_write,
+	input [15:0] host_wdata,
+	output tx_mac_done,
 	// Debugging
 	output ibadge_stb,
 	output [7:0] ibadge_data,
@@ -41,6 +47,7 @@ module rtefi_blob(
 
 parameter paw = 11;  // packet (memory) address width, nominal 11
 parameter n_lat = 8;  // latency of client pipeline
+parameter mac_aw = 10;  // sets size (in 16-bit words) of DPRAM in Tx MAC
 // See comments in rtefi_center.v
 parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4};  // 192.168.7.4
 parameter [47:0] mac = 48'h12555500012d;
@@ -62,6 +69,7 @@ wire [7*8-1:0] mux_data_in;
 
 rtefi_center #(
 	.ip(ip), .mac(mac), .paw(paw), .n_lat(n_lat),
+	.mac_aw(mac_aw),
 	.udp_port0(udp_port0),
 	.udp_port1(udp_port1),
 	.udp_port2(udp_port2),
@@ -80,6 +88,9 @@ rtefi_center #(
 	.config_a(config_a), .config_d(config_d),
 	.len_c(len_c), .raw_l(raw_l), .raw_s(raw_s),
 	.idata(idata), .mux_data_in(mux_data_in),
+	.host_clk(host_clk), .host_write(host_write),
+	.host_waddr(host_waddr), .host_wdata(host_wdata),
+	.tx_mac_done(tx_mac_done),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),

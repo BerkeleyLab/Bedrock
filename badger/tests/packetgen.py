@@ -5,6 +5,22 @@ from binascii import crc32, unhexlify
 from sys import argv
 
 
+def read_lb_pack(fname):
+    ''' Kind of special purpose
+    lines of hex-encoded bytes, doesn't matter how many bytes per line
+    multiple bytes per line are interpreted as big-endian (network byte order)
+    '''
+    d = b""
+    with open(fname, "r") as fd:
+        for line in fd.read().split("\n"):
+            if line == "":
+                continue
+            ll = int(len(line)/2)
+            xx = [int(line[ix*2:ix*2+2], 16) for ix in range(ll)]
+            d += bytes(xx)
+    return d
+
+
 def twobyte(x):
     # network byte order
     return bytes([x >> 8, x & 0xff])
@@ -84,7 +100,8 @@ def eth_gen(
         src_mac=bytes([0xda, 0x48, 0x9f, 0x29, 0x4d, 0x53]),
         dst_mac=bytes([0x12, 0x55, 0x55, 0x00, 0x01, 0x2d]),
         ethertype=0x00,
-        pad=None):
+        pad=None,
+        mac_only=False):
     gmii_pre = bytes([0x55]*7 + [0xd5])
     eth_head = dst_mac + src_mac + bytes([0x08, ethertype])
     content_len = len(contents)
@@ -97,8 +114,11 @@ def eth_gen(
         eth_pack = eth_pack[:pad]
     ec = crc32(eth_pack)
     eth_crc = bytes([ec & 0xff, (ec >> 8) & 0xff, (ec >> 16) & 0xff, ec >> 24])
-    gmii_pack = gmii_pre + eth_pack + eth_crc
-    for b in gmii_pack:
+    if mac_only:
+        out_pack = eth_pack
+    else:
+        out_pack = gmii_pre + eth_pack + eth_crc
+    for b in out_pack:
         print("%2.2X" % b)
     if goal is not None:
         print("stop %2X" % goal)
@@ -146,6 +166,39 @@ if __name__ == '__main__':
     elif len(argv) > 1 and argv[1] == "arp":
         # recreate file arp3.dat
         arp_gen(src_ip=src_ip, dst_ip=dst_ip)
+    elif len(argv) > 1 and argv[1] == "flip":
+        # test packet for exercising Tx mac
+        udp_data = b"Tx MAC exercise (a bit longer) 10\n"
+        contents = udp_gen(
+            data=udp_data, src_ip=dst_ip, dst_ip=src_ip,
+            src_port=3001, dst_port=3011)
+        # Determine our own MAC address; sort-of works on Linux.
+        # Feel free to upgrade to portable code, if such a thing exists :-p
+        ifname = "tap0"
+        try:
+            mac_colons = open('/sys/class/net/%s/address' % ifname).read()
+            dst_mac = bytes([int(x, 16) for x in mac_colons.split(':')])
+        except Exception:
+            dst_mac = bytes([0x12, 0x55, 0x55, 0x00, 0x01, 0x2d])
+        # Using ourselves as the destination of this packet allows
+        # simple confidence testing with "nc -l -u -p 3011".
+        eth_gen(
+            contents,
+            src_mac=bytes([0x12, 0x55, 0x55, 0x00, 0x01, 0x2d]),
+            dst_mac=dst_mac,
+            mac_only=True)
+    elif len(argv) > 2 and argv[1] == "lb":
+        udp_data = read_lb_pack(argv[2])
+        contents = udp_gen(
+            data=udp_data, src_ip=src_ip, dst_ip=dst_ip,
+            dst_port=803)
+        eth_gen(
+            contents,
+            src_mac=bytes([0xc6, 0x35, 0xe7, 0x83, 0x1c, 0x4d]),
+            dst_mac=bytes([0x12, 0x55, 0x55, 0x00, 0x01, 0x2d]),
+            goal=0x10)
+        print("wait 1557")
+        arp_gen(src_ip=src_ip, dst_ip=dst_ip, goal=0x05)
     else:
         # note lsb of first byte is 1
         multicast_mac = bytes([0xdb, 0x48, 0x9f, 0x29, 0x4d, 0x53])

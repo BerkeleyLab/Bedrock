@@ -69,29 +69,29 @@ module eth_gtx_bridge #(
 
    gmii_link i_gmii_link(
         // GMII to MAC
-   	.RX_CLK       (gmii_rx_clk),
-   	.RXD          (gmii_rxd),
-   	.RX_DV        (gmii_rx_dv),
+        .RX_CLK       (gmii_rx_clk),
+        .RXD          (gmii_rxd),
+        .RX_DV        (gmii_rx_dv),
         // MAC to GMII
-   	.GTX_CLK      (gmii_tx_clk),
-   	.TXD          (gmii_txd),
-   	.TX_EN        (gmii_tx_en),
-   	.TX_ER        (1'b0),
+        .GTX_CLK      (gmii_tx_clk),
+        .TXD          (gmii_txd),
+        .TX_EN        (gmii_tx_en),
+        .TX_ER        (1'b0),
         // To Transceiver
-   	.txdata       (gtx_txd_10),
+        .txdata       (gtx_txd_10),
         .rxdata       (gtx_rxd_10),
-   	.rx_err_los   (1'b0),
-   	.an_bypass    (1'b1),     // Disable auto-negotiation
-   	.lacr_rx      (lacr_rx),
-   	.an_state_mon (an_state_mon),
-   	.leds         (link_leds) // TODO: Connect this to actual LEDs
+        .rx_err_los   (1'b0),
+        .an_bypass    (1'b1),     // Disable auto-negotiation
+        .lacr_rx      (lacr_rx),
+        .an_state_mon (an_state_mon),
+        .leds         (link_leds) // TODO: Connect this to actual LEDs
    );
 
    // ----------------------------------
    // Ethernet MAC
    // ---------------------------------
 
-   rtefi_blob #(.ip(IP), .mac(MAC)) badger(
+   rtefi_blob #(.ip(IP), .mac(MAC), .mac_aw(2)) badger(
       // GMII Input (Rx)
       .rx_clk              (gmii_rx_clk),
       .rxd                 (gmii_rxd),
@@ -108,7 +108,18 @@ module eth_gtx_bridge #(
       .config_d            (8'd0),
       .config_s            (1'b0),
       .config_p            (1'b0),
-
+      // TX MAC Host interface
+      .host_clk            (1'b0),
+      .host_waddr          (3'b0),
+      .host_write          (1'b0),
+      .host_wdata          (16'b0),
+      .tx_mac_done         (),
+      // Debug ports
+      .ibadge_stb          (),
+      .ibadge_data         (),
+      .obadge_stb          (),
+      .obadge_data         (),
+      .xdomain_fault       (),
       // Pass-through to user modules
       .p2_nomangle         (1'b0),
       .p3_addr             (lb_addr),
