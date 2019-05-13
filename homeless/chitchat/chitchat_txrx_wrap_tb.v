@@ -149,12 +149,16 @@ module chitchat_txrx_wrap_tb;
    wire [15:0] rx_loopback_frame_counter;
 
    localparam REVID = 32'hdeadbeef;
+   localparam [2:0] TX_GATEW_TYPE = 2;
+   localparam [2:0] RX_GATEW_TYPE = 2;
 
    chitchat_txrx_wrap #(
-      .REV_ID        (REVID),
-      .TX_TO_GTX_CDC (1), // Selectively enable/disable CDC
-      .GTX_TO_RX_CDC (1),
-      .GTX_TO_LB_CDC (1)
+      .REV_ID           (REVID),
+      .TX_GATEWARE_TYPE (TX_GATEW_TYPE),
+      .RX_GATEWARE_TYPE (RX_GATEW_TYPE),
+      .TX_TO_GTX_CDC    (1), // Selectively enable/disable CDC
+      .GTX_TO_RX_CDC    (1),
+      .GTX_TO_LB_CDC    (1)
    ) i_dut (
       // -------------------
       // Data Interface
@@ -287,7 +291,7 @@ module chitchat_txrx_wrap_tb;
             fail <= 1;
          end
          // Compare fixed data
-         if ({rx_protocol_ver, rx_gateware_type, rx_rev_id} != {CC_PROTOCOL_VER, CC_GATEWARE_TYPE, REVID}) begin
+         if ({rx_protocol_ver, rx_gateware_type, rx_rev_id} != {CC_PROTOCOL_VER, TX_GATEW_TYPE, REVID}) begin
             $display("%t, ERROR: Version comparison failed", $time);
             fail <= 1;
          end

@@ -5,8 +5,7 @@
 // to communicate cavity status information (e.g. detune, interlock) between two
 // FPGA chassis over fiber.
 //
-// See interchassis_protocol.txt for an application of this protocol and lower level
-// details.
+// See chitchat.md for protocol specification.
 //
 // NOTE: This module depends on the K28.5 comma code (inserted as frame marker
 //       by chitchat_tx) being preserved in the data stream when gtx_k is
@@ -14,7 +13,9 @@
 //
 // ------------------------------------
 
-module chitchat_rx(
+module chitchat_rx #(
+   parameter [2:0] RX_GATEWARE_TYPE = 0 // Expected gateware type
+) (
    input         clk,
 
    input  [15:0] gtx_d,
@@ -97,7 +98,6 @@ module chitchat_rx(
             fault_r      <= 0; // Clear decoding errors
          end
       end
-
       if (|link_up_cnt && |faults) begin
          fault_r      <= faults; // Latch decoding errors
          fault_cnt_r  <= fault_cnt_r + 1;
@@ -137,6 +137,7 @@ module chitchat_rx(
 
          // Word 1
          {rx_gateware_type_r, rx_location_r, reserved} <= gtx_d;
+         wrong_prot <= gtx_d[15:15-2] != RX_GATEWARE_TYPE;
       end
 
       if (word_count==2) rx_rev_id_r <= {gtx_dd, gtx_d};

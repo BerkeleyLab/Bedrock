@@ -17,7 +17,7 @@ WAIT 1
 
 PRINT "RX Versions:"
 CMP :7 0x1
-CMP :8 0x0
+CMP :8 0x2
 CMP :10 0xdeadbeef
 
 PRINT "RX Location:"

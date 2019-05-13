@@ -9,13 +9,13 @@
 //        periodically, at a fixed rate. In order to control what data gets sent over the line,
 //        latching of input data with a valid/strobe must be done externally.
 //
-// See interchassis_protocol.txt for an application of this protocol and lower level
-// details.
+// See chitchat.md for protocol specification.
 //
 // ------------------------------------
 
 module chitchat_tx #(
-   parameter REV_ID = 0  // 32-bit ID (e.g. git commit)
+   parameter       REV_ID = 0,  // 32-bit ID (e.g. git commit)
+   parameter [2:0] TX_GATEWARE_TYPE = 0 // Gateware type to send out on TX packets
 ) (
    input         clk,
 
@@ -61,7 +61,7 @@ module chitchat_tx #(
    // Fixed-bit-width form of input parameters
    wire [3:0]  protocol_cat      = CC_PROTOCOL_CAT;
    wire [3:0]  protocol_ver_fix  = CC_PROTOCOL_VER;
-   wire [2:0]  gateware_type_fix = CC_GATEWARE_TYPE;
+   wire [2:0]  gateware_type_fix = TX_GATEWARE_TYPE;
    wire [31:0] rev_id_fix        = REV_ID;
    wire [7:0]  comma_pad         = CC_K28_5; // K28.5
    wire [9:0]  reserved          = 0;

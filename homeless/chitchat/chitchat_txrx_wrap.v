@@ -9,6 +9,8 @@
 
 module chitchat_txrx_wrap #(
    parameter REV_ID = 0,
+   parameter TX_GATEWARE_TYPE = 0,
+   parameter RX_GATEWARE_TYPE = 0,
    parameter TX_TO_GTX_CDC = 1, // Selectively enable/disable CDC
    parameter GTX_TO_RX_CDC = 1,
    parameter GTX_TO_LB_CDC = 1
@@ -146,7 +148,8 @@ module chitchat_txrx_wrap #(
    end
 
    chitchat_tx #(
-      .REV_ID (REV_ID)
+      .REV_ID           (REV_ID),
+      .TX_GATEWARE_TYPE (TX_GATEWARE_TYPE)
    ) i_chitchat_tx (
       .clk                       (gtx_tx_clk),
       .tx_transmit_en            (tx_transmit_en_tgtx),
@@ -166,7 +169,9 @@ module chitchat_txrx_wrap #(
          txrx_latency_x_tgtx = tx_local_frame_counter_x_tgtx - rx_lback_frame_counter_x_tgtx;
    end
 
-   chitchat_rx i_chitchat_rx (
+   chitchat_rx #(
+      .RX_GATEWARE_TYPE (RX_GATEWARE_TYPE)
+   ) i_chitchat_rx (
       .clk                       (gtx_rx_clk),
       .gtx_d                     (gtx_rx_d),
       .gtx_k                     (gtx_rx_k),

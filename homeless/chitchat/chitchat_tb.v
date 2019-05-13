@@ -116,9 +116,12 @@ module chitchat_tb;
    wire [15:0] rx_loopback_frame_counter;
 
    localparam REVID = 32'hdeadbeef;
+   localparam [2:0] TX_GATEW_TYPE = 2;
+   localparam [2:0] RX_GATEW_TYPE = 2;
 
    chitchat_tx #(
-      .REV_ID (REVID)
+      .REV_ID           (REVID),
+      .TX_GATEWARE_TYPE (TX_GATEW_TYPE)
    ) i_dut_tx (
       .clk                       (cc_clk),
       .tx_transmit_en            (tx_transmit_en),
@@ -132,7 +135,9 @@ module chitchat_tb;
       .gtx_k                     (gtx_k)
    );
 
-   chitchat_rx i_dut_rx (
+   chitchat_rx #(
+      .RX_GATEWARE_TYPE (RX_GATEW_TYPE)
+   ) i_dut_rx (
       .clk   (cc_clk),
 
       .gtx_d (gtx_d^corrupt),
@@ -203,7 +208,7 @@ module chitchat_tb;
             fail <= 1;
          end
          // Compare fixed data
-         if ({rx_protocol_ver, rx_gateware_type, rx_rev_id} != {CC_PROTOCOL_VER, CC_GATEWARE_TYPE, REVID}) begin
+         if ({rx_protocol_ver, rx_gateware_type, rx_rev_id} != {CC_PROTOCOL_VER, TX_GATEW_TYPE, REVID}) begin
             $display("%t, ERROR: Version comparison failed", $time);
             fail <= 1;
          end

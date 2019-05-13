@@ -274,7 +274,9 @@ module comms_top
 
 
    chitchat_txrx_wrap #(
-      .REV_ID        (32'hdeadbeef)
+      .REV_ID        (32'hdeadbeef),
+      .TX_GATEWARE_TYPE (2),
+      .RX_GATEWARE_TYPE (2)
    ) i_chitchat_wrap (
       // -------------------
       // Data Interface
