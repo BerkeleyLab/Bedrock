@@ -20,6 +20,7 @@ services:
 
 include:
   - local: .gitlab/ci/build.gitlab-ci.yml
+  - local: .gitlab/ci/serial_io.gitlab-ci.yml
 
 dsp_test:
   before_script:

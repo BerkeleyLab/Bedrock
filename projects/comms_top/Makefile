@@ -8,13 +8,14 @@ XILINX_TOOL := VIVADO
 
 FPGA_FAMILY_GTX_DIR = $(FPGA_FAMILY_DIR)/gtx
 BS_HARDWARE_DIR     = $(BOARD_SUPPORT_DIR)/$(HARDWARE)
+CHITCHAT_DIR        = $(SERIAL_IO_DIR)/chitchat
 
 APP_NAME = comms_top
 IP_TCL = gtx_comms_top.tcl
 
-vpath %.v $(BADGER_DIR) $(FPGA_FAMILY_DIR) $(FPGA_FAMILY_GTX_DIR) $(HOMELESS_DIR) $(DSP_DIR) $(HOMELESS_DIR)/chitchat
+vpath %.v $(BADGER_DIR) $(FPGA_FAMILY_DIR) $(FPGA_FAMILY_GTX_DIR) $(SERIAL_IO_DIR) $(DSP_DIR) $(CHITCHAT_DIR)
 
-VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR) -y$(BADGER_DIR) -y$(FPGA_FAMILY_GTX_DIR) -y$(HOMELESS_DIR) -y. -I$(HOMELESS_DIR) -I$(BADGER_DIR) -y$(DSP_DIR) -I$(FPGA_FAMILY_GTX_DIR) -y$(HOMELESS_DIR)/chitchat -I$(HOMELESS_DIR)/chitchat
+VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR) -y$(BADGER_DIR) -y$(FPGA_FAMILY_GTX_DIR) -y$(SERIAL_IO_DIR) -y. -I$(SERIAL_IO_DIR) -I$(BADGER_DIR) -y$(DSP_DIR) -I$(FPGA_FAMILY_GTX_DIR) -y$(CHITCHAT_DIR) -I$(CHITCHAT_DIR)
 
 VERILOG_DEFINE_FLAGS =
 SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
@@ -36,8 +37,10 @@ gen : $(RTEFI_V)
 
 $(APP_NAME).bit: $(IP_TCL)
 
+# TODO: Add target capable of loading bitfile (requires QF2 tools)
+
 hwtest:
-	cd test; ./comms_top_test.py -cf comms_test.cf ; ./runloop 30 ./comms_top_test.py -cf comms_test.cf > log.txt
+	cd test; ./comms_top_test.py -cf comms_test.cf && ./runloop 30 ./comms_top_test.py -cf comms_test.cf > log.txt
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))

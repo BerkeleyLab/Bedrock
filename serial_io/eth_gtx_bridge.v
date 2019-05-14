@@ -24,7 +24,7 @@ module eth_gtx_bridge #(
    // Local Bus interface
    output        lb_valid,
    output        lb_rnw,
-   output [23:0] lb_addr, // TODO: Something special about lb_addr[17]?
+   output [23:0] lb_addr,
    output [31:0] lb_wdata,
    output        lb_renable,
    input  [31:0] lb_rdata
