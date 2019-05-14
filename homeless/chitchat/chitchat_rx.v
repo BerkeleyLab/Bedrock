@@ -5,7 +5,7 @@
 // to communicate cavity status information (e.g. detune, interlock) between two
 // FPGA chassis over fiber.
 //
-// See chitchat.md for protocol specification.
+// See README.md for protocol specification.
 //
 // NOTE: This module depends on the K28.5 comma code (inserted as frame marker
 //       by chitchat_tx) being preserved in the data stream when gtx_k is

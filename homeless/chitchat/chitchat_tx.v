@@ -9,7 +9,7 @@
 //        periodically, at a fixed rate. In order to control what data gets sent over the line,
 //        latching of input data with a valid/strobe must be done externally.
 //
-// See chitchat.md for protocol specification.
+// See README.md for protocol specification.
 //
 // ------------------------------------
 
