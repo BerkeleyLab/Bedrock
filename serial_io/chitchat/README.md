@@ -5,9 +5,11 @@ to transmit non timing critical data between two FPGAs over a serial link. Side-
 information such as frame numbers, protocol identifiers and loop-back latency are
 included to ease system integration.
 
-The protocol expects data to be transmitted using 8b/10b line coding and it emits a
-K28.5 comma character periodically. The integrity of each transmitted packet is
-validated by a CRC16 check.
+The protocol expects data to be transmitted using 8b/10b line coding and uses a
+periodically sent K28.5 comma character for framing. Note that the K28.5 comma is
+always sent in the lower byte of the transmitted data.
+
+The integrity of each transmitted packet is validated by a CRC16 check.
 
 While the protocol was original conceived to transmit data over a Fiber link, nominally
 at a rate of 2.5 Gbaud (16-bit data + 4-bit 8b/10b overhead) * 125 MHz), it could

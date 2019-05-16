@@ -18,7 +18,11 @@ regressions in the following Bedrock sub-systems and features:
 
 > Load bitfile:
 
-`TODO: Not yet implemented`
+```
+python -m qf2_python/scripts/program_kintex_7 -b comms_top.bit
+
+TODO: Integrate into Makefile/CI
+```
 
 > Run hardware test:
 
@@ -72,7 +76,7 @@ entry point to the TCL-based GTX configuration flow described below.
 ## TCL-based GTX configuration
 
 The Quad GTX used in this system is configured with a TCL-based flow, essentially comprised of a
-TCL configuration script, `gtx_gen.tcl` and a QGTX Verilog wrapper, `qgtx_wrap.v`
+TCL configuration script, `gtx_gen.tcl` and a QGTX Verilog wrapper, `qgtx_wrap.v`.
 
 `gtx_gen.tcl` implements two user-facing procedures:
 * `proc add_aux_ip {ipname config_file module_name}`
@@ -85,13 +89,13 @@ generated manually through the GUI wizard.
 a TCL file containing a dictionary with all configuration parameters for a specific GTX. The remaining
 arguments associate the configuration with a specific GTX in the chip and set options that are used in
 the generation of the final Verilog modules (`q0_gtx_wrap`, `q1_gtx_wrap`, `q2_gtx_wrap`, `q3_gtx_wrap`),
-which all remain in `qgtx_wrap.v`
+which all remain in `qgtx_wrap.v`.
 
 `qgtx_wrap.v` makes extensive use of Verilog macros to generate the correct code in the presence of
 different configuration parameters. These are defined in `qgtx_wrap_stub.vh` and `qgtx_wrap_pack.vh` and
-are selectively activated based on compile-time defines set by `gtx_gen.tcl`
+are selectively activated based on compile-time defines set by `gtx_gen.tcl`.
 
-> An expanded version of `qgtx_wrap.v` can be generated, for debug purposes or otherwise:
+> An expanded version of `qgtx_wrap.v` can be generated, for debug purposes or otherwise, by running:
 
 `bedrock/fpga_family$ make qgtx_template`
 
