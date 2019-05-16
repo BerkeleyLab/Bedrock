@@ -33,7 +33,7 @@ proc add_gtx_protocol {config_file quad_num gtx_num en8b10b enGTREFCLK1} {
 
    # Enable GTX in QGTXWRAP.v by setting define
    set def_list {}
-   lappend def_list "GT${gtx_num}_ENABLE"
+   lappend def_list "Q${quad_num}_GT${gtx_num}_ENABLE"
 
    puts "\[GTX_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
 
@@ -44,8 +44,8 @@ proc add_gtx_protocol {config_file quad_num gtx_num en8b10b enGTREFCLK1} {
    gen_ip "gtwizard" $module_name $config_dict
 
    # Set defines to include required ports in GTX instance
-   if {$en8b10b == 1}     { lappend def_list "GT${gtx_num}_8B10B_EN" }
-   if {$enGTREFCLK1 == 1} { lappend def_list "GTREFCLK1_EN" }
+   if {$en8b10b == 1}     { lappend def_list "Q${quad_num}_GT${gtx_num}_8B10B_EN" }
+   if {$enGTREFCLK1 == 1} { lappend def_list "Q${quad_num}_GTREFCLK1_EN" }
 
    # Apply defines
    puts "\[GTX_GEN\] Adding to define list: $def_list"

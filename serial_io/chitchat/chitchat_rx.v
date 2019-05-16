@@ -19,7 +19,7 @@ module chitchat_rx #(
    input         clk,
 
    input  [15:0] gtx_d,
-   input         gtx_k, // comma in lower byte, see above
+   input  [1:0]  gtx_k, // Signals per-byte comma char
 
    // Status outputs
    output [2:0]  ccrx_fault,     // Error during decoding [0] - Incorrect protocol,
@@ -42,6 +42,8 @@ module chitchat_rx #(
 );
 `include "chitchat_pack.vh"
 
+   wire gtx_k_lo = gtx_k[0]; // Only lower-byte comma is used
+
    // To set up the latency-measuring feature, route this module's
    // rx_frame_counter output to chitchat_tx's tx_loopback_frame_counter.
    // The difference between chitchat_tx's local_frame_counter and this
@@ -55,7 +57,7 @@ module chitchat_rx #(
    wire increment = ~timeout;  // word_count stops at 15
 
    always @(posedge clk) begin
-      word_count <= gtx_k ? 0 : (word_count + increment);
+      word_count <= gtx_k_lo ? 0 : (word_count + increment);
    end
 
    // CRC calculation
@@ -125,7 +127,7 @@ module chitchat_rx #(
       gtx_dd             <= gtx_d;
       next_frame_counter <= rx_frame_counter_r + 1;
 
-      if (gtx_k) begin
+      if (gtx_k_lo) begin
          wrong_frame <= 0;
          wrong_prot  <= 0;
       end

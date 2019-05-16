@@ -64,7 +64,7 @@ module chitchat_tb;
    always @(posedge cc_clk) begin
       if (tx_transmit_en) begin
          if (cnt_on == 0)
-            tx_transmit_en <= gtx_k; // Wait for gtx_k to ease modelling
+            tx_transmit_en <= gtx_k[0]; // Wait for lower byte gtx_k to ease modelling
          else
             cnt_on <= cnt_on - 1;
       end else begin
@@ -99,7 +99,7 @@ module chitchat_tb;
 
    wire [15:0] local_frame_counter;
    wire [15:0] gtx_d;
-   wire        gtx_k;
+   wire [1:0]  gtx_k;
    wire [15:0] rx_frame_counter;
 
    wire        rx_valid;

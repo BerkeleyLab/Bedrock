@@ -58,9 +58,9 @@ module chitchat_txrx_wrap #(
    input         gtx_rx_clk,
 
    output [15:0] gtx_tx_d,
-   output        gtx_tx_k,
+   output [1:0]  gtx_tx_k,
    input  [15:0] gtx_rx_d,
-   input         gtx_rx_k
+   input  [1:0]  gtx_rx_k
 );
 
    // TX CDC signals

@@ -34,7 +34,7 @@ module chitchat_tx #(
    output [15:0] local_frame_counter,
 
    output [15:0] gtx_d,
-   output        gtx_k // flag that a comma code is in lower byte of Tx data
+   output [1:0]  gtx_k // Signal comma in lower byte of Tx data (MSB is unused)
 );
 
 `include "chitchat_pack.vh"
@@ -101,7 +101,7 @@ module chitchat_tx #(
    // Assign output ports
    assign tx_send   = start;
    assign gtx_d     = outer_data;
-   assign gtx_k     = sync_r;
+   assign gtx_k     = {1'b0, sync_r}; // No comma in upper byte
    assign local_frame_counter = frame_counter;
 
 endmodule

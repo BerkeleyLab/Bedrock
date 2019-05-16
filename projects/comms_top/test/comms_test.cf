@@ -8,8 +8,8 @@ WRW :0 0x3
 PRINT "RX Frame counter:"
 RDW :2
 
-PRINT "Check LOS"
-CMP :6 0x1
+PRINT "Read LOS"
+RDW :6
 
 PRINT "Enabling TX"
 WRW :1 0x1
@@ -72,4 +72,7 @@ CMP :6 0x0
 PRINT "Disabling TX"
 WRW :1 0x0
 WAIT 1
+
+PRINT "Check for LOS==1"
+CMP :6 0x1
 

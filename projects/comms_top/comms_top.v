@@ -1,11 +1,9 @@
 // ------------------------------------
 // COMMS_TOP.v
 //
-// TODO: Better summary of what's going on here
-//       WARNING: Compatible with QF2_PRE *only*. Older board versions are unsupported
-//       Instantiates Ethernet, ChitChat and ICC cores and connects them
-//       to an auto-generated Quad GTX.
-//       Ethernet core/local-bus gives access to other cores, which will operate in loopback mode.
+// NOTE: Compatible with QF2_PRE *only*. Older board versions are unsupported.
+// Instantiates Ethernet and ChitChat cores and connects them to an auto-generated Quad GTX.
+// Ethernet core/local-bus provides access to ChitChat operating in loopback mode.
 // ------------------------------------
 
 module comms_top
@@ -116,9 +114,9 @@ module comms_top
    // Configured by gtx_ethernet.tcl and gtx_gen.tcl
    // Refer to qgtx_wrap_pack.vh for port map
 
-   wire [GTX_ETH_WIDTH-1:0] gtx0_rxd, gtx0_txd;
-   wire [GTX_CC_WIDTH-1:0]  gtx1_rxd, gtx1_txd;
-   wire                     gtx1_txk, gtx1_rxk;
+   wire [GTX_ETH_WIDTH-1:0]    gtx0_rxd, gtx0_txd;
+   wire [GTX_CC_WIDTH-1:0]     gtx1_rxd, gtx1_txd;
+   wire [(GTX_CC_WIDTH/8)-1:0] gtx1_txk, gtx1_rxk;
 
    // Status signals
    wire gt_cpll_locked;
@@ -131,10 +129,14 @@ module comms_top
    wire [2:0] gt1_rxbufstatus;
    wire [1:0] gt1_txbufstatus;
 
+`ifndef SIMULATE
+   q0_gtx_wrap #(
+`else
    qgtx_wrap #(
+`endif
       .GT0_WI       (GTX_ETH_WIDTH),
       .GT1_WI       (GTX_CC_WIDTH))
-   i_qgtx_wrap (
+   i_q0_gtx_wrap (
       // Common Pins
       .drpclk_in               (sys_clk),
       .soft_reset              (1'b0),

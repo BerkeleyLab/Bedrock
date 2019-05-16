@@ -40,6 +40,8 @@
                           `ifdef GT``GTi``_8B10B_EN\
                           .gt0_rxcharisk_out           (gt``GTi``_rxcharisk_out),\
                           .gt0_txcharisk_in            (gt``GTi``_txcharisk_in),\
+                          .gt0_rxdisperr_out           (),\
+                          .gt0_rxnotintable_out        (),\
                           `endif\
                           .gt0_data_valid_in           (1'b1),\
                           .gt0_cpllfbclklost_out       (),\
@@ -90,3 +92,24 @@
 `define GTX_OUTCLK_BUF(GTi) BUFG i_gt``GTi``_txoutclk_buf (.I (gt``GTi``_txoutclk_out_l), .O (gt``GTi``_txoutclk_out));\
                             BUFG i_gt``GTi``_rxoutclk_buf (.I (gt``GTi``_rxoutclk_out_l), .O (gt``GTi``_rxoutclk_out));
 
+`define Q_REDEFINE(Qi) `undef GT0_ENABLE\
+                       `undef GT1_ENABLE\
+                       `undef GT2_ENABLE\
+                       `undef GT3_ENABLE\
+                       `ifdef Q``Qi``_GTREFCLK1_EN `define GTREFCLK1_EN `endif\
+                       `ifdef Q``Qi``_GT0_ENABLE `define GT0_ENABLE\
+                       `endif\
+                       `ifdef Q``Qi``_GT1_ENABLE `define GT1_ENABLE\
+                       `endif\
+                       `ifdef Q``Qi``_GT2_ENABLE `define GT2_ENABLE\
+                       `endif\
+                       `ifdef Q``Qi``_GT3_ENABLE `define GT3_ENABLE\
+                       `endif\
+                       `ifdef Q``Qi``_GT0_8B10B_EN `define GT0_8B10B_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT1_8B10B_EN `define GT1_8B10B_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT2_8B10B_EN `define GT2_8B10B_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT3_8B10B_EN `define GT3_8B10B_EN\
+                       `endif
