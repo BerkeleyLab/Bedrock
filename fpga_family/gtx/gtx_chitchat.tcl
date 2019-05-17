@@ -50,8 +50,9 @@ set cfg_dict {
    CONFIG.gt0_val_align_comma_enable       {0001111111}
    CONFIG.gt0_val_align_comma_double       {false}
    CONFIG.gt0_val_align_comma_word         {Two_Byte_Boundaries}
-   CONFIG.gt0_val_port_rxpcommaalignen     {false}
-   CONFIG.gt0_val_port_rxmcommaalignen     {false}
+   CONFIG.gt0_val_port_rxpcommaalignen     {true}
+   CONFIG.gt0_val_port_rxmcommaalignen     {true}
+   CONFIG.gt0_val_port_rxbyteisaligned     {true}
    CONFIG.gt0_val_dfe_mode                 {LPM-Auto}
    CONFIG.gt0_val_rx_termination_voltage   {Programmable}
    CONFIG.gt0_val_rx_cm_trim               {800}

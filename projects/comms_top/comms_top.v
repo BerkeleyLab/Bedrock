@@ -129,6 +129,8 @@ module comms_top
    wire [2:0] gt1_rxbufstatus;
    wire [1:0] gt1_txbufstatus;
 
+   wire gt1_rxbyteisaligned;
+
 `ifndef SIMULATE
    q0_gtx_wrap #(
 `else
@@ -183,6 +185,7 @@ module comms_top
       .gt1_txfsm_resetdone_out (gt1_txfsm_resetdone),
       .gt1_rxcharisk_out       (gtx1_rxk),
       .gt1_txcharisk_in        (gtx1_txk),
+      .gt1_rxbyteisaligned     (gt1_rxbyteisaligned),
       .gt1_rxbufstatus         (gt1_rxbufstatus),
       .gt1_txbufstatus         (gt1_txbufstatus),
 `endif
@@ -364,7 +367,7 @@ module comms_top
 
    // LED[0] GT Initialization done
    // LED[1] Received and decoded packet
-   assign LEDS = {gt_txrx_resetdone, lbus_led};
+   assign LEDS = {gt_txrx_resetdone & gt1_rxbyteisaligned, lbus_led};
 
 endmodule
 
