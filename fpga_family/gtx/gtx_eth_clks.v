@@ -49,13 +49,10 @@ module gtx_eth_clks (
    localparam CLK_PER_125 = 8;  // 8ns/125MHz
    localparam CLK_PER_625 = 16; // 16ns/62.5MHz
 
-   reg gtx_usr_clk_l, gmii_clk_l;
+   reg gtx_usr_clk_l=0, gmii_clk_l=0;
 
-   initial
-   begin
-      forever #(CLK_PER_125/2) gmii_clk_l    <= ~gmii_clk_l;
-      forever #(CLK_PER_625/2) gtx_usr_clk_l <= ~gtx_usr_clk_l;
-   end
+   initial forever #(CLK_PER_125/2) gmii_clk_l    <= ~gmii_clk_l;
+   initial forever #(CLK_PER_625/2) gtx_usr_clk_l <= ~gtx_usr_clk_l;
 
    assign pll_lock    = 1;
    assign gmii_clk    = gmii_clk_l;
