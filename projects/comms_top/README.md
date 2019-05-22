@@ -80,7 +80,7 @@ TCL configuration script, `gtx_gen.tcl` and a QGTX Verilog wrapper, `qgtx_wrap.v
 
 `gtx_gen.tcl` implements two user-facing procedures:
 * `proc add_aux_ip {ipname config_file module_name}`
-* `proc add_gtx_protocol {config_file quad_num gtx_num en8b10b enGTREFCLK1}`
+* `proc add_gtx_protocol {config_file quad_num gtx_num en8b10b}`
 
 `add_aux_ip` provides a convenient way of adding arbitrary IP, that would otherwise have to be
 generated manually through the GUI wizard.

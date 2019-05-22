@@ -90,6 +90,15 @@ module comms_top
       .clk_out (sys_clk)
    );
 
+   // Generate single-ended reference clock from MGTREFCLK_N/P with Transceiver BUF
+   ds_clk_buf #(
+      .GTX (1)) // Use GTX-specific primitive
+   i_ds_gtrefclk0 (
+      .clk_p   (gtrefclk0_p),
+      .clk_n   (gtrefclk0_n),
+      .clk_out (gtrefclk0)
+   );
+
    // Route 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
    // Ethernet clock managers
    gtx_eth_clks i_gtx_eth_clks_tx (
@@ -142,9 +151,8 @@ module comms_top
       // Common Pins
       .drpclk_in               (sys_clk),
       .soft_reset              (1'b0),
-      .gtrefclk0_n             (gtrefclk0_n),
-      .gtrefclk0_p             (gtrefclk0_p),
-
+      .gtrefclk0               (gtrefclk0),
+      .gtrefclk1               (1'b0),
 `ifndef SIMULATE
       // GTX0 - Ethernet
       .gt0_rxoutclk_out        (gtx0_rx_out_clk),

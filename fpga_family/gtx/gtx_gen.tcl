@@ -27,7 +27,7 @@ proc add_aux_ip {ipname config_file module_name} {
    gen_ip $ipname $module_name $config_dict
 }
 
-proc add_gtx_protocol {config_file quad_num gtx_num en8b10b enGTREFCLK1} {
+proc add_gtx_protocol {config_file quad_num gtx_num en8b10b} {
 
    set module_name "q${quad_num}_gtx${gtx_num}"
 
@@ -45,7 +45,6 @@ proc add_gtx_protocol {config_file quad_num gtx_num en8b10b enGTREFCLK1} {
 
    # Set defines to include required ports in GTX instance
    if {$en8b10b == 1}     { lappend def_list "Q${quad_num}_GT${gtx_num}_8B10B_EN" }
-   if {$enGTREFCLK1 == 1} { lappend def_list "Q${quad_num}_GTREFCLK1_EN" }
 
    # Apply defines
    puts "\[GTX_GEN\] Adding to define list: $def_list"

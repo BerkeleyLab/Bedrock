@@ -100,12 +100,10 @@
                        `undef GT1_ENABLE\
                        `undef GT2_ENABLE\
                        `undef GT3_ENABLE\
-                       `undef GTREFCLK1_EN\
                        `undef GT0_8B10B_EN\
                        `undef GT1_8B10B_EN\
                        `undef GT2_8B10B_EN\
                        `undef GT3_8B10B_EN\
-                       `ifdef Q``Qi``_GTREFCLK1_EN `define GTREFCLK1_EN `endif\
                        `ifdef Q``Qi``_GT0_ENABLE `define GT0_ENABLE\
                        `endif\
                        `ifdef Q``Qi``_GT1_ENABLE `define GT1_ENABLE\

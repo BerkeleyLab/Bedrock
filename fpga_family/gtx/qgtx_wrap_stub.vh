@@ -41,30 +41,6 @@
       .gt_txrx_resetdone (gt_txrx_resetdone)
    );
 
-   // Generate single-ended clocks from differential inputs
-   // This conversion must use a transceiver-specific Diff-to-Single buffer
-   wire gtrefclk0, gtrefclk1;
-
-   ds_clk_buf #(
-      .GTX (1)) // Use GTX-specific primitive
-   i_ds_gtrefclk0 (
-      .clk_p   (gtrefclk0_p),
-      .clk_n   (gtrefclk0_n),
-      .clk_out (gtrefclk0)
-   );
-
-`ifdef GTREFCLK1_EN
-   ds_clk_buf #(
-      .GTX (1))
-   i_ds_gtrefclk1 (
-      .clk_p   (gtrefclk1_p),
-      .clk_n   (gtrefclk1_n),
-      .clk_out (gtrefclk1)
-   );
-`else
-   assign gtrefclk1 = 0;
-`endif
-
 `ifndef SIMULATE
    // Instantiate wizard-generated Quad GTX
    // Configured by gtx_gen.tcl

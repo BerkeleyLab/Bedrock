@@ -22,12 +22,8 @@ module q0_gtx_wrap # (
 )(
    input         drpclk_in,
    input         soft_reset,
-   input         gtrefclk0_n,
-   input         gtrefclk0_p,
-`ifdef GTREFCLK1_EN
-   input         gtrefclk1_n,
-   input         gtrefclk1_p,
-`endif
+   input         gtrefclk0,
+   input         gtrefclk1,
    `ifdef GT0_ENABLE
    `GTi_PORTS(0, GT0_WI)
    `endif
@@ -59,12 +55,8 @@ module q1_gtx_wrap # (
 )(
    input         drpclk_in,
    input         soft_reset,
-   input         gtrefclk0_n,
-   input         gtrefclk0_p,
-`ifdef GTREFCLK1_EN
-   input         gtrefclk1_n,
-   input         gtrefclk1_p,
-`endif
+   input         gtrefclk0,
+   input         gtrefclk1,
    `ifdef GT0_ENABLE
    `GTi_PORTS(0, GT0_WI)
    `endif
@@ -96,12 +88,8 @@ module q2_gtx_wrap # (
 )(
    input         drpclk_in,
    input         soft_reset,
-   input         gtrefclk0_n,
-   input         gtrefclk0_p,
-`ifdef GTREFCLK1_EN
-   input         gtrefclk1_n,
-   input         gtrefclk1_p,
-`endif
+   input         gtrefclk0,
+   input         gtrefclk1,
    `ifdef GT0_ENABLE
    `GTi_PORTS(0, GT0_WI)
    `endif
@@ -133,12 +121,8 @@ module q3_gtx_wrap # (
 )(
    input         drpclk_in,
    input         soft_reset,
-   input         gtrefclk0_n,
-   input         gtrefclk0_p,
-`ifdef GTREFCLK1_EN
-   input         gtrefclk1_n,
-   input         gtrefclk1_p,
-`endif
+   input         gtrefclk0,
+   input         gtrefclk1,
    `ifdef GT0_ENABLE
    `GTi_PORTS(0, GT0_WI)
    `endif
@@ -170,8 +154,8 @@ module qgtx_wrap # (
 )(
    input         drpclk_in,
    input         soft_reset,
-   input         gtrefclk0_n,
-   input         gtrefclk0_p,
+   input         gtrefclk0,
+   input         gtrefclk1,
    output        gt_cpll_locked,
    output        gt_txrx_resetdone
 );
