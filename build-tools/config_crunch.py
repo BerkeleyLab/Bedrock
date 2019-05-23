@@ -38,6 +38,7 @@ def config_romx(dsp_flavor=0, tool_rev=0, board_type=0):
         'kc705': 19,
         'bmb7_kintex': 20,
         'qf2_kintex': 21,
+        'vc707': 22,
         'test': 99
     }
     print('board_type {}'.format(board_type))
@@ -87,28 +88,24 @@ def config_romx(dsp_flavor=0, tool_rev=0, board_type=0):
     except Exception:
         git_sha = 40 * 'f'
     print(git_sha)
+    version_number = 0
     try:
         git_version = subprocess.check_output(['git', 'describe', '--tag'])
-        m = re.match('\D*(\d*)\.[\s\S]*', git_version)
+        m = re.match(r'\D*(\d*)\.[\s\S]*', git_version)
         if m:
             version_number = eval(m.group(1))
-        else:
-            version_number = 0
-
-    #  if 'fatal:' not in git_version and m:
-    #      version_number = eval(m.group(1))
-    #  else:
-    #      version_number = 0
     except subprocess.CalledProcessError:
-        version_number = 0
+        print('config_crunch.py: Subprocess ERROR')
     except Exception:
-        version_number = 0
+        print('config_crunch.py: Generic exception')
+
     try:
         code_is_dirty = 0 if ('nothing' in subprocess.check_output(
             ['git', 'status']).split('\n')[-2]) else 1
     except Exception:
         code_is_dirty = 0
-    user = os.environ['USER']
+
+    user = os.getenv('USER', 'NONE')
     datatimestr = datetime.datetime.now()
     year = format(int(datatimestr.strftime('%y')), '02x')
     month = format(int(datatimestr.strftime('%m')), '02x')
@@ -142,6 +139,7 @@ def config_romx(dsp_flavor=0, tool_rev=0, board_type=0):
         git_sha[:40]
         # format(git_sha, '040x')
     ])
+
     config_case = '\n'.join([
         '''\t5'h%s: data = 8'h%s; // %s''' %
         (format(i, '02x'), str_config[i * 2:i * 2 + 2], comments[i])
@@ -160,12 +158,13 @@ module config_romx(
 );
 
 always @(address) case(address)
-%s
+{}
 endcase
 
 endmodule
 '''
-    return config_romx_v % config_case
+    Y = config_romx_v.format(config_case)
+    return Y
 
 
 def usage():
@@ -180,7 +179,6 @@ if __name__ == "__main__":
     tool_rev = '1.0'
     board_type = 'BOARD_llrf4'
     filename = 'config_romx.v'
-    usage()
     for opt, arg in opts:
         if opt in ('-h', '--HARDWARE'):
             board_type = arg
@@ -191,9 +189,10 @@ if __name__ == "__main__":
         elif opt in ('-o', '--OUTPUT'):
             filename = arg
         else:
+            print('BAD')
             usage()
-    f = open(filename, 'w')
-    f.write(
-        config_romx(
-            dsp_flavor=dsp_flavor, tool_rev=tool_rev, board_type=board_type))
-    f.close()
+            exit(1)
+    with open(filename, 'w') as f:
+        f.write(
+            config_romx(
+                dsp_flavor=dsp_flavor, tool_rev=tool_rev, board_type=board_type))

@@ -1,0 +1,25 @@
+# Xilinx SP605 (Spartan-6 XC6SLX45T-FGG484)
+# as documented in ug526.pdf
+# http://www.xilinx.com/support/documentation/sp605.htm
+##------- Pin Constraints -------
+
+## GTP Mapping
+NET "RXN0"             LOC = "C13";  # 12 on P2, SFP
+NET "RXP0"             LOC = "D13";  # 13 on P2, SFP
+NET "TXN0"             LOC = "A14";  # 19 on P2
+NET "TXP0"             LOC = "B14";  # 18 on P2
+NET "SFP0_LOS"         LOC = "T17";  # 8 , 1 on J14
+NET "IIC_SCL_SFP"      LOC = "E5";   # UG table 1-19, IIC_SCL_SFP
+NET "IIC_SDA_SFP"      LOC = "E6";   # UG table 1-19, IIC_SDA_SFP
+NET "SFP0_TX_DISABLE"  LOC = "Y8";   # 3, 1 on J44
+
+# SFP mgt clock module constraints
+NET "REFCLK_N"      LOC = "B12"| IOSTANDARD = LVDS_25;  ## SFPCLK_QO_N
+NET "REFCLK_P"      LOC = "A12"| IOSTANDARD = LVDS_25;  ## SFPCLK_QO_P
+NET "REFCLK_P" TNM_NET = "REFCLK_P";
+TIMESPEC "TS_REFCLK_P" = PERIOD "REFCLK_P"  8.0 ns HIGH 50 %;
+NET "REFCLK_N" TNM_NET = "REFCLK_N";
+TIMESPEC "TS_REFCLK_N" = PERIOD "REFCLK_N"  8.0 ns HIGH 50 %;
+
+##---------- Set placement for s6_gtp_wrap_i_foo/GTPA1_DUAL ------
+INST s6_gtp_wrap_i_foo LOC=GTPA1_DUAL_X1Y0;

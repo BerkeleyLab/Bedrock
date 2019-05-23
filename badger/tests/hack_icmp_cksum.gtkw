@@ -1,0 +1,28 @@
+[timestart] 257
+[size] 1068 579
+[pos] 212 0
+*-5.250514 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] hack_icmp_cksum_tb.
+[sst_width] 224
+[signals_width] 102
+[sst_expanded] 1
+[sst_vpaned_height] 147
+@22
+hack_icmp_cksum_tb.idat[7:0]
+hack_icmp_cksum_tb.odat[7:0]
+@28
+hack_icmp_cksum_tb.kick
+@200
+-DUT
+@22
+hack_icmp_cksum_tb.dut.dat1[7:0]
+hack_icmp_cksum_tb.dut.dat2[7:0]
+@28
+hack_icmp_cksum_tb.dut.all_ones
+@22
+hack_icmp_cksum_tb.dut.x0[15:0]
+hack_icmp_cksum_tb.dut.x1[15:0]
+hack_icmp_cksum_tb.dut.x2[15:0]
+hack_icmp_cksum_tb.dut.x3[15:0]
+[pattern_trace] 1
+[pattern_trace] 0

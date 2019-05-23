@@ -1,0 +1,36 @@
+[timestart] 0
+[size] 1183 456
+[pos] 201 49
+*-8.253656 1484 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] udp_port_cam_tb.
+[sst_width] 224
+[signals_width] 134
+[sst_expanded] 1
+[sst_vpaned_height] 103
+@200
+-Input
+@28
+udp_port_cam_tb.port_s
+@22
+udp_port_cam_tb.data[7:0]
+@200
+-Output
+@28
+udp_port_cam_tb.port_v
+udp_port_cam_tb.port_h
+@24
+udp_port_cam_tb.port_p[2:0]
+@200
+-Input setup
+@22
+udp_port_cam_tb.dut.port_in1[7:0]
+udp_port_cam_tb.dut.port_in2[7:0]
+udp_port_cam_tb.dut.port_cnt[3:0]
+@200
+-Internals
+@22
+udp_port_cam_tb.dut.pno_d[7:0]
+@28
+udp_port_cam_tb.dut.equal
+[pattern_trace] 1
+[pattern_trace] 0

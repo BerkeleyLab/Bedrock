@@ -1,0 +1,186 @@
+[timestart] 0
+[size] 1259 621
+[pos] 116 193
+*-9.996778 50964 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] scanner_tb.
+[treeopen] scanner_tb.a.
+[sst_width] 224
+[signals_width] 237
+[sst_expanded] 1
+[sst_vpaned_height] 161
+@22
+scanner_tb.goal[7:0]
+scanner_tb.stat_r[7:0]
+@28
+scanner_tb.eth_in_s
+scanner_tb.busy
+scanner_tb.keep
+@800200
+-Bench
+@200
+-Input
+@28
+scanner_tb.eth_in_s
+@22
+scanner_tb.eth_in[7:0]
+@200
+-Output
+@22
+scanner_tb.a.odata[7:0]
+@28
+scanner_tb.a.odata_s
+scanner_tb.a.odata_f
+scanner_tb.status_valid
+@22
+scanner_tb.status_vec[7:0]
+@24
+scanner_tb.pack_len[10:0]
+@200
+-DUT
+@24
+scanner_tb.a.ip_length[15:0]
+@28
+scanner_tb.a.ip_len_check
+@24
+scanner_tb.a.udp_length[15:0]
+@28
+scanner_tb.a.busy_with_arp
+scanner_tb.a.busy_with_icmp
+scanner_tb.a.busy_with_udp
+scanner_tb.a.busy_r
+@1000200
+-Bench
+@c00200
+-Input state machine
+@28
+scanner_tb.a.enable_rx
+scanner_tb.a.h_idle
+scanner_tb.a.h_preamble
+scanner_tb.a.h_data
+scanner_tb.a.h_drop
+@1401200
+-Input state machine
+@c00200
+-Squelch and CRC
+@28
+scanner_tb.a.h_data_d1
+scanner_tb.a.data_first
+@22
+scanner_tb.a.data_d1[7:0]
+@28
+scanner_tb.a.crc_zero
+scanner_tb.a.final_octet
+@1401200
+-Squelch and CRC
+@c00200
+-MAC/IP
+@28
+scanner_tb.a.pz
+@22
+scanner_tb.a.ip_a[3:0]
+scanner_tb.a.ip_d[7:0]
+@28
+scanner_tb.a.ip_m
+@22
+scanner_tb.a.data_d1[7:0]
+@24
+scanner_tb.a.pack_cnt[10:0]
+@28
+scanner_tb.a.want_c_eth
+scanner_tb.a.pass_ethmac
+scanner_tb.a.want_c_arp
+scanner_tb.a.pass_arpip
+scanner_tb.a.want_c_ip
+scanner_tb.a.pass_ipdst
+@1401200
+-MAC/IP
+@c00200
+-arp pattern
+@24
+scanner_tb.a.arp_p.cnt[10:0]
+@22
+scanner_tb.a.arp_p.data[7:0]
+scanner_tb.a.arp_p.template[7:0]
+@28
+scanner_tb.a.arp_p.want
+scanner_tb.a.arp_p.match
+scanner_tb.a.arp_p.pass
+@1401200
+-arp pattern
+@c00200
+-ip_pattern
+@24
+scanner_tb.a.ip_p.cnt[10:0]
+@22
+scanner_tb.a.ip_p.data[7:0]
+scanner_tb.a.ip_p.template[7:0]
+@28
+scanner_tb.a.ip_p.want
+scanner_tb.a.ip_p.match
+scanner_tb.a.ip_p.pass_r
+@24
+scanner_tb.a.ip_p.length[15:0]
+@1401200
+-ip_pattern
+@c00200
+-ip_cksum
+@24
+scanner_tb.a.ip_p.cnt[10:0]
+@22
+scanner_tb.a.ip_p.data[7:0]
+@28
+scanner_tb.a.ip_p.out_chksum_gate
+@22
+scanner_tb.a.ip_p.ck.chksum[7:0]
+@28
+scanner_tb.a.ip_p.ck.all_ones
+scanner_tb.a.ip_p.chksum_fail
+@1401200
+-ip_cksum
+@c00200
+-udp_pattern
+@22
+scanner_tb.a.udp_p.data[7:0]
+@28
+scanner_tb.a.udp_p.match
+scanner_tb.a.udp_p.want
+scanner_tb.a.udp_p.pass_r
+@24
+scanner_tb.a.udp_p.length_r[15:0]
+@1401200
+-udp_pattern
+@c00200
+-UDP port number CAM
+@28
+scanner_tb.a.cam.port_s
+@22
+scanner_tb.a.cam.data[7:0]
+@24
+scanner_tb.a.cam.port_p[2:0]
+@28
+scanner_tb.a.cam.port_h
+scanner_tb.a.cam.port_v
+@1401200
+-UDP port number CAM
+@c00200
+-chksum_chk
+@24
+scanner_tb.a.chk_p.length[15:0]
+@28
+scanner_tb.a.chk_p.end_of_ip
+@24
+scanner_tb.a.chk_p.cnt[10:0]
+@28
+scanner_tb.a.chk_p.chksum_zero
+scanner_tb.a.chk_p.chksum_gate
+@22
+scanner_tb.a.chk_p.data[7:0]
+scanner_tb.a.chk_p.data[7:0]
+scanner_tb.a.chk_p.ck.chksum[7:0]
+@28
+scanner_tb.a.chk_p.eof
+scanner_tb.a.chk_p.state
+@1401200
+-chksum_chk
+[pattern_trace] 1
+[pattern_trace] 0

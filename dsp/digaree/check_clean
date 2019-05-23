@@ -1,0 +1,8 @@
+# The "find" commands below check that the source code satisfies:
+#  no hidden files
+#  filenames are only alphanumeric, plus hyphen, underscore, and period
+#  files don't contain trailing spaces or tabs, non-tab followed by tab, or non-printing-ASCII chars
+set -e
+! find . -path ./.git -prune -o -name ".*" -and -not -name "." -print | grep . || exit 1
+! find . -path ./.git -prune -o -printf "%f\n" | grep "[^-A-Za-z0-9._]" || exit 1
+! find . -path ./.git -prune -o -type f -print | LC_ALL=C xargs grep -n -E "`printf \"\t$| $|[^\t]\t|[^[:alnum:][:punct:] \t]\"`"

@@ -42,8 +42,8 @@
 //     phase_step_l = (2^20*9%13)*315 = 945
 
 // TODO:
-// Potentially, isolate phase generation into a separate module
-//
+// Potentially, isolate phase generation into a separate module.
+// Haha, turns out there is ph_acc.v (We should USE it).
 // Synthesizes to ??? slices at ??? MHz in XC3Sxxx-4 using XST-??
 //
 

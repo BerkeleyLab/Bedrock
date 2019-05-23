@@ -1,13 +1,17 @@
 `timescale 1ns / 1ns
 
 // Name: Washout (DC-reject) filter
-//% track input allows freezing DC offset
+// track input allows freezing DC offset.
+// let N = 2^cut
+// The filter has a Zero at DC [1 + 0j] and 2 poles [0 + 0j], [(N-1)/N + 0j]
 module fwashout(
 	input clk,  // timespec 8.0 ns
 	input rst,
 	input track,
-	input signed [a_dw-1:0] a_data,  input a_gate, a_trig,
-	output signed [o_dw-1:0] o_data,  output o_gate, o_trig,
+	input signed [a_dw-1:0] a_data,  // Raw ADC samples
+	input a_gate, a_trig,
+	output signed [o_dw-1:0] o_data,
+	output o_gate, o_trig,
 	output time_err
 );
 

@@ -1,15 +1,19 @@
-VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -I$(DSP_DIR)
+include $(CORDIC_DIR)/rules.mk
+
+VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -y$(CORDIC_DIR)
 VFLAGS += -I. -y. -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
 TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb vectormul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb biquad_tb decimationLowpass_tb iirFilter_tb tinyEVR_tb
 
 TGT_ := $(TEST_BENCH)
 
-NO_CHECK = piloop2_check cavity_check lp_check
+NO_CHECK = piloop2_check cavity_check lp_check banyan_mem_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 
 BITS_ := bandpass3.bit
 PYTHON = python3
+
+VERILOG_AUTOGEN += " "
 
 .PHONY: targets checks bits check_all clean_all
 targets: $(TGT_)
@@ -17,18 +21,15 @@ checks: $(CHK_)
 check_all: $(CHK_)
 bits: $(BITS_)
 
-$(AUTOGEN_DIR)/cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
-	mkdir -p $(AUTOGEN_DIR) && $(PYTHON) $< 22 > $@
+rot_dds_auto: cordicg_b22.v
 
-rot_dds_auto: $(AUTOGEN_DIR)/cordicg_b22.v
+mon_12_auto: cordicg_b22.v
 
-mon_12_auto: $(AUTOGEN_DIR)/cordicg_b22.v
+ssb_out_auto: cordicg_b22.v
 
-ssb_out_auto: $(AUTOGEN_DIR)/cordicg_b22.v
+cordic_mux_auto: cordicg_b22.v
 
-cordic_mux_auto: $(AUTOGEN_DIR)/cordicg_b22.v
-
-fdbk_core_auto: $(AUTOGEN_DIR)/cordicg_b22.v
+fdbk_core_auto: cordicg_b22.v
 
 rf_controller_auto: lp_notch_auto fdbk_core_auto piezo_control_auto
 
@@ -45,7 +46,7 @@ timestamp.bit: timestamp.v reg_delay.v
 	mv _xilinx/timestamp.bit $@
 
 half_filt_check: half_filt.py half_filt.dat
-	$(PYTHON) half_filt.py -c
+	$(PYTHON) $< -c
 
 lp_notch_check: lp_notch_test.py lp_tb lp_notch_tb
 	$(PYTHON) $<
@@ -72,7 +73,7 @@ CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat
 
 CLEAN_DIRS += tt800_ref.dSYM
-CLEAN_DIRS += _xilinx
+CLEAN_DIRS += _xilinx __pycache__
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))

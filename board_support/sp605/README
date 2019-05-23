@@ -1,0 +1,4 @@
+# Board support for Xilinx SP605
+
+HARDWARE = sp605
+PART = xc6slx45t-fgg484-3

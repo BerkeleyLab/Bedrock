@@ -1,0 +1,42 @@
+[timestart] 0
+[size] 1366 664
+[pos] -1 -1
+*-11.503375 1515 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] circle_buf_serial_tb.
+[sst_width] 210
+[signals_width] 206
+[sst_expanded] 1
+[sst_vpaned_height] 177
+@28
+circle_buf_serial_tb.dut.iclk
+circle_buf_serial_tb.dut.buf_sync
+circle_buf_serial_tb.mismatch
+circle_buf_serial_tb.iclk
+circle_buf_serial_tb.oclk
+@24
+circle_buf_serial_tb.save_addr[5:0]
+@28
+circle_buf_serial_tb.record_type
+circle_buf_serial_tb.buffer_mark
+circle_buf_serial_tb.stop
+circle_buf_serial_tb.stb_in
+circle_buf_serial_tb.enable
+@200
+-source logic
+@24
+circle_buf_serial_tb.dut.buf_count[15:0]
+@28
+circle_buf_serial_tb.dut.sr_stb
+@23
+circle_buf_serial_tb.dut.sr_in[15:0]
+@200
+-readout logic
+@28
+circle_buf_serial_tb.dut.stb_out
+@22
+circle_buf_serial_tb.dut.read_addr[5:0]
+circle_buf_serial_tb.dut.d_out[15:0]
+@200
+-handshake
+[pattern_trace] 1
+[pattern_trace] 0

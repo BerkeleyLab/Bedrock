@@ -1,0 +1,16 @@
+[size] 1000 600
+[pos] -1 -1
+*-3.818690 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+@28
+complex_mul_tb.iq
+complex_mul_tb.ena
+@420
+complex_mul_tb.x[17:0]
+@24
+complex_mul_tb.y[17:0]
+@420
+complex_mul_tb.z[17:0]
+@28
+complex_mul_tb.g_out
+@200
+-complex_mul

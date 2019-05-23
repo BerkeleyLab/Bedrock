@@ -1,0 +1,4 @@
+# use PART=xc3s1000-ft256-5
+NET "clk" LOC="T9";
+NET "clk" TNM_NET = "CLK_1";
+TIMESPEC "TS_CLK_1" = PERIOD "CLK_1" 6.0 ns HIGH 50%;

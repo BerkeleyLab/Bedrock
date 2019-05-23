@@ -63,7 +63,7 @@ module sub_mul(
 // Assumes there is some guarantee that you will never multiply two
 // full-scale negative values together.
 
-// Based on the well-exercised vectormul.v, but without its
+// Based on the well-exercised complex_mul.v, but without its
 // final saturation and register.
 
 reg [2:0] iq_sr=0;

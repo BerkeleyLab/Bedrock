@@ -1,0 +1,50 @@
+# UDP
+# should almost match tx_icmp_table.csv
+# see tx_path.eps and tx_gen.py
+# pc out fp_offset cf_offset chk_in template comment
+  0   x    0   x    x   x    length lsb
+  1   x    0   x    x   x    length msb
+  2   x    0   x    x   x    flags
+  3   x    0   x    x   x    reserved
+  4  pxd   6   2   cfg  x    start Dest MAC
+  5  pxd   6   2   cfg  x
+  6  pxd   6   2   cfg  x
+  7  pxd   6   2   cfg  x
+  8  pxd   6   x    0   x
+  9  pxd   6   x    0   x    end Dest MAC
+ 10  cfg  20  -10  pxd  x    start Source MAC
+ 11  cfg  20  -10  pxd  x
+ 12  cfg  20  -10  pxd  x
+ 13  cfg  20  -10  pxd  x
+ 14  cfg   x  -10   0   x
+ 15  cfg   x  -10   0   x    end Source MAC
+ 16  pxd   0   x    0   x    EtherType
+ 17  pxd   0   x    0   x    EtherType
+ 18  pxd   0   x   pxd  x    Vers/IHL
+ 19  pxd   0   x   pxd  x    ToS
+ 20  pxd   0   x   pxd  x    Length
+ 21  pxd   0   x   pxd  x    Length
+ 22  tem   x   x   tem  0    Ident
+ 23  tem   x   x   tem  0    Ident
+ 24  pxd   0   x   pxd  x    Flags/Fragment
+ 25  pxd   0   x   pxd  x    Fragment
+ 26  tem   x   x   tem 32    TTL
+ 27  pxd   0   x   pxd  x    Protocol
+ 28  chk   x   x   tem  0    IP header checksum
+ 29  chk   x   x   tem  0    IP header checksum
+ 30  cfg   x  -24   x   x    start Source IP
+ 31  cfg   x  -24   x   x
+ 32  cfg   x  -24   x   x
+ 33  cfg   x  -24   x   x    end Source IP
+ 34  pxd  -4   x    x   x    start Dest IP
+ 35  pxd  -4   x    x   x
+ 36  pxd  -4   x    x   x
+ 37  pxd  -4   x    x   x    end Dest IP
+ 38  pxd   2   x    x   x    Source Port
+ 39  pxd   2   x    x   x
+ 40  pxd  -2   x    x   x    Destination Port
+ 41  pxd  -2   x    x   x
+ 42  pxd   0   x    x   x    Length
+ 43  pxd   0   x    x   x
+ 44  pxd   0   x    x   x    Checksum
+ 45  pxd   0   x    x   x

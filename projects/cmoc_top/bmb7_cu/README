@@ -1,0 +1,3 @@
+This version of CMOC running on the Kintex7 is accessible at the Spartan6's ip at port 50006.
+Communication between Spartan6 and the Kintex7 is via a local bus (code for which is in {jxj_gate.v, k7_to_s6.v, etc})
+This communication link fails when using async=True in kivygui.ini.

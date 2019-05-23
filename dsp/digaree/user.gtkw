@@ -1,0 +1,52 @@
+[timestart] 0
+[size] 1255 594
+[pos] 58 -11
+*-5.846355 215 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] user_tb.
+[treeopen] user_tb.dut.
+[treeopen] user_tb.dut.cpu.
+[sst_width] 210
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 152
+@28
+user_tb.clk
+user_tb.h_write
+@22
+user_tb.h_data[17:0]
+@28
+user_tb.trigger
+@420
+user_tb.meas[17:0]
+@28
+user_tb.trace_strobe
+@200
+-DUT
+@24
+user_tb.dut.pc[6:0]
+@28
+user_tb.dut.choose_const
+@22
+user_tb.dut.const_val[17:0]
+user_tb.dut.meas_mux[17:0]
+@28
+user_tb.dut.sat_happened
+user_tb.dut.trigger
+@22
+user_tb.dut.sat_cnt[6:0]
+@24
+user_tb.dut.sat_report[6:0]
+user_tb.dut.sat_count[6:0]
+@200
+-CPU
+@28
+user_tb.dut.cpu.set
+@200
+-ALU
+@22
+user_tb.dut.cpu.alu.sat[21:0]
+@28
+user_tb.dut.cpu.alu.sat_happened
+user_tb.dut.cpu.alu.valid_r
+[pattern_trace] 1
+[pattern_trace] 0

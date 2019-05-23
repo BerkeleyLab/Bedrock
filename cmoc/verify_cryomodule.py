@@ -38,11 +38,11 @@ def check_err(test_val, bound, err):
 
 def make_check(data):
     cav, fwd, rfl = data
-    l = len(cav) // 2
+    cav_len = len(cav) // 2
     err_bar = 5
-    fail_pass(check_err(abs(cav[l]), 1934, err_bar) and
-              check_err(abs(fwd[l]), 1318, err_bar) and
-              check_err(abs(rfl[l]), 847, err_bar))
+    fail_pass(check_err(abs(cav[cav_len]), 1934, err_bar) and
+              check_err(abs(fwd[cav_len]), 1318, err_bar) and
+              check_err(abs(rfl[cav_len]), 847, err_bar))
 
 
 if __name__ == "__main__":
