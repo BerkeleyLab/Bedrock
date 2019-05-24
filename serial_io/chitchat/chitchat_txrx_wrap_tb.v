@@ -210,9 +210,13 @@ module chitchat_txrx_wrap_tb;
    // Scoreboarding
    // ----------------------
    localparam SCB_BUS_WI = 32*2; // Data*2
+   reg  [2:0] scb_location;
    wire [SCB_BUS_WI-1:0] scb_data_in, scb_data_out, scb_data_out_xcc;
    reg  [SCB_BUS_WI-1:0] scb_data_sync_r, scb_data_sync_r2;
    wire scb_write_en, scb_write_en_xcc, scb_read_en, scb_full, scb_empty;
+
+   // Simple latching of tx_location
+   always @(posedge tx_clk) if (tx_valid && tx_transmit_en) scb_location <= tx_location;
 
    // Check TX clock crossing
    always @(posedge tx_clk) begin
@@ -231,7 +235,7 @@ module chitchat_txrx_wrap_tb;
    // Need to probe DUT due to complex synchronizer timing
    // TX synchronizer correctness checked above
    assign scb_write_en = i_dut.tx_send_x_tgtx;
-   assign scb_data_in = {tx_location, i_dut.tx_data1_x_tgtx, i_dut.tx_data0_x_tgtx};
+   assign scb_data_in = {i_dut.tx_data1_x_tgtx, i_dut.tx_data0_x_tgtx};
 
    // Move from gtx_tx_clk domain to rx_clk domain
    data_xdomain # (.size(SCB_BUS_WI)) i_scb_tx_sys (
@@ -290,12 +294,15 @@ module chitchat_txrx_wrap_tb;
             $display("%t, ERROR: Received non-incrementing frame counter", $time);
             fail <= 1;
          end
-         // Compare fixed data
+         // Compare fixed and slow data
          if ({rx_protocol_ver, rx_gateware_type, rx_rev_id} != {CC_PROTOCOL_VER, TX_GATEW_TYPE, REVID}) begin
             $display("%t, ERROR: Version comparison failed", $time);
             fail <= 1;
          end
-
+         if (rx_location != scb_location) begin
+            $display("%t, ERROR: Location comparison failed", $time);
+            fail <= 1;
+         end
          if (2 < txrx_latency > 10) begin // Should converge to 4
             $display("%t, ERROR: Latency calculation failed", $time);
             fail <= 1;
@@ -304,11 +311,6 @@ module chitchat_txrx_wrap_tb;
          prev_frame_cnt <= rx_frame_counter;
       end
       if (~tx_transmit_en) prev_frame_cnt <= 0;
-   end
-
-   // Check slow signals on lb_clk domain
-   always @(posedge lb_clk) begin
-
    end
 
 endmodule

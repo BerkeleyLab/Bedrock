@@ -2,6 +2,9 @@ PRINT "Info:"
 RDW :0
 RDW :1
 
+# Disable pattern generator
+WRW :2 0x1
+
 PRINT "Setting location"
 WRW :0 0x3
 
@@ -13,7 +16,7 @@ RDW :6
 
 PRINT "Enabling TX"
 WRW :1 0x1
-WAIT 1
+WAIT 3
 
 PRINT "RX Versions:"
 CMP :7 0x1
@@ -29,45 +32,34 @@ RDW :2
 PRINT "Latency:"
 RDW :3
 
+# Set up pattern generator (tmode=counter; rate=1/7)
+WRW :2 0x0
+WRW :3 0x6
+WRW :4 0x0
+
+WAIT 1
+
 ## Read data0/1 a few times
 PRINT "RX DATA:"
 RDW :11
 RDW :11
-RDW :11
-RDW :11
 RDW :12
 RDW :12
-RDW :12
-RDW :12
+
+PRINT "Pattern checker match data0/1"
+CMP :13 0x1
+CMP :14 0x1
+
+PRINT "Pattern checker errors"
+CMP :15 0x0
+CMP :16 0x0
 
 PRINT "Fault count:"
 CMP :4 0x0
 CMP :5 0x0
 CMP :6 0x0
 
-PRINT "WAIT 2s"
 WAIT 2
-
-PRINT "RX Frame counter:"
-RDW :2
-
-PRINT "Latency:"
-RDW :3
-
-PRINT "RX DATA:"
-RDW :11
-RDW :11
-RDW :11
-RDW :11
-RDW :12
-RDW :12
-RDW :12
-RDW :12
-
-PRINT "Fault count:"
-CMP :4 0x0
-CMP :5 0x0
-CMP :6 0x0
 
 PRINT "Disabling TX"
 WRW :1 0x0

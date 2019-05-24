@@ -1,6 +1,6 @@
-chitchat_test:
+serial_io_test:
   before_script:
-    - cd serial_io/chitchat
+    - cd serial_io
   stage: test
   script:
-    - make && make checks
+    - make && make checks && cd chitchat && make && make checks

@@ -28,17 +28,25 @@ module comms_top_regbank #(
    input [2:0]         rx_gateware_type_i,
    input [2:0]         rx_location_i,
    input [31:0]        rx_rev_id_i,
-
    input [31:0]        rx_data0_i,
    input [31:0]        rx_data1_i,
+   input               rx_match0_i,
+   input               rx_match1_i,
+   input [15:0]        rx_err_cnt0_i,
+   input [15:0]        rx_err_cnt1_i,
 
    // Control registers out
    output reg [2:0]    tx_location_o,
-   output reg          tx_transmit_en_o
+   output reg          tx_transmit_en_o,
+   output reg          pgen_disable_o,
+   output reg [4:0]    pgen_rate_o,
+   output reg          pgen_test_mode_o,
+   output reg [2:0]    pgen_inc_step_o,
+   output reg [31:0]   pgen_usr_data_o
 );
    `include "comms_pack.vh"
 
-   localparam LOCAL_AWI = 4;
+   localparam LOCAL_AWI = 5;
 
    // Address map of read registers
    localparam [LOCAL_AWI-1:0] INFO0_RD_REG            = 0;
@@ -54,14 +62,20 @@ module comms_top_regbank #(
    localparam [LOCAL_AWI-1:0] RX_REV_ID_RD_REG        = 10;
    localparam [LOCAL_AWI-1:0] RX_DATA0_RD_REG         = 11;
    localparam [LOCAL_AWI-1:0] RX_DATA1_RD_REG         = 12;
+   localparam [LOCAL_AWI-1:0] RX_MATCH0_RD_REG        = 13;
+   localparam [LOCAL_AWI-1:0] RX_MATCH1_RD_REG        = 14;
+   localparam [LOCAL_AWI-1:0] RX_ERR_CNT0_RD_REG      = 15;
+   localparam [LOCAL_AWI-1:0] RX_ERR_CNT1_RD_REG      = 16;
+
 
    // Address map of write registers
    localparam TX_LOCATION_WR_REG      = 0;
    localparam TX_TRANSMIT_EN_WR_REG   = 1;
-
-   // Size of read and write register banks
-   localparam NUM_RD_REG = RX_DATA1_RD_REG + 1;
-   localparam NUM_WR_REG = TX_TRANSMIT_EN_WR_REG + 1;
+   localparam PGEN_DISABLE_WR_REG     = 2;
+   localparam PGEN_RATE_WR_REG        = 3;
+   localparam PGEN_TEST_MODE_WR_REG   = 4;
+   localparam PGEN_INC_STEP_WR_REG    = 5;
+   localparam PGEN_USR_DAT_WR_REG     = 6;
 
    reg [LBUS_DATA_WIDTH-1:0] lb_rdata_reg = 0;
 
@@ -85,12 +99,21 @@ module comms_top_regbank #(
                RX_REV_ID_RD_REG:        lb_rdata_reg <= rx_rev_id_i;
                RX_DATA0_RD_REG:         lb_rdata_reg <= rx_data0_i;
                RX_DATA1_RD_REG:         lb_rdata_reg <= rx_data1_i;
+               RX_MATCH0_RD_REG:        lb_rdata_reg <= rx_match0_i;
+               RX_MATCH1_RD_REG:        lb_rdata_reg <= rx_match1_i;
+               RX_ERR_CNT0_RD_REG:      lb_rdata_reg <= rx_err_cnt0_i;
+               RX_ERR_CNT1_RD_REG:      lb_rdata_reg <= rx_err_cnt1_i;
                default:                 lb_rdata_reg <= 32'hdeadf00d;
             endcase
          end else begin
             case (lb_addr[LOCAL_AWI-1:0])
                TX_LOCATION_WR_REG:      tx_location_o    <= lb_wdata;
-               default:                 tx_transmit_en_o <= lb_wdata; // TX_TRANSMIT_EN_WR_REG
+               TX_TRANSMIT_EN_WR_REG:   tx_transmit_en_o <= lb_wdata; 
+               PGEN_DISABLE_WR_REG:     pgen_disable_o   <= lb_wdata;
+               PGEN_RATE_WR_REG:        pgen_rate_o      <= lb_wdata;
+               PGEN_TEST_MODE_WR_REG:   pgen_test_mode_o <= lb_wdata;
+               PGEN_INC_STEP_WR_REG:    pgen_inc_step_o  <= lb_wdata;
+               default:                 pgen_usr_data_o  <= lb_wdata; // PGEN_USR_DAT_WR_REG
             endcase
          end
       end

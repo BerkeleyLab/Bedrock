@@ -264,28 +264,6 @@ module comms_top
    wire [31:0] rx_data0;
    wire [31:0] rx_data1;
 
-
-   // Generate test pattern composed of circular byte shift, interleaved
-   // with bad data that should not be sampled by chitchat_txrx_wrap
-   reg [127:0] test_data0 = "QF2PRE++CHITCHAT";
-   reg [127:0] test_data1 = "COMMS+T+ETHERNET";
-   reg [4:0] cycle_cnt = 0;
-
-
-   always @(posedge sys_clk) begin
-      cycle_cnt <= cycle_cnt + 1;
-
-      if (cycle_cnt == 6) begin
-         test_data0 <= {test_data0[119:0], test_data0[127:120]};
-         test_data1 <= {test_data1[119:0], test_data1[127:120]};
-      end
-   end
-
-   assign tx_valid = cycle_cnt[4];
-   assign tx_data0 = cycle_cnt[4] ? test_data0 : 32'hBADD;
-   assign tx_data1 = cycle_cnt[4] ? test_data1 : 32'hBADD;
-
-
    chitchat_txrx_wrap #(
       .REV_ID        (32'hdeadbeef),
       .TX_GATEWARE_TYPE (2),
@@ -337,6 +315,64 @@ module comms_top
       .gtx_rx_k          (gtx1_rxk)
    );
 
+   // ----------------------------------
+   // Pattern generators and checkers
+   // ---------------------------------
+   wire        pgen_disable;
+   wire [4:0]  pgen_rate;
+   wire        pgen_test_mode;
+   wire [2:0]  pgen_inc_step;
+   wire [31:0] pgen_usr_data;
+
+   wire [1:0]  tx_valid_v;
+   wire [31:0] tx_data_v    [1:0];
+   wire [1:0]  rx_valid_v;
+   wire [31:0] rx_data_v    [1:0];
+   wire [1:0]  rx_match_v;
+   wire [15:0] rx_err_cnt_v [1:0];
+
+   genvar i;
+   generate for (i=0; i < 2; i = i + 1) begin: G_PATT_GEN_CHECK
+
+      patt_gen #(.DWI (32), .P_CHECK (0))
+      i_patt_gen (
+         .lb_clk         (lb_clk),
+         .pgen_disable   (pgen_disable),
+         .pgen_rate      (pgen_rate),
+         .pgen_test_mode (pgen_test_mode),
+         .pgen_inc_step  (pgen_inc_step),
+         .pgen_usr_data  (pgen_usr_data),
+         .clk            (sys_clk),
+         .tx_valid       (tx_valid_v[i]),
+         .tx_data        (tx_data_v[i]),
+         .rx_valid       (1'b0),
+         .rx_data        (32'b0),
+         .rx_match       (),
+         .rx_err_cnt     ()
+      );
+
+      patt_gen #(.DWI (32), .P_CHECK (1))
+      i_patt_check (
+         .lb_clk         (lb_clk),
+         .pgen_disable   (pgen_disable),
+         .pgen_rate      (pgen_rate),
+         .pgen_test_mode (pgen_test_mode),
+         .pgen_inc_step  (pgen_inc_step),
+         .pgen_usr_data  (pgen_usr_data),
+         .clk            (lb_clk),
+         .tx_valid       (),
+         .tx_data        (),
+         .rx_valid       (rx_valid_v[i]),
+         .rx_data        (rx_data_v[i]),
+         .rx_match       (rx_match_v[i]),
+         .rx_err_cnt     (rx_err_cnt_v[i])
+      );
+   end endgenerate
+
+   assign tx_valid = tx_valid_v[0];
+   assign {tx_data1, tx_data0} = {tx_data_v[1], tx_data_v[0]};
+   assign rx_valid_v = {rx_valid, rx_valid};
+   assign {rx_data_v[1], rx_data_v[0]} = {rx_data1, rx_data0};
 
    // ----------------------------------
    // Local Bus Register Decoding
@@ -362,10 +398,20 @@ module comms_top
       .rx_rev_id_i        (rx_rev_id),
       .rx_data0_i         (rx_data0),
       .rx_data1_i         (rx_data1),
+      .rx_match0_i        (rx_match_v[0]),
+      .rx_match1_i        (rx_match_v[1]),
+      .rx_err_cnt0_i      (rx_err_cnt_v[0]),
+      .rx_err_cnt1_i      (rx_err_cnt_v[1]),
 
       .tx_location_o      (tx_location),
-      .tx_transmit_en_o   (tx_transmit_en)
+      .tx_transmit_en_o   (tx_transmit_en),
+      .pgen_disable_o     (pgen_disable),
+      .pgen_rate_o        (pgen_rate),
+      .pgen_test_mode_o   (pgen_test_mode),
+      .pgen_inc_step_o    (pgen_inc_step),
+      .pgen_usr_data_o    (pgen_usr_data)
    );
+
 
    // ----------------------------------
    // Status LEDs
