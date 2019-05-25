@@ -15,6 +15,8 @@
 //
 // rx_match is the latched result of the previous data comparison and
 // rx_err_cnt reports how many times a matching sequence has been interrupted.
+//
+// Asserting pgen_disable will clear both status outputs
 // ------------------------------------
 
 module patt_gen #(
@@ -28,10 +30,10 @@ module patt_gen #(
    input            lb_clk,
    input            pgen_disable,   // Disable pattern generation
 
-   input  [4:0]     pgen_rate,      // Rate of data generation; 0=1 (full rate), 1=2 (half rate)
+   input  [4:0]     pgen_rate,      // Rate of data generation; 0=32 (1/32), 1=1 (full rate)
    input            pgen_test_mode, // test_mode = 0: Counter
                                     // test_mode = 1: User data
-   input  [2:0]     pgen_inc_step,  // Increment step for counter; 0=1, 1=2
+   input  [2:0]     pgen_inc_step,  // Increment step for counter; 0=8, 1=1
    input  [DWI-1:0] pgen_usr_data,
 
    // -------------------
@@ -77,8 +79,8 @@ module patt_gen #(
    reg       pgen_disable_r;
 
    always @(posedge clk) begin
-      pgen_rate_enc  <= pgen_rate_x + 1;
-      pgen_inc_enc   <= pgen_inc_x + 1;
+      pgen_rate_enc  <= pgen_rate_x==0 ? 1<<5 : pgen_rate_x;
+      pgen_inc_enc   <= pgen_inc_x==0 ? 1<<3 : pgen_inc_x;
       pgen_disable_r <= pgen_disable_x;
    end
 

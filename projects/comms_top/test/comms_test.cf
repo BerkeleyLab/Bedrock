@@ -32,9 +32,8 @@ RDW :2
 PRINT "Latency:"
 RDW :3
 
-# Set up pattern generator (tmode=counter; rate=1/7)
+# Set up pattern generator (tmode=counter))
 WRW :2 0x0
-WRW :3 0x6
 WRW :4 0x0
 
 WAIT 1
