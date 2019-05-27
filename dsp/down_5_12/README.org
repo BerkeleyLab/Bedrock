@@ -1,0 +1,82 @@
+#+TITLE: Downconversion
+#+AUTHOR: Vamsi Vytla
+#+EMAIL: vkvytla@lbl.gov
+
+* Downconvert
+** IQ extraction
+An RF tone, aka sinusoid with angular frequency (\omega = 2 \pi f) and an arbitrary phase (\phi_0)[fn:1]
+
+\begin{equation}
+Y(t) = A \cos{(\omega t + \phi_0)}
+\end{equation}
+
+Assuming \omega is in the first Nyquist zone of an ADC, without loss of generality, one can say:
+
+\begin{equation}
+Y[n] = Y(t)|_{t = n T_s}
+\end{equation}
+
+Where Y[n] is the observed data stream from the ADC, and T_s is the sampling period.
+
+\begin{equation}
+Y[n] = A \cos{(n \theta + \phi_0)} |_{\theta = \omega T_s}
+\end{equation}
+
+Data from an ADC tends to have a DC offset.[fn:2]
+\begin{equation}
+Y[n] = A \cos{(n \theta + \phi_0)} + DC
+\end{equation}
+
+\begin{equation}
+Y[n] = A \cos{(n \theta)} \cos{\phi_0} - A \sin{(n \theta)} \sin{\phi_0} + DC
+\end{equation}
+
+#+NAME: eqn:foo
+\begin{equation}
+ \begin{bmatrix}
+ y_n \\ y_{n+1} \\ .. \\ y_{n+k}
+ \end{bmatrix}
+ =
+ \begin{pmatrix}
+  \cos{n \theta} &  \sin{n \theta} &  1 \\
+  \cos{(n+1) \theta} &  \sin{(n+1) \theta} &  1 \\
+  ... \\
+  \cos{(n+k) \theta} &  \sin{(n+k) \theta} &  1
+  \end{pmatrix}
+  \begin{bmatrix} I \\ Q \\ DC \end{bmatrix}
+\end{equation}
+
+The transformation matrix is nothing but a set of spaced samples of a unit amplitude RF tone.
+On a typical PC one can easily extract I, Q, and DC by solving for the over determined system of
+equations in a least square sense. Assuming the signal is clean ;)
+
+** IQ extraction, this time for real time
+
+Extracting IQ with a minimal delay is key in closing high frequency feedback loops. In order to
+extract IQ on an FPGA, it is typical to choose the RF tone frequency to be a quarter of the
+sampling frequency (f_s). See cite:Cosnidine84 and Larry Doolittle's [[http://recycle.lbl.gov/~ldoolitt/down/][white paper]]. This choice
+simplifies the digital implementation of downconversion drastically.
+
+There are occasions when 4x sampling rate doesn't provide a good enough SNR, for example, when
+there are harmonics mixed into the RF tone, it is better to set the sampling rate to a rational
+fraction slightly away from 1/4. Say 7/33 or 5/12 which are close to 1/4 and 1/2 but not quite.
+See cite:Doolittle06. This will alias the harmonics away from the pulse tone itself, and therefore
+can be filtered away easily. This is also known to provide protection from DNL (Differential
+NonLinearity) and INL (Integral) for some types of ADCs.
+
+Knowing the above, what should \theta and k be for fast signal processing applications? From
+equation [[eqn:foo]] one can reason the following:
+1. Larger k should result in a better estimate of I and Q components
+2. Larger k also means a bigger group delay in the feedback pipeline
+
+
+In the case of quarter
+Typically the transformation matrix in [[eqn:foo]] is generated using either a DDS, or a look up table.
+
+
+[fn:1] For the purpose of this note, \phi_0 can be considered varying very slowly so that it
+doesn't violate the orthogonality of In-Phase and Quadrature componets
+[fn:2] Also a WSS white noise, and 1/f noise components, which we don't deal with here.
+
+
+bibliography:README-refs.bib
