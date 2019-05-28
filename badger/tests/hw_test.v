@@ -23,17 +23,27 @@ module hw_test(
 	input CSB,
 	input MOSI,
 
+	// Simulation-only
+`ifdef VERILATOR
+	output in_use,
+`endif
+
 	// Something physical
 	input RESET,
 	output [3:0] LED
 );
 
+`ifdef VERILATOR
+parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4};  // 192.168.7.4
+parameter [47:0] mac = 48'h12555500012d;
+`else
 `ifdef YOSYS
 parameter [31:0] ip = {8'd192, 8'd168, 8'd19, 8'd9};  // 192.168.19.9
 parameter [47:0] mac = 48'h12555500022d;
 `else
 parameter [31:0] ip = {8'd192, 8'd168, 8'd19, 8'd8};  // 192.168.19.8
 parameter [47:0] mac = 48'h12555500012d;
+`endif
 `endif
 
 wire tx_clk = vgmii_tx_clk;
@@ -53,6 +63,7 @@ spi_gate spi(
 
 wire led_user_mode, l1, l2;
 // Local bus
+wire lb_clk = tx_clk;
 wire [23:0] lb_addr;
 wire [31:0] lb_data_out, lb_data_in;
 wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;
@@ -60,20 +71,35 @@ wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;
 wire ibadge_stb, obadge_stb;
 wire [7:0] ibadge_data, obadge_data;
 wire xdomain_fault;
+wire tx_mac_done;
 //
-lb_demo_slave slave(.clk(tx_clk), .addr(lb_addr),
+lb_demo_slave slave(.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
 	.data_out(lb_data_out), .data_in(lb_data_in),
 	.ibadge_clk(rx_clk),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
+	.tx_mac_done(tx_mac_done),
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
 );
 
+// MAC master
+// Clearly not useful in the long run to drive this only from
+// the localbus, but doing so makes for a much lighter-weight test
+// than installing a real soft-core CPU.
+parameter mac_aw=10;
+wire host_clk = lb_clk;
+wire host_write = lb_control_strobe & ~lb_control_rd & (lb_addr[23:20]==1);
+wire [mac_aw:0] host_waddr = lb_addr[mac_aw:0];
+wire [15:0] host_wdata = lb_data_out[15:0];
+
 // Instantiate the Real Work
 wire rx_mon, tx_mon;
-rtefi_blob #(.ip(ip), .mac(mac)) rtefi(
+`ifndef VERILATOR
+wire in_use;
+`endif
+rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(mac_aw)) rtefi(
 	.rx_clk(vgmii_rx_clk), .rxd(vgmii_rxd),
 	.rx_dv(vgmii_rx_dv), .rx_er(vgmii_rx_er),
 	.tx_clk(tx_clk) , .txd(vgmii_txd),
@@ -81,6 +107,9 @@ rtefi_blob #(.ip(ip), .mac(mac)) rtefi(
 	.enable_rx(enable_rx),
 	.config_clk(config_clk), .config_s(config_s), .config_p(config_p),
 	.config_a(config_a), .config_d(config_d),
+	.host_clk(host_clk), .host_write(host_write),
+	.host_waddr(host_waddr), .host_wdata(host_wdata),
+	.tx_mac_done(tx_mac_done),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
@@ -88,7 +117,7 @@ rtefi_blob #(.ip(ip), .mac(mac)) rtefi(
 	.p3_addr(lb_addr), .p3_control_strobe(lb_control_strobe),
 	.p3_control_rd(lb_control_rd), .p3_control_rd_valid(lb_control_rd_valid),
 	.p3_data_out(lb_data_out), .p3_data_in(lb_data_in),
-	.rx_mon(rx_mon), .tx_mon(tx_mon)
+	.rx_mon(rx_mon), .tx_mon(tx_mon), .in_use(in_use)
 );
 assign vgmii_tx_er=1'b0;
 

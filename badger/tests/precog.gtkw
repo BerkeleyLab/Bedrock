@@ -1,0 +1,29 @@
+[timestart] 548
+[size] 1197 600
+[pos] -1 -1
+*-9.915936 1896 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] precog_tb.
+[sst_width] 224
+[signals_width] 234
+[sst_expanded] 1
+[sst_vpaned_height] 152
+@28
+precog_tb.clk
+precog_tb.fail
+@22
+precog_tb.dut.tx_packet_width[10:0]
+@28
+precog_tb.dut.scanner_busy
+precog_tb.dut.request_to_send
+precog_tb.dut.clear_to_send
+@c00200
+-internals
+@22
+precog_tb.dut.gap_width[10:0]
+precog_tb.dut.delay_cnt[11:0]
+@28
+precog_tb.dut.is_gap
+@1401200
+-internals
+[pattern_trace] 1
+[pattern_trace] 0

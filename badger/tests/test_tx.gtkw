@@ -1,0 +1,44 @@
+[timestart] 72
+[size] 1284 604
+[pos] 45 170
+*-5.719856 217 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] test_tx_tb.
+[sst_width] 224
+[signals_width] 182
+[sst_expanded] 1
+[sst_vpaned_height] 156
+@28
+test_tx_tb.start
+@24
+test_tx_tb.buf_start_addr[7:0]
+@28
+test_tx_tb.req
+test_tx_tb.req_d
+@22
+test_tx_tb.del1[3:0]
+@24
+test_tx_tb.len_req[10:0]
+@28
+test_tx_tb.done
+test_tx_tb.strobe
+@820
+test_tx_tb.mac_data[7:0]
+@22
+test_tx_tb.mac_data[7:0]
+@24
+test_tx_tb.host_addr[7:0]
+@22
+test_tx_tb.host_d[15:0]
+@820
+test_tx_tb.host_d[15:0]
+@200
+-mac
+@24
+test_tx_tb.mac.mode[2:0]
+test_tx_tb.mac.len_req_r[10:0]
+@28
+test_tx_tb.mac.odd_octet
+@24
+test_tx_tb.mac.buffer_point[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

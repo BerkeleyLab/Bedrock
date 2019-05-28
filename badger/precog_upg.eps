@@ -1,11 +1,10 @@
 %!PS-Adobe-3.0 EPSF-3.0
-%%Title: rtefi.eps
+%%Title: precog_upg.eps
 %%Creator: XCircuit v3.8 rev78
-%%CreationDate: Wed Apr 24 15:35:22 2019
+%%CreationDate: Wed Apr 24 14:20:07 2019
 %%Pages: 1
-%%BoundingBox: 68 68 782 671
-%%DocumentNeededResources: font Helvetica Helvetica-Bold Helvetica-Oblique
-%%+ font Times-Roman Symbol
+%%BoundingBox: 68 68 946 532
+%%DocumentNeededResources: font Helvetica Helvetica-Bold
 %%EndComments
 %%BeginProlog
 %
@@ -189,207 +188,141 @@ begingate
 endgate
 } def
 
-/generic::dot {
-% trivial
-begingate
-248 1.000 0 0 6 0.000 360.000 xcarc
-1.000 0.000 0.000 scb
-(x) {/Times-Roman cf} 2 29 0 1.000 0 0 pinlabel
-endgate
-} def
-
 
 %%EndSetup
 
-%%Page: rtefi 1
+%%Page: precog_upg 1
 %%PageOrientation: Portrait
 /pgsave save def bop
-0.7500 inchscale
-2.6000 setlinewidth 1562 966 translate
+1.0000 inchscale
+2.6000 setlinewidth 1424 592 translate
 
-
-(LBNL ATG's Real-Time Ethernet Fabric Infrastructure \(building on PSPEPS experience\))
-{/Helvetica-Bold cf} 2 17 0 1.200 -80 1248 label
-(GMII) {/Helvetica cf} 2 21 0 1.000 -1264 224 label
-(Input) {/Helvetica cf} 2 21 0 1.000 -1264 272 label
-(Input scanner) {/Helvetica cf} 2 21 0 1.000 -704 256 label
-(DPRAM) {/Helvetica cf} 2 21 0 1.000 -384 256 label
-(Status known by end of each packet:) {/Helvetica cf} 2 16 0 1.000 -608 -368
+0.898 0.898 0.898 scb
+497 0.000 -608 320 -224 -64 -16 -64 -400 320 -608 320 5 polygon
+497 0.000 -160 320 224 -64 448 -64 64 320 -160 320 5 polygon
+497 0.000 288 320 672 -64 800 -64 416 320 288 320 5 polygon
+0.000 0.000 0.000 scb
+(gap_counter) {/Helvetica cf} 2 23 0 1.000 -752 192 label
+(Rx_data_valid) {/Helvetica cf} 2 19 0 1.000 -752 -208 label
+3 1.000 -672 160 -96 160 2 polygon
+(Potential precog upgrade concept) {/Helvetica-Bold cf} 2 17 0 1.300 -80 784
 label
-(CRC32 OK) {/Helvetica cf} 2 16 0 1.000 -560 -656 label
+1 1.000 -688 -272 -624 -272 2 polygon
+1 1.000 -400 -272 -336 -272 2 polygon
+(1 MTU Delay) {/Helvetica cf} 2 21 0 0.750 -520 -272 label
+1.000 90 -320 -272 generic::arrowhead
+-1.000 270 -704 -272 generic::arrowhead
+(Packet_will_get_response) {/Helvetica cf} 2 19 0 1.000 -752 -144 label
+(N) {/Helvetica cf} 2 17 0 1.000 -400 -144 label
+(Y) {/Helvetica cf} 2 17 0 1.000 64 -144 label
+(request_len) {/Helvetica cf} 2 23 0 1.000 -464 192 label
+(Lock in transmit schedule when \(gap_counter > request_len\) & !Rx_data_valid)
+{/Helvetica cf} 2 16 0 1.000 -624 560 label
+(0) {/Helvetica cf} 2 23 0 1.000 -752 -64 label
+(1 MTU) {/Helvetica cf} 2 23 0 1.000 -752 320 label
 0.600 0.600 0.600 scb
-(Authentication passed) {/Helvetica cf} 2 16 0 1.000 -560 -704 label
-sce
-(UDP) {/Helvetica cf} 2 16 0 1.000 -560 -608 label
-(MAC match) {/Helvetica cf} 2 16 0 1.000 -560 -416 label
-(IP match) {/Helvetica cf} 2 16 0 1.000 -560 -464 label
-(ICMP echo) {/Helvetica cf} 2 16 0 1.000 -560 -560 label
-(ARP request) {/Helvetica cf} 2 16 0 1.000 -560 -512 label
-0 1.000 -848 304 -848 208 -560 208 -560 304 4 polygon
-1 1.000 -1200 256 -864 256 2 polygon
-1.000 90 -848 256 generic::arrowhead
-0 1.000 -480 304 -480 208 -288 208 -288 304 4 polygon
-1 1.000 -560 256 -496 256 2 polygon
-1.000 90 -480 256 generic::arrowhead
-3 1.000 -384 480 -384 304 2 polygon
-3 1.000 -384 208 -384 -256 2 polygon
-(Tx clock domain) {/Helvetica cf} 2 16 0 1.000 -352 1072 label
-(Rx clock domain) {/Helvetica cf} 2 19 0 1.000 -416 1072 label
-1 1.000 944 256 1056 256 2 polygon
-1.000 90 1072 256 generic::arrowhead
-(GMII) {/Helvetica cf} 2 16 0 1.000 1088 208 label
-(Output) {/Helvetica cf} 2 16 0 1.000 1088 256 label
-(MAC/IP) {/Helvetica cf} 2 21 0 1.000 -960 112 label
-(Config) {/Helvetica cf} 2 21 0 1.000 -960 64 label
-0 1.000 -1056 144 -1056 16 -864 16 -864 144 4 polygon
+1 1.000 -736 320 1088 320 2 polygon
+1 1.000 -736 -64 1072 -64 2 polygon
+0.180 0.545 0.341 scb
+1 3.000 -400 240 -320 320 2 polygon
+0.647 0.165 0.165 scb
+1 2.000 -320 -64 -96 160 2 polygon
 0.600 0.600 0.600 scb
-(keys) {/Helvetica cf} 2 21 0 1.000 -960 -128 label
-(authentication) {/Helvetica cf} 2 21 0 1.000 -960 -80 label
-0 1.000 -1104 -48 -1104 -176 -816 -176 -816 -48 4 polygon
+1 1.000 -704 -304 -320 -304 2 polygon
 sce
-1 1.000 -800 192 -800 80 -848 80 3 polygon
+(Tx auto response) {/Helvetica cf} 2 19 0 1.000 -752 -304 label
+0.400 0.400 0.400 scb
+1 1.000 -224 -288 -16 -288 2 polygon
+sce
+(request_len) {/Helvetica cf} 2 23 0 1.000 160 112 label
+3 1.000 -48 80 592 80 2 polygon
+1 1.000 288 -208 288 -160 416 -160 416 -208 1072 -208 5 polygon
+0.180 0.545 0.341 scb
+1 3.000 208 80 448 320 2 polygon
+sce
+(Y) {/Helvetica cf} 2 17 0 1.000 416 -144 label
+0.647 0.165 0.165 scb
+1 2.000 448 -64 592 80 2 polygon
+sce
+5 1.000 -400 224 -400 -104 2 polygon
+1 1.000 -704 32 -704 -64 -320 320 64 320 64 -64 448 320 6 polygon
+1 1.000 416 288 416 -64 800 320 3 polygon
+1 1.000 800 320 1072 320 2 polygon
+3 1.000 848 48 960 48 2 polygon
+(request_len) {/Helvetica cf} 2 23 0 1.000 944 80 label
+0.647 0.165 0.165 scb
+1 2.000 848 -64 960 48 2 polygon
+sce
+(Drawing ignores Inter-Frame-Gap \(IFG\)) {/Helvetica cf} 2 16 0 0.750 -640 464
+label
+(gap_counter resets at end of Rx packets if Packet_will_get_response)
+{/Helvetica cf} 2 16 0 1.000 -624 512 label
+1 1.000 -704 -160 -704 -208 -608 -208 -608 -160 -400 -160 -400 -208 -160 -208
+-160 -160 64 -160 64 -208 288 -208 288 -160 416 -160 416 -208 1072 -208 15
+polygon
+1 1.000 -320 -256 -320 -304 -224 -304 -224 -304 -16 -304 -16 -304 224 -304 224
+-256 448 -256 448 -304 672 -304 672 -256 800 -256 800 -304 1072 -304 15 polygon
+0.647 0.165 0.165 scb
+(Tx from MAC) {/Helvetica cf} 2 19 0 1.000 -752 -384 label
+sce
+
+(Use care moving Rx_data_valid and Packet_will_get_response from Rx to Tx clock domains)
+{/Helvetica cf} 2 16 0 0.750 -640 384 label
+0.400 0.400 0.400 scb
+(Rx packet ignored) {/Helvetica cf} 2 16 0 0.800 -224 -272 label
+sce
+1 1.000 -704 -400 -320 -400 -320 -352 -96 -352 -96 -400 448 -400 448 -352 592
+-352 592 -400 848 -400 848 -352 960 -352 960 -400 1072 -400 14 polygon
+0.647 0.165 0.165 scb
+1 2.000 -320 -352 -96 -352 2 polygon
+1 2.000 448 -352 592 -352 2 polygon
+1 2.000 848 -352 960 -352 2 polygon
+sce
+(Precog works mostly in Tx clock domain) {/Helvetica cf} 2 16 0 0.750 -640 424
+label
+(filled with packets that won't get a response.) {/Helvetica cf} 2 16 0 1.000
+-640 672 label
+(Takes more advantage of lead time to allow Tx "on top" of Rx time slots)
+{/Helvetica cf} 2 16 0 1.000 -640 720 label
+1.000 0.000 0.000 scb
+497 1.000 -640 528 8 0.000 360.000 xcarc
+497 1.000 64 320 8 0.000 360.000 xcarc
+497 1.000 416 288 8 0.000 360.000 xcarc
+0.180 0.545 0.341 scb
+497 1.000 -640 576 8 0.000 360.000 xcarc
+497 1.000 -400 240 8 0.000 360.000 xcarc
+497 1.000 208 80 8 0.000 360.000 xcarc
+497 1.000 848 320 8 0.000 360.000 xcarc
+0.647 0.165 0.165 scb
+497 1.000 -640 624 8 0.000 360.000 xcarc
+497 1.000 -672 160 8 0.000 360.000 xcarc
+sce
+(MAC packet Tx request initiated) {/Helvetica cf} 2 16 0 1.000 -624 608 label
+0.647 0.165 0.165 scb
+497 1.000 -48 80 8 0.000 360.000 xcarc
+497 1.000 848 48 8 0.000 360.000 xcarc
 0.600 0.600 0.600 scb
-1 1.000 -736 192 -736 -112 -800 -112 3 polygon
+(results from scanner.v) {/Helvetica cf} 2 16 0 0.800 -1216 -80 label
+1 1.000 -1232 -40 -1232 -232 -728 -232 -728 -104 -832 -104 -880 -40 -1232 -40 7
+polygon
 sce
--1.000 270 -864 80 generic::arrowhead
-0.600 0.600 0.600 scb
--1.000 270 -816 -112 generic::arrowhead
+1 1.000 -992 192 -1056 192 2 polygon
+0.180 0.545 0.341 scb
+1 2.000 -1104 128 -1056 128 2 polygon
+0.647 0.165 0.165 scb
+1 2.000 -1056 128 -1008 128 2 polygon
 sce
-1.000 0 -800 208 generic::arrowhead
-0.600 0.600 0.600 scb
-1.000 0 -736 208 generic::arrowhead
-sce
-3 1.000 -672 208 -672 -352 -640 -352 3 polygon
-1.000 90 -624 -352 generic::arrowhead
-0 1.000 688 368 688 144 944 144 944 368 4 polygon
-(signature) {/Helvetica cf} 2 21 0 1.000 816 256 label
-1.000 90 688 256 generic::arrowhead
-(insertion) {/Helvetica cf} 2 21 0 1.000 816 192 label
-0.800 0.800 0.800 scb
-1 1.000 816 128 816 -112 752 -112 3 polygon
--1.000 270 736 -112 generic::arrowhead
-1.000 0 816 144 generic::arrowhead
-sce
-(CRC32 and) {/Helvetica cf} 2 21 0 1.000 816 320 label
-(Length and status bits are written as trusted "badge,") {/Helvetica cf} 2 16 0
-1.000 160 -368 label
-(All clients \(except soft-core MAC\) have matched,) {/Helvetica cf} 2 16 0
-1.000 160 -544 label
-0.600 0.600 0.600 scb
-0 1.000 256 992 256 896 512 896 512 992 4 polygon
-sce
-(mem_gateway) {/Helvetica cf} 2 21 0 1.000 336 688 label
-0.600 0.600 0.600 scb
-0 1.000 160 864 160 768 512 768 512 864 4 polygon
-sce
-0 1.000 160 736 160 640 512 640 512 736 4 polygon
-(hello) {/Helvetica cf} 2 21 0 1.000 336 432 label
-0 1.000 160 608 160 512 512 512 512 608 4 polygon
-0 1.000 160 480 160 384 512 384 512 480 4 polygon
-(fixed latency; therefore no collisions possible) {/Helvetica cf} 2 16 0 1.000
-208 -592 label
-(s\) shift register) {/Helvetica cf} (m) {/Symbol cf}
-(DPRAM is \(mostly\) a 1 MTU \(12 ) {/Helvetica cf} 6 16 0 1.000 160 -480 label
-3 1.000 -384 1120 -384 576 2 polygon
-(See additional notes for details) {/Helvetica cf} 2 16 0 1.000 160 -704 label
-(\(work-in-progress, Dec. 2018\)) {/Helvetica cf} 2 21 0 1.000 -80 1216 label
-0.800 0.800 0.800 scb
-(keys) {/Helvetica cf} 2 21 0 1.000 592 -128 label
-(authentication) {/Helvetica cf} 2 21 0 1.000 592 -80 label
-0 1.000 448 -48 448 -176 736 -176 736 -48 4 polygon
-sce
-0 1.000 -208 304 -208 208 -16 208 -16 304 4 polygon
-(construct) {/Helvetica cf} 2 21 0 1.000 -112 256 label
-1 1.000 -288 256 -224 256 2 polygon
-1.000 90 -208 256 generic::arrowhead
-1 1.000 -608 304 -544 368 -224 368 -176 320 4 polygon
-(Gray code) {/Helvetica cf} 2 16 0 0.750 -592 384 label
-1.000 135 -160 304 generic::arrowhead
-1 1.000 -16 256 48 256 2 polygon
-1.000 90 64 256 generic::arrowhead
-0 1.000 64 320 64 208 608 208 608 320 4 polygon
-(data transformer) {/Helvetica cf} 2 21 0 1.000 336 288 label
-(built-in ARP, ICMP echo) {/Helvetica cf} 2 21 0 0.750 336 240 label
-1 1.000 608 256 672 256 2 polygon
-(speed_test) {/Helvetica cf} 2 21 0 1.000 336 560 label
-0.600 0.600 0.600 scb
-(???) {/Helvetica cf} 2 21 0 1.000 336 816 label
-sce
--1.000 180 576 320 generic::arrowhead
-1 1.000 576 816 576 336 2 polygon
-1 1.000 512 816 576 816 2 polygon
-1 1.000 512 688 576 688 2 polygon
-1 1.000 512 560 576 560 2 polygon
-1 1.000 512 432 576 432 2 polygon
-1.000 0 576 688 generic::dot
-1.000 0 576 560 generic::dot
-1.000 0 576 432 generic::dot
-1 1.000 144 816 96 816 2 polygon
-1 1.000 96 816 96 320 2 polygon
-1 1.000 144 688 96 688 2 polygon
-1 1.000 144 560 96 560 2 polygon
-1 1.000 144 432 96 432 2 polygon
--1.000 0 96 688 generic::dot
--1.000 0 96 560 generic::dot
--1.000 0 96 432 generic::dot
-1.000 90 160 432 generic::arrowhead
-1.000 90 160 560 generic::arrowhead
-1.000 90 160 688 generic::arrowhead
-1.000 90 160 816 generic::arrowhead
-(MAC/IP) {/Helvetica cf} 2 21 0 1.000 -224 112 label
-(Config) {/Helvetica cf} 2 21 0 1.000 -224 64 label
-0 1.000 -320 144 -320 16 -128 16 -128 144 4 polygon
-1 1.000 -64 192 -64 80 -112 80 3 polygon
--1.000 270 -128 80 generic::arrowhead
-1.000 0 -64 208 generic::arrowhead
-0.600 0.600 0.600 scb
-(Tx MAC) {/Helvetica cf} 2 21 0 1.000 384 944 label
-1 1.000 -672 304 -672 528 -496 528 3 polygon
--1.000 90 -480 528 generic::arrowhead
-(busy) {/Helvetica cf} 2 28 0 0.750 -624 512 label
-0 1.000 -480 480 -480 576 -288 576 -288 480 4 polygon
-(precog) {/Helvetica cf} 2 21 0 1.000 -384 528 label
--1.000 270 -288 512 generic::arrowhead
-(Tx trigger) {/Helvetica cf} 2 16 0 0.750 -176 976 label
-(length of Tx packet requested) {/Helvetica cf} 2 28 0 0.750 -176 912 label
--1.000 90 256 960 generic::arrowhead
-sce
-(UDP port) {/Helvetica cf} 2 21 0 1.000 -960 448 label
-(CAM) {/Helvetica cf} 2 21 0 1.000 -960 400 label
-0 1.000 -1056 368 -1056 496 -864 496 -864 368 4 polygon
-1 1.000 -800 320 -800 432 -848 432 3 polygon
-1.000 270 -864 432 generic::arrowhead
--1.000 180 -800 304 generic::arrowhead
-(Packet Badger) {/Times-Roman cf} 2 17 0 2.800 -80 1328 label
-0 1.000 304 1408 304 1328 384 1328 384 1408 4 polygon
-0 1.000 -544 1408 -544 1328 -464 1328 -464 1408 4 polygon
-0 1.000 464 1408 464 1328 544 1328 544 1408 4 polygon
-0 1.000 -704 1408 -704 1328 -624 1328 -624 1408 4 polygon
-5 1.000 128 352 544 352 624 432 976 432 976 -208 -1136 -208 -1136 608 -128 608
-128 352 9 polygon
-(scanner.v) {/Helvetica-Oblique cf} 2 16 0 0.750 -640 176 label
-(rtefi_center.v) {/Helvetica-Oblique cf} 2 16 0 0.750 720 -240 label
-(at Tx \(xformer.v\) mux) {/Helvetica cf} 2 16 0 1.000 208 -640 label
-0.600 0.600 0.600 scb
-1 1.000 256 928 256 928 -208 928 -208 512 -272 512 5 polygon
-1 1.000 -288 544 -240 544 -240 960 240 960 240 960 5 polygon
-sce
-4 1.000 -1168 1120 -1168 -256 1008 -256 1008 1120 4 polygon
-(rtefi_blob.v \(machine-generated basd on list of clients\))
-{/Helvetica-Oblique cf} 2 16 0 0.750 208 -288 label
-(construct.v) {/Helvetica-Oblique cf} 2 19 0 0.750 -112 176 label
-(xformer.v) {/Helvetica-Oblique cf} 2 19 0 0.750 560 176 label
-(ethernet_crc_add.v) {/Helvetica-Oblique cf} 2 19 0 0.750 784 112 label
-(udp_port_cam.v) {/Helvetica-Oblique cf} 2 16 0 0.750 -1056 336 label
-(prepended to each packet in DPRAM) {/Helvetica cf} 2 16 0 1.000 208 -416 label
-0.600 0.600 0.600 scb
-(Rx MAC) {/Helvetica cf} 2 21 0 1.000 -736 720 label
-0 1.000 -864 768 -864 672 -608 672 -608 768 4 polygon
-1 1.000 -736 304 -736 660 2 polygon
-1.000 0 -736 676 generic::arrowhead
-sce
-1 1.000 512 944 640 944 640 272 3 polygon
--1.000 180 640 256 generic::arrowhead
+(write_counter) {/Helvetica cf} 2 23 0 1.000 -752 128 label
+0.000 0.000 1.000 scb
+1 1.000 -608 320 -224 -64 2 polygon
+1 1.000 -160 320 224 -64 2 polygon
+1 1.000 288 320 672 -64 2 polygon
+1 2.000 -48 -352 96 -352 2 polygon
+(available time slot missed) {/Helvetica cf} 2 16 0 0.800 -48 -336 label
+(by even this fancy logic) {/Helvetica cf} 2 16 0 0.800 -48 -384 label
+1 1.000 64 320 448 -64 2 polygon
+1 1.000 416 320 800 -64 2 polygon
+1 1.000 -400 320 -16 -64 2 polygon
 pgsave restore showpage
 
 %%Trailer
