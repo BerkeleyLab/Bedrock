@@ -1,0 +1,80 @@
+[timestart] 0
+[size] 1051 781
+[pos] -1 -1
+*-18.286610 2800000 1990000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] xadc_tb.
+[treeopen] xadc_tb.cpu.
+[treeopen] xadc_tb.dut.
+[sst_width] 229
+[signals_width] 312
+[sst_expanded] 1
+[sst_vpaned_height] 214
+@800200
+-dut
+@28
+xadc_tb.dut.clk
+xadc_tb.dut.reset_in
+xadc_tb.dut.den_in
+xadc_tb.dut.dwe_in
+@22
+xadc_tb.dut.daddr_in[6:0]
+@28
+xadc_tb.dut.busy_out
+xadc_tb.dut.drdy_out
+@22
+xadc_tb.dut.do_out[15:0]
+xadc_tb.dut.channel_out[4:0]
+@28
+xadc_tb.dut.eoc_out
+xadc_tb.dut.eos_out
+xadc_tb.dut.xadc_reset
+@1000200
+-dut
+@28
+xadc_tb.trap
+@c00200
+-dbg
+@820
+xadc_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+@22
+xadc_tb.cpu.picorv32_core.dbg_insn_addr[31:0]
+xadc_tb.cpu.picorv32_core.dbg_insn_opcode[31:0]
+xadc_tb.cpu.picorv32_core.dbg_insn_imm[31:0]
+xadc_tb.cpu.picorv32_core.dbg_insn_rd[4:0]
+xadc_tb.cpu.picorv32_core.dbg_insn_rs1[4:0]
+xadc_tb.cpu.picorv32_core.dbg_insn_rs2[4:0]
+@28
+xadc_tb.cpu.picorv32_core.dbg_next
+@22
+xadc_tb.cpu.picorv32_core.dbg_rs1val[31:0]
+@28
+xadc_tb.cpu.picorv32_core.dbg_rs1val_valid
+@22
+xadc_tb.cpu.picorv32_core.dbg_rs2val[31:0]
+@28
+xadc_tb.cpu.picorv32_core.dbg_rs2val_valid
+xadc_tb.cpu.picorv32_core.dbg_valid_insn
+@1401200
+-dbg
+@800200
+-sfr
+@22
+xadc_tb.dut.sfrInst.sfRegsIn[31:0]
+xadc_tb.dut.sfrInst.mem_addr[31:0]
+xadc_tb.dut.sfrInst.mem_packed_fwd[68:0]
+xadc_tb.dut.sfrInst.mem_packed_ret[32:0]
+xadc_tb.dut.sfrInst.mem_rdata[31:0]
+@28
+xadc_tb.dut.sfrInst.mem_ready
+xadc_tb.dut.sfrInst.mem_valid
+@22
+xadc_tb.dut.sfrInst.mem_wdata[31:0]
+xadc_tb.dut.sfrInst.mem_wstrb[3:0]
+@1000200
+-sfr
+@22
+xadc_tb.cpu.mem_rdata[31:0]
+@29
+xadc_tb.cpu.mem_ready
+[pattern_trace] 1
+[pattern_trace] 0
