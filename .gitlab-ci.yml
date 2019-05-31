@@ -91,7 +91,7 @@ oscope_top:
 cmoc_litex:
   before_script:
     - cd projects/cmoc_top/litex
-  stage: deploy
+  stage: synthesis
   script:
     - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH make bit
 
