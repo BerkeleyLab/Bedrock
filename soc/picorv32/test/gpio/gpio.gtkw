@@ -1,0 +1,128 @@
+[timestart] 0
+[size] 1533 845
+[pos] -1 -1
+*-19.000000 2380000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] gpio_tb.
+[treeopen] gpio_tb.cpu.
+[treeopen] gpio_tb.gpio.
+[sst_width] 225
+[signals_width] 460
+[sst_expanded] 1
+[sst_vpaned_height] 348
+@28
+gpio_tb.mem_clk
+gpio_tb.reset
+@800200
+-CPU
+@22
+gpio_tb.cpu.picorv32_core.dbg_insn_addr[31:0]
+gpio_tb.cpu.picorv32_core.dbg_insn_opcode[31:0]
+gpio_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+@28
+gpio_tb.cpu.picorv32_core.dbg_mem_instr
+@22
+gpio_tb.cpu.picorv32_core.dbg_mem_rdata[31:0]
+@29
+gpio_tb.cpu.picorv32_core.dbg_mem_valid
+@28
+gpio_tb.cpu.picorv32_core.dbg_mem_ready
+@22
+gpio_tb.cpu.picorv32_core.dbg_mem_wdata[31:0]
+gpio_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+@1000200
+-CPU
+@800200
+-GPIO
+@28
+gpio_tb.gpio.reset
+@c00028
+gpio_tb.gpio.gpio_oe[31:0]
+@28
+(0)gpio_tb.gpio.gpio_oe[31:0]
+(1)gpio_tb.gpio.gpio_oe[31:0]
+(2)gpio_tb.gpio.gpio_oe[31:0]
+(3)gpio_tb.gpio.gpio_oe[31:0]
+(4)gpio_tb.gpio.gpio_oe[31:0]
+(5)gpio_tb.gpio.gpio_oe[31:0]
+(6)gpio_tb.gpio.gpio_oe[31:0]
+(7)gpio_tb.gpio.gpio_oe[31:0]
+(8)gpio_tb.gpio.gpio_oe[31:0]
+(9)gpio_tb.gpio.gpio_oe[31:0]
+(10)gpio_tb.gpio.gpio_oe[31:0]
+(11)gpio_tb.gpio.gpio_oe[31:0]
+(12)gpio_tb.gpio.gpio_oe[31:0]
+(13)gpio_tb.gpio.gpio_oe[31:0]
+(14)gpio_tb.gpio.gpio_oe[31:0]
+(15)gpio_tb.gpio.gpio_oe[31:0]
+(16)gpio_tb.gpio.gpio_oe[31:0]
+(17)gpio_tb.gpio.gpio_oe[31:0]
+(18)gpio_tb.gpio.gpio_oe[31:0]
+(19)gpio_tb.gpio.gpio_oe[31:0]
+(20)gpio_tb.gpio.gpio_oe[31:0]
+(21)gpio_tb.gpio.gpio_oe[31:0]
+(22)gpio_tb.gpio.gpio_oe[31:0]
+(23)gpio_tb.gpio.gpio_oe[31:0]
+(24)gpio_tb.gpio.gpio_oe[31:0]
+(25)gpio_tb.gpio.gpio_oe[31:0]
+(26)gpio_tb.gpio.gpio_oe[31:0]
+(27)gpio_tb.gpio.gpio_oe[31:0]
+(28)gpio_tb.gpio.gpio_oe[31:0]
+(29)gpio_tb.gpio.gpio_oe[31:0]
+(30)gpio_tb.gpio.gpio_oe[31:0]
+(31)gpio_tb.gpio.gpio_oe[31:0]
+@1401200
+-group_end
+@c00022
+gpio_tb.gpio.gpio_out[31:0]
+@28
+(0)gpio_tb.gpio.gpio_out[31:0]
+(1)gpio_tb.gpio.gpio_out[31:0]
+(2)gpio_tb.gpio.gpio_out[31:0]
+(3)gpio_tb.gpio.gpio_out[31:0]
+(4)gpio_tb.gpio.gpio_out[31:0]
+(5)gpio_tb.gpio.gpio_out[31:0]
+(6)gpio_tb.gpio.gpio_out[31:0]
+(7)gpio_tb.gpio.gpio_out[31:0]
+(8)gpio_tb.gpio.gpio_out[31:0]
+(9)gpio_tb.gpio.gpio_out[31:0]
+(10)gpio_tb.gpio.gpio_out[31:0]
+(11)gpio_tb.gpio.gpio_out[31:0]
+(12)gpio_tb.gpio.gpio_out[31:0]
+(13)gpio_tb.gpio.gpio_out[31:0]
+(14)gpio_tb.gpio.gpio_out[31:0]
+(15)gpio_tb.gpio.gpio_out[31:0]
+(16)gpio_tb.gpio.gpio_out[31:0]
+(17)gpio_tb.gpio.gpio_out[31:0]
+(18)gpio_tb.gpio.gpio_out[31:0]
+(19)gpio_tb.gpio.gpio_out[31:0]
+(20)gpio_tb.gpio.gpio_out[31:0]
+(21)gpio_tb.gpio.gpio_out[31:0]
+(22)gpio_tb.gpio.gpio_out[31:0]
+(23)gpio_tb.gpio.gpio_out[31:0]
+(24)gpio_tb.gpio.gpio_out[31:0]
+(25)gpio_tb.gpio.gpio_out[31:0]
+(26)gpio_tb.gpio.gpio_out[31:0]
+(27)gpio_tb.gpio.gpio_out[31:0]
+(28)gpio_tb.gpio.gpio_out[31:0]
+(29)gpio_tb.gpio.gpio_out[31:0]
+(30)gpio_tb.gpio.gpio_out[31:0]
+(31)gpio_tb.gpio.gpio_out[31:0]
+@1401200
+-group_end
+@22
+gpio_tb.gpio.gpio_in[31:0]
+@1000200
+-GPIO
+@c00200
+-LA_MEM
+@28
+gpio_tb.mem_inst.mem_la_read
+gpio_tb.mem_inst.mem_la_write
+@22
+gpio_tb.mem_inst.mem_la_wstrb[3:0]
+@1401200
+-LA_MEM
+@28
+gpio_tb.gpio.sfrInst.mem_ready
+[pattern_trace] 1
+[pattern_trace] 0

@@ -56,6 +56,7 @@ OCTAVE_SILENT = $(OCTAVE) -q $<
 PS2PDF = ps2pdf -dEPSCrop $< $@
 CHECK = $(VVP) $< | awk -f $(filter %.awk, $^)
 BIT2RBF = bit2rbf $@ < $<
+GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 
 # General directory-independent implicit rules
 

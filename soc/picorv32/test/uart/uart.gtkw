@@ -1,0 +1,101 @@
+[timestart] 163088
+[size] 1920 1041
+[pos] -1 -1
+*-4.486558 163164 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] uart_tb.
+[treeopen] uart_tb.gen.
+[treeopen] uart_tb.gen.stream_tx_i.
+[sst_width] 218
+[signals_width] 256
+[sst_expanded] 1
+[sst_vpaned_height] 297
+@420
+uart_tb.cc
+@28
+uart_tb.clk
+@420
+uart_tb.errors
+@28
+uart_tb.frame_valid
+uart_tb.rst
+uart_tb.txd
+uart_tb.rxd
+@800200
+-rx
+@28
+uart_tb.rx_busy
+@22
+uart_tb.rx_tdata[7:0]
+@28
+uart_tb.rx_tlast
+uart_tb.rx_tready
+uart_tb.rx_tvalid
+@1000200
+-rx
+@800200
+-tx
+@28
+uart_tb.uart_tx_inst.input_axis_tready_reg
+uart_tb.uart_tx_inst.input_axis_tready
+@22
+uart_tb.uart_tx_inst.bit_cnt[3:0]
+@28
+uart_tb.tx_busy
+@22
+uart_tb.tx_tdata[7:0]
+@28
+uart_tb.tx_tkeep[1:0]
+uart_tb.tx_tlast
+uart_tb.tx_tready
+uart_tb.tx_tvalid
+@1000200
+-tx
+@c00200
+-gen
+@28
+uart_tb.gen.clk
+@22
+uart_tb.gen.d_in[7:0]
+@28
+uart_tb.gen.dlast
+uart_tb.gen.dvalid
+@22
+uart_tb.gen.frame_cnt[6:0]
+@28
+uart_tb.gen.link_up
+@22
+uart_tb.gen.mode[6:0]
+@28
+uart_tb.gen.reset
+@22
+uart_tb.gen.shift_reg[383:0]
+uart_tb.gen.stream_tx_tdata[7:0]
+@28
+uart_tb.gen.stream_tx_tkeep[1:0]
+uart_tb.gen.stream_tx_tlast
+uart_tb.gen.stream_tx_tready
+uart_tb.gen.stream_tx_tvalid
+@1401200
+-gen
+@800200
+-check
+@22
+uart_tb.check.shift_reg[127:0]
+@28
+uart_tb.check.check_valid
+@22
+uart_tb.check.data_rx[7:0]
+@28
+uart_tb.check.reset
+@22
+uart_tb.check.stream_rx_tdata[7:0]
+@29
+uart_tb.check.stream_rx_tlast
+@28
+uart_tb.check.stream_rx_tvalid
+@24
+uart_tb.rx_tlast_cnt[8:0]
+@1000200
+-check
+[pattern_trace] 1
+[pattern_trace] 0

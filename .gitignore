@@ -4,6 +4,14 @@
 *_tb
 *.bak
 *.sav
+*.elf
+*.map
+*.lst
+*.vcd
+*32.hex
+*.trace
+*_synth.v
+*.bit
 _autogen/
 _dep/
 _xilinx/
