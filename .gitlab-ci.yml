@@ -1,10 +1,10 @@
 stages:
   - build
   - test
-  - deploy
-  - flake8
+  - synthesis
 
 variables:
+  XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1
   CI_REGISTRY: mohs.dhcp.lbl.gov
   CONTAINER_IMAGE: $CI_REGISTRY/testing_base
   CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
@@ -20,6 +20,7 @@ services:
 
 include:
   - local: .gitlab/ci/build.gitlab-ci.yml
+  - local: .gitlab/ci/soc.gitlab-ci.yml
 
 dsp_test:
   before_script:
@@ -57,7 +58,7 @@ rtsim_test:
     - make clean && make checks && make rtsim.dat
 
 flake8:
-  stage: flake8
+  stage: synthesis
   script:
    - find . -name "*.py" | xargs flake8
 
@@ -78,7 +79,7 @@ peripheral_test:
 oscope_top:
   before_script:
     - cd projects/oscope/bmb7_cu && ls /non-free
-  stage: deploy
+  stage: synthesis
   script:
     - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH make oscope_top.bit
   artifacts:
@@ -88,6 +89,6 @@ oscope_top:
       - projects/oscope/bmb7_cu/oscope_top.bit
 
 badger_ac701:
-  stage: deploy
+  stage: synthesis
   script:
-    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH && cd badger/tests && make ac701_rgmii_vtest.bit && sh teststand_ac701.sh && echo hi
+    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH && cd badger/tests && make ac701_rgmii_vtest.bit && sh teststand_ac701.sh

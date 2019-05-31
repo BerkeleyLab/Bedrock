@@ -1,0 +1,75 @@
+[timestart] 0
+[size] 1920 1041
+[pos] -1 -1
+*-12.039458 14200 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] uart_tb.
+[treeopen] uart_tb.cpu.
+[treeopen] uart_tb.uart.
+[sst_width] 218
+[signals_width] 313
+[sst_expanded] 1
+[sst_vpaned_height] 297
+@800200
+-rx
+@1000200
+-rx
+@800200
+-tx
+@1000200
+-tx
+@c00200
+-gen
+@1401200
+-gen
+@800200
+-check
+@1000200
+-check
+@28
+uart_tb.trap
+uart_tb.uart.rxd
+uart_tb.uart.txd
+@820
+uart_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+@22
+uart_tb.uart.mem_wdata[31:0]
+@28
+uart_tb.uart.mem_valid
+uart_tb.uart.mem_ready
+@22
+uart_tb.uart.mem_addr[31:0]
+uart_tb.uart.mem_rdata[31:0]
+@c00820
+uart_tb.uart.urx_tdata[7:0]
+@28
+(0)uart_tb.uart.urx_tdata[7:0]
+(1)uart_tb.uart.urx_tdata[7:0]
+(2)uart_tb.uart.urx_tdata[7:0]
+(3)uart_tb.uart.urx_tdata[7:0]
+(4)uart_tb.uart.urx_tdata[7:0]
+(5)uart_tb.uart.urx_tdata[7:0]
+(6)uart_tb.uart.urx_tdata[7:0]
+(7)uart_tb.uart.urx_tdata[7:0]
+@1401200
+-group_end
+@29
+uart_tb.uart.urx_tready
+@28
+uart_tb.uart.urx_tvalid
+@820
+uart_tb.uart.utx_tdata[31:0]
+@28
+uart_tb.uart.utx_tready
+uart_tb.uart.utx_tvalid
+uart_tb.uart.s_tx_tready
+@c00022
+uart_tb.uart.uart_status[3:0]
+@28
+(0)uart_tb.uart.uart_status[3:0]
+(1)uart_tb.uart.uart_status[3:0]
+(2)uart_tb.uart.uart_status[3:0]
+(3)uart_tb.uart.uart_status[3:0]
+@1401200
+-group_end
+[pattern_trace] 1
+[pattern_trace] 0

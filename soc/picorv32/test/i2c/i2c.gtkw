@@ -1,0 +1,62 @@
+[timestart] 0
+[size] 1533 845
+[pos] -1 -1
+*-25.199167 2190000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] i2c_soft_tb.
+[treeopen] i2c_soft_tb.cpu.
+[treeopen] i2c_soft_tb.cpu.picorv32_core.
+[treeopen] i2c_soft_tb.gpio.
+[treeopen] i2c_soft_tb.gpio.gpioInst.
+[treeopen] i2c_soft_tb.gpio.gpioInst.sfrInst.
+[sst_width] 313
+[signals_width] 356
+[sst_expanded] 1
+[sst_vpaned_height] 435
+@28
+i2c_soft_tb.mem_clk
+@800200
+-CPU
+@22
+i2c_soft_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+i2c_soft_tb.cpu.picorv32_core.dbg_insn_addr[31:0]
+@28
+i2c_soft_tb.cpu.picorv32_core.dbg_mem_instr
+@22
+i2c_soft_tb.cpu.picorv32_core.dbg_mem_rdata[31:0]
+@28
+i2c_soft_tb.cpu.picorv32_core.dbg_mem_ready
+i2c_soft_tb.cpu.picorv32_core.dbg_mem_valid
+@22
+i2c_soft_tb.cpu.picorv32_core.dbg_mem_wdata[31:0]
+i2c_soft_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+@1000200
+-CPU
+@28
+i2c_soft_tb.i2c_slave.scl
+i2c_soft_tb.i2c_slave.sda
+@c00200
+-I2C_SLAVE
+@22
+i2c_soft_tb.data_from_master[7:0]
+@28
+i2c_soft_tb.data_valid
+@22
+i2c_soft_tb.data_to_master[7:0]
+@28
+i2c_soft_tb.read_req
+@22
+i2c_soft_tb.i2c_slave.data_to_master_reg[7:0]
+@28
+i2c_soft_tb.i2c_slave.start_reg
+i2c_soft_tb.i2c_slave.stop_reg
+@24
+i2c_soft_tb.i2c_slave.state_reg[2:0]
+@28
+i2c_soft_tb.i2c_slave.continue_reg
+i2c_soft_tb.i2c_slave.cmd_reg
+i2c_soft_tb.i2c_slave.sda_wen_reg
+i2c_soft_tb.i2c_slave.sda_o_reg
+@1401200
+-I2C_SLAVE
+[pattern_trace] 1
+[pattern_trace] 0
