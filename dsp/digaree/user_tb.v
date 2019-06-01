@@ -15,6 +15,7 @@ initial begin
 	end
 end
 
+parameter pw = 18;
 parameter extra = 4;
 parameter mw = 18;
 parameter data_len = 6;
@@ -34,7 +35,7 @@ end
 // Emulate the host writing constants before we begin
 reg h_write=0;
 reg [const_aw-1:0] h_addr=0;
-reg signed [17:0] h_data=0;
+reg signed [pw-1:0] h_data=0;
 integer file1, ix, sx, kx;
 integer rc, ca, ixa, type;
 integer conveyor[0:7];
@@ -56,7 +57,20 @@ initial begin
 	for (kx=0; kx < 32; kx=kx+1) dut.cpu.rf_b[kx] = dut.cpu.rf_a[kx];
 end
 
-reg signed [17:0] meas=0;
+`ifdef PARAM_REGBANK
+// Decode Parameters into parallel register bank
+reg  [pw-1:0] p_regbank[2**const_aw-1:0];
+wire [pw*(2**const_aw)-1:0] param_in;
+
+always @(posedge clk) if (h_write) p_regbank[h_addr] <= h_data;
+
+genvar r;
+generate for (r=0; r<2**const_aw; r=r+1) begin : G_P_REGBANK
+	assign param_in[(r+1)*pw-1: r*pw] = p_regbank[r];
+end endgenerate
+`endif
+
+reg signed [pw-1:0] meas=0;
 reg trigger=0;
 always @(posedge clk) begin
 	if (cc-20>=0 && cc-20<data_len) begin
@@ -65,13 +79,17 @@ always @(posedge clk) begin
 	trigger <= cc==19;
 end
 
-wire signed [17:0] a, b;
+wire signed [pw-1:0] a, b;
 wire signed [21:0] trace;
 wire trace_strobe;
 sf_user #(.extra(extra), .mw(mw),
 	.data_len(data_len), .consts_len(consts_len), .const_aw(const_aw)) dut(
 	.clk(clk), .ce(1'b1), .meas(meas), .trigger(trigger),
+`ifdef PARAM_REGBANK
+	.param_in(param_in),
+`else
 	.h_write(h_write), .h_addr(h_addr), .h_data(h_data),
+`endif
 	.a_o(a), .b_o(b), .trace(trace), .trace_strobe(trace_strobe));
 
 real f;
