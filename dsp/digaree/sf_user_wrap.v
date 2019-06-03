@@ -60,16 +60,16 @@ module sf_user_preg #(
 ) (
 	`SF_USER_PORTS
 	// Flattened input to parameter register bank
-	input [pw*(2**const_aw)-1:0] param_in
+	input [pw*consts_len-1:0] param_in
 );
 
 wire signed [pw-1:0]       rd_data;
 wire        [const_aw-1:0] rd_addr;
-reg         [pw-1:0]       p_regbank[2**const_aw-1:0];
+reg         [pw-1:0]       p_regbank[consts_len-1:0];
 
 // Register bank written by the host, read by state machine
 genvar r;
-generate for (r=0; r<2**const_aw; r=r+1) begin : G_P_REGBANK
+generate for (r=0; r<consts_len; r=r+1) begin : G_P_REGBANK
 	always @(posedge clk) begin // Retime
 		p_regbank[r] <= param_in[(r+1)*pw-1: r*pw];
 	end

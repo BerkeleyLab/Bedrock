@@ -62,13 +62,13 @@ end
 
 // Decode Parameters into parallel register bank
 // ------------------------------------
-reg  [pw-1:0] p_regbank[2**const_aw-1:0];
-wire [pw*(2**const_aw)-1:0] param_in;
+reg  [pw-1:0] p_regbank[consts_len-1:0];
+wire [pw*consts_len-1:0] param_in;
 
 always @(posedge clk) if (h_write) p_regbank[h_addr] <= h_data;
 
 genvar r;
-generate for (r=0; r<2**const_aw; r=r+1) begin : G_P_REGBANK
+generate for (r=0; r<consts_len; r=r+1) begin : G_P_REGBANK
 	assign param_in[(r+1)*pw-1: r*pw] = p_regbank[r];
 end endgenerate
 // ------------------------------------
