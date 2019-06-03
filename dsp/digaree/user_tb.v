@@ -15,6 +15,9 @@ initial begin
 	end
 end
 
+parameter PMEM = 1; // PMEM = 1: DPRAM parameter wrapper
+		    // PMEM = 0: Parallel regbank parameter wrapper
+
 parameter pw = 18;
 parameter extra = 4;
 parameter mw = 18;
@@ -27,8 +30,8 @@ parameter const_aw = 2;
 integer hx;
 initial begin
 	for (hx=0; hx<32; hx=hx+1) begin
-		dut.cpu.rf_a[hx]=0;
-		dut.cpu.rf_b[hx]=0;
+		G_WRAP.dut.sf_user.cpu.rf_a[hx]=0;
+		G_WRAP.dut.sf_user.cpu.rf_b[hx]=0;
 	end
 end
 
@@ -49,16 +52,16 @@ initial begin
 		if (rc==3) case (type)
 		"s": begin conveyor[sx] = ca; sx = sx+1; end
 		"h": begin @(posedge clk); h_addr<=ixa; h_write<=1; h_data<=ca; end
-		"p": begin dut.cpu.rf_a[ixa] = ca <<< extra; end
+		"p": begin G_WRAP.dut.sf_user.cpu.rf_a[ixa] = ca <<< extra; end
 		default: begin $display("input error"); end
 		endcase
 	end
 	@(posedge clk); h_write<=0; h_addr<={const_aw{1'bx}}; h_data <= 18'bx;
-	for (kx=0; kx < 32; kx=kx+1) dut.cpu.rf_b[kx] = dut.cpu.rf_a[kx];
+	for (kx=0; kx < 32; kx=kx+1) G_WRAP.dut.sf_user.cpu.rf_b[kx] = G_WRAP.dut.sf_user.cpu.rf_a[kx];
 end
 
-`ifdef PARAM_REGBANK
 // Decode Parameters into parallel register bank
+// ------------------------------------
 reg  [pw-1:0] p_regbank[2**const_aw-1:0];
 wire [pw*(2**const_aw)-1:0] param_in;
 
@@ -68,7 +71,7 @@ genvar r;
 generate for (r=0; r<2**const_aw; r=r+1) begin : G_P_REGBANK
 	assign param_in[(r+1)*pw-1: r*pw] = p_regbank[r];
 end endgenerate
-`endif
+// ------------------------------------
 
 reg signed [pw-1:0] meas=0;
 reg trigger=0;
@@ -80,22 +83,35 @@ always @(posedge clk) begin
 end
 
 wire signed [pw-1:0] a, b;
+wire signed [pw-1:0] c, d;
 wire signed [21:0] trace;
 wire trace_strobe;
-sf_user #(.extra(extra), .mw(mw),
-	.data_len(data_len), .consts_len(consts_len), .const_aw(const_aw)) dut(
+
+generate if (PMEM == 1) begin : G_WRAP
+
+sf_user_pmem #(.extra(extra), .mw(mw),
+	.data_len(data_len), .consts_len(consts_len), .const_aw(const_aw)) dut (
 	.clk(clk), .ce(1'b1), .meas(meas), .trigger(trigger),
-`ifdef PARAM_REGBANK
-	.param_in(param_in),
-`else
 	.h_write(h_write), .h_addr(h_addr), .h_data(h_data),
-`endif
-	.a_o(a), .b_o(b), .trace(trace), .trace_strobe(trace_strobe));
+	.a_o(a), .b_o(b), .c_o(c), .d_o(d),
+	.trace(trace), .trace_strobe(trace_strobe));
+
+end else begin : G_WRAP
+
+sf_user_preg #(.extra(extra), .mw(mw),
+	.data_len(data_len), .consts_len(consts_len), .const_aw(const_aw)) dut (
+	.clk(clk), .ce(1'b1), .meas(meas), .trigger(trigger),
+	.param_in(param_in),
+	.a_o(a), .b_o(b), .c_o(c), .d_o(d),
+	.trace(trace), .trace_strobe(trace_strobe));
+
+end endgenerate
 
 real f;
 always @(negedge clk) begin
-	f = dut.cpu.d_in / (131072.0*dut.cpu.scale);
-	if (dut.cpu.we && cc>21) $display("%d:  r[%d] <= %d (%+8.5f)", cc-22, dut.cpu.wa, dut.cpu.d_in, f);
+	f = G_WRAP.dut.sf_user.cpu.d_in / (131072.0*G_WRAP.dut.sf_user.cpu.scale);
+	if (G_WRAP.dut.sf_user.cpu.we && cc>21)
+		$display("%d:  r[%d] <= %d (%+8.5f)", cc-22, G_WRAP.dut.sf_user.cpu.wa, G_WRAP.dut.sf_user.cpu.d_in, f);
 end
 
 endmodule

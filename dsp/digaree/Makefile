@@ -56,12 +56,12 @@ all: inverse_check ilookup_check match_mem match_reg accuracy
 
 main_tb: sf_main.v ops.vh
 
-VFLAGS_user_mem_tb = -Puser_tb.data_len=$(DATA_LEN) -Puser_tb.consts_len=$(CONSTS_LEN) -Puser_tb.const_aw=$(CONST_AW)
-user_mem_tb: user_tb.v sf_user.v sf_main.v ops.vh sf_dpram.v
+VFLAGS_user_mem_tb = -Puser_tb.data_len=$(DATA_LEN) -Puser_tb.consts_len=$(CONSTS_LEN) -Puser_tb.const_aw=$(CONST_AW) -Puser_tb.PMEM=1
+user_mem_tb: user_tb.v sf_user_wrap.v sf_user.v sf_main.v ops.vh sf_dpram.v
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
 
-VFLAGS_user_reg_tb = -Puser_tb.data_len=$(DATA_LEN) -Puser_tb.consts_len=$(CONSTS_LEN) -Puser_tb.const_aw=$(CONST_AW) -D PARAM_REGBANK
-user_reg_tb: user_tb.v sf_user.v sf_main.v ops.vh sf_dpram.v
+VFLAGS_user_reg_tb = -Puser_tb.data_len=$(DATA_LEN) -Puser_tb.consts_len=$(CONSTS_LEN) -Puser_tb.const_aw=$(CONST_AW) -Puser_tb.PMEM=0
+user_reg_tb: user_tb.v sf_user_wrap.v sf_user.v sf_main.v ops.vh sf_dpram.v
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
 
 
