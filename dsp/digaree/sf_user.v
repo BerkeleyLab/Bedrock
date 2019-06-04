@@ -20,6 +20,7 @@ module sf_user #(
 	output signed [pw-1:0] d_o,
 	// Debug output
 	output signed [pw+extra-1:0] trace,
+	output [6:0] trace_addr,
 	output trace_strobe,
 	output [6:0] sat_count
 );
@@ -70,5 +71,6 @@ always @(posedge clk) if (ce) begin
 	if (trigger) sat_report <= sat_cnt;
 end
 assign sat_count = sat_report;
+assign trace_addr = pc;
 
 endmodule

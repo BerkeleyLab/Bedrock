@@ -86,7 +86,8 @@ end
 wire signed [pw-1:0] a, b;
 wire signed [pw-1:0] c, d;
 wire signed [21:0] trace;
-wire trace_strobe;
+wire        [6:0]  trace_addr;
+wire               trace_strobe;
 
 generate if (PMEM == 1) begin : G_WRAP
 
@@ -95,7 +96,7 @@ sf_user_pmem #(.extra(extra), .mw(mw),
 	.clk(clk), .ce(1'b1), .meas(meas), .trigger(trigger),
 	.h_write(h_write), .h_addr(h_addr), .h_data(h_data),
 	.a_o(a), .b_o(b), .c_o(c), .d_o(d),
-	.trace(trace), .trace_strobe(trace_strobe));
+	.trace(trace), .trace_addr(trace_addr), .trace_strobe(trace_strobe));
 
 end else begin : G_WRAP
 
