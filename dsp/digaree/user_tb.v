@@ -2,21 +2,22 @@
 `include "constants.vams"
 module user_tb;
 
+parameter PMEM = 1; // PMEM = 1: DPRAM parameter wrapper
+		    // PMEM = 0: Parallel regbank parameter wrapper
+
 reg clk;
 integer cc;
 initial begin
 	if ($test$plusargs("vcd")) begin
-		$dumpfile("user.vcd");
-		$dumpvars(5,user_tb);
+		if (PMEM) $dumpfile("user_mem.vcd");
+		else $dumpfile("user_reg.vcd");
+		$dumpvars(7,user_tb);
 	end
 	for (cc=0; cc<300; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
 end
-
-parameter PMEM = 1; // PMEM = 1: DPRAM parameter wrapper
-		    // PMEM = 0: Parallel regbank parameter wrapper
 
 parameter pw = 18;
 parameter extra = 4;

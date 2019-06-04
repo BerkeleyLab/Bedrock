@@ -65,7 +65,8 @@ user_reg_tb: user_tb.v sf_user_wrap.v sf_user.v sf_main.v ops.vh sf_dpram.v
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
 
 
-user_%.vcd: init2.dat
+user_mem.vcd: init2.dat
+user_reg.vcd: init2.dat
 
 user_%.out: user_%_tb init2.dat
 	$(VVP) $< $(VFLAGS) > $@
