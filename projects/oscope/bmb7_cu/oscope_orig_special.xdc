@@ -34,42 +34,6 @@ set_property PACKAGE_PIN E10 [get_ports bus_bmb7_U7[16]]
 set_property PACKAGE_PIN C12 [get_ports bus_bmb7_U7[17]]
 set_property PACKAGE_PIN E11 [get_ports bus_bmb7_U7[18]]
 
-# U50: QSFP (management port pins)
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U50[2]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U50[5]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U50[6]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U50[11]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U50[12]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U50[19]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U50[20]}]
-set_property PULLTYPE PULLUP [get_ports {bus_bmb7_U50[2]}]
-set_property PULLTYPE PULLUP [get_ports {bus_bmb7_U50[11]}]
-set_property PACKAGE_PIN B12 [get_ports {bus_bmb7_U50[2]}]
-set_property PACKAGE_PIN A9 [get_ports {bus_bmb7_U50[5]}]
-set_property PACKAGE_PIN A8 [get_ports {bus_bmb7_U50[6]}]
-set_property PACKAGE_PIN B14 [get_ports {bus_bmb7_U50[11]}]
-set_property PACKAGE_PIN B9 [get_ports {bus_bmb7_U50[12]}]
-set_property PACKAGE_PIN A10 [get_ports {bus_bmb7_U50[19]}]
-set_property PACKAGE_PIN B10 [get_ports {bus_bmb7_U50[20]}]
-
-# U32: QSFP (management port pins)
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U32[8]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U32[9]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U32[16]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U32[20]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U32[21]}]
-set_property PACKAGE_PIN A15 [get_ports {bus_bmb7_U32[8]}]
-set_property PACKAGE_PIN B15 [get_ports {bus_bmb7_U32[9]}]
-set_property PACKAGE_PIN A14 [get_ports {bus_bmb7_U32[16]}]
-set_property PACKAGE_PIN B11 [get_ports {bus_bmb7_U32[20]}]
-set_property PACKAGE_PIN A12 [get_ports {bus_bmb7_U32[21]}]
-
-# Y4: one-time programmable oscillator (SIT9122)
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_Y4[0]}]
-set_property PACKAGE_PIN C9 [get_ports {bus_bmb7_Y4[0]}]
-set_property PACKAGE_PIN D5 [get_ports {bus_bmb7_Y4[1]}]
-set_property PACKAGE_PIN D6 [get_ports {bus_bmb7_Y4[2]}]
-
 # J28 and J4: external clock connector (SMP)
 set_property PACKAGE_PIN H5 [get_ports {bus_bmb7_J28[0]}]
 set_property PACKAGE_PIN H6 [get_ports {bus_bmb7_J4[0]}]

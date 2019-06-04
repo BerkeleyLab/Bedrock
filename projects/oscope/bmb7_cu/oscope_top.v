@@ -17,8 +17,6 @@ module oscope_top(
 	inout [1:0] bus_digitizer_U33U1
 );
 
-parameter BUF_AW=13;
-
 wire bmb7_U7_clkout;
 wire bmb7_U7_clk4xout;
 wire [7:0] port_50006_word_k7tos6;

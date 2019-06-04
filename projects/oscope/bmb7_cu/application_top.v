@@ -479,11 +479,11 @@ always @(posedge lb_clk) begin
 	  //24'b1xxx_xxxx_xxxx_xxxx_xxxx_xxxx: lb_din <= mirror_out_0;  // automatic address map
 		24'h10xxxx: lb_din <= hist_dout;
 		24'h11xxxx: lb_din <= phasex_dout;
-		24'h12xxxx: lb_din <= banyan_data;
 		24'h13xxxx: lb_din <= scanner_result_val;
 		24'h14xxxx: lb_din <= trace_data;
 		24'h18xxxx: lb_din <= slow_data[7:0];
 		24'h1cxxxx: lb_din <= trace_lb_out;
+		24'h2xxxxx: lb_din <= banyan_data;
 		24'bxxxx_xxxx_xxxx_1xxx_xxxx_xxxx: lb_din <= config_rom_out;  // xxx800 through xxxfff, 2K
 		24'hxxxx0x: lb_din <= reg_bank_0;
 		24'hxxxx1x: lb_din <= reg_bank_1;
