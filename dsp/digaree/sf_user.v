@@ -14,8 +14,10 @@ module sf_user #(
 	output [const_aw-1:0] h_addr, // external address for param memory
 	input signed [pw-1:0] h_data, // external
 	// Results
+	output                 ab_update,
 	output signed [pw-1:0] a_o,
 	output signed [pw-1:0] b_o,
+	output                 cd_update,
 	output signed [pw-1:0] c_o,
 	output signed [pw-1:0] d_o,
 	// Debug output
@@ -60,7 +62,9 @@ endcase
 wire sat_happened;
 sf_main #(.pw(pw), .extra(extra), .mw(mw)) cpu(.clk(clk), .ce(ce),
 	.inst(inst), .meas(meas_mux),
+	.ab_update(ab_update),
 	.a_o(a_o), .b_o(b_o),
+	.cd_update(cd_update),
 	.c_o(c_o), .d_o(d_o),
 	.trace(trace), .sat_happened(sat_happened));
 

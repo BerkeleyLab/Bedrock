@@ -16,8 +16,10 @@
                       input ce,\
                       input signed [pw-1:0] meas,\
                       input trigger,\
+                      output                 ab_update,\
                       output signed [pw-1:0] a_o,\
                       output signed [pw-1:0] b_o,\
+                      output                 cd_update,\
                       output signed [pw-1:0] c_o,\
                       output signed [pw-1:0] d_o,\
                       output signed [pw+extra-1:0] trace,\
@@ -49,7 +51,8 @@ sf_user #(.pw(pw), .extra(extra), .mw(mw), .data_len(data_len),
 sf_user (
         .clk(clk), .ce(ce), .meas(meas), .trigger(trigger),
         .h_addr(rd_addr), .h_data(rd_data),
-        .a_o(a_o), .b_o(b_o), .c_o(c_o), .d_o(d_o),
+        .ab_update(ab_update), .a_o(a_o), .b_o(b_o),
+        .cd_update(cd_update), .c_o(c_o), .d_o(d_o),
         .trace(trace), .trace_addr(trace_addr), .trace_strobe(trace_strobe),
         .sat_count(sat_count));
 
@@ -88,7 +91,8 @@ sf_user #(.pw(pw), .extra(extra), .mw(mw), .data_len(data_len),
 sf_user (
         .clk(clk), .ce(ce), .meas(meas), .trigger(trigger),
         .h_addr(rd_addr), .h_data(rd_data),
-        .a_o(a_o), .b_o(b_o), .c_o(c_o), .d_o(d_o),
+        .ab_update(ab_update), .a_o(a_o), .b_o(b_o),
+        .cd_update(cd_update), .c_o(c_o), .d_o(d_o),
         .trace(trace), .trace_addr(trace_addr), .trace_strobe(trace_strobe),
         .sat_count(sat_count));
 

@@ -85,6 +85,7 @@ end
 
 wire signed [pw-1:0] a, b;
 wire signed [pw-1:0] c, d;
+wire                 ab_update, cd_update;
 wire signed [21:0] trace;
 wire        [6:0]  trace_addr;
 wire               trace_strobe;
@@ -95,7 +96,8 @@ sf_user_pmem #(.extra(extra), .mw(mw),
 	.data_len(data_len), .consts_len(consts_len), .const_aw(const_aw)) dut (
 	.clk(clk), .ce(1'b1), .meas(meas), .trigger(trigger),
 	.h_write(h_write), .h_addr(h_addr), .h_data(h_data),
-	.a_o(a), .b_o(b), .c_o(c), .d_o(d),
+        .ab_update(ab_update), .a_o(a), .b_o(b),
+        .cd_update(cd_update), .c_o(c), .d_o(d),
 	.trace(trace), .trace_addr(trace_addr), .trace_strobe(trace_strobe));
 
 end else begin : G_WRAP
@@ -104,7 +106,8 @@ sf_user_preg #(.extra(extra), .mw(mw),
 	.data_len(data_len), .consts_len(consts_len), .const_aw(const_aw)) dut (
 	.clk(clk), .ce(1'b1), .meas(meas), .trigger(trigger),
 	.param_in(param_in),
-	.a_o(a), .b_o(b), .c_o(c), .d_o(d),
+        .ab_update(ab_update), .a_o(a), .b_o(b),
+        .cd_update(cd_update), .c_o(c), .d_o(d),
 	.trace(trace), .trace_strobe(trace_strobe));
 
 end endgenerate
