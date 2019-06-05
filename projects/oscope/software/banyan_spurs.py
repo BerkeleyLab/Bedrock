@@ -115,7 +115,7 @@ def collect(prc, npt, print_minmax=True, allow_clk_frozen=False):
         status = prc.reg_read_value(['banyan_status', 'clk_status_out'])
         b_status = status[0]
         clk_status = status[1]
-        # print "%8.8x"%b_status
+        #print("%8.8x"%b_status)
         if not (b_status & 0x80000000):
             break
     # See logic for clk_status_r in digitizer_config.v, and associated comments.
