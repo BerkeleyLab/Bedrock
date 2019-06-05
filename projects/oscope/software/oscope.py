@@ -1,11 +1,13 @@
 '''
-Top-level multichannel plotter.
+top-level multichannel plotter.
 Revamp with kivy started
 TODO:
 1. Move MeshLinePlot into a Kivy Graph object
 2. Verify the performance of gather data and plot (for now different threads)
 '''
 import sys
+import time
+from threading import Thread
 
 import numpy as np
 
@@ -50,31 +52,40 @@ class ADC:
         return raw_counts * ADC.count_to_1volt
 
 
-class carrier:
-    def setup_get_prc(self,
-                      ip_addr='192.168.1.121',
-                      port=50006,
-                      mask="0xff",
-                      npt_wish=0,
-                      count=10,
-                      verbose=False,
-                      filewritepath=None,
-                      use_spartan=False):
-        self.carrier = c_prc(ip_addr, port, filewritepath=filewritepath,
-                             use_spartan=use_spartan)
+class Carrier:
+    def __init__(self,
+                 ip_addr='192.168.1.121',
+                 port=50006,
+                 mask="0xff",
+                 npt_wish=0,
+                 count=10,
+                 verbose=False,
+                 filewritepath=None,
+                 use_spartan=False,
+                 test=False):
+        if not test:
+            self.carrier = c_prc(ip_addr, port, filewritepath=filewritepath,
+                                 use_spartan=use_spartan)
 
-        self.npt = get_npt(self.carrier)
-        mask_int = int(mask, 0)
-        self.n_channels, channels = write_mask(self.carrier, mask_int)
+            self.npt = get_npt(self.carrier)
+            mask_int = int(mask, 0)
+            self.n_channels, channels = write_mask(self.carrier, mask_int)
+        else:
+            banyan_aw = 13
+            self.npt = 2 ** banyan_aw
+            self.n_channels = 2
+
         self.pts_per_ch = self.npt * 8 // self.n_channels
+        self.test_counter = 0
 
-    def test_data(self):
-        self.nblock = np.array([np.random.random_sample(self.pts_per_ch)
-                                for _ in self.n_channels])
-        
-    def acquire_data(self, prc, test=False):
-        if test:
-            return self.test_data()
+    def test_data(self, *args):
+        while True:
+            self.test_counter += 1
+            self.nblock = np.array([np.random.random_sample(self.pts_per_ch)
+                                    for _ in range(self.n_channels)])
+            time.sleep(0.2)
+
+    def acquire_data(self, *args):
         # collect_adcs is not normal:
         # It always collects npt * 8 data points.
         # Each channel gets [(npt * 8) // n_channels] datapoints
@@ -91,18 +102,19 @@ from kivy.clock import Clock
 
 
 class Logic(BoxLayout):
-    def __init__(self, carrier, **kwargs):
+    def __init__(self, **kwargs):
         super(Logic, self).__init__()
         self.plot = MeshLinePlot(color=[1, 0, 0, 1])
 
     def start(self):
         self.ids.graph.add_plot(self.plot)
-        Clock.schedule_interval(carrier.test_data, 0.001)
+        Clock.schedule_interval(self.get_value, 0.01)
 
     def stop(self):
         Clock.unschedule(self.get_value)
 
     def get_value(self, dt):
+        print(len(carrier.nblock[0]), carrier.test_counter, dt)
         self.plot.points = [(i, d) for i, d in enumerate(carrier.nblock[0])]
 
 
@@ -110,7 +122,7 @@ class Oscope(App):
     def build(self):
         return Builder.load_file("look.kv")
 
-    
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Read/Write from FPGA memory')
@@ -142,11 +154,15 @@ if __name__ == "__main__":
         help="use spartan",
         default=True)
     args = parser.parse_args()
+    carrier = Carrier(ip_addr=args.ip,
+                      port=args.port,
+                      mask=args.mask,
+                      npt_wish=args.npt_wish,
+                      count=args.count,
+                      filewritepath=args.filewritepath,
+                      use_spartan=args.use_spartan,
+                      test=True)
+    acq_thread = Thread(target=carrier.test_data)
+    acq_thread.daemon = True
+    acq_thread.start()
     Oscope().run()
-    # run(ip_addr=args.ip,
-    #     port=args.port,
-    #     mask=args.mask,
-    #     npt_wish=args.npt_wish,
-    #     count=args.count,
-    #     filewritepath=args.filewritepath,
-    #     use_spartan=args.use_spartan)
