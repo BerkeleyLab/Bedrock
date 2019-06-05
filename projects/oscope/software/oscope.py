@@ -18,6 +18,7 @@ from prc import c_prc
 FOO1, FOO2 = None, None
 g_data = []
 
+
 def write_mask(prc, mask_int):
     prc.reg_write([{'banyan_mask': mask_int}])
     channels = banyan_ch_find(mask_int)
@@ -108,8 +109,8 @@ def run(ip_addr='192.168.1.121',
         # collect_adcs is not normal:
         # It always collects npt * 8 data points.
         # Each channel gets [(npt * 8) // n_channels] datapoints
-        (data_block, timestamp) = collect_adcs(prc, npt, n_channels)
-        nblock = counts_to_volts(np.array(data_block)) # ADC count / FULL SCALE => [-1.0, 1.0]
+        data_block, timestamp = collect_adcs(prc, npt, n_channels)
+        nblock = counts_to_volts(np.array(data_block))  # ADC count / FULL SCALE => [-1.0, 1.0]
         for j, line in enumerate(lines, start=1):
             ax = axes[j - 1]
             ax.relim()
@@ -142,6 +143,7 @@ def run(ip_addr='192.168.1.121',
     FOO1 = animation.FuncAnimation(fig, animate, interval=0.1, blit=True)
     FOO2 = animation.FuncAnimation(fig2, animate2, interval=0.1, blit=True)
     plt.show()
+
 
 if __name__ == "__main__":
     import argparse
