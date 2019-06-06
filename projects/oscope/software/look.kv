@@ -11,8 +11,29 @@ Logic:
         BoxLayout:
             size_hint: [1, .2]
             orientation: "horizontal"
+            Label:
+                text: "T"
+            Label:
+                text: "1"
             CheckBox:
-                on_active: root.ch_select()
+                on_active: root.ch_select("00", *args)
+            Label:
+                text: "2"
+            CheckBox:
+                on_active: root.ch_select("01", *args)
+            Label:
+                text: "3"
+            CheckBox:
+                on_active: root.ch_select("02", *args)
+            Label:
+                text: "4"
+            CheckBox:
+                on_active: root.ch_select("03", *args)
+        BoxLayout:
+            size_hint: [1, .2]
+            orientation: "horizontal"
+            Label:
+                text: "F"
             Label:
                 text: "1"
             CheckBox:

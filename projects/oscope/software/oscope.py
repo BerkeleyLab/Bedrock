@@ -95,25 +95,70 @@ class Carrier:
         self.nblock = ADC.counts_to_volts(np.array(data_block))
 
 
+g_channels = []
+
+
+# TODO: Should convert this to a dataclass for python 3.7+
+class GUIGraphChannel:
+    def __init__(self, ch_id, show_freq=False, show_ts=False, xlog=False, ylog=False):
+        self.ch_id = ch_id
+        self.show_freq = show_freq
+        self.show_ts = show_ts
+        self.xlog = False
+        self.ylog = False
+
+    @staticmethod
+    def setup_gui_channels(carrier):
+        for i in range(carrier.n_channels):
+            g_channels.append(GUIGraphChannel("0"+str(i), False, False, False, False))
+            g_channels.append(GUIGraphChannel("1"+str(i), False, False, False, False))
+        g_channels.append(GUIGraphChannel("3", False, False, False, False))
+
+
 from kivy.lang import Builder
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from kivy.garden.graph import MeshLinePlot, Graph, LinePlot
 from kivy.clock import Clock
 from kivy.garden.matplotlib.backend_kivyagg import FigureCanvas
-from kivy.utils import get_color_from_hex as rgb
 from kivy.logger import Logger
+
+
+default_ts_kwargs = {'ylabel': 'volts',
+                     'xlabel': 'sample_number',
+                     'label': 'Time Series'}
+
 
 class Logic(BoxLayout):
     def __init__(self, **kwargs):
         super(Logic, self).__init__()
-        fig1 = plt.figure()
-        self.ax = fig1.add_subplot(111)
-        self.plot = self.ax.plot(range(100),[1/2]*100)[0]
-        # Logger.info("whatever = {}".format(self.plot))
-        self.wid = FigureCanvas(fig1)
-        self.add_widget(self.wid)
-        self.ax.grid()
+        self.setup_channels(carrier.n_channels)
+
+    def setup_channel(self, i):
+        fig = plt.figure()
+        wid = FigureCanvas(fig)
+        self.widgets.append(wid)
+        ax = fig.add_subplot(111)
+        ax.axis(**default_ts_kwargs)
+        self.axes.append(ax)
+
+    def setup_channels(self, n_channels):
+        self.axes, self.widgets = [], []
+        for i in range(len(g_channels)):
+            self.setup_channel(g_channels[i])
+        Logger.info("added axes")
+
+    def ch_select(self, *args):
+        plot_type = int(args[0][0])
+        if plot_type < 2:
+            ch_number = int(args[0][1])
+            gui_plot_index = 2 * ch_number + plot_type
+        else:
+            gui_plot_index = 2 * carrier.n_channels
+
+        if args[-1]:
+            self.add_widget(self.widgets[gui_plot_index])
+        else:
+            self.remove_widget(self.widgets[gui_plot_index])
 
     def start(self):
         Clock.schedule_interval(self.get_value, 0.01)
@@ -126,7 +171,8 @@ class Logic(BoxLayout):
         self.plot.set_ydata(carrier.nblock[0])
         self.wid.draw()
         self.ax.relim()
-        self.ax.autoscale()#_view(True,True,True)
+        self.ax.autoscale()
+
 
 class Oscope(App):
     def build(self):
@@ -172,6 +218,7 @@ if __name__ == "__main__":
                       filewritepath=args.filewritepath,
                       use_spartan=args.use_spartan,
                       test=True)
+    GUIGraphChannel.setup_gui_channels(carrier)
     acq_thread = Thread(target=carrier.test_data)
     acq_thread.daemon = True
     acq_thread.start()
