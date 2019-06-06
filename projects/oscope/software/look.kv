@@ -6,10 +6,30 @@ Logic:
             size_hint: [1, .8]
             Graph:
                 id: graph
-                xlabel: ""
-                ylabel: "Level"
+                #xlabel: ""
+                #ylabel: "Level"
         BoxLayout:
             size_hint: [1, .2]
+            orientation: "horizontal"
+            CheckBox:
+                on_active: root.ch_select()
+            Label:
+                text: "1"
+            CheckBox:
+                on_active: root.ch_select()
+            Label:
+                text: "2"
+            CheckBox:
+                on_active: root.ch_select()
+            Label:
+                text: "3"
+            CheckBox:
+                on_active: root.ch_select()
+            Label:
+                text: "4"
+            CheckBox:
+                on_active: root.ch_select()
+        BoxLayout:
             orientation: "horizontal"
             Button:
                 text: "START"

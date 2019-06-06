@@ -10,6 +10,7 @@ import time
 from threading import Thread
 
 import numpy as np
+from matplotlib import pyplot as plt
 
 from banyan_ch_find import banyan_ch_find
 from banyan_spurs import collect_adcs
@@ -97,26 +98,35 @@ class Carrier:
 from kivy.lang import Builder
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from kivy.garden.graph import MeshLinePlot
+from kivy.garden.graph import MeshLinePlot, Graph, LinePlot
 from kivy.clock import Clock
-
+from kivy.garden.matplotlib.backend_kivyagg import FigureCanvas
+from kivy.utils import get_color_from_hex as rgb
+from kivy.logger import Logger
 
 class Logic(BoxLayout):
     def __init__(self, **kwargs):
         super(Logic, self).__init__()
-        self.plot = MeshLinePlot(color=[1, 0, 0, 1])
+        fig1 = plt.figure()
+        self.ax = fig1.add_subplot(111)
+        self.plot = self.ax.plot(range(100),[1/2]*100)[0]
+        # Logger.info("whatever = {}".format(self.plot))
+        self.wid = FigureCanvas(fig1)
+        self.add_widget(self.wid)
+        self.ax.grid()
 
     def start(self):
-        self.ids.graph.add_plot(self.plot)
         Clock.schedule_interval(self.get_value, 0.01)
 
     def stop(self):
         Clock.unschedule(self.get_value)
 
     def get_value(self, dt):
-        print(len(carrier.nblock[0]), carrier.test_counter, dt)
-        self.plot.points = [(i, d) for i, d in enumerate(carrier.nblock[0])]
-
+        self.plot.set_xdata(range(len(carrier.nblock[0])))
+        self.plot.set_ydata(carrier.nblock[0])
+        self.wid.draw()
+        self.ax.relim()
+        self.ax.autoscale()#_view(True,True,True)
 
 class Oscope(App):
     def build(self):
