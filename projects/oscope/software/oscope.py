@@ -1,3 +1,9 @@
+from kivy.logger import Logger
+from kivy.garden.matplotlib.backend_kivyagg import FigureCanvas
+from kivy.clock import Clock
+from kivy.uix.boxlayout import BoxLayout
+from kivy.app import App
+from kivy.lang import Builder
 '''
 top-level multichannel plotter.
 Revamp with kivy started
@@ -78,100 +84,122 @@ class Carrier:
 
         self.pts_per_ch = self.npt * 8 // self.n_channels
         self.test_counter = 0
+        self.subscriptions, self.results = {}, {}
 
     def test_data(self, *args):
         while True:
             self.test_counter += 1
             self.nblock = np.array([np.random.random_sample(self.pts_per_ch)
                                     for _ in range(self.n_channels)])
+            self.process_subscriptions()
             time.sleep(0.2)
 
     def acquire_data(self, *args):
         # collect_adcs is not normal:
         # It always collects npt * 8 data points.
         # Each channel gets [(npt * 8) // n_channels] datapoints
-        data_block, self.ts = collect_adcs(self.carrier, self.npt, self.n_channels)
+        data_block, self.ts = collect_adcs(
+            self.carrier, self.npt, self.n_channels)
         # ADC count / FULL SCALE => [-1.0, 1.        pass
         self.nblock = ADC.counts_to_volts(np.array(data_block))
+        self.process_subscriptions()
+
+    def process_subscriptions(self):
+        for ch_id, (ch_n, fn) in self.subscriptions.items():
+            self.results[ch_id] = fn(self.nblock[ch_n])
+
+    def add_subscription(self, sub_id, ch_n, fn):
+        # TODO: Add args/kwargs to the function
+        self.subscriptions[sub_id] = (ch_n, fn)
+        Logger.critical('Added subscription {}'.format(sub_id))
+
+    def remove_subscription(self, sub_id):
+        self.subscriptions.pop(sub_id)
 
 
-g_channels = []
+class Processing:
+    @staticmethod
+    def identity(ch_data):
+        return range(len(ch_data)), ch_data
+
+    @staticmethod
+    def fft(x, **kwargs):
+        pass
+
+    @staticmethod
+    def csd(x, **kwargs):
+        pass
+
+
+g_channels = {}
 
 
 # TODO: Should convert this to a dataclass for python 3.7+
 class GUIGraphChannel:
-    def __init__(self, ch_id, show_freq=False, show_ts=False, xlog=False, ylog=False):
+    def __init__(self, ch_id, show=False, xlog=False, ylog=False):
         self.ch_id = ch_id
-        self.show_freq = show_freq
-        self.show_ts = show_ts
-        self.xlog = False
-        self.ylog = False
+        self.show = show
+        self.xlog = xlog
+        self.ylog = ylog
+        self.fig = plt.figure()
+        self.wid = FigureCanvas(self.fig)
+        self.ax = self.fig.add_subplot(111)
+        self.plot = self.ax.plot(range(100), [1/2]*100)[0]
+        self.carrier_ch_n = int(ch_id[1]) if int(ch_id[0]) < 2 else None
+
+    def update_data(self):
+        if self.ch_id not in carrier.results:
+            Logger.critical('No data found')
+            return
+        print(carrier.results[self.ch_id][0])
+        self.plot.set_xdata(carrier.results[self.ch_id][0][:10000])
+        self.ax.set_xlim(0, 10000)
+        self.plot.set_ydata(carrier.results[self.ch_id][1][:10000])
+        self.ax.set_ylim(0, 1.0)
+
+    def set_plot_active(self, b):
+        self.show = b
 
     @staticmethod
     def setup_gui_channels(carrier):
         for i in range(carrier.n_channels):
-            g_channels.append(GUIGraphChannel("0"+str(i), False, False, False, False))
-            g_channels.append(GUIGraphChannel("1"+str(i), False, False, False, False))
-        g_channels.append(GUIGraphChannel("3", False, False, False, False))
-
-
-from kivy.lang import Builder
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.clock import Clock
-from kivy.garden.matplotlib.backend_kivyagg import FigureCanvas
-from kivy.logger import Logger
-
-
-default_ts_kwargs = {'ylabel': 'volts',
-                     'xlabel': 'sample_number',
-                     'label': 'Time Series'}
+            ch_id = "0" + str(i)
+            g_channels[ch_id] = GUIGraphChannel(ch_id)
+            ch_id = "1" + str(i)
+            g_channels[ch_id] = GUIGraphChannel(ch_id)
+        ch_id = "3"
+        g_channels[ch_id] = GUIGraphChannel(ch_id)
 
 
 class Logic(BoxLayout):
     def __init__(self, **kwargs):
         super(Logic, self).__init__()
-        self.setup_channels(carrier.n_channels)
-
-    def setup_channel(self, i):
-        fig = plt.figure()
-        wid = FigureCanvas(fig)
-        self.widgets.append(wid)
-        ax = fig.add_subplot(111)
-        ax.axis(**default_ts_kwargs)
-        self.axes.append(ax)
-
-    def setup_channels(self, n_channels):
-        self.axes, self.widgets = [], []
-        for i in range(len(g_channels)):
-            self.setup_channel(g_channels[i])
-        Logger.info("added axes")
 
     def ch_select(self, *args):
-        plot_type = int(args[0][0])
-        if plot_type < 2:
-            ch_number = int(args[0][1])
-            gui_plot_index = 2 * ch_number + plot_type
-        else:
-            gui_plot_index = 2 * carrier.n_channels
-
+        plot_id = args[0]
+        CH = g_channels[plot_id]
         if args[-1]:
-            self.add_widget(self.widgets[gui_plot_index])
+            CH.set_plot_active(True)
+            self.add_widget(CH.wid)
+            carrier.add_subscription(plot_id, int(
+                args[0][1]), Processing.identity)
         else:
-            self.remove_widget(self.widgets[gui_plot_index])
+            CH.set_plot_active(False)
+            self.remove_widget(CH.wid)
+            carrier.remove_subscription(plot_id)
 
     def start(self):
-        Clock.schedule_interval(self.get_value, 0.01)
+        Clock.schedule_interval(self.populate_graph, 0.01)
 
     def stop(self):
-        Clock.unschedule(self.get_value)
+        Clock.unschedule(self.populate_graph)
 
-    def get_value(self, dt):
-        self.plot.set_xdata(range(len(carrier.nblock[0])))
-        self.plot.set_ydata(carrier.nblock[0])
-        self.wid.draw()
-        self.ax.relim()
-        self.ax.autoscale()
+    def populate_graph(self, dt):
+        for _, ch in g_channels.items():
+            ch.update_data()
+            ch.wid.draw()
+            # ch.ax.relim()
+            # ch.ax.autoscale()
 
 
 class Oscope(App):
