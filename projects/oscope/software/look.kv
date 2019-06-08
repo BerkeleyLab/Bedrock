@@ -4,7 +4,7 @@ Logic:
     BoxLayout:
         orientation: "vertical"
         BoxLayout:
-            size_hint: [1, .1]
+            size_hint: [0, 0]
             id: settings_box
             orientation: "horizontal"
             Label:
@@ -15,18 +15,21 @@ Logic:
             Label:
                 text: "xlim"
             TextInput:
-                hint_text: "0, 1.0"
                 id: xlim
+                on_text: root.update_lim("X", *args)
             Label:
                 text: "ylim"
             TextInput:
-                hint_text: "0, 1.0"
                 id: ylim
+                on_text: root.update_lim("Y", *args)
+            Label:
+                text: "Autoscale"
+            CheckBox:
+                on_active: root.update_lim("autoscale", *args)
             Label:
                 text: "window"
             TextInput:
-                hint_text: "hanning"
-                id: ylim
+                id: window
         BoxLayout:
             size_hint: [1, .2]
             orientation: "horizontal"
@@ -35,19 +38,19 @@ Logic:
             Label:
                 text: "CH1"
             CheckBox:
-                on_active: root.ch_select("00", *args); root.plot_settings_select(*args)
+                on_active: root.ch_select("00", *args)
             Label:
                 text: "CH2"
             CheckBox:
-                on_active: root.ch_select("01", *args); root.plot_settings_select(*args)
+                on_active: root.ch_select("01", *args)
             Label:
                 text: "CH3"
             CheckBox:
-                on_active: root.ch_select("02", *args); root.plot_settings_select(*args)
+                on_active: root.ch_select("02", *args)
             Label:
                 text: "CH4"
             CheckBox:
-                on_active: root.ch_select("03", *args); root.plot_settings_select(*args)
+                on_active: root.ch_select("03", *args)
         BoxLayout:
             size_hint: [1, .2]
             orientation: "horizontal"

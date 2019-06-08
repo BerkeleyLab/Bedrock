@@ -167,6 +167,11 @@ class GUIGraphChannel:
         self.ch_id = ch_id
         self.show = show
         self.fig = plt.figure()
+        self.xlim = kwargs.get('xlim')
+        self.ylim = kwargs.get('ylim')
+        self.ylog = kwargs.get('ylog')
+        self.xlog = kwargs.get('xlog')
+        self.autoscale = kwargs.get('autoscale')
         self.wid = FigureCanvas(self.fig)
         self.ax = self.fig.add_subplot(111, **kwargs)
         self.plot = self.ax.plot(range(100), [1 / 2] * 100)[0]
@@ -176,8 +181,15 @@ class GUIGraphChannel:
         if self.ch_id not in carrier.results:
             # Logger.critical('No data found')
             return
-        self.plot.set_xdata(carrier.results[self.ch_id][0])
-        self.plot.set_ydata(carrier.results[self.ch_id][1])
+        x_data, y_data = carrier.results[self.ch_id]
+        self.plot.set_xdata(x_data)
+        self.plot.set_ydata(y_data)
+        if not self.autoscale:
+            self.ax.set_xlim(self.xlim)
+            self.ax.set_ylim(self.ylim)
+        else:
+            self.ax.relim()
+            self.ax.autoscale()
 
     def set_plot_active(self, b):
         self.show = b
@@ -194,10 +206,13 @@ class GUIGraphChannel:
                 ylim=[-1., 1.])
             ch_id = "1" + str(i)
             g_channels[ch_id] = GUIGraphChannel(
-                ch_id, xlabel='Frequency [Hz]', ylabel='[V/sqrt(Hz)]')
+                ch_id, xlabel='Frequency [Hz]', ylabel='[V]',
+                xlim=[0, 5e7], ylim=[1e-11, 200]
+            )
         ch_id = "3"
         g_channels[ch_id] = GUIGraphChannel(
-            ch_id, xlabel='Frequency [Hz]', ylabel='[V/sqrt(Hz)]')
+            ch_id, xlabel='Frequency [Hz]', ylabel='[V/sqrt(Hz)]', xlim=[0, 5e7], ylim=[1e-11, 200]
+)
 
 
 class Logic(BoxLayout):
@@ -205,9 +220,31 @@ class Logic(BoxLayout):
         super(Logic, self).__init__()
         self.csd_channels = 0, 1
         Clock.schedule_interval(self.update_graph, 0.01)
+        self.plot_id = '00'
 
-    def plot_settings_select(self, *args):
-        Logger.info(str(self.ids.ylim))
+    def update_lim(self, axis, *args):
+        CH = g_channels[self.plot_id]
+        if axis == 'autoscale':
+            Logger.warning(str(args[1]))
+            CH.autoscale = args[1]
+        text = args[1]
+        try:
+            if axis == "X":
+                CH.xlim = eval(text)
+            elif axis == "Y":
+                CH.ylim = eval(text)
+        except Exception:
+            Logger.warning('Invalid limits: ' + text)
+
+    def plot_settings_select(self, plot_id, *args):
+        CH = g_channels[plot_id]
+        self.ids.settings_box.size_hint = [1, .1]
+        try:
+            self.ids.ch_name.text = str('CH' + str(int(plot_id[1]) + 1))
+        except Exception:
+            self.ids.ch_name.text = 'CSD'
+        self.ids.ylim.text = str(CH.ylim)
+        self.ids.xlim.text = str(CH.xlim)
 
     def ch_select(self, plot_id, *args):
         '''
@@ -216,7 +253,9 @@ class Logic(BoxLayout):
         TODO: We don't need to handle plot types in this messy way if they are formalized
         into classes and dealt with inheritance
         '''
+        self.plot_id = plot_id
         CH = g_channels[plot_id]
+        self.plot_settings_select(plot_id)
         Logger.info(plot_id)
         Logger.info(str(args))
         if args[-1]:
@@ -234,6 +273,7 @@ class Logic(BoxLayout):
                                          self.csd_channels[0],
                                          self.csd_channels[1], 'hanning')
         else:
+            self.ids.settings_box.size_hint = [0, 0]
             CH.set_plot_active(False)
             self.remove_widget(CH.wid)
             carrier.remove_subscription(plot_id)
@@ -258,8 +298,6 @@ class Logic(BoxLayout):
         for _, ch in g_channels.items():
             ch.update_data()
             ch.wid.draw()
-            ch.ax.relim()
-            ch.ax.autoscale()
 
 
 class Oscope(App):
