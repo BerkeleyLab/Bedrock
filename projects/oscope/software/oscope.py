@@ -4,6 +4,7 @@ from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.properties import ObjectProperty
 '''
 top-level multichannel plotter.
 Revamp with kivy started
@@ -211,8 +212,8 @@ class GUIGraphChannel:
             )
         ch_id = "3"
         g_channels[ch_id] = GUIGraphChannel(
-            ch_id, xlabel='Frequency [Hz]', ylabel='[V/sqrt(Hz)]', xlim=[0, 5e7], ylim=[1e-11, 200]
-)
+            ch_id, xlabel='Frequency [Hz]', ylabel='[V/sqrt(Hz)]',
+            xlim=[0, 5e7], ylim=[1e-11, 200])
 
 
 class Logic(BoxLayout):
@@ -221,11 +222,11 @@ class Logic(BoxLayout):
         self.csd_channels = 0, 1
         Clock.schedule_interval(self.update_graph, 0.01)
         self.plot_id = '00'
+        self.plot_Q = []
 
     def update_lim(self, axis, *args):
         CH = g_channels[self.plot_id]
         if axis == 'autoscale':
-            Logger.warning(str(args[1]))
             CH.autoscale = args[1]
         text = args[1]
         try:
@@ -236,29 +237,44 @@ class Logic(BoxLayout):
         except Exception:
             Logger.warning('Invalid limits: ' + text)
 
-    def plot_settings_select(self, plot_id, *args):
-        CH = g_channels[plot_id]
-        self.ids.settings_box.size_hint = [1, .1]
+    def plot_settings_update(self, plot_id, plot_selected):
+        if plot_selected:
+            self.plot_Q.append(plot_id)
+        else:
+            self.plot_Q.remove(plot_id)
+
+        if len(self.plot_Q) == 0:
+            self.ids.settings_box.size_hint = [0, 0]
+            return
+        else:
+            self.ids.settings_box.size_hint = [1, .1]
+
+        self.plot_id = self.plot_Q[-1]
+        CH = g_channels[self.plot_id]
         try:
-            self.ids.ch_name.text = str('CH' + str(int(plot_id[1]) + 1))
+            self.ids.ch_name.text = str('CH' + str(int(self.plot_id[1]) + 1) + ' ' +
+                                        ('T' if self.plot_id[0] == '0' else 'F'))
         except Exception:
-            self.ids.ch_name.text = 'CSD'
+            self.ids.ch_name.text = 'Cross\nSpectral\nDensity'
         self.ids.ylim.text = str(CH.ylim)
         self.ids.xlim.text = str(CH.xlim)
+        self.ids.autoscale = ObjectProperty(CH.autoscale)
 
-    def ch_select(self, plot_id, *args):
+    def plot_select(self, plot_id, *args):
         '''
         plot_id == plot_type + channel_number
         plot_type is '0' for Timeseries, '1' for FFT, '3' for Cross Spectral Density
         TODO: We don't need to handle plot types in this messy way if they are formalized
         into classes and dealt with inheritance
         '''
+        plot_selected = args[-1]  # Adds the plot when True, else removes it
+
         self.plot_id = plot_id
         CH = g_channels[plot_id]
-        self.plot_settings_select(plot_id)
-        Logger.info(plot_id)
-        Logger.info(str(args))
-        if args[-1]:
+
+        self.plot_settings_update(plot_id, plot_selected)
+
+        if plot_selected:
             CH.set_plot_active(True)
             self.add_widget(CH.wid)
             plot_type = plot_id[0]
@@ -273,7 +289,6 @@ class Logic(BoxLayout):
                                          self.csd_channels[0],
                                          self.csd_channels[1], 'hanning')
         else:
-            self.ids.settings_box.size_hint = [0, 0]
             CH.set_plot_active(False)
             self.remove_widget(CH.wid)
             carrier.remove_subscription(plot_id)
@@ -296,8 +311,9 @@ class Logic(BoxLayout):
 
     def update_graph(self, dt):
         for _, ch in g_channels.items():
-            ch.update_data()
-            ch.wid.draw()
+            if ch.show:
+                ch.update_data()
+                ch.wid.draw()
 
 
 class Oscope(App):

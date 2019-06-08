@@ -8,11 +8,10 @@ Logic:
             id: settings_box
             orientation: "horizontal"
             Label:
-                text: "Plot Settings"
-            Label:
                 text: "CH1"
                 id: ch_name
             Label:
+                size_hint: [0.3, 1]
                 text: "xlim"
             TextInput:
                 id: xlim
@@ -22,63 +21,74 @@ Logic:
             TextInput:
                 id: ylim
                 on_text: root.update_lim("Y", *args)
-            Label:
-                text: "Autoscale"
-            CheckBox:
-                on_active: root.update_lim("autoscale", *args)
+            BoxLayout:
+                orientation: "horizontal"
+                Label:
+                    text: "Autoscale"
+                CheckBox:
+                    on_active: root.update_lim("autoscale", *args)
             Label:
                 text: "window"
             TextInput:
                 id: window
         BoxLayout:
-            size_hint: [1, .2]
+            size_hint: [1, .05]
             orientation: "horizontal"
             Label:
-                text: "TS"
-            Label:
                 text: "CH1"
-            CheckBox:
-                on_active: root.ch_select("00", *args)
+            BoxLayout:
+                orientation: "horizontal"
+                Label:
+                    text: "T"
+                CheckBox:
+                    on_active: root.plot_select("00", *args)
+                Label:
+                    text: "F"
+                CheckBox:
+                    on_active: root.plot_select("10", *args)
             Label:
                 text: "CH2"
-            CheckBox:
-                on_active: root.ch_select("01", *args)
+            BoxLayout:
+                orientation: "horizontal"
+                Label:
+                    text: "T"
+                CheckBox:
+                    on_active: root.plot_select("01", *args)
+                Label:
+                    text: "F"
+                CheckBox:
+                    on_active: root.plot_select("11", *args)
             Label:
                 text: "CH3"
-            CheckBox:
-                on_active: root.ch_select("02", *args)
+            BoxLayout:
+                orientation: "horizontal"
+                Label:
+                    text: "T"
+                CheckBox:
+                    on_active: root.plot_select("02", *args)
+                Label:
+                    text: "F"
+                CheckBox:
+                    on_active: root.plot_select("12", *args)
             Label:
                 text: "CH4"
-            CheckBox:
-                on_active: root.ch_select("03", *args)
+            BoxLayout:
+                orientation: "horizontal"
+                Label:
+                    text: "T"
+                CheckBox:
+                    on_active: root.plot_select("03", *args)
+                Label:
+                    text: "F"
+                CheckBox:
+                    on_active: root.plot_select("13", *args)
         BoxLayout:
-            size_hint: [1, .2]
-            orientation: "horizontal"
-            Label:
-                text: "FFT"
-            Label:
-                text: "CH1"
-            CheckBox:
-                on_active: root.ch_select("10", *args)
-            Label:
-                text: "CH2"
-            CheckBox:
-                on_active: root.ch_select("11", *args)
-            Label:
-                text: "CH3"
-            CheckBox:
-                on_active: root.ch_select("12", *args)
-            Label:
-                text: "CH4"
-            CheckBox:
-                on_active: root.ch_select("13", *args)
-        BoxLayout:
-            size_hint: [1, .2]
+            size_hint: [1, .05]
             orientation: "horizontal"
             Label:
                 text: "Cross Spectral Density"
             CheckBox:
-                on_active: root.ch_select("3", *args)
+                on_active: root.plot_select("3", *args)
             TextInput:
                 id: ti
                 hint_text: "1-2"
