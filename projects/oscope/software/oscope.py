@@ -172,7 +172,7 @@ class GUIGraphChannel:
         self.ylim = kwargs.get('ylim')
         self.ylog = kwargs.get('ylog')
         self.xlog = kwargs.get('xlog')
-        self.autoscale = kwargs.get('autoscale')
+        self.autoscale = kwargs.pop('autoscale', False)
         self.wid = FigureCanvas(self.fig)
         self.ax = self.fig.add_subplot(111, **kwargs)
         self.plot = self.ax.plot(range(100), [1 / 2] * 100)[0]
@@ -213,10 +213,11 @@ class GUIGraphChannel:
         ch_id = "3"
         g_channels[ch_id] = GUIGraphChannel(
             ch_id, xlabel='Frequency [Hz]', ylabel='[V/sqrt(Hz)]',
-            xlim=[0, 5e7], ylim=[1e-11, 200])
+            xlim=[0, 5e7], ylim=[1e-11, 200], autoscale=True)
 
 
 class Logic(BoxLayout):
+    autoscale = ObjectProperty(False)
     def __init__(self, **kwargs):
         super(Logic, self).__init__()
         self.csd_channels = 0, 1
@@ -228,6 +229,7 @@ class Logic(BoxLayout):
         CH = g_channels[self.plot_id]
         if axis == 'autoscale':
             CH.autoscale = args[1]
+            return
         text = args[1]
         try:
             if axis == "X":
@@ -258,7 +260,7 @@ class Logic(BoxLayout):
             self.ids.ch_name.text = 'Cross\nSpectral\nDensity'
         self.ids.ylim.text = str(CH.ylim)
         self.ids.xlim.text = str(CH.xlim)
-        self.ids.autoscale = ObjectProperty(CH.autoscale)
+        self.autoscale = CH.autoscale
 
     def plot_select(self, plot_id, *args):
         '''
@@ -269,7 +271,6 @@ class Logic(BoxLayout):
         '''
         plot_selected = args[-1]  # Adds the plot when True, else removes it
 
-        self.plot_id = plot_id
         CH = g_channels[plot_id]
 
         self.plot_settings_update(plot_id, plot_selected)
