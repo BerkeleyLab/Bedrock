@@ -9,9 +9,6 @@ in computer.eps.  I assert it fits in an interesting niche between the
 fast and simple logic conventionally implemented in FPGA fabric, and the
 slow and complex algorithms that can run on a general-purpose CPU.
 
-Seems usable, but not tested on hardware or incorporated in a larger
-design yet!  See todo.txt.
-
 As Antoine de Saint-Exupery commented about design: "perfection is
 reached not when there is nothing left to add, but when there is nothing
 left to take away".  This processing engine has one data type, no branch
@@ -30,7 +27,7 @@ A complete description of the arithmetic to perform for distortion
 compensation is in file job_ip3.txt.  A complete description of the
 arithmetic to perform for SRF cavity detune and quench finding is in
 tuning_dsp4.pdf (you have to "make" that first).  For now, select between
-the two by editing the Makefile.  The code for distortion compenstation
+the two by editing the Makefile.  The code for distortion compensation
 has probably bit-rotted.
 
 Run "make ops.h" to generate "assembly code" for the engine, machine-generated
@@ -53,9 +50,14 @@ simple tests.  It is written in portable Verilog.  The circuit is compatible
 with a high-speed clock, and has tiny FPGA resource usage; see quantitative
 comments in the Makefile.
 
-The module you should instantiate in your code is sf_user.v.  Comments there
-give a short description of its inputs and outputs.  This is a simple and well-
-pipelined single-clock-domain design, good for > 200 MHz on modern chips.
+There are a couple of choices for how to instantiate this code; two of them
+are given in sf_user_wrap.v, one (sf_user_pmem) provides a host access to
+parameters in a small DPRAM, the other (sf_user_preg) explodes those parameters
+into a single parallelized input port.  Other, more stripped-down interfaces
+are available in sf_user.v and sf_main.v.
+
+This is a simple and well-pipelined single-clock-domain design,
+good for > 200 MHz on modern chips.
 
 The code in sf_main.v is the core of the compute engine, with one input stream,
 and four outputs which are set at the end of the computation.  The "extra"

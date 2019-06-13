@@ -174,8 +174,10 @@ module sf_main #(
 	input [20:0] inst,  // consumes 21 bits of instruction per cycle
 	input signed [pw-1:0] meas,  // measurements from radio
 	// Results
+	output                 ab_update,
 	output signed [pw-1:0] a_o,
 	output signed [pw-1:0] b_o,
+	output                 cd_update,
 	output signed [pw-1:0] c_o,
 	output signed [pw-1:0] d_o,
 	// Monitoring only, probably superfluous
@@ -240,22 +242,28 @@ sf_alu #(.dw(dw), .mw(mw)) alu(.clk(clk), .ce(ce), .a(a), .b(b), .op(op), .sv(sv
 // make values available to outside world
 // take most significant bits
 reg signed [pw-1:0] a_out=0, b_out=0;
+reg ab_u=0;
 always @(posedge clk) if (ce & (op==1)) begin
 	a_out <= a[dw-1:extra];
 	b_out <= b[dw-1:extra];
-end
+	ab_u <= 1;
+end else ab_u <= 0;
 assign a_o = a_out;
 assign b_o = b_out;
+assign ab_update = ab_u;
 
 // make values available to outside world
 // take most significant bits
 reg signed [pw-1:0] c_out=0, d_out=0;
+reg cd_u=0;
 always @(posedge clk) if (ce & (op==2)) begin
 	c_out <= a[dw-1:extra];
 	d_out <= b[dw-1:extra];
-end
+	cd_u <= 1;
+end else cd_u <= 0;
 assign c_o = c_out;
 assign d_o = d_out;
+assign cd_update = cd_u;
 
 assign trace = d_in;
 assign collide_o = we_a & set;
