@@ -1,0 +1,39 @@
+[treeopen] onewire_soft_tb.gpio.
+[treeopen] onewire_soft_tb.gpio.gpioInst.
+[treeopen] onewire_soft_tb.gpio.gpioInst.sfrInst.
+[sst_width] 313
+[signals_width] 356
+[sst_expanded] 1
+[sst_vpaned_height] 423
+@28
+onewire_soft_tb.mem_clk
+onewire_soft_tb.reset
+@800200
+-CPU
+@22
+onewire_soft_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+onewire_soft_tb.cpu.picorv32_core.dbg_insn_addr[31:0]
+@28
+onewire_soft_tb.cpu.picorv32_core.dbg_mem_instr
+@22
+onewire_soft_tb.cpu.picorv32_core.dbg_mem_rdata[31:0]
+@28
+onewire_soft_tb.cpu.picorv32_core.dbg_mem_ready
+onewire_soft_tb.cpu.picorv32_core.dbg_mem_valid
+@22
+onewire_soft_tb.cpu.picorv32_core.dbg_mem_wdata[31:0]
+onewire_soft_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+onewire_soft_tb.cpu.picorv32_core.dbg_insn_opcode[31:0]
+onewire_soft_tb.cpu.picorv32_core.dbg_rs1val[31:0]
+onewire_soft_tb.cpu.picorv32_core.dbg_rs2val[31:0]
+@1000200
+-CPU
+@28
+onewire_soft_tb.ds1822.pin
+@22
+onewire_soft_tb.gpio.gpio_oe[31:0]
+@28
+onewire_soft_tb.ds1822.drive
+onewire_soft_tb.dbg.mine
+[pattern_trace] 1
+[pattern_trace] 0

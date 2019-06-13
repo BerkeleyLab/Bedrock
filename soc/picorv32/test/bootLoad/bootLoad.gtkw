@@ -1,0 +1,61 @@
+[timestart] 36048000
+[size] 1535 848
+[pos] -1 -1
+*-18.199167 36842000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] bootloader_tb.
+[treeopen] bootloader_tb.cpu.
+[treeopen] bootloader_tb.cpu.picorv32_core.
+[treeopen] bootloader_tb.uart_inst0.
+[sst_width] 313
+[signals_width] 356
+[sst_expanded] 1
+[sst_vpaned_height] 416
+@28
+bootloader_tb.reset
+@29
+bootloader_tb.cpu.picorv32_core.instr_trap
+@28
+bootloader_tb.mem_clk
+@800200
+-CPU
+@28
+bootloader_tb.cpu.picorv32_core.dbg_mem_instr
+@820
+bootloader_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+@22
+bootloader_tb.cpu.picorv32_core.dbg_insn_addr[31:0]
+bootloader_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+bootloader_tb.cpu.picorv32_core.dbg_mem_rdata[31:0]
+@28
+bootloader_tb.cpu.picorv32_core.dbg_mem_ready
+bootloader_tb.cpu.picorv32_core.dbg_mem_valid
+@22
+bootloader_tb.cpu.picorv32_core.dbg_mem_wdata[31:0]
+bootloader_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+@1000200
+-CPU
+@28
+bootloader_tb.uart_rx0
+bootloader_tb.uart_tx0
+@800200
+-URX
+@22
+bootloader_tb.urx_tdata0[7:0]
+@28
+bootloader_tb.urx_tready0
+bootloader_tb.urx_tvalid0
+@1000200
+-URX
+@800200
+-UTX
+@22
+bootloader_tb.utx_tdata0[7:0]
+@28
+bootloader_tb.utx_tready0
+bootloader_tb.utx_tvalid0
+@1000200
+-UTX
+@28
+bootloader_tb.uart_tb_rx.busy
+[pattern_trace] 1
+[pattern_trace] 0
