@@ -92,7 +92,7 @@ oscope_top:
 comms_top:
   before_script:
     - cd projects/comms_top && ls /non-free
-  stage: deploy
+  stage: synthesis
   script:
     - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH make comms_top.bit
   artifacts:
