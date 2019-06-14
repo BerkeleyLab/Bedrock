@@ -30,7 +30,7 @@ QGTX_D += -DQ0_GT0_8B10B_EN
 
 # Run through iverilog pre-processor and attempt to clean up newline chunks
 qgtx_template : qgtx_wrap.v qgtx_wrap_stub.vh qgtx_wrap_pack.vh
-	$(VERILOG) -I$(GTX_DIR) $(QGTX_D) -E $< -o a.out ; \grep . a.out > $(basename $<).template.v ; rm a.out
+	$(VERILOG) -I$(GTX_DIR) $(QGTX_D) -E $< -o - | grep "[^ ]" > $(basename $<).template.v
 
 
 CLEAN += $(REMOTE_TGTS) $(GTX_DIR)/*.out

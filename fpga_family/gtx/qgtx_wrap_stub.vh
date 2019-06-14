@@ -8,10 +8,10 @@
 //
 // ------------------------------------
 
-`ifdef GT0_ENABLE `GTi_WIRES(0) `endif
-`ifdef GT1_ENABLE `GTi_WIRES(1) `endif
-`ifdef GT2_ENABLE `GTi_WIRES(2) `endif
-`ifdef GT3_ENABLE `GTi_WIRES(3) `endif
+`ifdef GT0_ENABLE `GTi_WIRES(0)`endif
+`ifdef GT1_ENABLE `GTi_WIRES(1)`endif
+`ifdef GT2_ENABLE `GTi_WIRES(2)`endif
+`ifdef GT3_ENABLE `GTi_WIRES(3)`endif
 
    wire gt_cpll_reset, gt_txrx_reset;
 
