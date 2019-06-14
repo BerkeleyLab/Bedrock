@@ -68,7 +68,7 @@ COPY --from=riscv-builder /riscv32i /riscv32i
 
 ENV PATH="/riscv32i/bin:${PATH}"
 
-RUN apt-get install -y verilator libbsd-dev && \
+RUN apt-get install -y verilator libbsd-dev yosys && \
 	pip install git+https://github.com/m-labs/nmigen.git
 
 FROM litex as testing_base
