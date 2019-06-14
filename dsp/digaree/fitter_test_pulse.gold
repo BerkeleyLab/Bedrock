@@ -1,0 +1,8 @@
+SI beta -99.706+22.738j Hz
+sf_consts[0] = -1787
+sf_consts[1] = 407
+sf_consts[2] = 1255
+sf_consts[3] = 32768
+fq = 0.035526
+89 - 1.72*Gradient^2
+Plot saved to pulse_fit.png
