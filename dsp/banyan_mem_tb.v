@@ -10,7 +10,7 @@ initial begin
 		$dumpfile("banyan_mem.vcd");
 		$dumpvars(7,banyan_mem_tb);
 	end
-	for (cc=0; cc<1600; cc=cc+1) begin
+	for (cc=0; cc<2000; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
@@ -20,11 +20,13 @@ end
 reg [8*dw-1:0] test=0;
 integer ix;
 reg [7:0] cx=0;
+reg data_valid=1;
+
 always @(posedge clk) begin
 	cx <= cx+1;
 	for (ix=0; ix<8; ix=ix+1) test[(ix)*dw+:dw] <= ((ix+1) << 8) + cx;
+	if (cc > 1600) data_valid <= cx[0];
 end
-wire [dw-1:0] adc1 = test[dw-1:0];
 
 // Main test vector setup
 reg trig=0;
@@ -40,6 +42,8 @@ always @(posedge clk) begin
 		808: trig <= 1;
 		1206: banyan_mask <= 8'hff;
 		1208: trig <= 1;
+		1606: banyan_mask <= 8'hff;
+		1608: trig <= 1;
 	endcase
 end
 
@@ -58,7 +62,7 @@ reg [aw+3-1:0] ro_addr=0, ro_addr_d=0;
 wire [dw-1:0] ro_data;
 banyan_mem #(.aw(aw), .dw(dw)) dut3(.clk(clk),
 	.adc_data(test), .banyan_mask(banyan_mask),
-	.reset(reset), .run(run),
+	.reset(reset), .run(run & data_valid),
 	.pointer(pointer), .rollover(rollover), .full(full),
 	.ro_clk(clk), .ro_addr(ro_addr), .ro_data(ro_data)
 );
