@@ -108,7 +108,7 @@ module comms_top_regbank #(
          end else begin
             case (lb_addr[LOCAL_AWI-1:0])
                TX_LOCATION_WR_REG:      tx_location_o    <= lb_wdata;
-               TX_TRANSMIT_EN_WR_REG:   tx_transmit_en_o <= lb_wdata; 
+               TX_TRANSMIT_EN_WR_REG:   tx_transmit_en_o <= lb_wdata;
                PGEN_DISABLE_WR_REG:     pgen_disable_o   <= lb_wdata;
                PGEN_RATE_WR_REG:        pgen_rate_o      <= lb_wdata;
                PGEN_TEST_MODE_WR_REG:   pgen_test_mode_o <= lb_wdata;
