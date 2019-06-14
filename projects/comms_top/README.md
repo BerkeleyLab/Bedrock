@@ -5,6 +5,7 @@ multiple serial link protocols based on the TCL-based QGTX instantiation flow.
 
 Additionally, as part of the CI/CD, it provides coverage and protects against
 regressions in the following Bedrock sub-systems and features:
+
 * Ethernet to Local Bus bridge over fiber
 * ChitChat serial protocol over fiber
 * Generation of QF2PRE-compatible bitfiles
@@ -55,6 +56,7 @@ and reads to a pre-defined set of registers which provide access to the ChitChat
 
 `chitchat_txrx_wrap.v` implements a pair of TX/RX endpoints running the ChitChat protocol, along
 with the necessary clock domain crossing between the following clock domains:
+
 * `tx_clk`
 * `rx_clk`
 * `lb_clk`
@@ -79,6 +81,7 @@ The Quad GTX used in this system is configured with a TCL-based flow, essentiall
 TCL configuration script, `gtx_gen.tcl` and a QGTX Verilog wrapper, `qgtx_wrap.v`.
 
 `gtx_gen.tcl` implements two user-facing procedures:
+
 * `proc add_aux_ip {ipname config_file module_name}`
 * `proc add_gtx_protocol {config_file quad_num gtx_num en8b10b}`
 
@@ -111,6 +114,7 @@ Note that the transmitted data is currently not tested for correctness on the RX
 This test script contains a basic parser for 'command files' which can be used to quickly
 create test cases composed of sequences of localbus commands, along with a few meta-commands.
 The following commands are currently supported:
+
 * `RDW :ADDR`
 * `WRW :ADDR DATA`
 * `PRINT "STRING"`
@@ -120,4 +124,3 @@ The following commands are currently supported:
 A somewhat self-checking 'command file' is run with `make hwtest`. While not an exhaustive test,
 it is capable capable of finding basic issues with the ChitChat link, localbus decoding
 and, by implication, Ethernet over fiber.
-
