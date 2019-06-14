@@ -501,8 +501,8 @@ wire llspi_sdi = U2_sdi;
 wire llspi_sdo;
 assign U3_sdo = llspi_sdo;
 assign U2_sdo = llspi_sdo;
-assign U3_sdio_as_i = ~U27dir;
-assign U2_sdio_as_i = ~U27dir;
+assign U3_sdio_as_i = U27dir;
+assign U2_sdio_as_i = U27dir;
 
 wire rawadc_trig_x;
 digitizer_config digitizer_config // auto

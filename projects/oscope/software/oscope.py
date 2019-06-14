@@ -218,6 +218,7 @@ class GUIGraphChannel:
 
 class Logic(BoxLayout):
     autoscale = ObjectProperty(False)
+
     def __init__(self, **kwargs):
         super(Logic, self).__init__()
         self.csd_channels = 0, 1

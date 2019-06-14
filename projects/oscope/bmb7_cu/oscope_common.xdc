@@ -241,11 +241,6 @@ set_property PACKAGE_PIN AA14 [get_ports {bus_digitizer_U33U1[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {bus_digitizer_U33U1[1]}]
 set_property PACKAGE_PIN AA15 [get_ports {bus_digitizer_U33U1[1]}]
 
-# U5: SI571
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U5[*]}]
-set_property PACKAGE_PIN F6 [get_ports {bus_bmb7_U5[0]}]
-set_property PACKAGE_PIN F5 [get_ports {bus_bmb7_U5[1]}]
-
 
 ########
 # Clocks

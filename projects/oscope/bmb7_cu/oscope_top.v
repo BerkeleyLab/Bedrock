@@ -1,20 +1,19 @@
 // Note: BMB7 vR1 is only supported
 module oscope_top(
-	output [2:0] bus_bmb7_D4,
-	output [2:0] bus_bmb7_D5,
+	output [5:0] LEDS,
 	inout [18:0] bus_bmb7_U7,
-	inout [0:0] bus_bmb7_J28,
-	inout [0:0] bus_bmb7_J4,
-	inout [0:0] bus_digitizer_U27,
+	inout [0:0]  bus_bmb7_J28,
+	inout [0:0]  bus_bmb7_J4,
+	inout [0:0]  bus_digitizer_U27,
 	inout [38:0] bus_digitizer_U4,
-	inout [6:0] bus_digitizer_U1,
+	inout [6:0]  bus_digitizer_U1,
 	inout [26:0] bus_digitizer_U2,
 	inout [26:0] bus_digitizer_U3,
-	inout [3:0] bus_digitizer_U15,
-	inout [4:0] bus_digitizer_U18,
-	inout [7:0] bus_digitizer_J17,
-	inout [7:0] bus_digitizer_J18,
-	inout [1:0] bus_digitizer_U33U1
+	inout [3:0]  bus_digitizer_U15,
+	inout [4:0]  bus_digitizer_U18,
+	inout [7:0]  bus_digitizer_J17,
+	inout [7:0]  bus_digitizer_J18,
+	inout [1:0]  bus_digitizer_U33U1
 );
 
 wire bmb7_U7_clkout;
@@ -295,8 +294,7 @@ assign J28_pout = bus_bmb7_J28[0];
 wire [2:0] D4rgb;
 wire [2:0] D5rgb;
 
-assign bus_bmb7_D4 = D4rgb;
-assign bus_bmb7_D5 = D5rgb;
+assign LEDS = {D4rgb, D5rgb};
 
 wire U27dir;
 

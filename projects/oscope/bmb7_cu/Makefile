@@ -47,7 +47,6 @@ oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v
 oscope_top.v: $(AUTOGEN_DIR)/config_romx.v application_top_auto $(AUTOGEN_DIR)/moving_average.v
 
 system_top.xdc: $(APP_NAME)_orig_special.xdc $(APP_NAME)_common.xdc
-	cat $^ > $@
 
 $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
 	$(PYTHON) $< -v $@ -j $(APP_NAME)_regmap.json

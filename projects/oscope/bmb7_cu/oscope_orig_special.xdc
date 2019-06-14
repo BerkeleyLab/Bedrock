@@ -1,17 +1,5 @@
 # Constraints specific to BMB7 r1 board for prc build
 
-# D4: RGB LED
-set_property IOSTANDARD LVCMOS18 [get_ports bus_bmb7_D4[*]]
-set_property PACKAGE_PIN M16 [get_ports bus_bmb7_D4[0]]
-set_property PACKAGE_PIN L17 [get_ports bus_bmb7_D4[1]]
-set_property PACKAGE_PIN M17 [get_ports bus_bmb7_D4[2]]
-
-# D5: RGB LED
-set_property IOSTANDARD LVCMOS18 [get_ports bus_bmb7_D5[*]]
-set_property PACKAGE_PIN L20 [get_ports bus_bmb7_D5[0]]
-set_property PACKAGE_PIN L18 [get_ports bus_bmb7_D5[1]]
-set_property PACKAGE_PIN L19 [get_ports bus_bmb7_D5[2]]
-
 # U7: link to Spartan
 set_property IOSTANDARD LVCMOS33 [get_ports bus_bmb7_U7[*]]
 set_property PACKAGE_PIN J8 [get_ports bus_bmb7_U7[0]]
