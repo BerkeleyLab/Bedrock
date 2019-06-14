@@ -10,7 +10,6 @@ TOP_DIR = ../../..
 
 BUILD_DIR = $(TOP_DIR)/build-tools
 DSP_DIR = $(TOP_DIR)/dsp
-
 BOARD_SUPPORT_DIR = $(TOP_DIR)/board_support
 FPGA_FAMILY_DIR = $(TOP_DIR)/fpga_family
 XILINX_DIR = $(FPGA_FAMILY_DIR)/xilinx
@@ -39,8 +38,13 @@ include $(BUILD_DIR)/top_rules.mk
 include $(BS_HARDWARE_DIR)/rules.mk
 include $(BOARD_SUPPORT_DIR)/rules.mk
 
+$(AUTOGEN_DIR)/moving_average.v: $(DSP_DIR)/moving_average/moving_average.py
+	python $(DSP_DIR)/moving_average/moving_average.py > $(AUTOGEN_DIR)/moving_average.v
+	exit
+
 oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v
-oscope_top.v: $(AUTOGEN_DIR)/config_romx.v application_top_auto
+
+oscope_top.v: $(AUTOGEN_DIR)/config_romx.v application_top_auto $(AUTOGEN_DIR)/moving_average.v
 
 system_top.xdc: $(APP_NAME)_orig_special.xdc $(APP_NAME)_common.xdc
 	cat $^ > $@
