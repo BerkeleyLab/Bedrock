@@ -1,8 +1,9 @@
 '''
 nMigen based
 '''
-from nmigen import *
-from nmigen.back import rtlil, verilog, pysim
+from nmigen import Signal, Elaboratable, Module, Array
+from nmigen.back import verilog, pysim
+
 
 class MovingAverage(Elaboratable):
     def __init__(self, MAX_DELAY_BITS=5, dw=16):
@@ -42,8 +43,8 @@ def moving_average_tb(dut, log_downsample_ratio, signal_in, signal_out):
         signal_out.append((yield dut.o))
         yield
 
-ma = MovingAverage()
 
+ma = MovingAverage()
 print(verilog.convert(ma, name='moving_average', ports=[ma.i, ma.o, ma.data_valid, ma.log_downsample_ratio]))
 
 with pysim.Simulator(ma, vcd_file=open('foo.vcd', 'w')) as sim:
