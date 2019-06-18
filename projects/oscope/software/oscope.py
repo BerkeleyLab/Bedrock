@@ -56,19 +56,21 @@ class ADC:
     # V = np.sqrt(1e-3 * (10 ** 0.6) * 50)
     dbm_to_Vrms = np.sqrt(1e-3 * (10**0.6) * 50)
     Vzp = dbm_to_Vrms * np.sqrt(2)
+    count_to_v = Vzp / scale
 
     def counts_to_volts(raw_counts):
         # TODO: This should be adjusted to ADC.Vzp and verified
-        return raw_counts * ADC.count_to_1volt
+        return raw_counts * ADC.count_to_v
 
 
-class Carrier:
+class Carrier(ADC):
     def __init__(self,
                  ip_addr='192.168.1.121',
                  port=50006,
                  mask="0xff",
                  npt_wish=0,
                  count=10,
+                 log_downsample_ratio=0,
                  verbose=False,
                  filewritepath=None,
                  use_spartan=False,
@@ -92,6 +94,8 @@ class Carrier:
         self.pts_per_ch = self.npt * 8 // self.n_channels
         self.test_counter = 0
         self.subscriptions, self.results = {}, {}
+        self.carrier.reg_write([{'config_adc_downsample_ratio': log_downsample_ratio}])
+        ADC.sample_rate = ADC.sample_rate // (1 << log_downsample_ratio)
 
     def test_data(self, *args):
         while True:
@@ -117,6 +121,7 @@ class Carrier:
             # ADC count / FULL SCALE => [-1.0, 1.]
             self._nblock = ADC.counts_to_volts(np.array(data_block))
             self._process_subscriptions()
+            time.sleep(0.1)
 
     def _process_subscriptions(self):
         # TODO: Perhaps implement something to avoid race condition on results
@@ -140,7 +145,7 @@ class Processing:
     @staticmethod
     def identity(data_block, ch_n):
         ch_data = data_block[ch_n]
-        return range(len(ch_data)), ch_data
+        return range(len(ch_data)) * ADC.sample_rate, ch_data
 
     @staticmethod
     def save(data_block, *args):
@@ -336,7 +341,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-p', '--port', help='port', dest='port', type=int, default=50006)
     parser.add_argument(
-        '-m', '--mask', help='mask', dest='mask', type=str, default='0x3')
+        '-m', '--mask', help='mask', dest='mask', type=str, default='0x9')
     parser.add_argument(
         '-n',
         '--npt_wish',
@@ -346,7 +351,11 @@ if __name__ == "__main__":
     parser.add_argument(
         '-c', '--count', help='number of acquisitions', type=int, default=1)
     parser.add_argument(
+        '-l', '--log_downsample_ratio', help='Log downsample ratio', type=int, default=2)
+    parser.add_argument(
         '-f', '--filewritepath', help='static file out', type=str, default="")
+    parser.add_argument(
+        '-t', '--testmode', help='run in test mode', action='store_true')
     parser.add_argument(
         "-u",
         "--use_spartan",
@@ -362,7 +371,8 @@ if __name__ == "__main__":
         count=args.count,
         filewritepath=args.filewritepath,
         use_spartan=args.use_spartan,
-        test=True)
+        log_downsample_ratio=args.log_downsample_ratio,
+        test=args.testmode)
     GUIGraphChannel.setup_gui_channels(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
     acq_thread.daemon = True

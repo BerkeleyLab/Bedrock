@@ -241,7 +241,7 @@ class c_prc(c_llrf_bmb7):
         print("addr  U2  U3")
         for addr in sorted(self.ad9653_regname.keys()):
             foo = self.spi_readn(adc_list, addr)
-            x = [str(codecs.encode(v[2], 'hex'))[-2:] for v in foo]
+            x = [str(codecs.encode(v[2], 'hex'))[-3:-1] for v in foo]
             print(("%3.3x  " % addr + "  ".join(x) + " " +
                   self.ad9653_regname[addr]))
 
@@ -489,13 +489,13 @@ class c_prc(c_llrf_bmb7):
         sys.stdout.write("start lmk setup -")
         self.spi_write(self.lmk_spi, 15, self.lmk_spi.R15(uWireLock="0"))
         self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(RESET='1'))
-        if False:
+        if True:
             # Check this if running on sliderule.dhcp with 377MHz input clock
             self.spi_write(
                 self.lmk_spi,
                 0,
                 self.lmk_spi.R0(RESET='0',
-                                CLKin0_DIV="010",
+                                CLKin0_DIV="001",
                                 CLKin1_DIV="000",
                                 CLKin1_MUX="01",
                                 CLKin0_MUX="01"))
@@ -674,6 +674,8 @@ class c_prc(c_llrf_bmb7):
         return ix if 0 else self.top2idelay(lane, ix % 2)[0]
 
     def adc_idelay1(self, dbg1):
+        print('Setting decimation ratio to 0')
+        # self.reg_write([{"config_adc_downsample_ratio": 0}])
         print(('test pattern %s' % self.set_test_mode('00001100')))
         if True:  # not needed after powerup, but will clear old values if re-scanning
             # Note hard-coded 0x70 here and for lb_idelay_write in digitizer_config.v
