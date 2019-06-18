@@ -327,12 +327,12 @@ always @(posedge adc_clk) banyan_mask_x <= actual_banyan_mask;
 
 
 // Pass adc_data through a moving average filter
-wire adc_data_valid;
+wire [7: 0] adc_data_valid;
 wire [8*16-1:0] adc_data_decimated;
 genvar ix;
 generate for (ix=0; ix<8; ix=ix+1) begin: mavg_set
         moving_average mavg(.o(adc_data_decimated[(ix+1)*16-1 -: 16]),
-		       .data_valid(adc_data_valid),
+		       .data_valid(adc_data_valid[ix]),
 		       .log_downsample_ratio(adc_downsample_ratio[4:0]),
 		       .clk(adc_clk),
 		       .rst(1'b0),
@@ -344,7 +344,7 @@ end endgenerate
 //wire [127:0] banyan_adc = {U2DD, U2DC, U2DB, U2DA, U3DD, U3DC, U3DB, U3DA};
 banyan_mem #(.aw(banyan_aw), .dw(16)) banyan_mem(.clk(adc_clk),
 	.adc_data(adc_data_decimated), .banyan_mask(banyan_mask_x),
-	.reset(rawadc_trig_x), .run(banyan_run & adc_data_valid),
+	.reset(rawadc_trig_x), .run(banyan_run & adc_data_valid[0]),
 	.pointer(pointer), .rollover(rollover), .full(full),
 	.permuted_data(permuted_data),
 	.ro_clk(lb_clk), .ro_addr(lb_addr[banyan_aw+3-1:0]), .ro_data(banyan_data[15:0]), .ro_data2(banyan_data[31:16])

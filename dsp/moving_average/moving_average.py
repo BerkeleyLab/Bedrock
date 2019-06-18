@@ -28,6 +28,12 @@ class MovingAverage(Elaboratable):
             m.d.sync += delay_reg[x].eq(src)
             src = delay_reg[x]
         m.d.comb += out_val.eq(delay_reg[delay_tap - 1])
+        counter = Signal((self._dw, True))
+        with m.If(counter == delay_tap - 1):
+            m.d.sync += counter.eq(0)
+            m.d.comb += self.data_valid.eq(1)
+        with m.Else():
+            m.d.sync += counter.eq(counter + 1)
 
         moving_average_full = Signal((self._dw + self.MAX_DELAY_BITS, True))
         m.d.sync += moving_average_full.eq(moving_average_full + self.i - out_val)
@@ -50,7 +56,7 @@ print(verilog.convert(ma, name='moving_average', ports=[ma.i, ma.o, ma.data_vali
 with pysim.Simulator(ma, vcd_file=open('foo.vcd', 'w')) as sim:
     signal_in, signal_out = [], []
     sim.add_clock(1e-6)
-    tb = moving_average_tb(ma, 2, signal_in, signal_out)
+    tb = moving_average_tb(ma, 0, signal_in, signal_out)
     sim.add_sync_process(tb)
     sim.run()
     from matplotlib import pyplot as plt

@@ -298,7 +298,7 @@ assign LEDS = {D4rgb, D5rgb};
 
 wire U27dir;
 
-assign bus_digitizer_U27 = U27dir;
+assign bus_digitizer_U27 = ~U27dir;
 
 // pin    EN is    IO_L7N_T1_32 bank  32 bus_digitizer_U33U1[1]  AA15
 // pin  SYNC is    IO_L7P_T1_32 bank  32 bus_digitizer_U33U1[0]  AA14
