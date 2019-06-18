@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - synthesis
+  - program
 
 variables:
   XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1

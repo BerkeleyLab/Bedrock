@@ -9,3 +9,10 @@ oscope_top:
     expire_in: 1 week
     paths:
       - projects/oscope/bmb7_cu/oscope_top.bit
+
+oscope_program:
+  before_script:
+    - cd projects/oscope/software/
+  stage: program
+  script:
+    - python prc.py -a 192.168.1.121 -r -b ../bmb7_cu/oscope_top.bit

@@ -69,7 +69,8 @@ COPY --from=riscv-builder /riscv32i /riscv32i
 ENV PATH="/riscv32i/bin:${PATH}"
 
 RUN apt-get install -y verilator libbsd-dev yosys && \
-	pip install git+https://github.com/m-labs/nmigen.git
+	pip install git+https://github.com/m-labs/nmigen.git && \
+	pip install git+https://github.com/m-labs/nmigen-boards.git
 
 FROM litex as testing_base
 
@@ -89,3 +90,5 @@ RUN svn co https://svn.code.sf.net/p/xc3sprog/code/trunk xc3sprog &&\
 	make &&\
 	make install &&\
 	rm -rf xc3sprog
+
+RUN git clone https://github.com/yetifrisstlama/Si5xx-5x7-EVV_autoloader.git
