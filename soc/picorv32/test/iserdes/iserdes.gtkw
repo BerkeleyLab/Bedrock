@@ -1,0 +1,71 @@
+[timestart] 0
+[size] 1316 875
+[pos] 818 133
+*-24.801052 4312000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] iserdes_tb.
+[treeopen] iserdes_tb.cpu.
+[treeopen] iserdes_tb.dut.
+[treeopen] iserdes_tb.dut.in_cell[0].
+[treeopen] iserdes_tb.dut.in_cell[0].idelay.
+[treeopen] iserdes_tb.dut.in_cell[1].
+[sst_width] 281
+[signals_width] 355
+[sst_expanded] 1
+[sst_vpaned_height] 248
+@28
+iserdes_tb.clk_dco_buf
+iserdes_tb.clk_div_buf
+iserdes_tb.mem_clk
+@820
+iserdes_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+@28
+iserdes_tb.cpu.mem_valid
+@22
+iserdes_tb.cpu.mem_addr[31:0]
+iserdes_tb.cpu.mem_rdata[31:0]
+@28
+iserdes_tb.cpu.mem_ready
+@22
+iserdes_tb.cpu.mem_wdata[31:0]
+iserdes_tb.cpu.mem_wstrb[3:0]
+@28
+iserdes_tb.dut.bitslip_cmd[1:0]
+@22
+iserdes_tb.dut.del_val[4:0]
+@800200
+-lane0
+@28
+iserdes_tb.dut.\in_cell[0].iserdes_reset
+iserdes_tb.dut.\in_cell[0].del_ld_i
+iserdes_tb.dut.\in_cell[0].del_mon_i
+iserdes_tb.dut.\in_cell[0].bitslip
+@24
+iserdes_tb.dut.in_cell[0].idelay.del_cnt_wr[4:0]
+@22
+iserdes_tb.dut.\in_cell[0].dq[7:0]
+@1000200
+-lane0
+@800200
+-lane1
+@28
+iserdes_tb.dut.\in_cell[1].iserdes_reset
+iserdes_tb.dut.\in_cell[1].del_ld_i
+iserdes_tb.dut.\in_cell[1].del_mon_i
+iserdes_tb.dut.\in_cell[1].bitslip
+iserdes_tb.dut.\in_cell[1].iserdes_reset
+@22
+iserdes_tb.dut.\in_cell[1].dq[7:0]
+@1000200
+-lane1
+@22
+iserdes_tb.dout[15:0]
+@24
+iserdes_tb.dut.del_mux[7:0]
+@22
+iserdes_tb.dut.dat_mon_mux[7:0]
+@28
+iserdes_tb.mem_print_hit
+@24
+iserdes_tb.clk_div_cnt[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

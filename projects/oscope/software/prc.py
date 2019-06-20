@@ -911,8 +911,8 @@ class c_prc(c_llrf_bmb7):
         npt = 1 << ((b_status >> 24) & 0x3f)
         if npt < 512:
             return []
-        if npt > 4096:
-            npt = 4096
+        # if npt > 4096:
+        #     npt = 4096
         if not quiet:
             print(("pntest2 using banyan_mem npt=%d" % npt))
         sys.stdout.flush()

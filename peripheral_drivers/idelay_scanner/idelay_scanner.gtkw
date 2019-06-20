@@ -1,0 +1,84 @@
+[timestart] 17980
+[size] 1084 770
+[pos] 93 24
+*-13.100048 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] idelay_scanner_tb.
+[treeopen] idelay_scanner_tb.dut.
+[sst_width] 210
+[signals_width] 204
+[sst_expanded] 1
+[sst_vpaned_height] 276
+@28
+idelay_scanner_tb.scan_running
+@22
+idelay_scanner_tb.dut.counter[14:0]
+@28
+idelay_scanner_tb.dut.run
+idelay_scanner_tb.dut.autoset
+@22
+idelay_scanner_tb.dut.idelay_opt[4:0]
+@28
+idelay_scanner_tb.dut.good_enough
+@22
+idelay_scanner_tb.hw_data[4:0]
+idelay_scanner_tb.hw_addr[3:0]
+@28
+idelay_scanner_tb.hw_strobe
+@22
+idelay_scanner_tb.banyan_mask[7:0]
+idelay_scanner_tb.adc_val[15:0]
+@200
+-DUT
+@22
+idelay_scanner_tb.dut.state_micro[5:0]
+idelay_scanner_tb.dut.state_idelay[4:0]
+idelay_scanner_tb.dut.state_lane[3:0]
+@28
+idelay_scanner_tb.dut.lane_grab
+idelay_scanner_tb.dut.lane_half
+idelay_scanner_tb.dut.idelay_push
+@22
+idelay_scanner_tb.dut.lane_data[7:0]
+@c00200
+-result RAM
+@22
+idelay_scanner_tb.dut.result.addra[10:0]
+@28
+idelay_scanner_tb.dut.result.wena
+@22
+idelay_scanner_tb.dut.result.dina[7:0]
+@1401200
+-result RAM
+@800200
+-mirror RAM
+@22
+idelay_scanner_tb.dut.mirror.addra[3:0]
+@28
+idelay_scanner_tb.dut.mirror.wena
+@22
+idelay_scanner_tb.dut.mirror.dina[6:0]
+idelay_scanner_tb.dut.mirror.addrb[3:0]
+idelay_scanner_tb.dut.mirror.doutb[6:0]
+@1000200
+-mirror RAM
+@28
+idelay_scanner_tb.showme_d
+@c00200
+-decider
+@22
+idelay_scanner_tb.dut.decider.lane_data[7:0]
+@28
+idelay_scanner_tb.dut.decider.odd
+idelay_scanner_tb.dut.decider.valid
+idelay_scanner_tb.dut.decider.strobe
+@8024
+idelay_scanner_tb.dut.decider.goodness[7:0]
+idelay_scanner_tb.dut.decider.idelay[4:0]
+@24
+idelay_scanner_tb.dut.decider.center[7:0]
+@28
+idelay_scanner_tb.dut.decider.good_enough
+@1401200
+-decider
+[pattern_trace] 1
+[pattern_trace] 0

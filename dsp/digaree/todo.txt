@@ -1,0 +1,22 @@
+There's too much fragile Unix magic in the makefile, try replacing
+  some awk, grep, and paste with python.
+
+[Maybe done, not tested] Modify sf_user.v to take the input stream in a timing
+  structure that is compatible with AXI-stream-lite.
+  Involved adding a clock-enable line to all registers in sf_main.v
+
+Unfinished business, conceptually easy:
+  tune the shift values chosen in cgen_ip3.py
+
+Done:
+  think more about precision in the accumulation step (a3+=D*foo)
+    adder data path is now wider, and multiplier result lsb's are kept,
+    so just use a small D value
+
+Confidence-building step:
+  use sim1.c as a plugin to llrf/theory/distort/essay Octave
+
+To change the number of guard bits (to the right of the 18 used by the
+  multiplier input), you need to change:
+    extra in user_tb.v
+    maybe the TIMESPEC in blank_s3.ucf and blank_s6.ucf

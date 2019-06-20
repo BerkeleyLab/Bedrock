@@ -1,0 +1,142 @@
+[timestart] 0
+[size] 1920 979
+[pos] -1 -1
+*-21.000000 1220000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] fmc150_tb.
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[0].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[10].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[11].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[12].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[13].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[14].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[1].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[2].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[3].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[4].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[5].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[6].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[7].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[8].
+[treeopen] fmc150_tb.ads62_inst.idels_inst.idel[9].
+[treeopen] fmc150_tb.ads62_inst.lane[1].genblk2.
+[sst_width] 285
+[signals_width] 358
+[sst_expanded] 1
+[sst_vpaned_height] 378
+@28
+fmc150_tb.mem_clk
+fmc150_tb.clk_ab
+@800200
+-CPU
+@820
+fmc150_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+@22
+fmc150_tb.cpu.picorv32_core.mem_addr[31:0]
+fmc150_tb.cpu.picorv32_core.mem_rdata[31:0]
+fmc150_tb.cpu.picorv32_core.mem_wstrb[3:0]
+fmc150_tb.cpu.picorv32_core.mem_wdata[31:0]
+@28
+fmc150_tb.cpu.picorv32_core.mem_valid
+fmc150_tb.cpu.picorv32_core.mem_ready
+@1000200
+-CPU
+@800201
+-IDELAYS
+@23
+fmc150_tb.ads62_inst.idels_inst.idel[0].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[1].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[2].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[3].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[4].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[5].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[6].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[7].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[8].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[9].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[10].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[11].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[12].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[13].idelaye2_inst.cntValue[4:0]
+fmc150_tb.ads62_inst.idels_inst.idel[14].idelaye2_inst.cntValue[4:0]
+@1000201
+-IDELAYS
+@28
+fmc150_tb.ads62_inst.clk_ab_p
+fmc150_tb.ads62_inst.clk_ab_del
+@c00022
+fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+@28
+(0)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(1)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(2)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(3)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(4)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(5)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(6)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(7)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(8)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(9)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(10)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(11)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(12)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(13)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(14)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(15)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(16)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(17)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(18)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(19)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(20)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(21)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(22)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(23)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(24)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(25)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(26)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(27)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(28)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(29)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(30)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(31)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(32)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(33)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(34)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(35)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(36)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(37)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(38)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(39)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(40)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(41)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(42)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(43)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(44)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(45)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(46)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(47)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(48)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(49)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(50)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(51)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(52)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(53)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(54)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+(55)fmc150_tb.ads62_inst.sdrSamplesPingPong[55:0]
+@1401200
+-group_end
+@22
+fmc150_tb.ads62_inst.sdrSamplesPingPongClk[55:0]
+@28
+(13)fmc150_tb.ads62_inst.idels_inst.out_del[14:0]
+fmc150_tb.ads62_inst.idels_inst.idel[1].idelaye2_inst.DATAOUT
+@800200
+-f_cnt
+@28
+fmc150_tb.ads62_inst.fcnt.clk
+fmc150_tb.ads62_inst.fcnt.usbclk
+@22
+fmc150_tb.ads62_inst.fcnt.diff1[3:0]
+@1000200
+-f_cnt
+[pattern_trace] 1
+[pattern_trace] 0

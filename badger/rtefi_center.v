@@ -7,6 +7,11 @@
 //
 // Up to seven clients, each handling a UDP port, attach here.
 //
+// This module instantiates a series of modules for the data path
+// linking GMII Rx through to GMII Tx, shown in retefi.eps.
+// The several steps have instance names starting with a through e
+// (a_scan through e_crc).
+//
 module rtefi_center(
 	// GMII Input (Rx)
 	input rx_clk,
@@ -24,6 +29,14 @@ module rtefi_center(
 	input [7:0] config_d,
 	input config_s,  // MAC/IP address write
 	input config_p,  // UDP port number write
+	// Host side of Tx MAC
+	// I don't like having the MAC embedded here.
+	// Maybe it would be better if the DPRAM were external.
+	input host_clk,
+	input [mac_aw:0] host_waddr,
+	input host_write,
+	input [15:0] host_wdata,
+	output tx_mac_done,
 	// As documented in clients.eps
 	output [10:0] len_c,
 	output [6:0] raw_l,
@@ -45,6 +58,7 @@ module rtefi_center(
 
 parameter paw = 11;  // packet (memory) address width, nominal 11
 parameter n_lat = 3;  // latency of client pipeline
+parameter mac_aw = 10;  // sets size (in 16-bit words) of DPRAM in Tx MAC
 // The following parameters set the synthesis-time default, but all
 // can be overridden at run-time using the configuration port.
 // UDP ports 0 through 7 represent the index given in udp_sel.
@@ -78,14 +92,16 @@ end
 wire [3:0] ip_a;  reg [7:0] ip_d=0;  // MAC/IP config, Rx side
 wire [3:0] pno_a; reg [7:0] pno_d;  // UDP port numbers
 wire [7:0] sdata;
+wire scanner_busy;
 wire sdata_s, sdata_l;
 wire [10:0] pack_len;
 wire [7:0] status_vec; wire status_valid;
-scanner a(.clk(rx_clk),
+scanner a_scan(.clk(rx_clk),
 	.eth_in(eth_in_r), .eth_in_s(eth_in_s_r), .eth_in_e(eth_in_e_r),
 	.enable_rx(enable_rx),
 	.ip_a(ip_a), .ip_d(ip_d),
 	.pno_a(pno_a), .pno_d(pno_d),
+	.busy(scanner_busy),
 	.odata(sdata), .odata_s(sdata_s), .odata_f(sdata_l),
 	.pack_len(pack_len), .status_vec(status_vec), .status_valid(status_valid)
 );
@@ -93,7 +109,7 @@ scanner a(.clk(rx_clk),
 // Second step: create data flow to DPRAM
 wire [paw-1:0] pbuf_a_rx, gray_state;
 wire [8:0] pbuf_din;
-pbuf_writer #(.paw(paw)) b(.clk(rx_clk),
+pbuf_writer #(.paw(paw)) b_write(.clk(rx_clk),
 	.data_in(sdata), .data_s(sdata_s), .data_f(sdata_l),
 	.pack_len(pack_len), .status_vec(status_vec), .status_valid(status_valid),
 	.mem_a(pbuf_a_rx), .mem_d(pbuf_din),
@@ -124,7 +140,8 @@ wire [1:0] category;
 wire [2:0] udp_sel;
 wire [7:0] eth_data_out;
 wire eth_strobe_short, eth_strobe_long;
-construct #(.paw(paw)) c(.clk(tx_clk),
+localparam p_offset=480;  // see notes in construct.v
+construct #(.paw(paw), .p_offset(p_offset)) c_construct(.clk(tx_clk),
 	.gray_state(gray_state),
 	.ip_a(ip_mem_a_tx), .ip_d(ip_mem_d_tx),
 	.addr(mem_a2), .pbuf_out(pbuf_out),
@@ -135,10 +152,8 @@ construct #(.paw(paw)) c(.clk(tx_clk),
 );
 
 // Data multiplexer
-// Port structure to exchange data with various
-// UDP packet handlers will go here.
 wire xraw_s, xraw_l;  wire [7:0] raw_d;  // Output, still needs CRC
-xformer #(.n_lat(n_lat)) xform(.clk(tx_clk),
+xformer #(.n_lat(n_lat)) d_xform(.clk(tx_clk),
 	.pc(pc), .category(category), .udp_sel(udp_sel),
 	.idata(eth_data_out), .eth_strobe_short(eth_strobe_short), .eth_strobe_long(eth_strobe_long),
 	.len_c(len_c),
@@ -148,10 +163,32 @@ xformer #(.n_lat(n_lat)) xform(.clk(tx_clk),
 );
 assign idata = eth_data_out;
 
+// Tx MAC
+// precog_latency is kind of important;
+// check resulting interpacket gap in simulations
+localparam precog_latency = (1<<paw) - p_offset + 4 + n_lat;
+wire [7:0] tx_mac_data;
+wire tx_mac_strobe_s, tx_mac_strobe_l;
+mac_subset #(.aw(mac_aw), .latency(precog_latency)) txmac(
+	.host_clk(host_clk), .host_waddr(host_waddr),
+	.host_write(host_write), .host_wdata(host_wdata),
+	.done(tx_mac_done),
+	.scanner_busy(scanner_busy),
+	.tx_clk(tx_clk), .mac_data(tx_mac_data),
+	.strobe_s(tx_mac_strobe_s), .strobe_l(tx_mac_strobe_l)
+);
+
+// Slide data from Tx MAC in here
+// XXX no cross-checking that the MAC is avoiding collisions
+// using precog the way it's supposed to.
+wire xraw2_s = xraw_s | tx_mac_strobe_s;
+wire xraw2_l = xraw_l | tx_mac_strobe_l;
+wire [7:0] raw2_d = tx_mac_strobe_s ? tx_mac_data : raw_d;
+
 // Finally, add Ethernet CRC and GMII preamble
 wire opack_s;  wire [7:0] opack_d;
-ethernet_crc_add crc(.clk(tx_clk),
-	.raw_s(xraw_s), .raw_l(xraw_l), .raw_d(raw_d),
+ethernet_crc_add e_crc(.clk(tx_clk),
+	.raw_s(xraw2_s), .raw_l(xraw2_l), .raw_d(raw2_d),
 	.opack_s(opack_s), .opack_d(opack_d)
 );
 

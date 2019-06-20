@@ -1,7 +1,9 @@
+include $(CORDIC_DIR)/rules.mk
+
 VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -y$(CORDIC_DIR)
 VFLAGS += -I. -y. -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
-TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb complex_mul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb banyan_tb banyan_mem_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb complex_mul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb banyan_tb banyan_mem_tb biquad_tb iirFilter_tb tinyEVR_tb circle_buf_tb cic_multichannel_tb cic_wave_recorder_tb circle_buf_serial_tb iq_deinterleaver_tb serializer_multichannel_tb complex_freq_tb iq_trace_tb second_if_out_tb
 
 TGT_ := $(TEST_BENCH)
 
@@ -11,24 +13,23 @@ CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 BITS_ := bandpass3.bit
 PYTHON = python3
 
+VERILOG_AUTOGEN += " "
+
 .PHONY: targets checks bits check_all clean_all
 targets: $(TGT_)
 checks: $(CHK_)
 check_all: $(CHK_)
 bits: $(BITS_)
 
-$(AUTOGEN_DIR)/cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
-	mkdir -p $(AUTOGEN_DIR) && $(PYTHON) $< 22 > $@
+rot_dds_auto: cordicg_b22.v
 
-rot_dds_auto: $(AUTOGEN_DIR)/cordicg_b22.v
+mon_12_auto: cordicg_b22.v
 
-mon_12_auto: $(AUTOGEN_DIR)/cordicg_b22.v
+ssb_out_auto: cordicg_b22.v
 
-ssb_out_auto: $(AUTOGEN_DIR)/cordicg_b22.v
+cordic_mux_auto: cordicg_b22.v
 
-cordic_mux_auto: $(AUTOGEN_DIR)/cordicg_b22.v
-
-fdbk_core_auto: $(AUTOGEN_DIR)/cordicg_b22.v
+fdbk_core_auto: cordicg_b22.v
 
 rf_controller_auto: lp_notch_auto fdbk_core_auto piezo_control_auto
 
@@ -45,7 +46,7 @@ timestamp.bit: timestamp.v reg_delay.v
 	mv _xilinx/timestamp.bit $@
 
 half_filt_check: half_filt.py half_filt.dat
-	$(PYTHON) half_filt.py -c
+	$(PYTHON) $< -c
 
 lp_notch_check: lp_notch_test.py lp_tb lp_notch_tb
 	$(PYTHON) $<
@@ -64,12 +65,21 @@ tt800_ref.dat: tt800_ref
 tt800_check: tt800_tb tt800.dat tt800_ref.dat
 	cmp tt800.dat tt800_ref.dat
 
+biquad_tb: saturateMath.v
+iirFilter_tb: saturateMath.v
+
 banyan_check: banyan_tb banyan_ch_find.py $(BUILD_DIR)/testcode.awk
 	$(VERILOG_CHECK)
-	$(VVP) banyan_tb +trace +squelch | $(PYTHON) banyan_ch_find.py
+	$(VVP) banyan_tb +trace +squelch | $(PYTHON) $(filter %banyan_ch_find.py, $^)
 
-CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat *~
-CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat
+second_if_out_tb: cordicg_b22.v
+
+second_if_out_check: second_if_out_tb second_if_test.py $(BUILD_DIR)/testcode.awk
+	$(VERILOG_CHECK)
+	$(VVP) second_if_out_tb +trace; $(PYTHON) second_if_test.py second_if_out.dat
+
+CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat *.lxt *~
+CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cordicg_b22.v second_if_out.dat
 
 CLEAN_DIRS += tt800_ref.dSYM
 CLEAN_DIRS += _xilinx __pycache__

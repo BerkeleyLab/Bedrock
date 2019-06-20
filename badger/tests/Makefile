@@ -6,9 +6,15 @@
 # Down that path lies madness!  Confusion is the enemy!
 
 # =====
-all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb hello_check speed_test_check mem_gateway_check badge_trace_tb
+BUILD_DIR = .
+BADGER_DIR = ..
+HOMELESS_DIR = local
+SERIAL_IO_DIR = local
+# Hope this only does something when part of Bedrock
+-include ../../dir_list.mk
 
-# These go _before_ top_rules.mk
+# =====
+# These overrides go _before_ top_rules.mk
 %_check: %.out %.gold
 	cmp $^
 	@echo PASS
@@ -18,23 +24,23 @@ all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanne
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
 %-vpi.vpi: %-vpi.o
 	$(VERILOG_VPI) $^
-%_view: %.vcd %.gtkw
-	$(GTKWAVE) $(GTKW_OPT) $^
 
-# Setup / configuration
-BADGER_DIR = ..
-BUILD_DIR = ../../build-tools
-DSP_DIR = ../../dsp
-HOMELESS_DIR = ../../homeless
--include $(BUILD_DIR)/top_rules.mk
+# =====
+# Possibly common setup / configuration
+include $(BUILD_DIR)/top_rules.mk
 
-# Local overrides of default rules
+# Local overrides of default variables
 VERILOG += -Wno-timescale -DSIMULATE
-CFLAGS_VPI := $(shell $(VERILOG_VPI) --cflags)
-VVP = vvp$(ICARUS_SUFFIX) -N
+
+# Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
 VERILATOR = verilator
+YOSYS = yosys
 PERL = perl
+XCIRCUIT = xcircuit
+# XXX consider converting this to something more compatible with Bedrock's VIVADO_SYNTH.
+VIVADOEXEC = vivado
+SYNTH_VIVADO = $(VIVADOEXEC) -mode batch -source
 # apt-get install xvfb
 # normally OK to blank out XVFB if you don't have xvfb-run and don't mind pop-ups
 XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
@@ -44,18 +50,27 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 	arch=s6 $(ISE_SYNTH) $(notdir $(basename $<)) $^
 	mv _xilinx/$@ $@
 
+# =====
 # Attention!!!!
-vpath %.v $(BADGER_DIR) $(DSP_DIR) $(HOMELESS_DIR)
+vpath %.v $(DSP_DIR) $(HOMELESS_DIR) $(SERIAL_IO_DIR)
+vpath %.eps ..
+
+all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check
+all: test_tx_check precog_check mac_subset_check
+all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb rtefi_live
+all: lb_timing_demo.vcd
+# all: lb_timing_demo.pdf
 
 # Packet Badger synthesizable code
--include ../rules.mk
+RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
+include ../rules.mk
 
 # =====
 # CRC32 code verification
 # These foo3.dat files are not currently used by the main test benches,
 # but generate them anyway so we can cross-check our various CRC implementations
 %3.dat: packetgen.py
-	$(PYTHON) $< $(@:3.dat=) > $@
+	$(PYTHON) $< $* > $@
 crc_selfcheck_check: crc_selfcheck udp3.dat arp3.dat icmp3.dat udp4.dat
 	./$< $(word 2, $^)
 	./$< $(word 3, $^)
@@ -95,9 +110,10 @@ LDLIBS_pcap2v = -l pcap
 # =====
 # VPI module support for live testing
 # https://en.wikipedia.org/wiki/TUN/TAP
-CFLAGS_tap-vpi.o = $(CFLAGS_VPI) -D_POSIX_C_SOURCE=200809L
+CFLAGS_tap-vpi.o = $(VPI_CFLAGS) -D_POSIX_C_SOURCE=200809L
 tap-vpi.vpi: ethernet_model.c tap_alloc.o crc32.o
-CFLAGS_udp-vpi.o = $(CFLAGS_VPI) -D_POSIX_C_SOURCE=200809L
+CFLAGS_udp-vpi.o = $(VPI_CFLAGS) -D_POSIX_C_SOURCE=200809L
+udp-vpi.vpi: udp_model.c
 
 # =====
 # Components
@@ -113,7 +129,7 @@ hello.vcd: udp-vpi.vpi
 hello_run: hello_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=3010 +vcd
 hello.out: hello_tb udp-vpi.vpi xfer1
-	$(VVP) $< +log +packet_file=xfer1 > $@
+	$(VVP) $< +log +packet_file=$(filter %xfer1, $^) > $@
 
 # =====
 # Another tangent for another client
@@ -123,11 +139,11 @@ speed_test.vcd: udp-vpi.vpi
 speed_test_run: speed_test_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=3000 +vcd
 speed_test.out: speed_test_tb udp-vpi.vpi xfer1
-	$(VVP) $< +log +packet_file=xfer1 > $@
+	$(VVP) $< +log +packet_file=$(filter %xfer1, $^) > $@
 
 # =====
 # Another tangent for another client
-LB_DEMO_V = lb_demo_slave.v freq_count2.v
+LB_DEMO_V = lb_demo_slave.v freq_count.v
 # LB_DEMO_V += badge_trace.v
 mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V)
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
@@ -135,14 +151,14 @@ mem_gateway.vcd: udp-vpi.vpi
 mem_gateway_run: mem_gateway_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=3000 +vcd
 mem_gateway.out: mem_gateway_tb udp-vpi.vpi xfer1
-	$(VVP) $< +log +packet_file=xfer1 > $@
+	$(VVP) $< +log +packet_file=$(filter %xfer1, $^) > $@
 
 # ====
 # WIP client
 spi_flash_tb: client_sub.v spi_flash.v spi_flash_engine.v reg_delay.v
 VFLAGS_spi_flash_tb = -m ./udp-vpi
-spi_flash.vcd: udp-vpi.vpi
-VCD_ARGS_spi_flash.vcd = +packet_file=spi_flash_pack +data_len=14
+spi_flash.vcd: udp-vpi.vpi spi_flash_pack
+VCD_ARGS_spi_flash.vcd = +packet_file=$(filter %spi_flash_pack, $^) +data_len=14
 spi_flash.out: spi_flash_tb udp-vpi.vpi spi_flash_pack
 	$(VVP) $< +log +packet_file=spi_flash_pack > $@
 
@@ -158,10 +174,11 @@ VCD_ARGS_scanner_check = +packet_file=stests.dat
 
 # =====
 # assembled pipeline
-rtefi_pipe_tb: $(RTEFI_V) offline.v
+rtefi_pipe_tb: $(RTEFI_V) fake_config_romx.v offline.v
 rtefi_pipe.out: rtefi_pipe_tb udp4.dat
-	$(VVP) $< +trace +packet_file=$(word 2, $^) > $@
-VCD_ARGS_rtefi_pipe.vcd = +packet_file=udp4.dat
+	$(VVP) $< +trace +packet_file=$(filter %udp4.dat, $^) > $@
+rtefi_pipe.vcd: udp4.dat
+VCD_ARGS_rtefi_pipe.vcd = +packet_file=$(filter %udp4.dat, $^)
 
 # =====
 # experimental bitfiles, not for hardware
@@ -213,7 +230,7 @@ ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC
 
 # =====
 # On-line test using Icarus and Linux's tun/tap feature
-rtefi_live: rtefi_pipe_tb.v $(RTEFI_V)
+rtefi_live: rtefi_pipe_tb.v $(RTEFI_V) fake_config_romx.v
 	$(VERILOG) -m ./tap-vpi -DLINUX_TUN -o $@ $(filter %.v, $^)
 
 # Setup for a single-user machine is pretty easy: as root do a
@@ -230,7 +247,23 @@ tap_start: rtefi_live tap-vpi.vpi
 Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
-	make -C obj_dir -f Vrtefi_blob.mk
+	MAKEFLAGS="" make -C obj_dir -f Vrtefi_blob.mk
+	mv obj_dir/$@ $@
+
+# =====
+# Verilator, slightly larger scope
+Vhw_test: hw_test.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c freq_count.v activity.v
+	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
+	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
+	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
+	mv obj_dir/$@ $@
+
+# =====
+# WIP
+Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v lb_demo_slave.v freq_count.v mem_gateway_sim.cpp udp_model.c
+	rm -f udp_model.o  # can't leave C version around for C++ to find
+	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
+	MAKEFLAGS="" make -C obj_dir -f Vmem_gateway_wrap.mk
 	mv obj_dir/$@ $@
 
 # =====
@@ -251,11 +284,50 @@ ac701_rgmii_vtestx.bit: ac701_rgmii_testx.tcl ac701_rgmii_testx.d $(SYNTH_SOURCE
 	mv _xilinx/ac701_rgmii_testx.runs/impl_1/rgmii_hw_test.bit $@
 
 # =====
+# More experimental rules relating to a possible future MAC
+host_mem: host_mem_gen
+	./host_mem_gen
+test_tx_tb: test_tx_mac.v
+test_tx.vcd: host_mem
+test_tx.out: test_tx_tb host_mem
+	$(VVP) $<
+precog_tb: precog.v
+mac_subset_tb: mac_subset.v test_tx_mac.v precog.v
+host_cmds.dat: host_cmds_gen mac_subset.gold
+	./host_cmds_gen $(filter %mac_subset.gold, $^)
+mac_subset.vcd: host_cmds.dat
+mac_subset.out: mac_subset_tb host_cmds.dat
+	$(VVP) $<
+retrigger.dat: packetgen.py packet2txmac.py
+	$(PYTHON) $< flip | $(PYTHON) $(word 2, $^) > $@
+selfmac_in.dat: packetgen.py retrigger.dat
+	$(PYTHON) $< lb $(word 2, $^) > $@
+selfmac.vcd: rtefi_pipe_tb selfmac_in.dat
+	$(VVP) $< +vcd $(VCD_ARGS_$@)
+	mv rtefi_pipe.vcd $@  # horrible
+VCD_ARGS_selfmac.vcd = +packet_file=$(filter %selfmac_in.dat, $^)
+# Can also make tap_start and
+# python3 packetgen.py flip | python badger_lb_io.py --ip=192.168.7.4 arb
+# Result is at least visible to tcpdump -i tap0
+# Should make packetgen.py smarter about the dest MAC created in that case.
+
+# =====
 # If you've kept your .gtkw files up to date, this target should do nothing.
 # Still learning how window managers affect [sst_width].
 # rtefi_sim.gtkw is an oddball.
 gtkw_refresh:
 	for f in *.gtkw; do if test $$f != rtefi_sim.gtkw; then $(XVFB) make $${f%.gtkw}_view GTKW_OPT="-r gtkwave_nosplash.rc -S resave.tcl"; tail -n +9 $$f > temp_$$$$.gtkw && mv temp_$$$$.gtkw $$f; fi; done
+
+# =====
+# Documentation processing, maybe not not the best place for these rules
+docs: rtefi.svg clients.svg memory.svg tx_path.svg
+.PHONY: docs
+%.svg: %.eps
+	echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
+
+# Documentation from Du
+lb_timing_demo.pdf: lb_timing_demo.vcd lb_timing_demo.gtkw
+	$(XVFB) $(GTKWAVE) -r gtkwave_nosplash.rc -S gtkw_print.tcl $^
 
 # =====
 # Other, weirder, maintenance stuff
@@ -268,7 +340,10 @@ loc: rtefi_preblob.v $(filter-out rtefi_blob.v construct_tx_table.v, $(RTEFI_V))
 	sed -e 's,[ \t]*//.*,,' $^ | grep -c .
 locc:
 	rmccmt *.c *.cpp | tr -d ' \t' | grep -c .
+.PHONY: spellme loc locc
 
-# So weird to not have the "clean" rule here.  See top_rules.mk.
-CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob stests.dat *3.dat pcap2v $(RTEFI_CLEAN)
+CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen host_cmds.dat retrigger.dat selfmac_in.dat $(RTEFI_CLEAN)
+CLEAN += *.pdf
 CLEAN_DIRS += obj_dir _xilinx
+# Actual "clean" rule in bottom_rules.mk
+include $(BUILD_DIR)/bottom_rules.mk

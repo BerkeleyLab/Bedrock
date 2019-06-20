@@ -7,7 +7,7 @@ module offline(
 );
 
 integer fd;
-reg [255:0] packet_file;
+reg [1023:0] packet_file;  // file name, fragile! limited to 128 characters
 initial begin
 	fd = 0;
 	if ($value$plusargs("packet_file=%s", packet_file)) begin
@@ -21,7 +21,7 @@ reg eth_in_s=0;
 integer ifg=12;
 reg [7:0] goal_r;
 reg [15:0] test_count_goal=0;
-integer rc, hexin;
+integer rc, hexin, decin;
 always @(posedge clk) begin
 	eth_in <= 8'hxx;
 	eth_in_s <= 0;
@@ -40,10 +40,15 @@ always @(posedge clk) begin
 				ifg = 12;
 				goal_r <= hexin;
 			end else begin
-				rc = $fscanf(fd, "tests %d\n", hexin);
+				rc = $fscanf(fd, "tests %d\n", decin);
 				// $display("rc3 %d %x", rc, hexin);
 				if (rc==1) begin
-					test_count_goal <= hexin;
+					test_count_goal <= decin;
+				end else begin
+					rc = $fscanf(fd, "wait %d\n", decin);
+					if (rc==1) begin
+						ifg = decin;
+					end
 				end
 			end
 		end

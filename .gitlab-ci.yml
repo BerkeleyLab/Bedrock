@@ -1,9 +1,41 @@
+stages:
+  - build
+  - test
+  - synthesis
+
+variables:
+  XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1
+  CI_REGISTRY: mohs.dhcp.lbl.gov
+  CONTAINER_IMAGE: $CI_REGISTRY/testing_base
+  CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+
+image: $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
+
+services:
+  - name: docker:dind
+    entrypoint: ["dockerd-entrypoint.sh"]
+    command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
+
+include:
+  - local: .gitlab/ci/build.gitlab-ci.yml
+  - local: .gitlab/ci/serial_io.gitlab-ci.yml
+  - local: .gitlab/ci/soc.gitlab-ci.yml
+
 dsp_test:
   before_script:
     - cd dsp && export PYTHONPATH=../build-tools/
   stage: test
   script:
     - make && make checks
+
+digaree_test:
+  before_script:
+    - cd dsp/digaree
+  stage: test
+  script:
+    - make
 
 cmoc_test:
   before_script:
@@ -27,7 +59,7 @@ rtsim_test:
     - make clean && make checks && make rtsim.dat
 
 flake8:
-  stage: test
+  stage: synthesis
   script:
    - find . -name "*.py" | xargs flake8
 
@@ -36,7 +68,7 @@ badger_test:
     - cd badger/tests && make clean
   stage: test
   script:
-    - make
+    - make && make Vrtefi_blob
 
 peripheral_test:
   before_script:
@@ -44,3 +76,32 @@ peripheral_test:
   stage: test
   script:
     - make
+
+oscope_top:
+  before_script:
+    - cd projects/oscope/bmb7_cu && ls /non-free
+  stage: synthesis
+  script:
+    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH make oscope_top.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - projects/oscope/bmb7_cu/oscope_top.bit
+
+comms_top:
+  before_script:
+    - cd projects/comms_top && ls /non-free
+  stage: synthesis
+  script:
+    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH make comms_top.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - projects/comms_top/comms_top.bit
+
+badger_ac701:
+  stage: synthesis
+  script:
+    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH && cd badger/tests && make ac701_rgmii_vtest.bit && sh teststand_ac701.sh

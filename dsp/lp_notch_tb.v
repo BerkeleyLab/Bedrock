@@ -10,18 +10,41 @@
 
 module lp_notch_tb;
 
+localparam DRIVE_TIME = 606;
+localparam DECAY_TIME = 800;
+localparam DECAY_THRES = 10;
+
 reg clk;
 integer cc;
 real dth;  // delta theta, angle per pair of time steps
+
+integer drive_en=1;
+wire y_zero;
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("lp_notch.vcd");
 		$dumpvars(5,lp_notch_tb);
 	end
 	if (!$value$plusargs("dth=%f", dth)) dth = 0.0;
-	for (cc=0; cc<850; cc=cc+1) begin
+	for (cc=0; cc<DRIVE_TIME+DECAY_TIME; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
+	end
+
+	// Basic end-of-drive sanity-check
+	if (y > DECAY_THRES) begin
+		$display("ERROR: Non-zero filter output at the end of the test");
+		$stop;
+	end
+end
+
+always @(clk) begin
+	if (cc == DRIVE_TIME) begin
+		drive_en = 0;
+		// Check that both pole-filters decay without drive by depositing
+		// a non-zero value in their storage elements
+		dut.lp1a.yr = 100;
+		dut.lp1b.yr = 100;
 	end
 end
 
@@ -45,7 +68,7 @@ always @(posedge clk) begin
 		sint = 20000*$sin(dds*dth) + 0.5;
 		dds <= dds+1;
 	end
-	if (cc>5 && cc<606) x <= ~iq ? cost : sint;
+	if (cc>5 && cc<DRIVE_TIME) x <= ~iq ? cost : sint;
 	else x <= 0;
 end
 
@@ -97,7 +120,8 @@ always @(posedge clk) begin
 	if (~iq) y_q <= y;
 	if (~iq) x_i <= x1;
 	if (~iq) x_q <= x;
-	if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d\n", x_i, x_q, y_i, y_q);
+	if (drive_en)
+		if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d\n", x_i, x_q, y_i, y_q);
 end
 
 endmodule

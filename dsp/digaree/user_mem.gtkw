@@ -1,0 +1,53 @@
+[timestart] 0
+[size] 1709 788
+[pos] 58 0
+*-5.846355 215 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] user_tb.
+[treeopen] user_tb.G_WRAP.dut.sf_user.
+[treeopen] user_tb.G_WRAP.dut.sf_user.cpu.
+[sst_width] 228
+[signals_width] 255
+[sst_expanded] 1
+[sst_vpaned_height] 225
+@28
+user_tb.h_write
+user_tb.host_clk
+@22
+user_tb.h_data[17:0]
+@29
+user_tb.sf_clk
+@28
+user_tb.trigger
+@420
+user_tb.meas[17:0]
+@28
+user_tb.trace_strobe
+@200
+-DUT
+@24
+user_tb.G_WRAP.dut.sf_user.pc[6:0]
+@28
+user_tb.G_WRAP.dut.sf_user.choose_const
+@22
+user_tb.G_WRAP.dut.sf_user.meas_mux[17:0]
+@28
+user_tb.G_WRAP.dut.sf_user.sat_happened
+user_tb.G_WRAP.dut.sf_user.trigger
+@22
+user_tb.G_WRAP.dut.sf_user.sat_cnt[6:0]
+@24
+user_tb.G_WRAP.dut.sf_user.sat_report[6:0]
+user_tb.G_WRAP.dut.sf_user.sat_count[6:0]
+@200
+-CPU
+@28
+user_tb.G_WRAP.dut.sf_user.cpu.set
+@200
+-ALU
+@22
+user_tb.G_WRAP.dut.sf_user.cpu.alu.sat[21:0]
+@28
+user_tb.G_WRAP.dut.sf_user.cpu.alu.sat_happened
+user_tb.G_WRAP.dut.sf_user.cpu.alu.valid_r
+[pattern_trace] 1
+[pattern_trace] 0

@@ -50,6 +50,11 @@ always @(posedge clk) begin
 end
 
 // Timing
+// It's OK to pass-through the UDP checksum when udp_sel==0, because
+// nothing has changed from Rx packet except the order of IP addresses
+// and port numbers, and the checksum process is not sensitive to the
+// order of 16-bit words.  For all other UDP packets, we have to disable
+// the checksum by replacing it with zero.  See below.
 reg pc_at_checksum=0;
 reg use_zero=0, use_copy=0;
 always @(posedge clk) begin

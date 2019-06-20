@@ -38,6 +38,7 @@ def config_romx(dsp_flavor=0, tool_rev=0, board_type=0):
         'kc705': 19,
         'bmb7_kintex': 20,
         'qf2_kintex': 21,
+        'vc707': 22,
         'test': 99
     }
     print('board_type {}'.format(board_type))

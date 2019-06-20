@@ -268,10 +268,10 @@ assign U18_clk_in = 0;
 assign U33U1_pwr_sync = 0;
 `endif
 
-freq_count freq_count          (.clk(U3_clk_div_bufr), .usbclk(lb_clk), .frequency(frequency));
-freq_count freq_count_clk4xout (.clk(bmb7_U7_clk4xout),.usbclk(lb_clk), .frequency(frequency_4xout));
-freq_count freq_count_clkout3  (.clk(U1_clkout3),      .usbclk(lb_clk), .frequency(frequency_clkout3));
-freq_count freq_count_dac_dco  (.clk(U4_dco_clk_out),  .usbclk(lb_clk), .frequency(frequency_dac_dco));
+freq_count freq_count          (.f_in(U3_clk_div_bufr), .sysclk(lb_clk), .frequency(frequency));
+freq_count freq_count_clk4xout (.f_in(bmb7_U7_clk4xout),.sysclk(lb_clk), .frequency(frequency_4xout));
+freq_count freq_count_clkout3  (.f_in(U1_clkout3),      .sysclk(lb_clk), .frequency(frequency_clkout3));
+freq_count freq_count_dac_dco  (.f_in(U4_dco_clk_out),  .sysclk(lb_clk), .frequency(frequency_dac_dco));
 
 
 `define CONFIG_PHASEX

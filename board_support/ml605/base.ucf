@@ -1,0 +1,20 @@
+##
+NET "LED<0>"                    LOC = "AC22";   ## 2   on LED DS12, 1 on J62
+NET "LED<1>"                    LOC = "AC24";   ## 2   on LED DS11, 2 on J62
+NET "LED<2>"                    LOC = "AE22";   ## 2   on LED DS9,  3 on J62
+NET "LED<3>"                    LOC = "AE23";   ## 2   on LED DS10, 4 on J62
+NET "LED<4>"                    LOC = "AB23";   ## 2   on LED DS15, 5 on J62
+NET "LED<5>"                    LOC = "AG23";   ## 2   on LED DS14, 6 on J62
+NET "LED<6>"                    LOC = "AE24";   ## 2   on LED DS22, 7 on J62
+NET "LED<7>"                    LOC = "AD24";   ## 2   on LED DS21, 8 on J62
+##
+#NET "LED<C>"                    LOC = "AP24";   ## 2   on LED DS16
+#NET "LED<E>"                    LOC = "AE21";   ## 2   on LED DS19
+#NET "LED<N>"                    LOC = "AH27";   ## 2   on LED DS20
+#NET "LED<S>"                    LOC = "AH28";   ## 2   on LED DS18
+#NET "LED<W>"                    LOC = "AD21";   ## 2   on LED DS17
+##
+NET "SYSCLK_N"                      LOC = "H9"|IOSTANDARD="LVDS_25" |DIFF_TERM=TRUE;     ## 5   on U11, 5 on U89 (DNP)
+NET "SYSCLK_P"                      LOC = "J9"|IOSTANDARD="LVDS_25" |DIFF_TERM=TRUE;     ## 4   on U11, 4 on U89 (DNP)
+NET "SYSCLK_P" TNM_NET = "SYSCLK_P";
+TIMESPEC "TS_SYSCLK_P" = PERIOD "SYSCLK_P" 5.0 ns HIGH 50 %;

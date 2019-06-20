@@ -21,13 +21,13 @@ def chunk(l, flag=1):
 
 def sixteen(ss):
     if len(ss) % 2:  # need an even number of octets
-        ss += "\0"
-    return list(struct.unpack("!" + "H" * (len(ss) / 2), ss))
+        ss += bytes(1)  # Pad with \0
+    return list(struct.unpack("!" + "H" * int(len(ss) / 2), ss))
 
 
 def compress_file(fname):
     sha = hashlib.sha1()
-    fv = open(fname, 'r').read()
+    fv = open(fname, 'r').read().encode('utf-8')
     sha.update(fv)
     file_zip = zlib.compress(fv, 9)
     return sha.hexdigest(), sixteen(file_zip)
@@ -158,7 +158,7 @@ if __name__ == "__main__":
         for rr in r:
             print(rr)
     else:
-        a = create_array("LBNL LCLS-II LLRF Test stand support", args.json)
+        a = create_array(b"LBNL LCLS-II LLRF Test stand support", args.json)
         if args.loopback:
             r = decode_array(a)
             for rr in r:

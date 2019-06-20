@@ -1,0 +1,99 @@
+a3 is found by accumulating
+
+a3 = a3 + D/2*(sL/(s1^2*conj(s2)) + sH/(s2^2*conj(s1)))
+
+where all inputs and outputs are complex, except D.
+
+(h1; h2) = inverse(1 cos(th); 0 sin(th))*(a3.r;a3.i)
+
+and (h1; h2) are the outputs to the distortion corrector
+(a_o and b_o of sf_main).
+The matrix inverse resolves to (1 -cot(th); 0 csc(th)).
+
+Assume for specificity that the conveyor belt is used to load
+registers
+
+0  sL.r
+1  sL.i
+2  s1.r
+3  s1.i
+4  s2.r
+5  s2.i
+6  sH.r
+7  sH.i
+
+There are some constants, which I claim are loaded from the
+host controller by unspecified means (maybe a DPRAM with its
+readout merged with the conveyor belt output).
+
+8 K1=-cot(th)
+9 K2=csc(th)
+10 D
+11 2.0  (part of the iterative 1/x algorithm)
+
+There are state variables
+
+12 a3.r
+13 a3.i
+
+... and we have pretty much run out of 4-bit address space
+(confirmed by sched.py, which needs 19 registers).
+That's OK, the code now uses a 5-bit address: 32-entry register file.
+
+The matrix expression now resolves to the explicit
+h1 = a3.r + K1*a3.i
+h2 =        K2*a3.i
+
+But since constants in our system have to be less than 1.0,
+store K2 = 0.5*csc(th), and shift up (saturated) in the multiply.
+This limits th to the range of 30 to 150 degrees, a.k.a. 0.083 to
+0.417 of a revolution.
+
+We'd like to be able to route sf_main's d_in to our host buffer,
+enough to grab a full transaction cycle, to get a debug mode.
+
+How to handle external controls, like:
+  set a3 to a known value
+  do/don't accumulate (easy; set D or zero or not)
+
+The operation count is
+  4 to square a complex number
+  6 to multiply two complex numbers
+  2 to add two complex numbers
+  7 to invert a real number (study this, it could be 10 or 13)
+ 12 to invert a complex number
+ 28 for sL/(s1^2*conj(s2))
+ 60 for the combined delta
+  2 to accumulate
+  3 for the reduced matrix multiply
+ 65 total
+
+This sets a minimum cycle count.
+
+Above list doesn't include a mechanism to set the 4 constants.  One
+simple way is to use 4 cycles, that's what's done in the code now.
+
+The full instruction count is
+  8 to inject the conveyor belt results
+  4 to inject the constants
+ 65 arithmetic, from above
+  1 to push the output
+ 78 total
+
+The simple greedy scheduler I came up with (sched.py) packs these in
+125 cycles with the 5-stage pipeline.  Changing pipe_len lets me determine
+how the cycle count depends on the pipeline length:
+pipe_len   cycles
+  5         125
+  4         112
+  3          96
+  2          88
+  1          78
+
+Even a 188-cycle (47*4, 2.455 us) update would be plenty fast from
+the DSP perspective.
+
+A 128-entry 21-bit width ROM adds 168 cells to the engine's footprint
+in S3.  That's 50% of sf_main!  Might hope for some compression.
+It would take about 10 cells to time-align the instruction word with
+the pipeline operations it controls, but what's the point?

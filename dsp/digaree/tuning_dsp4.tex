@@ -1,0 +1,185 @@
+% see llrf8/tuning_dsp.tex
+
+\magnification=\magstep1
+\input lrdfig.tex
+\parindent=0pt
+\parskip=6pt
+\baselineskip=14.0pt
+\font\big=cmbx12 scaled 1200
+
+\centerline{\big LCLS-II LLRF Quench and Detune Revisited}
+\smallskip
+\centerline{Larry Doolittle, LBNL, 2016-10-25}
+\bigskip
+Simplify the usual cavity equation of state by including only
+one driven port, ignoring $1/Q$ of the probe, and postponing consideration
+of beam current.
+That leaves us with
+$$ {d\vec V\over dt} = a \vec V + b \vec K_1 $$
+$$ a = j\omega_d - {1\over 2}\omega_0\left({1\over Q_0}+{1\over Q_1}\right) $$
+$$ b = \omega_0\sqrt{(R/Q)\over Q_1} $$
+If $Q_0 >> Q_1$, it's possible to write
+$$ \Re(a) = -|b|^2 \cdot {1\over 2\omega_0 (R/Q)} $$
+where $\omega_0$ and $R/Q$ should be quite well known.
+
+Re-cast the state equation in terms of DSP-processed ADC readings
+$\vec M_V$ and $\vec M_K$, unitless where full-scale is represented as 1.
+Thus we need calibration constants $c_V$ with units of Volts, and
+$c_K$ with units of $\sqrt{\rm Watts}$, so that
+$$ \vec V = c_V \cdot \vec M_V $$
+$$ \vec K_1 = c_K \cdot \vec M_K $$
+Substitute and rearrange the state equation to get
+$$ {d\vec M_V\over dt} = a \vec M_V + \left(b{c_K\over c_V}\right) \vec M_K $$
+a quick and direct {\it in-situ} experiment (short on-pulse followed by
+passive decay, recording waveforms of $M_V$ and $M_K$) can determine
+$\Re(a)$ and $\beta \equiv b(c_K/c_V)$ with good accuracy.
+This same experiment is
+also useful to determine or cross-check the SEL phase offset term.
+
+The relation above gives us
+$$ {c_K\over c_V} = {\sqrt{-2\omega_0 (R/Q) \Re(a)}\over |\beta|} $$
+which can be cross-checked with what we hope are independent measures
+of $c_K$ and $c_V$.
+
+All that is left is to rearrange the state equation one more time to
+$$a = {1\over \vec M_V}\cdot \left[{d\vec M_V\over dt} - \beta \vec M_K\right] $$
+The FPGA can compute $\vec M_V$ and $\vec M_K$ with good accuracy at
+very high rates (up to $\sim$3\thinspace MS/s).  Getting acceptable
+accuracy from a meaningful derivative term will take longer;
+probably on the scale of 10\thinspace $\mu$s to 100\thinspace $\mu$s.
+
+The strategy for tuning and quench detection comes into focus now.
+A DSP engine is fed a continuous stream of $\vec M_V$ and $\vec M_K$
+with time separation $T$, from which it can also compute $d\vec M_V/dt$.
+It is pre-loaded with a (complex) value of $\beta $.
+After each new value of $\vec M_V$ and $\vec M_K$ is loaded, the
+equation above is used to compute (complex) $a$.  The imaginary part
+of $a$ is the detune frequency $\omega_d$, which can be passed to
+the resonance control subsystem.  The real part of $a$ is negative;
+if it moves above some pre-loaded threshold (maybe 0.9 of the value of
+$a$ found in the setup process), it is interpreted as a dramatic decrease
+in $Q_0$, and the quench detector trips.
+
+This mechanism will, at least in theory, work under all modes of
+operation: fill, SEL, or closed-loop.  As $|\vec M_V|$ gets smaller,
+measurement noise increases, and below some threshold the computation
+should be inhibited.  In that case, the tune algorithms should freeze,
+and we hope it's safe to assert no-quench.
+From a tuning-loop perspective, we want to enforce a narrow range of
+voltage validity, and even some dwell-time within that range,
+to avoid trying to follow irrelevant Lorentz detuning when the gradient
+is not what's needed for beam operations.
+
+%The computations are a bit intricate, but fall well within our ability
+%to program in Verilog, maybe best using a microprogrammed engine.
+%A good test bench is essential!
+Computing the derivative involves a complex difference % 2 adds
+followed by multiplying by the scalar representing $1/T$. % 2 mults
+One full complex multiply % 4 mults, 2 adds
+gives the second term inside the brackets.
+Then multiply by the conjugate of $\vec M_V$, % 4 mults, 2 adds
+and divide by $|\vec M_V|^2$.  % 2 mults, 1 add, 1 divide, 2 mults
+% 1 divide = 4 mult, 2 add, 1 init
+All told about 18 fixed-point scalar multiplies and 10 adds or subtracts
+are required.
+
+So far this analysis has used s$^{-1}$ as the units for $1/T$, $\beta$,
+and therefore $a$.  Some other choice of inverse-time units will
+make sense when implementing this with fixed-point DSP.
+The software is free to configure that when choosing the numerical values of
+$1/T$ and $\beta$ to load into the DSP engine.
+With a signed 18-bit representation and a bit-quantum of 0.01\thinspace Hz,
+full-scale would be $\pm$1310\thinspace Hz.
+
+Restoring the beam current term to this analysis is not conceptually difficult,
+it just requires additional calibration and timing input.  The real un-answered
+question is how to measure drifts in the $\beta$ parameter in-place during CW operation.
+
+The restriction that $|\vec V|$ is not small is a troubling one for
+a quench detector.  If $\vec V$ is stuck at zero, even with forward power
+applied, the cavity could equally well be quenched or far off-resonance.
+While a phase-ignoring power balance computation can possibly detect
+that condition, it's hard to generalize to the case with beam current,
+since the power absorbed is always phase-sensitive.  Let's develop the
+power balance technique anyway, and claim that beam current will only
+be turned on when $\vec V$ is far from zero, so that the state-vector
+approach is running smoothly.
+Thus at least one of the two methods will always be valid.
+
+First, refresh our memory that the reverse wave in the waveguide is
+$$ \vec R = c \vec V - \vec K $$
+(ignoring waveguide losses) where $c = 1/\sqrt{Q_1(R/Q)}$.
+This knowledge is helpful when setting up test benches.
+
+The way to account for the cavity's stored energy is through the
+equation
+$$ U = {V^2\over \omega_0 (R/Q)}$$
+$$ {dU\over dt} = 2 \Re\left(\vec V {d\vec V\over dt}\right) \cdot {1\over \omega_0 (R/Q)}$$
+
+The dissipated power in the cavity can then be estimated as
+$$ P_{\rm diss} = |\vec K|^2 - |\vec R|^2 - {dU\over dt}$$
+If this exceeds some threshold power $P_Q$, we can claim a quench
+condition is detected.  This representation purposefully uses the
+same notation and input measurements as the state-vector method.
+
+Converting to a hardware perspective, a trip is caused by a positive
+sign on the quantity
+$$ f_K|\vec M_K|^2 - f_R|\vec M_R|^2 -
+  f_V 2\Re\left( \vec M_V \cdot {d\vec M_V\over dt} \right) - f_Q$$
+where $f_K = fc_K^2$, $f_R = fc_R^2$, $f_Q = fP_Q$, and
+$$ f_V = f {c_V^2 \over \omega_0 (R/Q)}$$
+and the free parameter $f$ allows scaling from SI Watts to whatever
+internal number system is convenient.  Here we see the software needs
+to calibrate and download $f_K$, $f_R$, $f_V$, and $f_Q$.  The DSP
+engine needs to perform 9 fixed-point scalar multiplies and
+6 adds or subtracts.
+
+The arithmetic described here is more complicated than people usually
+associate with direct FPGA programming techniques.  Indeed,
+functionality like this has historically been done on a dedicated DSP chip.
+Fortunately, FPGAs are big and fast enough now to subsume that programmability
+by means of various architectures of soft-cores.  Our use case does not
+call even for a general-purpose soft-core, but rather one that can do
+a fixed sequence of fixed-point arithmetic (adds, subtracts, multiplies)
+every time a new set of RF vector measurements comes in.
+
+Such a streamlined DSP core is on-the-shelf at LBNL; its basic architecture
+is shown here.
+\medskip
+\centerfig{0.75\hsize}{computer}
+\smallskip
+It is capable of running at higher clock speeds than even the double-rate
+DAC clock in the LCLS-II FPGA.  It can perform one batch of this
+arithmetic in 80 cycles:  16 to load measurements and parameters,
+45 useful arithmetic instructions, 2 output instructions,
+and 17 no-op cycles to wait for results to flow through its pipeline.
+The actual representation of the jobs to be done (both state-variable
+and the power-balance, and an FIR computation of the derivative of cavity
+voltage) is written as 17 lines of stylized Python, plus
+comments and surrounding overhead (see appendix).  This gets
+machine-converted to an 80 $\times$ 22-bit program memory.
+As always, a good test bench is essential!
+
+The 80 cycles of computation take little time compared to the many microseconds
+needed to develop a decent $dV/dt$ measurement.  The hardware resources
+used are tiny both compared to what's available on the chip, and compared
+to what would be needed for a direct mapping of the arithmetic to hardware.
+
+\vfill\eject
+\baselineskip=13pt
+\parskip=0pt
+\centerline{\big Appendix: Program Listing}
+\medskip
+
+% Cribbed from the TeXbook p. 380-381:
+\def\uncatcodespecials{\def\do##1{\catcode`##1=12 }\dospecials}
+\def\listing#1{\par\begingroup\setupverbatim\input#1 \endgroup}
+\def\setupverbatim{\tt
+  \def\par{\leavevmode\endgraf} \catcode`\`=\active
+  \obeylines \uncatcodespecials \obeyspaces}
+{\obeyspaces\global\let =\ } % let active space = control space
+{\catcode`\`=\active \gdef`{\relax\lq}}
+
+\listing{cgen_srf.py}
+
+\bye

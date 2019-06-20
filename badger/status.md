@@ -16,6 +16,7 @@
 * 2018-12-20:  Demonstrated functional on AC701/RGMII, synthesizing with XST
 * 2018-12-21:  Demonstrated functional on AC701 when synthesizing with Vivado
 * 2019-01-15:  Merged into bedrock
+* 2019-03-26:  Refactored udp-vpi.c to enable Verilator test of mem_gateway.v
 
 Synthesized by XST 14.7 for Spartan-6:
 
@@ -44,7 +45,6 @@ Files in tests/sp605/, tests/ac701/, and tests/kc705/ are only here temporarily;
 eventually they should be constructed by the LBNL/ATG project infrastructure.
 
 Next steps, loose but plausible order:
-* Refactor udp-vpi.c to enable Verilator version of these tests
 * Rename modules, signals, and project
 * Create an instantiation template along with rtefi_blob.v
 * Update documentation

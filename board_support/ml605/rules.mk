@@ -1,0 +1,3 @@
+PART = xc6vlx240t-ff1156-1
+CLOCK_PIN = J9
+FPGA_FAMILY = virtex6

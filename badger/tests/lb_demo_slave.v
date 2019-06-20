@@ -2,6 +2,7 @@
 // just to make it clear that the master is alive (or not)
 // Has accreted some self-diagnostic features that (probably) would
 // not be part of a final production build.
+// Only write addresses implemented are LEDs, addr[23:20]==0.
 module lb_demo_slave(
 	input clk,
 	input [23:0] addr,
@@ -16,6 +17,7 @@ module lb_demo_slave(
 	input obadge_stb,
 	input [7:0] obadge_data,
 	input xdomain_fault,
+	input tx_mac_done,
 	// Output to hardware
 	output led_user_mode,
 	output led1,  // PWM
@@ -61,8 +63,8 @@ always @(posedge clk) if (xdomain_fault) xdomain_fault_count <= xdomain_fault_co
 
 // Frequency counter
 wire [31:0] tx_freq;
-freq_count2 #(.REFCNT_WIDTH(27)) f_count(.f_in(ibadge_clk),
-	.clk(clk), .frequency(tx_freq));
+freq_count #(.refcnt_width(27), .freq_width(32)) f_count(.f_in(ibadge_clk),
+	.sysclk(clk), .frequency(tx_freq));
 
 // Very basic pipelining of two-cycle read process
 reg [23:0] addr_r=0;
@@ -82,6 +84,7 @@ always @(posedge clk) if (do_rd) begin
 		3: reg_bank_0 <= "(::)";
 		4: reg_bank_0 <= xdomain_fault_count;
 		5: reg_bank_0 <= tx_freq;
+		6: reg_bank_0 <= tx_mac_done;
 		default: reg_bank_0 <= "zzzz";
 	endcase
 end
@@ -89,10 +92,10 @@ end
 // Second read cycle
 reg [31:0] lb_data_in=0;
 always @(posedge clk) if (do_rd_r) begin
-	casex (addr_r)
-		24'h01xxxx: lb_data_in <= ibadge_out;
-		24'h02xxxx: lb_data_in <= obadge_out;
-		24'h11xxxx: lb_data_in <= reg_bank_0;
+	casez (addr_r)
+		24'h01zzzz: lb_data_in <= ibadge_out;
+		24'h02zzzz: lb_data_in <= obadge_out;
+		24'h11zzzz: lb_data_in <= reg_bank_0;
 		default: lb_data_in <= 32'hdeadbeef;
 	endcase
 end
@@ -100,14 +103,13 @@ end
 // Direct writes
 reg led_user_r=0;
 reg [7:0] led_1_df=0, led_2_df=0;
-always @(posedge clk) if (control_strobe) begin
-	if (~control_rd) case (addr[3:0])
-		1: led_user_r <= data_out;
-		2: led_1_df <= data_out;
-		3: led_2_df <= data_out;
-		4: dbg_rst <= data_out;
-	endcase
-end
+wire led_write = control_strobe & ~control_rd & (addr[23:20]==0);
+always @(posedge clk) if (led_write) case (addr[3:0])
+	1: led_user_r <= data_out;
+	2: led_1_df <= data_out;
+	3: led_2_df <= data_out;
+	4: dbg_rst <= data_out;
+endcase
 // Blink the LEDs with the specified duty factor
 // (your eyes won't notice the blink, because it's at 488 kHz)
 reg [9:0] led_cc=0;

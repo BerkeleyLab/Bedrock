@@ -1,0 +1,117 @@
+Digaree - Digital Arithmetic Execution Engine
+Scaled-fixed-point execution engine and its programming support
+
+Designed to evaluate a complex arithmetic expression in support of
+RF distortion correction and/or SRF cavity detune and quench finding.
+Can run dozens of multiplies and adds at nearly one op per cycle, using
+a few hundred logic elements and one multiplier.  See the block diagram
+in computer.eps.  I assert it fits in an interesting niche between the
+fast and simple logic conventionally implemented in FPGA fabric, and the
+slow and complex algorithms that can run on a general-purpose CPU.
+
+As Antoine de Saint-Exupery commented about design: "perfection is
+reached not when there is nothing left to add, but when there is nothing
+left to take away".  This processing engine has one data type, no branch
+instructions, and every instruction takes the same number of cycles to
+complete.  Divides, all bookkeeping related to complex numbers, and even
+the synchronization of instruction bits across the pipeline stages, are all
+managed in the compilation phase.  The result is an extremely small hardware
+footprint, relative to the tasks it can perform.
+
+The choice of scaled-fixed-point instead of floating point is important.
+To me, as a DSP programmer, floating-point always seems like a euphemism
+for "data-dependent rounding error".  I want my noise levels predictable
+and constant.
+
+A complete description of the arithmetic to perform for distortion
+compensation is in file job_ip3.txt.  A complete description of the
+arithmetic to perform for SRF cavity detune and quench finding is in
+tuning_dsp4.pdf (you have to "make" that first).  For now, select between
+the two by editing the Makefile.  The code for distortion compensation
+has probably bit-rotted.
+
+Run "make ops.h" to generate "assembly code" for the engine, machine-generated
+by cgen$(STYLE).py.  Then "make ops.vh" to assemble that to the Verilog ROM
+that gets executed.  The tricky work of allocating registers and scheduling
+instructions is done in that latter step by sched.py -- maybe not perfectly,
+but the results are good enough.  I used some concepts from (and indeed the
+existence proof of) Sebastien Bourdeauducq's gfpus scheduler written for
+Milkymist's PFPU.  If this process seems opaque and esoteric, it's not:
+it fits in 198 lines (non-blank, non-comment) of python, orders of magnitude
+smaller than the code base used in the toolchain for a conventional CPU.
+
+That ops.h file is also C code; "make sim1" to compile it with its support
+code to get a bit-accurate (but not cycle-accurate) simulation of what's
+supposed to happen.  The cross-check that the C and the Verilog agree is done
+with a "make match".
+
+Run "make main_view" for a picture of the execution engine running some
+simple tests.  It is written in portable Verilog.  The circuit is compatible
+with a high-speed clock, and has tiny FPGA resource usage; see quantitative
+comments in the Makefile.
+
+There are a couple of choices for how to instantiate this code; two of them
+are given in sf_user_wrap.v, one (sf_user_pmem) provides a host access to
+parameters in a small DPRAM, the other (sf_user_preg) explodes those parameters
+into a single parallelized input port.  Other, more stripped-down interfaces
+are available in sf_user.v and sf_main.v.
+
+This is a simple and well-pipelined single-clock-domain design,
+good for > 200 MHz on modern chips.
+
+The code in sf_main.v is the core of the compute engine, with one input stream,
+and four outputs which are set at the end of the computation.  The "extra"
+features in the sf_user.v file are the instruction ROM, a program counter that
+starts the system running when given a trigger, a means of injecting parameters
+set by a host into the data stream, and a saturation event counter.
+
+For extra hardware debugging fun, it is plausible for the application to take
+the provided trace port and run it to a waveform recorder (presumably an
+already existing memory, just add the multiplexer to allow such a debug mode).
+This will give a trace at each cycle of what data came out of the ALU for
+write-back to the register file.
+
+If you want to adapt this module to perform some other similar scaled-fixed-
+point computation, you might get lucky and only have to add another cgen_foo.py.
+Read cgen_srf.py and cgen_ip3.py for examples of how to represent the task.
+You might also peruse cgen_lib.py for the full list of primitives and built-up
+instruction sequences.  This assumes you can match your task and its I/O
+needs with this design.  You should also pay serious attention to testing in
+simulation; see my initgen_foo.py code for examples of this process.
+
+You have to provide your input as a stream of data at this module's
+input port at the beginning of the computation (I do this with LBNL's famous
+"conveyor belt" that splits a CIC filter in half: an integrator per channel,
+a serializer/sampler, and then a shared differentiator).  It also has
+allowance for host-settable parameters (the number is easy to change via
+the Makefile).
+
+After any application code change, run "make", and read through the comments
+in ops.vh to make sure your computation fits in the envelope of 31 registers
+and 128 instructions.  Of course, you can increase those numbers, too.  My
+needs are small enough that all this memory is held in distributed (LUT)
+memory on the chip.  If that footprint grows for your application, and your
+BRAMs are not already spoken for, change the ram_style and rom_style attributes
+scattered through the code, from distributed to block.  Expect a slight
+slow-down in possible cycle time after that change.
+
+Most of my FPGA experience is with Xilinx.  This is all portable code, and is
+intended to run just as well on Altera, or any other chip architecture with
+multipliers and relatively fine-grained memory.  Only my discussion of different
+RAM technology changes.  Non-Xilinx users should check that the register file
+(one write port and two read ports) is properly inferred and mapped.
+
+Tools needed:
+  gcc or equivalent
+  Icarus Verilog
+  gtkwave
+  python (with sys, re, and numpy modules)
+  make
+(tested on Debian Jessie)
+
+Ages ago, I used Xilinx XST 12.1 to test synthesis.
+This is the only non-Free software involved.  All the hard work of this effort
+is portable Verilog, that should synthesize for any FPGA chip family, or even
+an ASIC.
+
+Larry Doolittle, LBNL, April 2017 (updated from earlier May 2013 version)

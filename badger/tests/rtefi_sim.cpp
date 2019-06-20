@@ -1,7 +1,7 @@
 // Partially based on Verilator example module
 #include <verilated.h>
 
-// Include model header, generated from Verilating "rtefi_blobv"
+// Include model header, generated from Verilating "rtefi_blob.v"
 #include "Vrtefi_blob.h"
 #include <verilated_vcd_c.h>
 #include "ethernet_model.h"
@@ -43,7 +43,7 @@ int main(int argc, char** argv, char** env) {
 	top->config_s = 0;
 
 	while (/* main_time < 1100 && */ !Verilated::gotFinish()) {
-		main_time+=4;  // Time passes in ticks of 8ns
+		main_time += 4;  // Time passes in ticks of 8ns
 		// Toggle clocks and such
 		top->rx_clk = !top->rx_clk;
 		top->tx_clk = top->rx_clk;
@@ -86,4 +86,3 @@ int main(int argc, char** argv, char** env) {
 	// Fin
 	exit(0);
 }
-

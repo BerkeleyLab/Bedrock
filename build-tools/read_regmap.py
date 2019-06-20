@@ -10,16 +10,16 @@ def get_map(f='regmap_gen_vmod1.json'):
     # Currently below only supports a line of length 2,
     # with format '<reg_name> <reg_addr>'
     for li in open(f, 'r'):
-        li = li.strip()
-        li = li.split()
-        if len(li) != 2:
-            print(("Something wrong with the line width: ", li))
+        ll = li.strip()
+        ll = ll.split()
+        if len(ll) != 2:
+            print("Something wrong with the line width: %d" % ll)
             exit()
         else:
             try:
-                regmap[li[0]] = int(li[1])
+                regmap[ll[0]] = int(ll[1])
             except ValueError:
-                print(('Unexpected literal: %s in file: %s' % li[1], f))
+                print('Unexpected literal: %s in file: %s' % (ll[1], f))
                 exit()
     return regmap
 
