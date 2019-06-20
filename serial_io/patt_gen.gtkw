@@ -1,0 +1,34 @@
+[timestart] 0
+[size] 1712 766
+[pos] -1 -1
+*-41.010693 -1 128040000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] patt_gen_tb.
+[sst_width] 332
+[signals_width] 415
+[sst_expanded] 1
+[sst_vpaned_height] 198
+@200
+-GENERATOR
+@28
+patt_gen_tb.i_dut_gen.pgen_disable
+patt_gen_tb.i_dut_gen.pgen_test_mode
+@22
+patt_gen_tb.i_dut_gen.pgen_rate[4:0]
+@28
+patt_gen_tb.i_dut_gen.pgen_inc_step[2:0]
+patt_gen_tb.i_dut_gen.tx_valid
+@22
+patt_gen_tb.i_dut_gen.tx_data[15:0]
+patt_gen_tb.i_dut_gen.data_cnt[6:0]
+@200
+-CHECKER
+@28
+patt_gen_tb.i_dut_check.rx_valid
+@22
+patt_gen_tb.i_dut_check.rx_data[15:0]
+@28
+patt_gen_tb.i_dut_check.rx_match
+@23
+patt_gen_tb.i_dut_check.rx_err_cnt[15:0]
+[pattern_trace] 1
+[pattern_trace] 0

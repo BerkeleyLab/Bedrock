@@ -9,6 +9,7 @@
 BUILD_DIR = .
 BADGER_DIR = ..
 HOMELESS_DIR = local
+SERIAL_IO_DIR = local
 # Hope this only does something when part of Bedrock
 -include ../../dir_list.mk
 
@@ -51,7 +52,7 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 
 # =====
 # Attention!!!!
-vpath %.v $(DSP_DIR) $(HOMELESS_DIR)
+vpath %.v $(DSP_DIR) $(HOMELESS_DIR) $(SERIAL_IO_DIR)
 vpath %.eps ..
 
 all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check

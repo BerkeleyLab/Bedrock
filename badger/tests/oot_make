@@ -4,4 +4,4 @@
 # Nothing gets written to the reference tree.
 # Alert!  The reference tree really needs to be clean for this to work right.
 D=`dirname $0`
-make -f $D/Makefile VPATH=$D:$D/..:$D/local:$D/../../dsp:$D/../../homeless BUILD_DIR=$D/../../build-tools -I $D $*
+make -f $D/Makefile VPATH=$D:$D/..:$D/local:$D/../../dsp:$D/../../homeless:$D/../../serial_io BUILD_DIR=$D/../../build-tools -I $D $*

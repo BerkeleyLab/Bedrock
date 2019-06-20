@@ -42,11 +42,13 @@ Dependencies
 ============
 
 Required:
+
 *  GNU Make
 *  iverilog
 *  Python
 
 Recommended:
+
 *  GTKWave
 *  Xilinx Vivado
 *  Verilator
