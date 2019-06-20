@@ -1,6 +1,8 @@
 ###############################################################################
 ### BMB7 R1.5 a.k.a. QF2-pre, with "modern" Fall 2018 Spartan firmware
 
+set_property CONFIG_VOLTAGE  3.3 [current_design]
+
 # Differential 50MHz system clock
 set_property IOSTANDARD LVDS_25 [get_ports {sys_clk_p}]
 set_property PACKAGE_PIN G11    [get_ports {sys_clk_p}]
