@@ -36,7 +36,7 @@ module pi_loop_ab (
 	input signed [17:0] measured_iq,
 
 	input reverse,
-	input integrator_enable,
+	input integrator_enable, // external
 	output reg signed [17:0] pi_out_iq
 );
 parameter KW = 18;
