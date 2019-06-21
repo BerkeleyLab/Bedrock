@@ -1,4 +1,4 @@
-include ../../dir_list.mk
+include ../../../dir_list.mk
 
 all: oscope_top.bit
 
