@@ -1,3 +1,5 @@
+include ../../dir_list.mk
+
 all: oscope_top.bit
 
 HARDWARE = bmb7_kintex
@@ -6,15 +8,7 @@ COMMUNICATION = gtx
 DAUGHTER = base
 XILINX_TOOL := VIVADO
 
-TOP_DIR = ../../..
-
-BUILD_DIR = $(TOP_DIR)/build-tools
-DSP_DIR = $(TOP_DIR)/dsp
-BOARD_SUPPORT_DIR = $(TOP_DIR)/board_support
-FPGA_FAMILY_DIR = $(TOP_DIR)/fpga_family
-XILINX_DIR = $(FPGA_FAMILY_DIR)/xilinx
 ISERDES_DIR = $(FPGA_FAMILY_DIR)/iserdes
-PERIPHERAL_DIR = $(TOP_DIR)/peripheral_drivers
 BS_HARDWARE_DIR = $(BOARD_SUPPORT_DIR)/$(HARDWARE)
 SERIAL_IO_DIR = $(TOP_DIR)/serial_io
 
@@ -24,7 +18,7 @@ VERILOG_DEFINE_FLAGS = ""
 
 SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
 
-VFLAGS_DEP += -y$(DSP_DIR) -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR) -y$(ISERDES_DIR) -y$(XILINX_DIR) -y$(SERIAL_IO_DIR) -y. -y$(PERIPHERAL_DIR) -y$(PERIPHERAL_DIR)/idelay_scanner
+VFLAGS_DEP += -y$(DSP_DIR) -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR) -y$(ISERDES_DIR) -y$(XILINX_DIR) -y$(SERIAL_IO_DIR) -y. -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/idelay_scanner
 
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
 
