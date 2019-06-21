@@ -8,7 +8,7 @@ soc_picorv32_test:
 soc_picorv32_kc705:
   stage: synthesis
   before_script:
-    - cd soc/picorv32/project/kc705 && echo $XILINXD_LICENSE_FILE
+    - cd soc/picorv32/project/kc705
   script:
     - XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.3 PATH=$XILINX_VIVADO/bin:$PATH make system_synth.bit
   artifacts:
@@ -22,7 +22,7 @@ soc_picorv32_cmod_a7:
   before_script:
     - cd soc/picorv32/project/cmod_a7
   script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make system_synth.bit
+    - PATH=$DEFAULT_XILINX_VIVADO/bin:$PATH make system_synth.bit
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week

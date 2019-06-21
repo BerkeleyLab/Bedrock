@@ -5,7 +5,7 @@ stages:
   - program
 
 variables:
-  XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1
+  DEFAULT_XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1
   CI_REGISTRY: mohs.dhcp.lbl.gov
   CONTAINER_IMAGE: $CI_REGISTRY/testing_base
   CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
@@ -84,7 +84,7 @@ comms_top:
     - cd projects/comms_top && ls /non-free
   stage: synthesis
   script:
-    - XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH make comms_top.bit
+    - XILINX_VIVADO=$DEFAULT_XILINX_VIVADO PATH=$DEFAULT_XILINX_VIVADO/bin:$PATH make comms_top.bit
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week
@@ -94,4 +94,4 @@ comms_top:
 badger_ac701:
   stage: synthesis
   script:
-    - XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH && cd badger/tests && make ac701_rgmii_vtest.bit && sh teststand_ac701.sh
+    - XILINX_VIVADO=$DEFAULT_XILINX_VIVADO PATH=$DEFAULT_XILINX_VIVADO/bin:$PATH && cd badger/tests && make ac701_rgmii_vtest.bit && sh teststand_ac701.sh
