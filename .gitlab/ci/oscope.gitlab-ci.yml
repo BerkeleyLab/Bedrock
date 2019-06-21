@@ -17,4 +17,4 @@ oscope_program:
   dependencies:
     - oscope_top
   script:
-    - PYTHONPATH=../../../build-tools/:../../../dsp && python prc.py -a 192.168.1.121 -r -b ../bmb7_cu/oscope_top.bit
+    - export PYTHONPATH=$PYTHONPATH:../../../build-tools/:../../../dsp && python prc.py -a 192.168.1.121 -r -b ../bmb7_cu/oscope_top.bit
