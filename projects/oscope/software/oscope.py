@@ -57,6 +57,7 @@ class ADC:
     dbm_to_Vrms = np.sqrt(1e-3 * (10**0.6) * 50)
     Vzp = dbm_to_Vrms * np.sqrt(2)
     count_to_v = Vzp / scale
+    count_to_v = 1.
 
     def counts_to_volts(raw_counts):
         # TODO: This should be adjusted to ADC.Vzp and verified
@@ -95,7 +96,7 @@ class Carrier(ADC):
         self.test_counter = 0
         self.subscriptions, self.results = {}, {}
         self.carrier.reg_write([{'config_adc_downsample_ratio': log_downsample_ratio}])
-        ADC.sample_rate = ADC.sample_rate // (1 << log_downsample_ratio)
+        ADC.sample_rate = ADC.sample_rate / (1 << log_downsample_ratio)
 
     def test_data(self, *args):
         while True:
@@ -119,7 +120,7 @@ class Carrier(ADC):
             data_block, self.ts = collect_adcs(self.carrier, self.npt,
                                                self.n_channels)
             # ADC count / FULL SCALE => [-1.0, 1.]
-            self._nblock = ADC.counts_to_volts(np.array(data_block))
+            self._nblock = ADC.counts_to_volts(np.array(data_block) - ADC.scale)
             self._process_subscriptions()
             time.sleep(0.1)
 
@@ -145,7 +146,8 @@ class Processing:
     @staticmethod
     def identity(data_block, ch_n):
         ch_data = data_block[ch_n]
-        return range(len(ch_data)) * ADC.sample_rate, ch_data
+        print(ch_data)
+        return np.arange(len(ch_data)) * ADC.sample_rate, ch_data
 
     @staticmethod
     def save(data_block, *args):
@@ -351,7 +353,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-c', '--count', help='number of acquisitions', type=int, default=1)
     parser.add_argument(
-        '-l', '--log_downsample_ratio', help='Log downsample ratio', type=int, default=2)
+        '-l', '--log_downsample_ratio', help='Log downsample ratio', type=int, default=0)
     parser.add_argument(
         '-f', '--filewritepath', help='static file out', type=str, default="")
     parser.add_argument(

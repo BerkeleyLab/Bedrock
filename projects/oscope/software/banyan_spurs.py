@@ -98,7 +98,7 @@ def pair_ram(prc, addr, count):
     addr needs to be numeric
     '''
     foo = prc.reg_read_alist(list(range(addr, addr + count)))
-    uuu = [struct.unpack('!hh', x[2]) for x in foo]
+    uuu = [struct.unpack('!HH', x[2]) for x in foo]
     ram1 = [x[1] for x in uuu]
     ram2 = [x[0] for x in uuu]
     return [ram1, ram2]
