@@ -217,23 +217,30 @@ module comms_top
       .MAC        (MACADDR),
       .JUMBO_DW   (JUMBO_DW))
    i_eth_gtx_bridge (
-      .gtx_tx_clk  (gtx0_tx_usr_clk), // Transceiver clock at half rate
-      .gmii_tx_clk (gmii_tx_clk),     // Clock for Ethernet fabric - 125 MHz for 1GbE
-      .gmii_rx_clk (gmii_rx_clk),
-      .gtx_rxd     (gtx0_rxd),
-      .gtx_txd     (gtx0_txd),
+      .gtx_tx_clk    (gtx0_tx_usr_clk), // Transceiver clock at half rate
+      .gmii_tx_clk   (gmii_tx_clk),     // Clock for Ethernet fabric - 125 MHz for 1GbE
+      .gmii_rx_clk   (gmii_rx_clk),
+      .gtx_rxd       (gtx0_rxd),
+      .gtx_txd       (gtx0_txd),
+
+      // Ethernet configuration interface
+      .cfg_enable_rx (1'b1),
+      .cfg_clk       (gmii_tx_clk),
+      .cfg_valid     (1'b0),
+      .cfg_mem_sel   (1'b0),
+      .cfg_wdata     (8'b0),
 
       // Status signals
-      .rx_mon      (rx_mon),
-      .tx_mon      (tx_mon),
+      .rx_mon        (rx_mon),
+      .tx_mon        (tx_mon),
 
       // Local bus interface in gmii_tx_clk domain
-      .lb_valid    (lb_valid),
-      .lb_rnw      (lb_rnw),
-      .lb_addr     (lb_addr),
-      .lb_wdata    (lb_wdata),
-      .lb_renable  (lb_renable),
-      .lb_rdata    (lb_rdata)
+      .lb_valid      (lb_valid),
+      .lb_rnw        (lb_rnw),
+      .lb_addr       (lb_addr),
+      .lb_wdata      (lb_wdata),
+      .lb_renable    (lb_renable),
+      .lb_rdata      (lb_rdata)
    );
 
    wire lb_clk = gmii_tx_clk;
