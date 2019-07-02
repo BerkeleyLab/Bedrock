@@ -87,6 +87,7 @@ class Carrier(ADC):
             self.npt = get_npt(self.carrier)
             mask_int = int(mask, 0)
             self.n_channels, channels = write_mask(self.carrier, mask_int)
+            self.carrier.reg_write([{'config_adc_downsample_ratio': log_downsample_ratio}])
         else:
             banyan_aw = 13
             self.npt = 2**banyan_aw
@@ -95,7 +96,6 @@ class Carrier(ADC):
         self.pts_per_ch = self.npt * 8 // self.n_channels
         self.test_counter = 0
         self.subscriptions, self.results = {}, {}
-        self.carrier.reg_write([{'config_adc_downsample_ratio': log_downsample_ratio}])
         ADC.sample_rate = ADC.sample_rate / (1 << log_downsample_ratio)
 
     def test_data(self, *args):
@@ -151,7 +151,9 @@ class Processing:
 
     @staticmethod
     def save(data_block, *args):
-        Logger.critical('Unimplemented')
+        print(len(data_block))
+        fname = time.strftime("%Y%m%d-%H%M%S")
+        np.savetxt(fname, data_block.T)
 
     @staticmethod
     def fft(data_block, ch_n, window):
@@ -364,7 +366,9 @@ if __name__ == "__main__":
         action="store_true",
         help="use spartan",
         default=True)
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
+    sys.argv[1:] = unknown
+    # args = parser.parse_args(sys.argv[2:])
     carrier = Carrier(
         ip_addr=args.ip,
         port=args.port,
@@ -374,7 +378,7 @@ if __name__ == "__main__":
         filewritepath=args.filewritepath,
         use_spartan=args.use_spartan,
         log_downsample_ratio=args.log_downsample_ratio,
-        test=args.testmode)
+        test=True)
     GUIGraphChannel.setup_gui_channels(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
     acq_thread.daemon = True
