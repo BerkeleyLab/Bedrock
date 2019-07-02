@@ -21,12 +21,15 @@ module eth_gtx_bridge #(
    output        rx_mon,
    output        tx_mon,
 
-   // Ethernet configuration (shift) interface
-   input         cfg_enable_rx,
+   // Ethernet configuration interface
    input         cfg_clk,
+   input         cfg_enable_rx,
    input         cfg_valid,
-   input         cfg_mem_sel, // 0 - MAC/IP; 1 - UDP Ports
+   input  [4:0]  cfg_addr, // cfg_addr[4] = {0 - MAC/IP, 1 - UDP Ports}
    input  [7:0]  cfg_wdata,
+   // Dummy ports used to trigger newad address space generation
+   input  [7:0]  cfg_reg, // external
+   output [4:0]  cfg_reg_addr, // external
 
    // Local Bus interface
    output        lb_valid,
@@ -101,29 +104,8 @@ module eth_gtx_bridge #(
    localparam UDP_MEM_SZ = 16;
    localparam SEL_MACIP = 0, SEL_UDP = 1;
 
-   reg [3:0] cfg_mem_ptr=0;
-   reg       prev_mem_sel=0;
-   wire switch_mem;
-
-   assign switch_mem = (cfg_mem_sel != prev_mem_sel) ? 1'b1 : 1'b0;
-
-   always @(posedge cfg_clk) begin
-      if (cfg_valid) begin
-         if (switch_mem) begin
-            prev_mem_sel <= cfg_mem_sel;
-            cfg_mem_ptr <= 1;
-         end else begin
-            if (cfg_mem_ptr == (cfg_mem_sel==SEL_MACIP ? MACIP_MEM_SZ : UDP_MEM_SZ) - 1)
-               cfg_mem_ptr <= 0;
-            else
-               cfg_mem_ptr <= cfg_mem_ptr + 1;
-         end
-      end
-   end
-
-   wire [3:0] cfg_addr = switch_mem ? 3'b0 : cfg_mem_ptr;
-   wire cfg_ipmac = (cfg_mem_sel==SEL_MACIP) & cfg_valid;
-   wire cfg_udp   = (cfg_mem_sel==SEL_UDP) & cfg_valid;
+   wire cfg_ipmac = (cfg_addr[4]==SEL_MACIP) & cfg_valid;
+   wire cfg_udp   = (cfg_addr[4]==SEL_UDP) & cfg_valid;
 
    rtefi_blob #(.ip(IP), .mac(MAC), .mac_aw(2)) badger(
       // GMII Input (Rx)
@@ -138,7 +120,7 @@ module eth_gtx_bridge #(
       // Configuration
       .enable_rx           (cfg_enable_rx),
       .config_clk          (cfg_clk),
-      .config_a            (cfg_addr),
+      .config_a            (cfg_addr[3:0]),
       .config_d            (cfg_wdata),
       .config_s            (cfg_ipmac),
       .config_p            (cfg_udp),
