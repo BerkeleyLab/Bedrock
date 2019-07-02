@@ -58,7 +58,7 @@ class ADC:
     Vzp = dbm_to_Vrms * np.sqrt(2)
     count_to_v = Vzp / scale
     count_to_v = 1.
-
+    downsample_ratio = 1
     def counts_to_volts(raw_counts):
         # TODO: This should be adjusted to ADC.Vzp and verified
         return raw_counts * ADC.count_to_v
@@ -76,6 +76,7 @@ class Carrier(ADC):
                  filewritepath=None,
                  use_spartan=False,
                  test=False):
+        ADC.downsample_ratio = 1 << log_downsample_ratio
         self.test = test
         if not test:
             self.carrier = c_prc(
@@ -96,7 +97,7 @@ class Carrier(ADC):
         self.pts_per_ch = self.npt * 8 // self.n_channels
         self.test_counter = 0
         self.subscriptions, self.results = {}, {}
-        ADC.sample_rate = ADC.sample_rate / (1 << log_downsample_ratio)
+        ADC.fpga_output_rate = ADC.sample_rate / ADC.downsample_ratio
 
     def test_data(self, *args):
         while True:
@@ -141,62 +142,73 @@ class Carrier(ADC):
         self.subscriptions.pop(sub_id)
         Logger.info('Removed subscription {}'.format(sub_id))
 
+def vdir(obj):
+    return [(x, v) for x, v in vars(obj).items() if not x.startswith('__')]
 
 class Processing:
     @staticmethod
     def identity(data_block, ch_n):
         ch_data = data_block[ch_n]
-        print(ch_data)
-        return np.arange(len(ch_data)) * ADC.sample_rate, ch_data
+        return np.arange(len(ch_data)) * ADC.fpga_output_rate, ch_data
 
     @staticmethod
     def save(data_block, *args):
-        print(len(data_block))
+        print(data_block.shape)
         fname = time.strftime("%Y%m%d-%H%M%S")
-        np.savetxt(fname, data_block.T)
+        ADC_attrs = sorted(vdir(ADC))
+        with open(fname, 'a') as f:
+            for x, v in ADC_attrs:
+                f.write('# {} {}\n'.format(x, v))
+            np.savetxt(f, data_block.T)
 
     @staticmethod
     def fft(data_block, ch_n, window):
         ch_data = data_block[ch_n]
         return (np.fft.rfftfreq(
-            len(ch_data), d=1 / ADC.sample_rate)[10:],
+            len(ch_data), d=1 / ADC.fpga_output_rate)[10:],
             np.abs(np.fft.rfft(ch_data))[10:])
 
     @staticmethod
     def csd(data_block, ch_1, ch_2, window='hanning'):
         ch1_data, ch2_data = data_block[ch_1], data_block[ch_2]
-        return signal.csd(ch1_data, ch2_data, ADC.sample_rate, window=window)
+        return signal.csd(ch1_data, ch2_data, ADC.fpga_output_rate, window=window)
 
 
-g_channels = {}
+g_channels, g_limits = {}, {}
 
-
-# TODO: Should convert this to a dataclass for python 3.7+
-class GUIGraphChannel:
-    def __init__(self, ch_id, show=False, **kwargs):
-        self.ch_id = ch_id
-        self.show = show
-        self.fig = plt.figure()
+class GUIGraphLimits:
+    def __init__(self, plot_type, **kwargs):
+        self.plot_type = plot_type
         self.xlim = kwargs.get('xlim')
         self.ylim = kwargs.get('ylim')
         self.ylog = kwargs.get('ylog')
         self.xlog = kwargs.get('xlog')
         self.autoscale = kwargs.pop('autoscale', False)
+
+
+# TODO: Should convert this to a dataclass for python 3.7+
+class GUIGraphChannel:
+    def __init__(self, ch_id, plot_type='T', show=False, **kwargs):
+        self.ch_id = ch_id
+        self.show = show
+        self.fig = plt.figure()
         self.wid = FigureCanvas(self.fig)
         self.ax = self.fig.add_subplot(111, **kwargs)
         self.plot = self.ax.plot(range(100), [1 / 2] * 100)[0]
         self.carrier_ch_n = int(ch_id[1]) if int(ch_id[0]) < 2 else None
+        self.plot_type = plot_type
 
     def update_data(self):
+        plot_limits = g_limits[self.plot_type]
         if self.ch_id not in carrier.results:
             # Logger.critical('No data found')
             return
         x_data, y_data = carrier.results[self.ch_id]
         self.plot.set_xdata(x_data)
         self.plot.set_ydata(y_data)
-        if not self.autoscale:
-            self.ax.set_xlim(self.xlim)
-            self.ax.set_ylim(self.ylim)
+        if not plot_limits.autoscale:
+            self.ax.set_xlim(plot_limits.xlim)
+            self.ax.set_ylim(plot_limits.ylim)
         else:
             self.ax.relim()
             self.ax.autoscale()
@@ -208,22 +220,17 @@ class GUIGraphChannel:
     def setup_gui_channels(carrier):
         for i in range(carrier.n_channels):
             ch_id = "0" + str(i)
-            g_channels[ch_id] = GUIGraphChannel(
-                ch_id,
-                xlabel='Time',
-                ylabel='Volts',
-                xlim=[0, 100],
-                ylim=[-1., 1.])
+            g_channels[ch_id] = GUIGraphChannel(ch_id, plot_type='T')
             ch_id = "1" + str(i)
-            g_channels[ch_id] = GUIGraphChannel(
-                ch_id, xlabel='Frequency [Hz]', ylabel='[V]',
-                xlim=[0, 5e7], ylim=[1e-11, 200]
-            )
+            g_channels[ch_id] = GUIGraphChannel(ch_id, plot_type='F')
         ch_id = "3"
-        g_channels[ch_id] = GUIGraphChannel(
-            ch_id, xlabel='Frequency [Hz]', ylabel='[V/sqrt(Hz)]',
-            xlim=[0, 5e7], ylim=[1e-11, 200], autoscale=True)
-
+        g_channels[ch_id] = GUIGraphChannel(ch_id, plot_type='F')
+        g_limits['T'] = GUIGraphLimits('T', xlabel='Time', ylabel='Volts',
+                                       xlim=[0, 100], ylim=[-1., 1.])
+        g_limits['F'] = GUIGraphLimits('F', xlabel='Frequency [Hz]',
+                                       ylabel='[V/sqrt(Hz)]',
+                                       xlim=[0, 5e7], ylim=[1e-11, 200],
+                                       autoscale=True)
 
 class Logic(BoxLayout):
     autoscale = ObjectProperty(False)
@@ -237,15 +244,16 @@ class Logic(BoxLayout):
 
     def update_lim(self, axis, *args):
         CH = g_channels[self.plot_id]
+        plot_limits = g_limits[CH.plot_type]
         if axis == 'autoscale':
-            CH.autoscale = args[1]
+            plot_limits.autoscale = args[1]
             return
         text = args[1]
         try:
             if axis == "X":
-                CH.xlim = eval(text)
+                plot_limits.xlim = eval(text)
             elif axis == "Y":
-                CH.ylim = eval(text)
+                plot_limits.ylim = eval(text)
         except Exception:
             Logger.warning('Invalid limits: ' + text)
 
@@ -263,14 +271,15 @@ class Logic(BoxLayout):
 
         self.plot_id = self.plot_Q[-1]
         CH = g_channels[self.plot_id]
+        plot_limits = g_limits[CH.plot_type]
         try:
             self.ids.ch_name.text = str('CH' + str(int(self.plot_id[1]) + 1) + ' ' +
                                         ('T' if self.plot_id[0] == '0' else 'F'))
         except Exception:
             self.ids.ch_name.text = 'Cross\nSpectral\nDensity'
-        self.ids.ylim.text = str(CH.ylim)
-        self.ids.xlim.text = str(CH.xlim)
-        self.autoscale = CH.autoscale
+        self.ids.ylim.text = str(plot_limits.ylim)
+        self.ids.xlim.text = str(plot_limits.xlim)
+        self.autoscale = plot_limits.autoscale
 
     def plot_select(self, plot_id, *args):
         '''
