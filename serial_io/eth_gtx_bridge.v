@@ -122,8 +122,8 @@ module eth_gtx_bridge #(
    end
 
    wire [3:0] cfg_addr = switch_mem ? 3'b0 : cfg_mem_ptr;
-   wire cfg_ipmac = (cfg_mem_sel == SEL_MACIP) ? 1'b1 : 1'b0;
-   wire cfg_udp   = (cfg_mem_sel == SEL_UDP)   ? 1'b1 : 1'b0;
+   wire cfg_ipmac = (cfg_mem_sel==SEL_MACIP) & cfg_valid;
+   wire cfg_udp   = (cfg_mem_sel==SEL_UDP) & cfg_valid;
 
    rtefi_blob #(.ip(IP), .mac(MAC), .mac_aw(2)) badger(
       // GMII Input (Rx)
