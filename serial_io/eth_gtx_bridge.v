@@ -21,6 +21,16 @@ module eth_gtx_bridge #(
    output        rx_mon,
    output        tx_mon,
 
+   // Ethernet configuration interface
+   input         cfg_clk,
+   input         cfg_enable_rx,
+   input         cfg_valid,
+   input  [4:0]  cfg_addr, // cfg_addr[4] = {0 - MAC/IP, 1 - UDP Ports}
+   input  [7:0]  cfg_wdata,
+   // Dummy ports used to trigger newad address space generation
+   input  [7:0]  cfg_reg, // external
+   output [4:0]  cfg_reg_addr, // external
+
    // Local Bus interface
    output        lb_valid,
    output        lb_rnw,
@@ -90,6 +100,10 @@ module eth_gtx_bridge #(
    // ----------------------------------
    // Ethernet MAC
    // ---------------------------------
+   localparam SEL_MACIP = 0, SEL_UDP = 1;
+
+   wire cfg_ipmac = (cfg_addr[4]==SEL_MACIP) & cfg_valid;
+   wire cfg_udp   = (cfg_addr[4]==SEL_UDP) & cfg_valid;
 
    rtefi_blob #(.ip(IP), .mac(MAC), .mac_aw(2)) badger(
       // GMII Input (Rx)
@@ -102,12 +116,12 @@ module eth_gtx_bridge #(
       .txd                 (gmii_txd),
       .tx_en               (gmii_tx_en),
       // Configuration
-      .enable_rx           (1'b1),
-      .config_clk          (gmii_tx_clk),
-      .config_a            (4'd0),
-      .config_d            (8'd0),
-      .config_s            (1'b0),
-      .config_p            (1'b0),
+      .enable_rx           (cfg_enable_rx),
+      .config_clk          (cfg_clk),
+      .config_a            (cfg_addr[3:0]),
+      .config_d            (cfg_wdata),
+      .config_s            (cfg_ipmac),
+      .config_p            (cfg_udp),
       // TX MAC Host interface
       .host_clk            (1'b0),
       .host_waddr          (3'b0),
