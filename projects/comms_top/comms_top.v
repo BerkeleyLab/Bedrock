@@ -224,10 +224,10 @@ module comms_top
       .gtx_txd       (gtx0_txd),
 
       // Ethernet configuration interface
-      .cfg_enable_rx (1'b1),
       .cfg_clk       (gmii_tx_clk),
+      .cfg_enable_rx (1'b1),
       .cfg_valid     (1'b0),
-      .cfg_mem_sel   (1'b0),
+      .cfg_addr      (5'b0),
       .cfg_wdata     (8'b0),
 
       // Status signals
