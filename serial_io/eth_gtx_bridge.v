@@ -100,8 +100,6 @@ module eth_gtx_bridge #(
    // ----------------------------------
    // Ethernet MAC
    // ---------------------------------
-   localparam MACIP_MEM_SZ = 10; // Bytes
-   localparam UDP_MEM_SZ = 16;
    localparam SEL_MACIP = 0, SEL_UDP = 1;
 
    wire cfg_ipmac = (cfg_addr[4]==SEL_MACIP) & cfg_valid;
