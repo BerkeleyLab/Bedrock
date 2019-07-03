@@ -25,6 +25,8 @@ from banyan_ch_find import banyan_ch_find
 from banyan_spurs import collect_adcs
 from prc import c_prc
 
+from misc import ADC, DataBlock, Processing
+
 
 def write_mask(prc, mask_int):
     prc.reg_write([{'banyan_mask': mask_int}])
@@ -43,40 +45,19 @@ def get_npt(prc):
     return npt
 
 
-class ADC:
-    bits = 16
-    scale = 1 << (bits - 1)  # signed
-    sample_rate = 100000000.
-    count_to_1volt = 1. / scale
-    # 6dbm = 10 * log10(P/1e-3W)
-    # 10 ** (6 / 10) = P / 1e-3
-    # 10 ** (0.6) * 1e-3 = P
-    # Assuming P = V**2 / 50 Ohms
-    # V**2 = 1e-3 * (10 ** 0.6) * 50
-    # V = np.sqrt(1e-3 * (10 ** 0.6) * 50)
-    dbm_to_Vrms = np.sqrt(1e-3 * (10**0.6) * 50)
-    Vzp = dbm_to_Vrms * np.sqrt(2)
-    count_to_v = Vzp / scale
-    count_to_v = 1.
-    downsample_ratio = 1
-    def counts_to_volts(raw_counts):
-        # TODO: This should be adjusted to ADC.Vzp and verified
-        return raw_counts * ADC.count_to_v
-
-
-class Carrier(ADC):
+class Carrier():
     def __init__(self,
                  ip_addr='192.168.1.121',
                  port=50006,
                  mask="0xff",
                  npt_wish=0,
                  count=10,
-                 log_downsample_ratio=0,
+                 log_decimation_factor=0,
                  verbose=False,
                  filewritepath=None,
                  use_spartan=False,
                  test=False):
-        ADC.downsample_ratio = 1 << log_downsample_ratio
+        ADC.decimation_factor = 1 << log_decimation_factor
         self.test = test
         if not test:
             self.carrier = c_prc(
@@ -88,25 +69,24 @@ class Carrier(ADC):
             self.npt = get_npt(self.carrier)
             mask_int = int(mask, 0)
             self.n_channels, channels = write_mask(self.carrier, mask_int)
-            self.carrier.reg_write([{'config_adc_downsample_ratio': log_downsample_ratio}])
+            self.carrier.reg_write([{'config_adc_downsample_ratio':
+                                     log_decimation_factor}])
         else:
             banyan_aw = 13
             self.npt = 2**banyan_aw
             self.n_channels = 2
 
         self.pts_per_ch = self.npt * 8 // self.n_channels
-        self.test_counter = 0
         self.subscriptions, self.results = {}, {}
-        ADC.fpga_output_rate = ADC.sample_rate / ADC.downsample_ratio
+        ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
 
     def test_data(self, *args):
         while True:
-            self.test_counter += 1
             # https://docs.python.org/3/tutorial/classes.html#private-variables
-            self._nblock = np.array([
-                np.random.random_sample(self.pts_per_ch)
-                for _ in range(self.n_channels)
-            ])
+            self._db = DataBlock(
+                np.array([np.random.random_sample(self.pts_per_ch)
+                          for _ in range(self.n_channels)]),
+                time.time())
             self._process_subscriptions()
             time.sleep(0.2)
 
@@ -118,10 +98,10 @@ class Carrier(ADC):
             # collect_adcs is not normal:
             # It always collects npt * 8 data points.
             # Each channel gets [(npt * 8) // n_channels] datapoints
-            data_block, self.ts = collect_adcs(self.carrier, self.npt,
-                                               self.n_channels)
+            data_raw, ts = collect_adcs(self.carrier,
+                                        self.npt, self.n_channels)
+            self._db = DataBlock(ADC.counts_to_volts(np.array(data_block)), ts)
             # ADC count / FULL SCALE => [-1.0, 1.]
-            self._nblock = ADC.counts_to_volts(np.array(data_block) - ADC.scale)
             self._process_subscriptions()
             time.sleep(0.1)
 
@@ -129,7 +109,7 @@ class Carrier(ADC):
         # TODO: Perhaps implement something to avoid race condition on results
         for sub_id, (single_subscribe, fn,
                      *fn_args) in list(self.subscriptions.items()):
-            self.results[sub_id] = fn(self._nblock, *fn_args)
+            self.results[sub_id] = fn(self._db, *fn_args)
             if single_subscribe:
                 self.remove_subscription(sub_id)
 
@@ -141,37 +121,6 @@ class Carrier(ADC):
     def remove_subscription(self, sub_id):
         self.subscriptions.pop(sub_id)
         Logger.info('Removed subscription {}'.format(sub_id))
-
-def vdir(obj):
-    return [(x, v) for x, v in vars(obj).items() if not x.startswith('__')]
-
-class Processing:
-    @staticmethod
-    def identity(data_block, ch_n):
-        ch_data = data_block[ch_n]
-        return np.arange(len(ch_data)) * ADC.fpga_output_rate, ch_data
-
-    @staticmethod
-    def save(data_block, *args):
-        print(data_block.shape)
-        fname = time.strftime("%Y%m%d-%H%M%S")
-        ADC_attrs = sorted(vdir(ADC))
-        with open(fname, 'a') as f:
-            for x, v in ADC_attrs:
-                f.write('# {} {}\n'.format(x, v))
-            np.savetxt(f, data_block.T)
-
-    @staticmethod
-    def fft(data_block, ch_n, window):
-        ch_data = data_block[ch_n]
-        return (np.fft.rfftfreq(
-            len(ch_data), d=1 / ADC.fpga_output_rate)[10:],
-            np.abs(np.fft.rfft(ch_data))[10:])
-
-    @staticmethod
-    def csd(data_block, ch_1, ch_2, window='hanning'):
-        ch1_data, ch2_data = data_block[ch_1], data_block[ch_2]
-        return signal.csd(ch1_data, ch2_data, ADC.fpga_output_rate, window=window)
 
 
 g_channels, g_limits = {}, {}
@@ -299,7 +248,7 @@ class Logic(BoxLayout):
             self.add_widget(CH.wid)
             plot_type = plot_id[0]
             if plot_type == '0':
-                carrier.add_subscription(plot_id, Processing.identity,
+                carrier.add_subscription(plot_id, Processing.time_domain,
                                          int(plot_id[1]))
             elif plot_type == '1':
                 carrier.add_subscription(plot_id, Processing.fft,
@@ -354,7 +303,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-p', '--port', help='port', dest='port', type=int, default=50006)
     parser.add_argument(
-        '-m', '--mask', help='mask', dest='mask', type=str, default='0x9')
+        '-m', '--mask', help='mask', dest='mask', type=str, default='0x1')
     parser.add_argument(
         '-n',
         '--npt_wish',
@@ -364,7 +313,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-c', '--count', help='number of acquisitions', type=int, default=1)
     parser.add_argument(
-        '-l', '--log_downsample_ratio', help='Log downsample ratio', type=int, default=0)
+        '-l', '--log_decimation_factor', help='Log downsample ratio', type=int, default=0)
     parser.add_argument(
         '-f', '--filewritepath', help='static file out', type=str, default="")
     parser.add_argument(
@@ -386,8 +335,8 @@ if __name__ == "__main__":
         count=args.count,
         filewritepath=args.filewritepath,
         use_spartan=args.use_spartan,
-        log_downsample_ratio=args.log_downsample_ratio,
-        test=True)
+        log_decimation_factor=args.log_decimation_factor,
+        test=False)
     GUIGraphChannel.setup_gui_channels(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
     acq_thread.daemon = True
