@@ -4,38 +4,50 @@ Logic:
     BoxLayout:
         orientation: "vertical"
         BoxLayout:
-            size_hint: [1, 0.1]
+            size_hint: [1, 0.05]
             id: settings_box
             orientation: "horizontal"
             BoxLayout:
+                size_hint: [0.2, 1]
                 orientation: "vertical"
                 Label:
                     text: "CH1"
+                    bold: True
                     id: ch_name
             BoxLayout:
                 orientation: "vertical"
-                Label:
-                    text: "xlim"
-                TextInput:
-                    id: xlim
-                    on_text: root.update_lim("X", *args)
+                size_hint: [0.6, 1]
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "xlim"
+                        size_hint: [0.3, 1]
+                    TextInput:
+                        id: xlim
+                        on_text: root.update_lim("X", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "ylim"
+                        size_hint: [0.3, 1]
+                    TextInput:
+                        id: ylim
+                        on_text: root.update_lim("Y", *args)
             BoxLayout:
                 orientation: "vertical"
-                Label:
-                    text: "ylim"
-                TextInput:
-                    id: ylim
-                    on_text: root.update_lim("Y", *args)
-            BoxLayout:
-                orientation: "vertical"
-                Label:
-                    text: "Autoscale"
-                CheckBox:
-                    on_active: root.update_lim("autoscale", *args)
-                    active: root.autoscale
+                size_hint: [0.2, 1]
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "Autoscale"
+                    CheckBox:
+                        on_active: root.update_lim("autoscale", *args)
+                        active: root.autoscale
                 Button:
+                    size_hint: [0.5, 0.2]
                     text: "SAVE"
                     bold: True
+                    center: self.parent.center
                     on_press: root.save_data()
             # BoxLayout:
             #     orientation: "vertical"
@@ -44,7 +56,7 @@ Logic:
             #     TextInput:
             #         id: window
         BoxLayout:
-            size_hint: [1, 0.5]
+            size_hint: [1, 0.05]
             orientation: "horizontal"
             BoxLayout:
                 orientation: "vertical"
@@ -56,6 +68,8 @@ Logic:
                         text: "T"
                     CheckBox:
                         on_active: root.plot_select("00", *args)
+                BoxLayout:
+                    orientation: "horizontal"
                     Label:
                         text: "F"
                     CheckBox:
@@ -70,6 +84,8 @@ Logic:
                         text: "T"
                     CheckBox:
                         on_active: root.plot_select("01", *args)
+                BoxLayout:
+                    orientation: "horizontal"
                     Label:
                         text: "F"
                     CheckBox:
@@ -84,6 +100,8 @@ Logic:
                         text: "T"
                     CheckBox:
                         on_active: root.plot_select("02", *args)
+                BoxLayout:
+                    orientation: "horizontal"
                     Label:
                         text: "F"
                     CheckBox:
@@ -98,6 +116,8 @@ Logic:
                         text: "T"
                     CheckBox:
                         on_active: root.plot_select("03", *args)
+                BoxLayout:
+                    orientation: "horizontal"
                     Label:
                         text: "F"
                     CheckBox:

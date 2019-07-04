@@ -139,15 +139,17 @@ class GUIGraphLimits:
 
 # TODO: Should convert this to a dataclass for python 3.7+
 class GUIGraph:
-    def __init__(self, ch_id, plot_info, show=False, **kwargs):
+    def __init__(self, ch_id, plot_info, show=False, label='Noname', **kwargs):
         self.ch_id = ch_id
         self.show = show
+        self.label = label
         self.fig = plt.figure()
         self.wid = FigureCanvas(self.fig)
         self.ax = self.fig.add_subplot(111, **kwargs)
-        self.plot = self.ax.plot(range(100), [1 / 2] * 100)[0]
+        self.plot = self.ax.plot(range(100), [1 / 2] * 100, label=self.label)[0]
         self.ax.set_xlabel(plot_info.xlabel)
         self.ax.set_ylabel(plot_info.ylabel)
+        self.ax.legend()
         self.carrier_ch_n = int(ch_id[1]) if int(ch_id[0]) < 2 else None
         self.plot_info = plot_info
 
@@ -187,11 +189,15 @@ class GUIGraph:
         # 2 graphs, 1 for T and 1 for F
         for i in range(carrier.n_channels):
             ch_id = "0" + str(i)
-            g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['T'])
+            g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['T'],
+                                               label='CH{}-TimeDomain'.format(i))
             ch_id = "1" + str(i)
-            g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'])
+            g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
+                                               label='CH{}-Frequency'.format(i))
         ch_id = "3"
-        g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'])
+        g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
+                                               label='CSD'.format(i))
+
 
 
 class Logic(BoxLayout):
