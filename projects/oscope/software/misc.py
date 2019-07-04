@@ -1,3 +1,9 @@
+import time
+
+import numpy as np
+from scipy import signal
+
+
 class ADC:
     bits = 16
     scale = 1 << (bits - 1)  # signed
@@ -15,6 +21,7 @@ class ADC:
     count_to_v = 1.
     downsample_ratio = 1
     # 1.7V saturates 765kHz
+
     def counts_to_volts(raw_counts):
         # TODO: This should be adjusted to ADC.Vzp and verified
         return raw_counts * ADC.count_to_v
@@ -31,16 +38,23 @@ def vdir(obj):
 
 
 class Processing:
-    g_freq, g_freq_peak = 0.0, 0.0
+    '''
+    A set of data processing functions for an Oscilloscope
+    TODO:
+    1. Easily testable in itself. So add python unittests!
+    '''
+    max_val_freq, max_val = 0.0, 0.0
+
     @staticmethod
     def time_domain(data_block, ch_n):
         ch_data = data_block.data[ch_n]
         with open('td_file', 'a') as f:
             f.write('{}, {}, {}, {}\n'.format(np.max(ch_data),
                                               np.max(ch_data) - np.min(ch_data),
-                                              Processing.g_freq,
-                                              Processing.g_freq_peak))
-        return np.arange(len(ch_data)) / ADC.fpga_output_rate, ch_data
+                                              Processing.max_val_freq,
+                                              Processing.max_val))
+        T = np.arange(len(ch_data)) / ADC.fpga_output_rate  # in seconds
+        return T, ch_data, np.max(ch_data) - np.min(ch_data)
 
     @staticmethod
     def save(data_block, *args):
@@ -59,10 +73,14 @@ class Processing:
         fft_x = np.fft.rfftfreq(len(ch_data), d=1 / ADC.fpga_output_rate)
         fft_result = np.abs(np.fft.rfft(ch_data))
         amax = np.argmax(fft_result[10:])
-        Processing.g_freq, Processing.g_freq_peak = fft_x[10:][amax], np.max(fft_result[10:])
-        return fft_x[10:], fft_result[10:]
+        Processing.max_val_freq = fft_x[10:][amax]
+        Processing.max_val = np.max(fft_result[10:])
+        return (fft_x[10:], fft_result[10:],
+                Processing.max_val_freq, Processing.max_val)
 
     @staticmethod
     def csd(data_block, ch_1, ch_2, window='hanning'):
         ch1_data, ch2_data = data_block.data[ch_1], data_block.data[ch_2]
-        return signal.csd(ch1_data, ch2_data, ADC.fpga_output_rate, window=window)
+        return signal.csd(ch1_data, ch2_data,
+                          ADC.fpga_output_rate,
+                          window=window)

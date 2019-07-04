@@ -18,7 +18,6 @@ import time
 from threading import Thread
 
 import numpy as np
-from scipy import signal
 from matplotlib import pyplot as plt
 
 from banyan_ch_find import banyan_ch_find
@@ -100,7 +99,7 @@ class Carrier():
             # Each channel gets [(npt * 8) // n_channels] datapoints
             data_raw, ts = collect_adcs(self.carrier,
                                         self.npt, self.n_channels)
-            self._db = DataBlock(ADC.counts_to_volts(np.array(data_block)), ts)
+            self._db = DataBlock(ADC.counts_to_volts(np.array(data_raw)), ts)
             # ADC count / FULL SCALE => [-1.0, 1.]
             self._process_subscriptions()
             time.sleep(0.1)
@@ -123,41 +122,48 @@ class Carrier():
         Logger.info('Removed subscription {}'.format(sub_id))
 
 
-g_channels, g_limits = {}, {}
+g_scope_channels, g_plot_type_limits = {}, {}
+
 
 class GUIGraphLimits:
     def __init__(self, plot_type, **kwargs):
         self.plot_type = plot_type
         self.xlim = kwargs.get('xlim')
         self.ylim = kwargs.get('ylim')
+        self.xlabel = kwargs.get('xlabel')
+        self.ylabel = kwargs.get('ylabel')
         self.ylog = kwargs.get('ylog')
         self.xlog = kwargs.get('xlog')
         self.autoscale = kwargs.pop('autoscale', False)
 
 
 # TODO: Should convert this to a dataclass for python 3.7+
-class GUIGraphChannel:
-    def __init__(self, ch_id, plot_type='T', show=False, **kwargs):
+class GUIGraph:
+    def __init__(self, ch_id, plot_info, show=False, **kwargs):
         self.ch_id = ch_id
         self.show = show
         self.fig = plt.figure()
         self.wid = FigureCanvas(self.fig)
         self.ax = self.fig.add_subplot(111, **kwargs)
         self.plot = self.ax.plot(range(100), [1 / 2] * 100)[0]
+        self.ax.set_xlabel(plot_info.xlabel)
+        self.ax.set_ylabel(plot_info.ylabel)
         self.carrier_ch_n = int(ch_id[1]) if int(ch_id[0]) < 2 else None
-        self.plot_type = plot_type
+        self.plot_info = plot_info
 
     def update_data(self):
-        plot_limits = g_limits[self.plot_type]
         if self.ch_id not in carrier.results:
             # Logger.critical('No data found')
             return
-        x_data, y_data = carrier.results[self.ch_id]
+        if self.plot_info.plot_type == 'T':
+            x_data, y_data, y_max = carrier.results[self.ch_id]
+        elif self.plot_info.plot_type == 'F':
+            x_data, y_data, xargmax, y_max = carrier.results[self.ch_id]
         self.plot.set_xdata(x_data)
         self.plot.set_ydata(y_data)
-        if not plot_limits.autoscale:
-            self.ax.set_xlim(plot_limits.xlim)
-            self.ax.set_ylim(plot_limits.ylim)
+        if not self.plot_info.autoscale:
+            self.ax.set_xlim(self.plot_info.xlim)
+            self.ax.set_ylim(self.plot_info.ylim)
         else:
             self.ax.relim()
             self.ax.autoscale()
@@ -166,20 +172,27 @@ class GUIGraphChannel:
         self.show = b
 
     @staticmethod
-    def setup_gui_channels(carrier):
+    def setup_gui_graphs(carrier):
+        # Load possible types of limits: For now T for time domain,
+        #                                and F for frequency
+        g_plot_type_limits['T'] = GUIGraphLimits('T', xlabel='Time [s]',
+                                                 ylabel='Volts',
+                                                 xlim=[0, 0.01], ylim=[-1., 1.])
+        g_plot_type_limits['F'] = GUIGraphLimits('F', xlabel='Frequency [Hz]',
+                                                 ylabel='[V/sqrt(Hz)]',
+                                                 xlim=[0, 5e7],
+                                                 ylim=[1e-11, 200],
+                                                 autoscale=True)
+        # Create 2 GUI graphs for each channel of data coming from the carrier
+        # 2 graphs, 1 for T and 1 for F
         for i in range(carrier.n_channels):
             ch_id = "0" + str(i)
-            g_channels[ch_id] = GUIGraphChannel(ch_id, plot_type='T')
+            g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['T'])
             ch_id = "1" + str(i)
-            g_channels[ch_id] = GUIGraphChannel(ch_id, plot_type='F')
+            g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'])
         ch_id = "3"
-        g_channels[ch_id] = GUIGraphChannel(ch_id, plot_type='F')
-        g_limits['T'] = GUIGraphLimits('T', xlabel='Time', ylabel='Volts',
-                                       xlim=[0, 100], ylim=[-1., 1.])
-        g_limits['F'] = GUIGraphLimits('F', xlabel='Frequency [Hz]',
-                                       ylabel='[V/sqrt(Hz)]',
-                                       xlim=[0, 5e7], ylim=[1e-11, 200],
-                                       autoscale=True)
+        g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'])
+
 
 class Logic(BoxLayout):
     autoscale = ObjectProperty(False)
@@ -192,8 +205,8 @@ class Logic(BoxLayout):
         self.plot_Q = []
 
     def update_lim(self, axis, *args):
-        CH = g_channels[self.plot_id]
-        plot_limits = g_limits[CH.plot_type]
+        CH = g_scope_channels[self.plot_id]
+        plot_limits = g_plot_type_limits[CH.plot_info.plot_type]
         if axis == 'autoscale':
             plot_limits.autoscale = args[1]
             return
@@ -219,8 +232,8 @@ class Logic(BoxLayout):
             self.ids.settings_box.size_hint = [1, .1]
 
         self.plot_id = self.plot_Q[-1]
-        CH = g_channels[self.plot_id]
-        plot_limits = g_limits[CH.plot_type]
+        CH = g_scope_channels[self.plot_id]
+        plot_limits = g_plot_type_limits[CH.plot_info.plot_type]
         try:
             self.ids.ch_name.text = str('CH' + str(int(self.plot_id[1]) + 1) + ' ' +
                                         ('T' if self.plot_id[0] == '0' else 'F'))
@@ -239,7 +252,7 @@ class Logic(BoxLayout):
         '''
         plot_selected = args[-1]  # Adds the plot when True, else removes it
 
-        CH = g_channels[plot_id]
+        CH = g_scope_channels[plot_id]
 
         self.plot_settings_update(plot_id, plot_selected)
 
@@ -279,7 +292,7 @@ class Logic(BoxLayout):
             'save', Processing.save, single_subscribe=True)
 
     def update_graph(self, dt):
-        for _, ch in g_channels.items():
+        for _, ch in g_scope_channels.items():
             if ch.show:
                 ch.update_data()
                 ch.wid.draw()
@@ -336,8 +349,8 @@ if __name__ == "__main__":
         filewritepath=args.filewritepath,
         use_spartan=args.use_spartan,
         log_decimation_factor=args.log_decimation_factor,
-        test=False)
-    GUIGraphChannel.setup_gui_channels(carrier)
+        test=True)
+    GUIGraph.setup_gui_graphs(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
     acq_thread.daemon = True
     acq_thread.start()
