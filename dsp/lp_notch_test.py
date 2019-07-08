@@ -123,10 +123,10 @@ class notch_setup:
             lpb = self.cl_bp.integers()
         return lpa, lpb
 
-    def dict(self, base):
-        d1 = self.cl_lp.dict(base + "lpa_")
+    def dict(self, base, lp_leaf="lpa_", notch_leaf="lpb_"):
+        d1 = self.cl_lp.dict(base + lp_leaf)
         if self.notch is not None:
-            d1.update(self.cl_bp.dict(base + "lpb_"))
+            d1.update(self.cl_bp.dict(base + notch_leaf))
         return d1
 
 
