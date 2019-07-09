@@ -17,7 +17,7 @@ MEM_SIZE = 4096
 SRC_V  += memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v sfr_pack.v gpio_pack.v
 OBJS   += startup.o common.o printf.o
 CFLAGS += -DSIMULATION
-VFLAGS += -DSIMULATION -m ./tap-vpi -DLINUX_TUN
+VFLAGS += -DSIMULATE -m ./tap-vpi -DLINUX_TUN
 
 #-------------------
 # The packet badger

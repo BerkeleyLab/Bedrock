@@ -35,7 +35,7 @@ $(TARGET)_tb: $(COMMON_V) $(SIM_V)
 $(TARGET).vcd: $(TARGET)32.hex
 
 # Only add the SIMULATION flag if target is simulation
-$(TARGET)_tb: VFLAGS += -DSIMULATION
+$(TARGET)_tb: VFLAGS += -DSIMULATE
 $(TARGET).vcd: CFLAGS += -DSIMULATION
 
 

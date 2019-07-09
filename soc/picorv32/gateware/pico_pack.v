@@ -75,7 +75,7 @@ picorv32 #(
     .ENABLE_DIV           ( 1              ),
     .TWO_CYCLE_COMPARE    ( 0              ),
     .TWO_CYCLE_ALU        ( 0              ),
-`ifdef SIMULATION
+`ifdef SIMULATE
     .ENABLE_TRACE    ( 1 )
 `else
     .ENABLE_TRACE    ( 0 )
@@ -114,7 +114,7 @@ picorv32 #(
     .trace_valid  (trace_valid),
     .trace_data   (trace_data)
 );
-`ifdef SIMULATION
+`ifdef SIMULATE
     integer trace_file;
     initial begin
         trace_file = $fopen("pico.trace", "w");

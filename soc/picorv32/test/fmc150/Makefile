@@ -12,7 +12,7 @@ SRC_V  += sfr_pack.v gpio_pack.v
 OBJS   = startup.o common.o timer.o
 
 CFLAGS += -DSIMULATION -I$(BOARD_SUPPORT_DIR)/fmc150/firmware
-VFLAGS += -DSIMULATION
+VFLAGS += -DSIMULATE
 
 TARGET  = fmc150
 

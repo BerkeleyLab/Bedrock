@@ -35,7 +35,7 @@ $(TARGET)_tb:  $(SIM_V)
 $(TARGET).vcd: $(TARGET)32.hex
 
 # Only add the SIMULATION flag if target is simulation
-$(TARGET)_tb: VFLAGS += -DSIMULATION
+$(TARGET)_tb: VFLAGS += -DSIMULATE
 $(TARGET).vcd: CFLAGS += -DSIMULATION
 
 CLEAN += $(TARGET)_synth.v xvhdl.log xvhdl.pb xvlog.log xelab.log xvlog.pb usage_statistics_webtalk.*
