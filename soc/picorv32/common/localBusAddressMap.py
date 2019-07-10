@@ -9,6 +9,7 @@ import datetime
 import os
 import sys
 
+
 def gen_addrmap(regmap):
     """
     Collect all addresses as keys to the addrmap dict. Values are the names.
@@ -33,6 +34,7 @@ def gen_addrmap(regmap):
                 print("Large array ignored (len>32), key: {}".format(key))
     return addrmap
 
+
 def write_addrmap(addrmap, ifname, ofname):
     """
     Iterate through all sorted keys of the addrmap dict and genereate #define strings
@@ -53,6 +55,7 @@ def write_addrmap(addrmap, ifname, ofname):
     with open(ofname, "w") as f:
         f.write(hf)
 
+
 def main(argv):
     json_fname = argv[0]
     dest_fname = argv[1]
@@ -61,6 +64,7 @@ def main(argv):
         regmap = json.load(s)
         addrmap = gen_addrmap(regmap)
         write_addrmap(addrmap, json_fname, dest_fname)
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
