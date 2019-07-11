@@ -207,6 +207,7 @@ module comms_top
    // GTX Ethernet to Local-Bus bridge
    // ---------------------------------
    wire rx_mon, tx_mon;
+   wire [6:0] an_status;
 
    wire lb_valid, lb_rnw, lb_renable;
    wire [LBUS_ADDR_WIDTH-1:0] lb_addr;
@@ -233,6 +234,7 @@ module comms_top
       // Status signals
       .rx_mon        (rx_mon),
       .tx_mon        (tx_mon),
+      .an_status     (an_status),
 
       // Local bus interface in gmii_tx_clk domain
       .lb_valid      (lb_valid),
@@ -382,6 +384,42 @@ module comms_top
    assign {rx_data_v[1], rx_data_v[0]} = {rx_data1, rx_data0};
 
    // ----------------------------------
+   // Optional CTRACE debugging scope
+   // ---------------------------------
+
+wire [31:0] ctr_mem_out;
+//`define CTRACE_EN
+`ifdef CTRACE_EN
+
+   // Capture live data with Ctrace;
+   // Data is compressed with a form of run-length encoding. Max length
+   // of a run is determined by CTRACE_TW.
+   // CTRACE_AW determines the total number of unique data-points.
+
+   localparam CTR_DW = 16;
+   localparam CTR_TW = 16; // Determines maximum run length
+   localparam CTR_AW = 16;
+
+   wire ctr_clk = gmii_rx_clk;
+   wire ctr_start = dbg_bus[16];
+   wire [CTR_DW-1:0] ctr_data = dbg_bus[15:0];
+
+   ctrace #(
+      .dw   (CTR_DW),
+      .tw   (CTR_TW),
+      .aw   (CTR_AW))
+   i_ctrace (
+      .clk     (ctr_clk),
+      .start   (ctr_start),
+      .data    (ctr_data),
+      .lb_clk  (lb_clk),
+      .lb_addr (lb_addr[CTR_AW-1:0]),
+      .lb_out  (ctr_mem_out)
+);
+`endif
+
+
+   // ----------------------------------
    // Local Bus Register Decoding
    // ---------------------------------
    comms_top_regbank i_comms_regbank
@@ -409,6 +447,8 @@ module comms_top
       .rx_match1_i        (rx_match_v[1]),
       .rx_err_cnt0_i      (rx_err_cnt_v[0]),
       .rx_err_cnt1_i      (rx_err_cnt_v[1]),
+      .an_status_i        (an_status),
+      .ctr_mem_out_i      (ctr_mem_out),
 
       .tx_location_o      (tx_location),
       .tx_transmit_en_o   (tx_transmit_en),
@@ -419,16 +459,15 @@ module comms_top
       .pgen_usr_data_o    (pgen_usr_data)
    );
 
-
    // ----------------------------------
    // Status LEDs
    // ---------------------------------
    wire lbus_led = rx_frame_counter[15]; // Toggle every 2**15 frames
 
 
-   // LED[0] GT Initialization done
+   // LED[0] Auto-negotiation complete
    // LED[1] Received and decoded packet
-   assign LEDS = {gt_txrx_resetdone & gt1_rxbyteisaligned, lbus_led};
+   assign LEDS = {lbus_led, an_status[0]};
 
 endmodule
 

@@ -178,7 +178,7 @@ end
             // LACR reception is enabled:
           end
           else if((lacr_rx_en)) begin
-            lacr_rx_val[15:8] <= d_data;
+            lacr_rx_val[7:0] <= d_data; // Little endian
           end
           rx_state <= RX_CR4;
         end
@@ -188,7 +188,7 @@ end
             rx_state <= RX_NOFRAME;
           end
           else if((lacr_rx_en)) begin
-            lacr_rx_val[7:0] <= d_data;
+            lacr_rx_val[15:8] <= d_data;
             lacr_rx_stb <= 1;
           end
           rx_state <= RX_NOFRAME;
