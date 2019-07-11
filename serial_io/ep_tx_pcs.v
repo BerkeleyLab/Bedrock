@@ -132,11 +132,11 @@ always @(posedge clk) tx_enable_p <= tx_enable;
           tx_state <= TX_CR3;
         end
         TX_CR3 : begin
-          tx_odata_reg <= ep_lacr_tx_val_i[15:8];
+          tx_odata_reg <= ep_lacr_tx_val_i[7:0]; // Little endian
           tx_state <= TX_CR4;
         end
         TX_CR4 : begin
-          tx_odata_reg <= ep_lacr_tx_val_i[7:0];
+          tx_odata_reg <= ep_lacr_tx_val_i[15:8];
           if((ep_lacr_tx_en_i == 1'b 1)) begin
             tx_state <= TX_CR1;
           end

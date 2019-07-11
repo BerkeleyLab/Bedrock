@@ -34,6 +34,8 @@ module comms_top_regbank #(
    input               rx_match1_i,
    input [15:0]        rx_err_cnt0_i,
    input [15:0]        rx_err_cnt1_i,
+   input [6:0]         an_status_i,
+   input [31:0]        ctr_mem_out_i,
 
    // Control registers out
    output reg [2:0]    tx_location_o,
@@ -46,7 +48,7 @@ module comms_top_regbank #(
 );
    `include "comms_pack.vh"
 
-   localparam LOCAL_AWI = 5;
+   localparam LOCAL_AWI = LB_AWI;
 
    // Address map of read registers
    localparam [LOCAL_AWI-1:0] INFO0_RD_REG            = 0;
@@ -66,6 +68,8 @@ module comms_top_regbank #(
    localparam [LOCAL_AWI-1:0] RX_MATCH1_RD_REG        = 14;
    localparam [LOCAL_AWI-1:0] RX_ERR_CNT0_RD_REG      = 15;
    localparam [LOCAL_AWI-1:0] RX_ERR_CNT1_RD_REG      = 16;
+   localparam [LOCAL_AWI-1:0] AN_STATUS_RD_REG        = 17;
+   localparam [LOCAL_AWI-1:0] CTR_MEM_OUT_RD_MEM      = 'h1????;
 
 
    // Address map of write registers
@@ -79,43 +83,47 @@ module comms_top_regbank #(
 
    reg [LBUS_DATA_WIDTH-1:0] lb_rdata_reg = 0;
 
+   reg [LOCAL_AWI-1:0] lb_addr_r=0;
+   always @(posedge lb_clk) if (lb_valid && lb_rnw) lb_addr_r <= lb_addr;
+
    // -------------------
    // Local Bus decoding
    // -------------------
    always @(posedge lb_clk) begin
-      if (lb_valid) begin
-         if (lb_rnw) begin
-            case (lb_addr[LOCAL_AWI-1:0])
-               INFO0_RD_REG:            lb_rdata_reg <= "QF2P";
-               INFO1_RD_REG:            lb_rdata_reg <= "COMM";
-               RX_FRAME_COUNTER_RD_REG: lb_rdata_reg <= rx_frame_counter_i;
-               TXRX_LATENCY_RD_REG:     lb_rdata_reg <= txrx_latency_i;
-               CCRX_FAULT_RD_REG:       lb_rdata_reg <= ccrx_fault_i;
-               CCRX_FAULT_CNT_RD_REG:   lb_rdata_reg <= ccrx_fault_cnt_i;
-               CCRX_LOS_RD_REG:         lb_rdata_reg <= ccrx_los_i;
-               RX_PROTOCOL_VER_RD_REG:  lb_rdata_reg <= rx_protocol_ver_i;
-               RX_GATEWARE_TYPE_RD_REG: lb_rdata_reg <= rx_gateware_type_i;
-               RX_LOCATION_RD_REG:      lb_rdata_reg <= rx_location_i;
-               RX_REV_ID_RD_REG:        lb_rdata_reg <= rx_rev_id_i;
-               RX_DATA0_RD_REG:         lb_rdata_reg <= rx_data0_i;
-               RX_DATA1_RD_REG:         lb_rdata_reg <= rx_data1_i;
-               RX_MATCH0_RD_REG:        lb_rdata_reg <= rx_match0_i;
-               RX_MATCH1_RD_REG:        lb_rdata_reg <= rx_match1_i;
-               RX_ERR_CNT0_RD_REG:      lb_rdata_reg <= rx_err_cnt0_i;
-               RX_ERR_CNT1_RD_REG:      lb_rdata_reg <= rx_err_cnt1_i;
-               default:                 lb_rdata_reg <= 32'hdeadf00d;
-            endcase
-         end else begin
-            case (lb_addr[LOCAL_AWI-1:0])
-               TX_LOCATION_WR_REG:      tx_location_o    <= lb_wdata;
-               TX_TRANSMIT_EN_WR_REG:   tx_transmit_en_o <= lb_wdata;
-               PGEN_DISABLE_WR_REG:     pgen_disable_o   <= lb_wdata;
-               PGEN_RATE_WR_REG:        pgen_rate_o      <= lb_wdata;
-               PGEN_TEST_MODE_WR_REG:   pgen_test_mode_o <= lb_wdata;
-               PGEN_INC_STEP_WR_REG:    pgen_inc_step_o  <= lb_wdata;
-               default:                 pgen_usr_data_o  <= lb_wdata; // PGEN_USR_DAT_WR_REG
-            endcase
-         end
+      case (lb_addr_r[LOCAL_AWI-1:0])
+         INFO0_RD_REG:            lb_rdata_reg <= "QF2P";
+         INFO1_RD_REG:            lb_rdata_reg <= "COMM";
+         RX_FRAME_COUNTER_RD_REG: lb_rdata_reg <= rx_frame_counter_i;
+         TXRX_LATENCY_RD_REG:     lb_rdata_reg <= txrx_latency_i;
+         CCRX_FAULT_RD_REG:       lb_rdata_reg <= ccrx_fault_i;
+         CCRX_FAULT_CNT_RD_REG:   lb_rdata_reg <= ccrx_fault_cnt_i;
+         CCRX_LOS_RD_REG:         lb_rdata_reg <= ccrx_los_i;
+         RX_PROTOCOL_VER_RD_REG:  lb_rdata_reg <= rx_protocol_ver_i;
+         RX_GATEWARE_TYPE_RD_REG: lb_rdata_reg <= rx_gateware_type_i;
+         RX_LOCATION_RD_REG:      lb_rdata_reg <= rx_location_i;
+         RX_REV_ID_RD_REG:        lb_rdata_reg <= rx_rev_id_i;
+         RX_DATA0_RD_REG:         lb_rdata_reg <= rx_data0_i;
+         RX_DATA1_RD_REG:         lb_rdata_reg <= rx_data1_i;
+         RX_MATCH0_RD_REG:        lb_rdata_reg <= rx_match0_i;
+         RX_MATCH1_RD_REG:        lb_rdata_reg <= rx_match1_i;
+         RX_ERR_CNT0_RD_REG:      lb_rdata_reg <= rx_err_cnt0_i;
+         RX_ERR_CNT1_RD_REG:      lb_rdata_reg <= rx_err_cnt1_i;
+         AN_STATUS_RD_REG:        lb_rdata_reg <= an_status_i;
+         default:                 lb_rdata_reg <= 32'hdeadf00d;
+      endcase
+      casez (lb_addr_r)
+         CTR_MEM_OUT_RD_MEM:      lb_rdata_reg <= ctr_mem_out_i;
+      endcase
+      if (lb_valid && !lb_rnw) begin
+         case (lb_addr[LOCAL_AWI-1:0])
+            TX_LOCATION_WR_REG:      tx_location_o    <= lb_wdata;
+            TX_TRANSMIT_EN_WR_REG:   tx_transmit_en_o <= lb_wdata;
+            PGEN_DISABLE_WR_REG:     pgen_disable_o   <= lb_wdata;
+            PGEN_RATE_WR_REG:        pgen_rate_o      <= lb_wdata;
+            PGEN_TEST_MODE_WR_REG:   pgen_test_mode_o <= lb_wdata;
+            PGEN_INC_STEP_WR_REG:    pgen_inc_step_o  <= lb_wdata;
+            default:                 pgen_usr_data_o  <= lb_wdata; // PGEN_USR_DAT_WR_REG
+         endcase
       end
    end
 

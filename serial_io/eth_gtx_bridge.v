@@ -20,6 +20,7 @@ module eth_gtx_bridge #(
    // Status signals
    output        rx_mon,
    output        tx_mon,
+   output [6:0]  an_status,
 
    // Ethernet configuration interface
    input         cfg_clk,
@@ -73,9 +74,7 @@ module eth_gtx_bridge #(
    // PCS/PMA and GMII Bridge
    // ---------------------------------
 
-   wire [5:0] link_leds;
    wire [15:0] lacr_rx;
-   wire [1:0] an_state_mon;
 
    gmii_link i_gmii_link(
         // GMII to MAC
@@ -91,10 +90,9 @@ module eth_gtx_bridge #(
         .txdata       (gtx_txd_10),
         .rxdata       (gtx_rxd_10),
         .rx_err_los   (1'b0),
-        .an_bypass    (1'b1),     // Disable auto-negotiation
+        .an_bypass    (1'b0),     // Disable auto-negotiation
         .lacr_rx      (lacr_rx),
-        .an_state_mon (an_state_mon),
-        .leds         (link_leds) // TODO: Connect this to actual LEDs
+        .an_status    (an_status)
    );
 
    // ----------------------------------
