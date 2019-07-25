@@ -24,7 +24,8 @@
 //    address to write
 //    lower half-word of data
 //    upper half-word of data
-// time delay is in units of clock cycles, applied _after_ the register write.
+// time delay is in units of (clock cycles * 2^tgen_gran), applied _after_ the
+// register write.
 // Each operation takes four cycles by itself; the delay cycle count adds to
 // this pedestal.
 // An address of zero ends the program and resets the state to pc=0,
@@ -35,7 +36,8 @@
 // Larry Doolittle, LBNL, 2014
 
 module tgen #(
-	parameter aw = 17
+	parameter aw = 17,
+	parameter tgen_gran = 0   // tick extension
 ) (
 	input clk,  // timespec 6.66 ns
 	input trig,
@@ -62,7 +64,7 @@ localparam pcw=10;  // Set delay_pc_XXX_addr width above to pcw
 // Counters
 reg [pcw-1:0] pc=0;
 wire [1:0] subcycle = pc[1:0];
-reg [15:0] timer=0;
+reg [15+tgen_gran:0] timer=0;
 wire [15:0] new_timer;  // comes from RAM
 reg mem_zero=0;  // comes from RAM
 wire zero_addr = (subcycle==3) & mem_zero;
@@ -74,7 +76,7 @@ always @(posedge clk) begin
 	trig1d <= trig1;
 	pc <= pc + increment;
 	if (zero_addr) pc <= 0;
-	timer <= (subcycle==1) ? new_timer : timer-(subcycle==0);
+	timer <= (subcycle==1) ? (new_timer<<tgen_gran) : timer-(subcycle==0);
 	if (trig1) did_work <= 0;
 	if (pc[2]) did_work <= 1;
 end
