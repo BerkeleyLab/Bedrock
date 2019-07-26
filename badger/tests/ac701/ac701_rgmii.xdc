@@ -32,10 +32,17 @@ set_property -dict {PACKAGE_PIN T24 IOSTANDARD LVCMOS33} [get_ports {LED[1]}]
 set_property -dict {PACKAGE_PIN T25 IOSTANDARD LVCMOS33} [get_ports {LED[2]}]
 set_property -dict {PACKAGE_PIN R26 IOSTANDARD LVCMOS33} [get_ports {LED[3]}]
 
-# More-or-less fake attachment to FMC; I have no plans to hook this up
-set_property -dict {PACKAGE_PIN H15 IOSTANDARD LVCMOS25} [get_ports SCLK]
-set_property -dict {PACKAGE_PIN H14 IOSTANDARD LVCMOS25} [get_ports CSB]
-set_property -dict {PACKAGE_PIN F17 IOSTANDARD LVCMOS25} [get_ports MOSI]
+# Want actual pins here so the synthesizer doesn't drop the supporting logic;
+# I have no short-term plans to exercise these pins in hardware.
+# Don't use FMC, or tests can break when you plug in a board!
+# R5 = GPIO_SW_W = SCLK
+# U6 = GPIO_SW_C = CSB
+# U5 = GPIO_SW_E = MOSI
+# These signals on the AC701 are "Active High".
+# Now tests can just freak out if you start pressing buttons.   :-p
+set_property -dict {PACKAGE_PIN R5 IOSTANDARD LVCMOS25} [get_ports SCLK]
+set_property -dict {PACKAGE_PIN U6 IOSTANDARD LVCMOS25} [get_ports CSB]
+set_property -dict {PACKAGE_PIN U5 IOSTANDARD LVCMOS25} [get_ports MOSI]
 
 # 200 MHz Clock input
 set_property -dict {PACKAGE_PIN R3 IOSTANDARD DIFF_SSTL15} [get_ports SYSCLK_P]
