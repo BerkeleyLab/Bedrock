@@ -1,0 +1,44 @@
+[timestart] 0
+[size] 1582 681
+[pos] -71 -35
+*-16.154074 5265 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] chirp_wrap_tb.
+[treeopen] chirp_wrap_tb.i_dut.
+[sst_width] 228
+[signals_width] 245
+[sst_expanded] 1
+[sst_vpaned_height] 155
+@420
+chirp_wrap_tb.chirp_cnt
+@24
+chirp_wrap_tb.i_dut.chirp_len[31:0]
+@28
+chirp_wrap_tb.i_dut.chirp_start
+chirp_wrap_tb.i_dut.chirp_status
+@24
+chirp_wrap_tb.i_dut.chirp_amp_max[19:0]
+chirp_wrap_tb.i_dut.chirp_amp_slope[19:0]
+chirp_wrap_tb.i_dut.chirp_dphase[25:0]
+chirp_wrap_tb.i_dut.chirp_ddphase[25:0]
+@8420
+chirp_wrap_tb.i_dut.cordic_amp[17:0]
+chirp_wrap_tb.i_dut.cordic_phase[18:0]
+@28
+chirp_wrap_tb.i_dut.chirp_error[2:0]
+chirp_wrap_tb.i_dut.ext_trig
+chirp_wrap_tb.i_dut.cordic_trig
+chirp_wrap_tb.i_dut.reset
+chirp_wrap_tb.i_dut.i_ramps.amp_railed
+chirp_wrap_tb.i_dut.i_ramps.pulse_on
+@24
+chirp_wrap_tb.i_dut.i_ramps.rise_t[31:0]
+@200
+-CORDIC
+@29
+chirp_wrap_tb.cordic_update
+@8420
+chirp_wrap_tb.cordic_amp_r[17:0]
+chirp_wrap_tb.cordic_phase_r[18:0]
+chirp_wrap_tb.dac_out[17:0]
+[pattern_trace] 1
+[pattern_trace] 0

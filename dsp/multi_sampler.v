@@ -36,6 +36,7 @@ module multi_sampler #(
    localparam INITVAL=0; // Longer startup
 `endif
 
+   reg [sample_period_wi-1:0] samp_per_r=0;
    reg [sample_period_wi-1:0] base_count = 0;
    reg [dsample0_wi-1:0]      ds0_count = INITVAL;
    reg [dsample1_wi-1:0]      ds1_count = INITVAL;
@@ -47,7 +48,13 @@ module multi_sampler #(
    always @(posedge clk) begin
       sample_out_l <= 0;
       if (ext_trig) begin
-         base_count   <= (base_count == (sample_period-1)) ? 0 : base_count+1;
+         samp_per_r <= sample_period;
+
+         base_count <= (base_count == (sample_period-1)) ? 0 : base_count+1;
+
+         // Restart count on sample_period change
+         if ((sample_period != samp_per_r) && |base_count) base_count <= 0;
+
          sample_out_l <= (base_count == 0);
       end
    end
