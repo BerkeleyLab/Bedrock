@@ -19,5 +19,5 @@ spect_test: chirp_wrap.out
 	python final.py x
 
 
-CLEAN += *.out *_tb *.vcd vivado.log cordicg_b24.v
+CLEAN += *.out *_tb *.vcd vivado.log cordicg_b22.v
 include $(BUILD_DIR)/bottom_rules.mk
