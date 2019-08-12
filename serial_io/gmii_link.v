@@ -27,8 +27,7 @@ module gmii_link(
 //New internal wires removed from the module interface (error signals from 8b10b enc/dec)
 wire rx_err_code, rx_err_rdisp;
 
-parameter DELAY=1400000;  // see negotiate.v
-//parameter DELAY=1250000;  // see negotiate.v
+parameter DELAY=1250000;  // see negotiate.v
 
 reg rx_rst=1, tx_rst=1;
 always @(posedge RX_CLK) rx_rst<=0;

@@ -45,7 +45,6 @@ module comms_top
 
    localparam IPADDR   = {8'd192, 8'd168, 8'd1, 8'd173};
    localparam MACADDR  = 48'h00105ad155b2;
-   localparam JUMBO_DW = 14;
 
    // on QF2-pre, REFCLK0 comes from D6/D5 from Y4 (SIT9122)
    wire gtrefclk0_p = K7_MGTREFCLK0_P;
@@ -216,7 +215,7 @@ module comms_top
    eth_gtx_bridge #(
       .IP         (IPADDR),
       .MAC        (MACADDR),
-      .JUMBO_DW   (JUMBO_DW))
+      .GTX_DW     (GTX_ETH_WIDTH))
    i_eth_gtx_bridge (
       .gtx_tx_clk    (gtx0_tx_usr_clk), // Transceiver clock at half rate
       .gmii_tx_clk   (gmii_tx_clk),     // Clock for Ethernet fabric - 125 MHz for 1GbE
@@ -231,10 +230,13 @@ module comms_top
       .cfg_addr      (5'b0),
       .cfg_wdata     (8'b0),
 
+      // Auto-Negotiation
+      .an_disable    (1'b0),
+      .an_status     (an_status),
+
       // Status signals
       .rx_mon        (rx_mon),
       .tx_mon        (tx_mon),
-      .an_status     (an_status),
 
       // Local bus interface in gmii_tx_clk domain
       .lb_valid      (lb_valid),

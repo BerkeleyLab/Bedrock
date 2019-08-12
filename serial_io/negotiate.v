@@ -20,7 +20,7 @@ module negotiate(
    output reg        lacr_send,
    // mode control
    output reg        operate,
-   output [6:0]      an_status
+   output reg [6:0]  an_status
 );
    // 10 ms link_timer = 10e6/8
    parameter TIMER_TICKS = 1250000;
@@ -40,14 +40,37 @@ module negotiate(
               RSV2_HIGH   = 11,
               RSV2_LOW    = 9;
 
+   // Autonegotiation state machine
+   localparam [2:0] AN_RESTART = 0,
+                    AN_ABILITY = 1,
+                    AN_ACK     = 2,
+                    AN_IDLE    = 3,
+                    AN_LINK_OK = 4,
+                    AN_ABORT   = 5;
+
+   reg [2:0] an_state = AN_RESTART, n_an_state;
+
    initial lacr_send=0;
    initial operate=0;
+
+   wire an_rst;
+   // Detect physical link
+   reg link_det=0;
+   always @(posedge rx_clk) begin
+      if (lacr_in_stb)
+         link_det <= 1;
+      if (los)
+         link_det <= 0;
+   end
 
    // Process the input from the LACR receiver, looking for
    // three in a row of the same value.
    reg [15:0] lacr_prev_val=0;
    reg lacr_match=0, lacr_change=0;
    reg [2:0] lacr_match_cnt=0;
+
+   wire match_ok = (lacr_match_cnt==3);
+
    always @(posedge rx_clk) begin
       if (an_state != AN_RESTART) begin
          if (lacr_in_stb) lacr_prev_val <= lacr_in;
@@ -56,20 +79,18 @@ module negotiate(
 
          if (lacr_match)
             lacr_match_cnt <= lacr_match_cnt + 1;
-         if (lacr_change || match_ok || an_restart) begin
+         if (lacr_change || match_ok || an_rst) begin
             lacr_match_cnt <= 0;
          end
       end
    end
-
-   wire match_ok = (lacr_match_cnt==3);
 
    // Ack/Abl and consistency flags
    reg [15:0] lacr_ability;
    reg ack_match=0, abl_match=0;
    reg consistency_match=0;
    always @(posedge rx_clk) begin
-      if (an_restart) begin
+      if (an_rst) begin
          ack_match <= 0;
          abl_match <= 0;
          consistency_match <= 0;
@@ -88,16 +109,15 @@ module negotiate(
    end
 
    // Look for 3 consecutive breaklink words, signalling a restart
-   wire an_restart;
    reg [1:0] breaklink_cnt=0;
    always @(posedge rx_clk) begin
-      if (an_restart) breaklink_cnt <= 0;
+      if (an_rst) breaklink_cnt <= 0;
       if (lacr_in_stb) begin
          if (lacr_in == 0) breaklink_cnt <= breaklink_cnt + 1;
          else breaklink_cnt <= 0;
       end
    end
-   assign an_restart = (breaklink_cnt==3);
+   assign an_rst = (breaklink_cnt==3);
 
    // Flags Remote Faults and unavailability of full-duplex mode
    wire [1:0] remote_fault = {lacr_prev_val[RF2_BITPOS], lacr_prev_val[RF1_BITPOS]};
@@ -106,6 +126,7 @@ module negotiate(
    reg [TIMER_LOG2-1:0] link_timer = 0;
    reg link_timer_on=0, link_timer_done;
    reg link_timer_start;
+   reg wdog_an_disable=0;
 
    always @(posedge rx_clk) begin
       link_timer_done <= 0;
@@ -121,18 +142,8 @@ module negotiate(
       end
    end
 
-   // Autonegotiation state machine
-   localparam [2:0] AN_RESTART = 0,
-                    AN_ABILITY = 1,
-                    AN_ACK     = 2,
-                    AN_IDLE    = 3,
-                    AN_LINK_OK = 4,
-                    AN_ABORT   = 5;
-
-   reg [2:0] an_state = AN_RESTART, n_an_state;
-
    always @(posedge rx_clk) begin
-      if (an_restart | los | wdog_timeout) begin
+      if ((an_rst & ~wdog_an_disable) | los | wdog_timeout) begin
          an_state <= AN_RESTART;
       end else begin
          an_state <= n_an_state;
@@ -158,7 +169,7 @@ module negotiate(
             n_send_breaklink = 1;
             if (!link_timer_on && !link_timer_done)
                link_timer_start = 1;
-            if (link_timer_done)
+            if (link_timer_done && link_det)
                n_an_state = wdog_an_disable ? AN_ABORT : AN_ABILITY;
          end
          AN_ABILITY: begin // Ability detect
@@ -199,13 +210,14 @@ module negotiate(
    localparam WATCHDOG_LOG2 = TIMER_LOG2+3;
 
    reg [WATCHDOG_LOG2-1:0] wdog_cnt=0;
-   reg wdog_an_disable=0;
    wire wdog_timeout;
    always @(posedge rx_clk) begin
-      if (n_an_state != an_state && n_an_state != AN_ABORT) begin
+      // Clear on FWD progress or on first pulse in after last AN
+      if ((n_an_state > an_state && an_state != AN_RESTART) || los)
+      begin
          wdog_cnt <= 0; // Reset on fwd progress
          wdog_an_disable <= 0;
-      end else begin
+      end else if (link_det) begin
          if (an_state != AN_LINK_OK) begin
             if (wdog_an_disable == 0)
                wdog_cnt <= wdog_cnt + 1;
@@ -217,16 +229,21 @@ module negotiate(
 
    assign wdog_timeout = (wdog_cnt==WATCHDOG_TIME);
 
+   wire [6:0] an_status_l = {wdog_an_disable, remote_fault, abl_mismatch,
+                             an_state==AN_ACK, an_state==AN_IDLE, an_state==AN_LINK_OK};
+
    // Register comb signals in rx_clk before transferring to tx_clk
    reg lacr_send_r=0; // lacr_send in the rx clock domain
    reg send_ack_r;
    reg send_breaklink_r;
    reg operate_r=0;
+   reg [6:0] an_status_r=0;
    always @(posedge rx_clk) begin
        operate_r        <= n_operate;
        lacr_send_r      <= n_lacr_send;
        send_ack_r       <= n_send_ack;
        send_breaklink_r <= n_send_breaklink;
+       an_status_r      <= an_status_l;
    end
 
    reg send_ack, send_breaklink;
@@ -235,15 +252,13 @@ module negotiate(
       lacr_send      <= lacr_send_r;
       send_ack       <= send_ack_r;
       send_breaklink <= send_breaklink_r;
+      an_status      <= an_status_r;
    end
-
-   assign an_status = {wdog_an_disable, remote_fault, abl_mismatch,
-                       an_state==AN_ACK, an_state==AN_IDLE, an_state==AN_LINK_OK};
 
    // 16-bit ethernet configuration register as documented in
    // Networking Protocol Fundamentals, by James Long
    // and http://grouper.ieee.org/groups/802/3/z/public/presentations/nov1996/RTpcs8b_sum5.pdf
-   wire FD=1;   // Full Duplex capable
+   reg  FD=1;   // Full Duplex capable
    wire HD=0;   // Half Duplex capable
    wire PS1=0;  // Pause 1
    wire PS2=0;  // Pause 2
