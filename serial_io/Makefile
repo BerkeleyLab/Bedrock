@@ -24,7 +24,7 @@ checks: $(CHK_)
 SRCS = patt_gen.v data_xdomain.v flag_xdomain.v multi_sampler.v
 patt_gen_tb : $(SRCS)
 
-SRCS = gmii_link.v ep_tx_pcs.v ep_rx_pcs.v ep_sync_detect.v enc_8b10b.v dec_8b10b.v negotiate.v
+SRCS = gmii_link.v ep_tx_pcs.v ep_rx_pcs.v ep_sync_detect.v enc_8b10b.v dec_8b10b.v negotiate.v shortfifo.v
 gmii_link_tb: $(SRCS)
 
 CLEAN += patt_gen_tb gmii_link_tb

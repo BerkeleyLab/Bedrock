@@ -72,7 +72,7 @@ parameter [3:0]
   TX_EPD = 8,
   TX_EXTEND = 9;
 
-reg [3:0] tx_state;
+reg [3:0] tx_state=TX_COMMA;
 reg tx_cr_alternate;
 reg tx_odd_length;
 
