@@ -67,4 +67,4 @@ Next steps, pretty much unordered:
 * Refactor and rewrite for clarity and reduced LUT count
 * Attach Tx and Rx MAC to a soft core
 * Add IEEE-1588 (PTP) feature to MAC
-* Make optional based on parameters: ARP and ICMP echo 
+* Make optional based on parameters: ARP and ICMP echo
