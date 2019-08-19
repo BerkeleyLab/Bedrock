@@ -26,16 +26,36 @@ set_property INTERNAL_VREF 0.9 [get_iobanks 13]
 # Rx clock constraint
 create_clock -period 8.00 -name phy_rxclk [get_ports RGMII_RX_CLK]
 
+# QSPI Boot Flash
+set_property -dict {PACKAGE_PIN P18 IOSTANDARD LVCMOS33} [get_ports BOOT_CS_B]
+set_property -dict {PACKAGE_PIN R14 IOSTANDARD LVCMOS33} [get_ports BOOT_MOSI]
+set_property -dict {PACKAGE_PIN R15 IOSTANDARD LVCMOS33} [get_ports BOOT_MISO]
+# mapping / net-names according to the schematic
+# P18  QSPI_IC_CS_B
+# R14  FLASH_D0  DQ0_DI
+# R15  FLASH_D1  DQ1_DO
+# P14  FLASH_D2  DQ2_WP_B
+# N14  FLASH_D3  DW3_HOLD_B
+# and the FPGA_CCLK is special, doesn't show up here,
+# access is by instantiating the STARTUPE2 primitive
+
 # LEDs
 set_property -dict {PACKAGE_PIN M26 IOSTANDARD LVCMOS33} [get_ports {LED[0]}]
 set_property -dict {PACKAGE_PIN T24 IOSTANDARD LVCMOS33} [get_ports {LED[1]}]
 set_property -dict {PACKAGE_PIN T25 IOSTANDARD LVCMOS33} [get_ports {LED[2]}]
 set_property -dict {PACKAGE_PIN R26 IOSTANDARD LVCMOS33} [get_ports {LED[3]}]
 
-# More-or-less fake attachment to FMC; I have no plans to hook this up
-set_property -dict {PACKAGE_PIN H15 IOSTANDARD LVCMOS25} [get_ports SCLK]
-set_property -dict {PACKAGE_PIN H14 IOSTANDARD LVCMOS25} [get_ports CSB]
-set_property -dict {PACKAGE_PIN F17 IOSTANDARD LVCMOS25} [get_ports MOSI]
+# Want actual pins here so the synthesizer doesn't drop the supporting logic;
+# I have no short-term plans to exercise these pins in hardware.
+# Don't use FMC, or tests can break when you plug in a board!
+# R5 = GPIO_SW_W = SCLK
+# U6 = GPIO_SW_C = CSB
+# U5 = GPIO_SW_E = MOSI
+# These signals on the AC701 are "Active High".
+# Now tests can just freak out if you start pressing buttons.   :-p
+set_property -dict {PACKAGE_PIN R5 IOSTANDARD LVCMOS15} [get_ports SCLK]
+set_property -dict {PACKAGE_PIN U6 IOSTANDARD LVCMOS15} [get_ports CSB]
+set_property -dict {PACKAGE_PIN U5 IOSTANDARD LVCMOS15} [get_ports MOSI]
 
 # 200 MHz Clock input
 set_property -dict {PACKAGE_PIN R3 IOSTANDARD DIFF_SSTL15} [get_ports SYSCLK_P]

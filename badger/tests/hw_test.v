@@ -23,10 +23,14 @@ module hw_test(
 	input CSB,
 	input MOSI,
 
-	// Simulation-only
-`ifdef VERILATOR
+	// SPI boot flash programming port
+	output boot_clk,
+	output boot_cs,
+	output boot_mosi,
+	input boot_miso,
+
+	// Simulation-only, please ignore in synthesis
 	output in_use,
-`endif
 
 	// Something physical
 	input RESET,
@@ -96,9 +100,7 @@ wire [15:0] host_wdata = lb_data_out[15:0];
 
 // Instantiate the Real Work
 wire rx_mon, tx_mon;
-`ifndef VERILATOR
-wire in_use;
-`endif
+wire boot_busy, blob_in_use;
 rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(mac_aw)) rtefi(
 	.rx_clk(vgmii_rx_clk), .rxd(vgmii_rxd),
 	.rx_dv(vgmii_rx_dv), .rx_er(vgmii_rx_er),
@@ -117,9 +119,13 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(mac_aw)) rtefi(
 	.p3_addr(lb_addr), .p3_control_strobe(lb_control_strobe),
 	.p3_control_rd(lb_control_rd), .p3_control_rd_valid(lb_control_rd_valid),
 	.p3_data_out(lb_data_out), .p3_data_in(lb_data_in),
-	.rx_mon(rx_mon), .tx_mon(tx_mon), .in_use(in_use)
+	.p4_spi_clk(boot_clk), .p4_spi_cs(boot_cs),
+	.p4_spi_mosi(boot_mosi), .p4_spi_miso(boot_miso),
+	.p4_busy(boot_busy),
+	.rx_mon(rx_mon), .tx_mon(tx_mon), .in_use(blob_in_use)
 );
 assign vgmii_tx_er=1'b0;
+assign in_use = blob_in_use | boot_busy;
 
 // Heartbeats and other LED
 reg [26:0] rx_heartbeat=0, tx_heartbeat=0;

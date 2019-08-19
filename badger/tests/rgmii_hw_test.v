@@ -24,6 +24,14 @@ module rgmii_hw_test(
 	input CSB,
 	input MOSI,
 
+        // SPI boot flash programming port
+`ifndef CHIP_FAMILY_7SERIES
+	output BOOT_CCLK,
+`endif
+	output BOOT_CS_B,
+	input  BOOT_MISO,
+	output BOOT_MOSI,
+
 	// Something physical
 	input RESET,
 	output [3:0] LED
@@ -64,6 +72,14 @@ gmii_to_rgmii gmii_to_rgmii_i(
 	.gmii_rx_er(vgmii_rx_er)
 );
 
+`ifdef CHIP_FAMILY_7SERIES
+wire BOOT_CCLK;
+// See XAPP1081 p.25: 7 Series FPGAs Access to the SPI Clock
+// and UG470 p. 90: STARTUPE2 Primitive
+STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0));
+defparam vgmii.rtefi.p4_client.engine.seven = 1;
+`endif
+
 // Real work
 hw_test vgmii(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
@@ -71,6 +87,8 @@ hw_test vgmii(
 	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
 	.vgmii_rx_dv(vgmii_rx_dv), .vgmii_rx_er(vgmii_rx_er),
 	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked),
+	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
+	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI),
 	.RESET(RESET), .LED(LED)
 );

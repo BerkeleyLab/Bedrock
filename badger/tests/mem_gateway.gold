@@ -17,11 +17,11 @@
 10
 11
 22
-31
-6f
-20
-77
-6f
+33
+28
+3a
+3a
+29
 10
 11
 22
@@ -33,17 +33,71 @@
 10
 11
 22
-33
-28
-3a
-3a
-Localbus write r[112233] = 41424344
-29
+31
+6f
+20
+77
+Localbus write r[112234] = 41424344
+6f
 00
 11
 22
-33
+34
 41
 42
 43
+Localbus write r[000004] = 10112235
 44
+20
+00
+00
+04
+10
+11
+22
+Localbus write r[bbaa00] = aabbaa01
+35
+aa
+bb
+aa
+00
+aa
+bb
+aa
+Localbus write r[bbaa02] = aabbaa03
+01
+aa
+bb
+aa
+02
+aa
+bb
+aa
+Localbus write r[112230] = 41424344
+03
+00
+11
+22
+30
+41
+42
+43
+Localbus write r[000002] = 00112240
+44
+20
+00
+00
+02
+00
+11
+22
+Localbus write r[424345] = 41424346
+40
+41
+42
+43
+45
+41
+42
+43
+46

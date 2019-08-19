@@ -55,14 +55,15 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 vpath %.v $(DSP_DIR) $(HOMELESS_DIR) $(SERIAL_IO_DIR)
 vpath %.eps ..
 
-all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check
+all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check spi_flash_check
 all: test_tx_check precog_check mac_subset_check
 all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb rtefi_live
 all: lb_timing_demo.vcd
 # all: lb_timing_demo.pdf
 
 # Packet Badger synthesizable code
-RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
+RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v spi_flash.v
+RTEFI_EXTRA_V = spi_flash_engine.v
 include ../rules.mk
 
 # =====
@@ -122,10 +123,14 @@ udp_port_cam_tb: udp_port_cam.v
 badge_trace_tb: badge_trace.v
 
 # =====
+xfer1: xfer1.readable
+	tr ' ' '\n' < $< > $@
+
+# =====
 # Tangent for client testing
 hello_tb: hello.v client_sub.v reg_delay.v
 VFLAGS_hello_tb = -m ./udp-vpi
-hello.vcd: udp-vpi.vpi
+hello.vcd: udp-vpi.vpi xfer1
 hello_run: hello_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=3010 +vcd
 hello.out: hello_tb udp-vpi.vpi xfer1
@@ -135,7 +140,7 @@ hello.out: hello_tb udp-vpi.vpi xfer1
 # Another tangent for another client
 speed_test_tb: speed_test.v client_sub.v reg_delay.v
 VFLAGS_speed_test_tb = -m ./udp-vpi
-speed_test.vcd: udp-vpi.vpi
+speed_test.vcd: udp-vpi.vpi xfer1
 speed_test_run: speed_test_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=3000 +vcd
 speed_test.out: speed_test_tb udp-vpi.vpi xfer1
@@ -147,20 +152,27 @@ LB_DEMO_V = lb_demo_slave.v freq_count.v
 # LB_DEMO_V += badge_trace.v
 mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V)
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
-mem_gateway.vcd: udp-vpi.vpi
+mem_gateway.vcd: udp-vpi.vpi xfer1
 mem_gateway_run: mem_gateway_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=3000 +vcd
 mem_gateway.out: mem_gateway_tb udp-vpi.vpi xfer1
 	$(VVP) $< +log +packet_file=$(filter %xfer1, $^) > $@
 
 # ====
-# WIP client
-spi_flash_tb: client_sub.v spi_flash.v spi_flash_engine.v reg_delay.v
+# WIP client supporting SPI Flash
+spi_flash_tb: spiflash.v client_sub.v spi_flash.v spi_flash_engine.v reg_delay.v
 VFLAGS_spi_flash_tb = -m ./udp-vpi
-spi_flash.vcd: udp-vpi.vpi spi_flash_pack
-VCD_ARGS_spi_flash.vcd = +packet_file=$(filter %spi_flash_pack, $^) +data_len=14
-spi_flash.out: spi_flash_tb udp-vpi.vpi spi_flash_pack
-	$(VVP) $< +log +packet_file=spi_flash_pack > $@
+spi_flash.vcd: udp-vpi.vpi spi_flash_pack lorem_ipsum.hex
+lorem_ipsum.hex: hexdump.py lorem_ipsum.txt
+	$(PYTHON) $^ > $@
+VCD_ARGS_spi_flash.vcd = +packet_file=$(filter %spi_flash_pack, $^) +data_len=265 +firmware=$(filter %lorem_ipsum.hex, $^)
+spi_flash.out: spi_flash_tb udp-vpi.vpi spi_flash_pack lorem_ipsum.hex
+	$(VVP) $< +log $(VCD_ARGS_spi_flash.vcd) > $@
+spi_flash.grab: spi_flash_check.sh udp-vpi.vpi spi_flash_tb lorem_ipsum.hex spi_test.py
+	bash $< $(filter %spi_test.py, $^)
+spi_flash_check: spi_flash.grab lorem_ipsum.txt
+	cmp $^
+	@echo PASS
 
 # =====
 # scanner off-line test
@@ -306,9 +318,11 @@ selfmac.vcd: rtefi_pipe_tb selfmac_in.dat
 	$(VVP) $< +vcd $(VCD_ARGS_$@)
 	mv rtefi_pipe.vcd $@  # horrible
 VCD_ARGS_selfmac.vcd = +packet_file=$(filter %selfmac_in.dat, $^)
-# Can also make tap_start and
-# python3 packetgen.py flip | python badger_lb_io.py --ip=192.168.7.4 arb
+# Can also make tap_start or make Vhw_test && ./Vhw_test and
+# python3 packetgen.py flip | python3 badger_lb_io.py --ip=192.168.7.4 arb
+# or python3 badger_lb_io.py --ip=192.168.7.4 emit
 # Result is at least visible to tcpdump -i tap0
+# and nc -u -l -p 3011
 # Should make packetgen.py smarter about the dest MAC created in that case.
 
 # =====
@@ -342,7 +356,7 @@ locc:
 	rmccmt *.c *.cpp | tr -d ' \t' | grep -c .
 .PHONY: spellme loc locc
 
-CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen host_cmds.dat retrigger.dat selfmac_in.dat $(RTEFI_CLEAN)
+CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab $(RTEFI_CLEAN)
 CLEAN += *.pdf
 CLEAN_DIRS += obj_dir _xilinx
 # Actual "clean" rule in bottom_rules.mk

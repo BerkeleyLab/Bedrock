@@ -76,6 +76,7 @@ rtefi_blob #(.ip(ip), .mac(mac), .paw(paw), .mac_aw(mac_aw)) a(
 	.p3_control_rd(lb_control_rd),
 	.p3_data_in(lb_rdata),
 	.p3_data_out(lb_wdata),
+	.p4_spi_miso(1'b0),
 	.in_use(thinking)
 );
 wire lb_read = lb_control_strobe && lb_control_rd;
