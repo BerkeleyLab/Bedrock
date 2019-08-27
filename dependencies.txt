@@ -6,6 +6,8 @@ gawk [looks like mawk is the default install and isn't enough]
 python-numpy
 python-flake8
 
+gtkwave
+
 [optional]
 Verilator
 Yosys
