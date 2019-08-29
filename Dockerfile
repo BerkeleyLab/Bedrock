@@ -89,3 +89,9 @@ RUN svn co https://svn.code.sf.net/p/xc3sprog/code/trunk xc3sprog &&\
 	make &&\
 	make install &&\
 	rm -rf xc3sprog
+
+RUN apt-get -y update && \
+	apt-get install -y \
+	hexdump \
+	curl  && \
+	rm -rf /var/lib/apt/lists/*
