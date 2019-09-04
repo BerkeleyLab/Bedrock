@@ -92,6 +92,8 @@ RUN svn co https://svn.code.sf.net/p/xc3sprog/code/trunk xc3sprog &&\
 
 RUN apt-get -y update && \
 	apt-get install -y \
-	hexdump \
+	iputils-ping \
+	iproute2 \
+	bsdmainutils \
 	curl  && \
 	rm -rf /var/lib/apt/lists/*
