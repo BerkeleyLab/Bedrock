@@ -133,7 +133,7 @@ module iq_trace #(
       // DI parameters
       .di_dwi        (dw+davr),
       .di_rwi        (ow),
-      .di_noise_bits (0),
+      .di_noise_bits (1), // NOTE: Setting to 1 to compensate for removed /2 from double_inte
       .cc_outw       (rw),
       .cc_halfband   (0),
       .cc_use_delay  (0),
@@ -158,7 +158,7 @@ module iq_trace #(
       // DI parameters
       .di_dwi        (dw+davr),
       .di_rwi        (ow),
-      .di_noise_bits (0),
+      .di_noise_bits (1), // NOTE: Setting to 1 to compensate for removed /2 from double_inte
       .cc_outw       (rw),
       .cc_halfband   (0),
       .cc_use_delay  (0),
