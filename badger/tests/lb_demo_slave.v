@@ -28,13 +28,6 @@ module lb_demo_slave(
 	output led2  // PWM
 );
 
-`ifdef SIMULATE
-always @(posedge clk) if (control_strobe) begin
-	if (control_rd) $display("Localbus read  r[%x]", addr);
-	else            $display("Localbus write r[%x] = %x", addr, data_out);
-end
-`endif
-
 wire do_rd = control_strobe & control_rd;
 reg dbg_rst=0;
 wire [7:0] ibadge_out, obadge_out;
@@ -71,6 +64,12 @@ wire [31:0] tx_freq;
 freq_count #(.refcnt_width(27), .freq_width(32)) f_count(.f_in(ibadge_clk),
 	.sysclk(clk), .frequency(tx_freq));
 
+// Configuration ROM
+wire [15:0] config_rom_out;
+fake_config_romx rom(
+	.clk(clk), .address(addr[10:0]), .data(config_rom_out)
+);
+
 // Very basic pipelining of two-cycle read process
 reg [23:0] addr_r=0;
 reg do_rd_r=0;
@@ -79,18 +78,23 @@ always @(posedge clk) begin
 	addr_r <= addr;
 end
 
+wire [31:0] hello_0 = "Hell";
+wire [31:0] hello_1 = "o wo";
+wire [31:0] hello_2 = "rld!";
+wire [31:0] hello_3 = "(::)";
+
 // First read cycle
 reg [31:0] reg_bank_0=0, dbg_mem_out=0;
 always @(posedge clk) if (do_rd) begin
 	case (addr[3:0])
-		0: reg_bank_0 <= "Hell";
-		1: reg_bank_0 <= "o wo";
-		2: reg_bank_0 <= "rld!";
-		3: reg_bank_0 <= "(::)";
-		4: reg_bank_0 <= xdomain_fault_count;
-		5: reg_bank_0 <= tx_freq;
-		6: reg_bank_0 <= tx_mac_done;
-		7: reg_bank_0 <= rx_mac_buf_status;
+		4'h0: reg_bank_0 <= hello_0;
+		4'h1: reg_bank_0 <= hello_1;
+		4'h2: reg_bank_0 <= hello_2;
+		4'h3: reg_bank_0 <= hello_3;
+		4'h4: reg_bank_0 <= xdomain_fault_count;
+		4'h5: reg_bank_0 <= tx_freq;
+		4'h6: reg_bank_0 <= tx_mac_done;
+		4'h7: reg_bank_0 <= rx_mac_buf_status;
 		default: reg_bank_0 <= "zzzz";
 	endcase
 end
@@ -99,6 +103,10 @@ end
 reg [31:0] lb_data_in=0;
 always @(posedge clk) if (do_rd_r) begin
 	casez (addr_r)
+		// Semi-standard address for 2K x 16 configuration ROM
+		// xxx800 through xxxfff
+		24'bzzzz_zzzz_zzzz_1zzz_zzzz_zzzz: lb_data_in <= config_rom_out;
+		24'h00000z: lb_data_in <= reg_bank_0;
 		24'h01zzzz: lb_data_in <= ibadge_out;
 		24'h02zzzz: lb_data_in <= obadge_out;
 		24'h03zzzz: lb_data_in <= rx_mac_data;
@@ -112,12 +120,14 @@ reg led_user_r=0;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
 wire led_write = control_strobe & ~control_rd & (addr[23:20]==0);
+reg stop_sim=0;  // clearly only useful in simulation
 always @(posedge clk) if (led_write) case (addr[3:0])
 	1: led_user_r <= data_out;
 	2: led_1_df <= data_out;
 	3: led_2_df <= data_out;
 	4: dbg_rst <= data_out;
 	5: rx_mac_hbank_r <= data_out;
+	6: stop_sim <= data_out;
 endcase
 // Blink the LEDs with the specified duty factor
 // (your eyes won't notice the blink, because it's at 488 kHz)
@@ -133,5 +143,18 @@ assign led1 = l1;
 assign led2 = l2;
 assign data_in = lb_data_in;
 assign rx_mac_hbank = rx_mac_hbank_r;
+
+`ifdef SIMULATE
+reg [1:0] sr=0;
+reg [23:0] addr_rr=0;
+always @(posedge clk) begin
+	sr <= {sr[0:0], control_strobe & control_rd};
+	addr_rr <= addr_r;
+	if (control_strobe & ~control_rd)
+		$display("Localbus write r[%x] = %x", addr, data_out);
+	if (sr[1])
+		$display("Localbus read  r[%x] = %x", addr_rr, data_in);
+end
+`endif
 
 endmodule

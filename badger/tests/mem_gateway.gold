@@ -5,36 +5,36 @@
 12
 34
 56
-Localbus read  r[112230]
 78
 10
+Localbus read  r[112230] = 48656c6c
 11
 22
 30
 48
 65
 6c
-Localbus read  r[112233]
 6c
 10
+Localbus read  r[112233] = 283a3a29
 11
 22
 33
 28
 3a
 3a
-Localbus read  r[112232]
 29
 10
+Localbus read  r[112232] = 726c6421
 11
 22
 32
 72
 6c
 64
-Localbus read  r[112231]
 21
 10
+Localbus read  r[112231] = 6f20776f
 11
 22
 31

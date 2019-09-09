@@ -148,7 +148,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 
 # =====
 # Another tangent for another client
-LB_DEMO_V = lb_demo_slave.v freq_count.v
+LB_DEMO_V = lb_demo_slave.v freq_count.v fake_config_romx.v
 # LB_DEMO_V += badge_trace.v
 mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V)
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
@@ -278,7 +278,7 @@ Vhw_test: hw_test.v base_rx_mac.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c ta
 
 # =====
 # WIP
-Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v lb_demo_slave.v freq_count.v mem_gateway_sim.cpp udp_model.c
+Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v lb_demo_slave.v freq_count.v fake_config_romx.v mem_gateway_sim.cpp udp_model.c
 	rm -f udp_model.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmem_gateway_wrap.mk
