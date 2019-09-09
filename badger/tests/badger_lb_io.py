@@ -1,64 +1,14 @@
 #!/usr/bin/env python
 '''
-Access to localbus gateway, supprting testing of Packet Badger
+Access to localbus gateway, supporting testing of Packet Badger
 '''
-# mostly cribbed from FEED/src/python/leep/raw.py
 import argparse
-from sys import stdin
-import socket
-import numpy
-import random
-# import logging
-be32 = numpy.dtype('>u4')
+import sys
+import os
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
-class subleep:
-    def __init__(self, host, timeout=1.02, port=803):
-        self.dest = (host, int(port))
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
-        self.sock.settimeout(timeout)
-
-    def exchange(self, addrs, values=None):
-        """Exchange a single low level message
-        """
-        msg = numpy.zeros(2+2*len(addrs), dtype=be32)
-        msg[0] = random.randint(0, 0xffffffff)
-        msg[1] = msg[0] ^ 0xffffffff
-
-        for i, (A, V) in enumerate(zip(addrs, values), 1):
-            A &= 0x00ffffff
-            if V is None:
-                A |= 0x10000000
-            msg[2*i] = A
-            msg[2*i+1] = V or 0
-
-        tosend = msg.tostring()
-        # print("%s Send (%d) %s", self.dest, len(tosend), repr(tosend))
-        self.sock.sendto(tosend, self.dest)
-
-        while True:
-            reply, src = self.sock.recvfrom(15000)
-            # print("%s Recv (%d) %s", src, len(reply), repr(reply))
-
-            if len(reply) % 8:
-                reply = reply[:-(len(reply) % 8)]
-
-            if len(tosend) != len(reply):
-                print("Reply truncated %d %d" % (len(tosend), len(reply)))
-                continue
-
-            reply = numpy.frombuffer(reply, be32)
-            if (msg[:2] != reply[:2]).any():
-                print('Ignore reply w/o matching nonce %s %s' % (msg[:2], reply[:2]))
-                continue
-            elif (msg[2::2] != reply[2::2]).any():
-                print('reply addresses are out of order')
-                continue
-
-            break
-
-        ret = reply[3::2]
-        return ret
+from lbus_access import lbus_access
 
 
 def show_trace(chip, b1):
@@ -157,9 +107,9 @@ if __name__ == "__main__":
         help='reset | tx | rx | show'
     )
     args = p.parse_args()
-    foo = subleep(args.ip, port=args.port)
+    foo = lbus_access(args.ip, port=args.port)
     if not foo:
-        print("subleep setup failed")
+        print("lbus_access setup failed")
         exit(1)
     if args.command == "reset":
         reset_trace(foo)
@@ -171,10 +121,10 @@ if __name__ == "__main__":
         show_trace(foo, 0x020000)
     elif args.command == "arb":
         if args.file is None:
-            fd = stdin
+            fd = sys.stdin
         else:
             fd = open(args.file, "r")
         addrs, values = process_fd(fd)
         foo.exchange(addrs, values)
     else:
-        print("usage: python grab.py reset|show|tx|rx")
+        print("usage: python badger_lb_io.py reset|show|tx|rx")
