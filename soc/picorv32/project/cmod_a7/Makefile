@@ -21,10 +21,10 @@ SRCS      = system.c print.c timer.c ui.c common.c printf.c
 OBJS      = $(subst .c,.o,$(SRCS)) startup_irq.o bootloader.o
 
 #size of the blockRam [bytes]
-MEM_SIZE  = 16384
+BLOCK_RAM_SIZE = 16384
 CFLAGS   += -DGIT_VERSION=\"$(GIT_VERSION)\" -DPRINTF_FLOAT_SUPPORT
 # CFLAGS   += -ffunction-sections
-VFLAGS   += -DMEM_SIZE=$(MEM_SIZE) -DMEMORY_PACK_FAST
+VFLAGS   += -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) -DMEMORY_PACK_FAST
 
 all: $(TARGET)_synth.bit
 

@@ -1,35 +1,56 @@
+// Use verilator to generate an executable which is an hardware emulator of the picorv32 SOC.
+// Then use it to run and debug the lwip stack on picorv32
 `timescale 1 ns / 1 ns
 
-module badger_tb;
-    localparam SYS_CLK_PERIOD = 8;  // [ns]
-    localparam ETH_RX_CLK_PERIOD = 8;
+// top level ports are accessed from badger_lwip_sim.cpp
+module badger_lwip_tb(
+    // GMII Tx port
+    input vgmii_tx_clk,
+    output [7:0] vgmii_txd,
+    output vgmii_tx_en,
+    output vgmii_tx_er,
+
+    // GMII Rx port
+    input vgmii_rx_clk,
+    input [7:0] vgmii_rxd,
+    input vgmii_rx_er,
+    input vgmii_rx_dv,
+
+    output in_use  // not used ;)
+);
     localparam LATENCY=64;
     //------------------------------------------------------------------------
-    //  Handle the power on Reset
+    //  Wire up clocks, reset and handle cpu trap
     //------------------------------------------------------------------------
-    reg sys_clk=0, eth_rx_clk=0;
+    wire eth_rx_clk = vgmii_rx_clk;
+    wire sys_clk = vgmii_rx_clk;
+
+    // assign in_use = badger_pack_inst.rtefi_blob_inst.in_use;
+    // the above line makes the emulator insert sleep() cycles
+    // when the eth-interface is not in use
+    assign in_use = 1; // emulation at full steam
+
     integer cc=0;
     reg rst = 1;
-    always #(SYS_CLK_PERIOD / 2) sys_clk = ~sys_clk;
-    always #(ETH_RX_CLK_PERIOD / 2) eth_rx_clk = ~eth_rx_clk;
-    initial begin
-        if ($test$plusargs("vcd")) begin
-            $dumpfile("badger.vcd");
-            $dumpvars(5,badger_tb);
-        end
-        repeat (10) @(posedge sys_clk);
-        rst <= 0;
-    end
-
-    // --------------------------------------------------------------
-    //  Catch the trap signal to end simulation
-    // --------------------------------------------------------------
     wire trap;
+    // `retVal` is the value returned from main() in the firmware code
+    wire [31:0] retVal = cpu.picorv32_core.dbg_reg_x10;
+
     always @(posedge sys_clk) begin
         cc <= cc + 1;
+        if (cc > 10)
+            rst <= 0;
+        // Catch the picorv trap signal to end simulation
         if (~rst && trap) begin
             $display("TRAP");
-            $finish();
+            // Make sim. fail when firmware returns != 1
+            if (retVal == 32'h1) begin
+                $display("PASS");
+                $finish;
+            end else begin
+                $display("FAIL");
+                $stop;
+            end
         end
     end
 
@@ -38,6 +59,7 @@ module badger_tb;
     // --------------------------------------------------------------
     wire [68:0] packed_cpu_fwd;
     wire [32:0] packed_cpu_ret;
+    `define DEBUGREGS
     pico_pack cpu (
         .clk           ( sys_clk        ),
         .reset         ( rst            ),
@@ -56,7 +78,7 @@ module badger_tb;
     //  Instantiate the memory (holds data and program!)
     // --------------------------------------------------------------
     memory_pack #(
-        .MEM_INIT      ("./badger32.hex"),
+        .MEM_INIT      ("./badger_lwip32.hex"),
         .BASE_ADDR     (8'h00)
     ) mem_inst (
         // Hardware interface
@@ -100,32 +122,18 @@ module badger_tb;
         .mem_packed_fwd(packed_cpu_fwd),
         .mem_packed_ret(packed_badger_ret),
         .eth_clocks_rx (eth_rx_clk),
-        .eth_rx_dv     (eth_in_s),
-        .eth_rx_er     (1'b0),
-        .eth_rx_data   (eth_in),
+        // Loopback output back to input
+        .eth_rx_dv     (vgmii_rx_dv),
+        .eth_rx_er     (vgmii_rx_er),
+        .eth_rx_data   (vgmii_rxd),
         .eth_clocks_gtx(),
         .eth_rst_n     (),
-        .eth_tx_en     (eth_out_s),
-        .eth_tx_er     (),
-        .eth_tx_data   (eth_out),
+        .eth_tx_en     (vgmii_tx_en),
+        .eth_tx_er     (vgmii_tx_er),
+        .eth_tx_data   (vgmii_txd),
         .eth_mdc       (),
         .eth_mdio      ()
     );
-
-    // --------------------------------------------------------------
-    //  TAP interface
-    // --------------------------------------------------------------
-    reg [7:0] eth_in_=0;
-    reg eth_in_s_=0;
-    // hook to make things run efficiently
-    wire thinking = badger_pack_inst.rtefi_blob_inst.in_use;
-    always @(posedge eth_rx_clk) begin
-        if (cc > 4) $tap_io(
-            eth_out, eth_out_s, eth_in_, eth_in_s_, thinking
-        );
-        eth_in <= eth_in_;
-        eth_in_s <= eth_in_s_;
-    end
 
     // printf to terminal
     always @(posedge sys_clk)

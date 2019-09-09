@@ -17,7 +17,11 @@ module lb_demo_slave(
 	input obadge_stb,
 	input [7:0] obadge_data,
 	input xdomain_fault,
+	// Features
 	input tx_mac_done,
+	input [15:0] rx_mac_data,
+	input [1:0] rx_mac_buf_status,
+	output rx_mac_hbank,
 	// Output to hardware
 	output led_user_mode,
 	output led1,  // PWM
@@ -25,8 +29,9 @@ module lb_demo_slave(
 );
 
 `ifdef SIMULATE
-always @(posedge clk) if (control_strobe & ~control_rd) begin
-	$display("Localbus write r[%x] = %x", addr, data_out);
+always @(posedge clk) if (control_strobe) begin
+	if (control_rd) $display("Localbus read  r[%x]", addr);
+	else            $display("Localbus write r[%x] = %x", addr, data_out);
 end
 `endif
 
@@ -85,6 +90,7 @@ always @(posedge clk) if (do_rd) begin
 		4: reg_bank_0 <= xdomain_fault_count;
 		5: reg_bank_0 <= tx_freq;
 		6: reg_bank_0 <= tx_mac_done;
+		7: reg_bank_0 <= rx_mac_buf_status;
 		default: reg_bank_0 <= "zzzz";
 	endcase
 end
@@ -95,6 +101,7 @@ always @(posedge clk) if (do_rd_r) begin
 	casez (addr_r)
 		24'h01zzzz: lb_data_in <= ibadge_out;
 		24'h02zzzz: lb_data_in <= obadge_out;
+		24'h03zzzz: lb_data_in <= rx_mac_data;
 		24'h11zzzz: lb_data_in <= reg_bank_0;
 		default: lb_data_in <= 32'hdeadbeef;
 	endcase
@@ -103,12 +110,14 @@ end
 // Direct writes
 reg led_user_r=0;
 reg [7:0] led_1_df=0, led_2_df=0;
+reg rx_mac_hbank_r=1;
 wire led_write = control_strobe & ~control_rd & (addr[23:20]==0);
 always @(posedge clk) if (led_write) case (addr[3:0])
 	1: led_user_r <= data_out;
 	2: led_1_df <= data_out;
 	3: led_2_df <= data_out;
 	4: dbg_rst <= data_out;
+	5: rx_mac_hbank_r <= data_out;
 endcase
 // Blink the LEDs with the specified duty factor
 // (your eyes won't notice the blink, because it's at 488 kHz)
@@ -123,5 +132,6 @@ assign led_user_mode = led_user_r;
 assign led1 = l1;
 assign led2 = l2;
 assign data_in = lb_data_in;
+assign rx_mac_hbank = rx_mac_hbank_r;
 
 endmodule

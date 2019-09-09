@@ -252,11 +252,16 @@ def flash_dump(s, file_name, ad, page_count):
 
 # Read local file and write to flash from FF to 00
 def remote_program(s, file_name, ad, size):
+    start_p = ad >> 8
+    start_a = start_p << 8
+    stop_p = ((ad + size - 1) >> 8) + 1
+    final_a = (stop_p << 8) - 1
     logging.info('Programming file %s to %s from add 0x%x to add 0x%x, length = 0x%x...'
                  % (file_name, IPADDR, ad, (((ad + size) >> 8) + 1) << 8, size))
     f = open(file_name, 'r')
     # assume that '.bin' file size is always less than whole pages
-    for ba in reversed(range(ad >> 8, ((ad + size) >> 8) + 1)):
+    for ba in reversed(range(start_p, stop_p)):
+        print("block %d" % ba)
         f.seek((ba << 8) - ad)
         bd = f.read(PAGE)
         while not (write_enable(s, True)):
@@ -268,9 +273,13 @@ def remote_program(s, file_name, ad, size):
 
 # Erase flash from 00 to FF, step 64KB
 def remote_erase(s, ad, size):
-    logging.info('Erasing flash %s from add 0x%x to add 0x%x, length = 0x%x...'
-                 % (IPADDR, ad, (((ad + size) >> 16) + 1) << 16, size))
-    for ba in range(ad >> 16, ((ad + size) >> 16) + 1):
+    start_p = ad >> 16
+    start_a = start_p << 16
+    stop_p = ((ad + size - 1) >> 16) + 1
+    final_a = (stop_p << 16) - 1
+    logging.info('Erasing flash %s from addr 0x%x to addr 0x%x, length = 0x%x...'
+                 % (IPADDR, start_a, final_a, size))
+    for ba in range(start_p, stop_p):
         while not (write_enable(s, True)):
             time.sleep(WAIT)
         erase_mem(s, ba << 16, '64KB')
@@ -375,6 +384,7 @@ def main(argv):
             prog_file = arg
             fileinfo = os.stat(prog_file)
             size = fileinfo.st_size
+            print("file size %d" % size)
             remote_erase(s, ad, size)
             remote_program(s, prog_file, ad, size)
         elif opt in ("--erase", "-e"):

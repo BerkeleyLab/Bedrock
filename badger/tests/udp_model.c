@@ -40,13 +40,13 @@
 static void setup_receive(int usd, unsigned int interface, unsigned short port)
 {
 	struct sockaddr_in sa_rcvr;
-	memset(&sa_rcvr,0,sizeof sa_rcvr);
+	memset(&sa_rcvr, 0, sizeof sa_rcvr);
 	sa_rcvr.sin_family=AF_INET;
 	sa_rcvr.sin_addr.s_addr=htonl(interface);
 	sa_rcvr.sin_port=htons(port);
-	if (bind(usd,(struct sockaddr *) &sa_rcvr,sizeof sa_rcvr) == -1) {
+	if (bind(usd, (struct sockaddr *) &sa_rcvr, sizeof sa_rcvr) == -1) {
 		perror("bind");
-		fprintf(stderr,"could not bind to udp port %u\n",port);
+		fprintf(stderr, "could not bind to udp port %u\n", port);
 		exit(1);
 	}
 }
@@ -86,6 +86,7 @@ void udp_receiver(int *in_octet, int *in_valid, int *in_count, int thinking)
 	static int sleepctr=0;
 	static int sleepmax=10;
 	static unsigned int preamble_cnt=0, postfix_cnt=0;
+	int udp_model_debug = 0;  /* adjustable */
 
 	if (!initialized) {
 		fprintf(stderr, "udp_receiver initializing UDP port %u\n", udp_port);
@@ -110,20 +111,22 @@ void udp_receiver(int *in_octet, int *in_valid, int *in_count, int thinking)
 
 		if (rc < 0 && errno == EAGAIN) {
 			if (!thinking) sleepctr++;
-			/* fprintf(stderr,"foo %d %d\n", sleepctr, thinking); */
+			/* fprintf(stderr, "foo %d %d\n", sleepctr, thinking); */
 			if (/* !out_valid && */ sleepctr > sleepmax) {
 				struct timespec minsleep = {0, 100000000};
 				nanosleep(&minsleep, NULL);
 			}
 		} else {
-			fprintf(stderr,"input packet read %d udp bytes, source port %u\n", rc, src_addr.sin_port);
-			/* for (unsigned jx=0; jx<src_addrlen; jx++) fprintf(stderr," %2.2x",((char *) &src_addr)[jx]); */
+			fprintf(stderr, "udp_model: Rx %d udp bytes, source port %u\n", rc, src_addr.sin_port);
+			/* for (unsigned jx=0; jx<src_addrlen; jx++) fprintf(stderr, " %2.2x", ((char *) &src_addr)[jx]); */
 			inbuf.len = rc;
 			inbuf.cur = 0;
 			sleepctr = 0;
 			preamble_cnt = 18;  /* should be 44(?) but I'm easily bored. */
-			fputs("Rx:",stderr);
-			print_buf(stderr, &inbuf);
+			if (udp_model_debug) {
+				fputs("Rx:", stderr);
+				print_buf(stderr, &inbuf);
+			}
 		}
 	}
 	if (preamble_cnt > 0) {
@@ -149,10 +152,13 @@ void udp_receiver(int *in_octet, int *in_valid, int *in_count, int thinking)
 	}
 	if (in_valid) *in_valid = val;
 	if (in_count) *in_count = val ? inbuf.len + 1 - inbuf.cur : 0;
-	if (val) {
-		fprintf(stderr, "UDP model %2.2x to Verilog\n", (unsigned int)((*in_octet)&0xff));
-	} else {
-		fprintf(stderr,".");
+	if (udp_model_debug) {
+		if (val) {
+			unsigned o = (unsigned int)((*in_octet)&0xff);
+			fprintf(stderr, "UDP model %2.2x to Verilog\n", o);
+		} else {
+			fprintf(stderr, ".");
+		}
 	}
 }
 
@@ -160,22 +166,23 @@ void udp_sender(int out_octet, int out_end)
 {
 	static struct pbuf outbuf;
 	static int initialized=0;
+	int udp_model_debug = 0;  /* adjustable */
 	if (!initialized) {
 		outbuf.cur = 0;
 		outbuf.len = 0;
 		initialized = 1;
 	}
 	if (1) {
-		fprintf(stderr,"Trying to write %2.2x\n", out_octet);
+		if (udp_model_debug) fprintf(stderr, "Trying to write %2.2x\n", out_octet);
 		outbuf.buf[outbuf.cur] = out_octet;
 		if (outbuf.cur < ETH_MAXLEN) outbuf.cur++;
-		else fprintf(stderr,"Ethernet output packet too long\n");
+		else fprintf(stderr, "Ethernet output packet too long\n");
 	}
 	if (out_end) {
 		/* write output packet */
 		int rc = sendto(udpfd, outbuf.buf, outbuf.cur, 0, (struct sockaddr *) &src_addr, src_addrlen);
 		if (rc < 0) perror("sendto");
-		fprintf(stderr, "output packet len %d, write rc=%d\n",outbuf.cur, rc);
+		fprintf(stderr, "udp_model: Tx len %d, write rc=%d\n", outbuf.cur, rc);
 		outbuf.cur=0;
 	}
 }

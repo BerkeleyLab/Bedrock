@@ -52,7 +52,7 @@ initRegs:
     addi x29, zero, 0
     addi x30, zero, 0
     addi x31, zero, 0
-    li  sp, MEM_SIZE          # Set stack pointer to last byte in memory + 1 of user app
+    li  sp, BLOCK_RAM_SIZE    # Set stack pointer to last byte in memory + 1 of user app
     addi sp,sp,-16
     sw zero,0(sp)
     sw zero,4(sp)

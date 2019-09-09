@@ -143,6 +143,17 @@ def arp_gen(
             src_mac=src_mac, dst_mac=dst_mac, ethertype=0x06)
 
 
+def guess_mac(ifname="tap0"):
+    # Determine our own MAC address; sort-of works on Linux.
+    # Feel free to upgrade to portable code, if such a thing exists :-p
+    try:
+        mac_colons = open('/sys/class/net/%s/address' % ifname).read()
+        dst_mac = bytes([int(x, 16) for x in mac_colons.split(':')])
+    except Exception:
+        dst_mac = bytes([0x12, 0x55, 0x55, 0x00, 0x01, 0x2d])
+    return dst_mac
+
+
 if __name__ == '__main__':
     src_ip = bytes([192, 168, 7, 1])
     dst_ip = bytes([192, 168, 7, 4])
@@ -172,14 +183,7 @@ if __name__ == '__main__':
         contents = udp_gen(
             data=udp_data, src_ip=dst_ip, dst_ip=src_ip,
             src_port=3001, dst_port=3011)
-        # Determine our own MAC address; sort-of works on Linux.
-        # Feel free to upgrade to portable code, if such a thing exists :-p
-        ifname = "tap0"
-        try:
-            mac_colons = open('/sys/class/net/%s/address' % ifname).read()
-            dst_mac = bytes([int(x, 16) for x in mac_colons.split(':')])
-        except Exception:
-            dst_mac = bytes([0x12, 0x55, 0x55, 0x00, 0x01, 0x2d])
+        dst_mac = guess_mac()
         # Using ourselves as the destination of this packet allows
         # simple confidence testing with "nc -l -u -p 3011".
         eth_gen(

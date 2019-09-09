@@ -71,6 +71,8 @@ end
 wire eth_in_e=0;  wire eth_out_e;
 cryomodule_badger #(.ip({8'd192, 8'd168, 8'd7, 8'd4}), .siphash_fifo_aw(7)) cryomodule_badger(.clk1x(clk1x), .clk2x(clk2x), .gmii_tx_clk(clk), .gmii_rx_clk(clk),
 	.gmii_rxd(eth_in),  .gmii_rx_dv(eth_in_s),  .gmii_rx_er(eth_in_e),
-	.gmii_txd(eth_out), .gmii_tx_en(eth_out_s), .gmii_tx_er(eth_out_e));
+	.gmii_txd(eth_out), .gmii_tx_en(eth_out_s), .gmii_tx_er(eth_out_e),
+	.eth_cfg_clk(1'b0), .eth_cfg_set(10'b0)
+);
 
 endmodule

@@ -1,0 +1,124 @@
+[*]
+[*] GTKWave Analyzer v3.3.94 (w)1999-2018 BSI
+[*] Wed Jul 17 00:26:48 2019
+[*]
+[dumpfile] "/home/michael/fpga_wsp/bedrock/soc/picorv32/test/badger_loopback/badger_lb.vcd"
+[dumpfile_mtime] "Wed Jul 17 00:26:04 2019"
+[dumpfile_size] 76718067
+[savefile] "/home/michael/fpga_wsp/bedrock/soc/picorv32/test/badger_loopback/badger_lb.gtkw"
+[timestart] 256070600
+[size] 1916 1037
+[pos] -1 -1
+*-16.000000 256116000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] badger_lb_tb.
+[treeopen] badger_lb_tb.badger_pack_inst.
+[treeopen] badger_lb_tb.badger_pack_inst.rtefi_blob_inst.center.txmac.
+[sst_width] 307
+[signals_width] 358
+[sst_expanded] 1
+[sst_vpaned_height] 329
+@420
+badger_lb_tb.cc
+@28
+badger_lb_tb.rst
+@800200
+-CPU
+@28
+badger_lb_tb.cpu.picorv32_core.trap
+badger_lb_tb.cpu.picorv32_core.dbg_mem_instr
+badger_lb_tb.cpu.picorv32_core.dbg_mem_ready
+badger_lb_tb.cpu.picorv32_core.dbg_mem_valid
+@22
+badger_lb_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+badger_lb_tb.cpu.picorv32_core.dbg_mem_rdata[31:0]
+badger_lb_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+badger_lb_tb.cpu.picorv32_core.dbg_mem_wdata[31:0]
+@1000200
+-CPU
+@800200
+-ethernet
+@22
+badger_lb_tb.eth_out[7:0]
+@29
+badger_lb_tb.eth_out_s
+@1000200
+-ethernet
+@c00200
+-API
+@22
+badger_lb_tb.badger_pack_inst.word_addr[13:0]
+@c00022
+badger_lb_tb.badger_pack_inst.mem_wstrb[3:0]
+@28
+(0)badger_lb_tb.badger_pack_inst.mem_wstrb[3:0]
+(1)badger_lb_tb.badger_pack_inst.mem_wstrb[3:0]
+(2)badger_lb_tb.badger_pack_inst.mem_wstrb[3:0]
+(3)badger_lb_tb.badger_pack_inst.mem_wstrb[3:0]
+@1401200
+-group_end
+@22
+badger_lb_tb.badger_pack_inst.mem_wdata[31:0]
+@28
+badger_lb_tb.badger_pack_inst.mem_ready
+@22
+badger_lb_tb.badger_pack_inst.buf_start_addr[15:0]
+@28
+badger_lb_tb.badger_pack_inst.tx_mac_start
+badger_lb_tb.badger_pack_inst.tx_mac_done
+@c00022
+badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+@28
+(0)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(1)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(2)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(3)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(4)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(5)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(6)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(7)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(8)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(9)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(10)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(11)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(12)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(13)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(14)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(15)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(16)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(17)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(18)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(19)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(20)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(21)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(22)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(23)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(24)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(25)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(26)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(27)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(28)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(29)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(30)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+(31)badger_lb_tb.badger_pack_inst.sfrInst.sfRegsIn[31:0]
+@1401200
+-group_end
+-API
+@c00200
+-RX_MAC
+@28
+badger_lb_tb.badger_pack_inst.rx_mac_wen
+@22
+badger_lb_tb.badger_pack_inst.rx_mac_a[11:0]
+badger_lb_tb.badger_pack_inst.rx_mac_d[7:0]
+@28
+badger_lb_tb.badger_pack_inst.rx_mac_hbank
+badger_lb_tb.badger_pack_inst.mac_bank
+badger_lb_tb.badger_pack_inst.rx_mac_accept
+badger_lb_tb.badger_pack_inst.rx_mac_status_s
+@22
+badger_lb_tb.badger_pack_inst.rx_mac_status_d[7:0]
+badger_lb_tb.badger_pack_inst.rx_mac_status[7:0]
+@1401200
+-RX_MAC
+[pattern_trace] 1
+[pattern_trace] 0

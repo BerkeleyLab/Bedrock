@@ -5,7 +5,8 @@
 [treeopen] rtefi_pipe_tb.
 [treeopen] rtefi_pipe_tb.a.
 [treeopen] rtefi_pipe_tb.a.center.
-[treeopen] rtefi_pipe_tb.a.center.txmac.
+[treeopen] rtefi_pipe_tb.a.center.mac_b.
+[treeopen] rtefi_pipe_tb.a.center.mac_b.txmac.
 [sst_width] 238
 [signals_width] 198
 [sst_expanded] 1
@@ -33,22 +34,22 @@ rtefi_pipe_tb.host_wdata[15:0]
 @200
 -mac_subset
 @28
-rtefi_pipe_tb.a.center.txmac.host_start
+rtefi_pipe_tb.a.center.mac_b.txmac.host_start_
 @22
-rtefi_pipe_tb.a.center.txmac.buf_start_addr[9:0]
+rtefi_pipe_tb.a.center.mac_b.txmac.buf_start_addr[9:0]
 @24
-rtefi_pipe_tb.a.center.txmac.len_req[10:0]
-rtefi_pipe_tb.a.center.txmac.precog_width[10:0]
+rtefi_pipe_tb.a.center.mac_b.txmac.len_req[10:0]
+rtefi_pipe_tb.a.center.mac_b.txmac.precog_width[10:0]
 @28
-rtefi_pipe_tb.a.center.txmac.req
-rtefi_pipe_tb.a.center.txmac.scanner_busy
-rtefi_pipe_tb.a.center.txmac.clear_to_send
+rtefi_pipe_tb.a.center.mac_b.txmac.req
+rtefi_pipe_tb.a.center.mac_b.txmac.scanner_busy
+rtefi_pipe_tb.a.center.mac_b.txmac.clear_to_send
 @200
 -precog
 @24
-rtefi_pipe_tb.a.center.txmac.precog.tx_packet_width[10:0]
-rtefi_pipe_tb.a.center.txmac.precog.state[1:0]
+rtefi_pipe_tb.a.center.mac_b.txmac.precog.tx_packet_width[10:0]
+rtefi_pipe_tb.a.center.mac_b.txmac.precog.state[1:0]
 @420
-rtefi_pipe_tb.a.center.txmac.precog.delay_cnt[11:0]
+rtefi_pipe_tb.a.center.mac_b.txmac.precog.delay_cnt[11:0]
 [pattern_trace] 1
 [pattern_trace] 0
