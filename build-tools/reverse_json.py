@@ -6,7 +6,7 @@ pipeline registers.  Attempts to deduce signed-ness and bit width for each
 entry by peeking at wire declarations in the Verilog.
 '''
 import re
-from sys import stderr
+from sys import stderr, argv
 
 trantab = {"[": "_", "]": ""}
 
@@ -92,7 +92,7 @@ def memorize(g):
     wire_info[g(3)] = sign + ":" + g(2)
 
 
-f = open("application_top.v", "r")
+f = open(argv[1], "r")
 print("{")
 sl = []
 param_db = {}
