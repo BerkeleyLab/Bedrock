@@ -143,12 +143,14 @@ module eth_gtx_bridge #(
       .config_d            (cfg_wdata),
       .config_s            (cfg_ipmac),
       .config_p            (cfg_udp),
-      // TX MAC Host interface
-      .host_clk            (1'b0),
-      .host_waddr          (3'b0),
-      .host_write          (1'b0),
-      .host_wdata          (16'b0),
-      .tx_mac_done         (),
+
+      // MAC Host interface
+      .host_rdata          (16'h0),
+      .buf_start_addr      (2'h0),
+      .tx_mac_start        (1'h0),
+      .rx_mac_hbank        (1'h0),
+      .rx_mac_accept       (1'h0),
+
       // Debug ports
       .ibadge_stb          (),
       .ibadge_data         (),

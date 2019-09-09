@@ -1,5 +1,5 @@
 set prefix [lindex $argv 0]
-set mem_size [lindex $argv 1]
+set block_ram_size [lindex $argv 1]
 set vivado_files [lrange $argv 2 end]
 
 set platform "kc705"
@@ -8,7 +8,7 @@ set project_part "xc7k325tffg900-2"
 read_verilog $vivado_files
 read_xdc top.xdc
 
-synth_design -part $project_part -top top -verilog_define MEM_SIZE=$mem_size
+synth_design -part $project_part -top top -verilog_define BLOCK_RAM_SIZE=$block_ram_size
 opt_design
 place_design -directive ExtraTimingOpt
 phys_opt_design

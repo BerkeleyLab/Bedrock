@@ -13,10 +13,11 @@ vpath %.c $(LIB_DIR)/src
 
 RISCV_TOOLS_PREFIX = riscv32-unknown-elf-
 CC      = $(RISCV_TOOLS_PREFIX)gcc
-VFLAGS  = -Wall -Wno-timescale -DMEM_SIZE=$(MEM_SIZE)
+AR      = $(RISCV_TOOLS_PREFIX)ar
+VFLAGS  = -Wall -Wno-timescale -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
 CFLAGS  = -Wall -Wextra -Wundef -Wstrict-prototypes -std=c99 -march=rv32imc -Os -ffreestanding
-CFLAGS += -nostdlib -DMEM_SIZE=$(MEM_SIZE) -mabi=ilp32
-LDFLAGS = $(CFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,-T,$(filter %.lds, $^),--defsym,MEM_SIZE=$(MEM_SIZE),--gc-sections,--no-relax
+CFLAGS += -mabi=ilp32 -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) -nostdlib
+LDFLAGS = $(CFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,-T,$(filter %.lds, $^),--defsym,BLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE),--gc-sections,--no-relax
 # --no-relax is a workaround for https://github.com/riscv/riscv-binutils-gdb/issues/144
 # --verbose=3,-M for verbose linker output / debugging
 
@@ -51,7 +52,7 @@ LDFLAGS = $(CFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,
 	chmod -x $@
 
 %_synth.bit: %.v
-	vivado -nojou -mode batch -source $(filter %.tcl, $^) -tclargs $(basename $@) $(MEM_SIZE) $(filter %.v, $^)
+	vivado -nojou -mode batch -source $(filter %.tcl, $^) -tclargs $(basename $@) $(BLOCK_RAM_SIZE) $(filter %.v, $^)
 
 %_config:
 	xc3sprog -c jtaghs1_fast $(patsubst %_config,%_synth.bit,$@)

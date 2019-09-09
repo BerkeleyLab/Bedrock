@@ -36,7 +36,7 @@ VVP_FLAGS_cryomodule.dat = +pfile=cryomodule_p.dat
 cryomodule.out: cryomodule_tb cryomodule_in.dat
 cryomodule.dat: cryomodule.out
 cryomodule.vcd: cryomodule_in.dat
-cryomodule_tb: $(AUTOGEN_DIR)/config_romx.v
+cryomodule_tb: $(AUTOGEN_DIR)/config_romx.v $(AUTOGEN_DIR)/cryomodule_auto.vh
 cryomodule_check: cryomodule.dat
 	$(PYTHON) verify_cryomodule.py
 

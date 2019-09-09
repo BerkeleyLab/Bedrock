@@ -186,7 +186,7 @@ VCD_ARGS_scanner_check = +packet_file=stests.dat
 
 # =====
 # assembled pipeline
-rtefi_pipe_tb: $(RTEFI_V) fake_config_romx.v offline.v
+rtefi_pipe_tb: $(RTEFI_V) fake_config_romx.v offline.v mac_compat_dpram.v
 rtefi_pipe.out: rtefi_pipe_tb udp4.dat
 	$(VVP) $< +trace +packet_file=$(filter %udp4.dat, $^) > $@
 rtefi_pipe.vcd: udp4.dat
@@ -206,7 +206,7 @@ rtefi_blob.bit: $(RTEFI_V)
 # =====
 # Make a bitfile for an SP605 with Xilinx XST
 # first just a syntax check (sp605_gmii_test.v is empty)
-SYNTH_SOURCE_EXTRA = hw_test.v spi_gate.v $(LB_DEMO_V) activity.v
+SYNTH_SOURCE_EXTRA = hw_test.v base_rx_mac.v spi_gate.v $(LB_DEMO_V) activity.v mac_compat_dpram.v
 SYNTH_SOURCE_SP605 = gmii_hw_test.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) sp605/gmii_clock_handle.v sp605/spartan6_clocks.v
 sp605_gmii_test_tb: $(SYNTH_SOURCE_SP605) sp605/ODDR2.v
 sp605_gmii_test.bit: $(SYNTH_SOURCE_SP605) sp605/sp605_gmii.ucf
@@ -242,7 +242,7 @@ ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC
 
 # =====
 # On-line test using Icarus and Linux's tun/tap feature
-rtefi_live: rtefi_pipe_tb.v $(RTEFI_V) fake_config_romx.v
+rtefi_live: rtefi_pipe_tb.v $(RTEFI_V) fake_config_romx.v mac_compat_dpram.v
 	$(VERILOG) -m ./tap-vpi -DLINUX_TUN -o $@ $(filter %.v, $^)
 
 # Setup for a single-user machine is pretty easy: as root do a
@@ -264,11 +264,17 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 
 # =====
 # Verilator, slightly larger scope
-Vhw_test: hw_test.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c freq_count.v activity.v
+Vhw_test: hw_test.v base_rx_mac.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c freq_count.v activity.v
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
 	mv obj_dir/$@ $@
+# TFTP server demo:
+# in terminal 1: make Vhw_test && ./Vhw_test
+# in terminal 2: python3 badger_lb_io.py --ip 192.168.7.4 get_rxn
+# in terminal 3: curl -s tftp://192.168.7.4/testing123
+# The curl command should print "ABC".  This the virtual contents of every file requested.
+# See tftp_test.sh
 
 # =====
 # WIP
@@ -304,7 +310,7 @@ test_tx.vcd: host_mem
 test_tx.out: test_tx_tb host_mem
 	$(VVP) $<
 precog_tb: precog.v
-mac_subset_tb: mac_subset.v test_tx_mac.v precog.v
+mac_subset_tb: mac_subset.v test_tx_mac.v precog.v mac_compat_dpram.v
 host_cmds.dat: host_cmds_gen mac_subset.gold
 	./host_cmds_gen $(filter %mac_subset.gold, $^)
 mac_subset.vcd: host_cmds.dat
@@ -334,10 +340,14 @@ gtkw_refresh:
 
 # =====
 # Documentation processing, maybe not not the best place for these rules
-docs: rtefi.svg clients.svg memory.svg tx_path.svg
+docs: rtefi.svg clients.svg memory.svg tx_path.svg index.html status.html
 .PHONY: docs
 %.svg: %.eps
 	echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
+index.html: ../README.md
+	pandoc -t html $< | sed -e 's,<a href="\(\w*\)\.eps" class="uri">\w*\.eps</a>,<img src="\1.svg">,' -e 's,status\.md,status.html,g' > $@
+status.html: ../status.md
+	pandoc -t html -o $@ $<
 
 # Documentation from Du
 lb_timing_demo.pdf: lb_timing_demo.vcd lb_timing_demo.gtkw
@@ -356,7 +366,7 @@ locc:
 	rmccmt *.c *.cpp | tr -d ' \t' | grep -c .
 .PHONY: spellme loc locc
 
-CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab $(RTEFI_CLEAN)
+CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen host_cmds.dat retrigger.dat selfmac_in.dat *.html xfer1 lorem_ipsum.hex spi_flash.grab $(RTEFI_CLEAN)
 CLEAN += *.pdf
 CLEAN_DIRS += obj_dir _xilinx
 # Actual "clean" rule in bottom_rules.mk
