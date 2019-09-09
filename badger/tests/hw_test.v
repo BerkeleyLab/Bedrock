@@ -145,6 +145,7 @@ mac_compat_dpram #(
 // Instantiate the Real Work
 wire rx_mon, tx_mon;
 wire boot_busy, blob_in_use;
+defparam rtefi.p3_enable_bursts=1;
 rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw)) rtefi(
 	.rx_clk(vgmii_rx_clk), .rxd(vgmii_rxd),
 	.rx_dv(vgmii_rx_dv), .rx_er(vgmii_rx_er),

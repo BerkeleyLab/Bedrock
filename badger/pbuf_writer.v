@@ -12,7 +12,7 @@
 // The datapath for the packet buffer data is reused to also produce
 // a port that can write data to an Rx MAC.  A 4 kByte buffer memory
 // is the smallest that can guarantee holding two full packets, and
-// we simply double buffer instead of trying somthing more complicated.
+// we simply double buffer instead of trying something more complicated.
 
 module pbuf_writer #(
 	parameter paw=11  // packet address width, 11 IRL, maybe less for simulations

@@ -24,7 +24,7 @@ client_sub #(.n_lat(n_lat)) net(.clk(clk), .len_c(len_c), .idata(idata),
 wire [23:0] addr;
 wire [31:0] data_out, data_in;
 wire control_strobe, control_rd, control_rd_valid;
-mem_gateway #(.n_lat(n_lat)) dut(.clk(clk),
+mem_gateway #(.n_lat(n_lat), .enable_bursts(1)) dut(.clk(clk),
 	.len_c(len_c), .idata(idata), .raw_l(raw_l), .raw_s(raw_s),
 	.odata(odata),
 	.addr(addr), .control_strobe(control_strobe),
