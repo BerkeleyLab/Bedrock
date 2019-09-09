@@ -193,6 +193,16 @@ rtefi_pipe.vcd: udp4.dat
 VCD_ARGS_rtefi_pipe.vcd = +packet_file=$(filter %udp4.dat, $^)
 
 # =====
+# unified version of assembled pipeline and test peripherals,
+# configured for on-line (tap) testing
+hw_test_tb: hw_test.v $(RTEFI_V) fake_config_romx.v mac_compat_dpram.v activity.v base_rx_mac.v lb_demo_slave.v spi_gate.v freq_count.v
+VFLAGS_hw_test_tb = -m ./tap-vpi
+hw_test.vcd: tap-vpi.vpi
+.PRECIOUS: hw_test.vcd  # work-around; better if vvp could exit with success
+hw_test_start: hw_test_tb tap-vpi.vpi
+	$(VVP) $<
+
+# =====
 # experimental bitfiles, not for hardware
 bits: scanner.bit construct.bit xformer.bit ethernet_crc_add.bit udp_port_cam_wrap.bit rtefi_blob.bit
 	(cd _xilinx && for f in $(basename $^); do echo $$f; grep "Slice LUT" $${f}_map.mrp; done)
