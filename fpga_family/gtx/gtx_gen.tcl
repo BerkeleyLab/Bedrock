@@ -5,6 +5,19 @@
 #
 ###############################
 
+proc add_define {new_def} {
+
+   set def_list {}
+   lappend def_list $new_def
+
+   # Apply defines
+   puts "\[GTX_GEN\] Adding to define list: $def_list"
+
+   set cur_list [get_property verilog_define [current_fileset]]
+   set def_list [list {*}$def_list {*}$cur_list]
+   set_property verilog_define $def_list [current_fileset]
+}
+
 proc gen_ip {ipname module_name config_dict} {
    create_ip -name $ipname -vendor xilinx.com -library ip -module_name $module_name
 
@@ -27,29 +40,55 @@ proc add_aux_ip {ipname config_file module_name} {
    gen_ip $ipname $module_name $config_dict
 }
 
-proc add_gtx_protocol {config_file quad_num gtx_num en8b10b} {
+proc add_gt_protocol {gt_type config_file quad_num gtx_num en8b10b} {
 
    set module_name "q${quad_num}_gtx${gtx_num}"
-
-   # Enable GTX in QGTXWRAP.v by setting define
-   set def_list {}
-   lappend def_list "Q${quad_num}_GT${gtx_num}_ENABLE"
 
    puts "\[GTX_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
 
    # Read in configuration list
    set config_dict [source $config_file]
 
+   # Force gt0_usesharedlogic to '0' to prevent generation of gt{x,p}_common
+   set config_dict [dict replace $config_dict CONFIG.gt0_usesharedlogic 0]
+
    # Create GTX IP
    gen_ip "gtwizard" $module_name $config_dict
 
+   # Enable GTX in QGTXWRAP.v by setting define
+   add_define "Q${quad_num}_GT${gtx_num}_ENABLE"
+
    # Set defines to include required ports in GTX instance
-   if {$en8b10b == 1}     { lappend def_list "Q${quad_num}_GT${gtx_num}_8B10B_EN" }
+   if {$en8b10b == 1}     { add_define "Q${quad_num}_GT${gtx_num}_8B10B_EN" }
 
-   # Apply defines
-   puts "\[GTX_GEN\] Adding to define list: $def_list"
+   set gt_type [string toupper $gt_type]
+   switch $gt_type {
+      GTX -
+      GTP {
+         add_define "GT_TYPE__${gt_type}"
+      }
+      default {
+         puts "Unsupported gigabit transceiver type $gt_type"
+         exit
+      }
+   }
+}
 
-   set cur_list [get_property verilog_define [current_fileset]]
-   set def_list [list {*}$def_list {*}$cur_list]
-   set_property verilog_define $def_list [current_fileset]
+proc add_gtcommon {config_file quad_num} {
+
+   set module_name "q${quad_num}_gtcommon"
+
+   # Enable GT{X,P}_COMMON in QGTXWRAP.v by setting define
+   add_define "Q${quad_num}_GTCOMMON_ENABLE"
+
+   puts "\[GTX_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
+
+   # Read in configuration list
+   set config_dict [source $config_file]
+
+   # Force gt0_usesharedlogic to '1' to force generation of gt{x,p}_common
+   set config_dict [dict replace $config_dict CONFIG.gt0_usesharedlogic 1]
+
+   # Create GT{X,P} IP
+   gen_ip "gtwizard" $module_name $config_dict
 }
