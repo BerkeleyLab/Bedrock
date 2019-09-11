@@ -24,6 +24,47 @@ class lbus_access:
         # TODO: Extract device capabilities automatically
         dev_burst_en = False
 
+        # Ugly, noisy, fragile, and invasive PoC
+        msg = numpy.zeros(14, dtype=be32)
+        msg[0] = random.randint(0, 0xffffffff)
+        msg[1] = msg[0] ^ 0xffffffff
+        msg[2] = 0x10000002  # read 2
+        msg[3] = 0xa5a5a5a5  # pad
+        msg[4] = 0x10000001  # read 1
+        msg[5] = 0xa5a5a5a5  # pad
+        msg[6] = 0x20000002  # repeat 2 / write 2
+        msg[7] = 0x10000001  # read 1 / write data
+        msg[8] = 0x10000001  # pad / read 1
+        msg[9] = 0xa5a5a5a5  # pad
+        msg[10] = 0x20000002  # repeat 2 / write 2
+        msg[11] = 0x10000001  # read 1 / write data
+        msg[12] = 0x10000002  # pad / read 2
+        msg[13] = 0xa5a5a5a5  # pad
+
+        tosend = msg.tostring()
+        # print("%s Send (%d) %s", self.dest, len(tosend), binascii.hexlify(tosend))
+        self.sock.sendto(tosend, self.dest)
+        if True:
+            reply, src = self.sock.recvfrom(15000)
+            if len(reply) == 14*4:
+                reply = numpy.frombuffer(reply, be32)
+                for n in [0, 1, 2, 4, 6, 7, 10, 11]:
+                    if reply[n] != msg[n]:
+                        print("bad mismatch %8.8x != %8.8x" % (reply[n], msg[n]))
+                r1 = reply[5]
+                r2 = reply[3]
+                if msg[8] == reply[8] and r1 == reply[9] and msg[12] == reply[12] and r2 == reply[13]:
+                    print("Seems to be no-burst")
+                    return False
+                elif r1 == reply[8] and r2 == reply[9] and r1 == reply[12] and r2 == reply[13]:
+                    print("Seems to be burst")
+                    return True
+                else:
+                    print("Burst autodetect failed")
+                    return False
+                # for jx, x in enumerate(reply):
+                #    print("%2d %8.8x" % (jx, x))
+
         return self.force_burst or dev_burst_en
 
     def _exchange(self, addrs, values=None, drop_reply=False, burst=False):
