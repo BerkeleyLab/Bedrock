@@ -67,20 +67,19 @@ reg_delay #(.len(read_pipe_len+1), .dw(8)) align(.clk(clk), .gate(1'b1), .reset(
 
 // Create localbus output signals
 reg [8:0] repeat_count=0;
-reg [31:0] isr=0;  // input shift register
-wire [31:0] next_isr = {isr[23:0], idata};
+reg [23:0] isr=0;  // input shift register
+wire [31:0] next_isr = {isr, idata};
 reg [63:0] big_r=0;  // command, address, data
-reg [31:0] data_out_r=0;
 reg [1:0] c4=0;
 reg data_phase=0;
 reg pre_body=0, body=0;
 reg do_op=0;
 wire next_do_op = body & &c4 & data_phase;
 wire set_repeat = ~data_phase & next_isr[29] & enable_bursts;
-wire set_repeat_view = body & &c4 & set_repeat;
+wire set_repeat_view = body & &c4 & set_repeat; // Debug signal
 reg inc_address=0;
 always @(posedge clk) begin
-	isr <= next_isr;
+	isr <= next_isr[23:0];
 	c4 <= raw_s ? c4+1 : 0;
 	if (&c4) pre_body <= 1;
 	if (&c4 & pre_body) body <= 1;

@@ -105,12 +105,12 @@ always @(posedge clk) if (do_rd_r) begin
 	casez (addr_r)
 		// Semi-standard address for 2K x 16 configuration ROM
 		// xxx800 through xxxfff
-		24'bzzzz_zzzz_zzzz_1zzz_zzzz_zzzz: lb_data_in <= config_rom_out;
-		24'h00000z: lb_data_in <= reg_bank_0;
-		24'h01zzzz: lb_data_in <= ibadge_out;
-		24'h02zzzz: lb_data_in <= obadge_out;
-		24'h03zzzz: lb_data_in <= rx_mac_data;
-		24'h11zzzz: lb_data_in <= reg_bank_0;
+		24'b????_????_????_1???_????_????: lb_data_in <= config_rom_out;
+		24'h00000?: lb_data_in <= reg_bank_0;
+		24'h01????: lb_data_in <= ibadge_out;
+		24'h02????: lb_data_in <= obadge_out;
+		24'h03????: lb_data_in <= rx_mac_data;
+		24'h11????: lb_data_in <= reg_bank_0;
 		default: lb_data_in <= 32'hdeadbeef;
 	endcase
 end

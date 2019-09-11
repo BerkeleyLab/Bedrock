@@ -7,7 +7,7 @@ import socket
 import numpy
 import random
 import ast
-import binascii
+# import binascii
 be32 = numpy.dtype('>u4')
 
 
