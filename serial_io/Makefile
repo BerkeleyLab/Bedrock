@@ -1,10 +1,5 @@
 include ../dir_list.mk
 
-# =====
-# This override goes _before_ top_rules.mk, in a directory like this where
-# testbenches $stop() when they fail.  Hope this becomes the default someday.
-%_check: %_tb
-	$(VVP) $< $(VCD_ARGS_$@)
 # This override goes _before_ top_rules.mk, to simplify builds in a
 # directory like this that does not use newad.
 %_tb: %_tb.v

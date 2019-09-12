@@ -54,7 +54,6 @@ wire signed [17:0] prodxs = prodx[34:17];
 wire signed [17:0] prodys = prody[34:17];
 reg signed [17:0] prodx2=0, prody2=0;
 reg signed [18:0] out_sum=0;
-reg signed [17:0] field_r=0, reflec_r=0;
 always @(posedge clk) begin
 	prodx <= xout*d_real;  prodx2 <= prodxs;
 	prody <= yout*d_imag;  prody2 <= prodys;
