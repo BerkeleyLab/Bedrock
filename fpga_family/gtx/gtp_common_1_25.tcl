@@ -4,14 +4,13 @@ set cfg_dict {
    CONFIG.gt0_val_drp_clock                {50}
    CONFIG.gt0_val_rx_refclk                {REFCLK0_Q0}
    CONFIG.gt0_val_tx_refclk                {REFCLK0_Q0}
-   CONFIG.identical_val_tx_reference_clock {125.000}
    CONFIG.gt0_val_txbuf_en                 {true}
    CONFIG.gt0_val_rxbuf_en                 {true}
    CONFIG.gt0_val_port_rxslide             {false}
    CONFIG.gt0_usesharedlogic               {0}
    CONFIG.identical_val_rx_line_rate       {1.25}
-   CONFIG.gt_val_tx_pll                    {CPLL}
-   CONFIG.gt_val_rx_pll                    {CPLL}
+   CONFIG.gt_val_tx_pll                    {PLL0}
+   CONFIG.gt_val_rx_pll                    {PLL1}
    CONFIG.identical_val_tx_reference_clock {125.000}
    CONFIG.identical_val_rx_reference_clock {125.000}
    CONFIG.gt0_val_tx_line_rate             {1.25}
@@ -50,14 +49,4 @@ set cfg_dict {
    CONFIG.gt0_val_pd_trans_time_to_p2      {100}
    CONFIG.gt0_val_pd_trans_time_from_p2    {60}
    CONFIG.gt0_val_pd_trans_time_non_p2     {25}
-   CONFIG.gt0_val_cb                       {false}
-   CONFIG.gt0_val_cc                       {false}
-   CONFIG.gt0_val_clk_cor_seq_1_1          {0100000000}
-   CONFIG.gt0_val_clk_cor_seq_1_2          {0000000000}
-   CONFIG.gt0_val_clk_cor_seq_1_3          {0000000000}
-   CONFIG.gt0_val_clk_cor_seq_1_4          {0000000000}
-   CONFIG.gt0_val_clk_cor_seq_2_1          {0100000000}
-   CONFIG.gt0_val_clk_cor_seq_2_2          {0000000000}
-   CONFIG.gt0_val_clk_cor_seq_2_3          {0000000000}
-   CONFIG.gt0_val_clk_cor_seq_2_4          {0000000000}
 }

@@ -40,7 +40,7 @@ proc add_aux_ip {ipname config_file module_name} {
    gen_ip $ipname $module_name $config_dict
 }
 
-proc add_gt_protocol {gt_type config_file quad_num gtx_num en8b10b} {
+proc add_gt_protocol {gt_type config_file quad_num gtx_num en8b10b pll_type} {
 
    set module_name "q${quad_num}_gtx${gtx_num}"
 
@@ -69,6 +69,24 @@ proc add_gt_protocol {gt_type config_file quad_num gtx_num en8b10b} {
       }
       default {
          puts "Unsupported gigabit transceiver type $gt_type"
+         exit
+      }
+   }
+
+   set pll_type [string toupper $pll_type]
+   switch $pll_type {
+      PLL0 -
+      PLL1 {
+         if {$gt_type != "GTP"} {puts "$pll_type not supported by $gt_type" exit}
+         add_define "q${quad_num}_gt${gtx_num}_$gt_type"
+      }
+      CPLL -
+      QPLL {
+         if {$gt_type != "GTX"} {puts "$pll_type not supported by $gt_type" exit}
+         add_define "Q${quad_num}_GT${gtx_num}_$gt_type"
+      }
+      default {
+         puts "Unsupported PLL type $pll_type"
          exit
       }
    }
