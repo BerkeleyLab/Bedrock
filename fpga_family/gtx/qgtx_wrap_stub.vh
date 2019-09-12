@@ -8,73 +8,117 @@
 //
 // ------------------------------------
 
+`ifdef GTCOMMON_EN
+`ifdef GT_TYPE__GTP
+
+   `ifdef Q3 `define Q_GTP_COMMON_MODULE(I) q3_gtp_common_wrap
+   `elsif Q2 `define Q_GTP_COMMON_MODULE(I) q2_gtp_common_wrap
+   `elsif Q1 `define Q_GTP_COMMON_MODULE(I) q1_gtp_common_wrap
+   `else     `define Q_GTP_COMMON_MODULE(I) q0_gtp_common_wrap
+   `endif
+
+   wire pll0_lock, pll1_lock;
+   wire pll0_outclk, pll1_outclk;
+   wire pll0_outrefclk, pll1_outrefclk;
+   wire pll0_refclklost, pll1_refclklost;
+
+   wire pll0_reset_l = |{1'b0,
+       `ifdef GT0_ENABLE gt0_pll0_reset, `endif
+       `ifdef GT1_ENABLE gt1_pll0_reset, `endif
+       `ifdef GT2_ENABLE gt2_pll0_reset, `endif
+       `ifdef GT3_ENABLE gt3_pll0_reset, `endif
+                         1'b0};
+
+   wire pll1_reset_l = |{1'b0,
+       `ifdef GT0_ENABLE gt0_pll1_reset, `endif
+       `ifdef GT1_ENABLE gt1_pll1_reset, `endif
+       `ifdef GT2_ENABLE gt2_pll1_reset, `endif
+       `ifdef GT3_ENABLE gt3_pll1_reset, `endif
+                         1'b0};
+
+   `Q_GTP_COMMON_MODULE i_gtp_common_wrap (
+      .sysclk_in        (drpclk_in),
+      .gtrefclk0        (gtrefclk0),
+      .gtrefclk1        (gtrefclk1),
+      .pll0_lock        (pll0_lock),
+      .pll1_lock        (pll1_lock),
+      .soft_reset_tx_in (soft_reset),
+      .soft_reset_rx_in (soft_reset),
+      .pll0_outclk      (pll0_outclk),
+      .pll0_outrefclk   (pll0_outrefclk),
+      .pll0_refclklost  (pll0_refclklost),
+      .pll0_reset       (pll0_reset_l),
+      .pll1_outclk      (pll1_outclk),
+      .pll1_outrefclk   (pll1_outrefclk),
+      .pll1_refclklost  (pll1_refclklost),
+      .pll1_reset       (pll1_reset_l));
+
+`endif // GTCOMMON_EN
+`endif // GT_TYPE__GTP
+
 `ifdef GT0_ENABLE `GTi_WIRES(0)`endif
 `ifdef GT1_ENABLE `GTi_WIRES(1)`endif
 `ifdef GT2_ENABLE `GTi_WIRES(2)`endif
 `ifdef GT3_ENABLE `GTi_WIRES(3)`endif
 
 `ifndef SIMULATE
+
    // Instantiate wizard-generated Quad GTX
    // Configured by gtx_gen.tcl
-
-   `ifdef Q3 `define Q_GTX_MODULE(I) q3_gtx``I``
-   `elsif Q2 `define Q_GTX_MODULE(I) q2_gtx``I``
-   `elsif Q1 `define Q_GTX_MODULE(I) q1_gtx``I``
-   `else     `define Q_GTX_MODULE(I) q0_gtx``I``
+   `ifdef Q3 `define Q_GT_MODULE(I) q3_gtx``I``
+   `elsif Q2 `define Q_GT_MODULE(I) q2_gtx``I``
+   `elsif Q1 `define Q_GT_MODULE(I) q1_gtx``I``
+   `else     `define Q_GT_MODULE(I) q0_gtx``I``
    `endif
 
-   wire [3:0] pll_locked, txresetdone, rxresetdone;
-
    `ifdef GT0_ENABLE
-      `Q_GTX_MODULE(0) i_gtx0 (
+      `Q_GT_MODULE(0) i_gtx0 (
          `GTi_PORT_MAP (0)
       );
 
-      assign {pll_locked[0], txresetdone[0], rxresetdone[0]} = {gt0_pll_locked, gt0_txresetdone, gt0_rxresetdone};
-
       `GT_OUTCLK_BUF(0)
-   `else
-      assign {pll_locked[0], txresetdone[0], rxresetdone[0]} = 'b111;
    `endif
 
    `ifdef GT1_ENABLE
-      `Q_GTX_MODULE(1) i_gtx1 (
+      `Q_GT_MODULE(1) i_gtx1 (
          `GTi_PORT_MAP (1)
       );
 
-      assign {pll_locked[1], txresetdone[1], rxresetdone[1]} = {gt0_pll_locked, gt0_txresetdone, gt0_rxresetdone};
-
       `GT_OUTCLK_BUF(1)
-   `else
-      assign {pll_locked[1], txresetdone[1], rxresetdone[1]} = 'b111;
    `endif
 
    `ifdef GT2_ENABLE
-      `Q_GTX_MODULE(2) i_gtx2 (
+      `Q_GT_MODULE(2) i_gtx2 (
          `GTi_PORT_MAP (2)
       );
 
-      assign {pll_locked[2], txresetdone[2], rxresetdone[2]} = {gt0_pll_locked, gt0_txresetdone, gt0_rxresetdone};
-
       `GT_OUTCLK_BUF(2)
-   `else
-      assign {pll_locked[2], txresetdone[2], rxresetdone[2]} = 'b111;
    `endif
 
    `ifdef GT3_ENABLE
-      `Q_GTX_MODULE(3) i_gtx3 (
+      `Q_GT_MODULE(3) i_gtx3 (
          `GTi_PORT_MAP (3)
       );
 
-      assign {pll_locked[3], txresetdone[3], rxresetdone[3]} = {gt0_pll_locked, gt0_txresetdone, gt0_rxresetdone};
-
       `GT_OUTCLK_BUF(3)
-   `else
-      assign {pll_locked[3], txresetdone[3], rxresetdone[3]} = 'b111;
    `endif
 
    assign gt_cpll_locked = &pll_locked;
    assign gt_txrx_resetdone = &{txresetdone, rxresetdone};
 
-`endif // `ifndef SIMULATE
+   assign gt_cpll_locked = &{1'b1,
+           `ifdef GT0_ENABLE gt0_pll_locked, `endif
+           `ifdef GT1_ENABLE gt1_pll_locked, `endif
+           `ifdef GT2_ENABLE gt2_pll_locked, `endif
+           `ifdef GT3_ENABLE gt3_pll_locked, `endif
+                             1'b1};
+
+   assign gt_txrx_resetdone = &{1'b1,
+              `ifdef GT0_ENABLE gt0_txresetdone, gt0_rxresetdone, `endif
+              `ifdef GT1_ENABLE gt1_txresetdone, gt1_rxresetdone, `endif
+              `ifdef GT2_ENABLE gt2_txresetdone, gt2_rxresetdone, `endif
+              `ifdef GT3_ENABLE gt3_txresetdone, gt3_rxresetdone, `endif
+                                1'b1};
+
+`endif // SIMULATE
 

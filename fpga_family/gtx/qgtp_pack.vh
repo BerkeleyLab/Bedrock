@@ -6,17 +6,7 @@
 `define GTi_WIRES(GTi) wire gt``GTi``_pll_locked, gt``GTi``_txresetdone, gt``GTi``_rxresetdone,\
                             gt``GTi``_txoutclk_out_l, gt``GTi``_rxoutclk_out_l;
 
-    // TODO: Check these
-    wire gt``GTi``_pll0reset_i, gt``GTi``_pll1reset_i;
-
-    wire pll0refclklost_i, pll1refclklost_i,
-         pll0lock_i, pll1lock_i,
-         pll0outclk_i, pll1outclk_i,
-         pll0outrefclk_i, pll1outrefclk_i;
-
-    wire gt0_pll0pd_t  ;
-    wire gt0_pll1pd_t  ;
-    wire gt0_pll1reset_t  ;
+`define GTi_COMMON_WIRES(GTi) wire gt``GTi``_pll0reset, gt``GTi``_pll1reset;
 
 `define GTi_PORT_MAP(GTi) .sysclk_in                   (drpclk_in),\
                           .soft_reset_tx_in            (soft_reset),\
@@ -72,37 +62,28 @@
                           .gt0_txresetdone_out         (gt``GTi``_txresetdone),\
                           `ifdef GT``GTi``_PLL0\
                           .gt0_pll0reset_out           (gt``GTi``_pll0reset),\
-                          .gt0_pll0lock_in             (pll0lock_i),\
-                          .gt0_pll0refclklost_in       (pll0refclklost_i),\
+                          .gt0_pll0lock_in             (pll0_lock),\
+                          .gt0_pll0refclklost_in       (pll0_refclklost),\
                           `else
                           .gt0_pll1reset_out           (gt``GTi``_pll1reset),\
-                          .gt0_pll1lock_in             (pll1lock_i),\
-                          .gt0_pll1refclklost_in       (pll1refclklost_i),\
+                          .gt0_pll1lock_in             (pll1_lock),\
+                          .gt0_pll1refclklost_in       (pll1_refclklost),\
                           `endif
-                          .gt0_pll0outclk_in           (pll0outclk_i),\
-                          .gt0_pll0outrefclk_in        (pll0outrefclk_i),\
-                          .gt0_pll1outclk_in           (pll1outclk_i),\
-                          .gt0_pll1outrefclk_in        (pll1outrefclk_i)
+                          .gt0_pll0outclk_in           (pll0_outclk),\
+                          .gt0_pll0outrefclk_in        (pll0_outrefclk),\
+                          .gt0_pll1outclk_in           (pll0_outclk),\
+                          .gt0_pll1outrefclk_in        (pll0_outrefclk)
 
 `define GT_OUTCLK_BUF(GTi) BUFG i_gt``GTi``_txoutclk_buf (.I (gt``GTi``_txoutclk_out_l), .O (gt``GTi``_txoutclk_out));\
                            BUFG i_gt``GTi``_rxoutclk_buf (.I (gt``GTi``_rxoutclk_out_l), .O (gt``GTi``_rxoutclk_out));
 
-`define GTP_COMMON_PORT_MAP .PLL0OUTCLK_OUT     (pll0outclk_i),\
-                            .PLL0OUTREFCLK_OUT  (pll0outrefclk_i),\
-                            .PLL0LOCK_OUT       (pll0lock_i),\
-                            .PLL0LOCKDETCLK_IN  (drpclk_in),\
-                            .PLL0REFCLKLOST_OUT (pll0refclklost_i),\
-                            .PLL0RESET_IN       (gt_pll_reset),\
-                            .PLL0PD_IN          (gt_pll_powerdown),\
-                            .PLL0REFCLKSEL_IN   (3'b001),\
-                            .PLL1OUTCLK_OUT     (pll1outclk_i),\
-                            .PLL1OUTREFCLK_OUT  (pll1outrefclk_i),\
-                            .PLL1LOCK_OUT       (pll1lock_i),\
-                            .PLL1LOCKDETCLK_IN  (drpclk_in),\
-                            .PLL1REFCLKLOST_OUT (pll1refclklost_i),  \
-                            .PLL1RESET_IN       (gt_pll_reset),\
-                            .PLL1PD_IN          (gt_pll_powerdown),\
-                            .PLL1REFCLKSEL_IN   (3'b001),\
-                            .GTREFCLK0_IN       (gtrefclk0),\
-                            .GTREFCLK1_IN       (gtrefclk1)
-
+`define GTP_COMMON_WRAP_PORTS input  soft_reset_tx_in,\
+                              input  soft_reset_rx_in,\
+                              output pll0_outclk,\
+                              output pll0_outrefclk,\
+                              output pll0_refclklost,\
+                              input  pll0_reset,\
+                              output pll1_outclk,\
+                              output pll1_outrefclk,\
+                              output pll1_refclklost,\
+                              input  pll1_reset
