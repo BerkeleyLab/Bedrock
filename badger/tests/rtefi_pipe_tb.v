@@ -125,8 +125,8 @@ always @(posedge clk) begin
 end
 
 // second read cycle
-always @(posedge clk) if (lb_read_r) casex(lb_addr_r[19:0])
-	20'h1000x: lb_rdata <= {16'h0, rom_data};
+always @(posedge clk) if (lb_read_r) casez(lb_addr_r[19:0])
+	20'h1000?: lb_rdata <= {16'h0, rom_data};
 	default: lb_rdata <= 32'hdeadbeaf;
 endcase
 

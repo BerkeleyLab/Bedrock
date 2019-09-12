@@ -475,23 +475,23 @@ always @(posedge lb_clk) begin
 	// All of the following rhs have had one stage of decode pipeline;
 	// either the reg_bank_x multiplexer above, or a dpram clock cycle.
 	// Thus the address is also one cycle delayed.
-	casex (lb_addr_r)
-	  //24'b1xxx_xxxx_xxxx_xxxx_xxxx_xxxx: lb_din <= mirror_out_0;  // automatic address map
-		24'h10xxxx: lb_din <= hist_dout;
-		24'h11xxxx: lb_din <= phasex_dout;
-		24'h12xxxx: lb_din <= banyan_data;
-		24'h13xxxx: lb_din <= scanner_result_val;
-		24'h14xxxx: lb_din <= trace_data;
-		24'h18xxxx: lb_din <= slow_data[7:0];
-		24'h1cxxxx: lb_din <= trace_lb_out;
-		24'bxxxx_xxxx_xxxx_1xxx_xxxx_xxxx: lb_din <= config_rom_out;  // xxx800 through xxxfff, 2K
-		24'hxxxx0x: lb_din <= reg_bank_0;
-		24'hxxxx1x: lb_din <= reg_bank_1;
-		24'hxxxx2x: lb_din <= reg_bank_2;
-		24'hxxxx3x: lb_din <= reg_bank_3;
-		24'hxxxx4x: lb_din <= reg_bank_4;
-		24'hxxxx5x: lb_din <= reg_bank_5;
-		24'bxxxx_xxxx_xxxx_xxxx_0111_xxxx: lb_din <= idelay_mirror_val;  // xxxxf0 through xxxff
+	casez (lb_addr_r)
+	  //24'b1???_????_????_????_????_????: lb_din <= mirror_out_0;  // automatic address map
+		24'h10????: lb_din <= hist_dout;
+		24'h11????: lb_din <= phasex_dout;
+		24'h12????: lb_din <= banyan_data;
+		24'h13????: lb_din <= scanner_result_val;
+		24'h14????: lb_din <= trace_data;
+		24'h18????: lb_din <= slow_data[7:0];
+		24'h1c????: lb_din <= trace_lb_out;
+		24'b????_????_????_1???_????_????: lb_din <= config_rom_out;  // xxx800 through xxxfff, 2K
+		24'h????0?: lb_din <= reg_bank_0;
+		24'h????1?: lb_din <= reg_bank_1;
+		24'h????2?: lb_din <= reg_bank_2;
+		24'h????3?: lb_din <= reg_bank_3;
+		24'h????4?: lb_din <= reg_bank_4;
+		24'h????5?: lb_din <= reg_bank_5;
+		24'b????_????_????_????_0111_????: lb_din <= idelay_mirror_val;  // xxxxf0 through xxxff
 		default: lb_din <= 32'hfaceface;
 	endcase
 end

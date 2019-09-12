@@ -13,6 +13,7 @@ V_TB = -Wno-timescale
 VFLAGS = ${VFLAGS_$@} -y$(AUTOGEN_DIR) -I$(AUTOGEN_DIR)
 VVP_FLAGS = ${VVP_FLAGS_$@}
 VVP = vvp$(ICARUS_SUFFIX) -N
+VERILATOR = verilator -Wall -Wno-fatal
 GTKWAVE = gtkwave
 VPIEXT = vpi
 PYTHON = python3
@@ -41,6 +42,11 @@ VERILOG_RUN = $(VVP) $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@.$$$$ $<
+
+VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I.
+VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY
+VERILATOR_LINT = $(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $(filter %.v, $^)
+
 FMC_MAP = awk -F\" 'NR==FNR{a[$$2]=$$4;next}$$4 in a{printf "NET %-15s LOC = %-4s | IOSTANDARD = %10s; \# %s\n",$$2,a[$$4],$$6,$$4}'
 XDC_MAP = awk -F"[ \"\t]+" 'NR==FNR{gsub(/]/,"",$$8);a[$$8]=$$4;next}($$3 in a){printf "set_property -dict \"PACKAGE_PIN %-4s IOSTANDARD %s\" [get_ports %s]\n",a[$$3], $$4, $$2}'
 ISE_SYNTH = bash $(BUILD_DIR)/xil_syn
@@ -100,6 +106,9 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 
 %_check: %_tb $(BUILD_DIR)/testcode.awk
 	$(VERILOG_CHECK)
+
+%_lint: %.v %_auto
+	$(VERILATOR_LINT)
 
 %: %.m
 	$(OCTAVE_SILENT)

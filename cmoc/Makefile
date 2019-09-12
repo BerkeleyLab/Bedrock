@@ -15,11 +15,14 @@ TGT_ := $(TEST_BENCH)
 
 NO_CHECK = tgen_check cryomodule_badger_check rf_controller_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
+NO_LINT = $(NO_CHECK)
+LNT_ = $(filter-out $(NO_LINT), $(TEST_BENCH:%_tb=%_lint))
 
 .PHONY: targets checks bits check_all clean_all
 targets: $(TGT_)
 checks: $(CHK_)
 check_all: $(CHK_)
+lint: $(LNT_)
 bits: $(BITS_)
 
 fdbk_core.vcd: $(AUTOGEN_DIR)/regmap_fdbk_core_tb.json

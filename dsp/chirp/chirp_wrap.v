@@ -74,7 +74,7 @@ module chirp_wrap # (
 
    // Instantiate quadratic phase generator
    wire signed [PH_WI-1:0] phase;
-   wire gate_o, parab_error;
+   wire parab_error;
 
    parab #(
       .dw (PH_WI),

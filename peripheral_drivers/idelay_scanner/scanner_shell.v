@@ -76,9 +76,9 @@ assign mask_out = banyan_mask;
 
 // Host reads
 reg [7:0] odata_r=0;
-always @(posedge clk) casex (addr_d)
-	12'b1xxx_xxxx_xxxx: odata_r <= result_val;
-	12'b0000_0001_xxxx: odata_r <= mirror_val;
+always @(posedge clk) casez (addr_d)
+	12'b1???_????_????: odata_r <= result_val;
+	12'b0000_0001_????: odata_r <= mirror_val;
 	12'b0000_0000_0100: odata_r <= scan_running;
 	default: odata_r <= 8'h55;
 endcase

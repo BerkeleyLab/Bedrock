@@ -166,7 +166,7 @@ module chitchat_txrx_wrap #(
    // Compute loopback latency
    always @(posedge gtx_tx_clk) begin
       if (rx_valid_x_tgtx)
-         txrx_latency_x_tgtx = tx_local_frame_counter_x_tgtx - rx_lback_frame_counter_x_tgtx;
+         txrx_latency_x_tgtx <= tx_local_frame_counter_x_tgtx - rx_lback_frame_counter_x_tgtx;
    end
 
    chitchat_rx #(
