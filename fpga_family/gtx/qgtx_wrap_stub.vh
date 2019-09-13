@@ -103,9 +103,6 @@
       `GT_OUTCLK_BUF(3)
    `endif
 
-   assign gt_cpll_locked = &pll_locked;
-   assign gt_txrx_resetdone = &{txresetdone, rxresetdone};
-
    assign gt_cpll_locked = &{1'b1,
            `ifdef GT0_ENABLE gt0_pll_locked, `endif
            `ifdef GT1_ENABLE gt1_pll_locked, `endif
