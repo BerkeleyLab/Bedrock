@@ -13,49 +13,61 @@ and narrower data words can be accommodated with padding.
 
 ## Packet structure
 
-LASS supports two types of packet structure. A simpler one, based on single-beat
-transactions, and a more complex block-transfer structure where a single burst-transaction
-is encoded more efficiently.
+LASS packets are composed of a 64-bit transaction ID followed by a string of
+consecutive transactions.
 
-The basic packet structure consists of a 64-bit transaction ID, followed by one
-or more single-beat transactions. Each transaction encodes a single read or write
-bus cycle. This type of packet is organized as follows:
+Two types of transactions are supported. A single-beat transaction where single read
+or write bus cycles are encoded, and a more complex, block-transfer based, where a
+burst of reads and writes to consecutive addresses are encoded in a more efficient
+manner.
+
+A single-beat transaction is encoded in 64 bits and is comprised of command, address
+and data fields. The diagram below shows how this transaction type can be used to
+form a simple packet containing two single-beat read or write transactions.
 ```
-+--------+-------+---------+-----------------+ +-------+--------+--------------+
-| TX ID  |  CMD  |  ADDR0  |      DATA0      | |  CMD  |  ADDR1 |    DATA1     |
-+--------+-------+---------+-----------------+ +-------+--------+--------------+
-   64b      8b       24b           32b             8b      24b        32b
++--------++-------+---------+---------++-------+--------+---------+
+| TX ID  ||  CMD  |  ADDR0  |  DATA1  ||  CMD  |  ADDR1 |  DATA1  |
++--------++-------+---------+---------++-------+--------+---------+
+   64b       8b       24b       32b        8b      24b      32b
 ```
 
-The block-transfer packet structure also starts with a 64-bit transaction ID and
-encodes a stream of either writes or reads to consecutive addresses, starting at
-a given base address. This type of packets is organized as follows:
+The packet space consumed by a block-transfer transaction depends on how many data
+beats are being read or written. At a minimum, this type of transaction can be encoded
+in 96 bits and adds an additional command and a repetition-count field to the
+single-beat transaction described previously. The additional command field is used
+to signal that the transaction being decoded is of type 'burst'. The following diagram
+depicts the structure of a packet containing a single block-transfer transaction where
+two beats of data are either read or written.
 ```
-+--------+-------+---------+-------+---------+---------+ +---------+ +---------+
-| TX ID  |  CMD  | REPCNT  |  CMD  |  ADDR0  |  DATA0  | |  DATA1  | |  DATA2  |
-+--------+-------+---------+-------+---------+---------+ +---------+ +---------+
-   64b      8b       24b       8b      24b       32b         32b         32b
++--------++-------------+---------+-------+---------+---------+---------+
+| TX ID  || CMD (Burst) | REPCNT  |  CMD  |  ADDR0  |  DATA0  |  DATA1  |
++--------++-------------+---------+-------+---------+---------+---------+
+   64b          8b          24b       8b      24b       32b       32b
 ```
-The type of packet structure being used is indicated by appropriately setting the
-operation (OP) field in the first 8-bit command (CMD) block. Whereas the basic
-structure must simply set OP to 'Read' or 'Write', the block-transfer packet must
-set OP in the first CMD block to 'Burst' and use the second CMD block to select
-between 'Read' or 'Write'.
 
-Note that packets utilizing the single-beat transaction structure may alternate
-reads and writes throughout the packet, by setting each CMD block appropriately.
-Packets utilizing the block-transfer structure, on the other hand, are locked to
-either reads or writes throughout, as set in the second CMD block.
+Note that each transmitted packet can string together any combination of these two
+transaction types, provided the maximum packet length is not exceeded (see section
+on practical considerations). This can be useful when, e.g., a long array and the
+status register indicating its validity must both be read, and splitting the operation
+into two packets is not desirable. The diagram below shows how such a packet could
+be structured.
+
+```
++--------++-------+---------+---------++-------------+---------+-------+---------+---------+---------++---------+
+| TX ID  ||  CMD  |  ADDR   |  DATA   || CMD (Burst) | REPCNT  |  CMD  |  ADDR0  |  DATA0  |  DATA1  ||  DATAN  |
++--------++-------+---------+---------++-------------+---------+-------+---------+---------+---------++---------+
+   64b       8b       24b       32b          8b          24b       8b      24b       32b       32b        32b
+```
 
 ## Data encoding
 
-For both packet structures, the bit-widths add up such that all transactions
+For both transaction types, the bit-widths add up such that all transactions
 start on a 32-bit boundary. Data encoding is big-endian, a.k.a. network byte order.
 
-In order to preserve 32-bit boundaries, the CMD and repeat count (REPCNT) blocks
+In order to preserve 32-bit boundaries, the CMD and repeat count (REPCNT) fields
 are oversized in relation to the information they convey.
 
-The 8-bit CMD block carries a single 2-bit operation field (OP), according to the
+The 8-bit CMD field carries a single 2-bit operation sub-field (OP), according to the
 following encoding:
 ```
 +------+------+----------+
@@ -74,8 +86,8 @@ N.B.: Reserved bits should be set to 0 by software. Failing to do this may resul
 in undefined behavior, since they may be defined in some future revision. One valid
 response from the FPGA is therefore to drop packets that have unused bits set.
 
-The 24-bit REPCNT block only uses 9 bits to encode the actual repetition count, as
-shown below. Note that while the width of the COUNT field places an upper bound on
+The 24-bit REPCNT field only uses 9 bits to encode the actual repetition count, as
+shown below. Note that while the width of the COUNT sub-field places an upper bound on
 the number of data beats that can be transferred in a single packet, typical UDP
 packet sizes place additional restrictions on this number. These limitations are
 outlined in the next section.
@@ -86,11 +98,11 @@ outlined in the next section.
 24     6 5     8        0
 ```
 | COUNT [8:0] | # Data Beats |
-|    ------   |     ------    |
-| 'h00        | Illegal       |
-| 'h01        | 1             |
-| 'h02        | 2             |
-| 'hN         | N             |
+|    ------   |     ------   |
+| 'h00        | Illegal      |
+| 'h01        | 1            |
+| 'h02        | 2            |
+| 'hN         | N            |
 
 ## Practical considerations
 
