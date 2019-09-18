@@ -75,6 +75,5 @@
       .GTREFCLK0_IN       (gtrefclk0),
       .GTREFCLK1_IN       (gtrefclk1));
 
-);
 
 `endif // `ifndef SIMULATE

@@ -8,13 +8,25 @@
 //
 // ------------------------------------
 
+`ifdef GT_TYPE__GTP
+`include "qgtp_pack.vh"
+`elsif GT_TYPE__GTX
+`include "qgtx_pack.vh"
+`endif
+
 `ifdef GTCOMMON_EN
+
+`ifdef GT0_ENABLE `GTi_COMMON_WIRES(0)`endif
+`ifdef GT1_ENABLE `GTi_COMMON_WIRES(1)`endif
+`ifdef GT2_ENABLE `GTi_COMMON_WIRES(2)`endif
+`ifdef GT3_ENABLE `GTi_COMMON_WIRES(3)`endif
+
 `ifdef GT_TYPE__GTP
 
-   `ifdef Q3 `define Q_GTP_COMMON_MODULE(I) q3_gtp_common_wrap
-   `elsif Q2 `define Q_GTP_COMMON_MODULE(I) q2_gtp_common_wrap
-   `elsif Q1 `define Q_GTP_COMMON_MODULE(I) q1_gtp_common_wrap
-   `else     `define Q_GTP_COMMON_MODULE(I) q0_gtp_common_wrap
+   `ifdef Q3 `define Q_GTP_COMMON_MODULE q3_gtp_common_wrap
+   `elsif Q2 `define Q_GTP_COMMON_MODULE q2_gtp_common_wrap
+   `elsif Q1 `define Q_GTP_COMMON_MODULE q1_gtp_common_wrap
+   `else     `define Q_GTP_COMMON_MODULE q0_gtp_common_wrap
    `endif
 
    wire pll0_lock, pll1_lock;
@@ -23,17 +35,17 @@
    wire pll0_refclklost, pll1_refclklost;
 
    wire pll0_reset_l = |{1'b0,
-       `ifdef GT0_ENABLE gt0_pll0_reset, `endif
-       `ifdef GT1_ENABLE gt1_pll0_reset, `endif
-       `ifdef GT2_ENABLE gt2_pll0_reset, `endif
-       `ifdef GT3_ENABLE gt3_pll0_reset, `endif
+       `ifdef GT0_ENABLE gt0_pll0reset, `endif
+       `ifdef GT1_ENABLE gt1_pll0reset, `endif
+       `ifdef GT2_ENABLE gt2_pll0reset, `endif
+       `ifdef GT3_ENABLE gt3_pll0reset, `endif
                          1'b0};
 
    wire pll1_reset_l = |{1'b0,
-       `ifdef GT0_ENABLE gt0_pll1_reset, `endif
-       `ifdef GT1_ENABLE gt1_pll1_reset, `endif
-       `ifdef GT2_ENABLE gt2_pll1_reset, `endif
-       `ifdef GT3_ENABLE gt3_pll1_reset, `endif
+       `ifdef GT0_ENABLE gt0_pll1reset, `endif
+       `ifdef GT1_ENABLE gt1_pll1reset, `endif
+       `ifdef GT2_ENABLE gt2_pll1reset, `endif
+       `ifdef GT3_ENABLE gt3_pll1reset, `endif
                          1'b0};
 
    `Q_GTP_COMMON_MODULE i_gtp_common_wrap (
@@ -52,6 +64,11 @@
       .pll1_outrefclk   (pll1_outrefclk),
       .pll1_refclklost  (pll1_refclklost),
       .pll1_reset       (pll1_reset_l));
+
+   `ifdef GT0_ENABLE wire gt0_pll_locked=&{pll0_lock, pll1_lock}; `endif
+   `ifdef GT1_ENABLE wire gt1_pll_locked=&{pll0_lock, pll1_lock}; `endif
+   `ifdef GT2_ENABLE wire gt2_pll_locked=&{pll0_lock, pll1_lock}; `endif
+   `ifdef GT3_ENABLE wire gt3_pll_locked=&{pll0_lock, pll1_lock}; `endif
 
 `endif // GTCOMMON_EN
 `endif // GT_TYPE__GTP
@@ -116,6 +133,16 @@
               `ifdef GT2_ENABLE gt2_txresetdone, gt2_rxresetdone, `endif
               `ifdef GT3_ENABLE gt3_txresetdone, gt3_rxresetdone, `endif
                                 1'b1};
+
+`else // SIMULATE
+
+   // Instantiate dummy components to help dependency generation and basic syntax checking
+   qgtp_common_wrap i_q_gtp_common_wrap(
+      .sysclk_in (drpclk_in),
+      .gtrefclk0 (gtrefclk0),
+      .gtrefclk1 (gtrefclk1),
+      .pll0_lock (),
+      .pll1_lock ());
 
 `endif // SIMULATE
 

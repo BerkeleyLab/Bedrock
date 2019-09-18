@@ -18,7 +18,7 @@ module q0_gtp_common_wrap (
    input gtrefclk1,
    output pll0_lock,
    output pll1_lock,
-   `include GTP_COMMON_WRAP_PORTS
+   `GTP_COMMON_WRAP_PORTS
 );
 `include "qgtp_common_wrap_stub.vh"
 
@@ -33,7 +33,7 @@ module q1_gtp_common_wrap (
    input gtrefclk1,
    output pll0_lock,
    output pll1_lock,
-   `include GTP_COMMON_WRAP_PORTS
+   `GTP_COMMON_WRAP_PORTS
 );
 `include "qgtp_common_wrap_stub.vh"
 
@@ -48,7 +48,7 @@ module q2_gtp_common_wrap (
    input  gtrefclk1,
    output pll0_lock,
    output pll1_lock,
-   `include GTP_COMMON_WRAP_PORTS
+   `GTP_COMMON_WRAP_PORTS
 );
 `include "qgtp_common_wrap_stub.vh"
 
@@ -63,7 +63,7 @@ module q3_gtp_common_wrap (
    input gtrefclk1,
    output pll0_lock,
    output pll1_lock,
-   `include GTP_COMMON_WRAP_PORTS
+   `GTP_COMMON_WRAP_PORTS
 );
 `include "qgtp_common_wrap_stub.vh"
 
@@ -73,14 +73,14 @@ endmodule
 
 `else // SIMULATE
 
-module q_gtp_common_wrap (
+module qgtp_common_wrap (
    input sysclk_in,
    input gtrefclk0,
-   input gtrefclk1
+   input gtrefclk1,
    output pll0_lock,
-   output pll1_lock,
+   output pll1_lock
 );
-`include "qgtx_wrap_stub.vh"
+`include "qgtp_common_wrap_stub.vh"
 
 endmodule
 
