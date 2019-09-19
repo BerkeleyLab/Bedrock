@@ -97,3 +97,12 @@ RUN apt-get -y update && \
 	bsdmainutils \
 	curl  && \
 	rm -rf /var/lib/apt/lists/*
+
+# Must follow iverilog installation
+RUN git clone https://github.com/ldoolitt/vhd2vl && \
+    cd vhd2vl && \
+    git checkout 37e3143395ce4e7d2f2e301e12a538caf52b983c && \
+    make && \
+    install src/vhd2vl /usr/local/bin && \
+    cd .. && \
+    rm -rf vhd2vl
