@@ -39,25 +39,13 @@ class c_prc(c_llrf_bmb7):
         # Used in top2idelay; makes things (more?) specific to
         # AD9653 test mode 00001100, but it seems needed for reliability.
         self.valid_pattern = [{
-            0x43: 1,
-            0x0d: 1,
-            0x34: 1,
-            0xd0: 1
+            0x43: 1, 0x0d: 1, 0x34: 1, 0xd0: 1
         }, {
-            0x39: 1,
-            0xe4: 1,
-            0x93: 1,
-            0x4e: 1
+            0x39: 1, 0xe4: 1, 0x93: 1, 0x4e: 1
         }]
         self.channels = {
-            0: 'U3DA',
-            1: 'U3DB',
-            2: 'U3DC',
-            3: 'U3DD',
-            4: 'U2DA',
-            5: 'U2DB',
-            6: 'U2DC',
-            7: 'U2DD'
+            0: 'U3DA', 1: 'U3DB', 2: 'U3DC', 3: 'U3DD',
+            4: 'U2DA', 5: 'U2DB', 6: 'U2DC', 7: 'U2DD'
         }
         self.chan_list = [self.channels[ix] for ix in range(8)]
         self.ad9653_regname = {  # XXX please move this to a class!
@@ -108,7 +96,6 @@ class c_prc(c_llrf_bmb7):
 
     def reset(self):
         print('Starting reset')
-        # self.carrier = c_bmb7(self.ip)
 
         if self.bitfilepath:
             if (self.carrier_rev == 2) != ('sesqui' in bitfilepath):
@@ -127,13 +114,13 @@ class c_prc(c_llrf_bmb7):
         self.digitizer_spi_init()
 
         if not self.amc7823_print(check_channels=[7]):
-            print("test-point 1")
+            print("amc7823_print failed")
             return False
         if not self.adc_reset_clk():
-            print("test-point 2")
+            print("adc_reset_clk failed")
             return False
         if not self.adc_idelay1(0):
-            print("test-point 3")
+            print("adc_idelay1 failed")
             return False
         # self.adc_idelay0()
         sys.stdout.flush()
@@ -149,7 +136,7 @@ class c_prc(c_llrf_bmb7):
             if not self.pntest4():
                 return False
         self.adc_twos_comp(twoscomp=True)
-        print(('test pattern %s' % self.set_test_mode('00000000')))
+        print('test pattern %s' % self.set_test_mode('00000000'))
         if not self.amc7823_print(check_channels=[4, 5, 6, 7]):
             return False
         return True
@@ -160,7 +147,7 @@ class c_prc(c_llrf_bmb7):
             if snread is False:
                 print("sn_read() failed")
                 return False
-            print(('Read SN: "%s"' % snread))
+            print('Read SN: "%s"' % snread)
             self.sn = snread
             m = re.match(r'LBNL DIGITIZER V1.\d SN +(\d+)', snread)
             if not m:
@@ -173,7 +160,7 @@ class c_prc(c_llrf_bmb7):
                     else:
                         # Emergency use only
                         adata = 'LBNL DIGITIZER V1.0 SN 006'
-                    print(('Writing new SN: "%s"' % adata))
+                    print('Writing new SN: "%s"' % adata)
                     self.sn_write(adata)
                 except Exception:
                     pass
@@ -196,25 +183,28 @@ class c_prc(c_llrf_bmb7):
             "adc_test_wave1_out": 0x4,
             "adc_test_wave2_out": 0x8
         }
-        avail = self.reg_read_value(
-            ['waveforms_available'])[0] & waveforms_available_location[chan]
+        avail = self.reg_read_value(['waveforms_available'])[0] & waveforms_available_location[chan]
         index = 0
         while avail and index <= 2 * 2**self.cirbuf_aw + 1:
             index = index + 128
-            print((
-                " ".join([hex(i) for i in self.reg_read_value(128 * [chan])])))
-            avail = self.reg_read_value(
-                ['waveforms_available'
-                 ])[0] & waveforms_available_location[chan]
+            print(" ".join([hex(i) for i in self.reg_read_value(128 * [chan])]))
+            avail = self.reg_read_value(['waveforms_available'])[0] & waveforms_available_location[chan]
         return index <= 2**(self.cirbuf_aw + 1)
 
-    def dac_out(self, dac_mode=0, amplitude=0, freq=0):
-        ddsa_phstep_h = freq * 1.0 / (1320.0 / 7) * 2**20
-        self.reg_write([{
-            "amplitude": amplitude,
-            "ddsa_phstep_h": ddsa_phstep_h,
-            "dac_mode": dac_mode
-        }])
+    def dac_out(self, dac_0_sel=0, dac_1_sel=0, amplitude=0, freq=145.0, verbose=False):
+        fclk = 1320.0/7
+        modulo = 136  # magic for LCLS-II
+        ddsa_phstep_h = int(freq*1.0/fclk*2**20+0.5)
+        ddsa_phstep_l = 1560
+        vlist = [("amplitude", amplitude), ("ddsa_modulo", modulo),
+                 ("ddsa_phstep_h", ddsa_phstep_h), ("ddsa_phstep_l", ddsa_phstep_l),
+                 ("dac_0_sel", dac_0_sel), ("dac_1_sel", dac_1_sel)]
+        if verbose:
+            actual_freq = fclk * (ddsa_phstep_h + ddsa_phstep_l / (4096.0-modulo)) * 0.5**20
+            ferror = freq - actual_freq
+            print("Frequency error %.3f Hz" % (ferror*1e6))
+            print(vlist)
+        self.leep.reg_write(vlist)
 
     def sn_write(self, write_string):
         for ix in range(len(write_string)):
@@ -228,8 +218,7 @@ class c_prc(c_llrf_bmb7):
         for i in range(count):
             if self.spartan_interface:
                 try:
-                    v = self.spartan_interface.read_at24c32d_prom(start_ix + i,
-                                                                  False)
+                    v = self.spartan_interface.read_at24c32d_prom(start_ix+i, False)
                     if v >= 32 and v < 127:
                         r_ascii += chr(v)
                 except Exception:
@@ -242,20 +231,17 @@ class c_prc(c_llrf_bmb7):
         for addr in sorted(self.ad9653_regname.keys()):
             foo = self.spi_readn(adc_list, addr)
             x = [str(codecs.encode(v[2], 'hex'))[-2:] for v in foo]
-            print(("%3.3x  " % addr + "  ".join(x) + " " +
-                  self.ad9653_regname[addr]))
+            print("%3.3x  " % addr + "  ".join(x) + " " + self.ad9653_regname[addr])
 
     def amc_write(self, pg, saddr, val):
         # print 'amc write pg', pg, 'saddr', hex(saddr), 'val', hex(val)
-        print(('amc write pg %d saddr 0x%x val 0x%x' % (pg, saddr, val)))
-        self.reg_write([{
-            "U15_spi_data_addr_r": self.amc7823.dataaddr(
-                val, self.amc7823.cmd(rw=0, pg=pg, saddr=saddr, eaddr=0x00))
-        }, {
-            "U15_spi_read_and_start_r": 2
-        }, {
-            "U15_spi_read_and_start_r": 3
-        }])
+        print('amc write pg %d saddr 0x%x val 0x%x' % (pg, saddr, val))
+        da = self.amc7823.dataaddr(val, self.amc7823.cmd(rw=0, pg=pg, saddr=saddr, eaddr=0x00))
+        self.reg_write([
+            {"U15_spi_data_addr_r": da},
+            {"U15_spi_read_and_start_r": 2},
+            {"U15_spi_read_and_start_r": 3}
+        ])
         # print 'after write',
         # , "U15_spi_ready, U15_sdio_as_sdo", "U15_spi_start, U15_spi_read_r", "U15_spi_data_r, U15_spi_addr_r"])
         self.reg_read_value(["U15_spi_rdbk"])
@@ -263,13 +249,12 @@ class c_prc(c_llrf_bmb7):
 
     def amc_read(self, pg, saddr):
         cmd = self.amc7823.cmd(rw=1, pg=pg, saddr=saddr, eaddr=0x00)
-        self.reg_write([{
-            "U15_spi_data_addr_r": self.amc7823.dataaddr(0xaaa, cmd)
-        }, {
-            "U15_spi_read_and_start_r": 0
-        }, {
-            "U15_spi_read_and_start_r": 3
-        }])
+        da = self.amc7823.dataaddr(0xaaa, cmd)
+        self.reg_write([
+            {"U15_spi_data_addr_r": da},
+            {"U15_spi_read_and_start_r": 0},
+            {"U15_spi_read_and_start_r": 3}
+        ])
         time.sleep(0.02)
         result = self.reg_read_value(["U15_spi_rdbk"])[0]
         [rw, pg, saddr, eaddr] = self.amc7823.cmddecode(result >> 16)
@@ -278,34 +263,28 @@ class c_prc(c_llrf_bmb7):
 
     def ad7794_write(self, addr, val):
         # print 'ad7794 write ', 'addr', hex(addr), 'val', hex(val)
-        self.reg_write([{
-            "U18_spi_data_addr_r": self.ad7794.dataaddr(
-                val, self.ad7794.cmd(read=0, addr=addr))
-        }, {
-            "U18_spi_read_and_start_r": 2
-        }, {
-            "U18_spi_read_and_start_r": 3
-        }])
+        da = self.ad7794.dataaddr(val, self.ad7794.cmd(read=0, addr=addr))
+        self.reg_write([
+            {"U18_spi_data_addr_r": da},
+            {"U18_spi_read_and_start_r": 2},
+            {"U18_spi_read_and_start_r": 3}
+        ])
 
     def ad7794_reset(self):
-        self.reg_write([{
-            "U18_spi_data_addr_r": 0xffffffff
-        }, {
-            "U18_spi_read_and_start_r": 0
-        }, {
-            "U18_spi_read_and_start_r": 3
-        }])
+        self.reg_write([
+            {"U18_spi_data_addr_r": 0xffffffff},
+            {"U18_spi_read_and_start_r": 0},
+            {"U18_spi_read_and_start_r": 3}
+        ])
         time.sleep(0.2)
 
     def ad7794_read(self, addr):
-        self.reg_write([{
-            "U18_spi_data_addr_r": self.ad7794.dataaddr(
-                0xffff, self.ad7794.cmd(read=1, addr=addr))
-        }, {
-            "U18_spi_read_and_start_r": 0
-        }, {
-            "U18_spi_read_and_start_r": 3
-        }])
+        da = self.ad7794.dataaddr(0xffff, self.ad7794.cmd(read=1, addr=addr))
+        self.reg_write([
+            {"U18_spi_data_addr_r": da},
+            {"U18_spi_read_and_start_r": 0},
+            {"U18_spi_read_and_start_r": 3}
+        ])
         time.sleep(0.2)
         result = self.reg_read_value(["U18_spi_rdbk"])
         result = result[0]
@@ -330,7 +309,7 @@ class c_prc(c_llrf_bmb7):
         # print(rvalue.encode('hex'), type(rvalue),
         #        hex(int(rvalue.encode('hex'), 16)), please_read)
         if retries > 0:
-            print(("%d retries" % retries))
+            print("%d retries" % retries)
         return please_read
 
     def verbose_send(self, dlist):
@@ -353,7 +332,7 @@ class c_prc(c_llrf_bmb7):
         self.spi_write(self.lmk_spi, addr, value)
 
     def spi_write(self, obj, addr, value):
-        self.verbose_send(obj.write(addr, value))  # dlist)
+        self.verbose_send(obj.write(addr, value))
 
     def spi_flush(self):
         please_read = self.wait_for_tx_fifo_empty()
@@ -361,11 +340,11 @@ class c_prc(c_llrf_bmb7):
             discard = self.mg.readwrite(
                 alist=please_read * [self.get_read_address('llspi_result')],
                 write=0)
-            print(("spi_flush: discarded %d FIFO entries" % discard))
+            print("spi_flush: discarded %d FIFO entries" % discard)
 
     def spi_read(self, obj, addr):
         # print 'spi_read addr', addr
-        please_read = self.verbose_send(obj.read(addr))  # dlist)
+        please_read = self.verbose_send(obj.read(addr))
         if please_read:
             result = self.mg.readwrite(
                 alist=please_read * [self.get_read_address('llspi_result')],
@@ -373,12 +352,11 @@ class c_prc(c_llrf_bmb7):
             return self.mg.parse_readvalue(result)
 
     def spi_readn(self, obj_list, addr):
-        please_read = self.verbose_send(
-            sum([adc.read(addr) for adc in obj_list], []))
+        please_read = self.verbose_send(sum([adc.read(addr) for adc in obj_list], []))
         lol = len(obj_list)
         if please_read != lol:
-            print(("spi_readn mismatch please_read %d  len(obj_list) %d" %
-                  (please_read, lol)))
+            print("spi_readn mismatch please_read %d  len(obj_list) %d" %
+                  (please_read, lol))
         if please_read:
             result1 = self.mg.readwrite(
                 alist=please_read * [self.get_read_address('llspi_result')],
@@ -430,58 +408,43 @@ class c_prc(c_llrf_bmb7):
         return bitslip
 
     def idelayctrl_reset(self):
-        self.reg_write([{
-            'idelayctrl_reset_r': 0
-        }, {
-            'idelayctrl_reset_r': 1
-        }, {
-            'idelayctrl_reset_r': 0
-        }])  # , {'idelayctrl_reset_r': 0}])
+        self.reg_write([
+            {'idelayctrl_reset_r': 0},
+            {'idelayctrl_reset_r': 1},
+            {'idelayctrl_reset_r': 0}
+        ])  # , {'idelayctrl_reset_r': 0}])
 
     def U2_adc_iserdes_reset(self):
-        self.reg_write([{
-            'U2_iserdes_reset_r': 0
-        }, {
-            'U2_iserdes_reset_r': 1
-        }, {
-            'U2_iserdes_reset_r': 1
-        }, {
-            'U2_iserdes_reset_r': 0
-        }])
+        self.reg_write([
+            {'U2_iserdes_reset_r': 0},
+            {'U2_iserdes_reset_r': 1},
+            {'U2_iserdes_reset_r': 1},
+            {'U2_iserdes_reset_r': 0}
+        ])
 
     def U3_adc_iserdes_reset(self):
-        self.reg_write([{
-            'U3_iserdes_reset_r': 0
-        }, {
-            'U3_iserdes_reset_r': 1
-        }, {
-            'U3_iserdes_reset_r': 1
-        }, {
-            'U3_iserdes_reset_r': 0
-        }])
+        self.reg_write([
+            {'U3_iserdes_reset_r': 0},
+            {'U3_iserdes_reset_r': 1},
+            {'U3_iserdes_reset_r': 1},
+            {'U3_iserdes_reset_r': 0}
+        ])
 
     def hw_reset(self):
-        self.reg_write([{
-            'U4_reset_r': 0
-        }, {
-            'U4_reset_r': 1
-        }, {
-            'U4_reset_r': 0
-        }, {
-            'U4_reset_r': 0
-        }])
+        self.reg_write([
+            {'U4_reset_r': 0},
+            {'U4_reset_r': 1},
+            {'U4_reset_r': 0},
+            {'U4_reset_r': 0}
+        ])
 
     def adc_test_reset(self):
-        self.reg_write([{
-            'adc_test_reset': 0
-        }, {
-            'adc_test_reset': 1
-        }, {
-            'adc_test_reset': 1
-        }, {
-            'adc_test_reset': 0
-        }])
-        pass
+        self.reg_write([
+            {'adc_test_reset': 0},
+            {'adc_test_reset': 1},
+            {'adc_test_reset': 1},
+            {'adc_test_reset': 0}
+        ])
 
     def digitizer_spi_init(self):
         self.reg_write([{'periph_config': 0xfffffffd}])
@@ -596,7 +559,7 @@ class c_prc(c_llrf_bmb7):
             bb = [
                 codecs.encode(d[2], 'hex') for d in self.spi_read(self.dac_spi, addr)
             ]
-            print(('dac spi addr 0x%x ' % addr + repr(bb)))
+            print('dac spi addr 0x%x ' % addr + repr(bb))
         print("done")
         sys.stdout.flush()
 
@@ -630,20 +593,20 @@ class c_prc(c_llrf_bmb7):
         regs.extend(1 * [{'U3_clk_reset_r': 0}])
         self.reg_write(regs)
 
-        print(('test pattern %s' % self.set_test_mode('00001100')))
+        print('test pattern %s' % self.set_test_mode('00001100'))
         time.sleep(0.34)  # Frequency counter reference 24 bits at 50 MHz
         adc_freq = self.reg_read_value(["frequency_adc"])[0]
         adc_freq = adc_freq * 50 * 0.5**24
-        print(('ADC clock %.3f MHz' % adc_freq))
+        print('ADC clock %.3f MHz' % adc_freq)
         if adc_freq < 20:
             print("Error: ADC clock not present")
             return False
         if abs(adc_freq - 94.2857) > 0.01:
             print("#### WARNING #### Unexpected ADC frequency")
         adc_values = self.adc_reg()
-        print(('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values])))
-        print(('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339,
-                               adc_values[0] != 0xa19c)))
+        print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
+        print('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339,
+                              adc_values[0] != 0xa19c))
         return True
 
     def top2idelay(self, listin, LH):
@@ -674,37 +637,35 @@ class c_prc(c_llrf_bmb7):
         return ix if 0 else self.top2idelay(lane, ix % 2)[0]
 
     def adc_idelay1(self, dbg1):
-        print(('test pattern %s' % self.set_test_mode('00001100')))
+        print('test pattern %s' % self.set_test_mode('00001100'))
         if True:  # not needed after powerup, but will clear old values if re-scanning
             # Note hard-coded 0x70 here and for lb_idelay_write in digitizer_config.v
             scanner_reset = [{0x70 + ix: 0} for ix in range(16)]
             self.reg_write(scanner_reset)
         rlist1 = self.query_resp_list(
             [("scanner_debug", dbg1), ("scan_trigger", 3), "banyan_status"])
-        print(("banyan_status 1 %x" % rlist1[0]))
+        print("banyan_status 1 %x" % rlist1[0])
         time.sleep(0.002)
         idelay_base = self.get_read_address('idelay_base')
         glist1 = ["banyan_status"] + list(range(idelay_base, idelay_base + 16))
         rlist1 = self.query_resp_list(glist1)
-        print(("banyan_status 2 %x" % rlist1[0]))
+        print("banyan_status 2 %x" % rlist1[0])
         scan_addr = self.get_read_address("scanner_result")
         scan_result = self.reg_read_alist(list(range(scan_addr, scan_addr + 2048)))
         scan_v = [struct.unpack("!I", x[2]) for x in scan_result]
-        print(("idelay  scan   " + "  ".join(self.chan_list)))
+        print("idelay  scan   " + "  ".join(self.chan_list))
         for jx in range(32):
             bb = " ".join(
                 ["%2.2x" % scan_v[lx * 128 + jx * 4 + 3] for lx in range(16)])
-            print(("idelay %2.2d  Rx %s" % (jx, bb)))
-        print(("idelay mirror " + " ".join(
-            ["%2d" % (x & 0x1f) for x in rlist1[1:17]])))
-        print(("idelay mflags " + " ".join(
-            ["%2d" % (x >> 5) for x in rlist1[1:17]])))
+            print("idelay %2.2d  Rx %s" % (jx, bb))
+        print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in rlist1[1:17]]))
+        print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in rlist1[1:17]]))
         return all([2 == (x >> 5)
                     for x in rlist1[1:17]])  # all channels scan success!
 
     def adc_idelay0(self):
-        print(('test pattern %s' % self.set_test_mode('00001100')))
-        print(("idelay  scan   " + "  ".join(self.chan_list)))
+        print('test pattern %s' % self.set_test_mode('00001100'))
+        print("idelay  scan   " + "  ".join(self.chan_list))
         idelay_dict = {}
         for idelay in range(33):
             test = ['U3dout_msb', 'U3dout_lsb', 'U2dout_msb', 'U2dout_lsb'
@@ -719,24 +680,22 @@ class c_prc(c_llrf_bmb7):
                 [[x >> 24, (x >> 16) & 0xff, (x >> 8) & 0xff, x & 0xff]
                  for x in list_resp], [])
             bb = " ".join(["%2.2x" % x for x in rx_pats])
-            print(("idelay %2.2d  Rx %s" % ((idelay - 1), bb)))
+            print("idelay %2.2d  Rx %s" % ((idelay - 1), bb))
             idelay_dict[idelay - 1] = rx_pats
         idelay_bests = [
             self.find_best_idelay(ix, idelay_dict) for ix in range(16)
         ]
-        print(("idelay  best  " + " ".join(['%2d' % v for v in idelay_bests])))
+        print("idelay  best  " + " ".join(['%2d' % v for v in idelay_bests]))
         self.query_resp_list(self.set_idelays(idelay_bests))
         if 1:
             idelay_base = self.get_read_address('idelay_base')
             glist1 = ["banyan_status"] + list(range(idelay_base, idelay_base + 16))
             rlist1 = self.query_resp_list(glist1)
-            print(("idelay mirror " + " ".join(
-                ["%2d" % (x & 0x1f) for x in rlist1[1:17]])))
-            print(("idelay mflags " + " ".join(
-                ["%2d" % (x >> 5) for x in rlist1[1:17]])))
+            print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in rlist1[1:17]]))
+            print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in rlist1[1:17]]))
         for i in range(0):
             adc = self.adc_reg()
-            print((" ".join([hex(i) for i in adc])))
+            print(" ".join([hex(i) for i in adc]))
             time.sleep(0.002)
         return True  # ???
 
@@ -749,21 +708,20 @@ class c_prc(c_llrf_bmb7):
             self.reg_write([{ic_reset: 0}, {ic_reset: 1}, {ic_reset: 0}])
             iserdes_reset()
             adc_values = self.adc_reg()
-            print(('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values])))
+            print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
             if adc_values[adc] == 0x4339 or adc_values[adc] == 0xa19c:
                 success = True
                 break
         else:
-            print(('ERROR: %s sync failed' % name))
-        print(('%s sync stopped after %d iterations' % (name, ix)))
+            print('ERROR: %s sync failed' % name)
+        print('%s sync stopped after %d iterations' % (name, ix))
         return success, adc_values
 
     def adc_bufr_reset(self):
-        print(('test pattern %s' % self.set_test_mode('00001100')))
+        print('test pattern %s' % self.set_test_mode('00001100'))
         adc_values = self.adc_reg()
-        print(('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values])))
-        print(('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339,
-                               adc_values[0] != 0xa19c)))
+        print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
+        print('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339, adc_values[0] != 0xa19c))
         s1, adc_values = self.adc_bufr_reset1(adc_values, 'BUFR 1', 0,
                                               'U3_clk_reset_r',
                                               self.U3_adc_iserdes_reset)
@@ -773,23 +731,23 @@ class c_prc(c_llrf_bmb7):
         return s1 and s2
 
     def adc_bitslip(self):
-        print(('bitslip: test pattern %s' % self.set_test_mode('00001100')))
+        print('bitslip: test pattern %s' % self.set_test_mode('00001100'))
         index = 0
         bitslip = self.bitslip_calc()
-        print((format(bitslip, '016b')))
+        print(format(bitslip, '016b'))
         time.sleep(0.002)
         while index <= 8 and bitslip != 0:
             self.reg_write([{'bitslip': bitslip}])
             self.reg_write([{'bitslip': 0}])
             time.sleep(0.001)
             bitslip = self.bitslip_calc()
-            print((format(bitslip, '016b')))
+            print(format(bitslip, '016b'))
             index = index + 1
-        print(("bitslip %s after %d iteration(s)" %
-              ("success" if bitslip == 0 else "failure", index)))
+        print("bitslip %s after %d iteration(s)" %
+              ("success" if bitslip == 0 else "failure", index))
         for i in range(10):
             adc = self.adc_reg()
-            print((" ".join([hex(i) for i in adc])))
+            print(" ".join([hex(i) for i in adc]))
             time.sleep(0.002)
 
     def adc_twos_comp(self, twoscomp):
@@ -810,8 +768,7 @@ class c_prc(c_llrf_bmb7):
         reg6 = self.spi_read(self.dac_spi, 6)
         SEEK = struct.unpack('!I', reg6[0][2])[0] & 0x1
         if display:
-            print(('working SMP %d SET %d HLD %d SEEK %d' %
-                  (SMP, SET, HLD, SEEK)))
+            print('working SMP %d SET %d HLD %d SEEK %d' % (SMP, SET, HLD, SEEK))
         return SEEK
 
     def dac_smp(self, SET=None, HLD=None, SMP=None):
@@ -823,7 +780,7 @@ class c_prc(c_llrf_bmb7):
             SET = 0
             HLD = 0
             SEEK = self.seeksethldsmp(SET, HLD, SMP)
-            print(('step 1 %d %d %d %d' % (SMP, SEEK, SET, HLD)))
+            print('step 1 %d %d %d %d' % (SMP, SEEK, SET, HLD))
             SEEK_000 = SEEK
             # step 2
             SMP = 0
@@ -833,7 +790,7 @@ class c_prc(c_llrf_bmb7):
             while HLD < 16 and SEEK == SEEK_000:
                 HLD = HLD + 1
                 SEEK = self.seeksethldsmp(SET, HLD, SMP)
-            print(('step 2 %d %d %d %d' % (SMP, SEEK, SET, HLD)))
+            print('step 2 %d %d %d %d' % (SMP, SEEK, SET, HLD))
             # step 3
             SMP = 0
             SET = 0
@@ -843,7 +800,7 @@ class c_prc(c_llrf_bmb7):
                 SET = SET + 1
                 SEEK = self.seeksethldsmp(SET, HLD, SMP)
             # print 'set', SET, 'seek', SEEK
-            print(('step 3 %d %d %d %d' % (SMP, SEEK, SET, HLD)))
+            print('step 3 %d %d %d %d' % (SMP, SEEK, SET, HLD))
             # step 4
             SET = 0
             HLD = 0
@@ -863,22 +820,22 @@ class c_prc(c_llrf_bmb7):
                     SEEK = self.seeksethldsmp(SET, HLD, SMP)
                 SET_SMP = SET
                 SET = 0
-                print(('step 3 %d %d %d %d' % (SMP, SEEK_SMP, SET_SMP, HLD_SMP)))
+                print('step 3 %d %d %d %d' % (SMP, SEEK_SMP, SET_SMP, HLD_SMP))
 
     # def raw_buf(self, adc_ch):  unused, bit-rotten, deleted; see all_adcs.py instead.
 
     def pntest_kernel(self, data):
         cnt = 0
-        offset = self.pn9.index(data[0]) if data[0] in self.pn9 else (
-            self.pn9.index(data[1]) - 1 if data[1] in self.pn9 else 0)
-        pn9l = len(self.pn9)
+        p9 = self.pn9
+        offset = p9.index(data[0]) if data[0] in p9 else (p9.index(data[1])-1 if data[1] in p9 else 0)
+        pn9l = len(p9)
         for i in range(len(data)):
             d = data[i]
-            p = self.pn9[(i + offset) % pn9l]
+            p = p9[(i+offset) % pn9l]
             if p != d:
                 cnt += 1
-            if d - p and False:
-                print(("%d %04x %04x %d" % (i, d, p, p - d)))
+            if d-p and False:
+                print("%d %04x %04x %d" % (i, d, p, p-d))
             # print 'chan', chan, 'error:', cnt
         return cnt
 
@@ -888,8 +845,7 @@ class c_prc(c_llrf_bmb7):
         self.adc_twos_comp(twoscomp=False)
         cntlist = []
         for chan in range(8):
-            sys.stdout.write('pseudo-random test channel %d (%s)' %
-                             (chan, self.channels[chan]))
+            sys.stdout.write('pseudo-random test channel %d (%s)' % (chan, self.channels[chan]))
             sys.stdout.flush()
             self.reg_write([{'wave0_src': chan}])
             # time.sleep(0.05)
@@ -914,7 +870,7 @@ class c_prc(c_llrf_bmb7):
         # if npt > 4096:
         #     npt = 4096
         if not quiet:
-            print(("pntest2 using banyan_mem npt=%d" % npt))
+            print("pntest2 using banyan_mem npt=%d" % npt)
         sys.stdout.flush()
         self.set_test_mode('00000110')
         self.adc_twos_comp(twoscomp=False)
@@ -944,7 +900,7 @@ class c_prc(c_llrf_bmb7):
     def pntest3(self, pstep):
         for kx in range(56 * 10 / pstep):
             r = self.pntest2(quiet=True)
-            print(("%3d " % (kx * pstep) + "  ".join(["%5d" % x for x in r])))
+            print("%3d " % (kx*pstep) + "  ".join(["%5d" % x for x in r]))
             self.mmcm_step(pstep)
 
     def pntest4(self):
@@ -954,31 +910,30 @@ class c_prc(c_llrf_bmb7):
         try:
             self.reg_write([{"clk_status_we": 1}])
             clk_status_present = 1
-        except Exception:
+        except KeyError:
             print("Please upgrade to post-commit-5a098b92 bitfile")
             clk_status_present = 0
         for kx in range(15):  # range(56*10/pstep):
             r = self.pntest2(quiet=True)
-            print(("%2d " % (kx * pstep) + "  ".join(["%5d" % x for x in r])))
+            print("%2d " % (kx*pstep) + "  ".join(["%5d" % x for x in r]))
             if all(x == 0 for x in r):
                 ok += 1
             else:
                 ok = 0
             if ok == 5:
                 self.mmcm_step(-2 * pstep)
-                print(("Found safe mmcm phase %d" % ((kx - 2) * pstep)))
+                print("Found safe mmcm phase %d" % ((kx - 2) * pstep))
                 if clk_status_present:
                     self.reg_write([{"clk_status_we": 2}])
                     c_status = self.reg_read_value(["clk_status_out"])[0]
-                    print(("Clock status %d" % c_status))
+                    print("Clock status %d" % c_status)
                 return True
             self.mmcm_step(pstep)
         print("Error: Finished full mmcm phase scan without finding eye")
         return False
 
     def ad7794_read_channel(self, chan, G=0):
-        config = self.ad7794.configuration_register(
-            chan=chan, G=G, REFSEL=2)  # should this in the init?
+        config = self.ad7794.configuration_register(chan=chan, G=G, REFSEL=2)  # should this in the init?
         # print 'chan', chan, 'config', format(config, '06x'), 'reading'
         self.ad7794_write(0x2, config)
         self.ad7794_write(0x1, 0x200aff)
@@ -1020,7 +975,6 @@ class c_prc(c_llrf_bmb7):
             8: 'On-chip temperature'
         }
         v = self.amc7823_adcread_volt_all()
-        print(v)
         amc_minmax = [(0, 3.3), (1.0, 1.2), (1.66, 2.04), (0.85, 2.24),
                       (0.5, 2.7), (0.7, 1.4), (0.3, 0.9), (1.5, 1.8),
                       (0.1, 0.2)]

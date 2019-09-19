@@ -52,8 +52,7 @@ def onewire_string(data, ds2438=True):
         return "No devices on 1-Wire bus"
     if onewire_crc(dallas_id) == 0:
         # Don't print family code or checksum
-        ss = "1-Wire Serial #: " + "".join(
-            ["%2.2x" % d for d in dallas_id[1:7]])
+        ss = "1-Wire Serial #: " + "".join(["%2.2x" % d for d in dallas_id[1:7]])
         ss += "  " + string_dallas_temperature(data[44:53])
         return ss
     else:
