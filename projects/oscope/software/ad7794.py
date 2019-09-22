@@ -128,4 +128,4 @@ if __name__ == "__main__":
         for chan in [0, 1, 2, 5, 6]:
             v = prc.ad7794.read_channel(prc, chan)
             print('%6.4f' % (v * 1.0 / 2**23 - 1))
-        print
+        print("")

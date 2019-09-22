@@ -3,22 +3,18 @@
 import os
 import sys
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "../submodules/qf2_pre"))
-from qf2_python.configuration.jtag import xilinx_kintex_7, xilinx_virtex_5, xilinx_virtex_7
-from qf2_python.configuration.jtag import xilinx_spartan_6, jtag, xilinx_bitfile_parser
+sys.path.append(os.path.join(os.path.dirname(__file__), "../submodules/qf2_pre"))
+from qf2_python.configuration.jtag import jtag, xilinx_bitfile_parser
+from qf2_python.configuration.jtag import xilinx_virtex_5, xilinx_spartan_6, xilinx_kintex_7, xilinx_virtex_7
 
 
 class c_qf2(object):
+
     def __init__(self, ip, reset=False, readdress=False):
         self.ip = ip
         self.sequencer_port = 50003
 
-        self.chain = jtag.chain(
-            ip=self.ip,
-            stream_port=self.sequencer_port,
-            input_select=1,
-            speed=0)
+        self.chain = jtag.chain(ip=self.ip, stream_port=self.sequencer_port, input_select=1, speed=0)
 
         if reset:
             self.reset(self.ip)
@@ -30,26 +26,25 @@ class c_qf2(object):
     def program_kintex_7(self, bitfilepath):
 
         # Initialize the chain control
-        print('There are {} devices in the chain:'.format(
-            self.chain.num_devices()))
+        print('There are %d devices in the chain:' % self.chain.num_devices())
 
-        print()
+        print("")
         for i in range(0, self.chain.num_devices()):
             print(hex(self.chain.idcode(i)) + ' - ' +
                   self.chain.idcode_resolve_name(self.chain.idcode(i)))
-        print()
+        print("")
 
         # Parse the bitfile and resolve the part type
-        print('Loading bitfile: {}'.format(bitfilepath))
+        print('Loading bitfile: ' + bitfilepath)
         bitfile = xilinx_bitfile_parser.bitfile(bitfilepath)
 
-        print('Design name:', bitfile.design_name())
-        print('Device name:', bitfile.device_name())
-        print('Build date:', bitfile.build_date())
-        print('Build time:', bitfile.build_time())
-        print('Length:', bitfile.length(), 'bits')
+        print('Design name: ' + bitfile.design_name())
+        print('Device name: ' + bitfile.device_name())
+        print('Build date: ' + bitfile.build_date())
+        print('Build time: ' + bitfile.build_time())
+        print('Length: %d bits' % bitfile.length())
 
-        print()
+        print("")
 
         matching_devices = list()
         for i in range(0, self.chain.num_devices()):
@@ -81,23 +76,19 @@ class c_qf2(object):
         # else:
         print('Defaulting device selection in chain from IDCODE')
 
-        print('Device selected for programming is in chain location:',
-              str(device_choice))
+        print('Device selected for programming is in chain location: ' + str(device_choice))
 
-        if str('Xilinx Virtex 5') in self.chain.idcode_resolve_name(
-                self.chain.idcode(device_choice)):
+        chain_name = self.chain.idcode_resolve_name(self.chain.idcode(device_choice))
+        if str('Xilinx Virtex 5') in chain_name:
             print('Xilinx Virtex 5 interface selected')
             interface = xilinx_virtex_5.interface(self.chain)
-        elif str('Xilinx Spartan 6') in self.chain.idcode_resolve_name(
-                self.chain.idcode(device_choice)):
+        elif str('Xilinx Spartan 6') in chain_name:
             print('Xilinx Spartan 6 interface selected')
             interface = xilinx_spartan_6.interface(self.chain)
-        elif str('Xilinx Kintex 7') in self.chain.idcode_resolve_name(
-                self.chain.idcode(device_choice)):
+        elif str('Xilinx Kintex 7') in chain_name:
             print('Xilinx Kintex 7 interface selected')
             interface = xilinx_kintex_7.interface(self.chain)
-        elif str('Xilinx Virtex 7') in self.chain.idcode_resolve_name(
-                self.chain.idcode(device_choice)):
+        elif str('Xilinx Virtex 7') in chain_name:
             print('Xilinx Virtex 7 interface selected')
             interface = xilinx_virtex_7.interface(self.chain)
         else:
@@ -105,7 +96,7 @@ class c_qf2(object):
             exit()
 
         print('Programming...')
-        print()
+        print("")
 
         # Load the bitfile
         interface.program(bitfile.data(), device_choice)

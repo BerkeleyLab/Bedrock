@@ -22,18 +22,14 @@ def qsfp_i2c_decode_lower(single, desc):
     # Order is now {Rx1, Rx2, Rx3, Rx4, Tx1, Tx2, Tx3, Tx4}
     los_status = list('{0:08b}'.format(los))[::-1]
 
-    a = [
-        single[ix] * 256 + single[ix + 1] for ix in [22, 26] + range(34, 50, 2)
-    ]
+    a = [single[ix]*256 + single[ix+1] for ix in [22, 26] + range(34, 50, 2)]
     if all(v == 65535 for v in a):
         return desc + "  --\n" + desc + "  --"
     temperature = a[0] / 256.0
     if temperature >= 128:
         temperature -= 256.0
-    srx = "  Rx POW: " + "  ".join(
-        ["%5.3f" % (x * .0001) for x in a[2:6]]) + "  mW"
-    stx = "  Tx CUR: " + "  ".join(
-        ["%5.3f" % (x * .002) for x in a[6:10]]) + "  mA"
+    srx = "  Rx POW: " + "  ".join(["%5.3f" % (x * 0.0001) for x in a[2:6]]) + "  mW"
+    stx = "  Tx CUR: " + "  ".join(["%5.3f" % (x * 0.002) for x in a[6:10]]) + "  mA"
     srx = too_cute_los_mangle(srx, los_status[0:4])
     stx = too_cute_los_mangle(stx, los_status[4:8])
     s = desc
@@ -41,7 +37,7 @@ def qsfp_i2c_decode_lower(single, desc):
     s += srx
     s += "\n"
     s += desc
-    s += "  VCC:  %5.3f V" % (a[1] * .0001)
+    s += "  VCC:  %5.3f V" % (a[1] * 0.0001)
     s += stx
     return s
 
@@ -59,7 +55,7 @@ def qsfp_i2c_decode_upper(single, desc):
     s += "\n"
     s += desc
     s += "  Serial: " + "".join([pchr(v) for v in single[68:84]])
-    wavelength = (single[58] * 256 + single[59]) * 0.05
+    wavelength = (single[58]*256 + single[59]) * 0.05
     s += "  Wavelength: %5.2f nm" % wavelength
     return s
 
@@ -69,15 +65,15 @@ def qsfp_i2c_status(prc, verbose=False, base=0x00, decoder=None):
     prc.reg_write([{"qsfp_i2c_reg": ((base << 16) + 3)}])
     foo = prc.reg_read_alist(range(addr, addr + 256))
     prc.reg_write([{"qsfp_i2c_reg": ((base << 16) + 2)}])
-    uuu = [struct.unpack('!I', x[2])[0] for x in foo]
+    qsfp_result = [struct.unpack('!I', x[2])[0] for x in foo]
     if verbose:
-        print("raw I2C mem:", " ".join(['%2.2x' % v for v in uuu]))
+        print("raw I2C mem: " + " ".join(['%2.2x' % v for v in qsfp_result]))
     if decoder:
         # indices below work around off-by-one error in FPGA code
         # U50_modsel = qsfp_i2c_modsel[0];  modsel_word == 0
         # U32_modsel = qsfp_i2c_modsel[1];  modsel_word == 1
-        print(decoder(uuu[1:128], "U50"))
-        print(decoder(uuu[129:256], "U32"))
+        print(decoder(qsfp_result[1:128], "U50"))
+        print(decoder(qsfp_result[129:256], "U32"))
 
 
 def qsfp_i2c_init(prc):

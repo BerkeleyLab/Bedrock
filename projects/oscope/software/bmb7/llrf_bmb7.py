@@ -108,8 +108,8 @@ class c_llrf_bmb7():
         if refresh or not isfile(regmappath):
             a = read_live_array(self)
             r = decode_array(a)
-            print(("Bitfile lists git commit " + r[1]))
-            print(("Attempting write of live json to " + regmappath))
+            print("Bitfile lists git commit " + r[1])
+            print("Attempting write of live json to " + regmappath)
             with open(regmappath, 'wb') as f:
                 f.write(r[3])
         self.regmap = get_map(regmappath)
@@ -138,7 +138,7 @@ class c_llrf_bmb7():
             elif name in list(self.read_regmap.values()):
                 addr = name
             else:
-                print(('unknown register:' + name + 'skipped'))
+                print('unknown register:' + name + 'skipped')
                 addr = None
             if addr:
                 alist.append(addr)
@@ -195,13 +195,13 @@ class c_llrf_bmb7():
         result = self.buf_read_raw(addr, count, debug)
         r1 = [struct.unpack('!i', r)[0] for r in result]
         if debug:
-            print((debug + [r[2].encode('hex') for r in result]))
+            print(debug + [r[2].encode('hex') for r in result])
         # print 'buf_read', [r[2].encode('hex') for r in result[0:10]], r1[0:10]
         return r1
 
     def buf_skip_read(self, addr, count=None, debug=None):
-        print(('skipped' + self.buf_read(addr, count, debug)[0:10]))
-        print(('skipped' + self.buf_read(addr, count, debug)[0:10]))
+        print('skipped' + self.buf_read(addr, count, debug)[0:10])
+        print('skipped' + self.buf_read(addr, count, debug)[0:10])
         return self.buf_read(addr, count, debug)
 
     def mg_read(self, alist):
@@ -224,7 +224,7 @@ class c_llrf_bmb7():
         ll = len(pack_in)//4 * 4
         pack_in = pack_in[0:ll]
         if 0:
-            print(("result packet len %d: %s" % (len(pack_in), pack_in.encode('hex'))))
+            print("result packet len %d: %s" % (len(pack_in), pack_in.encode('hex')))
         list1 = struct.unpack('!'+'I'*(len(pack_in)//4), pack_in)
         # list comprehension with predicate
         r = [list1[2*ix+3] for ix in range(len(list_in)) if not isinstance(list_in[ix], tuple)]
