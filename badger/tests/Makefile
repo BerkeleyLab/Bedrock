@@ -241,6 +241,14 @@ ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC
 	mv _xilinx/ac701_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
 # =====
+SYNTH_SOURCE_MARBLEM = rgmii_hw_test.v gmii_to_rgmii.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) marble/gmii_clock_handle.v kc705/xilinx7_clocks.v
+marblem_rgmii_test.d: $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
+	echo $^ | tr ' ' '\n' > $@
+marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
+	$(SYNTH_VIVADO) $<
+	mv _xilinx/marblem_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
+
+# =====
 # On-line test using Icarus and Linux's tun/tap feature
 rtefi_live: rtefi_pipe_tb.v $(RTEFI_V) fake_config_romx.v mac_compat_dpram.v
 	$(VERILOG) -m ./tap-vpi -DLINUX_TUN -o $@ $(filter %.v, $^)

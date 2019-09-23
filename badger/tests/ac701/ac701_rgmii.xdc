@@ -21,6 +21,7 @@ set_property IOB TRUE [get_ports RGMII_TX_CTRL]
 set_property IOB TRUE [get_ports {RGMII_RXD[*]}]
 set_property IOB TRUE [get_ports RGMII_RX_CTRL]
 
+# HSTL_I_18 RGMII Rx pins need this reference definition
 set_property INTERNAL_VREF 0.9 [get_iobanks 13]
 
 # Rx clock constraint
