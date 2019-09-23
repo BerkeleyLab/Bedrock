@@ -4,11 +4,7 @@ module gmii_to_rgmii #(
    parameter in_phase_tx_clk=0
 ) (
 
-    // Resets
-    //input tx_reset,
-    //input tx_reset90,
-
-    //RGMII physical interface to PHY
+    // RGMII physical interface with PHY
     output [3:0] rgmii_txd, // to PHY
     output rgmii_tx_ctl,    // to PHY
     output rgmii_tx_clk,    // to PHY
@@ -16,7 +12,7 @@ module gmii_to_rgmii #(
     input rgmii_rx_ctl,     // from PHY
     input rgmii_rx_clk,     // from PHY
 
-    //GMII internal interface from MAC
+    // GMII internal interface with MAC
     input gmii_tx_clk,      // from MAC
     input gmii_tx_clk90,    // from MAC
     input [7:0] gmii_txd,   // from MAC
@@ -25,7 +21,7 @@ module gmii_to_rgmii #(
     output [7:0] gmii_rxd,  // to MAC
     output gmii_rx_clk,     // to MAC
     output gmii_rx_dv,      // to MAC
-    output gmii_rx_er      // to MAC
+    output gmii_rx_er       // to MAC
 );
 
 // RGMII
@@ -193,7 +189,7 @@ generate for (k=0; k<4; k=k+1)
 endgenerate
 
 // AC701 does not need RX delay
-// instanciate IDELAYCTRL & use IDELAY_VALUE for IDELAYE2 to work
+// instantiate IDELAYCTRL & use IDELAY_VALUE for IDELAYE2 to work
 `ifdef RXDELAY
 wire rgmii_rx_ctl_delay;
 wire [3:0] rgmii_rxd_delay;
