@@ -1,6 +1,8 @@
 `timescale 1ps / 1ps
 
-module gmii_to_rgmii (
+module gmii_to_rgmii #(
+   parameter in_phase_tx_clk=0
+) (
 
     // Resets
     //input tx_reset,
@@ -76,18 +78,19 @@ generate for (ix=0; ix<4; ix=ix+1)
 endgenerate
 
 // RGMII Tx, Refer to PG051 Fig 3-66
-// refer to PG051 page 154 for reason of using ODDR & 90 phase clock
-// rgmii_tx_clk
+// Refer to PG051 page 154 for reason of using ODDR & 90 phase clock.
+// Other hardware (like Marvell 88E1512 in default mode)
+// wants an in-phase clock.
+wire rgmii_tx_clk_ = in_phase_tx_clk ? gmii_tx_clk : gmii_tx_clk90;
 ODDR #(
     .DDR_CLK_EDGE  ("SAME_EDGE")
 ) rgmii_tx_clk_oddr (
     .Q(rgmii_tx_clk_buf),
-    .C(gmii_tx_clk90),
+    .C(rgmii_tx_clk_),
     .CE(1'b1),
     .D1(1'b1),
     .D2(1'b0),
     .R(1'b0),
-    //.R(tx_reset90),
     .S(1'b0)
 );
 

@@ -4,7 +4,9 @@
 module rgmii_hw_test(
 	// 200 MHz typical
 	input SYSCLK_P,
+`ifndef MARBLE_TEST
 	input SYSCLK_N,
+`endif
 
 	// RGMII Tx port
 	output [3:0] RGMII_TXD,
@@ -32,18 +34,31 @@ module rgmii_hw_test(
 	input  BOOT_MISO,
 	output BOOT_MOSI,
 
+`ifdef MARBLE_TEST
+	output VCXO_EN,
+`endif
+
 	// Something physical
 	input RESET,
 	output [3:0] LED
 );
 
+`ifdef MARBLE_TEST
+assign VCXO_EN = 1;
+wire SYSCLK_N = 0;
+parameter in_phase_tx_clk = 1;
+`else
+parameter in_phase_tx_clk = 0;
+`endif
+
 // Standardized interface, hardware-dependent implementation
 wire tx_clk, tx_clk90;
 wire clk_locked;
+wire pll_reset = 0;  // or RESET?
 gmii_clock_handle clocks(
 	.sysclk_p(SYSCLK_P),
 	.sysclk_n(SYSCLK_N),
-	.reset(RESET),
+	.reset(pll_reset),
 	.clk_eth(tx_clk),
 	.clk_eth_90(tx_clk90),
 	.clk_locked(clk_locked)
@@ -53,7 +68,7 @@ gmii_clock_handle clocks(
 wire vgmii_tx_clk, vgmii_tx_clk90, vgmii_rx_clk;
 wire [7:0] vgmii_txd, vgmii_rxd;
 wire vgmii_tx_en, vgmii_tx_er, vgmii_rx_dv, vgmii_rx_er;
-gmii_to_rgmii gmii_to_rgmii_i(
+gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 	.rgmii_txd(RGMII_TXD),
 	.rgmii_tx_ctl(RGMII_TX_CTRL),
 	.rgmii_tx_clk(RGMII_TX_CLK),
