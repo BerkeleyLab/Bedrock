@@ -38,11 +38,10 @@ class c_prc(c_llrf_bmb7):
 
         # Used in top2idelay; makes things (more?) specific to
         # AD9653 test mode 00001100, but it seems needed for reliability.
-        self.valid_pattern = [{
-            0x43: 1, 0x0d: 1, 0x34: 1, 0xd0: 1
-        }, {
-            0x39: 1, 0xe4: 1, 0x93: 1, 0x4e: 1
-        }]
+        self.valid_pattern = [
+            {0x43: 1, 0x0d: 1, 0x34: 1, 0xd0: 1},
+            {0x39: 1, 0xe4: 1, 0x93: 1, 0x4e: 1}
+        ]
         self.channels = {
             0: 'U3DA', 1: 'U3DB', 2: 'U3DC', 3: 'U3DD',
             4: 'U2DA', 5: 'U2DB', 6: 'U2DC', 7: 'U2DD'
@@ -401,9 +400,7 @@ class c_prc(c_llrf_bmb7):
         checklist = 8 * [value_hi, value_lo]
         adchilo = self.adc_reg_hilo()
 
-        bitsliplist = [
-            adchilo[ix] != checklist[ix] for ix in range(len(adchilo))
-        ]
+        bitsliplist = [adchilo[ix] != checklist[ix] for ix in range(len(adchilo))]
         bitslip = (eval('0b' + ''.join([str(int(i)) for i in bitsliplist])))
         return bitslip
 
@@ -454,61 +451,51 @@ class c_prc(c_llrf_bmb7):
         self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(RESET='1'))
         if False:
             # Check this if running on sliderule.dhcp with 377MHz input clock
-            self.spi_write(
-                self.lmk_spi,
-                0,
-                self.lmk_spi.R0(RESET='0',
-                                CLKin0_DIV="010",
-                                CLKin1_DIV="000",
-                                CLKin1_MUX="01",
-                                CLKin0_MUX="01"))
+            self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
+                RESET='0',
+                CLKin0_DIV="010",
+                CLKin1_DIV="000",
+                CLKin1_MUX="01",
+                CLKin0_MUX="01"))
         else:
-            self.spi_write(
-                self.lmk_spi,
-                0,
-                self.lmk_spi.R0(RESET='0',
-                                CLKin0_DIV="111",
-                                CLKin1_DIV="000",
-                                CLKin1_MUX="01",
-                                CLKin0_MUX="01"))
+            self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
+                RESET='0',
+                CLKin0_DIV="111",
+                CLKin1_DIV="000",
+                CLKin1_MUX="01",
+                CLKin0_MUX="01"))
         # , CLKout4_7_PD='1', CLKout0_3_PD='0'))#, CLKin0_DIV='011'))
-        self.spi_write(
-            self.lmk_spi,
-            1,
-            self.lmk_spi.R1(
-                CLKout7_TYPE="0000",  # Powerdown
-                CLKout4_TYPE="0000",  # Powerdown
-                CLKout2_TYPE="001"))  # LVCMOS
-        self.spi_write(
-            self.lmk_spi,
-            2,
-            self.lmk_spi.R2(
-                CLKout13_TYPE="0000",  # Powerdown
-                CLKout12_TYPE="0000",  # Powerdown
-                CLKout11_TYPE="0110",  # CMOS J24 test point
-                CLKout10_TYPE="0001",  # LVDS J20
-                CLKout9_TYPE="0000",  # Powerdown
-                CLKout8_TYPE="0000"))  # Powerdown
+        self.spi_write(self.lmk_spi, 1, self.lmk_spi.R1(
+            CLKout7_TYPE="0000",  # Powerdown
+            CLKout4_TYPE="0000",  # Powerdown
+            CLKout2_TYPE="001"))  # LVCMOS
+        self.spi_write(self.lmk_spi, 2, self.lmk_spi.R2(
+            CLKout13_TYPE="0000",  # Powerdown
+            CLKout12_TYPE="0000",  # Powerdown
+            CLKout11_TYPE="0110",  # CMOS J24 test point
+            CLKout10_TYPE="0001",  # LVDS J20
+            CLKout9_TYPE="0000",   # Powerdown
+            CLKout8_TYPE="0000"))  # Powerdown
         sys.stdout.write("done\n")
         sys.stdout.flush()
         time.sleep(0.3)
         sys.stdout.write("turn on lmk output -")
-        self.spi_write(
-            self.lmk_spi,
-            3,
-            self.lmk_spi.R3(SYNC1_AUTO="0",
-                            SYNC0_AUTO="0",
-                            SYNC1_FAST="1",
-                            SYNC0_FAST="1",
-                            SYNC0_POL_INV='0',
-                            SYNC1_POL_INV='0'))
+        self.spi_write(self.lmk_spi, 3, self.lmk_spi.R3(
+            SYNC1_AUTO="0",
+            SYNC0_AUTO="0",
+            SYNC1_FAST="1",
+            SYNC0_FAST="1",
+            SYNC0_POL_INV='0',
+            SYNC1_POL_INV='0'))
         sys.stdout.write("done\n")
         sys.stdout.flush()
         sys.stdout.write("continue lmk setup -")
-        self.spi_write(
-            self.lmk_spi, 4, self.lmk_spi.R4(CLKout12_13_DDLY="0000000000"))
-        self.spi_write(self.lmk_spi, 5, self.lmk_spi.R5(CLKout0_3_DIV="010"))
-        self.spi_write(self.lmk_spi, 15, self.lmk_spi.R15(uWireLock="1"))
+        self.spi_write(self.lmk_spi, 4, self.lmk_spi.R4(
+            CLKout12_13_DDLY="0000000000"))
+        self.spi_write(self.lmk_spi, 5, self.lmk_spi.R5(
+            CLKout0_3_DIV="010"))
+        self.spi_write(self.lmk_spi, 15, self.lmk_spi.R15(
+            uWireLock="1"))
         sys.stdout.write("done\n")
         sys.stdout.flush()
 
@@ -552,13 +539,9 @@ class c_prc(c_llrf_bmb7):
         # self.spi_write(self.dac_spi, 0x10, '11111111')
         alist = [
             0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
-            0x0f, 0x10, 0x11, 0x12
-        ]
-        alist += [0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f]
+            0x0f, 0x10, 0x11, 0x12, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f]
         for addr in alist:
-            bb = [
-                codecs.encode(d[2], 'hex') for d in self.spi_read(self.dac_spi, addr)
-            ]
+            bb = [codecs.encode(d[2], 'hex') for d in self.spi_read(self.dac_spi, addr)]
             print('dac spi addr 0x%x ' % addr + repr(bb))
         print("done")
         sys.stdout.flush()
@@ -621,12 +604,11 @@ class c_prc(c_llrf_bmb7):
         for ix in range(len(a)):
             index = ix & 0x1f
             # print ix, index, (index-1) & 0x1f
-            cnt[index] = a[index] * (cnt[(index - 1) & 0x1f] + 1)
-            out[index] = 0 if a[(index + 1) & 0x1f] else cnt[index]
+            cnt[index] = a[index] * (cnt[(index-1) & 0x1f] + 1)
+            out[index] = 0 if a[(index+1) & 0x1f] else cnt[index]
         top1 = sorted(out)[-1]
         top2 = sorted(out)[-2]
-        return ((out.index(top1)) - top1 / 2) & 0x1f, (
-            (out.index(top2)) - top2 / 2) & 0x1f
+        return ((out.index(top1)) - int(top1/2)) & 0x1f, ((out.index(top2)) - int(top2/2)) & 0x1f
 
     def set_idelays(self, v):
         idelay_base = self.get_write_address('idelay_base')
@@ -649,42 +631,38 @@ class c_prc(c_llrf_bmb7):
         idelay_base = self.get_read_address('idelay_base')
         glist1 = ["banyan_status"] + list(range(idelay_base, idelay_base + 16))
         rlist1 = self.query_resp_list(glist1)
+        idelay_mirror = rlist1[1:17]
         print("banyan_status 2 %x" % rlist1[0])
         scan_addr = self.get_read_address("scanner_result")
-        scan_result = self.reg_read_alist(list(range(scan_addr, scan_addr + 2048)))
-        scan_v = [struct.unpack("!I", x[2]) for x in scan_result]
+        scan_rresult = self.reg_read_alist(list(range(scan_addr, scan_addr + 2048)))
+        scanner_result = [struct.unpack("!I", x[2]) for x in scan_rresult]
         print("idelay  scan   " + "  ".join(self.chan_list))
         for jx in range(32):
-            bb = " ".join(
-                ["%2.2x" % scan_v[lx * 128 + jx * 4 + 3] for lx in range(16)])
+            bb = " ".join(["%2.2x" % scanner_result[lx*128 + jx*4 + 3] for lx in range(16)])
             print("idelay %2.2d  Rx %s" % (jx, bb))
-        print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in rlist1[1:17]]))
-        print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in rlist1[1:17]]))
-        return all([2 == (x >> 5)
-                    for x in rlist1[1:17]])  # all channels scan success!
+        print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in idelay_mirror]))
+        print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in idelay_mirror]))
+        return all([2 == (x >> 5) for x in idelay_mirror])  # all channels scan success!
 
     def adc_idelay0(self):
         print('test pattern %s' % self.set_test_mode('00001100'))
         print("idelay  scan   " + "  ".join(self.chan_list))
         idelay_dict = {}
         for idelay in range(33):
-            test = ['U3dout_msb', 'U3dout_lsb', 'U2dout_msb', 'U2dout_lsb'
-                    ] + self.set_idelays([idelay % 32] * 16)
+            test = ['U3dout_msb', 'U3dout_lsb', 'U2dout_msb', 'U2dout_lsb']
+            test += self.set_idelays([idelay % 32] * 16)
             list_resp = self.query_resp_list(test)
             if 0:
                 list_resp = [0x12345678, 0x24681357, 0xdeadbeef, 0xfeedface]
             if idelay == 0:
                 continue
             # subdivide four 32-bit values to 16 x 8-bit values
-            rx_pats = sum(
-                [[x >> 24, (x >> 16) & 0xff, (x >> 8) & 0xff, x & 0xff]
-                 for x in list_resp], [])
+            rx_pats = sum([[x >> 24, (x >> 16) & 0xff, (x >> 8) & 0xff, x & 0xff]
+                           for x in list_resp], [])
             bb = " ".join(["%2.2x" % x for x in rx_pats])
             print("idelay %2.2d  Rx %s" % ((idelay - 1), bb))
             idelay_dict[idelay - 1] = rx_pats
-        idelay_bests = [
-            self.find_best_idelay(ix, idelay_dict) for ix in range(16)
-        ]
+        idelay_bests = [self.find_best_idelay(ix, idelay_dict) for ix in range(16)]
         print("idelay  best  " + " ".join(['%2d' % v for v in idelay_bests]))
         self.query_resp_list(self.set_idelays(idelay_bests))
         if 1:
@@ -722,12 +700,10 @@ class c_prc(c_llrf_bmb7):
         adc_values = self.adc_reg()
         print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
         print('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339, adc_values[0] != 0xa19c))
-        s1, adc_values = self.adc_bufr_reset1(adc_values, 'BUFR 1', 0,
-                                              'U3_clk_reset_r',
-                                              self.U3_adc_iserdes_reset)
-        s2, adc_values = self.adc_bufr_reset1(adc_values, 'BUFR 2', 2,
-                                              'U2_clk_reset_r',
-                                              self.U2_adc_iserdes_reset)
+        s1, adc_values = self.adc_bufr_reset1(
+            adc_values, 'BUFR 1', 0, 'U3_clk_reset_r', self.U3_adc_iserdes_reset)
+        s2, adc_values = self.adc_bufr_reset1(
+            adc_values, 'BUFR 2', 2, 'U2_clk_reset_r', self.U2_adc_iserdes_reset)
         return s1 and s2
 
     def adc_bitslip(self):
