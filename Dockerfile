@@ -2,9 +2,9 @@
 
 FROM python:3-slim-buster as riscv-builder
 
-# May only need build-essential libgmp-dev libmpfr-dev libmpc-dev
+# May only need wget build-essential libgmp-dev libmpfr-dev libmpc-dev
 # test that hypothesis later
-RUN apt-get update && apt-get install -y autoconf automake autotools-dev curl\
+RUN apt-get update && apt-get install -y wget coreutils autoconf automake autotools-dev curl\
 	libmpc-dev libmpfr-dev libgmp-dev \
 	gawk build-essential bison flex texinfo gperf\
 	libtool patchutils bc zlib1g-dev device-tree-compiler\
