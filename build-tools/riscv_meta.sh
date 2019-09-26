@@ -70,7 +70,7 @@
 # we build will win out over any older versions that might already be in $PATH.
 #
 SRC=$1
-PREFIX={$2:-$HOME/opt}
+PREFIX=${2:-$HOME/opt}
 TARGET=riscv32-unknown-elf
 PATH=$PREFIX/bin:$PATH
 MAKE_J=-j3

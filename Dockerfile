@@ -16,10 +16,10 @@ RUN cd && pwd && ls && \
 	cd software && \
 	wget http://recycle.lbl.gov/~ldoolitt/riscv/riscv_prep.sh && \
 	wget http://recycle.lbl.gov/~ldoolitt/riscv/riscv_meta.sh && \
-	echo "981e60e5afec1ecb492b5765c8c18b8b203ef3118510da018df8cacf33656a53  riscv_prep.sh" | sha256sum -c && \
+	echo "aaf2ae35d0a96399eee9d7e2adf185b49e702e1c10fc10fd7e0b9ce70b1fedcc  riscv_meta.sh" | sha256sum -c && \
 	echo "537a4cf6226bc39e536d18ac20dd0024943fc03aa448ffa227d961b4f4ae90f0  riscv_meta.sh" | sha256sum -c && \
 	sh riscv_prep.sh && \
-	sh riscv_meta.sh src /riscv32i && \
+	sh riscv_meta.sh $PWD/src /riscv32i && \
 	ls /riscv32i/bin/riscv32-unknown-elf-gcc && \
 	cd && rm -rf software && \
 	rm -rf /var/lib/apt/lists/*
