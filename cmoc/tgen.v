@@ -61,6 +61,7 @@ module tgen #(
 );
 
 localparam pcw=10;  // Set delay_pc_XXX_addr width above to pcw
+assign delay_pc_XXX_addr = 0;
 // Counters
 reg [pcw-1:0] pc=0;
 wire [1:0] subcycle = pc[1:0];

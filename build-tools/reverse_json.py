@@ -122,6 +122,12 @@ for l in f.read().split('\n'):
             p, v = m3.group(1), int(m3.group(2))
             param_db[p] = v
             # stderr.write('INFO: found parameter "%s" with value %d\n' % (p, v))
+    if "localparam " in l:
+        m3 = re.search(r"localparam\s+(\w+)\s*=\s*(\d+);", l)
+        if m3:
+            p, v = m3.group(1), int(m3.group(2))
+            param_db[p] = v
+            # stderr.write('INFO: found localparam "%s" with value %d\n' % (p, v))
 print(",\n".join(sl))
 print("}")
 exit(fail)
