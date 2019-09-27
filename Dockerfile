@@ -45,7 +45,8 @@ RUN apt-get update && \
 	python3-scipy \
 	python3-matplotlib && \
 	rm -rf /var/lib/apt/lists/* && \
-	python3 -c "import numpy; print('LRD Test1 %f' % numpy.pi)"
+	python3 -c "import numpy; print('LRD Test1 %f' % numpy.pi)" && \
+	pip3 --version
 
 FROM basic-iverilog as litex
 
@@ -61,7 +62,7 @@ COPY --from=riscv-builder /riscv32i /riscv32i
 
 ENV PATH="/riscv32i/bin:${PATH}"
 
-RUN pip install git+https://github.com/m-labs/nmigen.git
+RUN pip3 install git+https://github.com/m-labs/nmigen.git
 
 FROM litex as testing_base
 
