@@ -40,6 +40,7 @@ RUN apt-get update && \
 	curl \
 	gawk \
 	flake8 \
+	python3-pip \
 	python3-numpy \
 	python3-scipy \
 	python3-matplotlib && \
