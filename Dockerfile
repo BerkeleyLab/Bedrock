@@ -1,6 +1,6 @@
 # Install riscv cross compiler
 
-FROM buster-slim as riscv-builder
+FROM debian:buster-slim as riscv-builder
 
 # May only need wget build-essential libgmp-dev libmpfr-dev libmpc-dev
 # test that hypothesis later
@@ -23,7 +23,7 @@ RUN cd && pwd && ls && \
 	cd && rm -rf software && \
 	rm -rf /var/lib/apt/lists/*
 
-FROM slim-buster-slim as basic-iverilog
+FROM debian:buster-slim as basic-iverilog
 
 RUN apt-get update && \
 	apt-get install -y \
