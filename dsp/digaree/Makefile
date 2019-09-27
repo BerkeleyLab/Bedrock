@@ -6,7 +6,7 @@ VERILOG = iverilog$(ICARUS_SUFFIX) -Wall -Wno-timescale
 VVP = vvp$(ICARUS_SUFFIX) -n
 GTKWAVE = gtkwave
 # Tested with python2 (2.7.3, 2.7.9, and 2.7.12) and python3 (3.4.2 and 3.5.2)
-PYTHON = python
+PYTHON = python3
 AWK = awk
 SYNTH = xil_syn
 SYNTH_VIVADO = sh vivado_batch
