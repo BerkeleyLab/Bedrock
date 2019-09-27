@@ -28,6 +28,7 @@ FROM python:3-slim-buster as basic-iverilog
 
 RUN apt-get -y update && \
     apt-get install -y \
+	git \
 	iverilog \
 	verilator \
 	libbsd-dev \
