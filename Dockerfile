@@ -64,9 +64,12 @@ RUN pip install git+https://github.com/m-labs/nmigen.git
 
 FROM litex as testing_base
 
+# flex and bison required for building vhd2vl
 RUN apt-get -y update && \
 	apt-get install -y \
 	cmake \
+	flex \
+	bison \
 	libftdi1-dev \
 	libusb-dev \
 	pkg-config && \
