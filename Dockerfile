@@ -40,9 +40,9 @@ RUN apt-get -y update && \
 	curl \
 	gawk \
 	flake8 \
-	numpy \
-	scipy \
-	matplotlib && \
+	python3-numpy \
+	python3-scipy \
+	python3-matplotlib && \
     rm -rf /var/lib/apt/lists/*
 
 FROM basic-iverilog as litex
