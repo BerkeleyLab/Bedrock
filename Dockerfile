@@ -25,6 +25,7 @@ RUN cd && pwd && ls && \
 
 FROM debian:buster-slim as basic-iverilog
 
+# Vivado needs libtinfo5, at least for Artix?
 RUN apt-get update && \
 	apt-get install -y \
 	git \
@@ -33,6 +34,7 @@ RUN apt-get update && \
 	libbsd-dev \
 	xc3sprog \
 	build-essential \
+	libtinfo5 \
 	wget \
 	iputils-ping \
 	iproute2 \
@@ -45,7 +47,7 @@ RUN apt-get update && \
 	python3-scipy \
 	python3-matplotlib && \
 	rm -rf /var/lib/apt/lists/* && \
-	python3 -c "import numpy; print('LRD Test1 %f' % numpy.pi)" && \
+	python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
 	pip3 --version
 
 FROM basic-iverilog as litex
@@ -75,8 +77,7 @@ RUN apt-get update && \
 	libftdi1-dev \
 	libusb-dev \
 	pkg-config && \
-	rm -rf /var/lib/apt/lists/* && \
-	python3 -c "import numpy; print('LRD Test2 %f' % numpy.pi)"
+	rm -rf /var/lib/apt/lists/*
 
 # Must follow iverilog installation
 RUN git clone https://github.com/ldoolitt/vhd2vl && \
