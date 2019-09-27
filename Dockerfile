@@ -1,6 +1,6 @@
 # Install riscv cross compiler
 
-FROM python:3-slim-buster as riscv-builder
+FROM buster-slim as riscv-builder
 
 # May only need wget build-essential libgmp-dev libmpfr-dev libmpc-dev
 # test that hypothesis later
@@ -23,7 +23,7 @@ RUN cd && pwd && ls && \
 	cd && rm -rf software && \
 	rm -rf /var/lib/apt/lists/*
 
-FROM python:3-slim-buster as basic-iverilog
+FROM slim-buster-slim as basic-iverilog
 
 RUN apt-get update && \
 	apt-get install -y \
@@ -43,9 +43,8 @@ RUN apt-get update && \
 	python3-numpy \
 	python3-scipy \
 	python3-matplotlib && \
-	rm -rf /var/lib/apt/lists/*
-
-RUN python3 -c "import numpy; print('LRD Test1 %f' % numpy.pi)"
+	rm -rf /var/lib/apt/lists/* && \
+	python3 -c "import numpy; print('LRD Test1 %f' % numpy.pi)"
 
 FROM basic-iverilog as litex
 
@@ -54,7 +53,7 @@ ENV LITEX_ROOT_URL="http://github.com/yetifrisstlama/"
 RUN mkdir litex_setup_dir && \
 	cd litex_setup_dir && \
 	wget https://raw.githubusercontent.com/yetifrisstlama/litex/${LITEX_VERSION}/litex_setup.py && \
-	python litex_setup.py init install && \
+	python3 litex_setup.py init install && \
 	ln -s /non-free/Xilinx /opt/Xilinx
 
 COPY --from=riscv-builder /riscv32i /riscv32i
@@ -74,9 +73,8 @@ RUN apt-get update && \
 	libftdi1-dev \
 	libusb-dev \
 	pkg-config && \
-	rm -rf /var/lib/apt/lists/*
-
-RUN python3 -c "import numpy; print('LRD Test2 %f' % numpy.pi)"
+	rm -rf /var/lib/apt/lists/* && \
+	python3 -c "import numpy; print('LRD Test2 %f' % numpy.pi)"
 
 # Must follow iverilog installation
 RUN git clone https://github.com/ldoolitt/vhd2vl && \
