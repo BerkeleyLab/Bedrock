@@ -18,7 +18,7 @@ int cmd_memtest(void)
 {
 	// copied from:
 	// https://github.com/cliffordwolf/picorv32/blob/master/picosoc/firmware.c
-	int cyc_count = 5;
+	unsigned cyc_count = 5;
 	int stride = 256;
 	uint32_t state;
 
@@ -28,16 +28,16 @@ int cmd_memtest(void)
 	print_str("Running memtest ");
 
 	// Walk in stride increments, word access
-	for (int i = 1; i <= cyc_count; i++) {
+	for (unsigned i = 1; i <= cyc_count; i++) {
 		state = i;
 
-		for (int word = 0; word < BLOCK_RAM_SIZE / sizeof(int); word += stride) {
+		for (unsigned word = 0; word < BLOCK_RAM_SIZE / sizeof(unsigned); word += stride) {
 			*(base_word + word) = xorshift32(&state);
 		}
 
 		state = i;
 
-		for (int word = 0; word < BLOCK_RAM_SIZE / sizeof(int); word += stride) {
+		for (unsigned word = 0; word < BLOCK_RAM_SIZE / sizeof(unsigned); word += stride) {
 			if (*(base_word + word) != xorshift32(&state)) {
 				print_str(" ***FAILED WORD*** at ");
 				print_hex(4*word, 4);
@@ -49,11 +49,11 @@ int cmd_memtest(void)
 	}
 
 	// Byte access
-	for (int byte = 0; byte < 128; byte++) {
+	for (unsigned byte = 0; byte < 128; byte++) {
 		*(base_byte + byte) = (uint8_t) byte;
 	}
 
-	for (int byte = 0; byte < 128; byte++) {
+	for (unsigned byte = 0; byte < 128; byte++) {
 		if (*(base_byte + byte) != (uint8_t) byte) {
 			print_str(" ***FAILED BYTE*** at ");
 			print_hex(byte, 4);
@@ -100,7 +100,7 @@ static void print_prime(int idx, int val)
 
 unsigned sieve(unsigned nPrimes)
 {
-	int idx = 1;
+	unsigned idx = 1;
 	hash = 5381;
 	print_prime(idx++, 2);
 	for (int i = 0; i < BITMAP_SIZE; i++) {
