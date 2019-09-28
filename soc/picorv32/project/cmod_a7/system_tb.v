@@ -28,9 +28,8 @@ module general_tb;
         $display("Testbench UART Baud-rate: %d (prescaler: %d)", BAUD_RATE, baud_rate);
         repeat (100) @(posedge clk_p);
         reset <= 0;
-        #5000000 $display("Simulation finish.");
-        $finish;
     end
+
 
     // ------------------------------------------------------------------------
     //  Instantiate the unit under test (system.v)
@@ -39,7 +38,7 @@ module general_tb;
     wire uart_tx0;
     wire uart_rx0;
     wire [31:0]gpio_z;
-
+    `define DEBUGREGS
     system #(
         .SYSTEM_HEX_PATH("./system32.hex")
     ) uut (
@@ -97,7 +96,7 @@ module general_tb;
         .txd              (uart_rx0)
     );
 
-    // send some characters to the picorv UART
+    // send characters to the picorv UART
     task wchar;
         input [7:0] char;
         begin
@@ -112,26 +111,27 @@ module general_tb;
 
     initial begin
         #200000
-        wchar("b"); wchar("\n");
-        wchar("B"); wchar("\n");
-        wchar("b"); wchar("\n");
-        wchar("B"); wchar("\n");
-        wchar("b"); wchar("\n");
-        wchar("B"); wchar("\n");
-        wchar("c"); wchar("\n");
-        wchar("s"); wchar("\n");
-        wchar("c"); wchar("\n");
+        wchar("s");
     end
 
-    // End the simulation when the CPU falls into a `trap`
+    // --------------------------------------------------------------
+    //  Catch the trap signal to end simulation
+    // --------------------------------------------------------------
     // But wait until the UART is done receiving the last character
+    // `retVal` is the value returned from main()
+    wire [31:0] retVal = uut.cpu_inst.picorv32_core.dbg_reg_x10;
     always @(posedge clk_p) begin
-        if (!reset && trap && !uart_debug_rx.busy) begin
+        if (~reset && trap && !uart_debug_rx.busy) begin
             #100000
-            $write("\n");
-            $display("CPU Trap. Stop.");
-            $finish;
+            $display("TRAP");
+            if (retVal == 32'h0) begin
+                // $display("PASS");
+                $finish;
+            end
+            // $display("FAIL");
+            $stop;
         end
+        $fflush();
     end
 
 endmodule

@@ -67,7 +67,7 @@ picorv32 #(
     .ENABLE_IRQ_TIMER     ( 1              ),
     .LATCHED_IRQ          ( 32'h FFFF_0000 ),// 1 = Interrupts are latched until served by ISR
     .PROGADDR_RESET       ( 32'h 0000_0000 ),// Start into the bootloader at 0x00000000
-    .PROGADDR_IRQ         ( 32'h 0000_0210 ),// Interrupts jump into the main program at 0x00000210
+    .PROGADDR_IRQ         ( 32'h 0000_0010 ),// Interrupts jump into the main program at 0x0000010
     .CATCH_MISALIGN       ( 1              ),
     .BARREL_SHIFTER       ( 1              ),
     .ENABLE_MUL           ( 1              ),
