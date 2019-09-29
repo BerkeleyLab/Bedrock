@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 Get DJB2 hash for a list of n prime numbers.
 To verify the result of test.c/sieve()
