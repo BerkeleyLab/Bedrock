@@ -33,7 +33,7 @@ soc_picorv32_cmod_a7_run:
   stage: program
   dependencies:
     - soc_picorv32_cmod_a7
- before_script:
+  before_script:
     - cd soc/picorv32/project/cmod_a7
   script:
     - make system_config && python3 hw_test.py
