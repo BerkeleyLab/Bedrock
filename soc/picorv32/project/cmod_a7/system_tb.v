@@ -110,7 +110,13 @@ module general_tb;
     endtask
 
     initial begin
-        #200000
+        // test soft-reset
+        #100000
+        wchar(8'h14);
+        #100000
+        wchar(8'h14);
+        // test sieving
+        #400000
         wchar("s");
     end
 

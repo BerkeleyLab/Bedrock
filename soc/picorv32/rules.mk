@@ -16,8 +16,7 @@ CC      = $(RISCV_TOOLS_PREFIX)gcc
 AR      = $(RISCV_TOOLS_PREFIX)ar
 VFLAGS  = -Wall -Wno-timescale -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
 CFLAGS  = -Wall -Wextra -Wundef -Wstrict-prototypes -std=c99 -march=rv32imc -Os -ffreestanding
-CFLAGS += -mabi=ilp32 -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
-#  -nostdlib
+CFLAGS += -mabi=ilp32 -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) -nostdlib
 LDFLAGS = $(CFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,-T,$(filter %.lds, $^),--defsym,BLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE),--gc-sections,--no-relax
 # --no-relax is a workaround for https://github.com/riscv/riscv-binutils-gdb/issues/144
 # --verbose=3,-M for verbose linker output / debugging

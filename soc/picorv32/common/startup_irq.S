@@ -221,6 +221,15 @@ _picorv32_irq_enable:
     picorv32_maskirq_insn(zero, a0)   # set new interrupt mask
     ret                               # return( a0 );
 
+# extern void _picorv32_irq_reset(void);
+# reset (jump to address 0) from within an interrupt
+.globl _picorv32_irq_reset
+_picorv32_irq_reset:
+    li t0, 0xFFFFFFFF
+    picorv32_maskirq_insn(zero, t0)   # disable all interrupts
+	picorv32_setq_insn(q0, zero) 	  # set return address to 0
+	picorv32_retirq_insn()			  # return from interrupt jump to 0
+
 # extern uint32_t _picorv32_irq_timer( uint32_t tVal );
 # loads the timer with `tVal`. Counting down with every instruction,
 # it will trigger int0 and stop once it reaches zero

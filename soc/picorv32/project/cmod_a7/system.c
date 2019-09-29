@@ -20,7 +20,8 @@ uint32_t *irq(uint32_t *regs, uint32_t irqs) {
     if (irqs & (1 << IRQ_UART0_RX)) {
         // Ctrl + T = reset
         if (UART_GETC(BASE_UART0) == 0x14) {
-            __asm__ volatile ("J 0");
+            // reboot from interrupt
+            _picorv32_irq_reset();
         }
         chars_received++;
     }
@@ -30,17 +31,17 @@ uint32_t *irq(uint32_t *regs, uint32_t irqs) {
 int main(void) {
     unsigned hash;
 
+    UART_INIT(BASE_UART0, BOOTLOADER_BAUDRATE);  // Debug print (USB serial)
+    _picorv32_irq_enable(1 << IRQ_UART0_RX);
     SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0);
     SET_GPIO8(BASE_GPIO, GPIO_OE_REG, 0, 0xFF);  // Drive LEDs
-    UART_INIT(BASE_UART0, BOOTLOADER_BAUDRATE);  // Debug print (USB serial)
-    _picorv32_irq_enable( 1 << IRQ_UART0_RX);
 
     print_str("\n---------------------------------------\n");
     print_str(" LBL pico_soc "); print_str(GIT_VERSION);
     print_str("\n---------------------------------------\n");
     print_str("running UART0 at ");
     print_dec(BOOTLOADER_BAUDRATE);
-    print_str("baud/s\n\n");
+    print_str(" baud/s\n\n");
     print_str("CTRL+T for reset, `any key` to start sieving for prime numbers ...\n");
     while(chars_received == 0);
 
