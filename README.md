@@ -60,7 +60,10 @@ On contributing
 ===============
 See our first take [here](https://gitlab.lbl.gov/hdl-libraries/contributing-guidelines)
 
-*** Copyright Notice ***
+************************************************************************************
+
+
+### Copyright Notice
 
 "Bedrock v1.0" Copyright (c) 2019, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 
@@ -71,7 +74,7 @@ NOTICE.  This Software was developed under funding from the U.S. Department of E
 ************************************************************************************
 
 
-*** License Agreement ***
+### License Agreement
 
 "Bedrock v1.0" Copyright (c) 2019, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 
