@@ -25,10 +25,21 @@ A single-beat transaction is encoded in 64 bits and is comprised of command, add
 and data fields. The diagram below shows how this transaction type can be used to
 form a simple packet containing two single-beat read or write transactions.
 ```
-+--------++-------+---------+---------++-------+--------+---------+
-| TX ID  ||  CMD  |  ADDR0  |  DATA1  ||  CMD  |  ADDR1 |  DATA1  |
-+--------++-------+---------+---------++-------+--------+---------+
-   64b       8b       24b       32b        8b      24b      32b
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Transaction ID [0:31]                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Transaction ID [32:63]                     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Address 0                  |    Command    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           Data 0                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Address 1                  |    Command    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           Data 1                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
 The packet space consumed by a block-transfer transaction depends on how many data
@@ -39,10 +50,21 @@ to signal that the transaction being decoded is of type 'burst'. The following d
 depicts the structure of a packet containing a single block-transfer transaction where
 two beats of data are either read or written.
 ```
-+--------++-------------+---------+-------+---------+---------+---------+
-| TX ID  || CMD (Burst) | REPCNT  |  CMD  |  ADDR0  |  DATA0  |  DATA1  |
-+--------++-------------+---------+-------+---------+---------+---------+
-   64b          8b          24b       8b      24b       32b       32b
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Transaction ID [0:31]                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Transaction ID [32:63]                     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                Repetition Count               |  Cmd (Burst)  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Address 0                  |    Command    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           Data 0                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           Data 1                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
 Note that each transmitted packet can string together any combination of these two
@@ -53,10 +75,25 @@ into two packets is not desirable. The diagram below shows how such a packet cou
 be structured.
 
 ```
-+--------++-------+---------+---------++-------------+---------+-------+---------+---------+---------++---------+
-| TX ID  ||  CMD  |  ADDR   |  DATA   || CMD (Burst) | REPCNT  |  CMD  |  ADDR0  |  DATA0  |  DATA1  ||  DATAN  |
-+--------++-------+---------+---------++-------------+---------+-------+---------+---------+---------++---------+
-   64b       8b       24b       32b          8b          24b       8b      24b       32b       32b        32b
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Transaction ID [0:31]                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Transaction ID [32:63]                     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Address 0                  |    Command    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           Data 0                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                Repetition Count               |  Cmd (Burst)  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Address 1                  |    Command    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           Data 1                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           Data 2                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
 ## Data encoding
@@ -64,45 +101,48 @@ be structured.
 For both transaction types, the bit-widths add up such that all transactions
 start on a 32-bit boundary. Data encoding is big-endian, a.k.a. network byte order.
 
-In order to preserve 32-bit boundaries, the CMD and repeat count (REPCNT) fields
+In order to preserve 32-bit boundaries, the Command and Repetition Count fields
 are oversized in relation to the information they convey.
 
-The 8-bit CMD field carries a single 2-bit operation sub-field (OP), according to the
+The 8-bit Command field carries a single 2-bit operation sub-field (OP), according to the
 following encoding:
 ```
-+------+------+----------+
-| RSVD |  OP  |   RSVD   |
-+------+------+----------+
-7     6 5    4 3        0
+ 0  1  2  3  4  5  6  7  8
++--+--+--+--+--+--+--+--+--+
+|   RSVD    | OP  |  RSVD  |
++--+--+--+--+--+--+--+--+--+
+
+OP [1:0]:
+   2'b00 - Write
+   2'b01 - Read
+   2'b10 - Burst
+   2'b11 - Reserved
 ```
-| OP [1:0] | Operation |
-|  ------  |  ------   |
-| 'b00     | Write     |
-| 'b01     | Read      |
-| 'b10     | Burst     |
-| 'b11     | Reserved  |
 
 N.B.: Reserved bits should be set to 0 by software. Failing to do this may result
 in undefined behavior, since they may be defined in some future revision. One valid
 response from the FPGA is therefore to drop packets that have unused bits set.
 
-The 24-bit REPCNT field only uses 9 bits to encode the actual repetition count, as
+The 24-bit Repetition Count field only uses 9 bits to encode the actual repetition count, as
 shown below. Note that while the width of the COUNT sub-field places an upper bound on
 the number of data beats that can be transferred in a single packet, typical UDP
 packet sizes place additional restrictions on this number. These limitations are
 outlined in the next section.
 ```
-+-------------+----------+
-|    RSVD     |   COUNT  |
-+-------------+----------+
-24     6 5     8        0
+ 0                   1                   2
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      COUNT      |            Reserved           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+COUNT [8:0]:
+   9'h0 - Illegal
+   9'h1 - 1 Beat
+   9'h2 - 2 Beats
+   ...
+   9'hN - N Beats
+
 ```
-| COUNT [8:0] | # Data Beats |
-|    ------   |     ------   |
-| 'h00        | Illegal      |
-| 'h01        | 1            |
-| 'h02        | 2            |
-| 'hN         | N            |
 
 ## Practical considerations
 
@@ -126,7 +166,7 @@ is space for a maximum of 183 single-beat transactions per packet.
 
 Likewise, it is possible to fill a packet with a block-transfer transaction with
 364 data words, thus setting a practical limit on the values that can be used in
-the REPCNT block.
+the Repetition Count block.
 
 Exceeding the Ethernet MTU will trigger fragmentation on the software side,
 which both is theoretically undesirable, and practically not supported by
