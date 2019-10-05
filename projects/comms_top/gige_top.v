@@ -17,8 +17,8 @@ module gige_top
 
    input   SFP_RXP,
    input   SFP_RXN,
-   input   SFP_TXP,
-   input   SFP_TXN,
+   output  SFP_TXP,
+   output  SFP_TXN,
 
    output [1:0] LED
 );

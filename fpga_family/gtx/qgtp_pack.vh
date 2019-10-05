@@ -3,7 +3,7 @@
 // Helper macros for GTP transceivers
 // ------------------------------------
 
-`define GTi_WIRES(GTi) wire gt``GTi``_pll_locked, gt``GTi``_txresetdone, gt``GTi``_rxresetdone,\
+`define GTi_WIRES(GTi) wire gt``GTi``_txresetdone, gt``GTi``_rxresetdone,\
                             gt``GTi``_txoutclk_out_l, gt``GTi``_rxoutclk_out_l;
 
 `define GTi_COMMON_WIRES(GTi) wire gt``GTi``_pll0reset, gt``GTi``_pll1reset;
@@ -32,6 +32,7 @@
                           .gt0_drprdy_out              (),\
                           .gt0_drpwe_in                (1'b0),\
                           .gt0_dmonitorout_out         (),\
+                          .gt0_drp_busy_out            (),\
                           .gt0_eyescanreset_in         (1'b0),\
                           .gt0_rxuserrdy_in            (gt``GTi``_rxusrrdy_in),\
                           .gt0_eyescandataerror_out    (),\
@@ -42,7 +43,6 @@
                           .gt0_gtprxp_in               (gt``GTi``_rxp_in),\
                           .gt0_gtprxn_in               (gt``GTi``_rxn_in),\
                           .gt0_rxbufstatus_out         (gt``GTi``_rxbufstatus),\
-                          .gt0_drxmonitorout_out       (),\
                           .gt0_rxoutclk_out            (gt``GTi``_rxoutclk_out_l),\
                           .gt0_rxoutclkfabric_out      (),\
                           .gt0_gtrxreset_in            (gt_txrx_reset),\
@@ -57,7 +57,7 @@
                           .gt0_gtptxn_out              (gt``GTi``_txn_out),\
                           .gt0_gtptxp_out              (gt``GTi``_txp_out),\
                           .gt0_txoutclk_out            (gt``GTi``_txoutclk_out_l),\
-                          .gt0_txoutclkfabric_out      (),\
+			  .gt0_txoutclkfabric_out      (),\
                           .gt0_txoutclkpcs_out         (),\
                           .gt0_txresetdone_out         (gt``GTi``_txresetdone),\
                           `ifdef GT``GTi``_PLL0\

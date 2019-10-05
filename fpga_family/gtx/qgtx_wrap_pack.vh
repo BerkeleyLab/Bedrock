@@ -35,6 +35,14 @@
                        `undef GT1_8B10B_EN\
                        `undef GT2_8B10B_EN\
                        `undef GT3_8B10B_EN\
+                       `undef GT0_PLL0\
+                       `undef GT1_PLL0\
+                       `undef GT2_PLL0\
+                       `undef GT3_PLL0\
+                       `undef GT0_PLL1\
+                       `undef GT1_PLL1\
+                       `undef GT2_PLL1\
+                       `undef GT3_PLL1\
                        `undef GTCOMMON_EN\
                        `ifdef Q``Qi``_GT0_ENABLE `define GT0_ENABLE\
                        `endif\
@@ -51,6 +59,22 @@
                        `ifdef Q``Qi``_GT2_8B10B_EN `define GT2_8B10B_EN\
                        `endif\
                        `ifdef Q``Qi``_GT3_8B10B_EN `define GT3_8B10B_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT0_PLL0 `define GT0_PLL0\
+                       `endif\
+                       `ifdef Q``Qi``_GT1_PLL0 `define GT1_PLL0\
+                       `endif\
+                       `ifdef Q``Qi``_GT2_PLL0 `define GT2_PLL0\
+                       `endif\
+                       `ifdef Q``Qi``_GT3_PLL0 `define GT3_PLL0\
+                       `endif\
+                       `ifdef Q``Qi``_GT0_PLL1 `define GT0_PLL1\
+                       `endif\
+                       `ifdef Q``Qi``_GT1_PLL1 `define GT1_PLL1\
+                       `endif\
+                       `ifdef Q``Qi``_GT2_PLL1 `define GT2_PLL1\
+                       `endif\
+                       `ifdef Q``Qi``_GT3_PLL1 `define GT3_PLL1\
                        `endif\
                        `ifdef Q``Qi``_GTCOMMON_ENABLE `define GTCOMMON_EN\
                        `endif

@@ -28,6 +28,10 @@ proc gen_ip {ipname module_name config_dict} {
    generate_target all [get_files  $module_name.xci]
    export_ip_user_files -of_objects [get_files $module_name.xci] -no_script -force -quiet
    create_ip_run [get_files -of_objects [get_fileset sources_1] $module_name.xci]
+
+   # Add all (non-.xci) generated files to working fileset
+   set ip_srcs [get_files -filter {NAME !~ "*.xci"} -of_objects [get_fileset $module_name]]
+   add_files -norecurse -fileset sources_1 $ip_srcs
 }
 
 proc add_aux_ip {ipname config_file module_name} {
@@ -78,12 +82,12 @@ proc add_gt_protocol {gt_type config_file quad_num gtx_num en8b10b pll_type} {
       PLL0 -
       PLL1 {
          if {$gt_type != "GTP"} {puts "$pll_type not supported by $gt_type" exit}
-         add_define "q${quad_num}_gt${gtx_num}_$gt_type"
+         add_define "Q${quad_num}_GT${gtx_num}_$pll_type"
       }
       CPLL -
       QPLL {
          if {$gt_type != "GTX"} {puts "$pll_type not supported by $gt_type" exit}
-         add_define "Q${quad_num}_GT${gtx_num}_$gt_type"
+         add_define "Q${quad_num}_GT${gtx_num}_$pll_type"
       }
       default {
          puts "Unsupported PLL type $pll_type"
