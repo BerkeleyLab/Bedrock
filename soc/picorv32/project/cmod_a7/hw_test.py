@@ -26,3 +26,5 @@ with Serial(port=argv[1], baudrate=115200, timeout=5) as s:
         print(ln.decode(), end='')
         if ln == b'PASS\n':
             exit(0)
+        if ln == b'FAIL\n':
+            exit(-1)

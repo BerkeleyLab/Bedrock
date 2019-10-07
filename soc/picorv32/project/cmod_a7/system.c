@@ -43,26 +43,30 @@ int main(void) {
     print_dec(BOOTLOADER_BAUDRATE);
     print_str(" baud/s\n\n");
     print_str("CTRL+T for reset, `any key` to start sieving for prime numbers ...\n");
+    // Ready for test = yellow
+    SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0100);
     while(chars_received == 0);
 
     // Test running, LED = white
-    SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0111);
+    SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0000);
     hash = sieve(1024);
     // magic number from get_hash.py
     if (hash != 0x6bc508b6) {
         // Test failed, LED = red
-        SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0001);
+        SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0110);
         print_str("FAIL\n");
-        return -1;  // trap
+        while(1);
     }
 
     print_str("PASS\n");
+    SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0101);
     #ifndef SIMULATION
         // Blink LEDs on test success
         int i=0;
         while(1){
-            SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, ((i++)>>6));
-            DELAY_MS(100);
+            DELAY_MS(300);
+            SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, ~i & 0b0111);
+            i++;
         }
     #endif
     return 0;
