@@ -14,6 +14,7 @@ from serial import Serial
 from serial.tools import list_ports
 from time import sleep
 
+
 def getPort(req):
     '''
     req can be /dev/ttyUSB1 or a
@@ -23,6 +24,7 @@ def getPort(req):
         if port.device == req or port.serial_number == req:
             return port
     raise RuntimeError("Port not found: " + req)
+
 
 if len(argv) != 2:
     print(__doc__)
