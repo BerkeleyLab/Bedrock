@@ -6,7 +6,7 @@
 include ../../../../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
-USB_SERIAL = /dev/ttyUSB1
+USB_SERIAL = /dev/ttyUSB0
 
 COMMON_V  = picorv32.v system.v uart_pack.v uart_rx.v uart_tx.v mpack.v munpack.v pico_pack.v
 COMMON_V += memory_pack.v memory2_pack.v
