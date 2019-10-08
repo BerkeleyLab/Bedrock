@@ -36,5 +36,5 @@ soc_picorv32_cmod_a7_run:
   before_script:
     - cd soc/picorv32/project/cmod_a7
   script:
-    - xc3sprog -c jtaghs1_fast -s 210328A6DA47 system_synth.bit && python3 hw_test.py /dev/ttyUSB0
+    - xc3sprog -c jtaghs1_fast -s 210328A6DA47 system_synth.bit && python3 hw_test.py 210328A6DA47
 
