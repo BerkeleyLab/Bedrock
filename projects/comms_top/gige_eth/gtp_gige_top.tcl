@@ -29,3 +29,5 @@ add_gt_protocol $gt_type $GTX_CONFIG_DIR/gtp_ethernet.tcl $quad $gtx $en8b10b $p
 
 # proc add_aux_ip {ipname config_file module_name}
 add_aux_ip clk_wiz $GTX_CONFIG_DIR/gtx_eth_clk.tcl gtx_eth_mmcm
+
+add_aux_ip clk_wiz gtp_sys_clk_mmcm.tcl gtp_sys_clk_mmcm

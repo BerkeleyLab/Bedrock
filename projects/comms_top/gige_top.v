@@ -36,7 +36,7 @@ module gige_top
    // ----------------------------------
    // Clocking
    // ---------------------------------
-   wire sys_clk;
+   wire sys_clk_fast, sys_clk;
    wire gtrefclk0;
 
    wire gmii_tx_clk, gmii_rx_clk;
@@ -48,8 +48,19 @@ module gige_top
    ds_clk_buf i_ds_sys_clk (
       .clk_p   (SYS_CLK_P),
       .clk_n   (SYS_CLK_N),
-      .clk_out (sys_clk)
+      .clk_out (sys_clk_fast)
    );
+
+`ifndef SIMULATE
+   // Convert from 200 MHz to 100 MHz to meet DRPCLK timing requirement of GTP
+   gtp_sys_clk_mmcm i_gtp_sys_clk_mmcm (
+      .clk_in  (sys_clk_fast),
+      .sys_clk (sys_clk), // Buffered 100 MHz
+      .locked  ()
+   );
+`else
+   assign sys_clk = sys_clk_fast;
+`endif
 
    // Generate single-ended reference clock from MGTREFCLK_N/P with Transceiver BUF
    ds_clk_buf #(

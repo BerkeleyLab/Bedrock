@@ -71,8 +71,8 @@
                           `endif\
                           .gt0_pll0outclk_in           (pll0_outclk),\
                           .gt0_pll0outrefclk_in        (pll0_outrefclk),\
-                          .gt0_pll1outclk_in           (pll0_outclk),\
-                          .gt0_pll1outrefclk_in        (pll0_outrefclk)
+                          .gt0_pll1outclk_in           (pll1_outclk),\
+                          .gt0_pll1outrefclk_in        (pll1_outrefclk)
 
 `define GT_OUTCLK_BUF(GTi) BUFG i_gt``GTi``_txoutclk_buf (.I (gt``GTi``_txoutclk_out_l), .O (gt``GTi``_txoutclk_out));\
                            BUFG i_gt``GTi``_rxoutclk_buf (.I (gt``GTi``_rxoutclk_out_l), .O (gt``GTi``_rxoutclk_out));
