@@ -7,11 +7,6 @@ create_clock -period 8.000 -name MGTREFCLK0_P -waveform {0.000 4.000} [get_ports
 set_property -dict "PACKAGE_PIN C24 IOSTANDARD LVCMOS25" [get_ports {MGTREFCLK0_SEL1}]
 set_property -dict "PACKAGE_PIN B26 IOSTANDARD LVCMOS25" [get_ports {MGTREFCLK0_SEL0}]
 
-
-
-set_property -dict "PACKAGE_PIN C24 IOSTANDARD LVCMOS25" [get_ports {MGTREFCLK0_SEL1}]
-set_property -dict "PACKAGE_PIN B26 IOSTANDARD LVCMOS25" [get_ports {MGTREFCLK0_SEL0}]
-
 # QUAD 213
 set_property PACKAGE_PIN AC10 [get_ports {SFP_TXP}]
 set_property PACKAGE_PIN AD10 [get_ports {SFP_TXN}]

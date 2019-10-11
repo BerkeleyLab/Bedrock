@@ -9,9 +9,6 @@ set_property -dict "PACKAGE_PIN R3 IOSTANDARD LVDS_25" [get_ports {SYS_CLK_P}]
 set_property -dict "PACKAGE_PIN P3 IOSTANDARD LVDS_25" [get_ports {SYS_CLK_N}]
 create_clock -name sysclk_fast -period 5.0 [get_ports SYS_CLK_P]
 
-set_property -dict "PACKAGE_PIN P16 IOSTANDARD LVCMOS33" [get_ports {REF_CLK}]
-create_clock -name refclk -period 11.11 [get_ports REF_CLK]
-
 # LEDs
 set_property -dict "PACKAGE_PIN M26 IOSTANDARD LVCMOS33" [get_ports {LED[0]}]
 set_property -dict "PACKAGE_PIN T24 IOSTANDARD LVCMOS33" [get_ports {LED[1]}]
