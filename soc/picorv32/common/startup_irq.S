@@ -124,59 +124,59 @@ irq_regs:
 irq_stack:
 
 init_for_c:
-    lui   t0,     %hi(_bss_start)
-    addi  t0, t0, %lo(_bss_start)
-    lui   t1,     %hi(_bss_end)
-    addi  t1, t1, %lo(_bss_end)
-    # If _bss_start >= _bss_end: skip initBss
-    bgeu  t0, t1, initRegs
+	lui   t0,     %hi(_bss_start)
+	addi  t0, t0, %lo(_bss_start)
+	lui   t1,     %hi(_bss_end)
+	addi  t1, t1, %lo(_bss_end)
+	# If _bss_start >= _bss_end: skip initBss
+	bgeu  t0, t1, initRegs
 initBss:
-    # zero initialize .bss section
-    sw   zero, 0(t0)
-    addi t0, t0, 4
-    blt  t0, t1, initBss
+	# zero initialize .bss section
+	sw   zero, 0(t0)
+	addi t0, t0, 4
+	blt  t0, t1, initBss
 initRegs:
-    # zero initialize all CPU registers
-    # x0 is always zero
-    # x1 is the return address (ra)
-    # x2 is stack pointer (sp)
-    addi x3, zero, 0
-    addi x4, zero, 0
-    addi x5, zero, 0
-    addi x6, zero, 0
-    addi x7, zero, 0
-    addi x8, zero, 0
-    addi x9, zero, 0
-    addi x10, zero, 0
-    addi x11, zero, 0
-    addi x12, zero, 0
-    addi x13, zero, 0
-    addi x14, zero, 0
-    addi x15, zero, 0
-    addi x16, zero, 0
-    addi x17, zero, 0
-    addi x18, zero, 0
-    addi x19, zero, 0
-    addi x20, zero, 0
-    addi x21, zero, 0
-    addi x22, zero, 0
-    addi x23, zero, 0
-    addi x24, zero, 0
-    addi x25, zero, 0
-    addi x26, zero, 0
-    addi x27, zero, 0
-    addi x28, zero, 0
-    addi x29, zero, 0
-    addi x30, zero, 0
-    addi x31, zero, 0
-    li  sp, BLOCK_RAM_SIZE          # Set stack pointer to last byte in memory + 1 of user app
-    addi sp,sp,-16
-    sw zero,0(sp)
-    sw zero,4(sp)
-    sw zero,8(sp)
-    sw zero,12(sp)
-    jal ra, main              # call main()
-    ebreak                    # returned from main, put on the ebreak
+	# zero initialize all CPU registers
+	# x0 is always zero
+	# x1 is the return address (ra)
+	# x2 is stack pointer (sp)
+	addi x3, zero, 0
+	addi x4, zero, 0
+	addi x5, zero, 0
+	addi x6, zero, 0
+	addi x7, zero, 0
+	addi x8, zero, 0
+	addi x9, zero, 0
+	addi x10, zero, 0
+	addi x11, zero, 0
+	addi x12, zero, 0
+	addi x13, zero, 0
+	addi x14, zero, 0
+	addi x15, zero, 0
+	addi x16, zero, 0
+	addi x17, zero, 0
+	addi x18, zero, 0
+	addi x19, zero, 0
+	addi x20, zero, 0
+	addi x21, zero, 0
+	addi x22, zero, 0
+	addi x23, zero, 0
+	addi x24, zero, 0
+	addi x25, zero, 0
+	addi x26, zero, 0
+	addi x27, zero, 0
+	addi x28, zero, 0
+	addi x29, zero, 0
+	addi x30, zero, 0
+	addi x31, zero, 0
+	li  sp, BLOCK_RAM_SIZE          # Set stack pointer to last byte in memory + 1 of user app
+	addi sp,sp,-16
+	sw zero,0(sp)
+	sw zero,4(sp)
+	sw zero,8(sp)
+	sw zero,12(sp)
+	jal ra, main              # call main()
+	ebreak                    # returned from main, put on the ebreak
 
 #-----------------------------------------------
 # C-wrappers for the custom instructions
@@ -187,48 +187,48 @@ initRegs:
 # a1 = second argument
 .globl _asm_test
 _asm_test:
-    addi a0, a1, 0  # return( inpb );
-    ret
+	addi a0, a1, 0  # return( inpb );
+	ret
 
 # extern uint32_t _picorv32_irq_mask( uint32_t iMask );
 # setting a bit in `iMask` disables the corresponding interrupt
 # returns the previous interrupt mask
 .globl _picorv32_irq_mask
 _picorv32_irq_mask:
-    picorv32_maskirq_insn(a0, a0)
-    ret
+	picorv32_maskirq_insn(a0, a0)
+	ret
 
 # extern uint32_t _picorv32_irq_disable( uint32_t irqsToDisable );
 # Disable individual interrupts by setting specific bits in the interrupt mask register
 # returns the current interrupt mask
 .globl _picorv32_irq_disable
 _picorv32_irq_disable:
-    li t0, 0xFFFFFFFF
-    picorv32_maskirq_insn(t0, t0)     # t0 = currentMask, also disable all interrupts
-    or a0, a0, t0                     # a0 = bitsToSet | t0
-    picorv32_maskirq_insn(zero, a0)   # set new interrupt mask
-    ret                               # return( a0 );
+	li t0, 0xFFFFFFFF
+	picorv32_maskirq_insn(t0, t0)     # t0 = currentMask, also disable all interrupts
+	or a0, a0, t0                     # a0 = bitsToSet | t0
+	picorv32_maskirq_insn(zero, a0)   # set new interrupt mask
+	ret                               # return( a0 );
 
 # extern uint32_t _picorv32_irq_enable( uint32_t irqsToEnable );
 # Enable individual interrupts by clearing specific bits in the interrupt mask register
 # returns the current interrupt mask
 .globl _picorv32_irq_enable
 _picorv32_irq_enable:
-    li t0, 0xFFFFFFFF
-    xor a0, a0, t0                    # a0 = ~bitsToClear;
-    picorv32_maskirq_insn(t0, t0)     # t0 = currentMask, also disable all interrupts
-    and a0, a0, t0                    # a0 = a0 & currentMask
-    picorv32_maskirq_insn(zero, a0)   # set new interrupt mask
-    ret                               # return( a0 );
+	li t0, 0xFFFFFFFF
+	xor a0, a0, t0                    # a0 = ~bitsToClear;
+	picorv32_maskirq_insn(t0, t0)     # t0 = currentMask, also disable all interrupts
+	and a0, a0, t0                    # a0 = a0 & currentMask
+	picorv32_maskirq_insn(zero, a0)   # set new interrupt mask
+	ret                               # return( a0 );
 
 # extern void _picorv32_irq_reset(void);
 # reset (jump to address 0) from within an interrupt
 .globl _picorv32_irq_reset
 _picorv32_irq_reset:
-    li t0, 0xFFFFFFFF
-    picorv32_maskirq_insn(zero, t0)   # disable all interrupts
-	picorv32_setq_insn(q0, zero) 	  # set return address to 0
-	picorv32_retirq_insn()			  # return from interrupt jump to 0
+	li t0, 0xFFFFFFFF
+	picorv32_maskirq_insn(zero, t0)   # disable all interrupts
+	picorv32_setq_insn(q0, zero)      # set return address to 0
+	picorv32_retirq_insn()            # return from interrupt jump to 0
 
 # extern uint32_t _picorv32_irq_timer( uint32_t tVal );
 # loads the timer with `tVal`. Counting down with every instruction,
@@ -236,5 +236,5 @@ _picorv32_irq_reset:
 # returns the previous timer value before the reload
 .globl _picorv32_irq_timer
 _picorv32_irq_timer:
-    picorv32_timer_insn(a0, a0)
-    ret
+	picorv32_timer_insn(a0, a0)
+	ret
