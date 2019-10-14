@@ -1,13 +1,14 @@
 # See riscv_meta.sh for documentation
 # Should be run from an empty directory into which we have write privileges
+# Will create ref and src directories there
 set -e
 
 # Get upstream stable sources
 mkdir ref
 cd ref
-wget http://mirrors.kernel.org/gnu/binutils/binutils-2.32.tar.xz
-wget https://bigsearcher.com/mirrors/gcc/releases/gcc-8.3.0/gcc-8.3.0.tar.xz
-wget ftp://sourceware.org/pub/newlib/newlib-3.1.0.tar.gz
+wget --no-verbose http://mirrors.kernel.org/gnu/binutils/binutils-2.32.tar.xz
+wget --no-verbose https://bigsearcher.com/mirrors/gcc/releases/gcc-8.3.0/gcc-8.3.0.tar.xz
+wget --no-verbose ftp://sourceware.org/pub/newlib/newlib-3.1.0.tar.gz
 
 # Check file integrity
 sha256sum -c << EOT
