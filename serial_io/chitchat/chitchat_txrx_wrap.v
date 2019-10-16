@@ -21,10 +21,11 @@ module chitchat_txrx_wrap #(
    input         tx_clk,
 
    input         tx_transmit_en,
-   input         tx_valid,       // Input data will be latched on tx_valid and
-                                 // sent when tx_send_x_tgtx=1. If tx_valid rate is higher
-                                 // than tx_send_x_tgtx, data will be lost.
    input  [2:0]  tx_location,
+   input         tx_valid0, // Input data will be latched on tx_valid{0,1} and
+                            // sent when tx_send_x_tgtx=1. If tx_valid rate is higher
+                            // than tx_send_x_tgtx, data will be lost.
+   input         tx_valid1,
    input  [31:0] tx_data0,
    input  [31:0] tx_data1,
 
@@ -64,10 +65,8 @@ module chitchat_txrx_wrap #(
 );
 
    // TX CDC signals
-   localparam TX_PACK_WI = 32*2;
-   wire [TX_PACK_WI-1:0] tx_pack, tx_pack_x_tgtx;
    wire [31:0]           tx_data0_x_tgtx, tx_data1_x_tgtx;
-   wire                  tx_valid_x_tgtx;
+   wire                  tx_valid0_x_tgtx, tx_valid1_x_tgtx;
    wire                  tx_send_x_tgtx;
    reg                   tx_transmit_en_tgtx = 0;
    reg  [2:0]            tx_location_tgtx;
@@ -107,18 +106,25 @@ module chitchat_txrx_wrap #(
    // ----------------------
    // TX CDC
    // ----------------------
-   assign tx_pack = {tx_data1, tx_data0};
-
    generate if (TX_TO_GTX_CDC) begin : G_TX_CDC
       // This synchronizer serves the dual purpose of latching to input
       // data on tx_valid
-      data_xdomain # (.size(TX_PACK_WI)) i_tx_sync (
+      data_xdomain # (.size(32)) i_tx0_sync (
          .clk_in   (tx_clk),
-         .gate_in  (tx_valid),
-         .data_in  (tx_pack),
+         .gate_in  (tx_valid0),
+         .data_in  (tx_data0),
          .clk_out  (gtx_tx_clk),
-         .gate_out (tx_valid_x_tgtx), // Unused
-         .data_out (tx_pack_x_tgtx)
+         .gate_out (tx_valid0_x_tgtx), // Unused
+         .data_out (tx_data0_x_tgtx)
+      );
+
+      data_xdomain # (.size(32)) i_tx1_sync (
+         .clk_in   (tx_clk),
+         .gate_in  (tx_valid1),
+         .data_in  (tx_data1),
+         .clk_out  (gtx_tx_clk),
+         .gate_out (tx_valid1_x_tgtx), // Unused
+         .data_out (tx_data1_x_tgtx)
       );
 
       // Synchronize rx_frame_counter for loopback latency calc
@@ -131,15 +137,12 @@ module chitchat_txrx_wrap #(
          .data_out ({rx_frame_counter_x_tgtx, rx_lback_frame_counter_x_tgtx})
       );
    end else begin
-      // Latch input data on tx_valid
-      reg [TX_PACK_WI-1:0] tx_pack_r;
-      always @(tx_clk) if (tx_valid) tx_pack_r = tx_pack;
-      assign tx_pack_x_tgtx = tx_pack_r;
+      // Latch input data on tx_valid{0,1}
+      always @(tx_clk) if (tx_valid0) tx_data0_x_tgtx <= tx_data0;
+      always @(tx_clk) if (tx_valid1) tx_data1_x_tgtx <= tx_data1;
 
       assign {rx_frame_counter_x_tgtx, rx_lback_frame_counter_x_tgtx} = {rx_frame_counter_x_rgtx, rx_lback_frame_counter_x_rgtx};
    end endgenerate
-
-   assign {tx_data1_x_tgtx, tx_data0_x_tgtx} = tx_pack_x_tgtx;
 
    // Quasi-static signals; Just register in destination clk domain
    always @(posedge gtx_tx_clk) begin
