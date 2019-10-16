@@ -137,9 +137,12 @@ module chitchat_txrx_wrap #(
          .data_out ({rx_frame_counter_x_tgtx, rx_lback_frame_counter_x_tgtx})
       );
    end else begin
+      reg [31:0] tx_data0_r, tx_data1_r;
       // Latch input data on tx_valid{0,1}
-      always @(tx_clk) if (tx_valid0) tx_data0_x_tgtx <= tx_data0;
-      always @(tx_clk) if (tx_valid1) tx_data1_x_tgtx <= tx_data1;
+      always @(tx_clk) if (tx_valid0) tx_data0_r <= tx_data0;
+      always @(tx_clk) if (tx_valid1) tx_data1_r <= tx_data1;
+
+      assign {tx_data1_x_tgtx, tx_data0_x_tgtx} = {tx_data1_r, tx_data0_r};
 
       assign {rx_frame_counter_x_tgtx, rx_lback_frame_counter_x_tgtx} = {rx_frame_counter_x_rgtx, rx_lback_frame_counter_x_rgtx};
    end endgenerate

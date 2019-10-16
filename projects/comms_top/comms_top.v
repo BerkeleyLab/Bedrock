@@ -255,7 +255,6 @@ module comms_top
 
    wire tx_transmit_en;
 
-   wire        tx_valid;
    wire [2:0]  tx_location;
    wire [31:0] tx_data0;
    wire [31:0] tx_data1;
@@ -286,7 +285,8 @@ module comms_top
       .tx_clk            (sys_clk),
 
       .tx_transmit_en    (tx_transmit_en),
-      .tx_valid          (tx_valid),
+      .tx_valid0         (tx_valid_v[0]),
+      .tx_valid1         (tx_valid_v[1]),
       .tx_location       (tx_location),
       .tx_data0          (tx_data0),
       .tx_data1          (tx_data1),
@@ -380,7 +380,6 @@ module comms_top
       );
    end endgenerate
 
-   assign tx_valid = tx_valid_v[0];
    assign {tx_data1, tx_data0} = {tx_data_v[1], tx_data_v[0]};
    assign rx_valid_v = {rx_valid, rx_valid};
    assign {rx_data_v[1], rx_data_v[0]} = {rx_data1, rx_data0};
