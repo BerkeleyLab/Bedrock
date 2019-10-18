@@ -75,7 +75,7 @@ module chitchat_txrx_wrap_tb;
    // ----------------------
    reg  stim_start = 0;
    reg  tx_transmit_en = 0, tx_transmit_en_r = 0;
-   wire tx_valid;
+   wire tx_valid0, tx_valid1;
 
    integer cnt_off = MAX_OFF;
    integer cnt_on = 0;
@@ -112,7 +112,8 @@ module chitchat_txrx_wrap_tb;
       if (tx_transmit_en)
          val_cnt <= val_cnt + 1;
    end
-   assign tx_valid = (val_cnt!=0 & (val_cnt % valid_period)==0);
+   assign tx_valid0 = (val_cnt!=0 & (val_cnt % valid_period)==0);
+   assign tx_valid1 = (val_cnt!=0 & (val_cnt % valid_period)==5);
 
 
    reg  [7:0]  tx_data=0;
@@ -166,8 +167,9 @@ module chitchat_txrx_wrap_tb;
       .tx_clk            (tx_clk),
 
       .tx_transmit_en    (tx_transmit_en),
-      .tx_valid          (tx_valid),
       .tx_location       (tx_location),
+      .tx_valid0         (tx_valid0),
+      .tx_valid1         (tx_valid1),
       .tx_data0          (tx_data0),
       .tx_data1          (tx_data1),
 
@@ -212,21 +214,29 @@ module chitchat_txrx_wrap_tb;
    localparam SCB_BUS_WI = 32*2; // Data*2
    reg  [2:0] scb_location;
    wire [SCB_BUS_WI-1:0] scb_data_in, scb_data_out, scb_data_out_xcc;
-   reg  [SCB_BUS_WI-1:0] scb_data_sync_r, scb_data_sync_r2;
+   reg  [31:0] scb_data0_sync_r, scb_data0_sync_r2, scb_data1_sync_r, scb_data1_sync_r2;
    wire scb_write_en, scb_write_en_xcc, scb_read_en, scb_full, scb_empty;
 
    // Simple latching of tx_location
-   always @(posedge tx_clk) if (tx_valid && tx_transmit_en) scb_location <= tx_location;
+   always @(posedge tx_clk) if ((tx_valid0 || tx_valid1) && tx_transmit_en) scb_location <= tx_location;
 
    // Check TX clock crossing
    always @(posedge tx_clk) begin
-      if (tx_valid) scb_data_sync_r <= {tx_data1, tx_data0};
-      scb_data_sync_r2 <= scb_data_sync_r;
+      if (tx_valid0) scb_data0_sync_r <= tx_data0;
+      if (tx_valid1) scb_data1_sync_r <= tx_data1;
+      scb_data0_sync_r2 <= scb_data0_sync_r;
+      scb_data1_sync_r2 <= scb_data1_sync_r;
    end
    always @(posedge gtx_tx_clk) begin
-      if (i_dut.tx_valid_x_tgtx) begin
-         if (scb_data_sync_r2 != {i_dut.tx_data1_x_tgtx, i_dut.tx_data0_x_tgtx}) begin
-            $display("%t ERROR: TX data synchronization mismatch", $time);
+      if (i_dut.tx_valid0_x_tgtx) begin
+         if (scb_data0_sync_r2 != i_dut.tx_data0_x_tgtx) begin
+            $display("%t ERROR: TX data0 synchronization mismatch", $time);
+            fail <= 1;
+         end
+      end
+      if (i_dut.tx_valid1_x_tgtx) begin
+         if (scb_data1_sync_r2 != i_dut.tx_data1_x_tgtx) begin
+            $display("%t ERROR: TX data1 synchronization mismatch", $time);
             fail <= 1;
          end
       end
