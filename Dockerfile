@@ -2,14 +2,14 @@
 
 FROM debian:buster-slim as riscv-builder
 
-# May only need build-essential libgmp-dev libmpfr-dev libmpc-dev
-# test that hypothesis
+# prerequisites for building gcc
 # wget is used by riscv_prep.sh
 RUN apt-get update && apt-get install -y \
 	libmpc-dev libmpfr-dev libgmp-dev \
 	build-essential wget
 
 # Documentation and rationale for this process in build-tools/riscv_meta.sh
+# Note that "sh riscv_prep.sh" requires network access to pull in tarballs.
 RUN cd && pwd && ls && mkdir software
 COPY build-tools/riscv_prep.sh software/riscv_prep.sh
 COPY build-tools/riscv_meta.sh software/riscv_meta.sh
@@ -47,6 +47,11 @@ RUN apt-get update && \
 	python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
 	pip3 --version
 
+# The rest of this file defines a "stable" environment,
+# but LiteX is the exception.  It's an open question whether LiteX-based designs
+# should currently be considered usable for production.  If so, it would be
+# helpful to freeze a version of LiteX here -- preferably an upstream one that
+# doesn't involve yetifrisstlama.
 FROM basic-iverilog as litex
 
 ENV LITEX_VERSION=master
