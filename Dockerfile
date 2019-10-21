@@ -10,13 +10,10 @@ RUN apt-get update && apt-get install -y wget coreutils autoconf automake autoto
 	libtool
 
 # Documentation and rationale for this process in build-tools/riscv_meta.sh
-RUN cd && pwd && ls && \
-	mkdir software && \
-	cd software && \
-	wget https://raw.githubusercontent.com/BerkeleyLab/Bedrock/docker_lrd_test/build-tools/riscv_prep.sh && \
-	wget https://raw.githubusercontent.com/BerkeleyLab/Bedrock/docker_lrd_test/build-tools/riscv_meta.sh && \
-	echo "6d25bceb73e09aa611a4efcc0b90b40b66104cb7485a29686a95478eeb230718  riscv_prep.sh" | sha256sum -c && \
-	echo "aaf2ae35d0a96399eee9d7e2adf185b49e702e1c10fc10fd7e0b9ce70b1fedcc  riscv_meta.sh" | sha256sum -c && \
+RUN cd && pwd && ls && mkdir software
+COPY build-tools/riscv_prep.sh software/riscv_prep.sh
+COPY build-tools/riscv_meta.sh software/riscv_meta.sh
+RUN cd software && \
 	sh riscv_prep.sh && \
 	sh riscv_meta.sh $PWD/src /riscv32i && \
 	ls /riscv32i/bin/riscv32-unknown-elf-gcc && \
