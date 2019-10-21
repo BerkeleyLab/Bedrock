@@ -4,9 +4,10 @@ FROM debian:buster-slim as riscv-builder
 
 # May only need build-essential libgmp-dev libmpfr-dev libmpc-dev
 # test that hypothesis
+# wget is used by riscv_prep.sh
 RUN apt-get update && apt-get install -y \
 	libmpc-dev libmpfr-dev libgmp-dev \
-	build-essential
+	build-essential wget
 
 # Documentation and rationale for this process in build-tools/riscv_meta.sh
 RUN cd && pwd && ls && mkdir software
