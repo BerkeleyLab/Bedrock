@@ -31,10 +31,10 @@ LDFLAGS = $(CFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,
 	$(RISCV_TOOLS_PREFIX)objcopy $< -O verilog $@
 
 %32.hex: %8.hex
-	python $(COMMON_DIR)/hex8tohex32.py $< > $@
+	$(PYTHON) $(COMMON_DIR)/hex8tohex32.py $< > $@
 
 %_load: %32.hex
-	python3 $(COMMON_DIR)/boot_load.py $< $(USB_SERIAL)
+	$(PYTHON) $(COMMON_DIR)/boot_load.py $< $(USB_SERIAL)
 
 # All testbenches use $stop, eliminating the `awk` dependency
 %_check: %_tb $(BUILD_DIR)/testcode.awk
