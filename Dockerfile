@@ -2,12 +2,11 @@
 
 FROM debian:buster-slim as riscv-builder
 
-# May only need wget build-essential libgmp-dev libmpfr-dev libmpc-dev
-# test that hypothesis later
-RUN apt-get update && apt-get install -y wget coreutils autoconf automake autotools-dev \
+# May only need build-essential libgmp-dev libmpfr-dev libmpc-dev
+# test that hypothesis
+RUN apt-get update && apt-get install -y \
 	libmpc-dev libmpfr-dev libgmp-dev \
-	gawk build-essential bison flex texinfo gperf \
-	libtool
+	build-essential
 
 # Documentation and rationale for this process in build-tools/riscv_meta.sh
 RUN cd && pwd && ls && mkdir software
