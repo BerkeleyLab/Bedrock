@@ -16,7 +16,7 @@ parab_tb: parab.v ramps.v
 chirp_wrap_tb: chirp_wrap.v parab.v ramps.v ../multi_sampler.v cordicg_b22.v ../reg_delay.v
 
 spect_test: chirp_wrap.out
-	python final.py x
+	$(PYTHON) final.py x
 
 
 CLEAN += *.out *_tb *.vcd vivado.log cordicg_b22.v

@@ -13,7 +13,6 @@ NO_LINT = $(NO_CHECK) mon_12_lint biquad_lint
 LNT_ = $(filter-out $(NO_LINT), $(TEST_BENCH:%_tb=%_lint))
 
 BITS_ := bandpass3.bit
-PYTHON = python3
 
 VERILOG_AUTOGEN += " "
 
