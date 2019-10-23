@@ -24,23 +24,27 @@ manner.
 A single-beat transaction is encoded in 64 bits and is comprised of command, address
 and data fields. The diagram below shows how this transaction type can be used to
 form a simple packet containing two single-beat read or write transactions.
+
 ```
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Transaction ID [0:31]                      |
+|                    Transaction ID [31:0]                      |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Transaction ID [32:63]                     |
+|                    Transaction ID [63:32]                     |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Address 0                  |    Command    |
+|    Command    |                    Address 0                  |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                           Data 0                              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Address 1                  |    Command    |
+|    Command    |                    Address 1                  |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                           Data 1                              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
+
+**NOTE:** This and all other packet diagrams follow the convention used in RFC-791,
+whereby bytes are shown as they are sent 'on the wire', i.e., network-byte-order.
 
 The packet space consumed by a block-transfer transaction depends on how many data
 beats are being read or written. At a minimum, this type of transaction can be encoded
@@ -53,13 +57,13 @@ two beats of data are either read or written.
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Transaction ID [0:31]                      |
+|                    Transaction ID [31:0]                      |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Transaction ID [32:63]                     |
+|                    Transaction ID [63:32]                     |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                Repetition Count               |  Cmd (Burst)  |
+|  Cmd (Burst)  |                Repetition Count               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Address 0                  |    Command    |
+|    Command    |                    Address 0                  |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                           Data 0                              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -78,17 +82,17 @@ be structured.
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Transaction ID [0:31]                      |
+|                    Transaction ID [31:0]                      |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Transaction ID [32:63]                     |
+|                    Transaction ID [63:32]                     |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Address 0                  |    Command    |
+|    Command    |                    Address 0                  |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                           Data 0                              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                Repetition Count               |  Cmd (Burst)  |
+|  Cmd (Burst)  |                Repetition Count               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Address 1                  |    Command    |
+|    Command    |                    Address 1                  |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                           Data 1                              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -107,10 +111,10 @@ are oversized in relation to the information they convey.
 The 8-bit Command field carries a single 2-bit operation sub-field (OP), according to the
 following encoding:
 ```
- 0  1  2  3  4  5  6  7  8
-+--+--+--+--+--+--+--+--+--+
-|   RSVD    | OP  |  RSVD  |
-+--+--+--+--+--+--+--+--+--+
+ 0  1  2  3  4  5  6  7
++--+--+--+--+--+--+--+--+
+| RSV | OP  |    RSV    |
++--+--+--+--+--+--+--+--+
 
 OP [1:0]:
    2'b00 - Write
@@ -130,10 +134,10 @@ packet sizes place additional restrictions on this number. These limitations are
 outlined in the next section.
 ```
  0                   1                   2
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|      COUNT      |            Reserved           |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|            Reserved           |     COUNT     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 COUNT [8:0]:
    9'h0 - Illegal
