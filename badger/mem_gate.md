@@ -6,7 +6,7 @@ that make it useful for data exchange between a commodity computer master and
 an FPGA slave, with high throughput and controlled latency.
 
 LASS is agnostic as to the details of the bus that is driven; it is suitable
-for use with AXI, Wishbone, or the minimalist localbus in use by LBNL ATG.
+for use with AXI, Wishbone, or the minimalist local bus in use by LBNL ATG.
 The underlying bus configuration is fixed at 32 bits data, 24 bits of
 word-address.  Byte access is not supported.  Of course, fewer address bits
 and narrower data words can be accommodated with padding.
@@ -18,10 +18,10 @@ consecutive transactions.
 
 Two types of transactions are supported. A single-beat transaction where single read
 or write bus cycles are encoded, and a more complex, block-transfer based, where a
-burst of reads and writes to consecutive addresses are encoded in a more efficient
+burst of reads or writes to consecutive addresses are encoded in a more efficient
 manner.
 
-A single-beat transaction is encoded in 64 bits and is comprised of command, address
+A single-beat transaction is encoded in 64 bits and is composed of command, address
 and data fields. The diagram below shows how this transaction type can be used to
 form a simple packet containing two single-beat read or write transactions.
 
@@ -61,7 +61,7 @@ two beats of data are either read or written.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                    Transaction ID [63:32]                     |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Cmd (Burst)  |                Repetition Count               |
+|  Cmd (Burst)  |                Repetition Count (2)           |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Command    |                    Address 0                  |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -90,13 +90,15 @@ be structured.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                           Data 0                              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Cmd (Burst)  |                Repetition Count               |
+|  Cmd (Burst)  |                Repetition Count (3)           |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Command    |                    Address 1                  |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                           Data 1                              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                           Data 2                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           Data 3                              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
@@ -136,15 +138,15 @@ outlined in the next section.
  0                   1                   2
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|            Reserved           |     COUNT     |
+|            Reserved         |      COUNT      |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 COUNT [8:0]:
-   9'h0 - Illegal
-   9'h1 - 1 Beat
-   9'h2 - 2 Beats
+   9'd0 - Illegal
+   9'd1 - 1 Beat
+   9'd2 - 2 Beats
    ...
-   9'hN - N Beats
+   9'dN - N Beats
 
 ```
 
@@ -174,13 +176,13 @@ the Repetition Count block.
 
 Exceeding the Ethernet MTU will trigger fragmentation on the software side,
 which both is theoretically undesirable, and practically not supported by
-typical FPGA UDP implementations.
+typical FPGA UDP/IP implementations.
 
 Driver software should have the maximum packet size easily configurable,
 to be adaptable to changes in MTU or additional protocol layering.
 An authentication layer could reduce the available packet size by 16 octets.
 
-## Other considerations
+## Implementation and discussion
 
 A subset of LASS, without the repeat-count feature, has been used at LBNL
 since about 2010.  Its FPGA-side implementation was rewritten in 2018
@@ -199,6 +201,6 @@ to exercise the combination of software and (virtual) hardware for debugging.
 Packet Badger includes two demos of this setup, one using Verilator and one
 using Icarus Verilog.
 
-LASS as implemented on Packet Badger (along with other features like ARP and
+LASS as implemented on Packet Badger (including Ethernet/IP/UDP and other features like ARP and
 ICMP echo, for attachment to a GMII PHY) occupies about 1100 LUTs of Xilinx
 Spartan-6 or 7-Series chips. [Comparison to EtherBone?]
