@@ -6,7 +6,7 @@
 include ../../../../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
-USB_SERIAL = /dev/ttyUSB1
+USB_SERIAL = /dev/ttyUSB0
 
 COMMON_V  = picorv32.v system.v uart_pack.v uart_rx.v uart_tx.v mpack.v munpack.v pico_pack.v
 COMMON_V += memory_pack.v memory2_pack.v
@@ -17,13 +17,13 @@ SIM_V     = system_tb.v $(COMMON_V)
 SYNTH_V   = top.v xilinx7/xilinx7_clocks.v $(COMMON_V)
 
 TARGET    = system
-SRCS      = system.c print.c timer.c ui.c common.c printf.c
+SRCS      = system.c print.c timer.c test.c common.c
 OBJS      = $(subst .c,.o,$(SRCS)) startup_irq.o bootloader.o
 
 #size of the blockRam [bytes]
 BLOCK_RAM_SIZE = 16384
-CFLAGS   += -DGIT_VERSION=\"$(GIT_VERSION)\" -DPRINTF_FLOAT_SUPPORT
-# CFLAGS   += -ffunction-sections
+CFLAGS   += -DGIT_VERSION=\"$(GIT_VERSION)\" -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
+CFLAGS   += -ffunction-sections
 VFLAGS   += -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) -DMEMORY_PACK_FAST
 
 all: $(TARGET)_synth.bit
