@@ -1,4 +1,3 @@
-
 import numpy as np
 from numpy import sqrt, arctan2, exp, mean, std, pi, zeros, hstack, vstack, arange, diff, linalg
 from scipy import signal
@@ -6,10 +5,10 @@ from matplotlib import pyplot
 
 
 class rf_waveforms:
-    DAT_FMT = ["LOOPB_I", "LOOPB_Q",
-               "FWD_I", "FWD_Q",
+    DAT_FMT = ["FWD_I", "FWD_Q",
                "REV_I", "REV_Q",
-               "CAV_I", "CAV_Q"]
+               "CAV_I", "CAV_Q",
+               "LOOPB_I", "LOOPB_Q", ]  # Drive
     MIN_PTS = 256
 
     def __init__(self, data_file):
@@ -236,6 +235,13 @@ class detune_pulse(digaree_coeff):
         if verbose:
             print("SI beta %.3f%+.3fj Hz" % (beta.real, beta.imag))
 
+        bw_rad = fitc[2]
+        det_rad = fitc[3:]
+        if verbose:
+            print("Bandwidth rad/s", bw_rad, "Bandwidth Hz", bw_rad/(2*pi))
+            print("Detune rad/s", det_rad, "Detune Hz", det_rad/(2*pi))
+            print("SI beta %.3f%+.3fj Hz" % (beta.real, beta.imag))
+
         # Useful for plotting
         detune = basist.dot(fitc[3:])
         bandwidth = fitc[2]/2/pi  # Hz
@@ -262,10 +268,10 @@ if __name__ == "__main__":
     adc_clk = 1320.0e6 / 14.0  # Hz
 
     # Waveform acquisition timestep
-    wvform_dt = (255*2*33) / adc_clk
+    wvform_dt = (1*2*33) / adc_clk
 
     # Digaree data stream timestep
-    digaree_dt = (255*2*33) / adc_clk
+    digaree_dt = (32*2*33) / adc_clk
 
     # Setup configuration dict for detune coefficient calculation
     detune_dict = {"bandwidth": 15.0,  # Ignored in pulse mode
