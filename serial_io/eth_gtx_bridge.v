@@ -126,7 +126,7 @@ module eth_gtx_bridge #(
    wire cfg_ipmac = (cfg_addr[4]==SEL_MACIP) & cfg_valid;
    wire cfg_udp   = (cfg_addr[4]==SEL_UDP) & cfg_valid;
 
-   rtefi_blob #(.ip(IP), .mac(MAC), .mac_aw(2)) badger(
+   rtefi_blob #(.ip(IP), .mac(MAC), .mac_aw(2), .p3_enable_bursts(1)) badger(
       // GMII Input (Rx)
       .rx_clk              (gmii_rx_clk),
       .rxd                 (gmii_rxd),

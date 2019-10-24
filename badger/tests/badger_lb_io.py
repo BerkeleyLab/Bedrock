@@ -3,9 +3,9 @@
 Access to localbus gateway, supporting testing of Packet Badger
 '''
 import argparse
+import random
 import sys
 import os
-import random
 import time
 import struct
 
@@ -331,7 +331,7 @@ if __name__ == "__main__":
     )
     p.add_argument(
         'command',
-        help="reset | tx | rx | show | rxb0 | rxb1 | emit | get_rx1 | get_rxn"
+        help="reset | tx | rx | show | rxb0 | rxb1 | emit | get_rx1 | get_rxn | stop_sim"
     )
     args = p.parse_args()
     foo = lbus_access(args.ip, port=args.port)
@@ -372,5 +372,8 @@ if __name__ == "__main__":
             fd = open(args.file, "r")
         addrs, values = process_fd(fd)
         foo.exchange(addrs, values)
+    elif args.command == "stop_sim":
+        # One weird hack
+        foo.exchange([6], [1], drop_reply=True)
     else:
         print("unknown command %s: try python3 badger_lb_io.py --help" % args.command)

@@ -55,7 +55,7 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 vpath %.v $(DSP_DIR) $(HOMELESS_DIR) $(SERIAL_IO_DIR)
 vpath %.eps ..
 
-all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check spi_flash_check
+all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check spi_flash_check hw_test_tb
 all: test_tx_check precog_check mac_subset_check
 all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb rtefi_live
 all: lb_timing_demo.vcd
@@ -148,7 +148,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 
 # =====
 # Another tangent for another client
-LB_DEMO_V = lb_demo_slave.v freq_count.v
+LB_DEMO_V = lb_demo_slave.v freq_count.v fake_config_romx.v
 # LB_DEMO_V += badge_trace.v
 mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V)
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
@@ -191,6 +191,16 @@ rtefi_pipe.out: rtefi_pipe_tb udp4.dat
 	$(VVP) $< +trace +packet_file=$(filter %udp4.dat, $^) > $@
 rtefi_pipe.vcd: udp4.dat
 VCD_ARGS_rtefi_pipe.vcd = +packet_file=$(filter %udp4.dat, $^)
+
+# =====
+# unified version of assembled pipeline and test peripherals,
+# configured for on-line (tap) testing
+hw_test_tb: hw_test.v $(RTEFI_V) fake_config_romx.v mac_compat_dpram.v activity.v base_rx_mac.v lb_demo_slave.v spi_gate.v freq_count.v
+VFLAGS_hw_test_tb = -m ./tap-vpi
+hw_test.vcd: tap-vpi.vpi
+.PRECIOUS: hw_test.vcd  # work-around; better if vvp could exit with success
+hw_test_start: hw_test_tb tap-vpi.vpi
+	$(VVP) $<
 
 # =====
 # experimental bitfiles, not for hardware
@@ -286,7 +296,7 @@ Vhw_test: hw_test.v base_rx_mac.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c ta
 
 # =====
 # WIP
-Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v lb_demo_slave.v freq_count.v mem_gateway_sim.cpp udp_model.c
+Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v lb_demo_slave.v freq_count.v fake_config_romx.v mem_gateway_sim.cpp udp_model.c
 	rm -f udp_model.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmem_gateway_wrap.mk

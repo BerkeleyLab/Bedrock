@@ -1,4 +1,4 @@
-[timestart] 425
+[timestart] 552
 [size] 1348 577
 [pos] 34 1
 *-6.121265 708 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
@@ -20,10 +20,15 @@ mem_gateway_tb.dut.odata[7:0]
 mem_gateway_tb.net.txg
 @200
 -DUT
-@24
-mem_gateway_tb.dut.c8[2:0]
 @28
 mem_gateway_tb.dut.body
+@24
+mem_gateway_tb.dut.c4[1:0]
+@28
+mem_gateway_tb.dut.data_phase
+mem_gateway_tb.dut.set_repeat_view
+@24
+mem_gateway_tb.dut.repeat_count[8:0]
 @22
 mem_gateway_tb.dut.pdata[7:0]
 @28

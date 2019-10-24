@@ -8,7 +8,7 @@
 // Up to seven clients, each handling a UDP port, attach here.
 //
 // This module instantiates a series of modules for the data path
-// linking GMII Rx through to GMII Tx, shown in retefi.eps.
+// linking GMII Rx through to GMII Tx, shown in rtefi.eps.
 // The several steps have instance names starting with a through e
 // (a_scan through e_crc).
 //
