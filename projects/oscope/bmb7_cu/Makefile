@@ -17,7 +17,7 @@ XILINX_DIR = $(FPGA_FAMILY_DIR)/xilinx
 ISERDES_DIR = $(FPGA_FAMILY_DIR)/iserdes
 PERIPHERAL_DIR = $(TOP_DIR)/peripheral_drivers
 BS_HARDWARE_DIR = $(BOARD_SUPPORT_DIR)/$(HARDWARE)
-HOMELESS_DIR = $(TOP_DIR)/homeless
+SERIAL_IO_DIR = $(TOP_DIR)/serial_io
 
 APP_NAME = oscope
 
@@ -25,7 +25,7 @@ VERILOG_DEFINE_FLAGS = ""
 
 SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
 
-VFLAGS_DEP += -y$(DSP_DIR) -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR) -y$(ISERDES_DIR) -y$(XILINX_DIR) -y$(HOMELESS_DIR) -y. -y$(PERIPHERAL_DIR) -y$(PERIPHERAL_DIR)/idelay_scanner
+VFLAGS_DEP += -y$(DSP_DIR) -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR) -y$(ISERDES_DIR) -y$(XILINX_DIR) -y$(SERIAL_IO_DIR) -y. -y$(PERIPHERAL_DIR) -y$(PERIPHERAL_DIR)/idelay_scanner
 
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
 
@@ -49,7 +49,7 @@ $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
 	$(PYTHON) $< -v $@ -j $(APP_NAME)_regmap.json
 
 scalar_$(APP_NAME)_regmap.json: application_top.v
-	$(PYTHON) $(BUILD_DIR)/reverse_json.py > $@
+	$(PYTHON) $(BUILD_DIR)/reverse_json.py $< > $@
 
 $(APP_NAME)_regmap.json: $(AUTOGEN_DIR)/regmap_application_top.json scalar_$(APP_NAME)_regmap.json static_$(APP_NAME)_regmap.json merge_json.py shorten_names.py
 	$(PYTHON) merge_json.py -o $(APP_NAME)_regmap_long.json -i $(filter %.json, $^)

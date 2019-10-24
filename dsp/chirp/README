@@ -1,0 +1,38 @@
+Prototype chirp generator for LCLS-II LLRF resonance characterization
+
+Quick start demo:
+  make parab.out && python tracer.py
+assuming you're on a Linux machine with iverilog installed.
+
+You should see a frequency sweep from 100 Hz to 220 Hz, and the
+corresponding amplitude modulation.  That modulation is important to
+keep the final output waveform from having a huge step at rollover.
+See parab_tb.v for comments about how and why that test is configured.
+
+Overall demo:
+  make chirp_sys.out && python final.py
+showing amplitude envelope and DAC output for a stupidly short pulse.
+
+chirp_sys.v is the module that is intended to be easy to instantiate
+in a larger project.  See chirp_sys_tb.v for an example of "proper" setup
+of control registers, with comments.
+
+The amplitude envelope for each chirp is expected to start and stop at zero.
+If the setup is incorrect, and this condition is violated, the a_warning
+output port will go high (for a single cycle).
+
+The error output represents a violation of internal pipeline requirements.
+When running from internal timing, it is guaranteed to stay low as long as
+the configuration port base_divide is more than 256.  If externally timed,
+the etrig inputs must be separated by at least 256 clock cycles.
+
+If you want to keep each chirp set truly periodic and well-defined, you
+should somehow interlock host writes of the configuration parameters to
+only take place when the "active" output port of chirp_sys is 0.  Nothing
+will get damaged if this rule is violated.  In many cases, the output DAC
+value will even stay continuous.  Discontinuities are only possible if one
+of the above-mentioned warnigs are triggered.
+
+Write more documentation.  Maybe fix initial sign of sin output.
+Possible integer programming to constrain parameters for a non-stupid phase
+transient at reset; a brainless start is in scan1.bc.

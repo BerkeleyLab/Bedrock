@@ -56,7 +56,6 @@ module cav_elec(
 `AUTOMATIC_map
 
 // LO phase step is 7/33 per _pair_ of clock cycles.
-wire [19:0] phase_acc;
 wire [18:0] lo_phase;
 wire [19:0] phase_step_h = phase_step[31:12];
 wire [11:0] phase_step_l = phase_step[11:0];

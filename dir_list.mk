@@ -13,3 +13,5 @@ HOMELESS_DIR       = $(BEDROCK_DIR)/homeless
 FPGA_FAMILY_DIR    = $(BEDROCK_DIR)/fpga_family
 PERIPH_DRIVERS_DIR = $(BEDROCK_DIR)/peripheral_drivers
 PROJECTS_DIR       = $(BEDROCK_DIR)/projects
+SERIAL_IO_DIR      = $(BEDROCK_DIR)/serial_io
+PICORV_DIR         = $(BEDROCK_DIR)/soc/picorv32

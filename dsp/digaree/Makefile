@@ -6,7 +6,7 @@ VERILOG = iverilog$(ICARUS_SUFFIX) -Wall -Wno-timescale
 VVP = vvp$(ICARUS_SUFFIX) -n
 GTKWAVE = gtkwave
 # Tested with python2 (2.7.3, 2.7.9, and 2.7.12) and python3 (3.4.2 and 3.5.2)
-PYTHON = python
+PYTHON = python3
 AWK = awk
 SYNTH = xil_syn
 SYNTH_VIVADO = sh vivado_batch
@@ -48,7 +48,7 @@ SRF_DATA = ../run2.dat
 %.pdf: %.tex
 	pdftex $<
 
-all: inverse_check ilookup_check match accuracy
+all: inverse_check ilookup_check match_mem match_reg accuracy detune_cw detune_pulse_test
 
 # gnu make magic
 .DELETE_ON_ERROR:
@@ -56,16 +56,23 @@ all: inverse_check ilookup_check match accuracy
 
 main_tb: sf_main.v ops.vh
 
-user_tb: sf_user.v sf_main.v ops.vh sf_dpram.v
-VFLAGS_user_tb = -Puser_tb.data_len=$(DATA_LEN) -Puser_tb.consts_len=$(CONSTS_LEN) -Puser_tb.const_aw=$(CONST_AW)
+VFLAGS_user_mem_tb = -Puser_tb.data_len=$(DATA_LEN) -Puser_tb.consts_len=$(CONSTS_LEN) -Puser_tb.const_aw=$(CONST_AW) -Puser_tb.PMEM=1
+user_mem_tb: user_tb.v sf_user_wrap.v sf_user.v sf_main.v ops.vh sf_dpram.v
+	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
 
-user.vcd: init2.dat
+VFLAGS_user_reg_tb = -Puser_tb.data_len=$(DATA_LEN) -Puser_tb.consts_len=$(CONSTS_LEN) -Puser_tb.const_aw=$(CONST_AW) -Puser_tb.PMEM=0
+user_reg_tb: user_tb.v sf_user_wrap.v sf_user.v sf_main.v ops.vh sf_dpram.v
+	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
 
-user.out: user_tb init2.dat
+
+user_mem.vcd: init2.dat
+user_reg.vcd: init2.dat
+
+user_%.out: user_%_tb init2.dat
 	$(VVP) $< $(VFLAGS) > $@
 
-user.trace: user.out ops.vh
-	grep " // " ops.vh | grep -v " // terminus" > ops.vh_$$$$ && paste user.out ops.vh_$$$$ > $@; rm ops.vh_$$$$
+user_%.trace: user_%.out ops.vh
+	grep " // " ops.vh | grep -v " // terminus" > ops.vh_$$$$ && paste $< ops.vh_$$$$ > $@; rm ops.vh_$$$$
 
 inverse_tb: sf_main.v
 
@@ -137,7 +144,7 @@ sim1.trace: sim1 init.dat
 sim1.results: sim1.trace
 	$(AWK) '/ int /||/ ZZZ /{print $$6,$$3}' $< | sort > $@
 
-user.results: proc_usertrace.py user.trace
+user_%.results: proc_usertrace.py user_%.trace
 	$(PYTHON) $^ | sort > $@
 
 tuning_dsp4.pdf: computer.pdf cgen_srf.py
@@ -152,8 +159,12 @@ inverse_check: invcheck.py inverse.dat
 ilookup_check: ilookup_check.sh inverse.dat inverse.out
 	sh $<
 
-match: sim1.results user.results
-	cmp $^ && printf "\120\101\123\123\n"
+match_%: sim1.results user_%.results
+	cmp $^
+	@echo PASS
+
+match_mem:
+match_reg:
 
 accuracy: accuracy.py sim1.trace init.dat
 	$(PYTHON) $<
@@ -167,7 +178,20 @@ test.dat: sim1 $(SRF_DATA) init_run2.dat
 plot: pfloat.py $(SRF_DATA) test.dat
 	$(PYTHON) $^
 
+# pulse.dat and iq_sys2_rfs2_0.dat obtained from SRF cavities in pulsed and CW
+# mode, respectively
+detune_pulse: detune_coeff_calc.py fitter_dat/pulse.dat
+	$(PYTHON) $< -v -m pulse -f $(filter %.dat, $^)
+
+detune_cw: detune_coeff_calc.py fitter_dat/iq_sys2_rfs2_0.dat
+	$(PYTHON) $< -v -m cw -f $(filter %.dat, $^)
+
+detune_pulse_test: fitter_test.py fitter_dat/pulse.dat fitter_test_pulse.gold
+	$(PYTHON) $< -f $(filter %.dat, $^) > fitter_test.out
+	cmp fitter_test.out $(word 3, $^)
+	@echo "PASS"
+
 clean:
-	rm -f *_tb *.vcd *.bit *.out *.trace *.results ops.h ops.vh *.o sim1 init*.dat *.pdf *.log *.pyc sim1.h inverse.dat test.dat computer.png
+	rm -f *_tb *.vcd *.bit *.out *.trace *.results ops.h ops.vh *.o sim1 init*.dat *.pdf *.log *.pyc sim1.h inverse.dat test.dat *.png *.out
 	rm -rf _xilinx vivado_project __pycache__
 	sh check_clean

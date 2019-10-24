@@ -12,7 +12,7 @@ module banyan_mem #(
 	// API in clk domain for controlling acquisition
 	// See additional comments below
 	input reset,  // resets pointer and full
-	input run,  // set to enable writes to memory
+	input run,  // set to enable writes to memory; Modulate to take valid adc_data (See TB)
 	output [aw+3-1:0] pointer,  // write location
 	output rollover,
 	output full,

@@ -9,9 +9,10 @@ TGT_ := $(TEST_BENCH)
 
 NO_CHECK = piloop2_check cavity_check lp_check banyan_mem_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
+NO_LINT = $(NO_CHECK) mon_12_lint biquad_lint
+LNT_ = $(filter-out $(NO_LINT), $(TEST_BENCH:%_tb=%_lint))
 
 BITS_ := bandpass3.bit
-PYTHON = python3
 
 VERILOG_AUTOGEN += " "
 
@@ -19,6 +20,7 @@ VERILOG_AUTOGEN += " "
 targets: $(TGT_)
 checks: $(CHK_)
 check_all: $(CHK_)
+lint: $(LNT_)
 bits: $(BITS_)
 
 rot_dds_auto: cordicg_b22.v

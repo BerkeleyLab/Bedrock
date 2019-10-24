@@ -22,14 +22,13 @@ module sf_mul #(
 	output [dw+3:0] r
 );
 
-reg signed [2*mw-1:0] r1, r2;  // full 36-bit result
+reg signed [2*mw-1:0] r1;  // full 36-bit result
 wire signed [mw-1:0] a_trunc = a[dw-1:dw-mw];
 wire signed [mw-1:0] b_trunc = b[dw-1:dw-mw];
 always @(posedge clk) if (ce) begin
 	r1 <= a_trunc * b_trunc;
-	r2 <= r1;
 end
-assign r = r1[2*mw-1:2*mw-4-dw];  // XXX WRONG!  Needs to be r1
+assign r = r1[2*mw-1:2*mw-4-dw];
 endmodule
 
 // add or subtract
@@ -75,27 +74,27 @@ reg [iscale:0] r1=0;
 reg sign_a=0;
 always @(posedge clk) if (ce) begin
 	sign_a <= a[dw-1];
-	casex (abs_a)
+	casez (abs_a)
 	// positive numbers
 	//  r=min(floor(16./[0:15]*16/4+0.5),15);
 	//  printf('\t%d: r1 <= %d;\n',[[0:15]; r])
 	// 2.^(-floor(log2([0:255]/256))-1)
 	// In theory can be parameterized with a for loop;
 	// this version hard-coded for the case iscale == 8.
-	9'b11xxxxxxx: r1 <= 2;
-	9'b10xxxxxxx: r1 <= 3;
-	9'b011xxxxxx: r1 <= 4;
-	9'b010xxxxxx: r1 <= 6;
-	9'b0011xxxxx: r1 <= 8;
-	9'b0010xxxxx: r1 <= 12;
-	9'b00011xxxx: r1 <= 16;
-	9'b00010xxxx: r1 <= 24;
-	9'b000011xxx: r1 <= 32;
-	9'b000010xxx: r1 <= 48;
-	9'b0000011xx: r1 <= 64;
-	9'b0000010xx: r1 <= 96;
-	9'b00000011x: r1 <= 128;
-	9'b00000010x: r1 <= 192;
+	9'b11???????: r1 <= 2;
+	9'b10???????: r1 <= 3;
+	9'b011??????: r1 <= 4;
+	9'b010??????: r1 <= 6;
+	9'b0011?????: r1 <= 8;
+	9'b0010?????: r1 <= 12;
+	9'b00011????: r1 <= 16;
+	9'b00010????: r1 <= 24;
+	9'b000011???: r1 <= 32;
+	9'b000010???: r1 <= 48;
+	9'b0000011??: r1 <= 64;
+	9'b0000010??: r1 <= 96;
+	9'b00000011?: r1 <= 128;
+	9'b00000010?: r1 <= 192;
 	9'b000000011: r1 <= 256;
 	9'b000000010: r1 <= 384;
 	9'b000000001: r1 <= 512;
@@ -174,8 +173,10 @@ module sf_main #(
 	input [20:0] inst,  // consumes 21 bits of instruction per cycle
 	input signed [pw-1:0] meas,  // measurements from radio
 	// Results
+	output                 ab_update,
 	output signed [pw-1:0] a_o,
 	output signed [pw-1:0] b_o,
+	output                 cd_update,
 	output signed [pw-1:0] c_o,
 	output signed [pw-1:0] d_o,
 	// Monitoring only, probably superfluous
@@ -240,22 +241,28 @@ sf_alu #(.dw(dw), .mw(mw)) alu(.clk(clk), .ce(ce), .a(a), .b(b), .op(op), .sv(sv
 // make values available to outside world
 // take most significant bits
 reg signed [pw-1:0] a_out=0, b_out=0;
+reg ab_u=0;
 always @(posedge clk) if (ce & (op==1)) begin
 	a_out <= a[dw-1:extra];
 	b_out <= b[dw-1:extra];
-end
+	ab_u <= 1;
+end else ab_u <= 0;
 assign a_o = a_out;
 assign b_o = b_out;
+assign ab_update = ab_u;
 
 // make values available to outside world
 // take most significant bits
 reg signed [pw-1:0] c_out=0, d_out=0;
+reg cd_u=0;
 always @(posedge clk) if (ce & (op==2)) begin
 	c_out <= a[dw-1:extra];
 	d_out <= b[dw-1:extra];
-end
+	cd_u <= 1;
+end else cd_u <= 0;
 assign c_o = c_out;
 assign d_o = d_out;
+assign cd_update = cd_u;
 
 assign trace = d_in;
 assign collide_o = we_a & set;

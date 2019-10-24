@@ -2,7 +2,7 @@
 
 module mac_subset_tb;
 
-parameter aw=8;
+parameter mac_aw=8;
 parameter latency=64;
 parameter stretch=3;
 parameter ifg=3;
@@ -54,7 +54,7 @@ end
 
 // Host bus definition
 wire host_clk = clk;
-reg [aw:0] host_waddr;
+reg [mac_aw:0] host_waddr;
 reg host_write=0;
 reg [15:0] host_wdata;
 
@@ -69,15 +69,39 @@ always @(posedge clk) begin
 	endcase
 end
 
-// DUT
+// memory and control signals are handled external to mac_subset.v
+// in this branch, which the testbenches were not designed for ...
+// the next few lines are patching that up
+wire [mac_aw-1:0] host_raddr;
+wire [15:0] host_rdata;
+wire [mac_aw-1:0] buf_start_addr;
+wire tx_mac_start;
 wire tx_clk = clk;
+mac_compat_dpram #(
+	.mac_aw(mac_aw)
+) mac_compat_dpram_inst (
+	.host_clk(host_clk),
+	.host_waddr(host_waddr),
+	.host_write(host_write),
+	.host_wdata(host_wdata),
+// ----------------------------
+	.tx_clk(tx_clk),
+	.host_raddr(host_raddr),
+	.host_rdata(host_rdata),
+	.buf_start_addr(buf_start_addr),
+	.tx_mac_start(tx_mac_start)
+);
+
+// DUT
 wire done;
 wire [7:0] mac_data;
 wire strobe_s, strobe_l;
-mac_subset #(.aw(aw), .latency(latency), .stretch(stretch), .ifg(ifg)) mac(
-	.host_clk(host_clk), .host_waddr(host_waddr),
-	.host_write(host_write), .host_wdata(host_wdata),
-	.done(done),
+mac_subset #(.mac_aw(mac_aw), .latency(latency), .stretch(stretch), .ifg(ifg)) mac(
+	.host_raddr(host_raddr),
+	.host_rdata(host_rdata),
+	.buf_start_addr(buf_start_addr),
+	.tx_mac_start(tx_mac_start),
+	.tx_mac_done(done),
 	.scanner_busy(scanner_busy),
 	.tx_clk(tx_clk), .mac_data(mac_data),
 	.strobe_s(strobe_s), .strobe_l(strobe_l)

@@ -1,0 +1,54 @@
+[timestart] 0
+[size] 1538 608
+[pos] -1 -1
+*-26.095531 340900000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] mdio_tb.
+[treeopen] mdio_tb.cpu.
+[treeopen] mdio_tb.cpu.picorv32_core.
+[sst_width] 228
+[signals_width] 269
+[sst_expanded] 1
+[sst_vpaned_height] 145
+@28
+mdio_tb.mem_clk
+mdio_tb.phy.reset_b
+mdio_tb.phy.mdc
+mdio_tb.phy.mdio
+mdio_tb.phy.mdio_wen
+@22
+mdio_tb.phy.phy_addr[4:0]
+mdio_tb.phy.reg_addr[4:0]
+mdio_tb.phy.reg_val[15:0]
+mdio_tb.phy.reg_read[15:0]
+@24
+mdio_tb.phy.cnt[6:0]
+@28
+mdio_tb.phy.ready
+@24
+mdio_tb.phy.state_reg[2:0]
+@22
+>-430
+mdio_tb.phy.shift[31:0]
+@800200
+>0
+-cpu
+@820
+mdio_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+@22
+mdio_tb.cpu.picorv32_core.dbg_insn_addr[31:0]
+mdio_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+mdio_tb.cpu.picorv32_core.dbg_mem_rdata[31:0]
+@28
+mdio_tb.cpu.picorv32_core.dbg_mem_ready
+@1000200
+-cpu
+@28
+mdio_tb.cpu.trap
+mdio_tb.cpu_read_valid
+[pattern_trace] 1
+[pattern_trace] 0
+!100000@@
+?"DEAD
+@23
+mdio_tb.cpu.picorv32_core.dbg_mem_rdata[31:0]
+!!

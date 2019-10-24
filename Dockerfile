@@ -1,91 +1,91 @@
 # Install riscv cross compiler
 
-FROM python:3-slim-stretch as riscv-builder
+FROM debian:buster-slim as riscv-builder
 
-RUN apt-get update && apt-get install -y autoconf automake autotools-dev curl\
-	libmpc-dev libmpfr-dev libgmp-dev libusb-1.0-0-dev\
-	gawk build-essential bison flex texinfo gperf\
-	libtool patchutils bc zlib1g-dev device-tree-compiler git\
-	pkg-config libexpat-dev
+# prerequisites for building gcc
+# wget is used by riscv_prep.sh
+RUN apt-get update && apt-get install -y \
+	libmpc-dev libmpfr-dev libgmp-dev \
+	build-essential wget
 
-RUN mkdir software && \
-	cd software && \
-	git clone --recursive https://github.com/riscv/riscv-gnu-toolchain && \
-	cd riscv-gnu-toolchain && mkdir build && cd build && \
-	../configure --with-arch=rv32i --prefix=/riscv32i --enable-multilib && \
-	make -j$(nproc) && make install && \
+# Documentation and rationale for this process in build-tools/riscv_meta.sh
+# Note that "sh riscv_prep.sh" requires network access to pull in tarballs.
+RUN cd && pwd && ls && mkdir software
+COPY build-tools/riscv_prep.sh software/riscv_prep.sh
+COPY build-tools/riscv_meta.sh software/riscv_meta.sh
+RUN cd software && \
+	sh riscv_prep.sh && \
+	sh riscv_meta.sh $PWD/src /riscv32i && \
 	ls /riscv32i/bin/riscv32-unknown-elf-gcc && \
-	cd && rm -rf software/riscv-gnu-toolchain && \
+	cd && rm -rf software && \
 	rm -rf /var/lib/apt/lists/*
 
-# Basing of Lucas Russo's iverilog container
-# "https://github.com/lerwys/docker-iverilog.git"
+FROM debian:buster-slim as basic-iverilog
 
-FROM python:3-slim-stretch as basic-iverilog
-
-ENV IVERILOG_VERSION=v10_2
-
-# This is a debian flag: Picks default answers for apt questions
-# Largely unnecessary if -y is being given
-# ARG DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get -y update && \
-    apt-get install -y \
-	gawk \
-	automake \
-        autoconf \
-        gperf \
-        build-essential \
-        flex \
-        bison \
+# Vivado needs libtinfo5, at least for Artix?
+RUN apt-get update && \
+	apt-get install -y \
 	git \
-	subversion && \
-    rm -rf /var/lib/apt/lists/*
+	iverilog \
+	verilator \
+	libbsd-dev \
+	xc3sprog \
+	build-essential \
+	libtinfo5 \
+	wget \
+	iputils-ping \
+	iproute2 \
+	bsdmainutils \
+	curl \
+	gawk \
+	flake8 \
+	python3-pip \
+	python3-numpy \
+	python3-scipy \
+	python3-matplotlib && \
+	rm -rf /var/lib/apt/lists/* && \
+	python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
+	pip3 --version
 
-RUN pip install --trusted-host pypi.python.org flake8 numpy scipy matplotlib
-
-RUN git clone --branch=${IVERILOG_VERSION} https://github.com/steveicarus/iverilog && \
-    cd iverilog && \
-    bash autoconf.sh && \
-    ./configure && \
-    make -j$(nproc) && \
-    make install && \
-    cd && \
-    rm -rf iverilog
-
+# The rest of this file defines a "stable" environment,
+# but LiteX is the exception.  It's an open question whether LiteX-based designs
+# should currently be considered usable for production.  If so, it would be
+# helpful to freeze a version of LiteX here -- preferably an upstream one that
+# doesn't involve yetifrisstlama.
 FROM basic-iverilog as litex
 
 ENV LITEX_VERSION=master
 ENV LITEX_ROOT_URL="http://github.com/yetifrisstlama/"
-RUN apt-get update && apt-get install -y wget && \
-	mkdir litex_setup_dir && \
+RUN mkdir litex_setup_dir && \
 	cd litex_setup_dir && \
 	wget https://raw.githubusercontent.com/yetifrisstlama/litex/${LITEX_VERSION}/litex_setup.py && \
-	python litex_setup.py init install && \
+	python3 litex_setup.py init install && \
 	ln -s /non-free/Xilinx /opt/Xilinx
 
 COPY --from=riscv-builder /riscv32i /riscv32i
 
 ENV PATH="/riscv32i/bin:${PATH}"
 
-RUN apt-get install -y verilator libbsd-dev && \
-	pip install git+https://github.com/m-labs/nmigen.git
+RUN pip3 install git+https://github.com/m-labs/nmigen.git
 
 FROM litex as testing_base
 
-RUN apt-get -y update && \
+# flex and bison required for building vhd2vl
+RUN apt-get update && \
 	apt-get install -y \
 	cmake \
+	flex \
+	bison \
 	libftdi1-dev \
 	libusb-dev \
 	pkg-config && \
 	rm -rf /var/lib/apt/lists/*
 
-RUN svn co https://svn.code.sf.net/p/xc3sprog/code/trunk xc3sprog &&\
-	cd xc3sprog &&\
-	mkdir build && \
-	cd build &&\
-	cmake .. &&\
-	make &&\
-	make install &&\
-	rm -rf xc3sprog
+# Must follow iverilog installation
+RUN git clone https://github.com/ldoolitt/vhd2vl && \
+	cd vhd2vl && \
+	git checkout 37e3143395ce4e7d2f2e301e12a538caf52b983c && \
+	make && \
+	install src/vhd2vl /usr/local/bin && \
+	cd .. && \
+	rm -rf vhd2vl

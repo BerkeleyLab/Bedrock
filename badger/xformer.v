@@ -23,8 +23,11 @@ module xformer(
 	output ostrobe_l
 );
 
+// Configuration
 parameter n_lat=2;
-wire icmp = category == 2;
+parameter handle_icmp = 1;
+
+wire icmp = (category == 2) & handle_icmp;
 wire udp = category == 3;
 
 // ICMP Echo Checksum (see RFC 792 p. 13)
@@ -36,6 +39,8 @@ wire [7:0] d_out2;
 // but we've accumulated two cycles of pipeline delay.
 reg icmp_kick=0; always @(posedge clk) icmp_kick <= icmp & (pc==42);
 wire [7:0] odata0;
+// Always instantiate this; it turns into a simple pass-through
+// (two cycles delayed) when not kicked.
 hack_icmp_cksum hack_icmp_cksum(.clk(clk),
 	.kick(icmp_kick), .idat(idata), .odat(odata0));
 

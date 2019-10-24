@@ -1,20 +1,27 @@
 [timestart] 0
 [size] 1000 600
-[pos] -1 -1
-*-12.449860 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] 0 4
+*-22.120813 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] spi_flash_tb.
 [sst_width] 224
-[signals_width] 166
+[signals_width] 246
 [sst_expanded] 1
 [sst_vpaned_height] 154
 @22
 spi_flash_tb.idata[7:0]
 @28
 spi_flash_tb.raw_s
+spi_flash_tb.dut.status_capture_tick
+@22
+spi_flash_tb.dut.status_report[7:0]
+@28
+spi_flash_tb.dut.write_pack_flag
 @24
 spi_flash_tb.dut.eth_point[8:0]
 @28
+spi_flash_tb.dut.rx_mem_write
 spi_flash_tb.dut.pack_read_done
+spi_flash_tb.dut.pack_read_ready
 @24
 spi_flash_tb.dut.rx_rpoint[8:0]
 @22
@@ -24,5 +31,17 @@ spi_flash_tb.dut.spi_clk
 spi_flash_tb.dut.spi_cs
 spi_flash_tb.dut.spi_miso
 spi_flash_tb.dut.spi_mosi
+@200
+-device model
+@28
+spi_flash_tb.flash.powered_up
+@22
+spi_flash_tb.flash.spi_cmd[7:0]
+spi_flash_tb.flash.spi_addr[23:0]
+@420
+spi_flash_tb.flash.bytecount
+@22
+spi_flash_tb.flash.buffer[7:0]
+spi_flash_tb.flash.mode[3:0]
 [pattern_trace] 1
 [pattern_trace] 0

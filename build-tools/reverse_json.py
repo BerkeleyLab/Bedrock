@@ -6,14 +6,9 @@ pipeline registers.  Attempts to deduce signed-ness and bit width for each
 entry by peeking at wire declarations in the Verilog.
 '''
 import re
-from sys import stderr
-import sys
-# feel free to find a portable way to do this
-if sys.version_info > (3, 0):
-    trantab = {"[": "_", "]": "_"}
-else:
-    from string import maketrans
-    trantab = maketrans("[]", "__")
+from sys import stderr, argv
+
+trantab = {"[": "_", "]": ""}
 
 wire_info = {}
 addr_found = {}
@@ -23,7 +18,12 @@ fail = 0
 # Bugs:
 #   brittle to variations in Verilog code formatting
 #   Hard-coded filename
-#   Not yet compatible with python3
+
+
+def reg_trans(s, trandict):
+    for k, v in trandict.items():
+        s = s.replace(k, v)
+    return s
 
 
 def ponder_int(s):
@@ -53,7 +53,7 @@ def rprint(g, l, alias):
     # Given g(2) that might have the form m_accum[1], construct
     # m_accum_1 for the JSON name, and
     # m_accum as the name with which to look up the wire properties.
-    name = g(3).translate(trantab).rstrip("_")
+    name = reg_trans(g(3), trantab)  # Apply regname replacements
     if alias is not None:
         name = alias
     wname = g(3).split('[')[0]
@@ -92,7 +92,7 @@ def memorize(g):
     wire_info[g(3)] = sign + ":" + g(2)
 
 
-f = open("application_top.v", "r")
+f = open(argv[1], "r")
 print("{")
 sl = []
 param_db = {}
@@ -122,6 +122,12 @@ for l in f.read().split('\n'):
             p, v = m3.group(1), int(m3.group(2))
             param_db[p] = v
             # stderr.write('INFO: found parameter "%s" with value %d\n' % (p, v))
+    if "localparam " in l:
+        m3 = re.search(r"localparam\s+(\w+)\s*=\s*(\d+);", l)
+        if m3:
+            p, v = m3.group(1), int(m3.group(2))
+            param_db[p] = v
+            # stderr.write('INFO: found localparam "%s" with value %d\n' % (p, v))
 print(",\n".join(sl))
 print("}")
 exit(fail)

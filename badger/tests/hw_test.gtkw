@@ -1,0 +1,91 @@
+[timestart] 47750
+[size] 1160 580
+[pos] -1 -1
+*-7.455671 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] hw_test_tb.
+[treeopen] hw_test_tb.vgmii.
+[treeopen] hw_test_tb.vgmii.rtefi.
+[treeopen] hw_test_tb.vgmii.rtefi.center.
+[treeopen] hw_test_tb.vgmii.rtefi.p3_client.
+[treeopen] hw_test_tb.vgmii.slave.
+[sst_width] 272
+[signals_width] 190
+[sst_expanded] 1
+[sst_vpaned_height] 183
+@22
+hw_test_tb.vgmii.rtefi.center.d_xform.odata[7:0]
+@28
+hw_test_tb.vgmii.rtefi.center.d_xform.ostrobe_s
+hw_test_tb.vgmii.rtefi.center.d_xform.ostrobe_l
+@c00200
+-scanner
+@22
+hw_test_tb.vgmii.rtefi.center.a_scan.odata[7:0]
+@28
+hw_test_tb.vgmii.rtefi.center.a_scan.odata_s
+hw_test_tb.vgmii.rtefi.center.a_scan.odata_f
+@1401200
+-scanner
+@c00200
+-writer
+@22
+hw_test_tb.vgmii.rtefi.center.b_write.mem_d[8:0]
+hw_test_tb.vgmii.rtefi.center.b_write.mem_a[10:0]
+@1401200
+-writer
+@c00200
+-construct
+@22
+hw_test_tb.vgmii.rtefi.center.c_construct.addr[10:0]
+hw_test_tb.vgmii.rtefi.center.c_construct.pbuf_out[8:0]
+@28
+hw_test_tb.vgmii.rtefi.center.c_construct.category[1:0]
+@22
+hw_test_tb.vgmii.rtefi.center.c_construct.eth_data_out[7:0]
+@28
+hw_test_tb.vgmii.rtefi.center.c_construct.eth_strobe_long
+hw_test_tb.vgmii.rtefi.center.c_construct.eth_strobe_short
+@1401200
+-construct
+@c00200
+-mem_gateway
+@22
+hw_test_tb.vgmii.rtefi.p3_client.idata[7:0]
+hw_test_tb.vgmii.rtefi.p3_client.addr[23:0]
+@28
+hw_test_tb.vgmii.rtefi.p3_client.control_rd
+hw_test_tb.vgmii.rtefi.p3_client.control_strobe
+@22
+hw_test_tb.vgmii.rtefi.p3_client.control_pipe_rd[3:0]
+@28
+hw_test_tb.vgmii.rtefi.p3_client.control_rd_valid
+@22
+hw_test_tb.vgmii.rtefi.p3_client.data_in[31:0]
+hw_test_tb.vgmii.rtefi.p3_client.odata[7:0]
+@1401200
+-mem_gateway
+@200
+-lb_demo_slave
+@22
+hw_test_tb.vgmii.slave.addr[23:0]
+@28
+hw_test_tb.vgmii.slave.control_strobe
+hw_test_tb.vgmii.slave.control_rd
+@22
+hw_test_tb.vgmii.slave.data_in[31:0]
+hw_test_tb.vgmii.slave.rx_mac_data[15:0]
+@200
+-base_rx_mac
+@22
+hw_test_tb.vgmii.rx_mac.host_raddr[10:0]
+@23
+hw_test_tb.vgmii.rx_mac.raddr[10:0]
+@22
+hw_test_tb.vgmii.rx_mac.host_rdata[15:0]
+@28
+hw_test_tb.vgmii.rx_mac.rx_mac_wen
+@22
+hw_test_tb.vgmii.rx_mac.rx_mac_d[7:0]
+hw_test_tb.vgmii.rx_mac.a_msb[10:0]
+[pattern_trace] 1
+[pattern_trace] 0

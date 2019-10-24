@@ -1,6 +1,6 @@
 [timestart] 651
 [size] 1000 600
-[pos] 365 59
+[pos] 461 137
 *-6.633872 796 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] mac_subset_tb.
 [treeopen] mac_subset_tb.mac.
@@ -28,10 +28,13 @@ mac_subset_tb.mac_data[7:0]
 mac_subset_tb.timing_error
 @200
 -DUT
+@22
+mac_subset_tb.mac.host_raddr[7:0]
+mac_subset_tb.mac.host_rdata[15:0]
+mac_subset_tb.mac.buf_start_addr[7:0]
 @28
-mac_subset_tb.mac.host_start_write
-mac_subset_tb.mac.host_dpram_write
-mac_subset_tb.mac.host_start
+mac_subset_tb.mac.tx_mac_start
+mac_subset_tb.mac.tx_mac_done
 @200
 -tx_mac
 @24

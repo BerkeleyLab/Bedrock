@@ -1,6 +1,13 @@
+'''
+Top-level multichannel plotter.
+To be revamped with something more portable and GUI like (Kivy?)
+For now, plots the number of channels selected using the banyan mask on the
+input in an ultra hacky way, but as fast as it can get for Matplotlib
+'''
 import sys
 
 import numpy as np
+from scipy import signal as signal
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 
@@ -8,7 +15,8 @@ from banyan_ch_find import banyan_ch_find
 from banyan_spurs import collect_adcs
 from prc import c_prc
 
-FOO = None
+FOO1, FOO2 = None, None
+g_data = []
 
 
 def write_mask(prc, mask_int):
@@ -32,10 +40,20 @@ class ADC:
     bits = 16
     scale = 1 << (bits - 1)  # signed
     sample_rate = 100000000.
+    count_to_1volt = 1. / scale
+    # 6dbm = 10 * log10(P/1e-3W)
+    # 10 ** (6 / 10) = P / 1e-3
+    # 10 ** (0.6) * 1e-3 = P
+    # Assuming P = V**2 / 50 Ohms
+    # V**2 = 1e-3 * (10 ** 0.6) * 50
+    # V = np.sqrt(1e-3 * (10 ** 0.6) * 50)
+    dbm_to_Vrms = np.sqrt(1e-3 * (10 ** 0.6) * 50)
+    Vzp = dbm_to_Vrms * np.sqrt(2)
 
 
-def get_volts(raw_counts):
-    return raw_counts / (1. * ADC.scale)
+def counts_to_volts(raw_counts):
+    # TODO: This should be adjusted to ADC.Vzp and verified
+    return raw_counts * ADC.count_to_1volt
 
 
 def run(ip_addr='192.168.1.121',
@@ -54,74 +72,77 @@ def run(ip_addr='192.168.1.121',
     npt = get_npt(prc)
     n_channels, channels = write_mask(prc, mask_int)
     pts_per_ch = npt * 8 // n_channels
+    print('Points per ch: {}'.format(pts_per_ch))
 
     fig, axes = plt.subplots(nrows=n_channels)
-    axes = [axes] if n_channels == 1 else axes
+    # axes = [axes] if n_channels == 1 else axes
     styles = ['r-', 'g-', 'y-', 'm-'][:n_channels]
 
-    x = np.arange(0, pts_per_ch) / 10e3
+    x = np.arange(0, pts_per_ch) / 10e9
     x = np.fft.rfftfreq(pts_per_ch, d=1 / ADC.sample_rate)
     y = np.sin(x)
 
     def plot(ax, style, ch):
         line = ax.plot(x, y, style, label=ch, animated=True)[0]
         ax.set_ylabel('ADC data scaled to +/-1v')
+        ax.set_xlabel('Freq[Hz]')
+        ax.legend()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        return line
+
+    lines = [plot(ax, style, ch) for ax, style, ch in zip(axes, styles, channels)]
+
+    def csd_plot(ax, style, ch):
+        line = ax.plot(x, y/1e7, style, label=ch, animated=True)[0]
+        ax.set_ylabel('ADC data scaled to +/-1v')
         ax.set_xlabel('Time[us]')
         ax.legend()
         ax.set_yscale('log')
         return line
 
-    lines = [
-        plot(ax, style, ch) for ax, style, ch in zip(axes, styles, channels)
-    ]
-    print(123)
+    fig2, axes2 = plt.subplots(1)
+    csd_lines = [csd_plot(axes2, styles[-1], 'csd')]
 
     def animate(x):
-        (block, timestamp) = collect_adcs(prc, npt, n_channels)
-        nblock = get_volts(np.array(block))
-        # print(x)
+        global g_data
+        # collect_adcs is not normal:
+        # It always collects npt * 8 data points.
+        # Each channel gets [(npt * 8) // n_channels] datapoints
+        data_block, timestamp = collect_adcs(prc, npt, n_channels)
+        nblock = counts_to_volts(np.array(data_block))  # ADC count / FULL SCALE => [-1.0, 1.0]
         for j, line in enumerate(lines, start=1):
             ax = axes[j - 1]
             ax.relim()
             ax.autoscale_view()
             ch_data = nblock[j - 1]
-            rfft = np.abs(np.fft.rfft(get_volts(ch_data)))
-            line.set_ydata(rfft)
-            # line.set_ydata()
+            # rfft = np.abs(np.fft.rfft(ch_data))
+            f, psd = signal.periodogram(ch_data, ADC.sample_rate, 'hanning')
+            line.set_ydata(np.sqrt(np.abs(psd)))
+            line.set_xdata(f)
+        # do cross power
+        g_data = signal.csd(nblock[0], nblock[1], ADC.sample_rate)
         return lines
 
+    def animate2(x):
+        global g_data
+        if g_data:
+            f, Pxy = g_data
+            csd_lines[0].set_xdata(f)
+            csd_lines[0].set_ydata(np.sqrt(np.abs(Pxy)))
+        return csd_lines
+
     # npt_wish only works correctly if mask is 0xff
+    # This kind of sort of makes sense, but can be elided to the normal user
     if npt_wish and npt_wish < npt and mask_int == 0xff:
         npt = npt_wish
     print(("npt = {}".format(npt)))
-    pts_per_ch = npt * 8 / n_channels
-
-    # chan_txt = "column assignment for banyan_mask 0x%2.2x: " % mask_int + " ".join(
-    #    ["%d" % x for x in channels])
 
     # We'd normally specify a reasonable "interval" here...
-    global FOO
-    FOO = animation.FuncAnimation(fig, animate, interval=0.1, blit=True)
+    global FOO, FOO1, FOO2
+    FOO1 = animation.FuncAnimation(fig, animate, interval=0.1, blit=True)
+    FOO2 = animation.FuncAnimation(fig2, animate2, interval=0.1, blit=True)
     plt.show()
-    # for run_n in range(count):
-    #     print('Run: {}'.format(run_n))
-    #     animate(nblock.T)
-    #     if False:
-    #         # ISO 8601  2016-06-02T16:06:14Z
-    #         datetimestr = datetime.datetime.utcnow().isoformat() + "Z " + str(
-    #             timestamp)
-    #         header = "\n".join(["9999", datetimestr, chan_txt])
-    #         if filewritepath:
-    #             # Make sure path has terminating '/'
-    #             if filewritepath.endswith('/') is False:
-    #                 filewritepath = filewritepath + '/'
-    #         else:
-    #             filewritepath = ''
-    #         np.savetxt(
-    #             filewritepath + 'raw_z_%2.2d' % (run_n),
-    #             nblock,
-    #             fmt="%d",
-    #             header=header)
 
 
 if __name__ == "__main__":

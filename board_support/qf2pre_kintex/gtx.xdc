@@ -3,8 +3,9 @@
 # set_property -dict "PACKAGE_PIN B14 IOSTANDARD LVCMOS33" [get_ports {K7_QSFP_SCL}]
 
 # Y4: one-time programmable oscillator (SIT9122) - Defaults to 125 MHz
-set_property -dict "PACKAGE_PIN D6 IOSTANDARD LVDS" [get_ports {K7_MGTREFCLK0_P}]
-set_property -dict "PACKAGE_PIN D5 IOSTANDARD LVDS" [get_ports {K7_MGTREFCLK0_N}]
+# MGTREFCLK pins don't have configurable IOSTANDARD
+set_property -dict "PACKAGE_PIN D6" [get_ports {K7_MGTREFCLK0_P}]
+set_property -dict "PACKAGE_PIN D5" [get_ports {K7_MGTREFCLK0_N}]
 
 set_property PACKAGE_PIN F6 [get_ports {K7_MGTREFCLK1_P}]
 set_property PACKAGE_PIN F5 [get_ports {K7_MGTREFCLK1_N}]
