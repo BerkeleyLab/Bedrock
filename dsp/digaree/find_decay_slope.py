@@ -1,5 +1,4 @@
 import numpy as np
-# from matplotlib import pyplot
 from detune_coeff_calc import rf_waveforms
 
 
@@ -66,18 +65,19 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--datafile", dest="datafile", default=None, required=True,
                         help="IQ data input file")
     parser.add_argument("-v", "--verbose", action="store_true", dest="verbose", help="Verbode mode")
-    # parser.add_argument("-p", "--plot", action="store_true", dest="plot", help="Plot")
 
     args = parser.parse_args()
 
     # Read in IQ waveforms
-    rf_wvf = rf_waveforms(args.datafile)
+    rf_wvf = rf_waveforms(args.datafile, data_format=["UN_I", "UN_Q",
+                                                      "FWD_I", "FWD_Q",
+                                                      "REV_I", "REV_Q",
+                                                      "CAV_I", "CAV_Q"])
 
     adc_clk = 1320.0e6 / 14.0  # Hz
 
     # Waveform acquisition timestep
-    wvform_dt = (1*2*33) / adc_clk
-    wvform_dt = 1e-6
+    wvform_dt = (255*2*33) / adc_clk
 
     slp = decay_slope(rf_wvf, wvform_dt, verbose=args.verbose)
     slp.find_slope()
