@@ -113,7 +113,7 @@ wire lb_read = lb_control_strobe && lb_control_rd;
 // First read cycle
 wire [15:0] rom_data;
 fake_config_romx rom(
-	.clk(clk), .address(lb_addr[3:0]), .data(rom_data)
+	.clk(clk), .address(lb_addr[10:0]), .data(rom_data)
 );
 
 // match pipeline in first cycle

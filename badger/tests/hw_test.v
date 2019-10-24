@@ -143,9 +143,11 @@ mac_compat_dpram #(
 );
 
 // Instantiate the Real Work
+parameter enable_bursts=1;
+
 wire rx_mon, tx_mon;
 wire boot_busy, blob_in_use;
-rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw)) rtefi(
+rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bursts)) rtefi(
 	.rx_clk(vgmii_rx_clk), .rxd(vgmii_rxd),
 	.rx_dv(vgmii_rx_dv), .rx_er(vgmii_rx_er),
 	.tx_clk(tx_clk) , .txd(vgmii_txd),
@@ -199,5 +201,13 @@ always @(posedge tx_clk) begin
 	if (~clk_locked) phy_rb <= 0;
 end
 assign phy_rstn = phy_rb;
+
+// One weird hack, even works in Verilator!
+always @(posedge tx_clk) begin
+        if (slave.stop_sim & ~in_use) begin
+                $display("hw_test_tb:  stopping based on localbus request");
+                $finish();
+        end
+end
 
 endmodule
