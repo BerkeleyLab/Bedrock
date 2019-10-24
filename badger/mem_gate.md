@@ -190,6 +190,11 @@ since about 2010.  Its FPGA-side implementation was rewritten in 2018
 This new version gives stronger real-time guarantees, and responds correctly
 to "simultaneous" requests from multiple hosts/masters.
 
+For maximum compatibility with legacy software that might set unused control
+bits to non-zero, the implementation in mem_gateway.v does _not_ enable the
+repeat count feature by default.  Engaging it requires setting the
+enable_bursts parameter to 1.
+
 This feature set is extremely similar to EtherBone, sharing much of the
 motivation and boundary conditions.  LASS is a bit more granular, is limited
 to 24-bit addresses instead of 32, and is not specialized for Wishbone.
@@ -201,6 +206,6 @@ to exercise the combination of software and (virtual) hardware for debugging.
 Packet Badger includes two demos of this setup, one using Verilator and one
 using Icarus Verilog.
 
-LASS as implemented on Packet Badger (including Ethernet/IP/UDP and other features like ARP and
-ICMP echo, for attachment to a GMII PHY) occupies about 1100 LUTs of Xilinx
-Spartan-6 or 7-Series chips. [Comparison to EtherBone?]
+LASS as implemented on Packet Badger (including Ethernet/IP/UDP and other
+features like ARP and ICMP echo, for attachment to a GMII PHY) occupies about
+1100 LUTs of Xilinx Spartan-6 or 7-Series chips. [Comparison to EtherBone?]

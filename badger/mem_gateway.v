@@ -7,14 +7,15 @@
 // Local bus read latency is fixed, configurable at compile time.
 // Uses standard network byte order (big endian).
 //
-// This version has one more feature (disabled by default for compatibility
-// reasons, see the enable_bursts parameter), where a repeat count for the
-// following operation can be specified.  The address autoincrements
-// in that case, and each repeated operation consumes one more 32-bit
-// data field in the input stream.
+// This version has one more feature (disabled by default for paranoid
+// compatibility reasons, see the enable_bursts parameter), where a repeat
+// count for the following operation can be specified.  The address
+// autoincrements in that case, and each repeated operation (read or write)
+// consumes one more 32-bit data field in the input stream.  This feature
+// has been tested, but so far it lacks meaningful software support.
 //
 // For a longer description of the on-the-wire protocol, see mem_gate.md
-// Software and local-bus compatible with mem_gateway in ethernet-core
+// Software and local-bus compatible with mem_gateway in ethernet-core.
 
 // The control_rd port (a.k.a. not write) is just a level that changes at
 // the start of each transaction, timing exactly like addr and data_out.
@@ -28,9 +29,8 @@
 // has a possibly surprising length.
 //
 // If read_pipe_len is increased, and bus cycles are spaced close together
-// (every 8 for now, future burst modes could go down to every 4 or even
-// every 2), there can be multiple bus transactions in the pipeline
-// simultaneously.
+// (traditionally every 8 cycles, goes down to every 4 when bursts are used)
+// there can be multiple bus transactions in the pipeline simultaneously.
 
 // Write operations start on the cycle marked by control_write.
 // At the moment, there is no check that they complete, so any pipelining
