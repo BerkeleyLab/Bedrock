@@ -57,15 +57,22 @@ for documentation purposes.  Each such file demands some note as to
 how it was generated.
 
 All checked-in files should be permissively licensed, consistent with
-the LICENSE.txt file.
+the LICENSE.md file.
 
-If a file is needed that can be legally downloaded from the public Internet,
-please explicitly download those files and check that the result has the expected
-SHA256. Do NOT redistribute or embed it within Bedrock without checking license.
-This step should be visibly documented, and users encouraged to take that step
-once per repository checkout. TODO: Example?
+Sometimes files are needed that can be legally downloaded from the public Internet,
+but we either don't have permission to redistribute them, or we have other reasons to
+not want them checked into this repository (all GPL code falls in this category,
+due to guidance from University of California lawyers).  It's OK to script the
+download of these files; please include a check that the result has the expected
+[SHA256](https://en.wikipedia.org/wiki/SHA-2). Do NOT redistribute or embed
+any files within Bedrock unless they have a suitably permissive license.
+Any download steps should be visibly documented, and users encouraged to take that step
+once per repository checkout. An example in our current codebase is found in
+[riscv_meta.sh](../build-tools/riscv_meta.sh), which downloads source files needed to build
+a riscv toolchain (binutils, gcc, newlib), and is used in building our CI Docker image.
 
-Please do NOT check-in machine generated code. If unavoidable, make it explicit.
+Please do NOT check-in machine generated code. If unavoidable, document it explicitly,
+and give instructions for how to reproduce.
 
 Understanding that the choice of a programming language depends on the task at hand:
 Currently, synthesizable code is written in Verilog, machine-generated Verilog
