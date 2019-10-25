@@ -68,7 +68,7 @@ download of these files; please include a check that the result has the expected
 any files within Bedrock unless they have a suitably permissive license.
 Any download steps should be visibly documented, and users encouraged to take that step
 once per repository checkout. An example in our current codebase is found in
-[riscv_meta.sh](../build-tools/riscv_meta.sh), which downloads source files needed to build
+[riscv_prep.sh](../build-tools/riscv_prep.sh), which downloads source files needed to build
 a riscv toolchain (binutils, gcc, newlib), and is used in building our CI Docker image.
 
 Please do NOT check-in machine generated code. If unavoidable, document it explicitly,
