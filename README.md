@@ -65,4 +65,4 @@ See our first take [here](guidelines/CONTRIBUTING.md)
 
 ### Copyright Notice and License Agreement
 
-See [LICENSE](LICENSE).
+See [LICENSE](LICENSE.md).
