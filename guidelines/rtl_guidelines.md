@@ -11,8 +11,17 @@ These guidelines should be general enough such that they are not restricted to a
 
 Each guideline is individually labeled so it can be easily referred to in the context of code reviews or issue creation.
 
-A - Interface naming
+A - Interfaces
 --
+
+#### A.1 - Interface signal naming
+In the context of RTL modules, an interface is a collection of input/output signals that, when used together, implement a protocol that allows for the transfer of data in one, or both, directions. These closely-related signals should, therefore, share a common prefix that makes their relationship clear. This becomes even more important when the interface is associated with a specific clock domain. E.g.: lb_clk, lb_valid, lb_rnw, lb_wdata, lb_rdata.
+
+
+#### A.2 - Keeping interfaces standard
+In order to promote interface re-use and facilitate module interoperability, custom interfaces and protocols should be avoided whenever possible. Instead, conventional interface design patterns should be preferred, along with the use of traditional naming for both control and data signals. E.g. lb_valid, lb_ready/lb_enable, lb_wdata, lb_wstb/lb_wmask.
+
+Deviations from this recommendation should be accompanied by detailed documentation that goes beyond what is usually expected.
 
 B - Signal naming
 --
