@@ -3,10 +3,11 @@ from detune_coeff_calc import rf_waveforms
 
 
 class decay_slope:
-    def __init__(self, waveforms, acq_dt, verbose=False):
+    def __init__(self, waveforms, acq_dt, n_pts=50, verbose=False):
         self.FWD_CPX = waveforms.get_ch("FWD_I") + 1j*waveforms.get_ch("FWD_Q")
         self.CAV_CPX = waveforms.get_ch("CAV_I") + 1j*waveforms.get_ch("CAV_Q")
         self.acq_dt = acq_dt
+        self.n_pts = n_pts
         self.verbose = verbose
 
     def _find_decay(self):
@@ -21,12 +22,13 @@ class decay_slope:
     def _set_start(self):
         start = self._find_decay()+4
         fwd_len = len(self.FWD_CPX)
-        if start+50 > fwd_len:
-            start = fwd_len - 50
+        if start+self.n_pts > fwd_len:
+            start = fwd_len - self.n_pts
+        if start < self.n_pts:
+            print("Aborting due to lack of reasonable trailing edge")
+            exit(1)
         if self.verbose:
             print("Starting trailing waveform analysis at %d" % start)
-        if start < 50 or start > 500:
-            print("Aborting due to lack of reasonable trailing edge")
         return start
 
     """
@@ -55,7 +57,7 @@ class decay_slope:
 
     def find_slope(self):
         s = self._set_start()
-        return self._calc_slope(range(0, s), range(s, s+50), range(s, s+50))
+        return self._calc_slope(range(0, s), range(s, s+self.n_pts), range(s, s+self.n_pts))
 
 
 if __name__ == "__main__":
