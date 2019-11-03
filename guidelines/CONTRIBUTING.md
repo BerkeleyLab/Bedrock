@@ -38,13 +38,11 @@ preferably a test that goes with it!
 
 ## Code of Conduct
 
-TODO: A link to a meaningful one on line?
-
-A few things to ensure it doesn't miss:
-
-1. Make contributors feel welcome
-2. Don't prematurely shutdown ideas
-3. Provide help
+Behavior in this community is always expected to be professional, courteous, and constructive.
+Berkeley Lab in particular mandates support of
+[Inclusion, Diversity, Equity, and Accountability](https://diversity.lbl.gov/).
+Please make all contributors feel welcome, assume good intent, and be considerate of others.
+On-line, that often means re-reading your messages carefully before pressing "send."
 
 ## Contents of a repository
 
@@ -84,7 +82,7 @@ Standard implementations and standard libraries are preferred for obvious reason
 Automatic generation of documentation is a topic of current discussion. Suggestions welcome!
 
 
-## Makfiles
+## Makefiles
 
 We have an [explanation](../build-tools/makefile.md) about how
 our existing Makefiles are put together.
