@@ -64,7 +64,7 @@ due to guidance from University of California lawyers).  It's OK to script the
 download of these files; please include a check that the result has the expected
 [SHA256](https://en.wikipedia.org/wiki/SHA-2). Do NOT redistribute or embed
 any files within Bedrock unless they have a suitably permissive license.
-Any download steps should be visibly documented, and users encouraged to take that step
+Any download steps should be visibly documented, and users are encouraged to take that step
 once per repository checkout. An example in our current codebase is found in
 [riscv_prep.sh](../build-tools/riscv_prep.sh), which downloads source files needed to build
 a riscv toolchain (binutils, gcc, newlib), and is used in building our CI Docker image.
@@ -106,7 +106,7 @@ be great if that can change.
 
 Readability is a key goal for shared software. Lowering the barrier of entry for
 a newcomer enables the codebase to flourish. This can be easily achieved by adhering
-to commonly accepted best practices. Although, it maybe impractical to adhere to
+to commonly accepted best practices. Although, it may be impractical to adhere to
 every single best practice: reading guidelines, reviewing each others code, and
 having healthy discussions can tremendously improve the standard of software.
 
@@ -151,7 +151,7 @@ No other control characters besides 0x0a (LF) and 0x09 (HT) in text/source files
 
 See comments above concerning binary files.
 
-Tabs should not be used any place other than the beginning of a line; doing so
+Tabs should not be used in any place other than the beginning of a line; doing so
 invites "tab damage".  OTOH, using tabs consistently at the beginning of lines
 to represent logical indentation level has advantages; people's setting of tab
 width can systematically and locally adjust the visual indentation level. Just
@@ -170,10 +170,6 @@ Special case for Xcircuit PostScript files:
 avoid this in the distant future.
 
 ### Verilog
-
-[RTL Guidelines](rtl_guidelines.md)
-
-TODO: Reconcile the bottom two sections inside RTL?
 
 #### Of syntax
 Verilog files should always start with a human-readable description of
@@ -214,6 +210,14 @@ Most of our code is intended to run at relatively high clock rates.  Even
 modules that don't actually need high throughput are often put in a clock
 domain shared with high-throughput logic.  This consideration necessitates
 strongly pipelined logic.
+
+### Coding and style guidelines
+
+In addition to the general recommendations above, we strive for a uniform
+Verilog coding style that emphasizes readibility, reduces systematic errors and promotes
+code re-use. The [RTL Guidelines](rtl_guidelines.md) document, which is itself
+open to improvements and suggestions, attempts to formalize this process in the
+form of coding and style guidelines that apply to some of the most common facets of RTL coding.
 
 ### Python
 
