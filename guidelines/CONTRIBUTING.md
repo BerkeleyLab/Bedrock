@@ -44,6 +44,12 @@ Berkeley Lab in particular mandates support of
 Please make all contributors feel welcome, assume good intent, and be considerate of others.
 On-line, that often means re-reading your messages carefully before pressing "send."
 
+Our team supports the principles and goals expressed in/by the
+[Contributor Covenant](https://www.contributor-covenant.org/).
+As employees of the University of California, where this project is
+part of our workplace environment, it is not obvious that we have
+the right to unilaterally choose, impose, or enforce such a covenant.
+
 ## Contents of a repository
 
 A source repository should be primarily reserved for source code.
