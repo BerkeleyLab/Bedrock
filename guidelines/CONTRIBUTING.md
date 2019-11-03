@@ -84,6 +84,12 @@ Standard implementations and standard libraries are preferred for obvious reason
 Automatic generation of documentation is a topic of current discussion. Suggestions welcome!
 
 
+## Makfiles
+
+We have an [explanation](../build-tools/makefile.md) about how
+our existing Makefiles are put together.
+
+
 ## Reproducible builds
 
 All constructed files (sometimes called artifacts) should be reproducible.

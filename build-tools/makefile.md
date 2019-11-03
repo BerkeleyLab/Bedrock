@@ -200,6 +200,21 @@ VFLAGS_b2d_tb = -m ./udp-vpi
 This example causes an extra module to be loaded when building b2d_tb,
 without perturbing the commands to build other _tb targets.
 
+### Discussion
+
+There have been (many attempts](https://en.wikipedia.org/wiki/List_of_build_automation_software),
+continuing today, to build on, enhance, or replace make.
+Two in particular attempt to address the needs of an HDL environment.
+
+ * [Hdlmake](https://www.ohwr.org/project/hdl-make/wikis/home)
+ * [FuseSoC](https://pypi.org/project/fusesoc/)
+
+Our experiments with these tools have generally been frustrating.
+We have used the flexibility of make to support many combinations
+of target hardware and application code, as well as generated code
+and self-tests.  These ideas are not normally priorities of these
+more specialized tools.
+
 ### Cross-check
 
 A demo "project" using the example Makefiles above produces the
