@@ -1,0 +1,18 @@
+%_check: %_tb
+	vvp -N $<
+
+%_tb: %_tb.v
+	iverilog -o $@ $^
+
+%.out: %_tb
+	vvp -N $< > $@
+
+all: b2d_check fib_check
+
+fib_check: fib.out fib.gold
+	cmp $^
+	@echo PASS
+
+b2d_tb: b2d.v
+
+fib_tb: fib.v

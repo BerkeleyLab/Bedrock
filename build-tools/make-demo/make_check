@@ -1,0 +1,8 @@
+set -e
+echo "Testing $1"
+test -r $1
+rm -f *_tb *.out
+make --no-print-directory -f $1> check.$$
+diff -b make.log check.$$
+rm -f check.$$
+echo PASS
