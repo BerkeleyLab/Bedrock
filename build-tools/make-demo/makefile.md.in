@@ -131,7 +131,7 @@ without perturbing the commands to build other _tb targets.
 
 ### Discussion
 
-There have been (many attempts](https://en.wikipedia.org/wiki/List_of_build_automation_software),
+There have been [many attempts](https://en.wikipedia.org/wiki/List_of_build_automation_software),
 continuing today, to build on, enhance, or replace make.
 Two in particular attempt to address the needs of an HDL environment.
 
