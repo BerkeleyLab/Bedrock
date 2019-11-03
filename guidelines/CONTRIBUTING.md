@@ -61,7 +61,7 @@ for documentation purposes.  Each such file demands some note as to
 how it was generated.
 
 All checked-in files should be permissively licensed, consistent with
-the LICENSE.md file.
+the [LICENSE.md](../LICENSE.md) file.
 
 Sometimes files are needed that can be legally downloaded from the public Internet,
 but we either don't have permission to redistribute them, or we have other reasons to
