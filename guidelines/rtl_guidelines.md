@@ -33,7 +33,7 @@ B - Signal naming
 
 #### B.1 - Registered and Delayed signals
 Registered or delayed versions of a signal should use the suffix '_r' or '_d'. Where multiple delays are required,
-a number should be appended to the suffix. E.g.: valid_r, valid_r2, valid_r3.
+a number should be appended to the suffix. E.g.: valid_r for single delay; valid_r1, valid_r2 etc. for multiple delays.
 
 #### B.2 - Internal or Local signals
 Internal or local signals that have no other purpose other than to create an internal version of a module's port should
