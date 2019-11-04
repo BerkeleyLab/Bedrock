@@ -84,6 +84,7 @@ peripheral_test:
   stage: test
   script:
     - make
+    - cd ../ds1822 && make
 
 oscope_top:
   before_script:
