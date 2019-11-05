@@ -24,8 +24,8 @@ class decay_slope:
         fwd_len = len(self.FWD_CPX)
         if start+self.n_pts > fwd_len:
             start = fwd_len - self.n_pts
-        if start < self.n_pts:
-            print("Aborting due to lack of reasonable trailing edge")
+        if start < self.n_pts or start > 500:
+            print("Aborting due to lack of reasonable trailing edge (%d)" % start)
             exit(1)
         if self.verbose:
             print("Starting trailing waveform analysis at %d" % start)
