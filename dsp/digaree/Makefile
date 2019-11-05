@@ -48,7 +48,7 @@ SRF_DATA = ../run2.dat
 %.pdf: %.tex
 	pdftex $<
 
-all: inverse_check ilookup_check match_mem match_reg accuracy detune_cw detune_pulse_test
+all: inverse_check ilookup_check match_mem match_reg accuracy detune_cw detune_pulse_test decay_slope_test
 
 # gnu make magic
 .DELETE_ON_ERROR:
@@ -189,6 +189,11 @@ detune_cw: detune_coeff_calc.py fitter_dat/iq_sys2_rfs2_0.dat
 detune_pulse_test: fitter_test.py fitter_dat/pulse.dat fitter_test_pulse.gold
 	$(PYTHON) $< -f $(filter %.dat, $^) > fitter_test.out
 	cmp fitter_test.out $(word 3, $^)
+	@echo "PASS"
+
+decay_slope_test: find_decay_slope.py fitter_dat/pulse.dat find_decay_slope.gold
+	$(PYTHON) $< -f $(filter %.dat, $^) > find_decay_slope.out
+	cmp find_decay_slope.out $(word 3, $^)
 	@echo "PASS"
 
 clean:

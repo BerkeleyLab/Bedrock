@@ -73,10 +73,10 @@ def run1(wvf, det_dict, axes=None, dest={}, fname=None):
         dest["fitr"].set_label(bandlabel)
         dest["fitr"].set_data(tt, tt*0+bandwidth)
         if "fiti" in dest:
-            dest["fiti"].set_data(tt, detune/2/pi)
+            dest["fiti"].set_data(tt, detune)
         if axes is not None:
             axes[0].plot(tt, tt*0+bandwidth, label=bandlabel)
-            axes[1].plot(tt, detune/2/pi, label='Fit')
+            axes[1].plot(tt, detune, label='Fit')
 
     ix = range(3, 380)
     liver(cav[ix], fwd[ix], mr, ix=range(4, 25), dt=det_dict["wvform_dt"], axes=axes, dest=dest)
@@ -150,11 +150,14 @@ if __name__ == "__main__":
     r_init()
 
     # Read in IQ waveforms
-    rf_wvf = rf_waveforms(args.datafile)
+    rf_wvf = rf_waveforms(args.datafile, data_format=["UN_I", "UN_Q",
+                                                      "FWD_I", "FWD_Q",
+                                                      "REV_I", "REV_Q",
+                                                      "CAV_I", "CAV_Q"])
 
     adc_clk = 1320.0e6 / 14.0  # Hz
     wvform_dt = (255*2*33) / adc_clk
-    digaree_dt = (255*2*33) / adc_clk
+    digaree_dt = (32*2*33) / adc_clk
 
     # Setup configuration dict for detune coefficient calculation
     detune_dict = {"bandwidth": 15.0,  # Ignored in pulse mode
