@@ -66,6 +66,13 @@ rtsim_test:
   script:
     - make clean && make checks && make rtsim.dat
 
+make_docs:
+  before_script:
+    - cd build-tools/make-demo && make clean
+  stage: test
+  script:
+    - make check && make makefile.md && cmp ../makefile.md makefile.md
+
 flake8:
   stage: synthesis
   script:
