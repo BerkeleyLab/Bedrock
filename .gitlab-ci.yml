@@ -87,11 +87,11 @@ badger_test:
 
 peripheral_test:
   before_script:
-    - cd peripheral_drivers/idelay_scanner
+    - cd peripheral_drivers
   stage: test
   script:
-    - make
-    - cd ../ds1822 && make
+    - cd idelay_scanner && make ; cd -
+    - cd ds1822 && make
 
 oscope_top:
   before_script:
