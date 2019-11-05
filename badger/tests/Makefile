@@ -55,7 +55,9 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 vpath %.v $(DSP_DIR) $(HOMELESS_DIR) $(SERIAL_IO_DIR)
 vpath %.eps ..
 
-all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check spi_flash_check hw_test_tb
+all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check \
+  hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check \
+  spi_flash_check hw_test_tb
 all: test_tx_check precog_check mac_subset_check
 all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb rtefi_live
 all: lb_timing_demo.vcd
@@ -384,8 +386,12 @@ locc:
 	rmccmt *.c *.cpp | tr -d ' \t' | grep -c .
 .PHONY: spellme loc locc
 
-CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen host_cmds.dat retrigger.dat selfmac_in.dat *.html xfer1 lorem_ipsum.hex spi_flash.grab $(RTEFI_CLEAN)
-CLEAN += *.pdf
+CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck
+CLEAN += crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test
+CLEAN += stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen
+CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab
+CLEAN += $(RTEFI_CLEAN)
+CLEAN += *.html *.pdf
 CLEAN_DIRS += obj_dir _xilinx
 # Actual "clean" rule in bottom_rules.mk
 include $(BUILD_DIR)/bottom_rules.mk
