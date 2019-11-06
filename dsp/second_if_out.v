@@ -1,7 +1,7 @@
 `timescale 1ns / 1ns
 
 // Pin compatible with ssb_out,
-// but this is tuned for the LCLS-II configuration whree it
+// but this is tuned for the LCLS-II configuration where it
 // needs to generate 145 MHz, even though the input lo (cosa,sina)
 // is at 20 MHz (7/33 of clk rate).  Only DAC1 is provided.
 module second_if_out(
@@ -29,7 +29,7 @@ fiq_interp interp(.clk(clk),
 	.a_data(drive[17:2]), .a_gate(1'b1), .a_trig(iq),
 	.i_data(drive_i), .q_data(drive_q));
 
-// Convvert the 7/33 LO to 61/132 by (complex) multiplying by a 1/4 LO.
+// Convert the 7/33 LO to 61/132 by (complex) multiplying by a 1/4 LO.
 // This is "cheap" and adds the minimum extra divider state.
 // Only has value because we keep the LO in complex form.
 wire signed [17:0] cosi = ~cosa;

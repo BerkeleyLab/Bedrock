@@ -8,7 +8,7 @@ integer out_file;
 //reg fail=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
-		$dumpfile("sel4v/second_if_out.vcd");
+		$dumpfile("second_if_out.vcd");
 		$dumpvars(5,second_if_out_tb);
 	end
 	if ($test$plusargs("trace")) begin
