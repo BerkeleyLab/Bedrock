@@ -66,6 +66,13 @@ rtsim_test:
   script:
     - make clean && make checks && make rtsim.dat
 
+make_docs:
+  before_script:
+    - cd build-tools/make-demo && make clean
+  stage: test
+  script:
+    - make check && make makefile.md && cmp ../makefile.md makefile.md
+
 flake8:
   stage: synthesis
   script:
@@ -80,10 +87,11 @@ badger_test:
 
 peripheral_test:
   before_script:
-    - cd peripheral_drivers/idelay_scanner
+    - cd peripheral_drivers
   stage: test
   script:
-    - make
+    - cd idelay_scanner && make ; cd -
+    - cd ds1822 && make
 
 oscope_top:
   before_script:

@@ -1,5 +1,5 @@
 ## Marble Mini meta-xdc file process with
-##   python ../meta-xdc.py pin_map.csv > marblem_rgmii.xdc
+##   python ../meta-xdc.py < pin_map.csv > marblem_rgmii.xdc
 ## Implicit dependence on Marble.xdc generated from
 ##   git@github.com:BerkeleyLab/Marble.git
 

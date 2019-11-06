@@ -26,7 +26,7 @@ module rgmii_hw_test(
 	input CSB,
 	input MOSI,
 
-        // SPI boot flash programming port
+	// SPI boot flash programming port
 `ifndef CHIP_FAMILY_7SERIES
 	output BOOT_CCLK,
 `endif
