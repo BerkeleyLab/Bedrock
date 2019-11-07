@@ -29,6 +29,10 @@ fiq_interp interp(.clk(clk),
 	.a_data(drive[17:2]), .a_gate(1'b1), .a_trig(iq),
 	.i_data(drive_i), .q_data(drive_q));
 
+// ---------------------------------
+// 45.6 / 145 MHz LO generation
+// ---------------------------------
+
 // Convert the 7/33 LO to 61/132 by (complex) multiplying by a 1/4 LO.
 // This is "cheap" and adds the minimum extra divider state.
 // Only has value because we keep the LO in complex form.
@@ -56,6 +60,36 @@ always @(posedge clk) begin
 	cosb2 <= ~sinb + (cosb>>>4);
 	sinb2 <= cosb + (sinb>>>4);
 end
+
+// ---------------------------------
+// 60 MHz LO generation
+// ---------------------------------
+
+reg [5:0] lut_addr=0;
+wire [5:0] lut_addr1;
+wire [17:0] sin40, cos40, sin40_1, cos40_1;
+
+always @(posedge clk) lut_addr <= (lut_addr == 32) ? 0 : lut_addr + 1;
+assign lut_addr1 = (lut_addr == 32) ? 0 : lut_addr + 1;
+
+lo_lut i_lo_lut (
+   .clk (clk),
+   .sin_addr (lut_addr),
+   .cos_addr (lut_addr),
+   .sin_data (sin40),
+   .cos_data (cos40));
+
+lo_lut i_lo_lut1 (
+   .clk (clk),
+   .sin_addr (lut_addr1),
+   .cos_addr (lut_addr1),
+   .sin_data (sin40_1),
+   .cos_data (cos40_1));
+
+
+// ---------------------------------
+// LO selection
+// ---------------------------------
 
 wire signed [15:0] out1, out2;
 

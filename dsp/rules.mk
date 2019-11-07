@@ -16,7 +16,7 @@ BITS_ := bandpass3.bit
 
 VERILOG_AUTOGEN += " "
 
-.PHONY: targets checks bits check_all clean_all
+.PHONY: targets checks bits check_all clean_all lo_lut.include
 targets: $(TGT_)
 checks: $(CHK_)
 check_all: $(CHK_)
@@ -74,14 +74,20 @@ banyan_check: banyan_tb banyan_ch_find.py $(BUILD_DIR)/testcode.awk
 	$(VERILOG_CHECK)
 	$(VVP) banyan_tb +trace +squelch | $(PYTHON) $(filter %banyan_ch_find.py, $^)
 
-second_if_out_tb: cordicg_b22.v
+LO_LUT_INCLUDES = sin_lut.vh cos_lut.vh
+
+lo_lut.include: lo_lut_gen.py
+	echo "Generating ${LO_LUT_INCLUDES}"
+	$(PYTHON) $< -a 1.0 -p 14/33 -b 18
+
+second_if_out_tb: cordicg_b22.v lo_lut.include
 
 second_if_out_check: second_if_out_tb second_if_test.py $(BUILD_DIR)/testcode.awk
 	$(VERILOG_CHECK)
 	$(VVP) second_if_out_tb +trace; $(PYTHON) second_if_test.py second_if_out.dat
 
 CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat *.lxt *~
-CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cordicg_b22.v second_if_out.dat
+CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cordicg_b22.v second_if_out.dat ${LO_LUT_INCLUDES}
 
 CLEAN_DIRS += tt800_ref.dSYM
 CLEAN_DIRS += _xilinx __pycache__
