@@ -78,7 +78,7 @@ LO_LUT_INCLUDES = sin_lut.vh cos_lut.vh
 
 lo_lut.include: lo_lut_gen.py
 	echo "Generating ${LO_LUT_INCLUDES}"
-	$(PYTHON) $< -a 1.0 -p 14/33 -b 18
+	$(PYTHON) $< -a 131071.0 -p 14/33 -b 18
 
 second_if_out_tb: cordicg_b22.v lo_lut.include
 
