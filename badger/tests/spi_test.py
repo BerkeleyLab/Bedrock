@@ -222,7 +222,8 @@ def page_program(s, ad, bd):
     if len(bd) != PAGE:
         logging.warning('length of data %d not equal to 256' % (len(bd)))
         # pad with 0xff
-        bd += (PAGE - len(bd)) * '\xFF'
+        pad = (PAGE - len(bd)) * bytearray(b'\xFF')
+        bd += pad
         logging.warning('padded length now %d' % (len(bd)))
     logging.debug('Page Programming at %d...', ad)
     # sys.stdout.write('.')
@@ -263,7 +264,7 @@ def remote_program(s, file_name, ad, size):
     final_a = (stop_p << 8) - 1
     logging.info('Programming file %s to %s from add 0x%x to add 0x%x, length = 0x%x...'
                  % (file_name, IPADDR, ad, (((ad + size) >> 8) + 1) << 8, size))
-    f = open(file_name, 'r')
+    f = open(file_name, 'rb')
     # assume that '.bin' file size is always less than whole pages
     for ba in reversed(range(start_p, stop_p)):
         print("block %d" % ba)
