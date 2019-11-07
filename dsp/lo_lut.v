@@ -19,7 +19,7 @@ module lo_lut #(
    output signed [DATA_WI-1:0] cos_data
 );
 
-   reg signed [DATA_WI-1:0] data, s_data_r, c_data_r;
+   reg signed [DATA_WI-1:0] data, s_data_r=0, c_data_r=0;
    always @(posedge clk) begin
       case (sin_addr)
          `include "sin_lut.vh"

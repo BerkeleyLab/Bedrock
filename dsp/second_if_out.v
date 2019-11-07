@@ -8,6 +8,7 @@ module second_if_out(
 	input clk,
 	input [1:0] div_state,
 	input signed [17:0] drive,
+	input lo_sel, // 0 - 145 MHz; 1 - 60 MHz
 	input enable,
 	//input handedness,
 	// local oscillator
@@ -21,6 +22,9 @@ module second_if_out(
 	output signed [15:0] dac2_out1
 );
 
+localparam LO_SEL_145 = 0,
+           LO_SEL_60 = 1;
+
 wire iq = div_state[0];
 
 // Bring input I and Q to full data rate
@@ -30,7 +34,7 @@ fiq_interp interp(.clk(clk),
 	.i_data(drive_i), .q_data(drive_q));
 
 // ---------------------------------
-// 45.6 / 145 MHz LO generation
+// 43.6 / 145 MHz LO generation
 // ---------------------------------
 
 // Convert the 7/33 LO to 61/132 by (complex) multiplying by a 1/4 LO.
@@ -74,33 +78,59 @@ assign lut_addr1 = (lut_addr == 32) ? 0 : lut_addr + 1;
 
 lo_lut i_lo_lut (
    .clk (clk),
-   .sin_addr (lut_addr),
-   .cos_addr (lut_addr),
-   .sin_data (sin40),
-   .cos_data (cos40));
+   .sin_addr (lut_addr), .cos_addr (lut_addr),
+   .sin_data (sin40), .cos_data (cos40));
 
 lo_lut i_lo_lut1 (
    .clk (clk),
-   .sin_addr (lut_addr1),
-   .cos_addr (lut_addr1),
-   .sin_data (sin40_1),
-   .cos_data (cos40_1));
+   .sin_addr (lut_addr1), .cos_addr (lut_addr1),
+   .sin_data (sin40_1), .cos_data (cos40_1));
+
+wire [17:0] cos_mix, sin_mix, cos_mix1, sin_mix1;
+
+cpxmul_fullspeed i_cpxmul (
+   .clk (clk),
+   .re_a (cos40), .im_a (sin40),
+   .re_b (cosa), .im_b (sina),
+   .re_out (cos_mix), .im_out (sin_mix)
+);
+
+cpxmul_fullspeed i_cpxmul1 (
+   .clk (clk),
+   .re_a (cos40_1), .im_a (sin40_1),
+   .re_b (cosa), .im_b (sina),
+   .re_out (cos_mix1), .im_out (sin_mix1)
+);
 
 
 // ---------------------------------
-// LO selection
+// LO selection and IQ mixing
 // ---------------------------------
 
 wire signed [15:0] out1, out2;
+reg signed [17:0] cos_lo1, sin_lo1, cos_lo2, sin_lo2;
+
+always @(*) begin
+   case (lo_sel)
+      LO_SEL_145: begin
+         cos_lo1 = cosb1; sin_lo1 = sinb1;
+         cos_lo2 = cosb2; sin_lo2 = sinb2;
+      end
+      default : begin // LO_SEL_60
+         cos_lo1 = cos_mix; sin_lo1 = sin_mix;
+         cos_lo2 = cos_mix1; sin_lo2 = sin_mix1;
+      end
+   endcase
+end
 
 flevel_set level1(.clk(clk),
-	.cosd(cosb1), .sind(sinb1),
+	.cosd(cos_lo1), .sind(sin_lo1),
 	.i_data(drive_i), .i_gate(1'b1), .i_trig(1'b1),
 	.q_data(drive_q), .q_gate(1'b1), .q_trig(1'b1),
 	.o_data(out1));
 
 flevel_set level2(.clk(clk),
-	.cosd(cosb2), .sind(sinb2),
+	.cosd(cos_lo2), .sind(sin_lo2),
 	.i_data(drive_i), .i_gate(1'b1), .i_trig(1'b1),
 	.q_data(drive_q), .q_gate(1'b1), .q_trig(1'b1),
 	.o_data(out2));
