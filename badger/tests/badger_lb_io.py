@@ -52,7 +52,7 @@ def show_short(chip):
     xa = chip.exchange(addrs, [None]*len(addrs))
     for ix, x in enumerate(xa[0:npt]):
         if ix == 8:
-            uptime = float(x)*1024*8e-9;
+            uptime = float(x)*1024*8e-9
             print("%d:  %10d   %.3f s uptime" % (ix, x, uptime))
         elif ix == 5:
             ppm = (float(x)/2**27-1.0)*1e6
