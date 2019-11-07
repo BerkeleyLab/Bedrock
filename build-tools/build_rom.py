@@ -39,7 +39,11 @@ def compress_file(fname):
 
 
 def create_array(descrip, json_file):
-    git_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+    try:
+        git_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+    except subprocess.CalledProcessError:
+        print("Warning: no git info found, filling in with zeros")
+        git_sha = 40*"0"
     git_binary = [int(git_sha[ix * 4 + 0:ix * 4 + 4], 16) for ix in range(10)]
     sha1sum, regmap = compress_file(json_file)
     json_sha1_binary = [

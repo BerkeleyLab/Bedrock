@@ -42,7 +42,7 @@ def reset_trace(chip):
 
 def show_short(chip):
     base_0 = 0x110000
-    npt = 8
+    npt = 9
     addrs = list(range(base_0, base_0+npt))
     nbuf = 14
     rx_mac_b0 = 0x030000
@@ -51,7 +51,10 @@ def show_short(chip):
     addrs += list(range(rx_mac_b1, rx_mac_b1+nbuf))
     xa = chip.exchange(addrs, [None]*len(addrs))
     for ix, x in enumerate(xa[0:npt]):
-        if ix == 5:
+        if ix == 8:
+            uptime = float(x)*1024*8e-9;
+            print("%d:  %10d   %.3f s uptime" % (ix, x, uptime))
+        elif ix == 5:
             ppm = (float(x)/2**27-1.0)*1e6
             print("%d:  %10d   %+.2f ppm" % (ix, x, ppm))
         elif ix == 4:

@@ -52,6 +52,7 @@ PAGE_PROG      = bafromhex(b'0c02')            # 02 nn nn nn dd     Page program
 WRITE_DISABLE  = bafromhex(b'0104')            # 04                 Write Disaable
 WRITE_ENABLE   = bafromhex(b'0106')            # 06                 Write Enable
 WRITE_STATUS   = bafromhex(b'0201')            # 05 dd              Write Status Register
+READ_OTP       = bafromhex(b'0d4b')            # 4b nn nn nn        Like Fast Read (261 bytes)
 
 # ICAP_SPARTAN6 commands
 # UG380 table 7-1
@@ -189,8 +190,12 @@ def three_bytes(ad):
     return bytearray(adx[1:4])
 
 
-def page_read(s, ad, fast=False):
-    if fast:
+def page_read(s, ad, fast=False, otp=False):
+    if otp:
+        #  4b nn nn nn xx dd dd ... dd  Fast Read (261 bytes)
+        #  note padding byte between address and first data byte
+        p = READ_OTP + three_bytes(ad) + bytearray(257 * [0])
+    elif fast:
         #  0b nn nn nn xx dd dd ... dd  Fast Read (261 bytes)
         #  note padding byte between address and first data byte
         p = READ_FAST + three_bytes(ad) + bytearray(257 * [0])
@@ -238,13 +243,13 @@ def write_status(s, v):
 
 
 # Read flash content and dump
-def flash_dump(s, file_name, ad, page_count):
+def flash_dump(s, file_name, ad, page_count, otp=False):
     size = page_count << 8
     logging.info('Dumping flash content from add 0x%x to add 0x%x into %s, length = 0x%x...'
                  % (ad, ad + size, file_name, size))
     f = open(file_name, 'wb')
     for ba in range(ad >> 8, (ad + size) >> 8):
-        bd = page_read(s, ba << 8)
+        bd = page_read(s, ba << 8, fast=False, otp=otp)
         f.write(bd)
     f.close()
     return
@@ -287,7 +292,7 @@ def remote_erase(s, ad, size):
 
 
 # Specific to Spartan-6
-def reboot_fpga(s, ad):
+def reboot_spartan6(s, ad):
     logging.info('Rebooting FPGA %s to add 0x%x...' % (IPADDR, ad))
     #      88ffffffffffffaa9955663261xxxx328103xx32a1xxxx32c103xx30a1000e
     # p = '88ffffffffffffaa995566326100003281030132a1000032c1031030a1000e'.decode('hex')
@@ -302,18 +307,36 @@ def reboot_fpga(s, ad):
     if len(p) != 257:
         print("internal error")
         sys.exit()
-    if False:
-        # This is now implemented in FPGA gateware
-        print("bit-reversing bytes")
-        prev = p[0]
-        for ix in range(1, len(p)):   # don't bit-swap the length byte
-            b = ord(p[ix])
-            prev += byterev(b)
-        p = prev
-    s.send(p)
+    s.send(MSG_PREFIX + p)
     # if the reboot succeeds, we don't get an answer.
     # could read with a timeout, as a way to report failure to reboot.
-    return
+
+
+# ICAPE2 commands (7-series)
+# UG953? no, that just covers instantiation
+# XAPP1247? no
+# UG470? yes, see example in Table 5-18, Configuration Packets on p. 103,
+# and register address in Table 5-22.
+# FFFFFFFF  dummy
+# AA995566  sync
+# 20000000  Type 1 No Op
+# 30020001  Type 1 Write 1 word to WBSTAR
+# 00000000  Warm Boot Start Address
+# 30008001  Type 1 Write 1 word to CMD
+# 0000000F  IPROG command
+# 20000000  Type 1 No Op
+# Our hardware uses 16-bit access to ICAPE2, but that's kind of hidden
+def reboot_7series(s, ad):
+    wbstar = "%8.8x" % ad
+    # first command byte encodes payload length 256, route to ICAPE2
+    cmds = "88" + "FFFFFFFFFFFFFFFFAA9955662000000030020001" + wbstar + "300080010000000F"
+    icape2_noop = "20000000"
+    print(cmds)
+    cmdb = bafromhex(cmds + 56 * icape2_noop)
+    if len(cmdb) != 257:
+        print("internal error")
+        sys.exit()
+    s.send(MSG_PREFIX + cmdb)
 
 
 def usage():
@@ -336,9 +359,9 @@ def main(argv):
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
     try:
         helps = ["dump=", "program=", "erase=", "add=", "size=", "id", "power",
-                 "test_tx", "reboot", "status=", "ip=", "udp=", "pages=", "wait=",
-                 "status_write="]
-        opts, args = getopt.getopt(argv, "hie:td:p:ra:s:", helps)
+                 "test_tx", "reboot6", "reboot7", "status=", "ip=", "udp=", "pages=", "wait=",
+                 "status_write=", "otp"]
+        opts, args = getopt.getopt(argv, "hie:td:p:ra:s:o", helps)
     except getopt.GetoptError as err:
         print(str(err))
         usage()
@@ -362,6 +385,7 @@ def main(argv):
     # 1814 for XC6SLX16, could also get this from JEDEC status?
     page_count = 1814
     page_count = 2
+    otp = False
 
     for opt, arg in opts:
         if opt in ("-a", "--add"):
@@ -379,7 +403,7 @@ def main(argv):
             power_up(s)
         elif opt in ("--dump", "-d"):
             dump_file = arg
-            flash_dump(s, dump_file, ad, page_count)
+            flash_dump(s, dump_file, ad, page_count, otp=otp)
         elif opt in ("--program", "-p"):
             prog_file = arg
             fileinfo = os.stat(prog_file)
@@ -390,6 +414,8 @@ def main(argv):
         elif opt in ("--erase", "-e"):
             size = int(arg, base=16)
             remote_erase(s, ad, size)
+        elif opt in ("--otp", "-o"):
+            otp = True
         elif opt in ("--id", "-i"):
             read_id(s)
             read_status(s)
@@ -398,8 +424,10 @@ def main(argv):
         elif opt in ("--status_write", "-s"):
             ws = int(arg, base=16)
             write_status(s, ws)
-        elif opt in ("--reboot", "-r"):
-            reboot_fpga(s, ad)
+        elif opt in ("--reboot6"):
+            reboot_spartan6(s, ad)
+        elif opt in ("--reboot7", "-r"):
+            reboot_7series(s, ad)
         # else:
         # assert False, "unhandled option"
     logging.info('Done.')
