@@ -71,15 +71,12 @@ def decode_array(a):
             break
         print("Record %d type %d length %d" % (rec_num, flag, clen))
         if flag == 1:
-            # print struct.pack("!"+"H"*len(data), *data)
-            result += [struct.pack("!" + "H" * len(data), *data)]
+            result += [struct.pack("!" + "H" * len(data), *data).decode("utf-8")]
         elif flag == 2:
-            # print "".join([format(x, "04x") for x in data])
             result += ["".join([format(x, "04x") for x in data])]
         elif flag == 3:
             zipped = struct.pack("!" + "H" * len(data), *data)
-            # print zlib.decompress(zipped)
-            result += [zlib.decompress(zipped)]
+            result += [zlib.decompress(zipped).decode("utf-8")]
         rec_num += 1
     return result
 
