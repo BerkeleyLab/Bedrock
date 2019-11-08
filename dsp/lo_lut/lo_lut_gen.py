@@ -4,6 +4,7 @@ import os
 
 cwd = os.path.dirname(os.path.realpath(__file__)) + '/'
 
+
 def vlog_rom(fname, data, word_wi):
     VLOG_DATA_STR = "%(idx)s: data = %(wi)s\'b%(data)s;\n"
 
@@ -13,20 +14,21 @@ def vlog_rom(fname, data, word_wi):
         FH.write(VLOG_DATA_STR % ({"idx": "default", "wi": word_wi, "data": str(0)}))
     print("Wrote %s" % fname)
 
+
 def write_module(tag):
     basename = "lo_lut.v"
     fname = "lo_lut_%s.v" % tag
-    vh_re = {"lo_lut" : "lo_lut_%s",
-             "sin_lut.vh" : "sin_lut_%s.vh",
-             "cos_lut.vh" : "cos_lut_%s.vh"}
+    vh_re = {"lo_lut": "lo_lut_%s",
+             "sin_lut.vh": "sin_lut_%s.vh",
+             "cos_lut.vh": "cos_lut_%s.vh"}
 
     with open(cwd+basename, "r") as FH:
         lines = FH.readlines()
     with open(fname, "w") as FW:
-        for l in lines:
-            for k,v in vh_re.items():
-                l = l.replace(k, v % tag)
-            FW.write(l)
+        for line in lines:
+            for k, v in vh_re.items():
+                line = line.replace(k, v % tag)
+            FW.write(line)
 
     print("Wrote %s" % fname)
 
@@ -66,7 +68,7 @@ def lo_gen(amp=1.0, ph_step="14/33", st_ph=0.0, rot="1/1", n_bits=18):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a sin/cos look-up-table (LUT)')
-    parser.add_argument('-a', '--amp', type=float, default=131071.1, #  2**17-1
+    parser.add_argument('-a', '--amp', type=float, default=131071.1,  # 2**17-1
                         help='LO amplitude')
     parser.add_argument('-p', '--ph_step', type=str, default="14/33",
                         help='Phase step as irreducible fraction')
@@ -86,4 +88,3 @@ if __name__ == "__main__":
     vlog_rom("cos_lut_%s.vh" % args.tag, cos_lut, args.bits)
 
     write_module(args.tag)
-
