@@ -9,9 +9,9 @@ with open(fname, 'r') as f:
 
 if_out = sys.argv[2]
 if if_out == "145":
-   if_out = 188.6 - 145.0
+    if_out = 188.6 - 145.0
 elif if_out == "60":
-   if_out = 60.0
+    if_out = 60.0
 else:
     print("FAIL: Unsupported IF out frequency")
     sys.exit(1)
