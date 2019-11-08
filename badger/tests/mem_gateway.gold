@@ -71,15 +71,15 @@ Localbus read  r[112237] = 00000000
 00
 00
 00
-Localbus read  r[112238] = 7a7a7a7a
+Localbus read  r[112238] = 00000000
 00
 00
 00
-7a
-7a
-7a
+00
+00
+00
 Localbus write r[112230] = 41424344
-7a
+00
 00
 11
 22

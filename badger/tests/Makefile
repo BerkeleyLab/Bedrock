@@ -150,7 +150,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 
 # =====
 # Another tangent for another client
-LB_DEMO_V = lb_demo_slave.v freq_count.v fake_config_romx.v
+LB_DEMO_V = lb_demo_slave.v freq_count.v fake_config_romx.v dpram.v
 # LB_DEMO_V += badge_trace.v
 mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V)
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
@@ -197,7 +197,7 @@ VCD_ARGS_rtefi_pipe.vcd = +packet_file=$(filter %udp4.dat, $^)
 # =====
 # unified version of assembled pipeline and test peripherals,
 # configured for on-line (tap) testing
-hw_test_tb: hw_test.v $(RTEFI_V) fake_config_romx.v mac_compat_dpram.v activity.v base_rx_mac.v lb_demo_slave.v spi_gate.v freq_count.v
+hw_test_tb: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v
 VFLAGS_hw_test_tb = -m ./tap-vpi
 hw_test.vcd: tap-vpi.vpi
 .PRECIOUS: hw_test.vcd  # work-around; better if vvp could exit with success

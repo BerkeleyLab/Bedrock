@@ -39,7 +39,11 @@ def compress_file(fname):
 
 
 def create_array(descrip, json_file):
-    git_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+    try:
+        git_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+    except subprocess.CalledProcessError:
+        print("Warning: no git info found, filling in with zeros")
+        git_sha = 40*"0"
     git_binary = [int(git_sha[ix * 4 + 0:ix * 4 + 4], 16) for ix in range(10)]
     sha1sum, regmap = compress_file(json_file)
     json_sha1_binary = [
@@ -67,15 +71,12 @@ def decode_array(a):
             break
         print("Record %d type %d length %d" % (rec_num, flag, clen))
         if flag == 1:
-            # print struct.pack("!"+"H"*len(data), *data)
-            result += [struct.pack("!" + "H" * len(data), *data)]
+            result += [struct.pack("!" + "H" * len(data), *data).decode("utf-8")]
         elif flag == 2:
-            # print "".join([format(x, "04x") for x in data])
             result += ["".join([format(x, "04x") for x in data])]
         elif flag == 3:
             zipped = struct.pack("!" + "H" * len(data), *data)
-            # print zlib.decompress(zipped)
-            result += [zlib.decompress(zipped)]
+            result += [zlib.decompress(zipped).decode("utf-8")]
         rec_num += 1
     return result
 

@@ -52,6 +52,7 @@ PAGE_PROG      = bafromhex(b'0c02')            # 02 nn nn nn dd     Page program
 WRITE_DISABLE  = bafromhex(b'0104')            # 04                 Write Disaable
 WRITE_ENABLE   = bafromhex(b'0106')            # 06                 Write Enable
 WRITE_STATUS   = bafromhex(b'0201')            # 05 dd              Write Status Register
+READ_OTP       = bafromhex(b'0d4b')            # 4b nn nn nn        Like Fast Read (261 bytes)
 
 # ICAP_SPARTAN6 commands
 # UG380 table 7-1
@@ -189,8 +190,12 @@ def three_bytes(ad):
     return bytearray(adx[1:4])
 
 
-def page_read(s, ad, fast=False):
-    if fast:
+def page_read(s, ad, fast=False, otp=False):
+    if otp:
+        #  4b nn nn nn xx dd dd ... dd  Fast Read (261 bytes)
+        #  note padding byte between address and first data byte
+        p = READ_OTP + three_bytes(ad) + bytearray(257 * [0])
+    elif fast:
         #  0b nn nn nn xx dd dd ... dd  Fast Read (261 bytes)
         #  note padding byte between address and first data byte
         p = READ_FAST + three_bytes(ad) + bytearray(257 * [0])
@@ -217,7 +222,8 @@ def page_program(s, ad, bd):
     if len(bd) != PAGE:
         logging.warning('length of data %d not equal to 256' % (len(bd)))
         # pad with 0xff
-        bd += (PAGE - len(bd)) * '\xFF'
+        pad = (PAGE - len(bd)) * bytearray(b'\xFF')
+        bd += pad
         logging.warning('padded length now %d' % (len(bd)))
     logging.debug('Page Programming at %d...', ad)
     # sys.stdout.write('.')
@@ -238,13 +244,13 @@ def write_status(s, v):
 
 
 # Read flash content and dump
-def flash_dump(s, file_name, ad, page_count):
+def flash_dump(s, file_name, ad, page_count, otp=False):
     size = page_count << 8
     logging.info('Dumping flash content from add 0x%x to add 0x%x into %s, length = 0x%x...'
                  % (ad, ad + size, file_name, size))
     f = open(file_name, 'wb')
     for ba in range(ad >> 8, (ad + size) >> 8):
-        bd = page_read(s, ba << 8)
+        bd = page_read(s, ba << 8, fast=False, otp=otp)
         f.write(bd)
     f.close()
     return
@@ -258,7 +264,7 @@ def remote_program(s, file_name, ad, size):
     final_a = (stop_p << 8) - 1
     logging.info('Programming file %s to %s from add 0x%x to add 0x%x, length = 0x%x...'
                  % (file_name, IPADDR, ad, (((ad + size) >> 8) + 1) << 8, size))
-    f = open(file_name, 'r')
+    f = open(file_name, 'rb')
     # assume that '.bin' file size is always less than whole pages
     for ba in reversed(range(start_p, stop_p)):
         print("block %d" % ba)
@@ -287,7 +293,7 @@ def remote_erase(s, ad, size):
 
 
 # Specific to Spartan-6
-def reboot_fpga(s, ad):
+def reboot_spartan6(s, ad):
     logging.info('Rebooting FPGA %s to add 0x%x...' % (IPADDR, ad))
     #      88ffffffffffffaa9955663261xxxx328103xx32a1xxxx32c103xx30a1000e
     # p = '88ffffffffffffaa995566326100003281030132a1000032c1031030a1000e'.decode('hex')
@@ -302,111 +308,124 @@ def reboot_fpga(s, ad):
     if len(p) != 257:
         print("internal error")
         sys.exit()
-    if False:
-        # This is now implemented in FPGA gateware
-        print("bit-reversing bytes")
-        prev = p[0]
-        for ix in range(1, len(p)):   # don't bit-swap the length byte
-            b = ord(p[ix])
-            prev += byterev(b)
-        p = prev
-    s.send(p)
+    s.send(MSG_PREFIX + p)
     # if the reboot succeeds, we don't get an answer.
     # could read with a timeout, as a way to report failure to reboot.
-    return
 
 
-def usage():
-    print('usage: spi_test.py [commands]')
-    print('Commands:')
-    print('-h, --help')
-    print('-a, --add <address in hex>')
-    print('-d, --dump <filename>')
-    print('-m, --mem_read # Read ROM info')
-    print('-p, --program <filename>')
-    print('-e, --erase <size in hex (min 64KB)>')
-    print('-i, --id')
-    print('-s, --status <new_value in hex>')
-    print('-t, --test_tx')
-    print('-r, --reboot')
+def reboot_7series(s, ad):
+    '''
+    ICAPE2 commands (7-series)
+    UG953? no, that just covers instantiation
+    XAPP1247? no
+    UG470? yes, see example in Table 5-18, Configuration Packets on p. 103,
+    and register address in Table 5-22.
+    FFFFFFFF  dummy
+    AA995566  sync
+    20000000  Type 1 No Op
+    30020001  Type 1 Write 1 word to WBSTAR
+    00000000  Warm Boot Start Address
+    30008001  Type 1 Write 1 word to CMD
+    0000000F  IPROG command
+    20000000  Type 1 No Op
+    Our hardware uses 16-bit access to ICAPE2, but that's kind of hidden
+    '''
+    wbstar = "%8.8x" % ad
+    # first command byte encodes payload length 256, route to ICAPE2
+    cmds = "88" + "FFFFFFFFFFFFFFFFAA9955662000000030020001" + wbstar + "300080010000000F"
+    icape2_noop = "20000000"
+    print(cmds)
+    cmdb = bafromhex(cmds + 56 * icape2_noop)
+    if len(cmdb) != 257:
+        print("internal error")
+        sys.exit()
+    s.send(MSG_PREFIX + cmdb)
 
 
-# Main procedure
-def main(argv):
+def main():
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-    try:
-        helps = ["dump=", "program=", "erase=", "add=", "size=", "id", "power",
-                 "test_tx", "reboot", "status=", "ip=", "udp=", "pages=", "wait=",
-                 "status_write="]
-        opts, args = getopt.getopt(argv, "hie:td:p:ra:s:", helps)
-    except getopt.GetoptError as err:
-        print(str(err))
-        usage()
-        sys.exit(2)
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Utility for working with SPI Flash chips attached to Packet Badger")
+    parser.add_argument('--ip', default='192.168.19.8', help='IP address')
+    parser.add_argument('--udp', type=int, help='UDP Port number')
+    parser.add_argument('-a', '--add', type=lambda x: int(x,0), help='Flash offset address')
+    parser.add_argument('--pages', type=int, help='Number of 256-byte pages')
+    parser.add_argument('--mem_read', action='store_true', help='Read ROM info')
+    parser.add_argument('--id', action='store_true',
+                        help='Read SPI flash chip identification and status')
+    parser.add_argument('--erase', type=lambda x: int(x,0),
+                        help='Number of 256-byte sectors to erase')
+    parser.add_argument('--power', action='store_true', help='power up the flash chip')
+    parser.add_argument('--program', type=str, help='File to be stored in SPI Flash')
+    parser.add_argument('--dump', type=str, help='Dump flash memory contents into file')
+    parser.add_argument('--wait', default=0.001, type=float,
+                        help='Wait time between consecutive writes (seconds)')
+    parser.add_argument('--otp', action='store_true',
+                        help='Access One Time Programmable area of S25FL chip')
+    parser.add_argument('--status_write', type=lambda x: int(x,0),
+                        help='A value to be written to status register')
+    # TODO: Does the user really need to know this? Can this just be queried from the chip?
+    parser.add_argument('--reboot6', action='store_true',
+                        help='Reboot chip using Xilinx Spartan6 ICAP primitive')
+    parser.add_argument('--reboot7', action='store_true',
+                        help='Reboot chip using Xilinx 7-Series ICAPE2 primitive')
+    args = parser.parse_args()
 
     global IPADDR, PORTNUM, WAIT
-    for opt, arg in opts:
-        if opt in ("--ip"):
-            IPADDR = arg
-        if opt in ("--udp"):
-            PORTNUM = int(arg)
-
+    IPADDR, PORTNUM, WAIT = args.ip, args.udp, args.wait
     # initialize a socket, think of it as a cable
     # SOCK_DGRAM specifies that this is UDP
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
     # connect the socket, think of it as connecting the cable to the address location
-    s.connect((IPADDR, PORTNUM))
+
+    sock.connect((IPADDR, PORTNUM))
 
     # default starting address and length
-    ad = 0x0
+    ad = args.add if args.add is not None else 0x0
     # 1814 for XC6SLX16, could also get this from JEDEC status?
     page_count = 1814
     page_count = 2
+    otp = args.otp
 
-    for opt, arg in opts:
-        if opt in ("-a", "--add"):
-            ad = int(arg, base=16)
-        if opt in ("--pages"):
-            page_count = int(arg)
-        if opt in ("--wait"):
-            WAIT = float(arg)
+    if args.pages is not None:
+        page_count = args.pages
 
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            usage()
-            sys.exit()
-        elif opt in ("--power"):
-            power_up(s)
-        elif opt in ("--dump", "-d"):
-            dump_file = arg
-            flash_dump(s, dump_file, ad, page_count)
-        elif opt in ("--program", "-p"):
-            prog_file = arg
-            fileinfo = os.stat(prog_file)
-            size = fileinfo.st_size
-            print("file size %d" % size)
-            remote_erase(s, ad, size)
-            remote_program(s, prog_file, ad, size)
-        elif opt in ("--erase", "-e"):
-            size = int(arg, base=16)
-            remote_erase(s, ad, size)
-        elif opt in ("--id", "-i"):
-            read_id(s)
-            read_status(s)
-        elif opt in ("--test_tx", "-t"):
-            test_tx(s)
-        elif opt in ("--status_write", "-s"):
-            ws = int(arg, base=16)
-            write_status(s, ws)
-        elif opt in ("--reboot", "-r"):
-            reboot_fpga(s, ad)
-        # else:
-        # assert False, "unhandled option"
+    if args.power:
+        power_up(sock)
+
+    if args.dump is not None:
+        flash_dump(sock, args.dump, ad, page_count, otp=args.otp)
+
+    if args.program is not None:
+        prog_file = args.program
+        fileinfo = os.stat(prog_file)
+        size = fileinfo.st_size
+        print("file size %d" % size)
+        remote_erase(sock, ad, size)
+        remote_program(sock, prog_file, ad, size)
+
+    if args.erase:
+        remote_erase(sock, ad, args.erase)
+
+    if args.id:
+        read_id(sock)
+        read_status(sock)
+
+    # TODO: Ignoring test_tx since no codepath exists
+
+    if args.status_write is not None:
+        write_status(sock, ws)
+
+    if args.reboot6:
+        reboot_spartan6(sock, ad)
+    elif args.reboot7:
+        reboot_7series(sock, ad)
+
     logging.info('Done.')
 
     # close the socket
-    s.close()
-
+    sock.close()
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
