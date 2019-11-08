@@ -2,7 +2,7 @@
 
 module second_if_out_tb;
 
-reg clk, trace;
+reg clk, trace=0;
 integer cc;
 integer out_file;
 reg lo_mode;
