@@ -1,10 +1,12 @@
 import numpy as np
 import argparse
+import os
 
-VLOG_DATA_STR = "%(idx)s: data = %(wi)s\'b%(data)s;\n"
-
+cwd = os.path.dirname(os.path.realpath(__file__)) + '/'
 
 def vlog_rom(fname, data, word_wi):
+    VLOG_DATA_STR = "%(idx)s: data = %(wi)s\'b%(data)s;\n"
+
     with open(fname, "w") as FH:
         for i, d in enumerate(data):
             FH.write(VLOG_DATA_STR % ({"idx": i, "wi": word_wi, "data": d}))
@@ -18,7 +20,7 @@ def write_module(tag):
              "sin_lut.vh" : "sin_lut_%s.vh",
              "cos_lut.vh" : "cos_lut_%s.vh"}
 
-    with open(basename, "r") as FH:
+    with open(cwd+basename, "r") as FH:
         lines = FH.readlines()
     with open(fname, "w") as FW:
         for l in lines:

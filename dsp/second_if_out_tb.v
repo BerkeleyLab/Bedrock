@@ -5,12 +5,17 @@ module second_if_out_tb;
 reg clk, trace;
 integer cc;
 integer out_file;
+reg lo_mode;
 //reg fail=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("second_if_out.vcd");
 		$dumpvars(5,second_if_out_tb);
 	end
+
+	if (!$value$plusargs("if_lo=%d", lo_mode)) lo_mode=1'b0;
+	$display("Testing %s MHz IF out mode.", lo_mode==0 ? "145" : "60");
+
 	if ($test$plusargs("trace")) begin
 		trace = 1;
 		out_file = $fopen("second_if_out.dat", "w");
@@ -47,7 +52,7 @@ rot_dds #(.lo_amp(18'd74694)) dds(.clk(clk), .reset(1'b0),
 wire signed [17:0] out_xy;
 wire signed [15:0] dac1_out0, dac1_out1, dac2_out0, dac2_out1;
 second_if_out dut(.clk(clk), .div_state(div_state), .drive(drive), .enable(1'b1),
-	.lo_sel(1'b1),
+	.lo_sel(lo_mode),
 	.cosa(cosa), .sina(sina),
 	.dac1_out0(dac1_out0), .dac1_out1(dac1_out1),
 	.dac2_out0(dac2_out0), .dac2_out1(dac2_out1)

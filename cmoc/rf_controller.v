@@ -201,7 +201,8 @@ assign drive = drive_w[19:2];
 
 // second_if_out and ssb_out are pin-compatible
 second_if_out upconvert(.clk(clk),
-	.div_state(state[1:0]), .drive(drive), .enable(1'b1),
+	.div_state(state[1:0]), .drive(drive),
+	.enable(1'b1), .lo_sel(1'b0),
 	.cosa(cosal), .sina(sinal),
 	.dac1_out0(dac1_out0), .dac1_out1(dac1_out1),
 	.dac2_out0(dac2_out0), .dac2_out1(dac2_out1)
