@@ -340,45 +340,41 @@ def reboot_7series(s, ad):
     s.send(MSG_PREFIX + cmdb)
 
 
-def usage():
-    print('usage: spi_test.py [commands]')
-    print('Commands:')
-    print('-h, --help')
-    print('-a, --add <address in hex>')
-    print('-d, --dump <filename>')
-    print('-m, --mem_read # Read ROM info')
-    print('-p, --program <filename>')
-    print('-e, --erase <size in hex (min 64KB)>')
-    print('-i, --id')
-    print('-s, --status <new_value in hex>')
-    print('-t, --test_tx')
-    print('-r, --reboot')
-
-
-# Main procedure
-def main(argv):
+def main():
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-    try:
-        helps = ["dump=", "program=", "erase=", "add=", "size=", "id", "power",
-                 "test_tx", "reboot6", "reboot7", "status=", "ip=", "udp=", "pages=", "wait=",
-                 "status_write=", "otp"]
-        opts, args = getopt.getopt(argv, "hie:td:p:ra:s:o", helps)
-    except getopt.GetoptError as err:
-        print(str(err))
-        usage()
-        sys.exit(2)
+    import argparse
+    parser = argparse.ArgumentParser(description="LiteEth core builder")
+    builder_args(parser)
+    soc_core_args(parser)
+    parser.add_argument('--ip', default='192.168.19.8', help='IP address')
+    parser.add_argument('--udp', type=int, help='UDP Port number')
+    parser.add_argument('--add', type=int, help='<flash offset address in hex>')
+    parser.add_argument('--pages', type=int, help='Flash number of pages?')
+    parser.add_argument('--mem_read', action='store_true', help='Read ROM info')
+    parser.add_argument('--id', action='store_true',
+                        help='Read Board Identification (Marble Specific?) and SPI Flash status')
+    parser.add_argument('--erase', type=int, help='Erase SPI flash (Is this a sector?)')
+    parser.add_argument('--power', action='store_true', help='power up the SPI flash')
+    parser.add_argument('--program', type=str, help='File to be stored in SPI Flash')
+    parser.add_argument('--dump', type=str, help='File to dump flash memory content into')
+    parser.add_argument('--wait', default=0.001, type=float,
+                        help='Wait time between consecutive writes')
+    parser.add_argument('--otp', action='store_true', help='No idea')
+    parser.add_argument('--status_write', type=int, help='A hex value to be written as status to SPI')
+    # TODO: Does the user really need to know this? Can this just be queried from the chip?
+    parser.add_argument('--reboot6', action='store_true',
+                        help='Reboot chip using a xilinx 6 series primitive')
+    parser.add_argument('--reboot7', action='store_true',
+                        help='Reboot chip using a xilinx 7 series primitive')
+    args = parser.=arse_args()
 
     global IPADDR, PORTNUM, WAIT
-    for opt, arg in opts:
-        if opt in ("--ip"):
-            IPADDR = arg
-        if opt in ("--udp"):
-            PORTNUM = int(arg)
-
+    IPADDR, PORTNUM, WAIT = args.ip, args.udp, args.wait
     # initialize a socket, think of it as a cable
     # SOCK_DGRAM specifies that this is UDP
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
     # connect the socket, think of it as connecting the cable to the address location
+
     s.connect((IPADDR, PORTNUM))
 
     # default starting address and length
@@ -386,56 +382,46 @@ def main(argv):
     # 1814 for XC6SLX16, could also get this from JEDEC status?
     page_count = 1814
     page_count = 2
-    otp = False
+    otp = args.otp
 
-    for opt, arg in opts:
-        if opt in ("-a", "--add"):
-            ad = int(arg, base=16)
-        if opt in ("--pages"):
-            page_count = int(arg)
-        if opt in ("--wait"):
-            WAIT = float(arg)
+    if args.pages is not None:
+        page_count = args.pages
 
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            usage()
-            sys.exit()
-        elif opt in ("--power"):
-            power_up(s)
-        elif opt in ("--dump", "-d"):
-            dump_file = arg
-            flash_dump(s, dump_file, ad, page_count, otp=otp)
-        elif opt in ("--program", "-p"):
-            prog_file = arg
-            fileinfo = os.stat(prog_file)
-            size = fileinfo.st_size
-            print("file size %d" % size)
-            remote_erase(s, ad, size)
-            remote_program(s, prog_file, ad, size)
-        elif opt in ("--erase", "-e"):
-            size = int(arg, base=16)
-            remote_erase(s, ad, size)
-        elif opt in ("--otp", "-o"):
-            otp = True
-        elif opt in ("--id", "-i"):
-            read_id(s)
-            read_status(s)
-        elif opt in ("--test_tx", "-t"):
-            test_tx(s)
-        elif opt in ("--status_write", "-s"):
-            ws = int(arg, base=16)
-            write_status(s, ws)
-        elif opt in ("--reboot6"):
-            reboot_spartan6(s, ad)
-        elif opt in ("--reboot7", "-r"):
-            reboot_7series(s, ad)
-        # else:
-        # assert False, "unhandled option"
+    if args.power:
+        power_up(s)
+
+    if args.dumpfile is not None:
+        flash_dump(s, args.dump_file, ad, page_count, otp=args.otp)
+
+    if args.program is not None:
+        prog_file = args.program
+        fileinfo = os.stat(prog_file)
+        size = fileinfo.st_size
+        print("file size %d" % size)
+        remote_erase(s, ad, size)
+        remote_program(s, prog_file, ad, size)
+
+    if args.erase:
+        remote_erase(s, ad, args.erase)
+
+    if args.id:
+        read_id(s)
+        read_status(s)
+
+    # TODO: Ignoring test_tx since no codepath exists
+
+    if args.status_write is not None:
+        write_status(s, ws)
+
+    if args.reboot6:
+        reboot_spartan6(s, ad)
+    elif args.reboot7:
+        reboot_7series(s, ad)
+
     logging.info('Done.')
 
     # close the socket
     s.close()
-
 
 if __name__ == "__main__":
     main(sys.argv[1:])
