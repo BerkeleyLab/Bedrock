@@ -313,21 +313,23 @@ def reboot_spartan6(s, ad):
     # could read with a timeout, as a way to report failure to reboot.
 
 
-# ICAPE2 commands (7-series)
-# UG953? no, that just covers instantiation
-# XAPP1247? no
-# UG470? yes, see example in Table 5-18, Configuration Packets on p. 103,
-# and register address in Table 5-22.
-# FFFFFFFF  dummy
-# AA995566  sync
-# 20000000  Type 1 No Op
-# 30020001  Type 1 Write 1 word to WBSTAR
-# 00000000  Warm Boot Start Address
-# 30008001  Type 1 Write 1 word to CMD
-# 0000000F  IPROG command
-# 20000000  Type 1 No Op
-# Our hardware uses 16-bit access to ICAPE2, but that's kind of hidden
 def reboot_7series(s, ad):
+    '''
+    ICAPE2 commands (7-series)
+    UG953? no, that just covers instantiation
+    XAPP1247? no
+    UG470? yes, see example in Table 5-18, Configuration Packets on p. 103,
+    and register address in Table 5-22.
+    FFFFFFFF  dummy
+    AA995566  sync
+    20000000  Type 1 No Op
+    30020001  Type 1 Write 1 word to WBSTAR
+    00000000  Warm Boot Start Address
+    30008001  Type 1 Write 1 word to CMD
+    0000000F  IPROG command
+    20000000  Type 1 No Op
+    Our hardware uses 16-bit access to ICAPE2, but that's kind of hidden
+    '''
     wbstar = "%8.8x" % ad
     # first command byte encodes payload length 256, route to ICAPE2
     cmds = "88" + "FFFFFFFFFFFFFFFFAA9955662000000030020001" + wbstar + "300080010000000F"
@@ -343,24 +345,26 @@ def reboot_7series(s, ad):
 def main():
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
     import argparse
-    parser = argparse.ArgumentParser(description="Utility for working with SPI Flash chips attached to Packet Badger")
-    # builder_args(parser)
-    # soc_core_args(parser)
+    parser = argparse.ArgumentParser(
+        description="Utility for working with SPI Flash chips attached to Packet Badger")
     parser.add_argument('--ip', default='192.168.19.8', help='IP address')
     parser.add_argument('--udp', type=int, help='UDP Port number')
-    parser.add_argument('--add', type=int, help='Flash offset address in hex')
+    parser.add_argument('-a', '--add', type=lambda x: int(x,0), help='Flash offset address')
     parser.add_argument('--pages', type=int, help='Number of 256-byte pages')
     parser.add_argument('--mem_read', action='store_true', help='Read ROM info')
     parser.add_argument('--id', action='store_true',
                         help='Read SPI flash chip identification and status')
-    parser.add_argument('--erase', type=int, help='Nnumber of 256-byte sectors to erase')
+    parser.add_argument('--erase', type=lambda x: int(x,0),
+                        help='Number of 256-byte sectors to erase')
     parser.add_argument('--power', action='store_true', help='power up the flash chip')
     parser.add_argument('--program', type=str, help='File to be stored in SPI Flash')
     parser.add_argument('--dump', type=str, help='Dump flash memory contents into file')
     parser.add_argument('--wait', default=0.001, type=float,
                         help='Wait time between consecutive writes (seconds)')
-    parser.add_argument('--otp', action='store_true', help='Access One Time Programmable area of S25FL chip')
-    parser.add_argument('--status_write', type=int, help='A hex value to be written to status register')
+    parser.add_argument('--otp', action='store_true',
+                        help='Access One Time Programmable area of S25FL chip')
+    parser.add_argument('--status_write', type=lambda x: int(x,0),
+                        help='A value to be written to status register')
     # TODO: Does the user really need to know this? Can this just be queried from the chip?
     parser.add_argument('--reboot6', action='store_true',
                         help='Reboot chip using Xilinx Spartan6 ICAP primitive')
@@ -372,13 +376,13 @@ def main():
     IPADDR, PORTNUM, WAIT = args.ip, args.udp, args.wait
     # initialize a socket, think of it as a cable
     # SOCK_DGRAM specifies that this is UDP
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
     # connect the socket, think of it as connecting the cable to the address location
 
-    s.connect((IPADDR, PORTNUM))
+    sock.connect((IPADDR, PORTNUM))
 
     # default starting address and length
-    ad = 0x0
+    ad = args.add if args.add is not None else 0x0
     # 1814 for XC6SLX16, could also get this from JEDEC status?
     page_count = 1814
     page_count = 2
@@ -388,40 +392,40 @@ def main():
         page_count = args.pages
 
     if args.power:
-        power_up(s)
+        power_up(sock)
 
     if args.dump is not None:
-        flash_dump(s, args.dump, ad, page_count, otp=args.otp)
+        flash_dump(sock, args.dump, ad, page_count, otp=args.otp)
 
     if args.program is not None:
         prog_file = args.program
         fileinfo = os.stat(prog_file)
         size = fileinfo.st_size
         print("file size %d" % size)
-        remote_erase(s, ad, size)
-        remote_program(s, prog_file, ad, size)
+        remote_erase(sock, ad, size)
+        remote_program(sock, prog_file, ad, size)
 
     if args.erase:
-        remote_erase(s, ad, args.erase)
+        remote_erase(sock, ad, args.erase)
 
     if args.id:
-        read_id(s)
-        read_status(s)
+        read_id(sock)
+        read_status(sock)
 
     # TODO: Ignoring test_tx since no codepath exists
 
     if args.status_write is not None:
-        write_status(s, ws)
+        write_status(sock, ws)
 
     if args.reboot6:
-        reboot_spartan6(s, ad)
+        reboot_spartan6(sock, ad)
     elif args.reboot7:
-        reboot_7series(s, ad)
+        reboot_7series(sock, ad)
 
     logging.info('Done.')
 
     # close the socket
-    s.close()
+    sock.close()
 
 if __name__ == "__main__":
     main()
