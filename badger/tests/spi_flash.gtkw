@@ -1,12 +1,13 @@
 [timestart] 0
-[size] 1000 600
-[pos] 0 4
+[size] 1000 664
+[pos] 243 175
 *-22.120813 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] spi_flash_tb.
+[treeopen] spi_flash_tb.dut.
 [sst_width] 224
 [signals_width] 246
 [sst_expanded] 1
-[sst_vpaned_height] 154
+[sst_vpaned_height] 176
 @22
 spi_flash_tb.idata[7:0]
 @28
@@ -26,6 +27,8 @@ spi_flash_tb.dut.pack_read_ready
 spi_flash_tb.dut.rx_rpoint[8:0]
 @22
 spi_flash_tb.dut.pack_data_rx[7:0]
+@24
+spi_flash_tb.dut.engine.block_len[8:0]
 @28
 spi_flash_tb.dut.spi_clk
 spi_flash_tb.dut.spi_cs
@@ -43,5 +46,12 @@ spi_flash_tb.flash.bytecount
 @22
 spi_flash_tb.flash.buffer[7:0]
 spi_flash_tb.flash.mode[3:0]
+@200
+-icap
+@28
+spi_flash_tb.dut.engine.icap_clk
+spi_flash_tb.dut.engine.icap_en
+@22
+spi_flash_tb.dut.engine.icap_wdata[15:0]
 [pattern_trace] 1
 [pattern_trace] 0

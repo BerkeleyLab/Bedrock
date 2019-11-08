@@ -203,11 +203,14 @@ end
 assign phy_rstn = phy_rb;
 
 // One weird hack, even works in Verilator!
+// But trips up synthesis on XST.
+`ifdef SIMULATE
 always @(posedge tx_clk) begin
 	if (slave.stop_sim & ~in_use) begin
 		$display("hw_test_tb:  stopping based on localbus request");
 		$finish();
 	end
 end
+`endif
 
 endmodule
