@@ -70,20 +70,18 @@ end
 // ---------------------------------
 
 reg [5:0] lut_addr=0;
-wire [5:0] lut_addr1;
 wire signed [17:0] sin40, cos40, sin40_1, cos40_1;
 
 always @(posedge clk) lut_addr <= (lut_addr == 32) ? 0 : lut_addr + 1;
-assign lut_addr1 = (lut_addr == 32) ? 0 : lut_addr + 1;
 
-lo_lut i_lo_lut (
+lo_lut_f40 i_lo_lut (
    .clk (clk),
    .sin_addr (lut_addr), .cos_addr (lut_addr),
    .sin_data (sin40), .cos_data (cos40));
 
-lo_lut i_lo_lut1 (
+lo_lut_f40_05 i_lo_lut1 (
    .clk (clk),
-   .sin_addr (lut_addr1), .cos_addr (lut_addr1),
+   .sin_addr (lut_addr), .cos_addr (lut_addr),
    .sin_data (sin40_1), .cos_data (cos40_1));
 
 wire signed [17:0] cos_mix, sin_mix, cos_mix1, sin_mix1;

@@ -20,7 +20,7 @@ if len(sys.argv) > 2 and sys.argv[2] == "plot":
 
 peak = np.max(ss)
 peak_freq = freq_bins[np.argmax(ss)]
-print("Peak at %f Hz" % peak_freq)
+print("Peak at %f MHz" % peak_freq)
 fail = 0
 for ix in range(int(npt/2)):
     if ss[ix] > 0.003*peak:  # require spurs less than -50 dBc
