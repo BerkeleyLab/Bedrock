@@ -49,7 +49,7 @@
        .cpll_reset_out (pll1_init_reset),
        .cpll_pd_out    (pll1_pd),
        .refclk_out     (),
-       .refclk_in      (gtrefclk1));
+       .refclk_in      (gtrefclk0)); // Ideally configurable but in practice it's just generating a reset
 
     assign pll0_reset_l = pll_soft_reset | pll0_init_reset | pll0_reset;
     assign pll1_reset_l = pll_soft_reset | pll1_init_reset | pll1_reset;
@@ -59,7 +59,7 @@
       .PLL0OUTCLK_OUT     (pll0_outclk),
       .PLL0OUTREFCLK_OUT  (pll0_outrefclk),
       .PLL0LOCK_OUT       (pll0_lock),
-      .PLL0LOCKDETCLK_IN  (sysclk_in), // TODO: Check this
+      .PLL0LOCKDETCLK_IN  (sysclk_in),
       .PLL0REFCLKLOST_OUT (pll0_refclklost),
       .PLL0RESET_IN       (pll0_reset_l),
       .PLL0PD_IN          (pll0_pd),
@@ -67,7 +67,7 @@
       .PLL1OUTCLK_OUT     (pll1_outclk),
       .PLL1OUTREFCLK_OUT  (pll1_outrefclk),
       .PLL1LOCK_OUT       (pll1_lock),
-      .PLL1LOCKDETCLK_IN  (sysclk_in), // TODO: Check this
+      .PLL1LOCKDETCLK_IN  (sysclk_in),
       .PLL1REFCLKLOST_OUT (pll1_refclklost),
       .PLL1RESET_IN       (pll1_reset_l),
       .PLL1PD_IN          (pll1_pd),

@@ -11,6 +11,8 @@ module gige_top
 
    input   MGTREFCLK0_P,
    input   MGTREFCLK0_N,
+   input   MGTREFCLK1_P,
+   input   MGTREFCLK1_N,
 
    output  MGTREFCLK0_SEL1,
    output  MGTREFCLK0_SEL0,
@@ -20,7 +22,7 @@ module gige_top
    output  SFP_TXP,
    output  SFP_TXN,
 
-   output [1:0] LED
+   output [3:0] LED
 );
 
 `include "comms_pack.vh"
@@ -37,7 +39,7 @@ module gige_top
    // Clocking
    // ---------------------------------
    wire sys_clk_fast, sys_clk;
-   wire gtrefclk0;
+   wire gtrefclk0, gtrefclk1;
 
    wire gmii_tx_clk, gmii_rx_clk;
    wire gtx0_tx_out_clk, gtx0_rx_out_clk;
@@ -52,10 +54,10 @@ module gige_top
    );
 
 `ifndef SIMULATE
-   // Convert from 200 MHz to 100 MHz to meet DRPCLK timing requirement of GTP
+   // Convert from 200 MHz to 50 MHz to meet DRPCLK timing requirement of GTP
    gtp_sys_clk_mmcm i_gtp_sys_clk_mmcm (
       .clk_in  (sys_clk_fast),
-      .sys_clk (sys_clk), // Buffered 100 MHz
+      .sys_clk (sys_clk), // Buffered 50 MHz
       .locked  ()
    );
 `else
@@ -71,10 +73,23 @@ module gige_top
       .clk_out (gtrefclk0)
    );
 
+   ds_clk_buf #(
+      .GTX (1)) // Use GTX-specific primitive
+   i_ds_gtrefclk1 (
+      .clk_p   (MGTREFCLK1_P),
+      .clk_n   (MGTREFCLK1_N),
+      .clk_out (gtrefclk1)
+   );
+
+   // Status signals
+   wire gt_cpll_locked;
+   wire gt_txrx_resetdone;
+
    // Route 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
    // Ethernet clock managers
    gtx_eth_clks i_gtx_eth_clks_tx (
       .gtx_out_clk (gtx0_tx_out_clk), // From transceiver
+      .reset       (~gt_cpll_locked),
       .gtx_usr_clk (gtx0_tx_usr_clk), // Buffered 62.5 MHz
       .gmii_clk    (gmii_tx_clk),     // Buffered 125 MHz
       .pll_lock    (tx0_pll_lock)
@@ -82,6 +97,7 @@ module gige_top
 
    gtx_eth_clks i_gtx_eth_clks_rx (
       .gtx_out_clk (gtx0_rx_out_clk), // From transceiver
+      .reset       (~gt_cpll_locked),
       .gtx_usr_clk (gtx0_rx_usr_clk),
       .gmii_clk    (gmii_rx_clk),
       .pll_lock    (rx0_pll_lock)
@@ -96,10 +112,6 @@ module gige_top
    // Refer to qgtx_wrap_pack.vh for port map
 
    wire [GTX_ETH_WIDTH-1:0]    gtx0_rxd, gtx0_txd;
-
-   // Status signals
-   wire gt_cpll_locked;
-   wire gt_txrx_resetdone;
 
    wire gt0_rxfsm_resetdone, gt0_txfsm_resetdone;
    wire [2:0] gt0_rxbufstatus;
@@ -116,7 +128,7 @@ module gige_top
       .drpclk_in               (sys_clk),
       .soft_reset              (1'b0),
       .gtrefclk0               (gtrefclk0),
-      .gtrefclk1               (1'b0),
+      .gtrefclk1               (gtrefclk1),
 `ifndef SIMULATE
       // GTX0 - Ethernet
       .gt0_rxoutclk_out        (gtx0_rx_out_clk),
@@ -234,7 +246,19 @@ wire [31:0] ctr_mem_out;
 
    // LED[0] Auto-negotiation complete
    // LED[1] Received and decoded packet
-   assign LED = {lbus_led, an_status[0]};
+   // LED[2] 125 MHz buffered clock heartbeat
+   // LED[3] Lock
+
+   reg [28:0] hb_count=0;
+   wire heartbeat;
+
+   always @(posedge lb_clk) hb_count <= hb_count + 1;
+   assign heartbeat = hb_count[28]; // ~ 1 per second
+
+   assign LED = {gt_cpll_locked,
+                 heartbeat,
+                 lbus_led,
+                 an_status[0]};
 
 endmodule
 

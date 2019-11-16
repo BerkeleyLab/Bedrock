@@ -6,7 +6,13 @@
 `define GTi_WIRES(GTi) wire gt``GTi``_txresetdone, gt``GTi``_rxresetdone,\
                             gt``GTi``_txoutclk_out_l, gt``GTi``_rxoutclk_out_l;
 
-`define GTi_COMMON_WIRES(GTi) wire gt``GTi``_pll0reset, gt``GTi``_pll1reset;
+`define GTi_COMMON_WIRES(GTi) `ifdef GT``GTi``_PLL0\
+                              wire gt``GTi``_pll0reset;\
+                              wire gt``GTi``_pll1reset=1'b0;\
+                              `else\
+                              wire gt``GTi``_pll0reset=1'b0;\
+                              wire gt``GTi``_pll1reset;\
+                              `endif
 
 `define GTi_PORT_MAP(GTi) .sysclk_in                   (drpclk_in),\
                           .soft_reset_tx_in            (soft_reset),\
@@ -32,6 +38,8 @@
                           .gt0_drprdy_out              (),\
                           .gt0_drpwe_in                (1'b0),\
                           .gt0_dmonitorout_out         (),\
+                          .gt0_rxlpmlfhold_in          (1'b0),\
+                          .gt0_rxlpmhfhold_in          (1'b0),\
                           .gt0_drp_busy_out            (),\
                           .gt0_eyescanreset_in         (1'b0),\
                           .gt0_rxuserrdy_in            (gt``GTi``_rxusrrdy_in),\
@@ -45,10 +53,11 @@
                           .gt0_rxbufstatus_out         (gt``GTi``_rxbufstatus),\
                           .gt0_rxoutclk_out            (gt``GTi``_rxoutclk_out_l),\
                           .gt0_rxoutclkfabric_out      (),\
-                          .gt0_gtrxreset_in            (gt_txrx_reset),\
-                          .gt0_rxpmareset_in           (gt_txrx_reset),\
+                          .gt0_gtrxreset_in            (soft_reset),\
+                          .gt0_rxlpmreset_in           (soft_reset),\
+                          .gt0_rxpmareset_in           (soft_reset),\
                           .gt0_rxresetdone_out         (gt``GTi``_rxresetdone),\
-                          .gt0_gttxreset_in            (gt_txrx_reset),\
+                          .gt0_gttxreset_in            (soft_reset),\
                           .gt0_txuserrdy_in            (gt``GTi``_txusrrdy_in),\
                           .gt0_txusrclk_in             (gt``GTi``_txusrclk_in),\
                           .gt0_txusrclk2_in            (gt``GTi``_txusrclk2_in),\
@@ -57,7 +66,7 @@
                           .gt0_gtptxn_out              (gt``GTi``_txn_out),\
                           .gt0_gtptxp_out              (gt``GTi``_txp_out),\
                           .gt0_txoutclk_out            (gt``GTi``_txoutclk_out_l),\
-			  .gt0_txoutclkfabric_out      (),\
+                          .gt0_txoutclkfabric_out      (),\
                           .gt0_txoutclkpcs_out         (),\
                           .gt0_txresetdone_out         (gt``GTi``_txresetdone),\
                           `ifdef GT``GTi``_PLL0\

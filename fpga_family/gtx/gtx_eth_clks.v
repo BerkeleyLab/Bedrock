@@ -6,6 +6,7 @@
 
 module gtx_eth_clks (
    input  gtx_out_clk,
+   input  reset,
    output gtx_usr_clk,
    output gmii_clk,
    output pll_lock
@@ -28,7 +29,7 @@ module gtx_eth_clks (
    // Configured by gtx_ethernet_clk.tcl
    gtx_eth_mmcm i_gtx_eth_mmcm (
       .clk_in   (gtx_out_clk),
-      .reset    (1'b0),
+      .reset    (reset),
       .gtx_clk  (gtx_usr_clk_l),
       .gmii_clk (gmii_clk_l),
       .locked   (pll_lock)
