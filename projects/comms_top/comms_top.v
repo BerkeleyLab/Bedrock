@@ -99,9 +99,14 @@ module comms_top
       .clk_out (gtrefclk0)
    );
 
+   // Status signals
+   wire gt_cpll_locked;
+   wire gt_txrx_resetdone;
+
    // Route 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
    // Ethernet clock managers
    gtx_eth_clks i_gtx_eth_clks_tx (
+      .reset       (~gt_cpll_locked),
       .gtx_out_clk (gtx0_tx_out_clk), // From transceiver
       .gtx_usr_clk (gtx0_tx_usr_clk), // Buffered 62.5 MHz
       .gmii_clk    (gmii_tx_clk),     // Buffered 125 MHz
@@ -109,6 +114,7 @@ module comms_top
    );
 
    gtx_eth_clks i_gtx_eth_clks_rx (
+      .reset       (~gt_cpll_locked),
       .gtx_out_clk (gtx0_rx_out_clk), // From transceiver
       .gtx_usr_clk (gtx0_rx_usr_clk),
       .gmii_clk    (gmii_rx_clk),
@@ -126,10 +132,6 @@ module comms_top
    wire [GTX_ETH_WIDTH-1:0]    gtx0_rxd, gtx0_txd;
    wire [GTX_CC_WIDTH-1:0]     gtx1_rxd, gtx1_txd;
    wire [(GTX_CC_WIDTH/8)-1:0] gtx1_txk, gtx1_rxk;
-
-   // Status signals
-   wire gt_cpll_locked;
-   wire gt_txrx_resetdone;
 
    wire gt0_rxfsm_resetdone, gt0_txfsm_resetdone;
    wire [2:0] gt0_rxbufstatus;

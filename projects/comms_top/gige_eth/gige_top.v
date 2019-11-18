@@ -88,16 +88,16 @@ module gige_top
    // Route 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
    // Ethernet clock managers
    gtx_eth_clks i_gtx_eth_clks_tx (
-      .gtx_out_clk (gtx0_tx_out_clk), // From transceiver
       .reset       (~gt_cpll_locked),
+      .gtx_out_clk (gtx0_tx_out_clk), // From transceiver
       .gtx_usr_clk (gtx0_tx_usr_clk), // Buffered 62.5 MHz
       .gmii_clk    (gmii_tx_clk),     // Buffered 125 MHz
       .pll_lock    (tx0_pll_lock)
    );
 
    gtx_eth_clks i_gtx_eth_clks_rx (
-      .gtx_out_clk (gtx0_rx_out_clk), // From transceiver
       .reset       (~gt_cpll_locked),
+      .gtx_out_clk (gtx0_rx_out_clk), // From transceiver
       .gtx_usr_clk (gtx0_rx_usr_clk),
       .gmii_clk    (gmii_rx_clk),
       .pll_lock    (rx0_pll_lock)
@@ -185,7 +185,7 @@ module gige_top
       .cfg_wdata     (8'b0),
 
       // Auto-Negotiation
-      .an_disable    (1'b0),
+      .an_disable    (1'b1), // Keep disabled while not connecting to SFP switch
       .an_status     (an_status),
 
       // Status signals

@@ -5,8 +5,8 @@
 // ------------------------------------
 
 module gtx_eth_clks (
-   input  gtx_out_clk,
    input  reset,
+   input  gtx_out_clk,
    output gtx_usr_clk,
    output gmii_clk,
    output pll_lock
