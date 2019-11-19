@@ -12,8 +12,8 @@
                           .soft_reset_tx_in            (soft_reset),\
                           .soft_reset_rx_in            (soft_reset),\
                           .dont_reset_on_data_error_in (1'b0),\
-                          .gt0_gtrefclk0_in            (gtrefclk0),\
-                          .gt0_gtrefclk1_in            (gtrefclk1),\
+                          .gt0_gtrefclk0_in            (gt``GTi``_refclk0),\
+                          .gt0_gtrefclk1_in            (gt``GTi``_refclk1),\
                           .gt0_tx_fsm_reset_done_out   (gt``GTi``_txfsm_resetdone_out),\
                           .gt0_rx_fsm_reset_done_out   (gt``GTi``_rxfsm_resetdone_out),\
                           `ifdef GT``GTi``_8B10B_EN\
@@ -43,7 +43,7 @@
                           .gt0_eyescandataerror_out    (),\
                           .gt0_eyescantrigger_in       (1'b0),\
                           .gt0_rxusrclk_in             (gt``GTi``_rxusrclk_in),\
-                          .gt0_rxusrclk2_in            (gt``GTi``_rxusrclk2_in),\
+                          .gt0_rxusrclk2_in            (gt``GTi``_rxusrclk_in),\
                           .gt0_rxdata_out              (gt``GTi``_rxdata_out),\
                           .gt0_gtxrxp_in               (gt``GTi``_rxp_in),\
                           .gt0_gtxrxn_in               (gt``GTi``_rxn_in),\
@@ -59,7 +59,7 @@
                           .gt0_gttxreset_in            (1'b0),\
                           .gt0_txuserrdy_in            (gt``GTi``_txusrrdy_in),\
                           .gt0_txusrclk_in             (gt``GTi``_txusrclk_in),\
-                          .gt0_txusrclk2_in            (gt``GTi``_txusrclk2_in),\
+                          .gt0_txusrclk2_in            (gt``GTi``_txusrclk_in),\
                           .gt0_txbufstatus_out         (gt``GTi``_txbufstatus),\
                           .gt0_txdata_in               (gt``GTi``_txdata_in),\
                           .gt0_gtxtxn_out              (gt``GTi``_txn_out),\

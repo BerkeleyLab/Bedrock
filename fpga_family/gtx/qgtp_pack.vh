@@ -46,7 +46,7 @@
                           .gt0_eyescandataerror_out    (),\
                           .gt0_eyescantrigger_in       (1'b0),\
                           .gt0_rxusrclk_in             (gt``GTi``_rxusrclk_in),\
-                          .gt0_rxusrclk2_in            (gt``GTi``_rxusrclk2_in),\
+                          .gt0_rxusrclk2_in            (gt``GTi``_rxusrclk_in),\
                           .gt0_rxdata_out              (gt``GTi``_rxdata_out),\
                           .gt0_gtprxp_in               (gt``GTi``_rxp_in),\
                           .gt0_gtprxn_in               (gt``GTi``_rxn_in),\
@@ -60,7 +60,7 @@
                           .gt0_gttxreset_in            (soft_reset),\
                           .gt0_txuserrdy_in            (gt``GTi``_txusrrdy_in),\
                           .gt0_txusrclk_in             (gt``GTi``_txusrclk_in),\
-                          .gt0_txusrclk2_in            (gt``GTi``_txusrclk2_in),\
+                          .gt0_txusrclk2_in            (gt``GTi``_txusrclk_in),\
                           .gt0_txbufstatus_out         (gt``GTi``_txbufstatus),\
                           .gt0_txdata_in               (gt``GTi``_txdata_in),\
                           .gt0_gtptxn_out              (gt``GTi``_txn_out),\

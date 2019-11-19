@@ -133,10 +133,8 @@ module gige_top
       // GTX0 - Ethernet
       .gt0_rxoutclk_out        (gtx0_rx_out_clk),
       .gt0_rxusrclk_in         (gtx0_rx_usr_clk),
-      .gt0_rxusrclk2_in        (gtx0_rx_usr_clk),
       .gt0_txoutclk_out        (gtx0_tx_out_clk),
       .gt0_txusrclk_in         (gtx0_tx_usr_clk),
-      .gt0_txusrclk2_in        (gtx0_tx_usr_clk),
       .gt0_rxusrrdy_in         (rx0_pll_lock),
       .gt0_rxdata_out          (gtx0_rxd),
       .gt0_txusrrdy_in         (tx0_pll_lock),

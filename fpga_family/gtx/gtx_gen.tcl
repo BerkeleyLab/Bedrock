@@ -96,12 +96,9 @@ proc add_gt_protocol {gt_type config_file quad_num gtx_num en8b10b pll_type} {
    }
 }
 
-proc add_gtcommon {config_file quad_num} {
+proc add_gtcommon {config_file quad_num pll0_refclk pll1_refclk} {
 
    set module_name "q${quad_num}_gtcommon"
-
-   # Enable GT{X,P}_COMMON in QGTXWRAP.v by setting define
-   add_define "Q${quad_num}_GTCOMMON_ENABLE"
 
    puts "\[GTX_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
 
@@ -113,4 +110,31 @@ proc add_gtcommon {config_file quad_num} {
 
    # Create GT{X,P} IP
    gen_ip "gtwizard" $module_name $config_dict
+
+   # Enable GT{X,P}_COMMON in QGTXWRAP.v by setting define
+   add_define "Q${quad_num}_GTCOMMON_ENABLE"
+
+   set pll0_refclk [string toupper $pll0_refclk]
+   switch $pll0_refclk {
+      REFCLK0 -
+      REFCLK1 {
+         add_define "PLL0_${pll0_refclk}"
+      }
+      default {
+         puts "Unsupported clock source $pll0_refclk"
+         exit
+      }
+   }
+
+   set pll1_refclk [string toupper $pll1_refclk]
+   switch $pll1_refclk {
+      REFCLK0 -
+      REFCLK1 {
+         add_define "PLL1_${pll1_refclk}"
+      }
+      default {
+         puts "Unsupported clock source $pll1_refclk"
+         exit
+      }
+   }
 }

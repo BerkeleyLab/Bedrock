@@ -153,16 +153,16 @@ module comms_top
       // Common Pins
       .drpclk_in               (sys_clk),
       .soft_reset              (1'b0),
-      .gtrefclk0               (gtrefclk0),
+      .gtrefclk0               (1'b0),
       .gtrefclk1               (1'b0),
 `ifndef SIMULATE
       // GTX0 - Ethernet
+      .gt0_refclk0             (gtrefclk0),
+      .gt0_refclk1             (1'b0),
       .gt0_rxoutclk_out        (gtx0_rx_out_clk),
       .gt0_rxusrclk_in         (gtx0_rx_usr_clk),
-      .gt0_rxusrclk2_in        (gtx0_rx_usr_clk),
       .gt0_txoutclk_out        (gtx0_tx_out_clk),
       .gt0_txusrclk_in         (gtx0_tx_usr_clk),
-      .gt0_txusrclk2_in        (gtx0_tx_usr_clk),
       .gt0_rxusrrdy_in         (rx0_pll_lock),
       .gt0_rxdata_out          (gtx0_rxd),
       .gt0_txusrrdy_in         (tx0_pll_lock),
@@ -177,12 +177,12 @@ module comms_top
       .gt0_txbufstatus         (gt0_txbufstatus),
 
       // GTX1 - ChitChat
+      .gt1_refclk0             (gtrefclk0),
+      .gt1_refclk1             (1'b0),
       .gt1_rxoutclk_out        (gtx1_rx_out_clk),
       .gt1_rxusrclk_in         (gtx1_rx_out_clk),
-      .gt1_rxusrclk2_in        (gtx1_rx_out_clk),
       .gt1_txoutclk_out        (gtx1_tx_out_clk),
       .gt1_txusrclk_in         (gtx1_tx_out_clk),
-      .gt1_txusrclk2_in        (gtx1_tx_out_clk),
       .gt1_rxusrrdy_in         (gt_cpll_locked),
       .gt1_rxdata_out          (gtx1_rxd),
       .gt1_txusrrdy_in         (gt_cpll_locked),

@@ -3,12 +3,14 @@
 // Helper macros for qgtx_wrap.v
 // ------------------------------------
 
-`define GTi_PORTS(GTi, DWI) output               gt``GTi``_rxoutclk_out,\
+`define GTi_PORTS(GTi, DWI) `ifdef GT_TYPE__GTX\
+                            input                gt``GTi``_refclk0,\
+                            input                gt``GTi``_refclk1,\
+                            `endif\
+                            output               gt``GTi``_rxoutclk_out,\
                             input                gt``GTi``_rxusrclk_in,\
-                            input                gt``GTi``_rxusrclk2_in,\
                             output               gt``GTi``_txoutclk_out,\
                             input                gt``GTi``_txusrclk_in,\
-                            input                gt``GTi``_txusrclk2_in,\
                             input                gt``GTi``_rxusrrdy_in,\
                             output [DWI-1:0]     gt``GTi``_rxdata_out,\
                             input                gt``GTi``_txusrrdy_in,\
@@ -44,6 +46,10 @@
                        `undef GT2_PLL1\
                        `undef GT3_PLL1\
                        `undef GTCOMMON_EN\
+                       `undef PLL0_RECLK0\
+                       `undef PLL0_RECLK1\
+                       `undef PLL1_RECLK0\
+                       `undef PLL1_RECLK1\
                        `ifdef Q``Qi``_GT0_ENABLE `define GT0_ENABLE\
                        `endif\
                        `ifdef Q``Qi``_GT1_ENABLE `define GT1_ENABLE\
@@ -77,4 +83,12 @@
                        `ifdef Q``Qi``_GT3_PLL1 `define GT3_PLL1\
                        `endif\
                        `ifdef Q``Qi``_GTCOMMON_ENABLE `define GTCOMMON_EN\
+                       `endif\
+                       `ifdef Q``Qi``_PLL0_REFCLK0 `define PLL0_REFCLK0\
+                       `endif\
+                       `ifdef Q``Qi``_PLL0_REFCLK1 `define PLL0_REFCLK1\
+                       `endif\
+                       `ifdef Q``Qi``_PLL1_REFCLK0 `define PLL1_REFCLK0\
+                       `endif\
+                       `ifdef Q``Qi``_PLL1_REFCLK1 `define PLL1_REFCLK1\
                        `endif

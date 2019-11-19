@@ -71,6 +71,9 @@
    `ifdef GT3_ENABLE wire gt3_pll_locked=&{pll0_lock, pll1_lock}; `endif
 
 `endif // GTCOMMON_EN
+
+`else
+   // TODO: Add support for QGTX_COMMON/QPLL
 `endif // GT_TYPE__GTP
 
 `ifdef GT0_ENABLE `GTi_WIRES(0)`endif

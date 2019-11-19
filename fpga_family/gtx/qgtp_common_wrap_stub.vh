@@ -63,7 +63,11 @@
       .PLL0REFCLKLOST_OUT (pll0_refclklost),
       .PLL0RESET_IN       (pll0_reset_l),
       .PLL0PD_IN          (pll0_pd),
+`ifdef PLL0_REFCLK0
       .PLL0REFCLKSEL_IN   (3'b001),
+`else
+      .PLL0REFCLKSEL_IN   (3'b010),
+`endif
       .PLL1OUTCLK_OUT     (pll1_outclk),
       .PLL1OUTREFCLK_OUT  (pll1_outrefclk),
       .PLL1LOCK_OUT       (pll1_lock),
@@ -71,7 +75,11 @@
       .PLL1REFCLKLOST_OUT (pll1_refclklost),
       .PLL1RESET_IN       (pll1_reset_l),
       .PLL1PD_IN          (pll1_pd),
+`ifdef PLL1_REFCLK0
       .PLL1REFCLKSEL_IN   (3'b001),
+`else
+      .PLL1REFCLKSEL_IN   (3'b010),
+`endif
       .GTREFCLK0_IN       (gtrefclk0),
       .GTREFCLK1_IN       (gtrefclk1));
 
