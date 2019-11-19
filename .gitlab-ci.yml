@@ -120,6 +120,7 @@ badger_ac701:
 
 badger_ac701_run:
   stage: program
+  tags: deploy
   dependencies:
     - badger_ac701
   script:
