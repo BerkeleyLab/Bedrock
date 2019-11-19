@@ -1,7 +1,7 @@
 ###############################
-# GTX_GEN.tcl
-#    Configuration file for the QGTX_WRAP.v component which can associate pre-defined
-#    protocols to specific GTX instances within a Quad
+# MGT_GEN.tcl
+#    Configuration file for the QGT_WRAP.v component which can associate pre-defined
+#    protocols to specific GT instances within a Quad
 #
 ###############################
 
@@ -11,7 +11,7 @@ proc add_define {new_def} {
    lappend def_list $new_def
 
    # Apply defines
-   puts "\[GTX_GEN\] Adding to define list: $def_list"
+   puts "\[MGT_GEN\] Adding to define list: $def_list"
 
    set cur_list [get_property verilog_define [current_fileset]]
    set def_list [list {*}$def_list {*}$cur_list]
@@ -36,7 +36,7 @@ proc gen_ip {ipname module_name config_dict} {
 
 proc add_aux_ip {ipname config_file module_name} {
 
-   puts "\[GTX_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
+   puts "\[MGT_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
 
    # Read in configuration dict
    set config_dict [source $config_file]
@@ -44,11 +44,11 @@ proc add_aux_ip {ipname config_file module_name} {
    gen_ip $ipname $module_name $config_dict
 }
 
-proc add_gt_protocol {gt_type config_file quad_num gtx_num en8b10b pll_type} {
+proc add_gt_protocol {gt_type config_file quad_num gt_num en8b10b pll_type} {
 
-   set module_name "q${quad_num}_gtx${gtx_num}"
+   set module_name "q${quad_num}_gt${gt_num}"
 
-   puts "\[GTX_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
+   puts "\[MGT_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
 
    # Read in configuration list
    set config_dict [source $config_file]
@@ -56,14 +56,14 @@ proc add_gt_protocol {gt_type config_file quad_num gtx_num en8b10b pll_type} {
    # Force gt0_usesharedlogic to '0' to prevent generation of gt{x,p}_common
    set config_dict [dict replace $config_dict CONFIG.gt0_usesharedlogic 0]
 
-   # Create GTX IP
+   # Create GT IP
    gen_ip "gtwizard" $module_name $config_dict
 
-   # Enable GTX in QGTXWRAP.v by setting define
-   add_define "Q${quad_num}_GT${gtx_num}_ENABLE"
+   # Enable GT in QGT_WRAP.v by setting define
+   add_define "Q${quad_num}_GT${gt_num}_ENABLE"
 
-   # Set defines to include required ports in GTX instance
-   if {$en8b10b == 1}     { add_define "Q${quad_num}_GT${gtx_num}_8B10B_EN" }
+   # Set defines to include required ports in GT instance
+   if {$en8b10b == 1}     { add_define "Q${quad_num}_GT${gt_num}_8B10B_EN" }
 
    set gt_type [string toupper $gt_type]
    switch $gt_type {
@@ -82,12 +82,12 @@ proc add_gt_protocol {gt_type config_file quad_num gtx_num en8b10b pll_type} {
       PLL0 -
       PLL1 {
          if {$gt_type != "GTP"} {puts "$pll_type not supported by $gt_type" exit}
-         add_define "Q${quad_num}_GT${gtx_num}_$pll_type"
+         add_define "Q${quad_num}_GT${gt_num}_$pll_type"
       }
       CPLL -
       QPLL {
          if {$gt_type != "GTX"} {puts "$pll_type not supported by $gt_type" exit}
-         add_define "Q${quad_num}_GT${gtx_num}_$pll_type"
+         add_define "Q${quad_num}_GT${gt_num}_$pll_type"
       }
       default {
          puts "Unsupported PLL type $pll_type"
@@ -100,7 +100,7 @@ proc add_gtcommon {config_file quad_num pll0_refclk pll1_refclk} {
 
    set module_name "q${quad_num}_gtcommon"
 
-   puts "\[GTX_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
+   puts "\[MGT_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
 
    # Read in configuration list
    set config_dict [source $config_file]
@@ -111,7 +111,7 @@ proc add_gtcommon {config_file quad_num pll0_refclk pll1_refclk} {
    # Create GT{X,P} IP
    gen_ip "gtwizard" $module_name $config_dict
 
-   # Enable GT{X,P}_COMMON in QGTXWRAP.v by setting define
+   # Enable GT{X,P}_COMMON in QGT_WRAP.v by setting define
    add_define "Q${quad_num}_GTCOMMON_ENABLE"
 
    set pll0_refclk [string toupper $pll0_refclk]

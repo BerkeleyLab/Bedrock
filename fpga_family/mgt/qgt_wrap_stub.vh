@@ -1,10 +1,10 @@
 // ------------------------------------
-// QGTX_WRAP_STUB.vh
-// Generic module body of q{0,1,2,3}_gtx_wrap component.
-// This stub is meant to be `included into qgtx_wrap.v, where globally set defines will
-// configure it with the right settings and correct number of GTX instances.
+// QGT_WRAP_STUB.vh
+// Generic module body of q{0,1,2,3}_gt_wrap component.
+// This stub is meant to be `included into qgt_wrap.v, where globally set defines will
+// configure it with the right settings and correct number of GT instances.
 //
-// Helper macros are defined in qgtx_wrap_pack.vh
+// Helper macros are defined in qgt_wrap_pack.vh
 //
 // ------------------------------------
 
@@ -83,16 +83,16 @@
 
 `ifndef SIMULATE
 
-   // Instantiate wizard-generated Quad GTX
-   // Configured by gtx_gen.tcl
-   `ifdef Q3 `define Q_GT_MODULE(I) q3_gtx``I``
-   `elsif Q2 `define Q_GT_MODULE(I) q2_gtx``I``
-   `elsif Q1 `define Q_GT_MODULE(I) q1_gtx``I``
-   `else     `define Q_GT_MODULE(I) q0_gtx``I``
+   // Instantiate wizard-generated Quad GT
+   // Configured by gt_gen.tcl
+   `ifdef Q3 `define Q_GT_MODULE(I) q3_gt``I``
+   `elsif Q2 `define Q_GT_MODULE(I) q2_gt``I``
+   `elsif Q1 `define Q_GT_MODULE(I) q1_gt``I``
+   `else     `define Q_GT_MODULE(I) q0_gt``I``
    `endif
 
    `ifdef GT0_ENABLE
-      `Q_GT_MODULE(0) i_gtx0 (
+      `Q_GT_MODULE(0) i_gt0 (
          `GTi_PORT_MAP (0)
       );
 
@@ -100,7 +100,7 @@
    `endif
 
    `ifdef GT1_ENABLE
-      `Q_GT_MODULE(1) i_gtx1 (
+      `Q_GT_MODULE(1) i_gt1 (
          `GTi_PORT_MAP (1)
       );
 
@@ -108,7 +108,7 @@
    `endif
 
    `ifdef GT2_ENABLE
-      `Q_GT_MODULE(2) i_gtx2 (
+      `Q_GT_MODULE(2) i_gt2 (
          `GTi_PORT_MAP (2)
       );
 
@@ -116,7 +116,7 @@
    `endif
 
    `ifdef GT3_ENABLE
-      `Q_GT_MODULE(3) i_gtx3 (
+      `Q_GT_MODULE(3) i_gt3 (
          `GTi_PORT_MAP (3)
       );
 

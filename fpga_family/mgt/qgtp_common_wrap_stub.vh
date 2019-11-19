@@ -2,7 +2,7 @@
 // QGTP_COMMON_WRAP_STUB.vh
 // Generic module body of q{0,1,2,3}_gtp_common_wrap component.
 // This stub is meant to be `included into qgtp_common_wrap.v, where globally set defines will
-// configure it with the right settings and correct number of GTX instances.
+// configure it with the right settings and correct number of GTP instances.
 //
 // Helper macros are defined in qgtp_pack.vh
 //

@@ -42,8 +42,8 @@ module gige_top
    wire gtrefclk0, gtrefclk1;
 
    wire gmii_tx_clk, gmii_rx_clk;
-   wire gtx0_tx_out_clk, gtx0_rx_out_clk;
-   wire gtx0_tx_usr_clk, gtx0_rx_usr_clk;
+   wire gt0_tx_out_clk, gt0_rx_out_clk;
+   wire gt0_tx_usr_clk, gt0_rx_usr_clk;
    wire tx0_pll_lock, rx0_pll_lock;
 
    // Generate single clock from differential system clk
@@ -54,7 +54,7 @@ module gige_top
    );
 
 `ifndef SIMULATE
-   // Convert from 200 MHz to 50 MHz to meet DRPCLK timing requirement of GTP
+   // Convert from 200 MHz to 50 MHz to meet DRPCLK timing requirement of MGT
    gtp_sys_clk_mmcm i_gtp_sys_clk_mmcm (
       .clk_in  (sys_clk_fast),
       .sys_clk (sys_clk), // Buffered 50 MHz
@@ -87,58 +87,58 @@ module gige_top
 
    // Route 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
    // Ethernet clock managers
-   gtx_eth_clks i_gtx_eth_clks_tx (
+   mgt_eth_clks i_gt_eth_clks_tx (
       .reset       (~gt_cpll_locked),
-      .gtx_out_clk (gtx0_tx_out_clk), // From transceiver
-      .gtx_usr_clk (gtx0_tx_usr_clk), // Buffered 62.5 MHz
+      .mgt_out_clk (gt0_tx_out_clk), // From transceiver
+      .mgt_usr_clk (gt0_tx_usr_clk), // Buffered 62.5 MHz
       .gmii_clk    (gmii_tx_clk),     // Buffered 125 MHz
       .pll_lock    (tx0_pll_lock)
    );
 
-   gtx_eth_clks i_gtx_eth_clks_rx (
+   mgt_eth_clks i_gt_eth_clks_rx (
       .reset       (~gt_cpll_locked),
-      .gtx_out_clk (gtx0_rx_out_clk), // From transceiver
-      .gtx_usr_clk (gtx0_rx_usr_clk),
+      .mgt_out_clk (gt0_rx_out_clk), // From transceiver
+      .mgt_usr_clk (gt0_rx_usr_clk),
       .gmii_clk    (gmii_rx_clk),
       .pll_lock    (rx0_pll_lock)
    );
 
    // ----------------------------------
-   // GTX Instantiation
+   // GTP Instantiation
    // ---------------------------------
 
-   // Instantiate wizard-generated GTX transceiver
-   // Configured by gtx_ethernet.tcl and gtx_gen.tcl
-   // Refer to qgtx_wrap_pack.vh for port map
+   // Instantiate wizard-generated GTP transceiver
+   // Configured by gtx_ethernet.tcl and mgt_gen.tcl
+   // Refer to qgt_wrap_pack.vh for port map
 
-   wire [GTX_ETH_WIDTH-1:0]    gtx0_rxd, gtx0_txd;
+   wire [GTX_ETH_WIDTH-1:0]    gt0_rxd, gt0_txd;
 
    wire gt0_rxfsm_resetdone, gt0_txfsm_resetdone;
    wire [2:0] gt0_rxbufstatus;
    wire [1:0] gt0_txbufstatus;
 
 `ifndef SIMULATE
-   q0_gtx_wrap #(
+   q0_gt_wrap #(
 `else
-   qgtx_wrap #(
+   qgt_wrap #(
 `endif
       .GT0_WI       (GTX_ETH_WIDTH))
-   i_q0_gtx_wrap (
+   i_q0_gt_wrap (
       // Common Pins
       .drpclk_in               (sys_clk),
       .soft_reset              (1'b0),
       .gtrefclk0               (gtrefclk0),
       .gtrefclk1               (gtrefclk1),
 `ifndef SIMULATE
-      // GTX0 - Ethernet
-      .gt0_rxoutclk_out        (gtx0_rx_out_clk),
-      .gt0_rxusrclk_in         (gtx0_rx_usr_clk),
-      .gt0_txoutclk_out        (gtx0_tx_out_clk),
-      .gt0_txusrclk_in         (gtx0_tx_usr_clk),
+      // GTP0 - Ethernet
+      .gt0_rxoutclk_out        (gt0_rx_out_clk),
+      .gt0_rxusrclk_in         (gt0_rx_usr_clk),
+      .gt0_txoutclk_out        (gt0_tx_out_clk),
+      .gt0_txusrclk_in         (gt0_tx_usr_clk),
       .gt0_rxusrrdy_in         (rx0_pll_lock),
-      .gt0_rxdata_out          (gtx0_rxd),
+      .gt0_rxdata_out          (gt0_rxd),
       .gt0_txusrrdy_in         (tx0_pll_lock),
-      .gt0_txdata_in           (gtx0_txd),
+      .gt0_txdata_in           (gt0_txd),
       .gt0_rxn_in              (SFP_RXN),
       .gt0_rxp_in              (SFP_RXP),
       .gt0_txn_out             (SFP_TXN),
@@ -155,7 +155,7 @@ module gige_top
 
 
    // ----------------------------------
-   // GTX Ethernet to Local-Bus bridge
+   // GT Ethernet to Local-Bus bridge
    // ---------------------------------
    wire rx_mon, tx_mon;
    wire [6:0] an_status;
@@ -169,11 +169,11 @@ module gige_top
       .MAC        (MACADDR),
       .GTX_DW     (GTX_ETH_WIDTH))
    i_eth_gtx_bridge (
-      .gtx_tx_clk    (gtx0_tx_usr_clk), // Transceiver clock at half rate
-      .gmii_tx_clk   (gmii_tx_clk),     // Clock for Ethernet fabric - 125 MHz for 1GbE
-      .gmii_rx_clk   (gmii_rx_clk),
-      .gtx_rxd       (gtx0_rxd),
-      .gtx_txd       (gtx0_txd),
+      .gtx_tx_clk   (gt0_tx_usr_clk), // Transceiver clock at half rate
+      .gmii_tx_clk  (gmii_tx_clk),     // Clock for Ethernet fabric - 125 MHz for 1GbE
+      .gmii_rx_clk  (gmii_rx_clk),
+      .gtx_rxd      (gt0_rxd),
+      .gtx_txd      (gt0_txd),
 
       // Ethernet configuration interface
       .cfg_clk       (gmii_tx_clk),

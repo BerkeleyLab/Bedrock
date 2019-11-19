@@ -76,12 +76,12 @@ module comms_top
    wire gtrefclk0;
 
    wire gmii_tx_clk, gmii_rx_clk;
-   wire gtx0_tx_out_clk, gtx0_rx_out_clk;
-   wire gtx0_tx_usr_clk, gtx0_rx_usr_clk;
+   wire gt0_tx_out_clk, gt0_rx_out_clk;
+   wire gt0_tx_usr_clk, gt0_rx_usr_clk;
    wire tx0_pll_lock, rx0_pll_lock;
 
-   wire gtx1_tx_out_clk, gtx1_rx_out_clk;
-   wire gtx1_tx_usr_clk, gtx1_rx_usr_clk;
+   wire gt1_tx_out_clk, gt1_rx_out_clk;
+   wire gt1_tx_usr_clk, gt1_rx_usr_clk;
 
    // Generate single clock from differential system clk
    ds_clk_buf i_ds_sys_clk (
@@ -105,33 +105,33 @@ module comms_top
 
    // Route 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
    // Ethernet clock managers
-   gtx_eth_clks i_gtx_eth_clks_tx (
+   mgt_eth_clks i_gt_eth_clks_tx (
       .reset       (~gt_cpll_locked),
-      .gtx_out_clk (gtx0_tx_out_clk), // From transceiver
-      .gtx_usr_clk (gtx0_tx_usr_clk), // Buffered 62.5 MHz
+      .mgt_out_clk (gt0_tx_out_clk), // From transceiver
+      .mgt_usr_clk (gt0_tx_usr_clk), // Buffered 62.5 MHz
       .gmii_clk    (gmii_tx_clk),     // Buffered 125 MHz
       .pll_lock    (tx0_pll_lock)
    );
 
-   gtx_eth_clks i_gtx_eth_clks_rx (
+   mgt_eth_clks i_gt_eth_clks_rx (
       .reset       (~gt_cpll_locked),
-      .gtx_out_clk (gtx0_rx_out_clk), // From transceiver
-      .gtx_usr_clk (gtx0_rx_usr_clk),
+      .mgt_out_clk (gt0_rx_out_clk), // From transceiver
+      .mgt_usr_clk (gt0_rx_usr_clk),
       .gmii_clk    (gmii_rx_clk),
       .pll_lock    (rx0_pll_lock)
    );
 
    // ----------------------------------
-   // GTX Instantiation
+   // MGT Instantiation
    // ---------------------------------
 
-   // Instantiate wizard-generated GTX transceiver
-   // Configured by gtx_ethernet.tcl and gtx_gen.tcl
-   // Refer to qgtx_wrap_pack.vh for port map
+   // Instantiate wizard-generated MGT transceiver
+   // Configured by gtx_ethernet.tcl and mgt_gen.tcl
+   // Refer to qgt_wrap_pack.vh for port map
 
-   wire [GTX_ETH_WIDTH-1:0]    gtx0_rxd, gtx0_txd;
-   wire [GTX_CC_WIDTH-1:0]     gtx1_rxd, gtx1_txd;
-   wire [(GTX_CC_WIDTH/8)-1:0] gtx1_txk, gtx1_rxk;
+   wire [GTX_ETH_WIDTH-1:0]    gt0_rxd, gt0_txd;
+   wire [GTX_CC_WIDTH-1:0]     gt1_rxd, gt1_txd;
+   wire [(GTX_CC_WIDTH/8)-1:0] gt1_txk, gt1_rxk;
 
    wire gt0_rxfsm_resetdone, gt0_txfsm_resetdone;
    wire [2:0] gt0_rxbufstatus;
@@ -143,13 +143,13 @@ module comms_top
    wire gt1_rxbyteisaligned;
 
 `ifndef SIMULATE
-   q0_gtx_wrap #(
+   q0_gt_wrap #(
 `else
-   qgtx_wrap #(
+   qgt_wrap #(
 `endif
       .GT0_WI       (GTX_ETH_WIDTH),
       .GT1_WI       (GTX_CC_WIDTH))
-   i_q0_gtx_wrap (
+   i_q0_gt_wrap (
       // Common Pins
       .drpclk_in               (sys_clk),
       .soft_reset              (1'b0),
@@ -159,14 +159,14 @@ module comms_top
       // GTX0 - Ethernet
       .gt0_refclk0             (gtrefclk0),
       .gt0_refclk1             (1'b0),
-      .gt0_rxoutclk_out        (gtx0_rx_out_clk),
-      .gt0_rxusrclk_in         (gtx0_rx_usr_clk),
-      .gt0_txoutclk_out        (gtx0_tx_out_clk),
-      .gt0_txusrclk_in         (gtx0_tx_usr_clk),
+      .gt0_rxoutclk_out        (gt0_rx_out_clk),
+      .gt0_rxusrclk_in         (gt0_rx_usr_clk),
+      .gt0_txoutclk_out        (gt0_tx_out_clk),
+      .gt0_txusrclk_in         (gt0_tx_usr_clk),
       .gt0_rxusrrdy_in         (rx0_pll_lock),
-      .gt0_rxdata_out          (gtx0_rxd),
+      .gt0_rxdata_out          (gt0_rxd),
       .gt0_txusrrdy_in         (tx0_pll_lock),
-      .gt0_txdata_in           (gtx0_txd),
+      .gt0_txdata_in           (gt0_txd),
       .gt0_rxn_in              (K7_QSFP1_RX0_N),
       .gt0_rxp_in              (K7_QSFP1_RX0_P),
       .gt0_txn_out             (K7_QSFP1_TX0_N),
@@ -179,22 +179,22 @@ module comms_top
       // GTX1 - ChitChat
       .gt1_refclk0             (gtrefclk0),
       .gt1_refclk1             (1'b0),
-      .gt1_rxoutclk_out        (gtx1_rx_out_clk),
-      .gt1_rxusrclk_in         (gtx1_rx_out_clk),
-      .gt1_txoutclk_out        (gtx1_tx_out_clk),
-      .gt1_txusrclk_in         (gtx1_tx_out_clk),
+      .gt1_rxoutclk_out        (gt1_rx_out_clk),
+      .gt1_rxusrclk_in         (gt1_rx_out_clk),
+      .gt1_txoutclk_out        (gt1_tx_out_clk),
+      .gt1_txusrclk_in         (gt1_tx_out_clk),
       .gt1_rxusrrdy_in         (gt_cpll_locked),
-      .gt1_rxdata_out          (gtx1_rxd),
+      .gt1_rxdata_out          (gt1_rxd),
       .gt1_txusrrdy_in         (gt_cpll_locked),
-      .gt1_txdata_in           (gtx1_txd),
+      .gt1_txdata_in           (gt1_txd),
       .gt1_rxn_in              (K7_QSFP1_RX1_N),
       .gt1_rxp_in              (K7_QSFP1_RX1_P),
       .gt1_txn_out             (K7_QSFP1_TX1_N),
       .gt1_txp_out             (K7_QSFP1_TX1_P),
       .gt1_rxfsm_resetdone_out (gt1_rxfsm_resetdone),
       .gt1_txfsm_resetdone_out (gt1_txfsm_resetdone),
-      .gt1_rxcharisk_out       (gtx1_rxk),
-      .gt1_txcharisk_in        (gtx1_txk),
+      .gt1_rxcharisk_out       (gt1_rxk),
+      .gt1_txcharisk_in        (gt1_txk),
       .gt1_rxbyteisaligned     (gt1_rxbyteisaligned),
       .gt1_rxbufstatus         (gt1_rxbufstatus),
       .gt1_txbufstatus         (gt1_txbufstatus),
@@ -206,7 +206,7 @@ module comms_top
 
 
    // ----------------------------------
-   // GTX Ethernet to Local-Bus bridge
+   // MGT Ethernet to Local-Bus bridge
    // ---------------------------------
    wire rx_mon, tx_mon;
    wire [6:0] an_status;
@@ -220,11 +220,11 @@ module comms_top
       .MAC        (MACADDR),
       .GTX_DW     (GTX_ETH_WIDTH))
    i_eth_gtx_bridge (
-      .gtx_tx_clk    (gtx0_tx_usr_clk), // Transceiver clock at half rate
+      .gtx_tx_clk    (gt0_tx_usr_clk), // Transceiver clock at half rate
       .gmii_tx_clk   (gmii_tx_clk),     // Clock for Ethernet fabric - 125 MHz for 1GbE
       .gmii_rx_clk   (gmii_rx_clk),
-      .gtx_rxd       (gtx0_rxd),
-      .gtx_txd       (gtx0_txd),
+      .gtx_rxd       (gt0_rxd),
+      .gtx_txd       (gt0_txd),
 
       // Ethernet configuration interface
       .cfg_clk       (gmii_tx_clk),
@@ -320,13 +320,13 @@ module comms_top
       // ------------------------------------
       // GTX Interface
       // ------------------------------------
-      .gtx_tx_clk        (gtx1_tx_out_clk),
-      .gtx_rx_clk        (gtx1_rx_out_clk),
+      .gtx_tx_clk        (gt1_tx_out_clk),
+      .gtx_rx_clk        (gt1_rx_out_clk),
 
-      .gtx_tx_d          (gtx1_txd),
-      .gtx_tx_k          (gtx1_txk),
-      .gtx_rx_d          (gtx1_rxd),
-      .gtx_rx_k          (gtx1_rxk)
+      .gtx_tx_d          (gt1_txd),
+      .gtx_tx_k          (gt1_txk),
+      .gtx_rx_d          (gt1_rxd),
+      .gtx_rx_k          (gt1_rxk)
    );
 
    // ----------------------------------

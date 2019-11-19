@@ -1,6 +1,6 @@
 // ------------------------------------
-// QGTX_WRAP_PACK.VH
-// Helper macros for qgtx_wrap.v
+// QGT_WRAP_PACK.VH
+// Helper macros for qgt_wrap.v
 // ------------------------------------
 
 `define GTi_PORTS(GTi, DWI) `ifdef GT_TYPE__GTX\
