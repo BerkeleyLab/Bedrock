@@ -24,7 +24,8 @@ gige_sfp_ac701:
 
 gige_sfp_ac701_run:
   stage: program
-  tags: deploy
+  tags:
+    - deploy
   dependencies:
     - gige_sfp_ac701
   script:
