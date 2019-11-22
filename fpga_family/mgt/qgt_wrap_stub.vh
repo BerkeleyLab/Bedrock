@@ -139,8 +139,6 @@
 
 `else // SIMULATE
 
-`ifdef GT_TYPE__GTP
-
    // Instantiate dummy components to help dependency generation and basic syntax checking
    qgtp_common_wrap i_q_gtp_common_wrap(
       .sysclk_in (drpclk_in),
@@ -148,8 +146,6 @@
       .gtrefclk1 (gtrefclk1),
       .pll0_lock (),
       .pll1_lock ());
-
-`endif // GT_TYPE__GTP
 
 `endif // SIMULATE
 
