@@ -4,7 +4,7 @@ import yaml
 import json
 
 
-def parse_yaml(fname):
+def parse_yaml(fname, config=False, verbose=False):
     with open(fname, 'r') as FH:
         try:
             yy = yaml.load(FH, Loader=yaml.FullLoader)
@@ -14,6 +14,18 @@ def parse_yaml(fname):
             sys.exit(-1)
 
     config_list = [k for k in yy.keys() if not k.startswith("__")]
+
+    if not config:
+        if verbose:
+            print("No config specified, parsing all configs specified in %s" % fname)
+    else:
+        if config in config_list:
+            config_list = [config]
+            if verbose:
+                print("Parsing config %s" % config)
+        else:
+            print("WARNING: Specified config %s does not exist in %s. Parsing all configs." % (config, fname))
+
     config_dicts = [(k, yy[k]) for k in config_list]
 
     return config_dicts
@@ -59,12 +71,22 @@ if __name__ == "__main__":
                                                   defines/parameter. The output are per-config ROM metadata\
                                                   in JSON format and Verilog packages')
     parser.add_argument('-i', '--input', type=str, required=True, help='A list of json files to be merged')
-    parser.add_argument('-v', '--verbose', default=False, type=str, help='Verbose output')
+    parser.add_argument('-c', '--config', default=False, type=str,
+                        help='Configuration to generate JSON and VH files for. Default is all configs')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
     args = parser.parse_args()
 
-    cfg_dicts = parse_yaml(args.input)
+    cfg_dicts = parse_yaml(args.input, args.config, args.verbose)
+
+    # Derive basename from YAML
+    basename = args.input.split('.')[0]
+
+    # If generating more than one config append config name
+    cfg_append = True if len(cfg_dicts) > 1 else False
 
     for cfg in cfg_dicts:
-        basename = "features_" + cfg[0]
-        write_json(basename, cfg[1], args.verbose)
-        write_vlog(basename, cfg[1], args.verbose)
+        fname = basename
+        if cfg_append:
+            fname = fname + '_' + cfg[0]
+        write_json(fname, cfg[1], args.verbose)
+        write_vlog(fname, cfg[1], args.verbose)
