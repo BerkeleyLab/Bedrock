@@ -5,6 +5,10 @@ COMMUNICATION = gtx
 
 APP_NAME = comms_top
 IP_TCL = gtx_comms_top.tcl
+QF2_TOOLS =
+QF2_IP = 192.168.1.30
+FIB_IP = 192.168.1.173
+BIT = $(APP_NAME).bit
 
 # Set auto-generated dependencies before including top_rules.mk
 VERILOG_AUTOGEN += comms_features.vh
@@ -20,10 +24,12 @@ comms_features.vh: $(BUILD_DIR)/gen_features.py comms_features.yaml
 
 $(APP_NAME).bit: $(IP_TCL)
 
-# TODO: Add target capable of loading bitfile (requires QF2 tools)
+
+hwload:
+	ln -s $(QF2_TOOLS)/qf2_python .; python -m qf2_python.scripts.program_kintex_7 -t $(QF2_IP) -b $(BIT)
 
 hwtest:
-	cd test; ./comms_top_test.py -cf comms_test.cf && ./runloop 30 ./comms_top_test.py -cf comms_test.cf > log.txt
+	cd test; ./comms_top_test.py -t $(FIB_IP) -cf comms_test.cf && ./runloop 5 ./comms_top_test.py -cf comms_test.cf > log.txt
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))

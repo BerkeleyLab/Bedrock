@@ -10,6 +10,17 @@ comms_top:
     paths:
       - projects/comms_top/comms_top.bit
 
+comms_top_run:
+  stage: program
+  tags:
+    - deploy
+  dependencies:
+    - comms_top
+  script:
+    - cd projects/comms_top
+    - git clone --depth 1 --branch v0.591_unstable https://gitlab.com/qf2-pre/users.git qf2_users
+    - make QF2_TOOLS=qf2_users QF2_IP=192.168.1.30 hwload && sleep 3 && make hwtest
+
 gige_sfp_ac701:
   before_script:
     - cd projects/comms_top/gige_eth && ls /non-free
