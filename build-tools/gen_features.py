@@ -62,10 +62,14 @@ def write_vlog(basename, cfg_dict, verbose=False):
             if type(v) is str:
                 v = '\"%s\"' % v
             FH.write(p_string % (p.upper(), v))
+
+        # Use include guard for defines only
+        FH.write("`ifndef __%(n)s__\n`define __%(n)s__\n\n" % {'n': basename.upper()})
         for d, v in d_dict.items():
             if (v == 0):
                 FH.write("//")
             FH.write(d_string % d.upper())
+        FH.write("\n`endif // __%s__" % basename.upper())
 
 
 if __name__ == "__main__":
