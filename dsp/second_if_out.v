@@ -4,11 +4,15 @@
 // but this is tuned for the LCLS-II configuration where it
 // needs to generate 145 MHz, even though the input lo (cosa,sina)
 // is at 20 MHz (7/33 of clk rate).  Only DAC1 is provided.
-module second_if_out(
+module second_if_out #(
+   parameter IF_OUT_CONFIG=2 // 0 - 1300 MHz mode (145 MHz IF)
+                             // 1 - 3900 MHz mode (60 MHz IF)
+                             // 2 - Runtime mode selection
+) (
 	input clk,
 	input [1:0] div_state,
 	input signed [17:0] drive,
-	input lo_sel, // 0 - 145 MHz; 1 - 60 MHz
+	input lo_sel, // 0 - 145 MHz; 1 - 60 MHz. Ignored when IF_OUT_CONFIG != 2
 	input enable,
 	//input handedness,
 	// local oscillator
@@ -71,6 +75,9 @@ end
 
 reg [5:0] lut_addr=0;
 wire signed [17:0] sin40, cos40, sin40_1, cos40_1;
+wire signed [17:0] cos_mix, sin_mix, cos_mix1, sin_mix1;
+
+generate if (IF_OUT_CONFIG != LO_SEL_145) begin : G_60_LO
 
 always @(posedge clk) lut_addr <= (lut_addr == 32) ? 0 : lut_addr + 1;
 
@@ -83,8 +90,6 @@ lo_lut_f40_05 i_lo_lut1 (
    .clk (clk),
    .sin_addr (lut_addr), .cos_addr (lut_addr),
    .sin_data (sin40_1), .cos_data (cos40_1));
-
-wire signed [17:0] cos_mix, sin_mix, cos_mix1, sin_mix1;
 
 cpxmul_fullspeed i_cpxmul (
    .clk (clk),
@@ -100,6 +105,7 @@ cpxmul_fullspeed i_cpxmul1 (
    .re_out (cos_mix1), .im_out (sin_mix1)
 );
 
+end endgenerate
 
 // ---------------------------------
 // LO selection and IQ mixing
@@ -108,8 +114,11 @@ cpxmul_fullspeed i_cpxmul1 (
 wire signed [15:0] out1, out2;
 reg signed [17:0] cos_lo1, sin_lo1, cos_lo2, sin_lo2;
 
+wire lo_sel_l = IF_OUT_CONFIG == 2 ? lo_sel : // Runtime selection
+                IF_OUT_CONFIG == LO_SEL_145 ? LO_SEL_145 : LO_SEL_60; // Fixed selection
+
 always @(*) begin
-   case (lo_sel)
+   case (lo_sel_l)
       LO_SEL_145: begin
          cos_lo1 = cosb1; sin_lo1 = sinb1;
          cos_lo2 = cosb2; sin_lo2 = sinb2;

@@ -46,6 +46,7 @@ module comms_top_regbank #(
    output reg [2:0]    pgen_inc_step_o,
    output reg [31:0]   pgen_usr_data_o
 );
+   `include "comms_features.vh"
    `include "comms_pack.vh"
 
    localparam LOCAL_AWI = LB_AWI;
@@ -81,7 +82,7 @@ module comms_top_regbank #(
    localparam PGEN_INC_STEP_WR_REG    = 5;
    localparam PGEN_USR_DAT_WR_REG     = 6;
 
-   reg [LBUS_DATA_WIDTH-1:0] lb_rdata_reg = 0;
+   reg [C_LBUS_DATA_WIDTH-1:0] lb_rdata_reg = 0;
 
    reg [LOCAL_AWI-1:0] lb_addr_r=0;
    always @(posedge lb_clk) if (lb_valid && lb_rnw) lb_addr_r <= lb_addr;
