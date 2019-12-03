@@ -1,0 +1,6 @@
+comms_top:
+    defs:
+        CTRACE_EN: 0
+    params:
+        LBUS_ADDR_WIDTH: 24
+        LBUS_DATA_WIDTH: 32

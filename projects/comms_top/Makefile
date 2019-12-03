@@ -35,7 +35,10 @@ all: gen $(APP_NAME).bit
 
 gen : $(RTEFI_V)
 
-$(APP_NAME).bit: $(IP_TCL)
+comms_top_feat.vh: $(BUILD_DIR)/gen_features.py comms_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^)
+
+$(APP_NAME).bit: $(IP_TCL) comms_top_feat.vh
 
 # TODO: Add target capable of loading bitfile (requires QF2 tools)
 

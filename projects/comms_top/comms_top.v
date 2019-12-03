@@ -41,6 +41,7 @@ module comms_top
    output [1:0] LEDS
 );
 
+`include "comms_features.vh"
 `include "comms_pack.vh"
 
    localparam IPADDR   = {8'd192, 8'd168, 8'd1, 8'd173};
@@ -209,8 +210,8 @@ module comms_top
    wire [6:0] an_status;
 
    wire lb_valid, lb_rnw, lb_renable;
-   wire [LBUS_ADDR_WIDTH-1:0] lb_addr;
-   wire [LBUS_DATA_WIDTH-1:0] lb_wdata, lb_rdata;
+   wire [C_LBUS_ADDR_WIDTH-1:0] lb_addr;
+   wire [C_LBUS_DATA_WIDTH-1:0] lb_wdata, lb_rdata;
 
    eth_gtx_bridge #(
       .IP         (IPADDR),
@@ -389,7 +390,6 @@ module comms_top
    // ---------------------------------
 
 wire [31:0] ctr_mem_out;
-//`define CTRACE_EN
 `ifdef CTRACE_EN
 
    // Capture live data with Ctrace;
