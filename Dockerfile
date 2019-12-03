@@ -89,3 +89,5 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 	install src/vhd2vl /usr/local/bin && \
 	cd .. && \
 	rm -rf vhd2vl
+
+RUN pip3 install pyyaml
