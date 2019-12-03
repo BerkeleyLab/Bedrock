@@ -1,4 +1,5 @@
 import sys
+import os
 import argparse
 import yaml
 import json
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     cfg_dicts = parse_yaml(args.input, args.config, args.verbose)
 
     # Derive basename from YAML
-    basename = args.input.split('.')[0]
+    basename = os.path.splitext(os.path.basename(args.input))[0]
 
     # If generating more than one config append config name
     cfg_append = True if len(cfg_dicts) > 1 else False

@@ -19,10 +19,14 @@ include $(BOARD_SUPPORT_DIR)/rules.mk
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include $(BADGER_DIR)/rules.mk
 
+# gen_features.py rules
+comms_features.vh: $(BUILD_DIR)/gen_features.py $(COMMS_TOP_DIR)/comms_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^)
+
 # Set auto-generated dependencies before including top_rules.mk
-VERILOG_AUTOGEN += $(RTEFI_V)
+VERILOG_AUTOGEN += $(RTEFI_V) comms_features.vh
 
 gen : $(RTEFI_V)
 
 CLEAN_DIRS += ./.Xil _xilinx
-CLEAN += $(RTEFI_CLEAN)
+CLEAN += $(RTEFI_CLEAN) comms_features.json comms_features.vh

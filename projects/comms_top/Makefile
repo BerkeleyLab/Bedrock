@@ -11,7 +11,7 @@ FIB_IP = 192.168.1.173
 BIT = $(APP_NAME).bit
 
 # Set auto-generated dependencies before including top_rules.mk
-VERILOG_AUTOGEN += comms_features.vh
+VERILOG_AUTOGEN +=
 
 VERILOG_DEFINE_FLAGS =
 include rules.mk
@@ -19,11 +19,7 @@ include $(BUILD_DIR)/top_rules.mk
 
 all: gen $(APP_NAME).bit
 
-comms_features.vh: $(BUILD_DIR)/gen_features.py comms_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^)
-
 $(APP_NAME).bit: $(IP_TCL)
-
 
 hwload:
 	ln -s $(QF2_TOOLS)/qf2_python .; python -m qf2_python.scripts.program_kintex_7 -t $(QF2_IP) -b $(BIT)
@@ -39,5 +35,5 @@ ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     endif
 endif
 
-CLEAN += *.bit test/log.txt comms_features.json comms_features.vh
+CLEAN += *.bit test/log.txt
 include $(BUILD_DIR)/bottom_rules.mk
