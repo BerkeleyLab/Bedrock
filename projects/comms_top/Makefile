@@ -26,7 +26,7 @@ RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include $(BADGER_DIR)/rules.mk
 
 # Set auto-generated dependencies before including top_rules.mk
-VERILOG_AUTOGEN += $(RTEFI_V)
+VERILOG_AUTOGEN += $(RTEFI_V) comms_features.vh
 include $(BUILD_DIR)/top_rules.mk
 include $(BS_HARDWARE_DIR)/rules.mk
 include $(BOARD_SUPPORT_DIR)/rules.mk
@@ -38,7 +38,7 @@ gen : $(RTEFI_V)
 comms_features.vh: $(BUILD_DIR)/gen_features.py comms_features.yaml
 	$(PYTHON) $< -i $(filter %.yaml, $^)
 
-$(APP_NAME).bit: $(IP_TCL) comms_features.vh
+$(APP_NAME).bit: $(IP_TCL)
 
 # TODO: Add target capable of loading bitfile (requires QF2 tools)
 
@@ -54,5 +54,5 @@ ifneq (,$(findstring bit,$(MAKECMDGOALS)))
 endif
 
 CLEAN_DIRS += ./.Xil _xilinx
-CLEAN += $(RTEFI_CLEAN) *.bit test/log.txt
+CLEAN += $(RTEFI_CLEAN) *.bit test/log.txt comms_features.json comms_features.vh
 include $(BUILD_DIR)/bottom_rules.mk
