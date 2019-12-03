@@ -42,6 +42,9 @@ READ_STATUS_1  = bafromhex(b'020500')          # 05 dd              Read Status 
 READ_STATUS_2  = bafromhex(b'023500')
 READ_JEDEC_ID  = bafromhex(b'049f000000')      # 9F dd dd dd        Read JEDEC ID
 READ_DEVICE_ID = bafromhex(b'06900000000000')  # 90 00 00 00 dd dd  Read Device ID
+READ_CONFIG_REG = bafromhex(b'023500')         # 35 dd              Read Configuration Register
+CLEAR_STATUS   = bafromhex(b'0130')            # 30                 Clear Status Register
+RESET_CHIP     = bafromhex(b'01f0')            # f0                 Software reset
 
 ERASE_SECTOR   = bafromhex(b'0420')            # 20 nn nn nn        Erase Sector (4kB)
 ERASE_BLOCK_32 = bafromhex(b'0452')            # 52 nn nn nn        Erase Block  (32kB)
@@ -51,7 +54,8 @@ READ_DATA      = bafromhex(b'0c03')            # 03 nn nn nn        Read Data (2
 PAGE_PROG      = bafromhex(b'0c02')            # 02 nn nn nn dd     Page program (260 bytes)
 WRITE_DISABLE  = bafromhex(b'0104')            # 04                 Write Disaable
 WRITE_ENABLE   = bafromhex(b'0106')            # 06                 Write Enable
-WRITE_STATUS   = bafromhex(b'0201')            # 05 dd              Write Status Register
+WRITE_STATUS   = bafromhex(b'0201')            # 01 dd              Write Status Register
+WRITE_CONFIG   = bafromhex(b'0301')            # 01 dd dd           Write Status and Config
 READ_OTP       = bafromhex(b'0d4b')            # 4b nn nn nn        Like Fast Read (261 bytes)
 
 # ICAP_SPARTAN6 commands
@@ -123,7 +127,7 @@ def do_message(s, p, verbose=False):
 def read_id(s):
     logging.info('Reading ID...')
     p = READ_STATUS_1 + READ_STATUS_2 + READ_STATUS_1 + READ_JEDEC_ID + READ_DEVICE_ID
-    r, addr = do_message(s, p)
+    r, addr = do_message(s, p, verbose=False)
     manu_id = r[len(r) - 2]
     dev_id = r[len(r) - 1]
     capacity = r[len(r) - 8]
@@ -138,12 +142,14 @@ def read_id(s):
 
 # Read status reg 1, twice for good measure
 def read_status(s):
-    p = 2 * READ_STATUS_1
-    r, addr = do_message(s, p)
+    p = READ_CONFIG_REG + 2 * READ_STATUS_1
+    r, addr = do_message(s, p, verbose=False)
     status_reg = r[len(r) - 1]
+    config_reg = r[len(r) - 1 - 2*len(READ_STATUS_1)]
+    print("CONFIG_REG = %x" % config_reg)
     logging.debug('From: %s \n Tx length: %d\n Rx length: %d\n' % (addr, len(p), len(r)))
     logging.info('Check Status Reg: %02x' % status_reg)
-    return ~status_reg
+    return status_reg
 
 
 #  20 nn nn nn   Sector Erase (4 kB)
@@ -217,6 +223,20 @@ def power_up(s):
     return
 
 
+# Needed after an attempt to erase or program a write-protected block
+def clear_status(s):
+    p = CLEAR_STATUS
+    r, addr = do_message(s, p)
+    return
+
+
+# Not currently used
+def reset_chip(s):
+    p = RESET_CHIP
+    r, addr = do_message(s, p)
+    return
+
+
 def page_program(s, ad, bd):
     # 256 bytes of data 'bd' to be writen to page at address 'ad'
     if len(bd) != PAGE:
@@ -234,11 +254,14 @@ def page_program(s, ad, bd):
     return
 
 
-# Write Status Register
-def write_status(s, v):
-    p = WRITE_ENABLE + WRITE_STATUS
-    vx = struct.pack('!i', v)
-    pp = p + vx[3] + 7 * READ_STATUS_1
+# Write Status Register (and optionally Config)
+def write_status(s, v, config=None):
+    clear_status(s)
+    if config is None:
+        p = WRITE_ENABLE + WRITE_STATUS + bytes([v])
+    else:
+        p = WRITE_ENABLE + WRITE_CONFIG + bytes([v, config])
+    pp = p + 7 * READ_STATUS_1
     logging.info('Write Status')
     r, addr = do_message(s, pp, verbose=True)
 
@@ -348,7 +371,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Utility for working with SPI Flash chips attached to Packet Badger")
     parser.add_argument('--ip', default='192.168.19.8', help='IP address')
-    parser.add_argument('--udp', type=int, help='UDP Port number')
+    parser.add_argument('--udp', type=int, default=804, help='UDP Port number')
     parser.add_argument('-a', '--add', type=lambda x: int(x,0), help='Flash offset address')
     parser.add_argument('--pages', type=int, help='Number of 256-byte pages')
     parser.add_argument('--mem_read', action='store_true', help='Read ROM info')
@@ -365,6 +388,8 @@ def main():
                         help='Access One Time Programmable area of S25FL chip')
     parser.add_argument('--status_write', type=lambda x: int(x,0),
                         help='A value to be written to status register')
+    parser.add_argument('--config_write', type=lambda x: int(x,0),
+                        help='A value to be written to the config register')
     # TODO: Does the user really need to know this? Can this just be queried from the chip?
     parser.add_argument('--reboot6', action='store_true',
                         help='Reboot chip using Xilinx Spartan6 ICAP primitive')
@@ -402,6 +427,7 @@ def main():
         fileinfo = os.stat(prog_file)
         size = fileinfo.st_size
         print("file size %d" % size)
+        clear_status(sock)
         remote_erase(sock, ad, size)
         remote_program(sock, prog_file, ad, size)
 
@@ -415,7 +441,7 @@ def main():
     # TODO: Ignoring test_tx since no codepath exists
 
     if args.status_write is not None:
-        write_status(sock, ws)
+        write_status(sock, args.status_write, config=args.config_write)
 
     if args.reboot6:
         reboot_spartan6(sock, ad)
