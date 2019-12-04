@@ -3,6 +3,8 @@ include ../../dir_list.mk
 HARDWARE = qf2pre_kintex
 COMMUNICATION = gtx
 
+COMMS_TOP_DIR = ./
+
 APP_NAME = comms_top
 IP_TCL = gtx_comms_top.tcl
 QF2_TOOLS =
