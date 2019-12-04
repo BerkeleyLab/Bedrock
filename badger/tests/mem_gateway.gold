@@ -91,7 +91,7 @@ Localbus write r[112230] = 41424344
 20
 00
 00
-Localbus write r[112240] = 41424344
+Localbus write r[112240] = 41424345
 02
 00
 11

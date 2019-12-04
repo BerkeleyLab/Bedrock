@@ -12,11 +12,16 @@ be32 = numpy.dtype('>u4')
 
 
 class lbus_access:
-    def __init__(self, host, timeout=1.02, port=803, force_burst=False):
+    def __init__(self, host, timeout=1.02, port=803, force_burst=False, allow_burst=True):
         self.dest = (host, int(port))
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
         self.sock.settimeout(timeout)
-        self.force_burst = force_burst
+        if force_burst:
+            self.burst_avail = True
+        elif allow_burst:
+            self.burst_avail = self._burst_avail()
+        else:
+            self.burst_avail = False
 
     def _burst_avail(self,):
         """Determines if device supports block-transfer/repeat-count
@@ -65,7 +70,7 @@ class lbus_access:
                 # for jx, x in enumerate(reply):
                 #    print("%2d %8.8x" % (jx, x))
 
-        return self.force_burst or dev_burst_en
+        return dev_burst_en
 
     def _exchange(self, addrs, values=None, drop_reply=False, burst=False):
         """Exchange a single low level message
@@ -98,7 +103,9 @@ class lbus_access:
                 msg[i] = V or 0
 
         tosend = msg.tostring()
-        # print("%s Send (%d) %s", self.dest, len(tosend), binascii.hexlify(tosend))
+        if False:
+            mm = ".".join(["%8.8x" % x for x in msg])
+            print("%s Send (%d) %s" % (self.dest, len(tosend), mm))
         self.sock.sendto(tosend, self.dest)
 
         if drop_reply:
@@ -139,7 +146,7 @@ class lbus_access:
 
         consec = False
         # Check for consecutive addresses if burst mode available
-        if self._burst_avail() and (addrs == list(range(addrs[0], addrs[-1]+1))):
+        if self.burst_avail and len(addrs) > 1 and (addrs == list(range(addrs[0], addrs[-1]+1))):
             consec = True
 
         if values is None:

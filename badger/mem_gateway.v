@@ -95,6 +95,7 @@ always @(posedge clk) begin
 			data_phase <= 1;
 			big_r[63:32] <= next_isr;
 		end else if (|repeat_count) begin
+			big_r[31:0] <= next_isr;
 			repeat_count <= repeat_count - 1;
 			inc_address <= 1;
 		end else begin
