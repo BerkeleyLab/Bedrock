@@ -1,20 +1,20 @@
 `timescale 1ns / 1ps
 
 // ------------------------------------
-// QGTX_WRAP.v
-// Module declaration of 4 quad wrappers, q{0,1,2,3}_gtx_wrap
-// The body for each module is `included from qgtx_wrap_stub.vh, which
+// QGT_WRAP.v
+// Module declaration of 4 quad wrappers, q{0,1,2,3}_gt_wrap
+// The body for each module is `included from qgt_wrap_stub.vh, which
 // uses globaly set defines (redefined for each quad by `Q_REDEFINE)
 // to generate the correct per-quad configuration
 // ------------------------------------
-`include "qgtx_wrap_pack.vh"
+`include "qgt_wrap_pack.vh"
 
 `ifndef SIMULATE
 
 `define Q0
 `Q_REDEFINE(0)
 
-module q0_gtx_wrap # (
+module q0_gt_wrap # (
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
@@ -39,7 +39,7 @@ module q0_gtx_wrap # (
    output        gt_cpll_locked,
    output        gt_txrx_resetdone
 );
-`include "qgtx_wrap_stub.vh"
+`include "qgt_wrap_stub.vh"
 
 endmodule
 
@@ -47,7 +47,7 @@ endmodule
 `define Q1
 `Q_REDEFINE(1)
 
-module q1_gtx_wrap # (
+module q1_gt_wrap # (
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
@@ -72,7 +72,7 @@ module q1_gtx_wrap # (
    output        gt_cpll_locked,
    output        gt_txrx_resetdone
 );
-`include "qgtx_wrap_stub.vh"
+`include "qgt_wrap_stub.vh"
 
 endmodule
 
@@ -80,7 +80,7 @@ endmodule
 `define Q2
 `Q_REDEFINE(2)
 
-module q2_gtx_wrap # (
+module q2_gt_wrap # (
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
@@ -105,7 +105,7 @@ module q2_gtx_wrap # (
    output        gt_cpll_locked,
    output        gt_txrx_resetdone
 );
-`include "qgtx_wrap_stub.vh"
+`include "qgt_wrap_stub.vh"
 
 endmodule
 
@@ -113,7 +113,7 @@ endmodule
 `define Q3
 `Q_REDEFINE(3)
 
-module q3_gtx_wrap # (
+module q3_gt_wrap # (
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
@@ -138,7 +138,7 @@ module q3_gtx_wrap # (
    output        gt_cpll_locked,
    output        gt_txrx_resetdone
 );
-`include "qgtx_wrap_stub.vh"
+`include "qgt_wrap_stub.vh"
 
 endmodule
 
@@ -146,7 +146,7 @@ endmodule
 
 `else // SIMULATE
 
-module qgtx_wrap # (
+module qgt_wrap # (
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
@@ -159,7 +159,7 @@ module qgtx_wrap # (
    output        gt_cpll_locked,
    output        gt_txrx_resetdone
 );
-`include "qgtx_wrap_stub.vh"
+`include "qgt_wrap_stub.vh"
 
 endmodule
 

@@ -3,7 +3,7 @@ set cfg_dict {
    CONFIG.CLKOUT1_USED               {true}
    CONFIG.CLKOUT2_USED               {true}
    CONFIG.PRIMARY_PORT               {clk_in}
-   CONFIG.CLK_OUT1_PORT              {gtx_clk}
+   CONFIG.CLK_OUT1_PORT              {mgt_clk}
    CONFIG.CLK_OUT2_PORT              {gmii_clk}
    CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {62.5}
    CONFIG.CLKOUT1_REQUESTED_PHASE    {90.0}

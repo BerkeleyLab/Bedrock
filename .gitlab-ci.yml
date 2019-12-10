@@ -23,6 +23,7 @@ include:
   - local: .gitlab/ci/build.gitlab-ci.yml
   - local: .gitlab/ci/serial_io.gitlab-ci.yml
   - local: .gitlab/ci/soc.gitlab-ci.yml
+  - local: .gitlab/ci/comms_top.gitlab-ci.yml
 
 dsp_test:
   before_script:
@@ -105,18 +106,6 @@ oscope_top:
     paths:
       - projects/oscope/bmb7_cu/oscope_top.bit
 
-comms_top:
-  before_script:
-    - cd projects/comms_top && ls /non-free
-  stage: synthesis
-  script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make comms_top.bit
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
-    expire_in: 1 week
-    paths:
-      - projects/comms_top/comms_top.bit
-
 badger_ac701:
   stage: synthesis
   before_script:
@@ -131,6 +120,8 @@ badger_ac701:
 
 badger_ac701_run:
   stage: program
+  tags:
+    - deploy
   dependencies:
     - badger_ac701
   script:
