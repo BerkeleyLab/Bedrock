@@ -44,15 +44,19 @@ class Processing:
     1. Easily testable in itself. So add python unittests!
     '''
     max_val_freq, max_val = 0.0, 0.0
+    stacked_fft = {}
+    stack_n = 100
+    stack_count = 0
 
     @staticmethod
     def time_domain(data_block, ch_n):
         ch_data = data_block.data[ch_n]
         with open('td_file', 'a') as f:
-            f.write('{}, {}, {}, {}\n'.format(np.max(ch_data),
-                                              np.max(ch_data) - np.min(ch_data),
-                                              Processing.max_val_freq,
-                                              Processing.max_val))
+            f.write('{}, {}, {}, {}, {}\n'.format(np.max(ch_data),
+                                                  np.max(ch_data) - np.min(ch_data),
+                                                  Processing.max_val_freq,
+                                                  Processing.max_val,
+                                                  ch_n))
         T = np.arange(len(ch_data)) / ADC.fpga_output_rate  # in seconds
         return T, ch_data, np.max(ch_data) - np.min(ch_data)
 
@@ -76,6 +80,25 @@ class Processing:
         Processing.max_val_freq = fft_x[10:][amax]
         Processing.max_val = np.max(fft_result[10:])
         return (fft_x[10:], fft_result[10:],
+                Processing.max_val_freq, Processing.max_val)
+
+    @staticmethod
+    def stacking_fft(data_block, ch_n, window):
+        ch_data = data_block.data[ch_n]
+        count = Processing.stack_count % 100
+        fft_x = np.fft.rfftfreq(len(ch_data), d=1 / ADC.fpga_output_rate)
+        fft_result = np.abs(np.fft.rfft(ch_data))
+        if count == 0:
+            Processing.stacked_fft[ch_n] = fft_result
+        else:
+            Processing.stacked_fft[ch_n] += fft_result
+            Processing.stacked_fft[ch_n] /= count
+        amax = np.argmax(fft_result[10:])
+        Processing.max_val_freq = fft_x[10:][amax]
+        Processing.max_val = np.max(fft_result[10:])
+        Processing.stack_count += 1
+        print(count)
+        return (fft_x[10:], Processing.stacked_fft[ch_n][10:],
                 Processing.max_val_freq, Processing.max_val)
 
     @staticmethod

@@ -270,7 +270,7 @@ class Logic(BoxLayout):
                 carrier.add_subscription(plot_id, Processing.time_domain,
                                          int(plot_id[1]))
             elif plot_type == '1':
-                carrier.add_subscription(plot_id, Processing.fft,
+                carrier.add_subscription(plot_id, Processing.stacking_fft,
                                          int(plot_id[1]), 'hanning')
             elif plot_type == '3':
                 carrier.add_subscription('3', Processing.csd,
@@ -322,7 +322,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-p', '--port', help='port', dest='port', type=int, default=50006)
     parser.add_argument(
-        '-m', '--mask', help='mask', dest='mask', type=str, default='0x1')
+        '-m', '--mask', help='mask', dest='mask', type=str, default='0x11')
     parser.add_argument(
         '-n',
         '--npt_wish',
@@ -355,7 +355,7 @@ if __name__ == "__main__":
         filewritepath=args.filewritepath,
         use_spartan=args.use_spartan,
         log_decimation_factor=args.log_decimation_factor,
-        test=True)
+        test=False)
     GUIGraph.setup_gui_graphs(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
     acq_thread.daemon = True
