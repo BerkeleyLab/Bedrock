@@ -1,0 +1,43 @@
+comms_top:
+  before_script:
+    - cd projects/comms_top && ls /non-free
+  stage: synthesis
+  script:
+    - PATH=$XILINX_VIVADO/bin:$PATH make comms_top.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - projects/comms_top/comms_top.bit
+
+comms_top_run:
+  stage: program
+  tags:
+    - deploy
+  dependencies:
+    - comms_top
+  script:
+    - cd projects/comms_top
+    - git clone --depth 1 --branch v0.591_unstable https://gitlab.com/qf2-pre/users.git qf2_users
+    - make QF2_TOOLS=qf2_users QF2_IP=192.168.1.30 hwload && sleep 3 && make hwtest
+
+gige_sfp_ac701:
+  before_script:
+    - cd projects/comms_top/gige_eth && ls /non-free
+  stage: synthesis
+  script:
+    - PATH=$XILINX_VIVADO/bin:$PATH make HARDWARE=ac701 gige_top.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - projects/comms_top/gige_eth/gige_top.bit
+
+gige_sfp_ac701_run:
+  stage: program
+  tags:
+    - deploy
+  dependencies:
+    - gige_sfp_ac701
+  script:
+    - cd projects/comms_top/gige_eth && make hwload_ac701 && make hwtest_ac701
