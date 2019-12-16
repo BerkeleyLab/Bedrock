@@ -1,0 +1,30 @@
+{
+    "led_1_df": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327682,
+        "data_width": 8
+    },
+    "led_2_df": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327683,
+        "data_width": 8
+    },
+    "twi_freeze": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327687,
+        "data_width": 1
+    },
+    "wr_dac": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327689,
+        "data_width": 18
+    }
+}
