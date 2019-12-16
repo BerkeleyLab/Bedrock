@@ -1,0 +1,4 @@
+# use PART=xc6slx45t-fgg484-3
+NET "clk" LOC="K21";
+NET "clk" TNM_NET = "CLK_1";
+TIMESPEC "TS_CLK_1" = PERIOD "CLK_1" 5.00 ns HIGH 50%;
