@@ -20,6 +20,13 @@
         "base_addr": 327687,
         "data_width": 1
     },
+    "misc_config": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327688,
+        "data_width": 3
+    },
     "wr_dac": {
         "access": "rw",
         "addr_width": 0,

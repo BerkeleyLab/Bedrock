@@ -9,7 +9,7 @@ regsub -all "\n" $file_data " " file_data
 puts $file_data
 add_files $file_data
 set_property top "marble1" [current_fileset]
-set_property verilog_define [list "CHIP_FAMILY_7SERIES" "USE_I2CBRIDGE"] [current_fileset]
+set_property verilog_define [list "CHIP_FAMILY_7SERIES" "USE_I2CBRIDGE" "MMC_CTRACE"] [current_fileset]
 
 launch_runs synth_1
 wait_on_run synth_1

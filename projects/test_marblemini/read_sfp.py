@@ -101,19 +101,27 @@ def sfp_poll(port_n):
     return a
 
 
+def busmux_reset():
+    a = []
+    a += pause(10)
+    a += hw_config(1)  # turn on reset
+    a += pause(10)
+    a += hw_config(0)  # turn off reset
+    a += pause(10)
+    return a
+
+
 # see i2c_map.txt for more documentation on I2C addresses
 def hw_test_prog():
     ina_list = [0x80, 0x82, 0x84]  # U17, U3, unplaced
     # SFP1 is closest to edge of board
     # SFP4 is closest to center of board
     sfp_list = [2, 5, 4, 3]  # SFP modules 1-4
+    fmc_list = [0, 1]
     a = []
     a += pause(2)  # ignored?
     a += set_resx(2)  # avoid any confusion
-    a += hw_config(1)  # turn on reset
-    a += pause(2)
-    a += hw_config(0)  # turn off reset
-    a += pause(2)
+    a += busmux_reset()
     #
     a += busmux_sel(6)  # App bus
     a += ram_read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
@@ -124,8 +132,14 @@ def hw_test_prog():
         a += ram_read(ax, 0, 2)  # config
     for sfp_port in sfp_list:
         a += sfp_init(sfp_port)
+    a += trig_analyz()
+    for fmc_port in fmc_list:
+        a += busmux_sel(fmc_port)
+        a += pause(10)
+        a += ram_read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
+        a += ram_read(0xa0, 0, 27, addr_bytes=2)  # AT24C32D on Zest
     #
-    jump_n = 5
+    jump_n = 6
     a += jump(jump_n)
     pad_n = 32*jump_n-len(a)
     if pad_n < 0:
@@ -133,7 +147,6 @@ def hw_test_prog():
     a += pad_n*[0]  # pad
     #
     # Start of polling loop
-    a += trig_analyz()
     a += set_resx(0)
     a += busmux_sel(6)  # App bus
     a += ram_write(0x42, 2, [0, 4])  # Output registers
@@ -146,13 +159,15 @@ def hw_test_prog():
     #
     for sfp_port in sfp_list:
         a += sfp_poll(sfp_port)
+    a += buffer_flip()  # Flip right away, so most info is minimally stale
+    # This does mean that the second readout of the PCA9555 will be extra-stale
+    # or even (on the first trip through) invalid.
     a += pause(6944)
     #
     a += busmux_sel(6)  # App bus
     a += ram_write(0x42, 2, [0, 8])  # Output registers
     a += pause(2)
     a += ram_read(0x42, 0, 2)  # Physical pin logic levels
-    a += buffer_flip()
     a += pause(6944)
     if True:  # extra weird little flicker
         a += ram_write(0x42, 2, [0, 4])  # Output registers

@@ -20,6 +20,7 @@ module marble1(
 	input CSB,
 	input MOSI,
 	output MISO,
+	output MMC_INT,
 
 	// SPI boot flash programming port
 	// BOOT_CCLK treated specially in 7-series
@@ -100,7 +101,7 @@ marble_base base(
 	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked),
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
-	.cfg_d02(CFG_D02),
+	.cfg_d02(CFG_D02), .mmc_int(MMC_INT),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.TWI_SCL(TWI_SCL), .TWI_SDA(TWI_SDA),
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),

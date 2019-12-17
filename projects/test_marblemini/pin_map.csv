@@ -38,11 +38,12 @@ Pmod1_5    {LED[5]}
 Pmod1_6    {LED[6]}
 Pmod1_7    {LED[7]}
 
-# MMC microcontroller for configuration - for real!?
+# MMC microcontroller for configuration - for real!
 FPGA_SCK   SCLK
 FPGA_SSEL  CSB
 FPGA_MOSI  MOSI
 FPGA_MISO  MISO
+FPGA_INT   MMC_INT
 
 # I2C, shared access with microcontroller
 I2C_FPGA_SDA     TWI_SDA

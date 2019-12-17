@@ -61,14 +61,19 @@ net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 
 # =====
 # syntax-check only, no actual test bench code
-MARBLE_BASE_V = marble_base.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v $(LB_MARBLE_SLAVE_V)
+MARBLE_BASE_V = marble_base.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V)
 marble_base_tb: $(MARBLE_BASE_V)
-VFLAGS_marble_base_tb = -DUSE_I2CBRIDGE
+VFLAGS_marble_base_tb = -DUSE_I2CBRIDGE -DMMC_CTRACE
 
 .PHONY: no_multiple_drivers_check
 no_multiple_drivers_check: marble_base_tb
 	$(AWK) '$$NF=="drivers" && $$(NF-1)>1 {print $$0; code=1}BEGIN{code=0}END{exit(code)}' $<
 	@echo PASS
+
+# =====
+# constraint
+marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py pin_map.csv
+	$(PYTHON) $< < $(word 2, $^) > $@
 
 # =====
 # bitfile

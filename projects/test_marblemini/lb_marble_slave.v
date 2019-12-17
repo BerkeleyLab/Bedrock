@@ -26,6 +26,8 @@ module lb_marble_slave(
 	input [1:0] rx_mac_buf_status,
 	output rx_mac_hbank,
 	output cfg_d02,
+	output mmc_int,
+	output allow_mmc_eth_config,
 `ifdef USE_I2CBRIDGE
 	output twi_scl,
 	inout twi_sda,
@@ -77,7 +79,7 @@ wire [0:0] ctrace_running;
 localparam ctrace_aw=11;
 wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
 ctrace #(.dw(3), .tw(13), .aw(ctrace_aw)) mmc_ctrace(
-	.clk(clk), data(mmc_pins), .start(ctrace_start),
+	.clk(clk), .data(mmc_pins), .start(ctrace_start),
 	.running(ctrace_running), .pc_mon(ctrace_pc_mon),
 	.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
 );
@@ -218,7 +220,7 @@ end
 
 // Direct writes
 reg led_user_r=0;
-reg cfg_d02_r=0;
+reg [2:0] misc_config = 3'b000;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
 // decoding corresponds to mirror readback, see notes above
@@ -232,7 +234,7 @@ always @(posedge clk) if (local_write) case (addr[3:0])
 	5: rx_mac_hbank_r <= data_out;
 	6: stop_sim <= data_out;
 	7: twi_ctl <= data_out;
-	8: cfg_d02_r <= data_out;
+	8: misc_config <= data_out;
 	// 9: wr_dac
 	// 10: ctrace_start
 endcase
@@ -264,7 +266,9 @@ assign led1 = l1;
 assign led2 = l2;
 assign data_in = lb_data_in;
 assign rx_mac_hbank = rx_mac_hbank_r;
-assign cfg_d02 = cfg_d02_r;
+assign cfg_d02 = misc_config[0];
+assign mmc_int = misc_config[1];
+assign allow_mmc_eth_config = misc_config[2];
 
 // Bus activity trace output
 `ifdef SIMULATE

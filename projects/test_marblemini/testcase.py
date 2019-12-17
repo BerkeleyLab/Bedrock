@@ -83,7 +83,8 @@ def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, 
         mtime = 1 << 6
         dw = 2
         with open(capture, "w") as ofile:
-            produce_vcd(ofile, logic, dw=dw, mtime=mtime, t_step=8)
+            # 125 MHz clock and twi_q0=5
+            produce_vcd(ofile, logic, dw=dw, mtime=mtime, t_step=8*32)
     return readout
 
 
@@ -119,22 +120,41 @@ def print_sfp_z(a):
 
 
 def print_ina219(title, a):
+    # hard-coded for default configuration 0x399F and 0.02 Ohm shunt
+    shuntr = 0.02  # Ohm
     aa = [x1*256+x2 for x1, x2 in zip(a[0::2], a[1::2])]
     aa = [x if x < 32768 else x-65536 for x in aa]
-    print("%s:  current %d  voltage %d" % (title, aa[0], aa[1]))
+    current = float(aa[0])/65536.0*0.32/shuntr
+    busv = float(aa[1])/65536.0*32.0
+    print("%s:  current %6.3f A   voltage %7.3f V" % (title, current, busv))
+
+
+def print_ina219_config(title, a):
+    x = a[0]*256 + a[1]
+    suffix = "OK" if x == 0x399F else "BAD!"
+    print("%s INA219 config: 0x%4.4X %s" % (title, x, suffix))
 
 
 def print_readout(result, args, poll_only=False):
     if args.debug:
         print(readout)
     if not poll_only:  # init block
+        ib = 2*32  # init result memory base, derived from set_resx(2)
+        print_ina219_config("FMC1", readout[ib+1:ib+3])
+        print_ina219_config("FMC2", readout[ib+3:ib+5])
         if args.sfp:
             for ix in range(4):
                 pitch = 50
-                hx = 2*32 + 7 + pitch*ix
+                hx = ib + 7 + pitch*ix
                 print("SFP%d:  busmux readback %x" % (ix+1, readout[hx]))
                 print_sfp(readout[1+hx:pitch+hx])
-    if True:
+            for ix in range(2):
+                pitch = 28
+                hx = ib + 207 + pitch*ix
+                a1 = readout[hx:hx+pitch]
+                print("FMC%d: busmux 0x%2.2X" % (ix+1, a1[0]))
+                print(a1[1:])
+    if True:  # polling block
         if args.sfp:
             ss = "Off" if readout[0] and 0x80 else "On"
             print("Write Protect switch is %s" % ss)
@@ -151,8 +171,8 @@ def print_readout(result, args, poll_only=False):
         else:
             ss = "Off" if readout[32] and 0x80 else "On"
             print("Write Protect switch is %s" % ss)
-            print_ina219("FMC1", readout[38:38+6])
-            print_ina219("FMC2", readout[44:44+6])
+            print_ina219("FMC1", readout[38:38+4])
+            print_ina219("FMC2", readout[44:44+4])
 
 
 if __name__ == "__main__":
@@ -169,7 +189,7 @@ if __name__ == "__main__":
     parser.add_argument('--debug', action='store_true', help='print raw arrays')
     parser.add_argument('--poll', action='store_true', help='only poll for results')
     parser.add_argument('--vcd', type=str, help='VCD file to capture')
-    parser.add_argument('--rlen', type=int, default=280, help='result array length')
+    parser.add_argument('--rlen', type=int, default=327, help='result array length')
 
     args = parser.parse_args()
     ip = args.ip
