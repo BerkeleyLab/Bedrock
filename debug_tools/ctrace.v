@@ -10,10 +10,6 @@
 // compress the time axis, and I personally want an enable input that can give
 // more flexiblity to time stretching and event capturing.
 
-// "make ctrace_view" will show you the internals of its logic.
-// "make ctrace_test1_view" will show the test bench stimulus waveform,
-// as captured by ctrace, and converted to VCD by c2vcd.
-
 module ctrace #(
 	parameter dw = 8,  // width of data word captured
 	parameter tw = 24,  // width of counter word keeping track of time
@@ -65,7 +61,7 @@ end
 wire [dw+tw-1:0] saveme = {count, data2};
 
 // Trace memory
-dpram #(.dw(dw+tw), .aw(aw)) mem(
+dpram #(.dw(dw+tw), .aw(aw)) i_dpram (
 	.clka(clk), .clkb(lb_clk),
 	.addra(pc), .dina(saveme), .wena(wen),
 	.addrb(lb_addr), .doutb(lb_out)
