@@ -1,6 +1,6 @@
 ## Marble Mini meta-xdc file process with
-##   python ../meta-xdc.py < pin_map.csv > marblem_rgmii.xdc
-## Implicit dependence on Marble.xdc generated from
+##   python ../meta-xdc.py Marble.xdc pin_map.csv > marblem_rgmii.xdc
+## Explicit dependence on Marble.xdc generated from
 ##   git@github.com:BerkeleyLab/Marble.git
 
 ## First column is pin name listed in Marble.xdc

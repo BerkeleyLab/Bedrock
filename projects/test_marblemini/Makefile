@@ -24,6 +24,7 @@ SYNTH_VIVADO = $(VIVADOEXEC) -mode batch -source
 # Attention!!!!
 vpath %.v $(BADGER_DIR)/tests $(HOMELESS_DIR) $(DSP_DIR) $(SERIAL_IO_DIR) $(I2CBRIDGE_DIR) $(PERIPH_DRIVERS_DIR) $(BOARD_SUPPORT_DIR)/marblemini
 vpath %.c $(BADGER_DIR)/tests
+vpath %.xdc $(BOARD_SUPPORT_DIR)/marblemini
 
 # This must go in front of include $(BADGER_DIR)/rules.mk
 all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check
@@ -72,8 +73,8 @@ no_multiple_drivers_check: marble_base_tb
 
 # =====
 # constraint
-marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py pin_map.csv
-	$(PYTHON) $< < $(word 2, $^) > $@
+marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py Marble.xdc pin_map.csv
+	$(PYTHON) $^ > $@
 
 # =====
 # bitfile
