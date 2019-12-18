@@ -8,7 +8,7 @@ converter = {"DIFF_HSTL_II_25": ("LVDS_25", "LVCMOS25")}
 
 def merge(prefix, vport):
     # mostly simple but add a weird heuristic for converting FMC pins
-    m1 = re.match("(.*IOSTANDARD *)(\w+)(.*)", prefix)
+    m1 = re.match(r"(.*IOSTANDARD *)(\w+)(.*)", prefix)
     if m1:
         ios = m1.group(2)
         if ios in converter:
