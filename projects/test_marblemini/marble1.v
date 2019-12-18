@@ -101,7 +101,7 @@ marble_base base(
 	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked),
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
-	.cfg_d02(CFG_D02), .mmc_int(MMC_INT),
+	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.TWI_SCL(TWI_SCL), .TWI_SDA(TWI_SDA),
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),

@@ -28,6 +28,7 @@ module lb_marble_slave(
 	output cfg_d02,
 	output mmc_int,
 	output allow_mmc_eth_config,
+	output zest_pwr_en,
 `ifdef USE_I2CBRIDGE
 	output twi_scl,
 	inout twi_sda,
@@ -220,7 +221,7 @@ end
 
 // Direct writes
 reg led_user_r=0;
-reg [2:0] misc_config = 3'b000;
+reg [3:0] misc_config = 4'b0000;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
 // decoding corresponds to mirror readback, see notes above
@@ -269,6 +270,7 @@ assign rx_mac_hbank = rx_mac_hbank_r;
 assign cfg_d02 = misc_config[0];
 assign mmc_int = misc_config[1];
 assign allow_mmc_eth_config = misc_config[2];
+assign zest_pwr_en = misc_config[3];
 
 // Bus activity trace output
 `ifdef SIMULATE

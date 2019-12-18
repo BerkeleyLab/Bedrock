@@ -24,6 +24,7 @@ module marble_base(
 	input CSB,
 	input MOSI,
 	output MISO,
+	output mmc_int,
 
 	// SPI boot flash programming port
 	output boot_clk,
@@ -48,6 +49,7 @@ module marble_base(
 	output in_use,
 
 	// Something physical
+	output ZEST_PWR_EN,
 	output [7:0] LED
 );
 
@@ -94,6 +96,7 @@ wire tx_mac_done;
 wire [15:0] rx_mac_data;
 wire rx_mac_hbank;
 wire [1:0] rx_mac_buf_status;
+wire allow_mmc_eth_config;
 //
 lb_marble_slave slave(
 	.clk(lb_clk), .addr(lb_addr),
@@ -111,6 +114,9 @@ lb_marble_slave slave(
 	.wr_dac_sclk(WR_DAC_SCLK), .wr_dac_sdo(WR_DAC_DIN),
 	.wr_dac_sync({WR_DAC2_SYNC, WR_DAC1_SYNC}),
 	.cfg_d02(cfg_d02),
+	.mmc_int(mmc_int),
+	.zest_pwr_en(ZEST_PWR_EN),
+	.allow_mmc_eth_config(allow_mmc_eth_config),
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
 );
 
@@ -174,8 +180,18 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 	.rx_dv(vgmii_rx_dv), .rx_er(vgmii_rx_er),
 	.tx_clk(tx_clk) , .txd(vgmii_txd),
 	.tx_en(vgmii_tx_en),  // no vgmii_tx_er
-	.enable_rx(enable_rx),
-	.config_clk(config_clk), .config_s(config_s), .config_p(config_p),
+
+// Note special-case enabling of config controls from MMC!
+// Expect allow_mmc_eth_config to be 1 in the long run,
+// but the 0 case is very interesting for debugging, and in fact
+// is the power-on default for now.
+// Simple combinational logic is OK, since all signals are in tx_clk domain
+// (config_clk == tx_clk == lb_clk).
+
+	.enable_rx(enable_rx | ~allow_mmc_eth_config),
+	.config_clk(config_clk),
+	.config_s(config_s & allow_mmc_eth_config),
+	.config_p(config_p & allow_mmc_eth_config),
 	.config_a(config_a), .config_d(config_d),
 
 	// .host_clk(host_clk), .host_write(host_write),

@@ -67,9 +67,8 @@ PHY_RSTn   PHY_RSTN
 VCXO_EN    VCXO_EN
 
 # Zest Stuff
-
-FMC2_LA27_N    ZEST_PWR_EN
-FMC2_LA27_P    ZEST_PWR_SYNC
+FMC2_LA_27_N    ZEST_PWR_EN
+# FMC2_LA_27_P    ZEST_PWR_SYNC
 
 # Literal output follows
 
