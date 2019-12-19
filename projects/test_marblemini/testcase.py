@@ -250,6 +250,6 @@ if __name__ == "__main__":
             print(prog)
         print("Program size %d/1024" % len(prog))
         result = run_testcase(dev, prog, sim=sim, result_len=args.rlen,
-                               debug=args.debug,
-                               stop=args.stop, capture=args.vcd)
+                              debug=args.debug,
+                              stop=args.stop, capture=args.vcd)
         print_result(result, args)
