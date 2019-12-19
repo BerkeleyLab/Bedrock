@@ -61,6 +61,13 @@ net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=8030 +vcd
 
 # =====
+# Actual regression test of the above; tricky!
+# Depends on UDP port 8030 not being tied up.
+# It would be nice to have a "quiet" option to udp-vpi.
+net_slave_check: lb_marble_slave_tb udp-vpi.vpi
+	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py --sim --ramtest --stop --rlen=34
+
+# =====
 # syntax-check only, no actual test bench code
 MARBLE_BASE_V = marble_base.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V)
 marble_base_tb: $(MARBLE_BASE_V)
