@@ -11,16 +11,14 @@ Microprocessor "MMC" feature wish-list:
   eventually participate in Siphash key management
 
 Gateware feature wish-list:
-  program SPI flash from network, reboot (ICAPE2) on command
-  self-JTAG
-  spi_flash_engine and self-jtag can share spi_flash access to badger client?
   no soft core needed, right?
   should be usable as a golden image, as well as hardware verification
-  step 1: add i2cbridge and SPI micro hookup to a copy of badger/tests/rgmii_hw_test.v
-  step 2: add UDP for boot flash programming and self-JTAG
+  step 1: [DONE] add i2cbridge and SPI micro hookup to a copy of badger/tests/rgmii_hw_test.v
+  step 2: [DONE] add UDP for boot flash programming
+  step 2a: add UDP for self-JTAG
   step 3: do something with UART so hardware can be tested
   step 4: add FMC tester support code
-  step 5a: add SPI control of WR DACs (2 x AD5662, separate SYNC#)
+  step 5a: [DONE] add SPI control of WR DACs (2 x AD5662, separate SYNC#)
   step 5b: start on some kind of White Rabbit support or at least phase-locking VCXO
   step 6: test framework for DDR3, use LiteDRAM?
   The above steps are mostly orthogonal and could be pursued in parallel if we had a larger team
@@ -28,43 +26,12 @@ Gateware feature wish-list:
 Other work:
   learn how to program FT4232H config EEPROM
     add device_desc and serial number, leave vid and pid alone?
-  learn how to program/debug LPC1776
-    tcl/target/lpc17xx.cfg for NXP LPC17xx Cortex-M3 with at least 8kB SRAM
-    tcl/interface/jlink.cfg for SEGGER J-Link
-    openocd -f interface/jlink.cfg -c "transport select jtag" -f target/lpc17xx.cfg
-    only tested with openocd built from git master (commit ded67990)
-    and only checked as far as "seeing" the LPC1776, not actually doing anything
-  test FPGA UART over USB
+    learn how to program/debug LPC1776 - [DONE] see bringup.txt
   test LPC1776 UART over USB
   use MMC to test features on I2C_PM bus: 2 x LM75 (thermometers),
     MAX6639 (thermometers, thermal shutdown, fans), XRP7724 (power supply)
-
-Immediate work:
-  test i2cbridge
-    - find burst-mode bug
-    - exercise SFP setup
-    - improve support software
   add MAC hookup to spi_gate, maybe try to use ENC28J60 paradigms?
     (leave room in SPI plan for Siphash keys)
-  MMC needed to turn on power to FMC connectors:
-    EN_FMC1_P12V = P1[27]
-    EN_FMC2_P12V = P1[19]
-  make sure to leave FPGA I2C pins high-impedance:
-    I2C_FPGA_SDA = P0[10]
-    I2C_FPGA_SCL = P0[11]
-  key items for watchdogging are
-    PROG_B    = P0[4]
-    FPGA_DONE = P0[5]
-    FPGA_SCK  = P0[15]
-    FPGA_SSEL = P0[16]
-    FPGA_MISO = P0[17]
-    FPGA_MOSI = P0[18]
-    FPGA_INT  = P0[19]
-  user interface via push-button and LEDs, both active low
-    P2[12]
-    LD13  P2[25]
-    LD14  P2[24]
-    LD15  P2[21]
 
 Wishlist for next rev of Marble Mini (relative to v1.0rc3)
   fix errata according to Michal:
@@ -95,6 +62,8 @@ Wishlist for next rev of Marble Mini (relative to v1.0rc3)
       (but MMC supply is not powered from that path, so not included)
   move Q19 to bottom of board to avoid needing a second reel for that part
   see if we can use one BOM line (on one side) for all push-buttons
+  move U29 (I2C thermometer) to other end of board, near VCXOs
   NAD builds can mark S1 as DNF
   AMC builds should mark Pmod J12, J13, J16 as DNF
   reduce BOM line count in general
+  improve testablity in general

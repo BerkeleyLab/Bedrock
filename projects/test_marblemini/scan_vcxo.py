@@ -15,6 +15,9 @@ def measure_1(chip, v, dac=2, pause=1.1, repeat=1):
     prefix_map = {1: 0x10000, 2: 0x20000}
     if dac in prefix_map:
         v |= prefix_map[dac]
+    else:
+        print("Invalid DAC choice")
+        exit(1)
     chip.exchange([327689], [v])
     ppm = []
     for ix in range(repeat):
@@ -45,7 +48,7 @@ if __name__ == "__main__":
     plot2 = []
     for jx in range(0, 17):
         v = min(jx*4096, 65535)
-        ppm = measure_1(chip, v, dac=args.dac, repeat=3)
+        ppm = measure_1(chip, v, dac=int(args.dac), repeat=3)
         print("%5d  %+.2f %+.2f ppm" % (v, ppm[1], ppm[2]))
         plx += [float(v)/65535]
         plot1 += [ppm[1]]

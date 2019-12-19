@@ -1,7 +1,8 @@
 from time import sleep
 import sys
-sys.path.append("i2cbridge")
-sys.path.append("bedrock/badger")
+bedrock_dir = "../../"
+sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
+sys.path.append(bedrock_dir + "badger")
 import lbus_access
 from c2vcd import produce_vcd
 
@@ -123,9 +124,9 @@ def print_ina219(title, a):
     # hard-coded for default configuration 0x399F and 0.02 Ohm shunt
     shuntr = 0.02  # Ohm
     aa = [x1*256+x2 for x1, x2 in zip(a[0::2], a[1::2])]
-    aa = [x if x < 32768 else x-65536 for x in aa]
-    current = float(aa[0])/65536.0*0.32/shuntr
-    busv = float(aa[1])/65536.0*32.0
+    aa[0] = aa[0] if aa[0] < 32768 else aa[0]-65536  # only current is signed
+    current = float(aa[0])/32768.0*0.32/shuntr
+    busv = float(aa[1] & 0xfff8)/65536.0*32.0
     print("%s:  current %6.3f A   voltage %7.3f V" % (title, current, busv))
 
 
@@ -156,7 +157,8 @@ def print_readout(result, args, poll_only=False):
                 print(a1[1:])
     if True:  # polling block
         if args.sfp:
-            ss = "Off" if readout[0] and 0x80 else "On"
+            wp_bit = readout[0] & 0x80
+            ss = "Off" if wp_bit else "On"
             print("Write Protect switch is %s" % ss)
             sfp_pp = readout[2]*256 + readout[3]  # parallel SFP status via U34
             sfp_pp1 = [(sfp_pp >> ix*4) & 0xf for ix in [2, 1, 0, 3]]
@@ -169,7 +171,8 @@ def print_readout(result, args, poll_only=False):
                 print("SFP%d:  0x%X" % (ix+1, sfp_pp1[ix]))
                 print_sfp_z(a1)
         else:
-            ss = "Off" if readout[32] and 0x80 else "On"
+            wp_bit = readout[32] & 0x80
+            ss = "Off" if wp_bit else "On"
             print("Write Protect switch is %s" % ss)
             print_ina219("FMC1", readout[38:38+4])
             print_ina219("FMC2", readout[44:44+4])

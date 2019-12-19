@@ -1,7 +1,10 @@
 // Top level Marble-Mini test build
 // Mostly cut-and-paste from rgmii_hw_test.v
 module marble1(
+	input GTPREFCLK_P,
+	input GTPREFCLK_N,
 	input SYSCLK_P,
+
 	// RGMII Tx port
 	output [3:0] RGMII_TXD,
 	output RGMII_TX_CTRL,
@@ -50,12 +53,36 @@ module marble1(
 );
 
 assign VCXO_EN = 1;
-wire SYSCLK_N = 0;
+wire gtpclk0, gtpclk;
+// Gateway GTP refclk to fabric
+IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0));
+// Vivado fails, with egregiously useless error messages,
+// if you don't put this BUFG in the chain to the MMCM.
+BUFG passg_125(.I(gtpclk0), .O(gtpclk));
+
 parameter in_phase_tx_clk = 1;
 // Standardized interface, hardware-dependent implementation
 wire tx_clk, tx_clk90;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
+
+`define USE_GTPCLK
+`ifdef USE_GTPCLK
+xilinx7_clocks #(
+        .DIFF_CLKIN("BYPASS"),
+        .CLKIN_PERIOD(8),  // REFCLK = 125 MHz
+        .MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
+        .DIV0     (8)       // 1 GHz / 8 = 125 MHz
+) clocks_i(
+        .sysclk_p (gtpclk),
+        .sysclk_n (1'b0),
+        .reset    (pll_reset),
+        .clk_out0 (tx_clk),
+        .clk_out2 (tx_clk90),
+        .locked   (clk_locked)
+);
+`else
+wire SYSCLK_N = 0;
 gmii_clock_handle clocks(
 	.sysclk_p(SYSCLK_P),
 	.sysclk_n(SYSCLK_N),
@@ -64,6 +91,7 @@ gmii_clock_handle clocks(
 	.clk_eth_90(tx_clk90),
 	.clk_locked(clk_locked)
 );
+`endif
 
 // Double-data-rate conversion
 wire vgmii_tx_clk, vgmii_tx_clk90, vgmii_rx_clk;

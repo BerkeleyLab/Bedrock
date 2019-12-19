@@ -12,21 +12,31 @@ There's a trivial utility (mutil) that documents common operations,
 and [instructions](bringup.txt) for initial FPGA/Flash programming.
 Also see the [todo list](todo).
 
-The [i2cbridge code](i2cbridge/README) here is meant to be general-purpose,
-but hadn't been hardware-verified or published before this.
-
 Top-level needs more automated regression testing.  Concept for testing in simulation:
 
     make net_slave_run &
     python testcase.py --sim --ramtest --stop
     make lb_marble_slave_view
 
-and then with hardware, blinking LEDs and viewing bit-flicker on IN219 chips:
+Hardware tests of the I2C subsystem (bedrock's i2cbridge gateware)
+will configure and read out SFPs, read the write-protect status, FMC voltage and current, and blink LEDs:
 
     ./mutil usb
-    python testcase.py --vcd=capture.vcd
+    python testcase.py --sfp --vcd=capture.vcd
     gtkwave capture.vcd
-    python testcase.py --poll --rlen=48
+    python testcase.py --sfp --poll --rlen=64
 
-where, among other things, the high-order bit of the 32nd word is likely to tell
-you the status of the write-protect switch: 255 (write-enabled) or 127 (write-protected).
+Periodic output from that last step is something like:
+
+    Write Protect switch is Off
+    FMC1:  current  0.000 A   voltage  10.399 V
+    FMC2:  current  0.119 A   voltage  10.399 V
+    SFP1:  0xF
+    SFP2:  0xB
+      Temp     35.0 C
+      Vcc      3.248 V
+      Tx bias  0.0000 mA
+      Tx pwr   0.0001 mW
+      Rx pwr   0.0001 mW
+    SFP3:  0xF
+    SFP4:  0xF

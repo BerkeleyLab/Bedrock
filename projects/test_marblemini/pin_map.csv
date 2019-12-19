@@ -72,6 +72,12 @@ FMC2_LA_27_N    ZEST_PWR_EN
 
 # Literal output follows
 
+# Truly special:
+#   MGTREFCLK0 MGT_CLK_0 connected via C296+C297 to FPGA_REF_CLK1
+#   125 MHz from U20 CDCM61004
+set_property -dict {PACKAGE_PIN F6} [get_ports GTPREFCLK_P]
+set_property -dict {PACKAGE_PIN E6} [get_ports GTPREFCLK_N]
+
 # Special pin properties for RGMII
 # Invalid to flag RGMII_RX_CLK as IOB TRUE
 set_property IOB TRUE [get_ports {RGMII_RX_CTRL}]

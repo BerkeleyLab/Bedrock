@@ -113,7 +113,7 @@ def busmux_reset():
 
 # see i2c_map.txt for more documentation on I2C addresses
 def hw_test_prog():
-    ina_list = [0x80, 0x82, 0x84]  # U17, U3, unplaced
+    ina_list = [0x80, 0x82, 0x84]  # U17, U32, unplaced
     # SFP1 is closest to edge of board
     # SFP4 is closest to center of board
     sfp_list = [2, 5, 4, 3]  # SFP modules 1-4
