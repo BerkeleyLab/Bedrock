@@ -5,6 +5,7 @@ sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 import lbus_access
 from c2vcd import produce_vcd
+import assem
 
 
 def read_result(dev, i2c_base=0x040000, result_len=20, run=True):
@@ -196,6 +197,7 @@ def print_result(result, args, poll_only=False):
 
 
 if __name__ == "__main__":
+    assembler = assem.i2c_assem()
     import argparse
     # import importlib
     parser = argparse.ArgumentParser(
@@ -229,10 +231,10 @@ if __name__ == "__main__":
     # infrastructure part of this file as a class.
     if args.ramtest:
         import ramtest
-        prog = ramtest.ram_test_prog()
+        prog = ramtest.ram_test_prog(assembler)
     elif args.sfp:
         import read_sfp
-        prog = read_sfp.hw_test_prog()
+        prog = read_sfp.hw_test_prog(assembler)
     else:
         import poller
         prog = poller.hw_test_prog()
