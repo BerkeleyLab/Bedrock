@@ -51,15 +51,19 @@ Wishlist for next rev of Marble Mini (relative to v1.0rc3)
   mounting holes (standoffs)? (overlap with rubber feet)
   physical power switch (includes barrel and PoE but not AMC?)
   direct-attach LED or two to FPGA, maybe on interrupt line to MMC?
-  on-board SiLabs oscillator instead of U.Fl
+  on-board SiLabs oscillator instead of U.Fl,
+    prototype first with Pmod from Michael?
   more (labeled) test points, esp. power supplies
   if keeping J14 "Cortex Debug Connector" make a big pin-1 marking
+    can we use a keyed/shrouded option for J14? Amphenol 20021221-00010C4LF
   more labels in general, e.g., DONE by associated LED
+  bigger silkscreen labels for user-facing parts:
+    J9, J10, J11, J12, J13, J14, J15, J16, S1, SW1, SW2, SW3, M1, M2
   power meter (another IN219) on 12V bulk input
     barrel-\         /---fans
     PoE--------vvv-------XR
     AMC----/         \---FMC
-      (but MMC supply is not powered from that path, so not included)
+      (but 3V3MP is not supplied from that path, so not included)
   move Q19 to bottom of board to avoid needing a second reel for that part
   see if we can use one BOM line (on one side) for all push-buttons
   move U29 (I2C thermometer) to other end of board, near VCXOs
@@ -67,3 +71,6 @@ Wishlist for next rev of Marble Mini (relative to v1.0rc3)
   AMC builds should mark Pmod J12, J13, J16 as DNF
   reduce BOM line count in general
   improve testablity in general
+  schematic: clarify/unify net names +3.3VP (power), 3V3PM (AMC), +3V3MP (many)
+  add 330 Ohm series resistor to all four FMC GA pins
+  use 10 Ohm instead of F1 and F2

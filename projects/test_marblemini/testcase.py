@@ -5,7 +5,6 @@ sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 import lbus_access
 from c2vcd import produce_vcd
-import assem
 
 
 def read_result(dev, i2c_base=0x040000, result_len=20, run=True):
@@ -174,7 +173,7 @@ def print_result(result, args, poll_only=False):
                 print("FMC%d: busmux 0x%2.2X" % (ix+1, a1[0]))
                 print(a1[1:])
     if True:  # polling block
-        if args.sfp:
+        if True:
             wp_bit = result[0] & 0x80
             ss = "Off" if wp_bit else "On"
             print("Write Protect switch is %s" % ss)
@@ -182,22 +181,16 @@ def print_result(result, args, poll_only=False):
             sfp_pp1 = [(sfp_pp >> ix*4) & 0xf for ix in [2, 1, 0, 3]]
             print_ina219("FMC1", result[4:4+4])
             print_ina219("FMC2", result[8:8+4])
+        if args.sfp:
             for ix in range(4):
                 pitch = 10
                 hx = 16 + pitch*ix
                 a1 = result[hx:hx+pitch]
                 print("SFP%d:  0x%X" % (ix+1, sfp_pp1[ix]))
                 print_sfp_z(a1)
-        else:
-            wp_bit = result[32] & 0x80
-            ss = "Off" if wp_bit else "On"
-            print("Write Protect switch is %s" % ss)
-            print_ina219("FMC1", result[38:38+4])
-            print_ina219("FMC2", result[44:44+4])
 
 
 if __name__ == "__main__":
-    assembler = assem.i2c_assem()
     import argparse
     # import importlib
     parser = argparse.ArgumentParser(
@@ -231,10 +224,10 @@ if __name__ == "__main__":
     # infrastructure part of this file as a class.
     if args.ramtest:
         import ramtest
-        prog = ramtest.ram_test_prog(assembler)
+        prog = ramtest.ram_test_prog()
     elif args.sfp:
         import read_sfp
-        prog = read_sfp.hw_test_prog(assembler)
+        prog = read_sfp.hw_test_prog()
     else:
         import poller
         prog = poller.hw_test_prog()

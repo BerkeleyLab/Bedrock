@@ -41,7 +41,8 @@ def busmux_reset(s):
 
 
 # see i2c_map.txt for more documentation on I2C addresses
-def hw_test_prog(s):
+def hw_test_prog():
+    s = assem.i2c_assem()
     ina_list = [0x80, 0x82, 0x84]  # U17, U32, unplaced
     # SFP1 is closest to edge of board
     # SFP4 is closest to center of board
@@ -66,9 +67,19 @@ def hw_test_prog(s):
         a += busmux_sel(s, fmc_port)
         a += s.pause(10)
         a += s.read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
-        a += s.read(0xa0, 0, 27, addr_bytes=2)  # AT24C32D on Zest
+        # += s.read(0xa0, 0, 27, addr_bytes=2)  # AT24C32D on Zest
+        a += s.write(0x46, 2, [0x00, 0x18])  # poll channel 8
+        # += s.write(0x46, 2, [0x0f, 0xf8])  # poll all channels
+        a += s.write(0x46, 3, [0x02])  # cycle timer register
+        a += s.read(0x46, 2, 2)  # AD7997 on FMC Carrier Tester
+        a += s.read(0x46, 0, 2)  # result
+        # attempt to power-down the ADN4600 on the FMC Carrier Tester
+        # cuts total current at 10.5V from 0.58A to 0.43A, 1.6W reduction
+        # (can't see it on the 12V current, since IC7 is powered from P3V3)
+        for xppr in [0xE3, 0xEB, 0xF3, 0xFB, 0xDB, 0xD3, 0xCB, 0xC3]:
+            a += s.write(0x90, xppr, [0])
     #
-    jump_n = 6
+    jump_n = 9
     a += s.jump(jump_n)
     a += s.pad(jump_n, len(a))
     #
@@ -85,6 +96,11 @@ def hw_test_prog(s):
     #
     for sfp_port in sfp_list:
         a += sfp_poll(s, sfp_port)
+    # won't work until hw_config(2) implemented
+    for cfg in []:  # [2, 4]:
+        a += s.hw_config(cfg)
+        for mcp23017 in [0x4E, 0x48, 0x44, 0x4C, 0x42]:  # skip 0x4A
+            a += s.read(mcp23017, 0x12, 2)  # read pin values
     a += s.buffer_flip()  # Flip right away, so most info is minimally stale
     # This does mean that the second readout of the PCA9555 will be extra-stale
     # or even (on the first trip through) invalid.
@@ -105,6 +121,5 @@ def hw_test_prog(s):
 
 
 if __name__ == "__main__":
-    s = assem.i2c_assem()
-    a = hw_test_prog(s)
+    a = hw_test_prog()
     print("\n".join(["%02x" % x for x in a]))
