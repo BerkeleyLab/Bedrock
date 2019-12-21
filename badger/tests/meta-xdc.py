@@ -37,21 +37,27 @@ for ll in open(argv[1]).read().splitlines():
     rest = " ".join(bb[:-1])
     proplist[pin] = rest
 
+
 # mapping file
-literal = False
-for ll in open(argv[2]).read().splitlines():
-    if ll == "# Literal output follows":
-        literal = True
-    elif len(ll) == 0 or ll[0] == "#":
-        if len(ll) > 1 and ll[1] == "#":
-            pass  # special case, don't print lines that start with ##
-        else:
+def absorb_map(fname):
+    literal = False
+    for ll in open(fname).read().splitlines():
+        if ll == "# Literal output follows":
+            literal = True
+        elif len(ll) == 0 or ll[0] == "#":
+            if len(ll) > 1 and ll[1] == "#":
+                pass  # special case, don't print lines that start with ##
+            else:
+                print(ll)
+        elif literal:
             print(ll)
-    elif literal:
-        print(ll)
-    else:
-        pa, pb = ll.split()
-        if pa in proplist:
-            merge(proplist[pa], pb)
         else:
-            print("wtf")
+            pa, pb = ll.split()
+            if pa in proplist:
+                merge(proplist[pa], pb)
+            else:
+                print("wtf")
+
+
+for fname in argv[2:]:
+    absorb_map(fname)
