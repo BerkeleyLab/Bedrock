@@ -43,7 +43,9 @@ reg lb_write=0;
 wire [7:0] lb_dout;
 
 // I2C bus itself -- unless you want to call it TWI
-wire scl;  tri1 sda;
+wire scl, sda_drive;
+tri1 sda = sda_drive ? 1'bz : 1'b0;
+wire sda_sense = sda;
 
 reg trig=0, run=0, freeze=0;
 integer file1, rc=1;
@@ -78,7 +80,8 @@ i2c_chunk #(.q1(0), .q2(2)) chunk (.clk(clk),
 	.lb_addr(lb_addr), .lb_din(lb_din), .lb_write(lb_write),
 	.lb_dout(lb_dout),
 	.run_cmd(run), .freeze(freeze), .hw_config(hw_config),
-	.scl(scl), .sda(sda), .intp(1'b0), .rst(1'b1)
+	.scl(scl), .sda_drive(sda_drive), .sda_sense(sda_sense),
+	.intp(1'b0), .rst(1'b1)
 );
 
 // One device on the bus

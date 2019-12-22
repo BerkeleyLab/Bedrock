@@ -18,7 +18,8 @@ module i2c_chunk(
 	output [3:0] hw_config,
 	// Hardware pins: TWI (almost I2C) bus
 	output scl,
-	inout  sda,
+	output sda_drive,
+	input  sda_sense,
 	input  rst,  // count on someone else to drive this
 	input  intp  // not yet used
 );
@@ -65,11 +66,11 @@ i2c_prog #(.q1(q1), .q2(q2)) prog (.clk(clk),
 );
 
 // That engine delegates pin driving to i2c_bit
-wire scl_o, sda_o;
+wire scl_o;
 i2c_bit ibit (.clk(clk),
 	.tick(tick), .advance(bit_adv),
 	.command(bit_cmd),
-	.scl_o(scl_o), .sda_o(sda_o), .sda_v(sda), .sda_h(sda_h)
+	.scl_o(scl_o), .sda_o(sda_drive), .sda_v(sda_sense), .sda_h(sda_h)
 );
 
 // Then i2c_analyze observes the pin levels
@@ -77,7 +78,7 @@ wire [7:0] trace;
 wire trace_push;
 reg trace_run=0;
 i2c_analyze analyze(.clk(clk), .tick(tick),
-	.scl(scl), .sda(sda), .intp(intp), .rst(rst),
+	.scl(scl), .sda(sda_h), .intp(intp), .rst(rst),
 	.bit_adv(bit_adv), .bit_cmd(bit_cmd),
 	.trace(trace), .trace_push(trace_push), .run(trace_run)
 );
@@ -158,7 +159,6 @@ assign lb_dout = lb_dout0;
 
 // Eric Norum suggests true active drive for SCL, since it's edge sensitive
 assign scl = scl_o;
-assign sda = sda_o ? 1'bz : 1'b0;
 assign err_flag = err;
 assign updated = updated_r;
 

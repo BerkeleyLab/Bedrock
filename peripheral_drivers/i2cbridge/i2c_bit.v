@@ -17,7 +17,7 @@ module i2c_bit(
 	output advance,
 	input [1:0] command,
 	output scl_o,
-	output sda_o,
+	output sda_o, // drive
 	input sda_v,  // pin
 	output sda_h   // sampled output for recording
 );

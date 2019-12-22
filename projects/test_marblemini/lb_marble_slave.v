@@ -134,19 +134,25 @@ wire twi_run_cmd = twi_ctl[1];
 // align with read decoding for twi_dout.
 wire twi_write = control_strobe & ~control_rd & (addr[23:16]==8'h04);
 wire [3:0] hw_config;
+wire twi0_scl, twi_sda_drive, twi_sda_sense;
 i2c_chunk #(.tick_scale(twi_q0), .q1(twi_q1), .q2(twi_q2)) i2c(
 	.clk(clk), .lb_addr(addr[11:0]), .lb_din(data_out[7:0]),
 	.lb_write(twi_write), .lb_dout(twi_dout),
 	.run_cmd(twi_run_cmd), .freeze(twi_freeze),
 	.run_stat(twi_run_stat), .updated(twi_updated), .err_flag(twi_err),
 	.hw_config(hw_config),
-	.scl(twi_scl), .sda(twi_sda), .intp(twi_int), .rst(twi_rst)
+	.scl(twi0_scl), .sda_drive(twi_sda_drive), .sda_sense(twi_sda_sense),
+	.intp(twi_int), .rst(twi_rst)
 );
 assign twi_status = {twi_run_stat, twi_err, twi_updated};
+assign twi_scl = twi0_scl;
+assign twi_sda = twi_sda_drive ? 1'bz : 1'b0;
+assign twi_sda_sense = twi_sda;
+assign twi_rst = hw_config[0] ? 1'b0 : 1'bz;  // three-state
 `else
 assign twi_dout=0;
 assign twi_status=0;
-assign twi_rst = hw_config[0] ? 1'b0 : 1'bz;  // three-state
+assign twi_rst = 1'bz;
 `endif
 
 // White Rabbit DAC - software-only for initial testing
