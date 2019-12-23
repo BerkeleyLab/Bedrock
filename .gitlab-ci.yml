@@ -60,6 +60,25 @@ cordic_test:
   script:
     - make all
 
+marble_sim:
+  stage: test
+  script:
+    - cd projects/test_marblemini && make all net_slave_check
+
+marble_synth:
+  before_script:
+    - cd projects/test_marblemini && ls /non-free
+  stage: synthesis
+  script:
+    - PATH=$XILINX_VIVADO/bin:$PATH make marble1.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 2 days
+    paths:
+      - projects/test_marblemini/marble1.bit
+      - projects/test_marblemini/vivado.log
+      - projects/test_marblemini/_xilinx/marble1.runs/impl_1/marble1_utilization_placed.rpt
+
 rtsim_test:
   before_script:
     - cd rtsim && make clean && make
