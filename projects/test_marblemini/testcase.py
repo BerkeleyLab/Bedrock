@@ -1,11 +1,19 @@
 from time import sleep
 import sys
-bedrock_dir = "../../"
+bedrock_dir = "bedrock/"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 import lbus_access
 from c2vcd import produce_vcd
 from fmc_test_l import fmc_decode
+
+
+# given a 2*n long array of 8-bit values,
+# return an n-long array of 16-bit values, still integer
+# constructed assuming 8-bit values are arranged in pairs, msb-first
+def merge_16(a):
+    aa = [x1*256+x2 for x1, x2 in zip(a[0::2], a[1::2])]
+    return aa
 
 
 def read_result(dev, i2c_base=0x040000, result_len=20, run=True):
@@ -111,7 +119,7 @@ def print_sfp_z(a):
     if all([x == 255 for x in a]):
         pass
     else:
-        aa = [float(x1*256+x2) for x1, x2 in zip(a[0::2], a[1::2])]
+        aa = [float(x) for x in merge_16(a)]
         if aa[0] >= 32768:  # Only temperature is signed
             aa[0] -= 65536
         print("  Temp     %.1f C" % (aa[0]/256.0))
@@ -124,7 +132,7 @@ def print_sfp_z(a):
 def print_ina219(title, a):
     # hard-coded for default configuration 0x399F and 0.02 Ohm shunt
     shuntr = 0.02  # Ohm
-    aa = [x1*256+x2 for x1, x2 in zip(a[0::2], a[1::2])]
+    aa = merge_16(a)
     aa[0] = aa[0] if aa[0] < 32768 else aa[0]-65536  # only current is signed
     current = float(aa[0])/32768.0*0.32/shuntr
     busv = float(aa[1] & 0xfff8)/65536.0*32.0
@@ -194,6 +202,27 @@ def print_result(result, args, poll_only=False):
                 hx = 16+40 + pitch*ix
                 fmc_dig = result[hx:hx+pitch]
                 fmc_decode(ix, fmc_dig, squelch=args.squelch)
+            for ix in range(2):
+                pitch = 6
+                hx = 16+40+20 + pitch*ix
+                fmc_ana = merge_16(result[hx:hx+pitch])
+                if fmc_ana[0] == 0xffff:
+                    ss = "not present"
+                else:
+                    # Cross-check:  these should be results from channels 6 to 8
+                    # reference Tables 13 and 14 in AD7997 data sheet
+                    if any([ix+5 != (x >> 12) for ix, x in enumerate(fmc_ana)]):
+                        print(fmc_ana)
+                        ss = "bad"
+                    else:
+                        fmc_v = [float(x & 0xfff)/4096.0 * 2.5 for x in fmc_ana]
+                        ss = "  ".join(["%5.3f V" % x for x in fmc_v])
+                print("FMC%d ana:  %s" % (ix+1, ss))
+                # Table on EDA-02327-V1-0 schematic:
+                # Valid voltage values [V] (5% tolerance)
+                #  P3V3         1.58 - 1.89
+                #  P12V         1.80 - 2.21
+                #  Vadj (2.5V)  1.53 - 1.81
 
 
 if __name__ == "__main__":

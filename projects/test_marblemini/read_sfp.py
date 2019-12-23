@@ -1,5 +1,5 @@
 import sys
-bedrock_dir = "../../"
+bedrock_dir = "bedrock/"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 import assem
 
@@ -68,11 +68,6 @@ def hw_test_prog():
         a += s.pause(10)
         a += s.read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
         # += s.read(0xa0, 0, 27, addr_bytes=2)  # AT24C32D on Zest
-        a += s.write(0x46, 2, [0x00, 0x18])  # poll channel 8
-        # += s.write(0x46, 2, [0x0f, 0xf8])  # poll all channels
-        a += s.write(0x46, 3, [0x02])  # cycle timer register
-        a += s.read(0x46, 2, 2)  # AD7997 on FMC Carrier Tester
-        a += s.read(0x46, 0, 2)  # result
         # attempt to power-down the ADN4600 on the FMC Carrier Tester
         # cuts total current at 10.5V from 0.58A to 0.43A, 1.6W reduction
         # (can't see it on the 12V current, since IC7 is powered from P3V3)
@@ -96,11 +91,20 @@ def hw_test_prog():
     #
     for sfp_port in sfp_list:
         a += sfp_poll(s, sfp_port)
+    # FMC carrier tester card possible on FMC1 and FMC2
+    # Set of six MCP23017 on application I2C bus (LA_02_P and LA_02_N)
     for cfg in [2, 4]:
         a += s.hw_config(cfg)
         for mcp23017 in [0x4E, 0x48, 0x44, 0x4C, 0x42]:  # skip 0x4A
             a += s.read(mcp23017, 0x12, 2)  # read pin values
     a += s.hw_config(0)
+    for fmc_port in fmc_list:
+        a += busmux_sel(s, fmc_port)
+        # AD7997 on standard I2C bus
+        # ch6: P3V3,  ch7: P12V,  ch8: Vadj
+        for chan_7797 in [6, 7, 8]:
+            apb_7797 = (chan_7797+7) << 4
+            a += s.read(0x46, apb_7797, 2)  # convert and read specified channel
     a += s.buffer_flip()  # Flip right away, so most info is minimally stale
     # This does mean that the second readout of the PCA9555 will be extra-stale
     # or even (on the first trip through) invalid.
