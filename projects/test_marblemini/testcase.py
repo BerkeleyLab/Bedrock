@@ -1,6 +1,6 @@
 from time import sleep
 import sys
-bedrock_dir = "bedrock/"
+bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 import lbus_access
