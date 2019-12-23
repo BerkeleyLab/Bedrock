@@ -30,8 +30,11 @@ module lb_marble_slave(
 	output allow_mmc_eth_config,
 	output zest_pwr_en,
 `ifdef USE_I2CBRIDGE
-	output twi_scl,
-	inout twi_sda,
+	//   0 is main I2C, routes to Marble I2C bus multiplexer
+	//   1 and 2 route to FMC User I/O
+	//   3 is unused so far
+	output [3:0] twi_scl,
+	inout [3:0] twi_sda,
 	input twi_int,
 	inout twi_rst,
 `endif
@@ -39,13 +42,14 @@ module lb_marble_slave(
 	output wr_dac_sdo,
 	output [1:0] wr_dac_sync,
 	// Output to hardware
+	output [131:0] fmc_test,
 	output led_user_mode,
 	output led1,  // PWM
 	output led2  // PWM
 );
 
 // Timing hooks, can be used to speed up simulation
-parameter twi_q0=5;  // 280 kbps with 125 MHz clock
+parameter twi_q0=6;  // 140 kbps with 125 MHz clock
 parameter twi_q1=2;
 parameter twi_q2=7;
 parameter led_cw=10;
@@ -145,9 +149,22 @@ i2c_chunk #(.tick_scale(twi_q0), .q1(twi_q1), .q2(twi_q2)) i2c(
 	.intp(twi_int), .rst(twi_rst)
 );
 assign twi_status = {twi_run_stat, twi_err, twi_updated};
-assign twi_scl = twi0_scl;
-assign twi_sda = twi_sda_drive ? 1'bz : 1'b0;
-assign twi_sda_sense = twi_sda;
+//
+// Incomplete bus mux stuff
+wire [1:0] twi_bus_sel = hw_config[2:1];
+reg [3:0] twi_scl_r=0, twi_sda_r=0;
+always @(posedge clk) begin
+	twi_scl_r <= 4'b1111;
+	twi_scl_r[twi_bus_sel] <= twi0_scl;
+	twi_sda_r <= 4'b1111;
+	twi_sda_r[twi_bus_sel] <= twi_sda_drive;
+end
+assign twi_scl = twi_scl_r;
+assign twi_sda[0] = twi_sda_r[0] ? 1'bz : 1'b0;
+assign twi_sda[1] = twi_sda_r[1] ? 1'bz : 1'b0;
+assign twi_sda[2] = twi_sda_r[2] ? 1'bz : 1'b0;
+assign twi_sda[3] = twi_sda_r[3] ? 1'bz : 1'b0;
+assign twi_sda_sense = twi_sda[twi_bus_sel];
 assign twi_rst = hw_config[0] ? 1'b0 : 1'bz;  // three-state
 `else
 assign twi_dout=0;
@@ -233,7 +250,8 @@ reg rx_mac_hbank_r=1;
 // decoding corresponds to mirror readback, see notes above
 wire local_write = control_strobe & ~control_rd & (addr[23:16]==5);
 reg stop_sim=0;  // clearly only useful in simulation
-always @(posedge clk) if (local_write) case (addr[3:0])
+reg [131:0] fmc_test_r=0;
+always @(posedge clk) if (local_write) case (addr[4:0])
 	1: led_user_r <= data_out;
 	2: led_1_df <= data_out;
 	3: led_2_df <= data_out;
@@ -244,11 +262,17 @@ always @(posedge clk) if (local_write) case (addr[3:0])
 	8: misc_config <= data_out;
 	// 9: wr_dac
 	// 10: ctrace_start
+	16: fmc_test_r[21:0] <= data_out;
+	17: fmc_test_r[43:22] <= data_out;
+	18: fmc_test_r[65:44] <= data_out;
+	19: fmc_test_r[87:66] <= data_out;
+	20: fmc_test_r[109:88] <= data_out;
+	21: fmc_test_r[131:110] <= data_out;
 endcase
 //
 always @(posedge clk) begin
-	wr_dac_send <= local_write & (addr[3:0] == 9);
-	ctrace_start <= local_write & (addr[3:0] == 10);
+	wr_dac_send <= local_write & (addr[4:0] == 9);
+	ctrace_start <= local_write & (addr[4:0] == 10);
 end
 
 // Mirror memory
@@ -277,6 +301,7 @@ assign cfg_d02 = misc_config[0];
 assign mmc_int = misc_config[1];
 assign allow_mmc_eth_config = misc_config[2];
 assign zest_pwr_en = misc_config[3];
+assign fmc_test = fmc_test_r;
 
 // Bus activity trace output
 `ifdef SIMULATE

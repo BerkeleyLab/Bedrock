@@ -34,6 +34,8 @@ mem_gateway #(.n_lat(n_lat), .enable_bursts(1)) dut(.clk(clk),
 
 // TWI bus itself
 wire TWI_SCL;  tri1 TWI_SDA, TWI_INT, TWI_RST;
+wire [2:0] dum_scl;
+tri1 [2:0] dum_sda;
 
 // Should mostly match marble_base.v, some outputs ignored
 lb_marble_slave #(.twi_q0(4), .twi_q1(0), .twi_q2(2), .led_cw(6)) slave(
@@ -47,7 +49,7 @@ lb_marble_slave #(.twi_q0(4), .twi_q1(0), .twi_q2(2), .led_cw(6)) slave(
 	.rx_mac_buf_status(2'b0),
 	.xdomain_fault(1'b0),
 	.mmc_pins(3'b0),
-	.twi_scl(TWI_SCL), .twi_sda(TWI_SDA),
+	.twi_scl({dum_scl, TWI_SCL}), .twi_sda({dum_sda, TWI_SDA}),
 	.twi_int(TWI_INT), .twi_rst(TWI_RST)
 );
 

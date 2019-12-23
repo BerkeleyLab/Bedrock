@@ -1,4 +1,4 @@
-[timestart] 123500
+[timestart] 48500
 [size] 1137 721
 [pos] 190 74
 *-16.968988 1557 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
@@ -20,6 +20,15 @@ lb_marble_slave_tb.data_out[31:0]
 lb_marble_slave_tb.data_in[31:0]
 @28
 lb_marble_slave_tb.slave.stop_sim
+@200
+-TWI mux
+@28
+lb_marble_slave_tb.slave.twi0_scl
+lb_marble_slave_tb.slave.twi_sda_drive
+lb_marble_slave_tb.slave.twi_sda_sense
+@22
+lb_marble_slave_tb.slave.twi_scl[3:0]
+lb_marble_slave_tb.slave.twi_sda[3:0]
 @200
 -TWI
 @28

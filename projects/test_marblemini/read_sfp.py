@@ -50,7 +50,7 @@ def hw_test_prog():
     fmc_list = [0, 1]
     a = []
     a += s.pause(2)  # ignored?
-    a += s.set_resx(2)  # avoid any confusion
+    a += s.set_resx(3)  # avoid any confusion
     a += busmux_reset(s)
     #
     a += busmux_sel(s, 6)  # App bus
@@ -96,22 +96,22 @@ def hw_test_prog():
     #
     for sfp_port in sfp_list:
         a += sfp_poll(s, sfp_port)
-    # won't work until hw_config(2) implemented
-    for cfg in []:  # [2, 4]:
+    for cfg in [2, 4]:
         a += s.hw_config(cfg)
         for mcp23017 in [0x4E, 0x48, 0x44, 0x4C, 0x42]:  # skip 0x4A
             a += s.read(mcp23017, 0x12, 2)  # read pin values
+    a += s.hw_config(0)
     a += s.buffer_flip()  # Flip right away, so most info is minimally stale
     # This does mean that the second readout of the PCA9555 will be extra-stale
     # or even (on the first trip through) invalid.
-    a += s.pause(6944)
+    a += s.pause(3470)
     #
     a += busmux_sel(s, 6)  # App bus
     a += s.write(0x42, 2, [0, 8])  # Output registers
     a += s.pause(2)
     a += s.read(0x42, 0, 2)  # Physical pin logic levels
-    a += s.pause(6944)
-    if True:  # extra weird little flicker
+    a += s.pause(3470)
+    if False:  # extra weird little flicker
         a += s.write(0x42, 2, [0, 4])  # Output registers
         a += s.pause(1056)
         a += s.write(0x42, 2, [0, 8])  # Output registers

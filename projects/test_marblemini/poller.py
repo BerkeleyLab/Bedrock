@@ -16,7 +16,7 @@ def hw_test_prog():
     s = assem.i2c_assem()
     a = []
     a += s.pause(2)  # ignored?
-    a += s.set_resx(2)  # avoid any confusion
+    a += s.set_resx(3)  # avoid any confusion
     a += s.hw_config(1)  # turn on reset
     a += s.pause(2)
     a += s.hw_config(0)  # turn off reset

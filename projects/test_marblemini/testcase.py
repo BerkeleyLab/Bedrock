@@ -5,6 +5,7 @@ sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 import lbus_access
 from c2vcd import produce_vcd
+from fmc_test_l import fmc_decode
 
 
 def read_result(dev, i2c_base=0x040000, result_len=20, run=True):
@@ -157,7 +158,7 @@ def print_result(result, args, poll_only=False):
             exit(1)
         return
     if not poll_only:  # init block
-        ib = 2*32  # init result memory base, derived from set_resx(2)
+        ib = 3*32  # init result memory base, derived from set_resx(3)
         print_ina219_config("FMC1", result[ib+1:ib+3])
         print_ina219_config("FMC2", result[ib+3:ib+5])
         if args.sfp:
@@ -188,6 +189,11 @@ def print_result(result, args, poll_only=False):
                 a1 = result[hx:hx+pitch]
                 print("SFP%d:  0x%X" % (ix+1, sfp_pp1[ix]))
                 print_sfp_z(a1)
+            for ix in range(2):
+                pitch = 10
+                hx = 16+40 + pitch*ix
+                fmc_dig = result[hx:hx+pitch]
+                fmc_decode(ix, fmc_dig, squelch=args.squelch)
 
 
 if __name__ == "__main__":
@@ -204,7 +210,8 @@ if __name__ == "__main__":
     parser.add_argument('--debug', action='store_true', help='print raw arrays')
     parser.add_argument('--poll', action='store_true', help='only poll for results')
     parser.add_argument('--vcd', type=str, help='VCD file to capture')
-    parser.add_argument('--rlen', type=int, default=327, help='result array length')
+    parser.add_argument('--rlen', type=int, default=359, help='result array length')
+    parser.add_argument('--squelch', action='store_true', help='squelch non-LA FMC pins')
 
     args = parser.parse_args()
     ip = args.ip

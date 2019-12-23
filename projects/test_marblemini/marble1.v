@@ -46,8 +46,12 @@ module marble1(
 
 	output VCXO_EN,
 
-	// Zest stuff
-	output ZEST_PWR_EN,
+	// FMC stuff
+	inout [33:0] FMC1_LA_P,
+	inout [33:0] FMC1_LA_N,
+	inout [33:0] FMC2_LA_P,
+	inout [33:0] FMC2_LA_N,
+	// output ZEST_PWR_EN,
 	// Something physical
 	output [7:0] LED
 );
@@ -119,6 +123,10 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 wire BOOT_CCLK;
 STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0));
 
+// Placeholders
+wire ZEST_PWR_EN;
+wire dum_scl, dum_sda;
+
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
 marble_base base(
@@ -131,7 +139,13 @@ marble_base base(
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
-	.TWI_SCL(TWI_SCL), .TWI_SDA(TWI_SDA),
+	.twi_scl({dum_scl, FMC2_LA_P[2], FMC1_LA_P[2], TWI_SCL}),
+	.twi_sda({dum_sda, FMC2_LA_N[2], FMC1_LA_N[2], TWI_SDA}),
+	.fmc_test({
+		FMC2_LA_P[33:3], FMC2_LA_P[1:0],
+		FMC2_LA_N[33:3], FMC2_LA_N[1:0],
+		FMC1_LA_P[33:3], FMC1_LA_P[1:0],
+		FMC1_LA_N[33:3], FMC1_LA_N[1:0]}),
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),

@@ -80,7 +80,9 @@ no_multiple_drivers_check: marble_base_tb
 
 # =====
 # constraint
-marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py Marble.xdc pin_map.csv
+pin_map_fmc.csv: pin_map_fmc.py
+	$(PYTHON) $< > $@
+marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py Marble.xdc pin_map.csv pin_map_fmc.csv
 	$(PYTHON) $^ > $@
 
 # =====
@@ -94,6 +96,6 @@ marble1.bit: marble1.tcl marble1.d $(MARBLE_SYNTH_SOURCE)
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
-	rm -f marble1.xdc marble1.bit vivado* datasheet.txt
+	rm -f pin_map_fmc.csv marble1.xdc marble1.bit vivado* datasheet.txt
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
 	rm -rf _xilinx .Xil

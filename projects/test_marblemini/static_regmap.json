@@ -33,5 +33,47 @@
         "sign": "unsigned",
         "base_addr": 327689,
         "data_width": 18
+    },
+    "fmc_test_0": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327696,
+        "data_width": 22
+    },
+    "fmc_test_1": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327697,
+        "data_width": 22
+    },
+    "fmc_test_2": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327698,
+        "data_width": 22
+    },
+    "fmc_test_3": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327699,
+        "data_width": 22
+    },
+    "fmc_test_4": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327700,
+        "data_width": 22
+    },
+    "fmc_test_5": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327701,
+        "data_width": 22
     }
 }

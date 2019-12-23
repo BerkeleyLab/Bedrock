@@ -34,8 +34,8 @@ module marble_base(
 	output cfg_d02,
 
 	// One I2C bus, everything gatewayed through a TCA9548
-	output TWI_SCL,
-	inout  TWI_SDA,
+	output [3:0] twi_scl,
+	inout  [3:0] twi_sda,
 	output TWI_RST,
 	input  TWI_INT,
 
@@ -49,6 +49,7 @@ module marble_base(
 	output in_use,
 
 	// Something physical
+	output [131:0] fmc_test,
 	output ZEST_PWR_EN,
 	output [7:0] LED
 );
@@ -109,7 +110,7 @@ lb_marble_slave slave(
 	.mmc_pins({MOSI, SCLK, CSB}),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
-	.twi_scl(TWI_SCL), .twi_sda(TWI_SDA),
+	.twi_scl(twi_scl), .twi_sda(twi_sda),
 	.twi_int(TWI_INT), .twi_rst(TWI_RST),
 	.wr_dac_sclk(WR_DAC_SCLK), .wr_dac_sdo(WR_DAC_DIN),
 	.wr_dac_sync({WR_DAC2_SYNC, WR_DAC1_SYNC}),
@@ -117,6 +118,7 @@ lb_marble_slave slave(
 	.mmc_int(mmc_int),
 	.zest_pwr_en(ZEST_PWR_EN),
 	.allow_mmc_eth_config(allow_mmc_eth_config),
+	.fmc_test(fmc_test),
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
 );
 
