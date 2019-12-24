@@ -28,16 +28,6 @@ CFG_MOSI   BOOT_MOSI
 CFG_DIN    BOOT_MISO
 CFG_D02    CFG_D02
 
-# Debugging LEDs, Pmod1 == J12
-Pmod1_0    {LED[0]}
-Pmod1_1    {LED[1]}
-Pmod1_2    {LED[2]}
-Pmod1_3    {LED[3]}
-Pmod1_4    {LED[4]}
-Pmod1_5    {LED[5]}
-Pmod1_6    {LED[6]}
-Pmod1_7    {LED[7]}
-
 # MMC microcontroller for configuration - for real!
 FPGA_SCK   SCLK
 FPGA_SSEL  CSB
@@ -65,10 +55,6 @@ CLK20_VCXO  SYSCLK_P
 # Miscellaneous
 PHY_RSTn   PHY_RSTN
 VCXO_EN    VCXO_EN
-
-# Zest Stuff
-FMC2_LA_27_N    ZEST_PWR_EN
-# FMC2_LA_27_P    ZEST_PWR_SYNC
 
 # Literal output follows
 

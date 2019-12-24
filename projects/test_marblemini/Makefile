@@ -82,7 +82,7 @@ no_multiple_drivers_check: marble_base_tb
 # constraint
 pin_map_fmc.csv: pin_map_fmc.py
 	$(PYTHON) $< > $@
-marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py Marble.xdc pin_map.csv pin_map_fmc.csv
+marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py Marble.xdc $(BOARD_SUPPORT_DIR)/marblemini/pin_map.csv digilent_led_pmod.csv pin_map_fmc.csv
 	$(PYTHON) $^ > $@
 
 # =====

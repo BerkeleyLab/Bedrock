@@ -56,7 +56,7 @@ def absorb_map(fname):
             if pa in proplist:
                 merge(proplist[pa], pb)
             else:
-                print("wtf")
+                print("wtf: Can't interpret {} %%".format(pa))
 
 
 for fname in argv[2:]:
