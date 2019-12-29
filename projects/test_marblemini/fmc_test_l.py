@@ -109,7 +109,10 @@ def tobin(x, count=8):
     return list(map(lambda y: (x >> y) & 1, range(count-1, -1, -1)))
 
 
-def fmc_decode(n, a, squelch=True):
+def fmc_decode(n, a, squelch=True, verbose=True):
+    if verbose:
+        fmc_asc = ", ".join(["0x%2.2x" % x for x in a])
+        print("FMC%s dig: %s" % (n+1, fmc_asc))
     # squelch bits:
     #  TDI_TO_FMC
     #  TDO_FROM_FMC
@@ -120,12 +123,22 @@ def fmc_decode(n, a, squelch=True):
     #  TCK_TO_FMC
     #  PG_C2M
     sb = [0x00, 0x00, 0x00, 0x00, 0x44, 0xe4, 0x04, 0x00, 0x00, 0x02]
-    fmc_asc = ", ".join(["0x%2.2x" % x for x in a])
-    print("FMC%s dig: %s" % (n+1, fmc_asc))
+    found = []
     for ix in range(10):
         bits = tobin(a[ix] & ~sb[ix]) if squelch else tobin(a[ix])
         # print(bits)
         for jx in range(8):
             bname = fmc_n[vadj_n[ix*8+jx]]
             if bits[jx] == 1:
-                print("  FMC%d on: %s" % (n+1, bname))
+                found += [bname]
+                if verbose:
+                    print("  FMC%d on: %s" % (n+1, bname))
+    return found
+
+
+def fmc_goal(n):
+    pn = "P" if int(n/33) else "N"
+    d = n % 33
+    if d > 1:
+        d = d+1
+    return "LA%2.2d_%s" % (d, pn)

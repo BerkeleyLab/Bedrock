@@ -206,8 +206,9 @@ def print_result(result, args, poll_only=False):
                 pitch = 6
                 hx = 16+40+20 + pitch*ix
                 fmc_ana = merge_16(result[hx:hx+pitch])
+                print("FMC%d analog" % (ix+1))
                 if fmc_ana[0] == 0xffff:
-                    ss = "not present"
+                    print("  not present")
                 else:
                     # Cross-check:  these should be results from channels 6 to 8
                     # reference Tables 13 and 14 in AD7997 data sheet
@@ -216,8 +217,16 @@ def print_result(result, args, poll_only=False):
                         ss = "bad"
                     else:
                         fmc_v = [float(x & 0xfff)/4096.0 * 2.5 for x in fmc_ana]
-                        ss = "  ".join(["%5.3f V" % x for x in fmc_v])
-                print("FMC%d ana:  %s" % (ix+1, ss))
+                        setup = [
+                            ("VS_VADJ", 1.58, 1.75),
+                            ("VS_P12V_x", 1.88, 2.13),
+                            ("VS_P3V3_x", 1.64, 1.82)]
+                        for jx in range(3):
+                            v = fmc_v[jx]
+                            rr = setup[jx]
+                            oor = v < rr[1] or v > rr[2]
+                            suffix = "out of (%.2f, %.2f) range" % (rr[1], rr[2]) if oor else "OK"
+                            print("  %-9s  = %5.3f V  %s" % (rr[0], v, suffix))
                 # Table on EDA-02327-V1-0 schematic:
                 # Valid voltage values [V] (5% tolerance)
                 #  P3V3         1.58 - 1.89
