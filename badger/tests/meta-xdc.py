@@ -3,12 +3,25 @@
 # See marble/pin_map.csv for the first (and currently only) use case.
 from sys import argv
 import re
+
+
 converter = {"DIFF_HSTL_II_25": ("LVDS_25", "LVCMOS25")}
 
+# original .xdc netlist fle
+xdc_map = {}
 
-def merge(prefix, vport):
+
+def absorb_xdc(xdc_file):
+    for ll in open(xdc_file).read().splitlines():
+        bb = ll.split()
+        pin_name = bb[-1].rstrip("]")
+        rest = " ".join(bb[:-1])
+        xdc_map[pin_name] = rest
+
+
+def merge(xdc_info, vport):
     # mostly simple but add a weird heuristic for converting FMC pins
-    m1 = re.match(r"(.*IOSTANDARD *)(\w+)(.*)", prefix)
+    m1 = re.match(r"(.*IOSTANDARD *)(\w+)(.*)", xdc_info)
     if m1:
         ios = m1.group(2)
         if ios in converter:
@@ -18,27 +31,14 @@ def merge(prefix, vport):
             ios2 = converter[ios][0] if diff else converter[ios][1]
             # print("woo", ios, diff, ios2)
             # replace it!
-            prefix = m1.group(1) + ios2 + m1.group(3)
+            xdc_info = m1.group(1) + ios2 + m1.group(3)
             # Seems like a lot of work, and fragile, but I haven't
             # thought of a better solution yet.
-    print(prefix + " " + vport + "]")
-
-
-if len(argv) < 3:
-    print("usage: $PYTHON %s foo.xdc foo.csv" % argv[0])
-    print("  where foo.csv is the mapping file")
-    exit(1)
-
-# original .xdc netlist fle
-proplist = {}
-for ll in open(argv[1]).read().splitlines():
-    bb = ll.split()
-    pin = bb[-1].rstrip("]")
-    rest = " ".join(bb[:-1])
-    proplist[pin] = rest
+    print(xdc_info + " " + vport + "]")
 
 
 # mapping file
+# TODO: Define what a mapping file is
 def absorb_map(fname):
     literal = False
     for ll in open(fname).read().splitlines():
@@ -53,11 +53,18 @@ def absorb_map(fname):
             print(ll)
         else:
             pa, pb = ll.split()
-            if pa in proplist:
-                merge(proplist[pa], pb)
+            if pa in xdc_map:
+                merge(xdc_map[pa], pb)
             else:
                 print("wtf: Can't interpret {} %%".format(pa))
 
 
+if len(argv) < 3:
+    print("usage: $PYTHON %s foo.xdc foo_1.csv .. foo_n.csv" % argv[0])
+    print("  where foo_*.csv are re-mapping files")
+    exit(1)
+
+
+absorb_xdc(argv[1])
 for fname in argv[2:]:
     absorb_map(fname)
