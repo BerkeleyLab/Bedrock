@@ -41,11 +41,12 @@ def cycle_xdc(fname):
             if a[1] == "IOSTANDARD":
                 application_top_to_iostandard[v_name] = a[2]
             if a[1] == "PACKAGE_PIN":
-                # io_std = application_top_to_iostandard[v_name]
+                io_std = application_top_to_iostandard[v_name]
                 fmc_name = fpga_pin_to_fmc[a[2]]
                 # zest_name = fmc_name_to_zest[fmc_name]
                 # print(" ".join([v_name, io_std, a[2], fmc_name, zest_name]))
-                print(" ".join([fmc_name_good_to_bad(fmc_name), v_name]))
+                suffix = " DIFF" if "LVDS" in io_std else ""
+                print(" ".join([fmc_name_good_to_bad(fmc_name), v_name]) + suffix)
                 if False:
                     a[2] = fpga_pin_to_fmc[a[2]]
                     fix = " ".join(a)

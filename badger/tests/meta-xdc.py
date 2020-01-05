@@ -19,15 +19,18 @@ def absorb_xdc(xdc_file):
         xdc_map[pin_name] = rest
 
 
-def merge(xdc_info, vport):
+def merge(xdc_info, vport, force_diff=False):
     # mostly simple but add a weird heuristic for converting FMC pins
     m1 = re.match(r"(.*IOSTANDARD *)(\w+)(.*)", xdc_info)
     if m1:
         ios = m1.group(2)
         if ios in converter:
-            # now figure out if the port name "looks" differntial
-            # XXX will need to add the case of foo_n[1]
-            diff = len(vport) > 3 and vport[-2:] == "_N" or vport[-2:] == "_P"
+            if force_diff:
+                diff = True
+            else:
+                # Figure out if the port name "looks" differntial
+                # XXX will need to add the case of foo_n[1]
+                diff = len(vport) > 3 and vport[-2:] == "_N" or vport[-2:] == "_P"
             ios2 = converter[ios][0] if diff else converter[ios][1]
             # print("woo", ios, diff, ios2)
             # replace it!
@@ -52,9 +55,11 @@ def absorb_map(fname):
         elif literal:
             print(ll)
         else:
-            pa, pb = ll.split()
+            splitted = ll.split()
+            iostd_flag = splitted[2] if len(splitted) > 2 else None
+            pa, pb = splitted[0:2]
             if pa in xdc_map:
-                merge(xdc_map[pa], pb)
+                merge(xdc_map[pa], pb, force_diff=(iostd_flag == "DIFF"))
             else:
                 print("wtf: Can't interpret {} %%".format(pa))
 
