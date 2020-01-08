@@ -17,25 +17,29 @@ class i2c_live:
         self.retry = retry
         self.i2c_base = i2c_base
 
-    def read_result(self, result_len=20):
-        # freeze result buffer, and keep running
-        self.dev.exchange([327687], values=[3])
-        # read out "results"
+    def read_result(self, result_len=20, running=True):
+        run_flag = 2 if running else 0
         addr = range(self.i2c_base+0x800, self.i2c_base+0x800+result_len)
-        readout = self.dev.exchange(addr)
-        # thaw result buffer, still keep running
-        self.dev.exchange([327687], values=[2])
+        if result_len < 125:  # combine into one packet
+            ll = len(addr)
+            push_addr = [327687] + list(addr) + [327687]
+            push_vals = [run_flag + 1] + [None]*ll + [run_flag]
+            raw_read = self.dev.exchange(push_addr, push_vals)
+            readout = raw_read[1:-1]
+        else:  # allow burst mode for data
+            # freeze result buffer, and keep running
+            self.dev.exchange([327687], values=[run_flag + 1])
+            # read out "results"
+            readout = self.dev.exchange(addr)
+            # thaw result buffer, still keep running
+            self.dev.exchange([327687], values=[run_flag])
         return readout
 
-    def wait_for_new(self, verbose=True):
+    def wait_for_stat(self, checker, verbose=True):
         for ix in range(self.retry):
-            if self.sim:
-                self.dev.exchange(125*[0])  # twiddle our thumbs for 1000 clock cycles
-            else:
-                sleep(0.02)
             updated = self.dev.exchange([9])
             # print("%d updated? %d" % (ix, updated))
-            if updated & 1:
+            if checker(updated):
                 if verbose:
                     sys.stdout.write("OK\n")
                 break
@@ -43,21 +47,16 @@ class i2c_live:
                 if verbose:
                     sys.stdout.write(".")
                     sys.stdout.flush()
-
-    def wait_for_stop(self):
-        for ix in range(self.retry):
             if self.sim:
                 self.dev.exchange(125*[0])  # twiddle our thumbs for 1000 clock cycles
             else:
-                sleep(0.02)
-            updated = self.dev.exchange([9])
-            # print("%d updated? %d" % (ix, updated))
-            if (updated & 4) == 0:
-                sys.stdout.write("OK\n")
-                break
-            else:
-                sys.stdout.write("-")
-                sys.stdout.flush()
+                sleep(0.01)
+
+    def wait_for_done(self, verbose=True):
+        self.wait_for_stat(lambda x: (x & 1) == 1, verbose=verbose)
+
+    def wait_for_stop(self, verbose=True):
+        self.wait_for_stat(lambda x: (x & 4) == 0, verbose=verbose)
 
     def run_testcase(self, prog, result_len=20, capture=None, stop=False):
         self.dev.exchange([327687], values=[0])  # run_cmd=0

@@ -1,4 +1,5 @@
 from fmc_test_l import fmc_decode, fmc_goal
+from time import sleep
 import i2c_live
 
 import sys
@@ -10,7 +11,6 @@ from assem import i2c_assem
 def build_i2c_reader(fmc_bus):
     s = i2c_assem()
     a = []
-    a += s.pause(2)  # ignored?
     a += s.set_resx(0)  # avoid any confusion
     a += s.hw_config(fmc_bus)
     for mcp23017 in [0x4E, 0x48, 0x44, 0x4C, 0x42]:  # skip 0x4A
@@ -33,9 +33,11 @@ def fpga_out_one(sig_num):
 
 def start_one(chip, sig_num):
     push_add, push_val = fpga_out_one(sig_num)
-    # combine this with the run/stop commands
-    push_add += [327687, 327687]
-    push_val += [2, 0]
+    # combine this with the run and stop commands
+    # stop must be delayed by at least 2*32*14 cycles from start
+    # I don't really like this
+    push_add += [327687]*114
+    push_val += [2]*113 + [0]
     chip.exchange(push_add, values=push_val)
 
 
@@ -55,13 +57,11 @@ def run_set(xchip, fmc_bus_sel):
         want = fmc_goal(ix)
         #
         start_one(xchip.dev, ix + fmc_bus_sel*66)
-        xchip.wait_for_stop()
-        result = xchip.read_result(result_len=10)
-        #
-        # XXX repeat temporarily needed to work around an acquisition problem
-        start_one(xchip.dev, ix + fmc_bus_sel*66)
-        xchip.wait_for_stop()
-        result = xchip.read_result(result_len=10)
+        # run time for i2cbridge sequence should be about
+        # 8ns * 64 * 14 * 10 * 9 * 5 = 3.2 ms
+        sleep(0.0033)
+        xchip.wait_for_stop(verbose=False)
+        result = xchip.read_result(result_len=10, running=False)
         #
         found = fmc_decode(fmc_bus_sel, result, squelch=True, verbose=False)
         if len(found) == 1 and found[0] == want:

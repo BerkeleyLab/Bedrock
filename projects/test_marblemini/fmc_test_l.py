@@ -139,6 +139,7 @@ def fmc_decode(n, a, squelch=True, verbose=True):
 def fmc_goal(n):
     pn = "P" if int(n/33) else "N"
     d = n % 33
+    # LA02 is special, used for I2C pins
     if d > 1:
         d = d+1
     return "LA%2.2d_%s" % (d, pn)
