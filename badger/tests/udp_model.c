@@ -21,15 +21,12 @@
 #include "udp_model.h"
 
 /*
- * VPI (a.k.a. PLI 2) routines for connection to a UDP
- * port to/from a Verilog program.
+ * UDP model used by udp-vpi.c VPI front-end.
  *
- * $udp_in(udp_idata, udp_iflag, udp_count, thinking);
- * $udp_outdup_odata, opack_complete);
- *   in_octet is data received from the UDP port, sent
- *      to the Verilog program.
- *   out_octet provided by the Verilog program, will be sent to
- *      the UDP port, once out_valid is low for a cycle.
+ * udp_receiver() supports two interface modes,
+ * as selected by badger_client global variable:
+ *    0: Raw bytes+strobe interface
+ *    1: Badger-client interface, as defined in badger/clients.pes
  *
  * Written according to standards, but so far only tested on
  * Linux with Icarus Verilog.
@@ -89,7 +86,12 @@ void udp_receiver(int *in_octet, int *in_valid, int *in_count, int thinking)
 	int udp_model_debug = 0;  /* adjustable */
 
 	if (!initialized) {
-		fprintf(stderr, "udp_receiver initializing UDP port %u\n", udp_port);
+		fprintf(stderr, "udp_receiver initializing UDP port %u. Interface mode: ", udp_port);
+		if (badger_client) {
+			fprintf(stderr, "Badger-client\n");
+                } else {
+			fprintf(stderr, "Raw\n");
+                }
 		inbuf.cur = 0;
 		inbuf.len = 0;
 		initialized = 1;
@@ -129,25 +131,29 @@ void udp_receiver(int *in_octet, int *in_valid, int *in_count, int thinking)
 			}
 		}
 	}
-	if (preamble_cnt > 0) {
-		--preamble_cnt;
-		if (in_valid) *in_valid = 1;
-		if (in_count) *in_count = 0;
-		return;
-	}
-	if (postfix_cnt > 0) {
-		--postfix_cnt;
-		if (in_valid) *in_valid = 1;
-		if (in_count) *in_count = 0;
-		return;
+	if (badger_client) { // Badger client interface
+		if (preamble_cnt > 0) {
+			--preamble_cnt;
+			if (in_valid) *in_valid = 1;
+			if (in_count) *in_count = 0;
+			return;
+		}
+		if (postfix_cnt > 0) {
+			--postfix_cnt;
+			if (in_valid) *in_valid = 1;
+			if (in_count) *in_count = 0;
+			return;
+		}
 	}
 	if (inbuf.cur < inbuf.len) {
 		if (in_octet) *in_octet = inbuf.buf[inbuf.cur];
 		inbuf.cur++;
 		val = 1;
-		if (inbuf.cur == inbuf.len) {
-			postfix_cnt = 4;
-			if (inbuf.len < 22) postfix_cnt = 26-inbuf.len;
+		if (badger_client) {
+			if (inbuf.cur == inbuf.len) {
+				postfix_cnt = 4;
+				if (inbuf.len < 22) postfix_cnt = 26-inbuf.len;
+			}
 		}
 	}
 	if (in_valid) *in_valid = val;
