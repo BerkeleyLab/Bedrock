@@ -23,7 +23,12 @@ def gen_map():
     mapin("../../../board_support/bmb7_kintex/fmc-hpc.lst", "FMC2_")
 
 
-def fmc_name_good_to_bad(name):
+def fmc_name_mangle(name):
+    '''
+    This function mangles the FMC names that respect the standard to
+    names that don't for the sake of currently solving the problem.
+    TODO: Fixing above requires modifying meta-xdc.py?
+    '''
     return name.replace('LA0', 'LA').replace('LA', 'LA_').replace('_CC', '')
 
 
@@ -46,7 +51,7 @@ def cycle_xdc(fname):
                 # zest_name = fmc_name_to_zest[fmc_name]
                 # print(" ".join([v_name, io_std, a[2], fmc_name, zest_name]))
                 suffix = " DIFF" if "LVDS" in io_std else ""
-                print(" ".join([fmc_name_good_to_bad(fmc_name), v_name]) + suffix)
+                print(" ".join([fmc_name_mangle(fmc_name), v_name]) + suffix)
                 if False:
                     a[2] = fpga_pin_to_fmc[a[2]]
                     fix = " ".join(a)

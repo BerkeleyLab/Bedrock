@@ -48,6 +48,18 @@ module marble_base(
 	// Simulation-only, please ignore in synthesis
 	output in_use,
 
+        // Local bus for an external application
+        // Define clock domain
+        output lb_clk,
+        output [23:0] lb_addr,
+        output lb_strobe,
+        output lb_rd,
+        output lb_write,
+        output lb_rd_valid,
+	// output [read_pipe_len:0] control_pipe_rd,
+        output [31:0] lb_data_out,
+        input [31:0] lb_data_in,
+
 	// Something physical
 	output [131:0] fmc_test,
 	output ZEST_PWR_EN,
@@ -85,10 +97,15 @@ assign MISO = 0;  // XXX fixme
 
 wire led_user_mode, l1, l2;
 // Local bus
-wire lb_clk = tx_clk;
-wire [23:0] lb_addr;
-wire [31:0] lb_data_out, lb_data_in;
+assign lb_clk = tx_clk;
+//wire [23:0] lb_addr;
+wire [31:0] lb_data_muxed;
 wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;
+assign lb_strobe = lb_control_strobe;
+assign lb_rd = lb_control_rd;
+assign lb_rd_valid = lb_control_rd_valid;
+assign lb_write = lb_control_strobe & ~lb_control_rd;
+
 // Debugging hooks
 wire ibadge_stb, obadge_stb;
 wire [7:0] ibadge_data, obadge_data;
@@ -98,11 +115,13 @@ wire [15:0] rx_mac_data;
 wire rx_mac_hbank;
 wire [1:0] rx_mac_buf_status;
 wire allow_mmc_eth_config;
+wire [31:0] lb_slave_data_read;
+
 //
 lb_marble_slave slave(
 	.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
-	.data_out(lb_data_out), .data_in(lb_data_in),
+	.data_out(lb_data_out), .data_in(lb_slave_data_read),
 	.ibadge_clk(rx_clk),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
@@ -110,8 +129,10 @@ lb_marble_slave slave(
 	.mmc_pins({MOSI, SCLK, CSB}),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
+`ifdef USE_I2CBRIDGE
 	.twi_scl(twi_scl), .twi_sda(twi_sda),
 	.twi_int(TWI_INT), .twi_rst(TWI_RST),
+`endif
 	.wr_dac_sclk(WR_DAC_SCLK), .wr_dac_sdo(WR_DAC_DIN),
 	.wr_dac_sync({WR_DAC2_SYNC, WR_DAC1_SYNC}),
 	.cfg_d02(cfg_d02),
@@ -220,6 +241,7 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 	.p4_busy(boot_busy),
 	.rx_mon(rx_mon), .tx_mon(tx_mon), .in_use(blob_in_use)
 );
+
 assign vgmii_tx_er=1'b0;
 assign in_use = blob_in_use | boot_busy;
 
