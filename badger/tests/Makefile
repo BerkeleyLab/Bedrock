@@ -55,9 +55,10 @@ XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 vpath %.v $(DSP_DIR) $(HOMELESS_DIR) $(SERIAL_IO_DIR)
 vpath %.eps ..
 
-all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check scanner_check \
-  hack_icmp_cksum_check rtefi_pipe_check hello_check speed_test_check mem_gateway_check \
-  spi_flash_check hw_test_tb Vrtefi_blob Vhw_test Vmem_gateway_check
+all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check
+all: scanner_check hack_icmp_cksum_check rtefi_pipe_check hw_test_tb
+all: hello_check speed_test_check mem_gateway_check spi_flash_check
+all: Vrtefi_blob Vhw_test Vmem_gateway_check
 all: test_tx_check precog_check mac_subset_check
 all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb rtefi_live
 all: lb_timing_demo.vcd
@@ -298,7 +299,7 @@ Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) $(R
 
 # =====
 # WIP
-Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) freq_count.v fake_config_romx.v mem_gateway_sim.cpp udp_model.c
+Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) mem_gateway_sim.cpp udp_model.c
 	rm -f udp_model.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmem_gateway_wrap.mk
