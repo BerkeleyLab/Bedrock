@@ -84,7 +84,7 @@ badger_test:
     - cd badger/tests && make clean
   stage: test
   script:
-    - make && make Vrtefi_blob
+    - make
 
 peripheral_test:
   before_script:
