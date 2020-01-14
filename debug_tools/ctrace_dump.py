@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 
 
 def tobin(x, count=8):
@@ -74,28 +75,44 @@ if __name__ == "__main__":
         elif opt in ('-o', '--output'):
             out_file = arg
 
+    if not out_file:
+        out_file = in_file.split()[0] + ".vcd"
+
     # signals should be runtime config
     # this static configuration matches application_top.v
-    signals = ["ack_match",
-               "consistency_match",
-               "abl_match",
-               "link_timer_on",
-               "lacr_in_stb"]
+    # signals = ["ack_match",
+    #            "consistency_match",
+    #            "abl_match",
+    #            "link_timer_on",
+    #            "lacr_in_stb"]
 
-    signals = ["rx_valid"] + ["rx_data0%2.2d" % jx for jx in range(15-1, -1, -1)]
+    # signals = ["mrf_clk_time_err%2.2d" % jx for jx in range(8-1, -1, -1)] +\
+    #           ["mrf_clk_pulse_per%2.2d" % jx for jx in range(7-1, -1, -1)] +\
+    #           ["mrf_msg_strobe"]
+    # signals = ["mrf_rxd%2.2d" % jx for jx in range(14-1, -1, -1)] +\
+    #           ["mrf_rxbyteisaligned", "mrf_rxk0"]
+
+    signals = ["tpg_txd%2.2d" % jx for jx in range(8-1, -1, -1)] +\
+              ["tpg_count%2.2d" % jx for jx in range(7-1, -1, -1)] +\
+              ["tpg_baseenable"]
     print(signals)
     tw = 16
     aw = 16
 
     raw_dat = []
-    hex_set = set('abcdefABCDEF')
+    is_hex = False
     with open(in_file, 'r') as FH:
         line = FH.readlines()[0]
+        match = re.search(r'[a-fA-F]', line)
+        if match:
+            print("Treating all data as HEX")
+            is_hex = True
+        else:
+            print("Treating all data as DEC")
+
         for it in line.split():
-            if any((c in hex_set) for c in it):
-                raw_dat.append(int(it, 16))
-            else:
-                raw_dat.append(int(it))
+            raw_dat.append(int(it, [10, 16][int(is_hex)]))
 
     with open(out_file, 'w') as FH:
+        print("Writing VCD to: %s" % out_file)
         write_vcd(FH, signals, raw_dat, tstep=8, tw=tw)
