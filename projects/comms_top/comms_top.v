@@ -14,7 +14,6 @@ module comms_top
    input   kintex_data_in_n,
    output  kintex_data_out_p,
    output  kintex_data_out_n,
-   output  kintex_done,
 
    input   K7_MGTREFCLK0_P, // D6 - Y4[2] - SIT9122
    input   K7_MGTREFCLK0_N, // D5 - Y4[1] - SIT9122
@@ -53,8 +52,6 @@ module comms_top
 
    // Enable Y4(SIT9122) for GTX_REF_CLK
    assign K7_GTX_REF_CTRL = 1'b1;
-
-   assign kintex_done = 1'b1;
 
    // Not using Spartan-Kintex connection
    wire kintex_data_in, kintex_data_out;
