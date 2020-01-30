@@ -143,6 +143,16 @@ lb_marble_slave slave(
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
 );
 
+reg [23:0] p3_lb_addr_d;
+reg p3_use_app_rd;
+
+always @(posedge lb_clk) begin
+	p3_lb_addr_d <= lb_addr;
+	p3_use_app_rd <= p3_lb_addr_d[23:20] == 1;
+end
+
+wire [31:0] p3_lb_data_in = p3_use_app_rd ? lb_data_in : lb_slave_data_read;
+
 // MAC master
 // Clearly not useful in the long run to drive this only from
 // the localbus, but doing so makes for a much lighter-weight test
@@ -235,7 +245,7 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 	.p2_nomangle(1'b0),
 	.p3_addr(lb_addr), .p3_control_strobe(lb_control_strobe),
 	.p3_control_rd(lb_control_rd), .p3_control_rd_valid(lb_control_rd_valid),
-	.p3_data_out(lb_data_out), .p3_data_in(lb_data_in),
+	.p3_data_out(lb_data_out), .p3_data_in(p3_lb_data_in),
 	.p4_spi_clk(boot_clk), .p4_spi_cs(boot_cs),
 	.p4_spi_mosi(boot_mosi), .p4_spi_miso(boot_miso),
 	.p4_busy(boot_busy),

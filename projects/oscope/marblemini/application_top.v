@@ -341,6 +341,7 @@ always @ (posedge lb_clk) begin
 		lb_addr_r <= lb_addr;
 end
 
+// reverse_json_offset : 1638400
 // Stupid test rig -- help us, Vamsi!
 reg [31:0]
 	reg_bank_0=0,
@@ -450,14 +451,14 @@ always @(posedge lb_clk) begin
 		24'h13????: lb_din <= scanner_result_val;
 		24'h14????: lb_din <= trace_data;
 		24'h18????: lb_din <= slow_data[7:0];
+		24'h19??0?: lb_din <= reg_bank_0;
+		24'h19??1?: lb_din <= reg_bank_1;
+		24'h19??2?: lb_din <= reg_bank_2;
+		24'h19??3?: lb_din <= reg_bank_3;
+		24'h19??4?: lb_din <= reg_bank_4;
+		24'h19??5?: lb_din <= reg_bank_5;
 		24'h1c????: lb_din <= trace_lb_out;
 		24'b????_????_????_1???_????_????: lb_din <= config_rom_out;  // xxx800 through xxxfff, 2K
-		24'h????0?: lb_din <= reg_bank_0;
-		24'h????1?: lb_din <= reg_bank_1;
-		24'h????2?: lb_din <= reg_bank_2;
-		24'h????3?: lb_din <= reg_bank_3;
-		24'h????4?: lb_din <= reg_bank_4;
-		24'h????5?: lb_din <= reg_bank_5;
 		24'b????_????_????_????_0111_????: lb_din <= idelay_mirror_val;  // xxxxf0 through xxxff
 		default: lb_din <= 32'hfaceface;
 	endcase

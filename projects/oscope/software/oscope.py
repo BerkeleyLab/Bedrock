@@ -173,8 +173,7 @@ if __name__ == "__main__":
         "-u",
         "--use_spartan",
         action="store_true",
-        help="use spartan",
-        default=True)
+        help="use spartan")
     args = parser.parse_args()
     run(ip_addr=args.ip,
         port=args.port,
