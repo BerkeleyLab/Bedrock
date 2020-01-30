@@ -82,18 +82,33 @@ constant link_trainer_kernel_FIFO_DATA_WIDTH : integer := 0;
 constant link_trainer_kernel_PORT_DATA_WIDTH : integer := 8;
 type type_link_trainer_kernel_port_array is array (integer range link_trainer_kernel_PORT_DEPTH-1 downto 0) of std_logic_vector(link_trainer_kernel_PORT_DATA_WIDTH-1 downto 0);
 type type_link_trainer_kernel_rram_array is array (integer range link_trainer_kernel_RRAM_DEPTH-1 downto 0) of std_logic_vector(link_trainer_kernel_CORE_DATA_WIDTH-1 downto 0);
-component link_trainer_kernel
- port (
-    prog_data_in : in std_logic_vector(link_trainer_kernel_PRAM_DATA_WIDTH-1 downto 0);
-    prog_data_out : out std_logic_vector(link_trainer_kernel_PRAM_DATA_WIDTH-1 downto 0);
-    prog_address_in : in std_logic_vector(link_trainer_kernel_PRAM_ADDRESS_WIDTH-1 downto 0);
-    port_in : in type_link_trainer_kernel_port_array;
-    port_in_strobe : out std_logic_vector(link_trainer_kernel_PORT_DEPTH-1 downto 0);
-    port_out : out type_link_trainer_kernel_port_array;
-    port_out_strobe : out std_logic_vector(link_trainer_kernel_PORT_DEPTH-1 downto 0);
-    clk, sync_reset, prog_write : in std_logic
-  );
-end component;
+
+  component dp_ram_no_init
+    GENERIC (
+      ADDRESS_WIDTH : integer;
+      DATA_WIDTH : integer;
+      DEPTH : integer
+      );
+    PORT (
+      -- main clock
+      clk : in std_logic;
+
+      -- master control for reloading the program memory from
+      -- and external control interface at runtime
+      master_read_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
+      master_write : in std_logic;
+      master_write_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
+      master_data_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
+      master_data_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
+
+      -- read / write strobes and addresses
+      slave_read_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
+      slave_write : in std_logic;
+      slave_write_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
+      slave_data_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
+      slave_data_out : out std_logic_vector(DATA_WIDTH-1 downto 0)
+      );
+  end component;
   component dp_ram
     GENERIC (
       ADDRESS_WIDTH : integer;
@@ -112,7 +127,7 @@ end component;
       master_write_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
       master_data_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
       master_data_out : out std_logic_vector(DATA_WIDTH-1 downto 0);
-    
+
       -- read / write strobes and addresses
       slave_read_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
       slave_write : in std_logic;
@@ -121,6 +136,7 @@ end component;
       slave_data_out : out std_logic_vector(DATA_WIDTH-1 downto 0)
       );
   end component;
+
   component lifo
     GENERIC (
       DATA_WIDTH : integer;
@@ -137,6 +153,7 @@ end component;
       data_out : out std_logic_vector(DATA_WIDTH-1 downto 0)
       );
   end component;
+
   component op_add
     generic (
       RWIDTH : integer
@@ -224,7 +241,7 @@ end component;
       ra : in std_logic_vector(RWIDTH-1 downto 0);
       rc : out std_logic_vector(RWIDTH-1 downto 0)
       );
-  end component;  
+  end component;
   component op_out
     generic (
       PWIDTH : integer;
@@ -297,9 +314,110 @@ end component;
   end definitions;
 
 --
+-- dp_ram_no_init
+--
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+ENTITY dp_ram_no_init IS
+  GENERIC (
+    ADDRESS_WIDTH : integer;
+    DATA_WIDTH : integer;
+    DEPTH : integer
+    );
+  PORT (
+    -- main clock
+    clk : in std_logic;
+
+    -- master control for reloading the program memory from
+    -- and external control interface at runtime
+    master_read_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
+    master_write : in std_logic;
+    master_write_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
+    master_data_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
+    master_data_out : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
+
+    -- read / write strobes and addresses
+    slave_read_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
+    slave_write : in std_logic;
+    slave_write_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
+    slave_data_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
+    slave_data_out : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0')
+    );
+END ENTITY dp_ram_no_init;
+
+architecture rtl OF dp_ram_no_init is
+
+  type type_ram_array is array (integer range DEPTH-1 downto 0) of std_logic_vector(DATA_WIDTH-1 downto 0);
+
+  function dp_ram_init_null (A : integer; B : integer) return type_ram_array is
+    variable RES : type_ram_array;
+  begin
+    for I in A-1 downto 0 loop
+      for J in B-1 downto 0 loop
+        RES(I)(J) := '0';
+      end loop;
+    end loop;
+    return RES;
+  end dp_ram_init_null;
+
+  function string_to_slv(s : string) return std_logic_vector is
+    variable ret_slv : std_logic_vector(s'length-1 downto 0);
+  begin
+    for i in 1 to s'length loop
+      if s(i) = '0' then
+        ret_slv(i-1) := '0';
+      elsif s(i) = '1' then
+        ret_slv(i-1) := '1';
+      else
+        --catch bad characters
+        ret_slv(i-1) := 'X';
+      end if;
+    end loop;
+    return ret_slv;
+  end string_to_slv;
+
+  -- define the ram array
+  signal int_ram_array : type_ram_array := dp_ram_init_null(DEPTH,DATA_WIDTH);
+
+  -- control signals for the ram
+  -- split read, interlocked write
+  signal int_write : std_logic;
+  signal int_write_address : std_logic_vector(ADDRESS_WIDTH-1 downto 0);
+  signal int_write_data : std_logic_vector(DATA_WIDTH-1 downto 0);
+
+BEGIN
+
+    -- slave read
+  slave_data_out <= int_ram_array(to_integer(unsigned(slave_read_address))) when rising_edge(clk);
+
+  -- master read
+  master_data_out <= int_ram_array(to_integer(unsigned(master_read_address))) when rising_edge(clk);
+
+  -- interlocked write (master_write must keep at '0' if slave is not halted)
+  int_write <= slave_write or master_write;
+  int_write_address <= master_write_address when master_write = '1'
+                       else slave_write_address;
+  int_write_data <= master_data_in when master_write = '1'
+                    else slave_data_in;
+
+  write_process : process(clk)
+  begin
+    if rising_edge(clk) then
+      if int_write = '1' then
+        int_ram_array(to_integer(unsigned(int_write_address))) <= int_write_data;
+      end if;
+    end if;
+  end process write_process;
+
+END ARCHITECTURE rtl;
+
+--
 -- dp_ram
 --
-  
+
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -322,7 +440,7 @@ ENTITY dp_ram IS
     master_write_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
     master_data_in : in std_logic_vector(DATA_WIDTH-1 downto 0);
     master_data_out : out std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
-    
+
     -- read / write strobes and addresses
     slave_read_address : in std_logic_vector(ADDRESS_WIDTH-1 downto 0);
     slave_write : in std_logic;
@@ -332,10 +450,10 @@ ENTITY dp_ram IS
     );
 END ENTITY dp_ram;
 
-architecture rtl OF dp_ram is 
+architecture rtl OF dp_ram is
 
   type type_ram_array is array (integer range DEPTH-1 downto 0) of std_logic_vector(DATA_WIDTH-1 downto 0);
-  
+
   function dp_ram_init_null (A : integer; B : integer) return type_ram_array is
     variable RES : type_ram_array;
   begin
@@ -393,7 +511,7 @@ BEGIN
 
     -- slave read
   slave_data_out <= int_ram_array(to_integer(unsigned(slave_read_address))) when rising_edge(clk);
-  
+
   -- master read
   master_data_out <= int_ram_array(to_integer(unsigned(master_read_address))) when rising_edge(clk);
 
@@ -440,7 +558,7 @@ architecture rtl of lifo is
 
   -- lifo shift array
   signal lifo_array : std_logic_vector((DEPTH * DATA_WIDTH) - 1 downto 0) := (others => '0');
-  
+
 begin
 
   data_out <= lifo_array(DATA_WIDTH-1 downto 0);
@@ -473,7 +591,7 @@ ENTITY op_add IS
     );
 END ENTITY op_add;
 
-ARCHITECTURE rtl OF op_add is   
+ARCHITECTURE rtl OF op_add is
   signal int_q : std_logic_vector(RWIDTH downto 0);
   signal int_d_a : std_logic_vector(RWIDTH downto 0);
   signal int_d_b : std_logic_vector(RWIDTH downto 0);
@@ -481,13 +599,13 @@ BEGIN
 
   int_d_a <= '0' & ra;
   int_d_b <= '0' & rb;
-  
+
   -- add a to b and assign to q
   int_q <= std_logic_vector(unsigned(int_d_a) + unsigned(int_d_b));
 
   -- output result
   rc <= int_q(RWIDTH-1 downto 0);
-  
+
 END ARCHITECTURE rtl;
 
 LIBRARY ieee;
@@ -508,7 +626,7 @@ ENTITY op_call IS
     );
 END ENTITY op_call;
 
-ARCHITECTURE rtl OF op_call is   
+ARCHITECTURE rtl OF op_call is
 BEGIN
 
   glt1: if CWIDTH > AWIDTH generate
@@ -620,7 +738,7 @@ ENTITY op_djmp IS
     );
 END ENTITY op_djmp;
 
-ARCHITECTURE rtl OF op_djmp is   
+ARCHITECTURE rtl OF op_djmp is
 BEGIN
   glt: if CWIDTH < AWIDTH generate
     ao <= std_logic_vector(to_unsigned(0, AWIDTH-CWIDTH)) & c;
@@ -648,7 +766,7 @@ ENTITY op_in IS
     );
 END ENTITY op_in;
 
-ARCHITECTURE rtl OF op_in is   
+ARCHITECTURE rtl OF op_in is
 BEGIN
 
   glt: if PWIDTH < RWIDTH generate
@@ -678,7 +796,7 @@ ENTITY op_ld IS
     );
 END ENTITY op_ld;
 
-ARCHITECTURE rtl OF op_ld is   
+ARCHITECTURE rtl OF op_ld is
 BEGIN
 
   glt: if CWIDTH < RWIDTH generate
@@ -690,7 +808,7 @@ BEGIN
   ggt: if CWIDTH > RWIDTH generate
     rc <= c(RWIDTH-1 downto 0);
   end generate ggt;
-  
+
 END ARCHITECTURE rtl;
 
 LIBRARY ieee;
@@ -706,11 +824,11 @@ ENTITY op_mov IS
     );
 END ENTITY op_mov;
 
-ARCHITECTURE rtl OF op_mov is   
+ARCHITECTURE rtl OF op_mov is
 BEGIN
 
   rc <= ra;
-  
+
 END ARCHITECTURE rtl;
 
 LIBRARY ieee;
@@ -728,7 +846,7 @@ ENTITY op_out IS
     );
 END ENTITY op_out;
 
-ARCHITECTURE rtl OF op_out is   
+ARCHITECTURE rtl OF op_out is
 BEGIN
 
   glt: if PWIDTH > RWIDTH generate
@@ -740,7 +858,7 @@ BEGIN
   ggt: if PWIDTH < RWIDTH generate
     po <= ra(PWIDTH-1 downto 0);
   end generate ggt;
-  
+
 END ARCHITECTURE rtl;
 
 LIBRARY ieee;
@@ -758,7 +876,7 @@ ENTITY op_pop IS
     );
 END ENTITY op_pop;
 
-ARCHITECTURE rtl OF op_pop is   
+ARCHITECTURE rtl OF op_pop is
 BEGIN
   glt: if RWIDTH > SWIDTH generate
     rc <= std_logic_vector(to_unsigned(0, RWIDTH-SWIDTH)) & sti;
@@ -786,7 +904,7 @@ ENTITY op_push IS
     );
 END ENTITY op_push;
 
-ARCHITECTURE rtl OF op_push is   
+ARCHITECTURE rtl OF op_push is
 BEGIN
 
   glt2: if SWIDTH > RWIDTH generate
@@ -816,7 +934,7 @@ ENTITY op_ret IS
     );
 END ENTITY op_ret;
 
-ARCHITECTURE rtl OF op_ret is   
+ARCHITECTURE rtl OF op_ret is
 BEGIN
   glt: if AWIDTH > SWIDTH generate
     ao <= std_logic_vector(unsigned(std_logic_vector(to_unsigned(0, AWIDTH-SWIDTH)) & sti) + 1);
@@ -843,13 +961,13 @@ ENTITY op_shr IS
     );
 END ENTITY op_shr;
 
-ARCHITECTURE rtl OF op_shr is   
+ARCHITECTURE rtl OF op_shr is
 BEGIN
 
   -- rotate bits
   rc(RWIDTH-2 downto 0) <= ra(RWIDTH-1 downto 1);
   rc(RWIDTH-1) <= '0';
-  
+
 END ARCHITECTURE rtl;
 
 LIBRARY ieee;
@@ -867,7 +985,7 @@ ENTITY op_sub IS
     );
 END ENTITY op_sub;
 
-ARCHITECTURE rtl OF op_sub is   
+ARCHITECTURE rtl OF op_sub is
   signal int_q : std_logic_vector(RWIDTH downto 0);
   signal int_d_a : std_logic_vector(RWIDTH downto 0);
   signal int_d_b : std_logic_vector(RWIDTH downto 0);
@@ -875,13 +993,13 @@ BEGIN
 
   int_d_a <= '0' & ra;
   int_d_b <= '0' & rb;
-  
+
   -- add a to b and assign to q
   int_q <= std_logic_vector(unsigned(int_d_b) - unsigned(int_d_a));
 
   -- output result
   rc <= int_q(RWIDTH-1 downto 0);
-  
+
 END ARCHITECTURE rtl;
 
 LIBRARY ieee;
@@ -905,7 +1023,7 @@ BEGIN
   -- unsigned greater than flag
   rc(RWIDTH-1 downto 1) <= (others => '0');
   rc(0) <= '1' when unsigned(rb) > unsigned(ra) else '0';
-  
+
 END ARCHITECTURE rtl;
 
 --
@@ -1173,12 +1291,12 @@ pram_inst : dp_ram
 pram_master_read_address <= prog_address_in when sync_reset = '1' else next_pram_address;
 pram_prefetch_data <= int_prog_data_out;
 prog_data_out <= int_prog_data_out;
-rram_inst : dp_ram
+rram_inst : dp_ram_no_init
   generic map (
     ADDRESS_WIDTH => RRAM_ADDRESS_WIDTH,
     DATA_WIDTH    => CORE_DATA_WIDTH,
-    DEPTH         => RRAM_DEPTH,
-    INIT          => "")
+    DEPTH         => RRAM_DEPTH
+    )
   port map (
     clk => clk,
     master_read_address => ra_address,
@@ -1578,6 +1696,19 @@ end entity link_trainer;
 
 architecture rtl of link_trainer is
 
+  component link_trainer_kernel
+ port (
+    prog_data_in : in std_logic_vector(link_trainer_kernel_PRAM_DATA_WIDTH-1 downto 0);
+    prog_data_out : out std_logic_vector(link_trainer_kernel_PRAM_DATA_WIDTH-1 downto 0);
+    prog_address_in : in std_logic_vector(link_trainer_kernel_PRAM_ADDRESS_WIDTH-1 downto 0);
+    port_in : in type_link_trainer_kernel_port_array;
+    port_in_strobe : out std_logic_vector(link_trainer_kernel_PORT_DEPTH-1 downto 0);
+    port_out : out type_link_trainer_kernel_port_array;
+    port_out_strobe : out std_logic_vector(link_trainer_kernel_PORT_DEPTH-1 downto 0);
+    clk, sync_reset, prog_write : in std_logic
+  );
+  end component;
+
   signal gnd_prog_data_in    : std_logic_vector(link_trainer_kernel_PRAM_DATA_WIDTH-1 downto 0)    := (others => '0');
   signal gnd_prog_address_in : std_logic_vector(link_trainer_kernel_PRAM_ADDRESS_WIDTH-1 downto 0) := (others => '0');
   signal gnd                 : std_logic                                                             := '0';
@@ -1589,7 +1720,7 @@ architecture rtl of link_trainer is
 
   signal rx_crc_error_latch, rx_code_error_latch, rx_disparity_error_latch, rx_error_latch_clear : std_logic := '0';
   signal int_rx_scan_bits : std_logic_vector(31 downto 0) := (others => '0');
-  
+
 begin
 
   -- 8-bit kernel
@@ -1627,7 +1758,7 @@ begin
       end if;
     end if;
   end process rx_error_latch_proc;
-  
+
   -- Input ports
   port_in(0) <= "00000" & rx_crc_error_latch & rx_disparity_error_latch & rx_code_error_latch;
 
@@ -1650,7 +1781,7 @@ begin
     end if;
   end process rx_scan_bits_proc;
   rx_scan_bits <= int_rx_scan_bits;
-  
+
 end architecture rtl;
 
 --
@@ -2721,13 +2852,13 @@ architecture rtl of encode_8b10b is
 
   signal r_data_in : std_logic_vector(7 downto 0) := (others => '0');
   signal r_is_k : std_logic := '0';
-  
+
 begin
 
   -- Register inputs
   r_data_in <= data_in when rising_edge(clk);
   r_is_k <= is_k when rising_edge(clk);
-  
+
   -- XOR output disparity change flag with running disparity
   running_disparity <= code_vector(9) xor result(10) when rising_edge(clk);
 
@@ -2740,7 +2871,7 @@ begin
 
   -- Pass out code minus running disparity
   data_out <= r_result(9 downto 0);
-  
+
 end rtl;
 
 --
@@ -3809,7 +3940,7 @@ architecture rtl of decode_8b10b is
   signal result, r_result                : std_logic_vector(11 downto 0) := (others => '0');
   signal r_code_error, r_disparity_error : std_logic                     := '0';
   signal r_data_in : std_logic_vector(9 downto 0) := (others => '0');
-  
+
 begin
 
   -- Register the input
@@ -3843,7 +3974,7 @@ begin
   is_k            <= r_result(8);
   disparity_error <= r_disparity_error;
   code_error      <= r_code_error;
-  
+
 end rtl;
 
 -- base
@@ -3883,7 +4014,7 @@ entity base is
     clk_100mhz_tx : out std_logic;
     clk_500mhz_tx : out std_logic;
 
-    -- PS en should be pulsed for one clock cycle in the clk_100mhz_rx domain. 
+    -- PS en should be pulsed for one clock cycle in the clk_100mhz_rx domain.
     tx_ps_en   : in  std_logic;
     tx_ps_done : out std_logic;
 
@@ -3999,7 +4130,7 @@ begin
       RST          => mmcm_reset
       );
 
-  -- RX subsystem PLL  
+  -- RX subsystem PLL
   inst_pll_adv : component unisim.vcomponents.PLLE2_ADV
     generic map (
       bandwidth          => "OPTIMIZED",
@@ -4450,7 +4581,7 @@ architecture rtl of k7_tx_8b10b is
     data_in  : in  std_logic_vector(7 downto 0);
     data_out : out std_logic_vector(9 downto 0)
     );
-  end component;  
+  end component;
 
   signal value_10b                : std_logic_vector(9 downto 0);
   signal data_out, shift1, shift2 : std_logic;
@@ -4701,7 +4832,7 @@ architecture rtl of comms_link is
     rx_delay_last_end : out std_logic_vector(7 downto 0);
     rx_scan_bits : out std_logic_vector(31 downto 0)
     );
-end component;
+  end component;
 
   -- K codes
   constant K28P2 : std_logic_vector(7 downto 0) := x"5C";
@@ -5328,7 +5459,7 @@ architecture rtl of qf2_core is
       clk_100mhz_tx : out std_logic;
       clk_500mhz_tx : out std_logic;
 
-      -- PS en should be pulsed for one clock cycle in the clk_100mhz_rx domain. 
+      -- PS en should be pulsed for one clock cycle in the clk_100mhz_rx domain.
       tx_ps_en   : in  std_logic;
       tx_ps_done : out std_logic;
 
