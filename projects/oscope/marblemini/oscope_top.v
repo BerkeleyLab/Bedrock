@@ -379,11 +379,9 @@ wire J28_pout;
 assign J4_pout = bus_bmb7_J4[0];
 assign J28_pout = bus_bmb7_J28[0];
 
+// These are meaningful LEDs, one could use them
 wire [2:0] D4rgb;
 wire [2:0] D5rgb;
-
-assign bus_bmb7_D4 = D4rgb;
-assign bus_bmb7_D5 = D5rgb;
 
 wire U27dir;
 
@@ -469,7 +467,7 @@ digitizer_U18(
 // Here's the real work
 application_top application_top(
 	.lb_clk(lb_clk),
-	.lb_write(lb_strobe & ~lb_rd),
+	.lb_write(lb_write),
 	.lb_strobe(lb_strobe),
 	.lb_rd(lb_rd),
 	.lb_addr(lb_addr),

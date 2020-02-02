@@ -225,10 +225,9 @@ wire adc_mmcm_psincdec = adc_mmcm[1];
 
 // Most reads are passive; these are not
 // TODO: There is no real way to automate this before we start automating the read address space
-wire slow_read_lb = lb_strobe & lb_rd & (lb_addr==8'h43);
+wire slow_read_lb = lb_strobe & lb_rd & (lb_addr==(24'h190000 + 8'h43));
 // llspi lb address decoding
-//wire llspi_we = lb_strobe & ~lb_rd & (lb_addr==5);
-wire llspi_re = lb_strobe &  lb_rd & (lb_addr==5);
+wire llspi_re = lb_strobe &  lb_rd & (lb_addr==(24'h190000 + 5));
 
 // ADC channel data setup and mapping
 reg signed [15:0] U2DA=0, U2DB=0, U2DC=0, U2DD=0;
@@ -457,9 +456,9 @@ always @(posedge lb_clk) begin
 		24'h19??3?: lb_din <= reg_bank_3;
 		24'h19??4?: lb_din <= reg_bank_4;
 		24'h19??5?: lb_din <= reg_bank_5;
+		24'h19007?: lb_din <= idelay_mirror_val;  // xxxxf0 through xxxff
 		24'h1c????: lb_din <= trace_lb_out;
 		24'b????_????_????_1???_????_????: lb_din <= config_rom_out;  // xxx800 through xxxfff, 2K
-		24'b????_????_????_????_0111_????: lb_din <= idelay_mirror_val;  // xxxxf0 through xxxff
 		default: lb_din <= 32'hfaceface;
 	endcase
 end
