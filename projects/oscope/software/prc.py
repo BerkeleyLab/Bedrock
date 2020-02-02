@@ -1,4 +1,3 @@
-import os
 import re
 import struct
 import sys
@@ -15,7 +14,6 @@ from llspi_ad9781 import c_llspi_ad9781
 from ad7794 import c_ad7794
 from amc7823 import c_amc7823
 from prnd import prnd
-from onewire import onewire_status
 
 
 class c_prc(c_llrf_bmb7):
@@ -970,23 +968,23 @@ class c_prc(c_llrf_bmb7):
         sys.stdout.write(ss)
         return True
 
-    def read_health_status(leep):
-        fnames = ["adc", "4xout", "clkout3", "dco", "gtx_tx", "gtx_rx"]
-        pnames = ["U2", "U3"]
-        onames = ["crc_errors"]
-        name_list = [("frequency_"+n) for n in fnames] + \
-            [("clk_phase_diff_out_"+n) for n in pnames] + \
-            [(x) for x in onames] + \
-            [("freq_multi_count[%d]" % ix) for ix in range(8)]
-        foo = leep.reg_read(name_list)[0]
-        for ix in range(6):
-            print("%12s  %.6f * 50 MHz" % (fnames[ix], foo[ix]*0.5**24))
-        for ix in range(8):
-            print("freq_multi_count[%d]  %.6f * 50 MHz" % (ix, foo[9+ix]/(2.0**23-5.0)))
-        describe_phase_diff(foo[6], "U2")
-        describe_phase_diff(foo[7], "U3")
-        for ix in range(len(onames)):
-            print("%s %d" % (onames[ix], foo[8+ix]))
+    # def read_health_status(leep):
+    #     fnames = ["adc", "4xout", "clkout3", "dco", "gtx_tx", "gtx_rx"]
+    #     pnames = ["U2", "U3"]
+    #     onames = ["crc_errors"]
+    #     name_list = [("frequency_"+n) for n in fnames] + \
+    #         [("clk_phase_diff_out_"+n) for n in pnames] + \
+    #         [(x) for x in onames] + \
+    #         [("freq_multi_count[%d]" % ix) for ix in range(8)]
+    #     foo = leep.reg_read(name_list)[0]
+    #     for ix in range(6):
+    #         print("%12s  %.6f * 50 MHz" % (fnames[ix], foo[ix]*0.5**24))
+    #     for ix in range(8):
+    #         print("freq_multi_count[%d]  %.6f * 50 MHz" % (ix, foo[9+ix]/(2.0**23-5.0)))
+    #     describe_phase_diff(foo[6], "U2")
+    #     describe_phase_diff(foo[7], "U3")
+    #     for ix in range(len(onames)):
+    #         print("%s %d" % (onames[ix], foo[8+ix]))
 
 
 def usage():
@@ -1016,7 +1014,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    prc = c_prc(args.dev_addr, port=args.port, bitfilepath=args.bitfilepath, reset=args.reset, use_spartan=args.use_spartan, ref_freq=args.ref_freq, clk_freq=100e6)
+    prc = c_prc(args.dev_addr, port=args.port, bitfilepath=args.bitfilepath, reset=args.reset,
+                use_spartan=args.use_spartan, ref_freq=args.ref_freq, clk_freq=100e6)
 
     if args.scan:
         prc.pntest3(args.scan)

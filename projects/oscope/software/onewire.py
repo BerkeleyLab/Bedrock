@@ -1,6 +1,3 @@
-import struct
-
-
 def onewire_crc(data):
     crc = 0
     for d in reversed(data):
