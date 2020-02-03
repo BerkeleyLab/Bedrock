@@ -24,6 +24,7 @@ parameter sim_length = 250;  // for off-line runs
 reg clk_r, log;
 integer cc;
 integer udp_port;  // non-zero to enable UDP socket mode
+integer badger_client = 1; // Badger client interface
 reg [1023:0] packet_file;  // file name, fragile! limited to 128 characters
 integer data_len;
 reg [7:0] in_stream[0:msg_len-1];  // file contents
@@ -31,7 +32,7 @@ initial begin
 	log = $test$plusargs("log");
 	if (!$value$plusargs("packet_file=%s", packet_file)) packet_file="xfer1";
 	if (!$value$plusargs("udp_port=%d", udp_port))  udp_port=0;
-	if (udp_port!=0) $udp_init(udp_port);
+	if (udp_port!=0) $udp_init(udp_port, badger_client);
 	else $readmemh(packet_file, in_stream);
 	if (!$value$plusargs("data_len=%d", data_len)) data_len=msg_len;
 	// Run forever (until interrupt) when connected to UDP socket

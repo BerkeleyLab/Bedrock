@@ -67,6 +67,22 @@ def show_short(chip):
     print("Rx b1:" + ss0)
 
 
+def hello_test(chip):
+    base_0 = 0x110000
+    npt = 4
+    addrs = list(range(base_0, base_0+npt))
+    xa = chip.exchange(addrs, [None]*len(addrs))
+    hello = ""
+    for ix, x in enumerate(xa[0:npt]):
+        xx = [((x >> (8*(3-ix))) & 0xff) for ix in range(4)]
+        ss = "".join([chr(y) if y >= 32 and y < 128 else "?" for y in xx])
+        print("%d:  %8x  %s" % (ix, x, ss))
+        hello += ss
+    rv = hello == "Hello world!(::)"
+    print("PASS" if rv else "FAIL")
+    return rv
+
+
 def set_rx_mac_hbank(chip, hbank, verbose=False):
     base_0 = 0x110000
     rx_mac_status = base_0+7
@@ -343,6 +359,8 @@ if __name__ == "__main__":
         exit(1)
     if args.command == "reset":
         reset_trace(foo)
+    elif args.command == "hello":
+        exit(0 if hello_test(foo) else 1)
     elif args.command == "show":
         show_short(foo)
     elif args.command == "rx":
