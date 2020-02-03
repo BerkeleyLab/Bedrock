@@ -138,6 +138,6 @@ shortfifo #(.dw(9), .aw(5)) fifo (
 
 assign tx_rdy_l = slow_rx ? ~empty&nonce_done : ~empty;
 assign tx_rdy = tx_rdy_l;
-assign tx_end = tx_done && tx_pending==1;
+assign tx_end = tx_done && tx_pending==1 && ~rx_active;
 
 endmodule
