@@ -4,7 +4,12 @@
 // Uses standard network byte order (big endian).
 // Supposedly compatible with mem_gateway.v
 // NOTE: This code is not compatible with block-transfer mode described in mem_gate.md
-module jxj_gate #(parameter dbg="true", parameter pipe_del=3) (
+module jxj_gate #(
+	parameter dbg="true",
+	parameter pipe_del=3,
+	parameter slow_rx=1 // Enables legacy mode for slow S6-K7 link;
+			    // In this mode, tx start is delayed so stream is not interrupted
+) (
 	input clk,  // single-clock-domain design
 	// AXI-lite-stream-ish port from remote host
 	// (Spartan-6 communication decoder in case of BMB7)
@@ -124,14 +129,15 @@ wire drive_fifo = drive_fifo_tx | rx_loopback;
 // One more FIFO.  Could be considered bufferbloat.
 (* mark_debug = dbg *) wire empty;
 wire tx_done;
-wire fifo_re = tx_stb&~empty;
+wire fifo_re = tx_rdy_l&tx_stb;
 
 shortfifo #(.dw(9), .aw(5)) fifo (
 	.clk(clk),
 	.din({drive_fifo_data, drive_fifo_done}), .we(drive_fifo),
 	.dout({tx_dout, tx_done}), .re(fifo_re), .empty(empty));
 
-assign tx_rdy = ~empty;
+assign tx_rdy_l = slow_rx ? ~empty&nonce_done : ~empty;
+assign tx_rdy = tx_rdy_l;
 assign tx_end = tx_done && tx_pending==1;
 
 endmodule
