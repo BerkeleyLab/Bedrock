@@ -31,7 +31,7 @@ module ds_clk_buf #(
       end
    endgenerate
 `else
-   assign clk_out = clk_p;
+   assign clk_out_i = clk_p;
 `endif
 
    generate

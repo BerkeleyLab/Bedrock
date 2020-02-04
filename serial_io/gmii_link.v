@@ -20,15 +20,14 @@ module gmii_link(
 	// other
 	input an_bypass,  // disables lacr transmission for autonegotiation
 	output operate,   // (GTX_CLK domain) tells upper levels we're ready to transmit
-	output [1:0] an_state_mon,  // autonegotiation state monitor
 	output [15:0] lacr_rx,  // (RX_CLK domain) layering violation
-	output [5:0] leds
+	output [6:0] an_status
 );
 
 //New internal wires removed from the module interface (error signals from 8b10b enc/dec)
 wire rx_err_code, rx_err_rdisp;
 
-parameter DELAY=10000;  // see negotiate.v
+parameter DELAY=1250000;  // see negotiate.v
 
 reg rx_rst=1, tx_rst=1;
 always @(posedge RX_CLK) rx_rst<=0;
@@ -43,7 +42,7 @@ reg enc_dispin;
 wire enc_dispout;
 ep_tx_pcs tx(.clk(GTX_CLK), .rst(tx_rst),
 	.tx_data_i(TXD),
-	.tx_enable(TX_EN),
+	.tx_enable(TX_EN & (operate | an_bypass)), // Wait for AN to complete (if enabled)
 	.ep_tcr_en_pcs_i(1'b1),
 	.ep_lacr_tx_val_i(lacr_out),
 	.ep_lacr_tx_en_i(lacr_send & ~an_bypass),
@@ -56,7 +55,10 @@ wire [8:0] txdata_in_enc={tx_is_k, tx_odata};
 
 always @(posedge GTX_CLK) enc_dispin <= enc_dispout & ~tx_rst;
 
-enc_8b10b my_enc_8b10b(.datain(txdata_in_enc), .dispin(enc_dispin), .dataout(txdata), .dispout(enc_dispout));
+enc_8b10b my_enc_8b10b (
+	.datain(txdata_in_enc), .dispin(enc_dispin),
+	.dataout(txdata), .dispout(enc_dispout)
+);
 
 wire [8:0] rxdata_dec_out;
 // Rx path from deserializer to GMII
@@ -82,9 +84,13 @@ wire dec_dispout;
 
 always @(posedge RX_CLK) dec_dispin <= dec_dispout & ~rx_rst;
 
-dec_8b10b my_dec_8b10b(.datain(rxdata), .dispin(dec_dispin), .dataout(rxdata_dec_out), .dispout(dec_dispout), .code_err(rx_err_code), .disp_err(rx_err_rdisp));
+dec_8b10b my_dec_8b10b(
+	.datain(rxdata), .dispin(dec_dispin),
+	.dataout(rxdata_dec_out), .dispout(dec_dispout),
+	.code_err(rx_err_code), .disp_err(rx_err_rdisp)
+);
 
-negotiate #(.DELAY(DELAY)) negotiator(
+negotiate #(.TIMER_TICKS(DELAY)) negotiator(
 	.rx_clk(RX_CLK),
 	.tx_clk(GTX_CLK),
 	.los(rx_err_los),
@@ -93,8 +99,7 @@ negotiate #(.DELAY(DELAY)) negotiator(
 	.lacr_out(lacr_out),
 	.lacr_send(lacr_send),
 	.operate(operate),
-	.state_mon(an_state_mon),
-	.leds(leds)
+	.an_status(an_status)
 );
 
 assign lacr_rx = lacr_rx_val;

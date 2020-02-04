@@ -3,7 +3,7 @@ include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
 
 TARGET  = gpio
-MEM_SIZE = 512
+BLOCK_RAM_SIZE = 512
 CFLAGS += -DSIMULATION
 SRC_V += memory2_pack.v mpack.v munpack.v picorv32.v pico_pack.v
 SRC_V += gpio_pack.v sfr_pack.v

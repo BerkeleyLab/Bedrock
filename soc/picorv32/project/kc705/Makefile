@@ -3,7 +3,7 @@ include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
 
 #size of the blockRam [bytes]
-MEM_SIZE   = 8192
+BLOCK_RAM_SIZE = 8192
 USB_SERIAL = /dev/ttyUSB0
 TARGET     = system
 
@@ -22,7 +22,7 @@ OBJS      =  $(subst .c,.o,$(SRCS)) startup.o bootloader.o
 
 # Verilog / C flags for compiler, assembler, linker and simulator
 # Note: flags for the synthesizer need to be defined in system_synth.tcl
-VFLAGS   += -DMEM_SIZE=$(MEM_SIZE)
+VFLAGS   += -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
 # CFLAGS   += -Os -march=rv32imc
 # -ffunction-sections -fdata-sections
 
@@ -35,7 +35,7 @@ $(TARGET)_tb:  $(SIM_V)
 $(TARGET).vcd: $(TARGET)32.hex
 
 # Only add the SIMULATION flag if target is simulation
-$(TARGET)_tb: VFLAGS += -DSIMULATION
+$(TARGET)_tb: VFLAGS += -DSIMULATE
 $(TARGET).vcd: CFLAGS += -DSIMULATION
 
 CLEAN += $(TARGET)_synth.v xvhdl.log xvhdl.pb xvlog.log xelab.log xvlog.pb usage_statistics_webtalk.*

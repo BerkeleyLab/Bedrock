@@ -29,3 +29,10 @@ int memcmp(const void *s1, const void *s2, size_t n){
     }
     return c;
 }
+
+int rand(void) // RAND_MAX assumed to be 32767
+{
+    static unsigned long int next = 1;
+    next = next * 1103515245 + 12345;
+    return (unsigned int)(next/65536) % 32768;
+}

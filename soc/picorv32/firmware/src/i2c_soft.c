@@ -10,8 +10,8 @@
 // Private macros /functions
 //-------------------------------------------------
 // setting / clearing / reading the I2C pins
-#define SDA1() { SET_GPIO1( BASE_GPIO, GPIO_OE_REG, PIN_I2C_SDA, 0 ) I2C_DELAY(); }  // SDA SET 1
-#define SDA0() { SET_GPIO1( BASE_GPIO, GPIO_OE_REG, PIN_I2C_SDA, 1 ) I2C_DELAY(); }
+#define SDA1() { SET_GPIO1( BASE_GPIO, GPIO_OE_REG, PIN_I2C_SDA, 0 ); I2C_DELAY(); }  // SDA SET 1
+#define SDA0() { SET_GPIO1( BASE_GPIO, GPIO_OE_REG, PIN_I2C_SDA, 1 ); I2C_DELAY(); }
 #define SDAR()   GET_GPIO1( BASE_GPIO, GPIO_IN_REG, PIN_I2C_SDA )                     // SDA READ
 #define SCL1() { SET_GPIO1( BASE_GPIO, GPIO_OE_REG, PIN_I2C_SCL, 0 ); I2C_DELAY(); }  // SCL SET 1
 #define SCL0() { SET_GPIO1( BASE_GPIO, GPIO_OE_REG, PIN_I2C_SCL, 1 ); I2C_DELAY(); }

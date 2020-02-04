@@ -50,7 +50,9 @@ int tap_alloc(char *dev)
 
 	if( (fd = open("/dev/net/tun", O_RDWR)) < 0 ){
 		perror("tun-open");
-		printf("Maybe you want to: tunctl -u <username> && ifconfig tap0 <ip_address> up\n");
+		printf("Maybe you want to: tunctl -u $USER && ifconfig tap0 <ip_address> up\n");
+		printf("or: printf \"tuntap add mode tap user $USER\\n link set tap0 up\\n address add 192.168.7.1 dev tap0\\n route add 192.168.7.0/24 dev tap0\\n\" | sudo ip -batch -\n");
+
 		return -1;
 	}
 
@@ -67,7 +69,8 @@ int tap_alloc(char *dev)
 
 	if( (err = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0 ){
 		perror("tun-ioctl");
-		printf("Maybe you want to: tunctl -u <username> && ifconfig tap0 <ip_address> up\n");
+		printf("Maybe you want to: tunctl -u $USER && ifconfig tap0 <ip_address> up\n");
+		printf("or: printf \"tuntap add mode tap user $USER\\n link set tap0 up\\n address add 192.168.7.1 dev tap0\\n route add 192.168.7.0/24 dev tap0\\n\" | sudo ip -batch -\n");
 		close(fd);
 		return err;
 	}

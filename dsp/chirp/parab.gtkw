@@ -1,0 +1,21 @@
+[timestart] 0
+[size] 1000 600
+[pos] 329 53
+*-6.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] parab_tb.
+[sst_width] 210
+[signals_width] 142
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@24
+parab_tb.dphase[19:0]
+parab_tb.ddphase[19:0]
+@28
+parab_tb.gate
+parab_tb.reset
+@24
+parab_tb.phase[19:0]
+parab_tb.dut.dphase_r[35:0]
+parab_tb.rut.amp[19:0]
+[pattern_trace] 1
+[pattern_trace] 0

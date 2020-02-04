@@ -143,6 +143,24 @@ class cfileParser:
 
         print("{} {}".format(cmd, " ".join(args)))
 
+    def _prdmem(self, cmd, args):
+        if (len(args) != 3):
+            self._badarg(cmd)
+            return
+        base_addr = int(args[0].lstrip(':'), 0)
+        read_length = int(args[1], 0)
+        out_file = args[2]
+        with open(out_file, 'w') as FW:
+            for i in range(0, read_length):
+                bdata = udp_packet.get_lbus_read(base_addr+i)
+                (d_hex, d_asc) = udp_packet.send_recv(bdata)
+
+                # Convert to decimal; pay attention to endianness
+                d_dec = int.from_bytes(binascii.unhexlify(d_hex), byteorder='big')
+                FW.write("{} ".format(d_dec))
+
+        print("{} {} : Successfully read {} memory positions".format(cmd, " ".join(args), read_length))
+
     def _pwait(self, cmd, args):
         if (len(args) != 1):
             self._badarg(cmd)
@@ -173,6 +191,7 @@ class cfileParser:
         func_map = {"PRINT": self._pprint,
                     "WRW": self._pwrite,
                     "RDW": self._pread,
+                    "RDMEM": self._prdmem,
                     "WAIT": self._pwait,
                     "CMP": self._pcmp,
                     }

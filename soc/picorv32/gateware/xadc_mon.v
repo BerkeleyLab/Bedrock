@@ -77,7 +77,7 @@ wire [7:0]  alm_int;
 wire ot_out;
 assign alarm_out = {ot_out, alm_int};
 
-`ifndef SIMULATION
+`ifndef SIMULATE
 /***********
 create_ip -name xadc_wiz -vendor xilinx.com -library ip -module_name "xadc_wiz_0"
 set_property -dict {

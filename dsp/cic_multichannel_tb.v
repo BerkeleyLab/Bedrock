@@ -204,7 +204,7 @@ module cic_multichannel_tb;
                             // Difference between above two widths should be N*log2 of the maximum number
                             // of samples per CIC sample, where N=2 is the order of the CIC filter.
 
-      .di_noise_bits (0),
+      .di_noise_bits (1),   // NOTE: Setting to 1 to compensate for removed /2 from double_inte
       .cc_outw       (20),  // CCFilt output width; Must be 20 if using half-band filter
       .cc_halfband   (1),
       .cc_use_delay  (0),   // Match pipeline length of filt_halfband=1

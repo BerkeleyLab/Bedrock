@@ -1,0 +1,20 @@
+iverilog -o b2d_tb b2d_tb.v b2d.v
+vvp -N b2d_tb
+result           x for input     x
+result         123 for input   123
+result         123 for input   123
+result       60875 for input 60875
+result       13604 for input 13604
+result       24193 for input 24193
+result       54793 for input 54793
+result       22115 for input 22115
+result       31501 for input 31501
+result       39309 for input 39309
+result       33893 for input 33893
+result       21010 for input 21010
+         12 tests passed
+PASS
+iverilog -o fib_tb fib_tb.v fib.v
+vvp -N fib_tb > fib.out
+cmp fib.out fib.gold
+PASS
