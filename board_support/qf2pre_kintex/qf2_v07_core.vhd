@@ -4178,7 +4178,7 @@ begin
   idelayctrl_reset <= not(pll_locked);
 
   -- Use BUFH to restrict placement
-  inst_bufh_clk_300mhz_idelay : component unisim.vcomponents.BUFH
+  inst_bufg_clk_300mhz_idelay : component unisim.vcomponents.BUFG
     port map (
       i => int_clk_300mhz_idelay,
       o => clk_300mhz_idelay

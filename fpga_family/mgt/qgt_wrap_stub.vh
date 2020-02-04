@@ -96,7 +96,11 @@
          `GTi_PORT_MAP (0)
       );
 
-      `GT_OUTCLK_BUF(0)
+      generate if (GT0_BUF==0) begin
+      `GT_OUTCLK_BUFG(0)
+      end else begin
+      `GT_OUTCLK_BUFH(0)
+      end endgenerate
    `endif
 
    `ifdef GT1_ENABLE
@@ -104,7 +108,11 @@
          `GTi_PORT_MAP (1)
       );
 
-      `GT_OUTCLK_BUF(1)
+      generate if (GT1_BUF==0) begin
+      `GT_OUTCLK_BUFG(1)
+      end else begin
+      `GT_OUTCLK_BUFH(1)
+      end endgenerate
    `endif
 
    `ifdef GT2_ENABLE
@@ -112,7 +120,11 @@
          `GTi_PORT_MAP (2)
       );
 
-      `GT_OUTCLK_BUF(2)
+      generate if (GT2_BUF==0) begin
+      `GT_OUTCLK_BUFG(2)
+      end else begin
+      `GT_OUTCLK_BUFH(2)
+      end endgenerate
    `endif
 
    `ifdef GT3_ENABLE
@@ -120,7 +132,11 @@
          `GTi_PORT_MAP (3)
       );
 
-      `GT_OUTCLK_BUF(3)
+      generate if (GT3_BUF==0) begin
+      `GT_OUTCLK_BUFG(3)
+      end else begin
+      `GT_OUTCLK_BUFH(3)
+      end endgenerate
    `endif
 
    assign gt_cpll_locked = &{1'b1,
