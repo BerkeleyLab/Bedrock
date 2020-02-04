@@ -106,8 +106,7 @@ class Carrier():
 
     def _process_subscriptions(self):
         # TODO: Perhaps implement something to avoid race condition on results
-        for sub_id, (single_subscribe, fn,
-                     *fn_args) in list(self.subscriptions.items()):
+        for sub_id, (single_subscribe, fn, *fn_args) in list(self.subscriptions.items()):
             self.results[sub_id] = fn(self._db, *fn_args)
             if single_subscribe:
                 self.remove_subscription(sub_id)
@@ -180,8 +179,8 @@ class GUIGraph:
                                                  xlim=[0, 0.01], ylim=[-1., 1.])
         g_plot_type_limits['F'] = GUIGraphLimits('F', xlabel='Frequency [Hz]',
                                                  ylabel='[V/sqrt(Hz)]',
-                                                 xlim=[0, 5e7],
-                                                 ylim=[1e-11, 200],
+                                                 xlim=[0, 5e6],
+                                                 ylim=[1e-11, 60000],
                                                  autoscale=True)
         # Create 2 GUI graphs for each channel of data coming from the carrier
         # 2 graphs, 1 for T and 1 for F
@@ -267,7 +266,8 @@ class Logic(BoxLayout):
                 carrier.add_subscription(plot_id, Processing.stacking_fft,
                                          int(plot_id[1]), 'hanning')
             elif plot_type == '3':
-                carrier.add_subscription('3', Processing.csd,
+                print(self.csd_channels)
+                carrier.add_subscription('3', Processing.H,
                                          self.csd_channels[0],
                                          self.csd_channels[1], 'hanning')
         else:
@@ -290,6 +290,10 @@ class Logic(BoxLayout):
     def save_data(self, *args):
         carrier.add_subscription(
             'save', Processing.save, single_subscribe=True)
+
+    def restack_data(self, *args):
+        Processing.reset_ch_stack_count(0)
+        Processing.reset_ch_stack_count(1)
 
     def update_graph(self, dt):
         for _, ch in g_scope_channels.items():
@@ -326,7 +330,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-c', '--count', help='number of acquisitions', type=int, default=1)
     parser.add_argument(
-        '-l', '--log_decimation_factor', help='Log downsample ratio', type=int, default=0)
+        '-l', '--log_decimation_factor', help='Log downsample ratio', type=int, default=2)
     parser.add_argument(
         '-f', '--filewritepath', help='static file out', type=str, default="")
     parser.add_argument(
