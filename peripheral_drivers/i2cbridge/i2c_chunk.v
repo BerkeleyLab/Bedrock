@@ -4,27 +4,27 @@ module i2c_chunk(
 	// Single clock domain, slave to the local bus
 	// hard-coded read/write 4K address space,
 	// subdivided into quarters as shown below
-	input clk,
-	input [11:0] lb_addr,
-	input [7:0] lb_din,
+	input clk,  // Rising edge clock input; all logic is synchronous in this domain
+	input [11:0] lb_addr,  // Local bus address
+	input [7:0] lb_din,  // Data from local bus master
 	input lb_write,  // memory space only
-	output [7:0] lb_dout,
+	output [7:0] lb_dout,  // Data made available to local bus master
 	// Auxiliary control and status
-	input run_cmd,
-	input freeze,
-	output run_stat,
-	output updated,
-	output err_flag,
-	output [3:0] hw_config,
+	input run_cmd,  // Command sequencer to run
+	input freeze,  // Keep output buffer from changing
+	output run_stat,  // Reports if sequencer is running
+	output updated,  // New data is available in output buffer
+	output err_flag,  // Error condition detected
+	output [3:0] hw_config,  // Can be used to select between I2C busses
 	// Hardware pins: TWI (almost I2C) bus
-	output scl,
-	output sda_drive,
-	input  sda_sense,
-	input  rst,  // count on someone else to drive this
+	output scl,  // Direct drive of SCL pin
+	output sda_drive,  // Low value should operate pull-down of SDA pin
+	input  sda_sense,  // SDA pin
+	input  rst,  // not yet used
 	input  intp  // not yet used
 );
 
-parameter tick_scale = 4;
+parameter tick_scale = 6;
 // transparently passed to i2c_prog
 parameter q1 = 2;  // o_p1 ticks are 2^(q1+1) * bit_adv
 parameter q2 = 7;  // o_p2 ticks are 2^(q2+1) * bit_adv
@@ -33,7 +33,7 @@ parameter q2 = 7;  // o_p2 ticks are 2^(q2+1) * bit_adv
 // and loose with its clock domain, and even ignore it for a
 // few cycles.  As long as it takes effect before a following
 // read returns data, the sequence of reads that follows will
-// stay self-consistent.  If the Von-Neumann machine that creates
+// stay self-consistent.  If the von Neumann machine that creates
 // this command wants to be super-conservative, it's free to insert
 // a bus cycle of some kind between the freeze command and the
 // subsequent data read.
@@ -109,7 +109,7 @@ reg result_k=0;
 
 // Collate write requests
 // Output is the "X-bus" signals xbd (data), xba(address), and xbs (strobe)
-// Memory is subdivded into quarters:
+// Memory is subdivided into quarters:
 //   0x000 - 0x3ff   program
 //   0x400 - 0x7ff   logic analyzer
 //   0x800 - 0xbff   results
