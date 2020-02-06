@@ -15,20 +15,8 @@ CFLAGS = -O2 -Wall -Wextra -pedantic -std=c99 -D_DEFAULT_SOURCE
 CFLAGS += -Wshadow -Wundef -Wstrict-prototypes -Wredundant-decls
 CFLAGS += -I .
 
-# Enable this stanza for SRF cavity detune and quench finding
-STYLE = _srf
-DATA_LEN = 6
-CONSTS_LEN = 8
-CONST_AW = 3
-
 # See README.run2
 SRF_DATA = ../run2.dat
-
-# Enable this stanza for RF distortion correction
-# STYLE = _ip3
-# DATA_LEN = 8
-# CONSTS_LEN = 4
-# CONST_AW = 2
 
 %_tb: %_tb.v
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
@@ -53,6 +41,10 @@ all: inverse_check ilookup_check match_mem match_reg accuracy detune_cw detune_p
 # gnu make magic
 .DELETE_ON_ERROR:
 .PHONY: inverse_check ilookup_check match accuracy plot
+
+# Get Digaree program-building rules from rules.mk
+DIG_DIR = .
+include rules.mk
 
 main_tb: sf_main.v ops.vh
 
@@ -117,16 +109,10 @@ user_k7.bit: sf_user.tcl sf_user.v sf_main.v ops.vh sf_dpram.v sf_user.xdc
 .PHONY: bits
 bits: main_s6.bit main_s3.bit user_s6.bit user_s3.bit
 
-ops.h: cgen$(STYLE).py cgen_lib.py
-	$(PYTHON) $< > $@
-
 # init.dat will be read by both Verilog (user_tb.v) and C (sim1.c),
 # so it has to be kept very simple.
 init.dat: initgen$(STYLE).py
 	$(PYTHON) $< > $@
-
-ops.vh: sched.py ops.h
-	$(PYTHON) $^ > $@
 
 init2.dat: init_xindex.py init.dat ops.vh
 	$(PYTHON) $< > $@
