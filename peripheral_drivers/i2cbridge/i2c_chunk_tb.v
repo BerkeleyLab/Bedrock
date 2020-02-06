@@ -76,7 +76,7 @@ end
 
 // Instantiate device under test
 wire [3:0] hw_config;
-i2c_chunk #(.q1(0), .q2(2)) chunk (.clk(clk),
+i2c_chunk #(.tick_scale(4), .q1(0), .q2(2)) chunk (.clk(clk),
 	.lb_addr(lb_addr), .lb_din(lb_din), .lb_write(lb_write),
 	.lb_dout(lb_dout),
 	.run_cmd(run), .freeze(freeze), .hw_config(hw_config),

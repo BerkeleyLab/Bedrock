@@ -26,7 +26,7 @@ to hold:
 See below for more discussion of the sequence (program) that is held
 in that first section of memory.
 
-A simplified block diagram is in [blocks.eps](blocks.eps).
+A simplified block diagram is in blocks.eps.
 It is annotated, to possibly be useful as a top-level introduction to the code.
 To edit that file, use xcircuit.  If you'd rather look at it as a PDF,
 "make blocks.pdf".
@@ -37,7 +37,7 @@ Current synthesis result in Spartan-6 using ISE 14.7:
 ## Usage
 
 The expected interface to the rest of your chip design is i2c_chunk.
-This is a single-clock-domain design.
+This is a single-clock-domain design (input clk).
 
 Bus timing parameter tick_scale, default 6:
 One I2C bit time is (clk period) * 14 * 2^(tick_scale).
@@ -72,6 +72,26 @@ Hardware tie-in:
 * input sda_sense
 * output hw_config (Can be used to select between I2C busses)
 
+When running, a typical instruction sequence will fill one half of the
+output ping-pong buffer, and then request an atomic swap so that new data
+is accessible from the host side (bf command, see below).
+This buffer flip request is willfully ignored if the freeze bit
+is set by the host.  This supports a guaranteed-self-consistent
+readout paradigm that should be used by the host:
+
+* Set freeze bit
+* Read out buffer
+* Clear freeze bit
+
+The idea is that this operation will be quick compared to the polling
+cycle, and is permitted to happen at any time.  This assumes there are
+negligible consequences of dropping an occasional buffer of data;
+new data will arrive shortly anyway.
+
+The host can optimize this process somewhat by checking the updated bit,
+and only reading data out when it is set.  As a side effect to setting
+and clearing the freeze bit is to clear the updated status bit.
+
 ## Workstation requirements
 
 Standard *nix tools, Icarus Verilog, gtkwave,
@@ -86,7 +106,7 @@ i2c_bit_view, i2c_prog_view, i2c_analyze_view, and i2c_chunk_view.
 ## Programming
 
 There is some python code in here that acts as an assembler for
-the instruction sequence that loaded into i2cbridge to control
+the instruction sequence that gets loaded into i2cbridge to control
 the I2C operations.
 
 Instruction encoding:
@@ -131,7 +151,7 @@ The I2C czars would be unhappy that this code doesn't handle clock
 stretching or multi-mastering.  So officially this should be called TWI
 (two-wire interface) instead.  But it's intended for use with commonly
 available I2C peripherals, including SFP modules, and none of the chips
-I've encountered actually use those features.
+I've encountered actually use those exotic features.
 
 The dpram.v code is not identical to that in LBNL's code repo.
 It is superficially compatible, and ought to be merged after more
