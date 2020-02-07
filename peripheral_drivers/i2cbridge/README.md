@@ -21,9 +21,13 @@ This is a single-clock-domain design (input clk).
 
 ![symbol](i2c_chunk.svg)
 
-Bus timing parameter tick_scale, default 6:
+Parameter tick_scale controls the bus timing, default value is 6.
 One I2C bit time is (clk period) * 14 * 2^(tick_scale).
 With 125 MHz clock, that yields 7.168 uS, for a bus bit rate of 140 kHz.
+
+Parameter initial_file allows loading a program at synthesis time.
+Default value of "" is no load; otherwise provide a filename suitable
+for use with Verilog $readmemh().
 
 Local bus ports:
 

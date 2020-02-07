@@ -9,7 +9,6 @@ module dpram_x(
 parameter aw=8;
 parameter dw=8;
 parameter sz=(32'b1<<aw)-1;
-parameter initial_load = 0;
 parameter initial_file = "";
 
 	input clka, clkb, wena;
@@ -28,7 +27,7 @@ always @(posedge clkb) begin
 end
 
 initial begin
-	if (initial_load) $readmemh(initial_file, mem);
+	if (initial_file != "") $readmemh(initial_file, mem);
 end
 
 endmodule
