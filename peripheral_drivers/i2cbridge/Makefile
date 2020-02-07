@@ -68,6 +68,9 @@ loc: i2c_bit.v i2c_prog.v i2c_analyze.v i2c_chunk.v
 repro_pdf: blocks.pdf
 	sha256sum -c < pdfsums
 
+blocks.svg: blocks.eps
+	inkscape --export-plain-svg $@ $<
+
 clean:
 	rm -f *_tb *.vcd *.dat *.bit *.pdf *.pyc init.in
 	rm -rf _xilinx

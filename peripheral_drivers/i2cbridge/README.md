@@ -14,26 +14,6 @@ create new command strings to send to the I2C busses.
 * Collect bus activity traces to let people diagnose bus behavior
 * Be small enough to be ignored in the resource accounting of an SoC
 
-## Design
-
-Internally, the design uses a dual-port RAM (one quantum in 7-series is 4K x 8)
-to hold:
-
-* an instruction sequence, including data for I2C write commands
-* results of I2C read commands
-* output trace from an embedded logic analyzer
-
-See below for more discussion of the sequence (program) that is held
-in that first section of memory.
-
-A simplified block diagram is in blocks.eps.
-It is annotated, to possibly be useful as a top-level introduction to the code.
-To edit that file, use xcircuit.  If you'd rather look at it as a PDF,
-"make blocks.pdf".
-
-Current synthesis result in Spartan-6 using ISE 14.7:
-  203 LUT/FF pairs and 2 x 16K BRAM, 200 MHz
-
 ## Usage
 
 The expected interface to the rest of your chip design is i2c_chunk.
@@ -58,6 +38,9 @@ The 4 kByte local bus memory is subdivided into quarters:
 *  0x400 - 0x7ff   logic analyzer
 *  0x800 - 0xbff   results
 *  0xc00 - 0xfff   result buffer in progress (not meant for host access)
+
+See below for more discussion of the sequence (program) that is held
+in that first section of memory.
 
 Auxiliary control and status:
 
@@ -91,8 +74,20 @@ negligible consequences of dropping an occasional buffer of data;
 new data will arrive shortly anyway.
 
 The host can optimize this process somewhat by checking the updated bit,
-and only reading data out when it is set.  As a side effect to setting
-and clearing the freeze bit is to clear the updated status bit.
+and only reading data out when it is set.  The updated flag is cleared
+as a side effect of clearing the freeze bit.
+
+## Design
+
+![block diagram](blocks.svg)
+
+A simplified block diagram of i2c_chunk.v is shown above,
+It is annotated, to possibly be useful as a top-level introduction to the code.
+That svg file was converted from an xcircuit file blocks.eps.
+If you'd rather look at it as a PDF, "make blocks.pdf".
+
+Current synthesis result in Spartan-6 using ISE 14.7:
+  203 LUT/FF pairs and 2 x 16K BRAM, 200 MHz
 
 ## Workstation requirements
 
@@ -155,13 +150,12 @@ stretching or multi-mastering.  So officially this should be called TWI
 available I2C peripherals, including SFP modules, and none of the chips
 I've encountered actually use those exotic features.
 
-The dpram.v code is not identical to that in LBNL's code repo.
+The dpram_x.v code is not identical to dpram.v in LBNL's code repo.
 It is superficially compatible, and ought to be merged after more
 discussion and testing.
 
 # To do
 
-* Synthesis-time setup of RAM contents
 * Write more documentation
 * Add more features to i2c_prog: skip if interrupt
 * Add more features to analyzer: commands, reset, interrupt
