@@ -47,7 +47,7 @@ atrace.dat: i2c_analyze_tb
 init.in: ramtest.py
 	$(PYTHON) $< > $@
 
-i2c_chunk_tb: i2c_chunk.v i2c_prog.v i2c_bit.v i2c_analyze.v dpram.v i2c_slave_model.v
+i2c_chunk_tb: i2c_chunk.v i2c_prog.v i2c_bit.v i2c_analyze.v dpram_x.v i2c_slave_model.v
 
 i2c_chunk.vcd: init.in
 
@@ -56,7 +56,7 @@ i2c_chunk_check: init.in
 a2trace.dat: i2c_chunk_tb init.in
 	$(VVP) $< +dfile=$@
 
-i2c_chunk.bit: i2c_chunk.v i2c_prog.v i2c_bit.v i2c_analyze.v dpram.v blank_s6.ucf
+i2c_chunk.bit: i2c_chunk.v i2c_prog.v i2c_bit.v i2c_analyze.v dpram_x.v blank_s6.ucf
 	PART=xc6slx45t-fgg484-2 $(SYNTH) i2c_chunk $^
 	mv _xilinx/i2c_chunk.bit .
 

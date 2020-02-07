@@ -1,6 +1,7 @@
 // Dual port memory with independent clocks, port B is read-only
 // Altera and Xilinx synthesis tools successfully "find" this as block memory
-module dpram(
+// Experimental, derived from main bedrock dpram
+module dpram_x(
 	clka, clkb,
 	addra, douta, dina, wena,
 	addrb, doutb
@@ -8,6 +9,9 @@ module dpram(
 parameter aw=8;
 parameter dw=8;
 parameter sz=(32'b1<<aw)-1;
+parameter initial_load = 0;
+parameter initial_file = "";
+
 	input clka, clkb, wena;
 	input [aw-1:0] addra, addrb;
 	input [dw-1:0] dina;
@@ -21,6 +25,10 @@ always @(posedge clka) begin
 end
 always @(posedge clkb) begin
 	doutb <= mem[addrb];
+end
+
+initial begin
+	if (initial_load) $readmemh(initial_file, mem);
 end
 
 endmodule

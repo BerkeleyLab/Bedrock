@@ -24,6 +24,8 @@ module i2c_chunk(
 	input  intp  // not yet used
 );
 
+parameter initial_load = 0;
+parameter initial_file = "";
 parameter tick_scale = 6;
 // transparently passed to i2c_prog
 parameter q1 = 2;  // o_p1 ticks are 2^(q1+1) * bit_adv
@@ -151,7 +153,9 @@ wire [11:0] lb_addr1 = lb_addr ^ {1'b0, lb_flip, 10'b0};
 
 wire [7:0] xbo;  // local read data
 wire [7:0] lb_dout0;
-dpram #(.aw(12), .dw(8)) dpram(
+dpram_x #(.aw(12), .dw(8),
+	.initial_load(initial_load),
+	.initial_file(initial_file)) dpram(
 	.clka(clk), .addra(xba), .dina(xbd), .wena(xbs), .douta(xbo),
 	.clkb(clk), .addrb(lb_addr1), .doutb(lb_dout0)
 );
