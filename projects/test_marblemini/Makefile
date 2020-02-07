@@ -34,7 +34,7 @@ RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v spi_flash.v
 RTEFI_EXTRA_V = spi_flash_engine.v
 include $(BADGER_DIR)/rules.mk
 
-I2CBRIDGE_V = i2c_chunk.v i2c_prog.v i2c_bit.v i2c_analyze.v dpram.v
+I2CBRIDGE_V = i2c_chunk.v i2c_prog.v i2c_bit.v i2c_analyze.v dpram_x.v
 
 # =====
 # auto-generated files
