@@ -39,6 +39,8 @@ Current synthesis result in Spartan-6 using ISE 14.7:
 The expected interface to the rest of your chip design is i2c_chunk.
 This is a single-clock-domain design (input clk).
 
+![symbol](i2c_chunk.svg)
+
 Bus timing parameter tick_scale, default 6:
 One I2C bit time is (clk period) * 14 * 2^(tick_scale).
 With 125 MHz clock, that yields 7.168 uS, for a bus bit rate of 140 kHz.
