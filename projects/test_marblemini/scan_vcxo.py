@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "bedrock/badger"))
 from lbus_access import lbus_access
 
 
-def measure_1(chip, v, dac=2, pause=1.1, repeat=1):
+def measure_1(chip, v, dac=2, pause=1.1, repeat=1, gps=False):
     '''
     v should be between 0 and 65535
     freq_count gateware module configured to update every 1.0737 s
@@ -22,8 +22,13 @@ def measure_1(chip, v, dac=2, pause=1.1, repeat=1):
     ppm = []
     for ix in range(repeat):
         time.sleep(pause)
-        raw = chip.exchange([5])
-        ppm += [(float(raw)/2**27-1.0)*1e6]
+        if gps:
+            raw = chip.exchange([13])
+            x = (float(raw)/125000000.0-1.0)*1e6
+            ppm += [x]
+        else:
+            raw = chip.exchange([5])
+            ppm += [(float(raw)/2**27-1.0)*1e6]
     return ppm
 
 
@@ -33,23 +38,25 @@ if __name__ == "__main__":
                    help="IP address of FPGA")
     p.add_argument('--port', default=803,
                    help="UDP port for I/O")
-    p.add_argument('--dac', default=2,
-                   help="DAC (1 or 2)")
+    p.add_argument('--dac', default=1,
+                   help="DAC (1 or 2), 1 tunes precision 25 MHz")
     p.add_argument('--plot', action='store_true',
                    help="Plot data")
+    p.add_argument('--gps', action='store_true',
+                   help="Use GPS-pps-based measurement")
     args = p.parse_args()
     if args.plot:
         from matplotlib import pyplot
 
     chip = lbus_access(args.ip, port=args.port)
-    print("Design run rate is 3.3 seconds per line, 56 s total")
+    print("Design run rate is 4.4 seconds per line, 75 s total")
     plx = []
     plot1 = []
     plot2 = []
     for jx in range(0, 17):
         v = min(jx*4096, 65535)
-        ppm = measure_1(chip, v, dac=int(args.dac), repeat=3)
-        print("%5d  %+.2f %+.2f ppm" % (v, ppm[1], ppm[2]))
+        ppm = measure_1(chip, v, dac=int(args.dac), repeat=4, gps=args.gps)
+        print("%5d  %+.3f %+.3f %+.3f ppm" % (v, ppm[1], ppm[2], ppm[3]))
         plx += [float(v)/65535]
         plot1 += [ppm[1]]
         plot2 += [ppm[2]]

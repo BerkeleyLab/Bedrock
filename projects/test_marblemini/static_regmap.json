@@ -34,6 +34,13 @@
         "base_addr": 327689,
         "data_width": 18
     },
+    "gps_buf_reset": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327691,
+        "data_width": 1
+    },
     "fmc_test_0": {
         "access": "rw",
         "addr_width": 0,
@@ -75,5 +82,12 @@
         "sign": "unsigned",
         "base_addr": 327701,
         "data_width": 22
+    },
+    "gps_buff": {
+        "access": "r",
+        "addr_width": 10,
+        "sign": "unsigned",
+        "base_addr": 458752,
+        "data_width": 8
     }
 }

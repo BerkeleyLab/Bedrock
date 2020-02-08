@@ -74,3 +74,5 @@ Wishlist for next rev of Marble Mini (relative to v1.0rc3)
   schematic: clarify/unify net names +3.3VP (power), 3V3PM (AMC), +3V3MP (many)
   add 330 Ohm series resistor to all four FMC GA pins
   use 10 Ohm instead of F1 and F2
+  mark SFP TX_DIS pulldown resistors as 0 Ohm DNF: R84 R105 R185 R187
+  U4 (88E1512 Ethernet PHY): VDDO_SEL (10) should be tied low for VDDO = 2.5V

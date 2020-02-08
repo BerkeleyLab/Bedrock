@@ -52,6 +52,40 @@ WR_DAC2_SYNC     WR_DAC2_SYNC
 # 20 MHz from Y3 is a poor substitute
 CLK20_VCXO  SYSCLK_P
 
+# UART to USB
+FPGA_TxD  FPGA_TxD
+FPGA_RxD  FPGA_RxD
+
+# Pmod1 J12
+Pmod1_0    {Pmod1[0]}
+Pmod1_1    {Pmod1[1]}
+Pmod1_2    {Pmod1[2]}
+Pmod1_3    {Pmod1[3]}
+Pmod1_4    {Pmod1[4]}
+Pmod1_5    {Pmod1[5]}
+Pmod1_6    {Pmod1[6]}
+Pmod1_7    {Pmod1[7]}
+
+# Pmod2 J13
+Pmod2_0    {Pmod2[0]}
+Pmod2_1    {Pmod2[1]}
+Pmod2_2    {Pmod2[2]}
+Pmod2_3    {Pmod2[3]}
+Pmod2_4    {Pmod2[4]}
+Pmod2_5    {Pmod2[5]}
+Pmod2_6    {Pmod2[6]}
+Pmod2_7    {Pmod2[7]}
+
+# TMDS J15
+TMDS0_P     {TMDS_P[0]}
+TMDS0_N     {TMDS_N[0]}
+TMDS1_P     {TMDS_P[1]}
+TMDS1_N     {TMDS_N[1]}
+TMDS2_P     {TMDS_P[2]}
+TMDS2_N     {TMDS_N[2]}
+TMDS_CLK_P  {TMDS_P[3]}
+TMDS_CLK_N  {TMDS_N[3]}
+
 # Miscellaneous
 PHY_RSTn   PHY_RSTN
 VCXO_EN    VCXO_EN

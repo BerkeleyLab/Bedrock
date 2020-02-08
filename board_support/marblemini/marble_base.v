@@ -16,6 +16,7 @@ module marble_base(
 	input vgmii_rx_dv,
 
 	// Auxiliary I/O and status
+	input aux_clk,
 	output phy_rstn,
 	input clk_locked,
 
@@ -45,20 +46,32 @@ module marble_base(
 	output WR_DAC1_SYNC,
 	output WR_DAC2_SYNC,
 
+	// UART to USB
+	// The RxD and TxD directions are with respect
+	// to the USB/UART chip, not the FPGA!
+	output FPGA_RxD,
+	input FPGA_TxD,
+
+	// Digilent GPS
+	input [3:0] GPS,
+
+	// Placeholder for configuring external devices
+	output [3:0] ext_config,
+
 	// Simulation-only, please ignore in synthesis
 	output in_use,
 
-        // Local bus for an external application
-        // Define clock domain
-        output lb_clk,
-        output [23:0] lb_addr,
-        output lb_strobe,
-        output lb_rd,
-        output lb_write,
-        output lb_rd_valid,
+	// Local bus for an external application
+	// Define clock domain
+	output lb_clk,
+	output [23:0] lb_addr,
+	output lb_strobe,
+	output lb_rd,
+	output lb_write,
+	output lb_rd_valid,
 	// output [read_pipe_len:0] control_pipe_rd,
-        output [31:0] lb_data_out,
-        input [31:0] lb_data_in,
+	output [31:0] lb_data_out,
+	input [31:0] lb_data_in,
 
 	// Something physical
 	output [131:0] fmc_test,
@@ -140,17 +153,17 @@ lb_marble_slave slave(
 	.zest_pwr_en(ZEST_PWR_EN),
 	.allow_mmc_eth_config(allow_mmc_eth_config),
 	.fmc_test(fmc_test),
+	.gps(GPS), .ext_config(ext_config),
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
 );
 
+// Delegate part of the address space to application code outside this module
 reg [23:0] p3_lb_addr_d;
 reg p3_use_app_rd;
-
 always @(posedge lb_clk) begin
 	p3_lb_addr_d <= lb_addr;
 	p3_use_app_rd <= p3_lb_addr_d[23:20] == 1;
 end
-
 wire [31:0] p3_lb_data_in = p3_use_app_rd ? lb_data_in : lb_slave_data_read;
 
 // MAC master
@@ -251,9 +264,15 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 	.p4_busy(boot_busy),
 	.rx_mon(rx_mon), .tx_mon(tx_mon), .in_use(blob_in_use)
 );
-
 assign vgmii_tx_er=1'b0;
 assign in_use = blob_in_use | boot_busy;
+
+// Frequency counter demo to UART
+wire [3:0] unk_clk = {1'b0, 1'b0, aux_clk, rx_clk};
+freq_demo freq_demo(
+	.refclk(tx_clk), .unk_clk(unk_clk),
+	.uart_tx(FPGA_RxD), .uart_rx(FPGA_TxD)
+);
 
 // Heartbeats and other LED
 reg [26:0] rx_heartbeat=0, tx_heartbeat=0;

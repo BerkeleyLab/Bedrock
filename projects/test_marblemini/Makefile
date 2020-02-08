@@ -1,5 +1,7 @@
 include ../../dir_list.mk
 I2CBRIDGE_DIR = $(PERIPH_DRIVERS_DIR)/i2cbridge
+# Unisims not provided
+UNISIMS_DIR = broken
 
 %_tb: %_tb.v
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
@@ -27,7 +29,18 @@ vpath %.c $(BADGER_DIR)/tests
 vpath %.xdc $(BOARD_SUPPORT_DIR)/marblemini
 
 # This must go in front of include $(BADGER_DIR)/rules.mk
-all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check
+all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check b2decimal_check dec_forward_check freq_demo_tb
+
+# =====
+# Move these to bedrock?
+b2decimal_tb: b2decimal.v
+dec_forward_tb: dec_forward.v b2decimal.v
+
+# =====
+# freq_demo subsystem
+GRAY_V = simplest_gray.v
+FREQ_DEMO_V = freq_demo.v dec_forward.v b2decimal.v simpleuart.v freq_multi_count_fe.v $(GRAY_V)
+freq_demo_tb: $(FREQ_DEMO_V)
 
 # Packet Badger synthesizable code
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v spi_flash.v
@@ -45,6 +58,11 @@ marble_regmap.json: static_regmap.json scalar_marble_regmap.json
 config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOURCE))
 	$(PYTHON) $(BUILD_DIR)/build_rom.py -v $@ -j $< -d "Marble Testing"
 
+# ====
+# tmds_test, requires access to unisims (or unisims_lrd)
+tmds_test_tb: tmds_test.v
+VFLAGS_tmds_test_tb = -y $(UNISIMS_DIR)
+
 # =====
 # VPI module support for live testing
 # https://en.wikipedia.org/wiki/TUN/TAP
@@ -54,7 +72,7 @@ udp-vpi.vpi: udp_model.o
 
 # =====
 # subset that is interesting to test live on network
-LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v config_romx.v $(I2CBRIDGE_V) ad5662.v
+LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v config_romx.v $(I2CBRIDGE_V) ad5662.v gps_test.v simpleuart.v
 lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v
 VFLAGS_lb_marble_slave_tb = -DUSE_I2CBRIDGE -m ./udp-vpi
 net_slave_run: lb_marble_slave_tb udp-vpi.vpi
@@ -69,7 +87,7 @@ net_slave_check: lb_marble_slave_tb udp-vpi.vpi
 
 # =====
 # syntax-check only, no actual test bench code
-MARBLE_BASE_V = marble_base.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V)
+MARBLE_BASE_V = marble_base.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V)
 marble_base_tb: $(MARBLE_BASE_V)
 VFLAGS_marble_base_tb = -DUSE_I2CBRIDGE -DMMC_CTRACE
 
@@ -82,12 +100,17 @@ no_multiple_drivers_check: marble_base_tb
 # constraint
 pin_map_fmc.csv: pin_map_fmc.py
 	$(PYTHON) $< > $@
-marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py Marble.xdc $(BOARD_SUPPORT_DIR)/marblemini/pin_map.csv digilent_led_pmod.csv pin_map_fmc.csv
+marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py Marble.xdc $(BOARD_SUPPORT_DIR)/marblemini/pin_map.csv pin_map_fmc.csv
 	$(PYTHON) $^ > $@
 
 # =====
+# Initialization file for i2cbridge
+read_sfp.dat: read_sfp.py
+	$(PYTHON) $< > $@
+
+# =====
 # bitfile
-MARBLE_SYNTH_SOURCE = marble1.v marble/gmii_clock_handle.v kc705/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) marble1.xdc
+MARBLE_SYNTH_SOURCE = marble1.v tmds_test.v marble/gmii_clock_handle.v kc705/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_sfp.dat marble1.xdc
 marble1.d: $(MARBLE_SYNTH_SOURCE)
 	echo $^ | tr ' ' '\n' > $@
 marble1.bit: marble1.tcl marble1.d $(MARBLE_SYNTH_SOURCE)
@@ -98,4 +121,5 @@ clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
 	rm -f pin_map_fmc.csv marble1.xdc marble1.bit vivado* datasheet.txt
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
+	rm -f read_sfp.dat
 	rm -rf _xilinx .Xil

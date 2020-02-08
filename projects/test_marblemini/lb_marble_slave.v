@@ -41,6 +41,8 @@ module lb_marble_slave(
 	output wr_dac_sclk,
 	output wr_dac_sdo,
 	output [1:0] wr_dac_sync,
+	input [3:0] gps,
+	output [3:0] ext_config,
 	// Output to hardware
 	output [131:0] fmc_test,
 	output led_user_mode,
@@ -53,6 +55,7 @@ parameter twi_q0=6;  // 140 kbps with 125 MHz clock
 parameter twi_q1=2;
 parameter twi_q2=7;
 parameter led_cw=10;
+parameter initial_twi_file="read_sfp.dat";
 
 wire do_rd = control_strobe & control_rd;
 reg dbg_rst=0;
@@ -106,6 +109,22 @@ wire [31:0] tx_freq;
 freq_count #(.refcnt_width(27), .freq_width(32)) f_count(.f_in(ibadge_clk),
 	.sysclk(clk), .frequency(tx_freq));
 
+// GPS, includes another frequency counter
+// Capture input pins
+reg [3:0] gps_pins=0;
+always @(posedge clk) gps_pins <= gps;
+reg gps_buf_reset=0;
+wire gps_buf_full;
+wire [7:0] gps_buf_out;
+wire [26:0] gps_freq;
+wire [3:0] pps_cnt;
+gps_test gps_test(.gps_pins(gps_pins),
+	.clk(clk), .lb_addr(addr[9:0]), .lb_dout(gps_buf_out),
+	.buf_full(gps_buf_full), .buf_reset(gps_buf_reset),
+	.f_read(gps_freq), .pps_cnt(pps_cnt)
+);
+wire [8:0] gps_stat = {gps_buf_full, pps_cnt, gps_pins};
+
 // Configuration ROM
 wire [15:0] config_rom_out;
 config_romx rom(
@@ -129,7 +148,9 @@ always @(posedge clk) if (led_tick) uptime <= uptime+1;
 // Optional I2C bridge instance
 wire [7:0] twi_dout;
 wire [2:0] twi_status;
-reg [1:0] twi_ctl=0;
+
+reg [1:0] twi_ctl;
+initial twi_ctl = (initial_twi_file != "") ? 2'b10 : 2'b00;
 `ifdef USE_I2CBRIDGE
 wire twi_run_stat, twi_updated, twi_err;
 wire twi_freeze = twi_ctl[0];
@@ -139,7 +160,8 @@ wire twi_run_cmd = twi_ctl[1];
 wire twi_write = control_strobe & ~control_rd & (addr[23:16]==8'h04);
 wire [3:0] hw_config;
 wire twi0_scl, twi_sda_drive, twi_sda_sense;
-i2c_chunk #(.tick_scale(twi_q0), .q1(twi_q1), .q2(twi_q2)) i2c(
+i2c_chunk #(.tick_scale(twi_q0), .q1(twi_q1), .q2(twi_q2),
+	.initial_file(initial_twi_file)) i2c(
 	.clk(clk), .lb_addr(addr[11:0]), .lb_din(data_out[7:0]),
 	.lb_write(twi_write), .lb_dout(twi_dout),
 	.run_cmd(twi_run_cmd), .freeze(twi_freeze),
@@ -216,6 +238,8 @@ always @(posedge clk) if (do_rd) begin
 		4'h9: reg_bank_0 <= twi_status;
 		4'ha: reg_bank_0 <= wr_dac_busy;
 		4'hb: reg_bank_0 <= ctrace_running;
+		4'hc: reg_bank_0 <= gps_stat;
+		4'hd: reg_bank_0 <= gps_freq;
 		default: reg_bank_0 <= "zzzz";
 	endcase
 end
@@ -238,13 +262,14 @@ always @(posedge clk) if (do_rd_r) begin
 		24'h04????: lb_data_in <= twi_dout;
 		24'h05????: lb_data_in <= mirror_out_0;
 		24'h06????: lb_data_in <= ctrace_out;
+		24'h07????: lb_data_in <= gps_buf_out;
 		default: lb_data_in <= 32'hdeadbeef;
 	endcase
 end
 
 // Direct writes
 reg led_user_r=0;
-reg [3:0] misc_config = 4'b0000;
+reg [7:0] misc_config = 8'd0;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
 // decoding corresponds to mirror readback, see notes above
@@ -262,6 +287,7 @@ always @(posedge clk) if (local_write) case (addr[4:0])
 	8: misc_config <= data_out;
 	// 9: wr_dac
 	// 10: ctrace_start
+	// 11: gps_buf_reset
 	16: fmc_test_r[21:0] <= data_out;
 	17: fmc_test_r[43:22] <= data_out;
 	18: fmc_test_r[65:44] <= data_out;
@@ -273,6 +299,7 @@ endcase
 always @(posedge clk) begin
 	wr_dac_send <= local_write & (addr[4:0] == 9);
 	ctrace_start <= local_write & (addr[4:0] == 10);
+	gps_buf_reset <= local_write & (addr[4:0] == 11);
 end
 
 // Mirror memory
@@ -301,6 +328,7 @@ assign cfg_d02 = misc_config[0];
 assign mmc_int = misc_config[1];
 assign allow_mmc_eth_config = misc_config[2];
 assign zest_pwr_en = misc_config[3];
+assign ext_config = misc_config[7:4];
 assign fmc_test = fmc_test_r;
 
 // Bus activity trace output

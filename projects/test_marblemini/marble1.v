@@ -44,6 +44,12 @@ module marble1(
 	output WR_DAC1_SYNC,
 	output WR_DAC2_SYNC,
 
+	// UART to USB
+	// The RxD and TxD directions are with respect
+	// to the USB/UART chip, not the FPGA!
+	output FPGA_RxD,
+	input FPGA_TxD,
+
 	output VCXO_EN,
 
 	// FMC stuff
@@ -52,11 +58,16 @@ module marble1(
 	inout [33:0] FMC2_LA_P,
 	inout [33:0] FMC2_LA_N,
 	// output ZEST_PWR_EN,
-	// Something physical
-	output [7:0] LED
+
+	// J15 TMDS 0, 1, 2, CLK
+	output [3:0] TMDS_P,
+	output [3:0] TMDS_N,
+
+	// Physical Pmod, may be used as LEDs
+	inout [7:0] Pmod1,
+	input [7:0] Pmod2
 );
 
-assign VCXO_EN = 1;
 wire gtpclk0, gtpclk;
 // Gateway GTP refclk to fabric
 IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0));
@@ -69,21 +80,23 @@ parameter in_phase_tx_clk = 1;
 wire tx_clk, tx_clk90;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
+wire test_clk;
 
 `define USE_GTPCLK
 `ifdef USE_GTPCLK
 xilinx7_clocks #(
-        .DIFF_CLKIN("BYPASS"),
-        .CLKIN_PERIOD(8),  // REFCLK = 125 MHz
-        .MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
-        .DIV0     (8)       // 1 GHz / 8 = 125 MHz
+	.DIFF_CLKIN("BYPASS"),
+	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
+	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
+	.DIV0     (8)       // 1 GHz / 8 = 125 MHz
 ) clocks_i(
-        .sysclk_p (gtpclk),
-        .sysclk_n (1'b0),
-        .reset    (pll_reset),
-        .clk_out0 (tx_clk),
-        .clk_out2 (tx_clk90),
-        .locked   (clk_locked)
+	.sysclk_p (gtpclk),
+	.sysclk_n (1'b0),
+	.reset    (pll_reset),
+	.clk_out0 (tx_clk),
+	.clk_out2 (tx_clk90),
+	.clk_out3f(test_clk),  // not buffered, straight from MMCM
+	.locked   (clk_locked)
 );
 `else
 wire SYSCLK_N = 0;
@@ -95,6 +108,7 @@ gmii_clock_handle clocks(
 	.clk_eth_90(tx_clk90),
 	.clk_locked(clk_locked)
 );
+assign test_clk=0;
 `endif
 
 // Double-data-rate conversion
@@ -126,6 +140,7 @@ STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0));
 // Placeholders
 wire ZEST_PWR_EN;
 wire dum_scl, dum_sda;
+wire [3:0] ext_config;
 
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
@@ -138,7 +153,9 @@ marble_base base(
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
+	.aux_clk(SYSCLK_P),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
+	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
 	.twi_scl({dum_scl, FMC2_LA_P[2], FMC1_LA_P[2], TWI_SCL}),
 	.twi_sda({dum_sda, FMC2_LA_N[2], FMC1_LA_N[2], TWI_SDA}),
 	.fmc_test({
@@ -149,8 +166,16 @@ marble_base base(
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
-	.LED(LED)
+	.GPS(Pmod2[3:0]), .ext_config(ext_config), .LED(Pmod1)
 );
 defparam base.rtefi.p4_client.engine.seven = 1;
+
+// TMDS test pattern generation
+wire tmds_enable = ext_config[0];
+tmds_test tmds_test(.clk(test_clk), .enable(tmds_enable),
+	.tmds_p(TMDS_P), .tmds_n(TMDS_N));
+
+// Give the network the option of turning off the 20 MHz VCXO
+assign VCXO_EN = ~ext_config[1];
 
 endmodule

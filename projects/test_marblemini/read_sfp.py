@@ -56,8 +56,9 @@ def hw_test_prog():
     a += busmux_sel(s, 6)  # App bus
     a += s.read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
     a += s.write(0x42, 6, [0xff, 0xf3])  # U39 Configuration registers
-    a += s.write(0x44, 6, [0xbb, 0xbb])  # U34 Configuration registers
-    a += s.write(0x44, 6, [0x00, 0x00])  # U34 Output registers
+    # pull down all four TX_DIS pins
+    a += s.write(0x44, 6, [0xdd, 0xdd])  # U34 Configuration registers
+    a += s.write(0x44, 2, [0x00, 0x00])  # U34 Output registers
     for ax in ina_list:
         a += s.read(ax, 0, 2)  # config
     for sfp_port in sfp_list:
