@@ -4,7 +4,7 @@ Larry Doolittle, LBNL, August 2018
 
 ## Primary goals
 
-* When the FPGA boots, this module should be able to send a batch of
+* When the FPGA boots, it should be able to send a batch of
 configuration writes to one or more I2C busses, without external help.
 * After boot, it should go into a polling loop, reading out status
 and making it available via a convenient dual-port-memory interface to
@@ -13,6 +13,8 @@ a host (local or network-based).
 create new command strings to send to the I2C busses.
 * Collect bus activity traces to let people diagnose bus behavior
 * Be small enough to be ignored in the resource accounting of an SoC
+
+As of February 2020, it appears to meet all these goals.
 
 ## Usage
 
@@ -26,8 +28,8 @@ One I2C bit time is (clk period) * 14 * 2^(tick_scale).
 With 125 MHz clock, that yields 7.168 uS, for a bus bit rate of 140 kHz.
 
 Parameter initial_file allows loading a program at synthesis time.
-Default value of "" is no load; otherwise provide a filename suitable
-for use with Verilog $readmemh().
+Default value of "" (empty string) means no load; otherwise provide
+a filename suitable for use with Verilog $readmemh().
 
 Local bus ports:
 
@@ -61,6 +63,18 @@ Hardware tie-in:
 * input sda_sense
 * output hw_config (Can be used to select between I2C busses)
 
+The scl port should drive the SCL pin directly.  The SDA pin is open-collector
+style, and requires three-state hardware that is not universally considered
+part of synthesizable Verilog.  The sda_drive pin has the same polarity as
+the final SDA pin, so a low value should cause pull-down (tri-state enable
+with value 0).  The sda_sense port passes the logic value of the I/O pin back
+to this module.
+
+Using the hw_config output to select between multiple I2C busses is
+possible (and has been hardware-tested) but complicates handling of the
+scl and sda pins.  The value of hw_config is set by the hw instruction,
+described below.
+
 When running, a typical instruction sequence will fill one half of the
 output ping-pong buffer, and then request an atomic swap so that new data
 is accessible from the host side (bf command, see below).
@@ -81,6 +95,14 @@ The host can optimize this process somewhat by checking the updated bit,
 and only reading data out when it is set.  The updated flag is cleared
 as a side effect of clearing the freeze bit.
 
+Whether or not an initial program was set up at synthesis time with
+initial_file, new programs can be tested as follows:
+
+* de-assert run_cmd
+* wait for run_stat to read back 0
+* write a new program into addresses 0x000 - 0x3fff
+* assert run_cmd
+
 ## Design
 
 ![block diagram](blocks.svg)
@@ -91,7 +113,9 @@ That svg file was converted from an xcircuit file blocks.eps.
 If you'd rather look at it as a PDF, "make blocks.pdf".
 
 Current synthesis result in Spartan-6 using ISE 14.7:
-  203 LUT/FF pairs and 2 x 16K BRAM, 200 MHz
+  197 LUT/FF pairs and 2 x 16K BRAM, compatible with clocks up to 200 MHz.
+Extensively hardware-tested on Artix-7/Vivado at 125 MHz,
+as part of a much larger design.
 
 ## Workstation requirements
 
@@ -131,7 +155,7 @@ specials
  000 00000  zz  sleep
  000 00010  bf  result buffer flip
  000 00011  ta  trigger logic analyzer
- 000 1xxxx  hw  hardware bus select/configure (includes reset?)
+ 000 1xxxx  hw  hardware bus select/configure
 ```
 The jump command jumps to the address constructed as {n, 5'b0}, thus can
 reach the whole 10-bit address space reach with granularity of 32 bytes.
@@ -154,16 +178,16 @@ stretching or multi-mastering.  So officially this should be called TWI
 available I2C peripherals, including SFP modules, and none of the chips
 I've encountered actually use those exotic features.
 
-The dpram_x.v code is not identical to dpram.v in LBNL's code repo.
+The dpram_x.v code is not identical to dpram.v in LBNL's bedrock repo.
 It is superficially compatible, and ought to be merged after more
 discussion and testing.
 
 # To do
 
-* Write more documentation
+* Better design of assembler: integrate readout decoder
+* Write more and better documentation
 * Add more features to i2c_prog: skip if interrupt
 * Add more features to analyzer: commands, reset, interrupt
-* Wishbone bridge?
-* Add meta-control path?
+* Wishbone and/or AXI bridge?
 
 See design.txt for a longer story.
