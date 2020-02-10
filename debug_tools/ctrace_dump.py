@@ -44,7 +44,7 @@ def write_vcd(FH, sigs, data, tstep=20, tw=16, FR=None):
         v = a & data_mask
 
         if FR:
-            for i in range(dt): # Full, per-cycle, signal dump
+            for i in range(dt):  # Full, per-cycle, signal dump
                 print("%d" % v, file=FR)
 
         vbin = tobin(v, count=dw)
@@ -90,9 +90,9 @@ if __name__ == "__main__":
     # signals = ["mrf_rxd%2.2d" % jx for jx in range(14-1, -1, -1)] +\
     #           ["mrf_rxbyteisaligned", "mrf_rxk0"]
 
-    #signals = ["tpg_txd%2.2d" % jx for jx in range(8-1, -1, -1)] +\
-    #          ["tpg_count%2.2d" % jx for jx in range(7-1, -1, -1)] +\
-    #          ["tpg_baseenable"]
+    # signals = ["tpg_txd%2.2d" % jx for jx in range(8-1, -1, -1)] +\
+    #           ["tpg_count%2.2d" % jx for jx in range(7-1, -1, -1)] +\
+    #           ["tpg_baseenable"]
 
     signals = ["mrf_rxd%2.2d" % jx for jx in range(16-1, -1, -1)] +\
               ["mrf_rxk0"]
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     print(signals)
     tw = 16
     aw = 16
-    tstep = 8 # ns
+    tstep = 8  # ns
 
     raw_dat = []
     is_hex = False
@@ -119,8 +119,8 @@ if __name__ == "__main__":
     with open(out_file, 'w') as FH:
         print("Writing VCD to: %s" % out_file)
         if args.raw:
-           raw_file = in_file.split('.')[0] + ".raw"
+            raw_file = in_file.split('.')[0] + ".raw"
 
-           with open(raw_file, 'w') as FR:
-               print("Writing raw data to: %s" % raw_file)
-               write_vcd(FH, signals, raw_dat, tstep=tstep, tw=tw, FR=FR)
+            with open(raw_file, 'w') as FR:
+                print("Writing raw data to: %s" % raw_file)
+                write_vcd(FH, signals, raw_dat, tstep=tstep, tw=tw, FR=FR)
