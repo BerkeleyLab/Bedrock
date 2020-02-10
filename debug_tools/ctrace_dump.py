@@ -29,7 +29,7 @@ def vcd_header(fh, sigs, first, timescale="1ns", now=None):
 
 # 50 MHz and ns time step means multiply integer time count by 20
 # tw parameter should be configured to match that set for ctrace.v
-def write_vcd(fh, sigs, data, tstep=20, tw=16):
+def write_vcd(FH, sigs, data, tstep=20, tw=16, FR=None):
     dw = len(sigs)  # this also needs to match ctrace.v parameter
     t = 0
     pc = 0
@@ -42,14 +42,19 @@ def write_vcd(fh, sigs, data, tstep=20, tw=16):
             dt = mtime
         t = t + dt
         v = a & data_mask
+
+        if FR:
+            for i in range(dt): # Full, per-cycle, signal dump
+                print("%d" % v, file=FR)
+
         vbin = tobin(v, count=dw)
         if pc == 0:
-            vcd_header(fh, sigs, vbin)
+            vcd_header(FH, sigs, vbin)
         else:
             for ix in range(dw):
                 if vbin[ix] != old_vbin[ix]:
-                    print("b%d %s" % (vbin[ix], chr(65+ix)), file=fh)
-        print("#%d" % (t*tstep), file=fh)
+                    print("b%d %s" % (vbin[ix], chr(65+ix)), file=FH)
+        print("#%d" % (t*tstep), file=FH)
         old_vbin = vbin
         pc += 1
 
@@ -59,32 +64,25 @@ def usage():
 
 
 if __name__ == "__main__":
-    import sys
-    import getopt
-    larglist = 'help', 'i=', 'o='
-    opts, args = getopt.getopt(sys.argv[1:], 'hi:o:', larglist)
-    do_start = False
-    do_dump = False
-    out_file = None
-    for opt, arg in opts:
-        if opt in ('-h', '--help'):
-            usage()
-            sys.exit()
-        elif opt in ('-i', '--input'):
-            in_file = arg
-        elif opt in ('-o', '--output'):
-            out_file = arg
+    import argparse
 
-    if not out_file:
-        out_file = in_file.split()[0] + ".vcd"
+    p = argparse.ArgumentParser()
+    p.add_argument('-i', '--input', help='Ctrace data/memory dump.', required=True)
+    p.add_argument('-o', '--output',
+                   help='Output VCD file. If not specified, output file name will be derived from input file.')
+    p.add_argument('-r', '--raw', action='store_true',
+                   help='Write out per-cycle activity file. Useful generate testbench stimulus.')
 
-    # signals should be runtime config
-    # this static configuration matches application_top.v
-    # signals = ["ack_match",
-    #            "consistency_match",
-    #            "abl_match",
-    #            "link_timer_on",
-    #            "lacr_in_stb"]
+    args = p.parse_args()
+
+    in_file = args.input
+    if args.output:
+        out_file = args.output
+    else:
+        out_file = in_file.split('.')[0] + ".vcd"
+
+    # signals should be runtime configurable
+    # Signal order is MSB to LSB, i.e., ["dbg_7", "dbg_6", ... , "dbg_0"]
 
     # signals = ["mrf_clk_time_err%2.2d" % jx for jx in range(8-1, -1, -1)] +\
     #           ["mrf_clk_pulse_per%2.2d" % jx for jx in range(7-1, -1, -1)] +\
@@ -92,12 +90,17 @@ if __name__ == "__main__":
     # signals = ["mrf_rxd%2.2d" % jx for jx in range(14-1, -1, -1)] +\
     #           ["mrf_rxbyteisaligned", "mrf_rxk0"]
 
-    signals = ["tpg_txd%2.2d" % jx for jx in range(8-1, -1, -1)] +\
-              ["tpg_count%2.2d" % jx for jx in range(7-1, -1, -1)] +\
-              ["tpg_baseenable"]
+    #signals = ["tpg_txd%2.2d" % jx for jx in range(8-1, -1, -1)] +\
+    #          ["tpg_count%2.2d" % jx for jx in range(7-1, -1, -1)] +\
+    #          ["tpg_baseenable"]
+
+    signals = ["mrf_rxd%2.2d" % jx for jx in range(16-1, -1, -1)] +\
+              ["mrf_rxk0"]
+
     print(signals)
     tw = 16
     aw = 16
+    tstep = 8 # ns
 
     raw_dat = []
     is_hex = False
@@ -115,4 +118,9 @@ if __name__ == "__main__":
 
     with open(out_file, 'w') as FH:
         print("Writing VCD to: %s" % out_file)
-        write_vcd(FH, signals, raw_dat, tstep=8, tw=tw)
+        if args.raw:
+           raw_file = in_file.split('.')[0] + ".raw"
+
+           with open(raw_file, 'w') as FR:
+               print("Writing raw data to: %s" % raw_file)
+               write_vcd(FH, signals, raw_dat, tstep=tstep, tw=tw, FR=FR)
