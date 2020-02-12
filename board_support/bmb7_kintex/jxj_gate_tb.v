@@ -30,6 +30,7 @@ module jxj_gate_tb;
          clk=1; #10;
       end
       $display("%s", fail ? "FAIL" : "PASS");
+      if (fail) $stop;
       $finish();
    end
 

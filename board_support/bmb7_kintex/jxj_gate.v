@@ -129,6 +129,7 @@ wire drive_fifo = drive_fifo_tx | rx_loopback;
 // One more FIFO.  Could be considered bufferbloat.
 (* mark_debug = dbg *) wire empty;
 wire tx_done;
+wire tx_rdy_l;
 wire fifo_re = tx_rdy_l&tx_stb;
 
 shortfifo #(.dw(9), .aw(5)) fifo (
