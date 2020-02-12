@@ -33,8 +33,9 @@ def open(addr, **kws):
     """
     if addr.startswith('ca://'):
         try:
-            from cothread.catools import caget
-        except ImportError:
+            import importlib
+            importlib.import_module('cothread')
+        except Exception:
             raise RuntimeError(
                 'ca:// not available, cothread module not found in PYTHONPATH')
         from .ca import CADevice
