@@ -3,9 +3,6 @@ import struct
 import sys
 import time
 
-sys.path.append("/home/fubar/work/lbl/lcls2_llrf/software/bmb7")
-sys.path.append("/home/fubar/work/lbl/lcls2_llrf/software/submodules/FEED/src/python")
-
 from llrf_bmb7 import c_llrf_bmb7
 
 from llspi_lmk01801 import c_llspi_lmk01801
