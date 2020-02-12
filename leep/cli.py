@@ -1,20 +1,17 @@
 
 from __future__ import print_function
+from . import open
+import numpy
+from collections import defaultdict
+import ast
+import shutil
+import tempfile
+import sys
+import json
 
 import logging
 _log = logging.getLogger(__name__)
 
-import json
-import sys
-import tempfile
-import shutil
-import ast
-
-from collections import defaultdict
-
-import numpy
-
-from . import open
 
 def readwrite(args, dev):
     for pair in args.reg:
@@ -25,7 +22,8 @@ def readwrite(args, dev):
         else:
             value, = dev.reg_read((name,))
             if isinstance(value, (list, numpy.ndarray)):
-                print("%s \t%08s" % (name, ' '.join(['%x' % v for v in value])))
+                print("%s \t%08s" %
+                      (name, ' '.join(['%x' % v for v in value])))
             else:
                 print("%s \t%08x" % (name, value))
 
@@ -35,6 +33,7 @@ def listreg(args, dev):
     regs.sort()
     for reg in regs:
         print(reg)
+
 
 def acquire(args, dev):
     if args.plot:
@@ -54,8 +53,10 @@ def acquire(args, dev):
     if args.plot:
         pylab.show()
 
+
 def decimate(args, dev):
     dev.set_decimate(args.div)
+
 
 def dumpaddrs(args, dev):
     regs = []
@@ -86,9 +87,11 @@ def dumpaddrs(args, dev):
             continue
         print("%08x %08x" % (addr, value))
 
+
 def dumpjson(args, dev):
     json.dump(dev.regmap, sys.stdout, indent=2)
     sys.stdout.write('\n')
+
 
 def dumpdrv(args, dev):
     if dev.backend != 'ca':
@@ -97,15 +100,18 @@ def dumpdrv(args, dev):
     json.dump(dev._info, sys.stdout, indent=2)
     sys.stdout.write('\n')
 
+
 class MapDirect(object):
 
     def __call__(self, name):
         return 'reg_'+name
 
+
 class MapPlain(object):
 
     def __call__(self, name):
         return name
+
 
 class MapShort(object):
 
@@ -116,11 +122,12 @@ class MapShort(object):
         N, self._next = self._next, self._next+1
         return 'REG%x' % N
 
+
 def gentemplate(args, dev):
     mapper = {
-        'short':MapShort,
-        'long':MapDirect,
-        'plain':MapPlain,
+        'short': MapShort,
+        'long': MapDirect,
+        'plain': MapPlain,
     }[args.mode]()
 
     files = defaultdict(list)
@@ -166,7 +173,8 @@ def gentemplate(args, dev):
         infos.sort(key=lambda i: i['pv'])
 
         for info in infos:
-            out.write('{PREF="$(CHAS):%(pv)s",\tREG="%(name)s",\tSIZE="%(size)s"}\n' % info)
+            out.write(
+                '{PREF="$(CHAS):%(pv)s",\tREG="%(name)s",\tSIZE="%(size)s"}\n' % info)
 
         out.write('}\n\n')
 
@@ -177,14 +185,18 @@ def gentemplate(args, dev):
     else:
         shutil.copyfile(out.name, args.output)
 
+
 def getargs():
     from argparse import ArgumentParser
     P = ArgumentParser()
-    P.add_argument('-d', '--debug', action='store_const', const=logging.DEBUG, default=logging.INFO)
-    P.add_argument('-q', '--quiet', action='store_const', const=logging.WARN, dest='debug')
+    P.add_argument('-d', '--debug', action='store_const',
+                   const=logging.DEBUG, default=logging.INFO)
+    P.add_argument('-q', '--quiet', action='store_const',
+                   const=logging.WARN, dest='debug')
     P.add_argument('-t', '--timeout', type=float, default=5.0)
     P.add_argument('-i', '--inst', action='append', default=[])
-    P.add_argument('dest', metavar="URI", help="Server address.  ca://Prefix or leep://host[:port]")
+    P.add_argument('dest', metavar="URI",
+                   help="Server address.  ca://Prefix or leep://host[:port]")
 
     SP = P.add_subparsers()
 
@@ -210,7 +222,8 @@ def getargs():
     S.set_defaults(func=listreg)
 
     S = SP.add_parser('dump', help='dump registers')
-    S.add_argument('-Z', '--ignore-zeros', action='store_true', help="Only print registers with non-zero values")
+    S.add_argument('-Z', '--ignore-zeros', action='store_true',
+                   help="Only print registers with non-zero values")
     S.set_defaults(func=dumpaddrs)
 
     S = SP.add_parser('json', help='print json')
@@ -222,8 +235,10 @@ def getargs():
     S = SP.add_parser('template', help='Generate MSI substitutions file')
     S.set_defaults(func=gentemplate)
     S.add_argument('output', help='Output file')
-    S.add_argument('-M', '--mode', default='long', help='Record naming mode: long (default), short, plain')
-    S.add_argument('--short', action='store_const', const='short', dest='mode', help='Alias for -M short')
+    S.add_argument('-M', '--mode', default='long',
+                   help='Record naming mode: long (default), short, plain')
+    S.add_argument('--short', action='store_const', const='short',
+                   dest='mode', help='Alias for -M short')
 
     return P.parse_args()
 
@@ -233,6 +248,7 @@ def main():
     logging.basicConfig(level=args.debug)
     dev = open(args.dest, timeout=args.timeout, instance=args.inst)
     args.func(args, dev)
+
 
 if __name__ == '__main__':
     main()

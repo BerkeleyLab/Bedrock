@@ -1,5 +1,13 @@
 
 from __future__ import print_function
+import numpy
+from .base import DeviceBase
+from datetime import datetime
+import json
+import zlib
+import random
+import socket
+import sys
 from functools import reduce
 
 import logging
@@ -8,22 +16,13 @@ _log = logging.getLogger(__name__)
 _spam = logging.getLogger(__name__+'.packets')
 _spam.propagate = False
 
-import sys
-import socket
-import random
-import zlib
-import json
-from datetime import datetime
-
-from .base import DeviceBase, IGNORE, WARN, ERROR
-
-import numpy
 
 if sys.version_info >= (3, 0):
     unicode = str
 
 be32 = numpy.dtype('>u4')
 be16 = numpy.dtype('>u2')
+
 
 def yscale(wave_samp_per=1):
     # Note that changes to the output of this function
@@ -46,11 +45,13 @@ def yscale(wave_samp_per=1):
         shift_min = log2(cic_n**2 * lo_cheat)-12
 
         wave_shift = max(0, ceil(shift_min/2))
-        adc_fs = 16 * lo_cheat * (33 * wave_samp_per)**2 * 4**(8 - wave_shift)/512.0/(2**shift_base)
+        adc_fs = 16 * lo_cheat * (33 * wave_samp_per)**2 * \
+            4**(8 - wave_shift)/512.0/(2**shift_base)
 
         return wave_shift, adc_fs
     except Exception as e:
         raise RuntimeError("yscale(%s) %s" % (wave_samp_per, e))
+
 
 class LEEPDevice(DeviceBase):
     backend = 'leep'
@@ -85,13 +86,14 @@ class LEEPDevice(DeviceBase):
 
             if L > 1:
                 _log.debug('reg_write %s <- %s ...', name, value[:10])
-                assert value.ndim==1 and value.shape[0] == L, ('must write whole register', value.shape, L)
+                assert value.ndim == 1 and value.shape[0] == L, (
+                    'must write whole register', value.shape, L)
                 # array register
                 for A, V in enumerate(value, base_addr):
                     addrs.append(A)
                     values.append(V)
             else:
-                assert value.ndim==0, 'scalar register'
+                assert value.ndim == 0, 'scalar register'
                 _log.debug('reg_write %s <- %s', name, value)
                 addrs.append(base_addr)
                 values.append(value)
@@ -179,9 +181,9 @@ class LEEPDevice(DeviceBase):
             self.reg_write([('dsp_tag', T)], instance=instance)
             _log.debug('Set Tag %d', T)
 
-        I = self.instance + instance
+        inst = self.instance + instance
         # assume that the shell_#_ number is the first
-        mask = 2**int(I[0])
+        mask = 2**int(inst[0])
 
         while True:
             self.reg_write([('circle_buf_flip', mask)], instance=None)
@@ -212,7 +214,8 @@ class LEEPDevice(DeviceBase):
                 break  # all done, waveform reflects latest parameter changes
 
             if dT != 0xff:
-                raise RuntimeError('acquisition collides with another client: %d %d %d' % (tag_old, tag_new, T))
+                raise RuntimeError(
+                    'acquisition collides with another client: %d %d %d' % (tag_old, tag_new, T))
 
             _log.debug('Acquire retry')
 
@@ -237,7 +240,8 @@ class LEEPDevice(DeviceBase):
 
         if (keep & interested) != interested:
             # chans must be a strict sub-set of keep
-            raise RuntimeError('Requested channels (%x) not kept (%x)' % (interested, keep))
+            raise RuntimeError(
+                'Requested channels (%x) not kept (%x)' % (interested, keep))
 
         # count number of bits set
         nbits, M = 0, keep
@@ -277,7 +281,8 @@ class LEEPDevice(DeviceBase):
                 nbits += 1
             M >>= 1
 
-        T = numpy.arange(1+totalsamp/nbits) * period  # result is often one sample too long
+        # result is often one sample too long
+        T = numpy.arange(1+totalsamp/nbits) * period
 
         T = T.repeat(nbits)  # [a, b, ...] w/ nbits=2 --> [a, a, b, b, ...]
         assert len(T) >= totalsamp, (len(T), totalsamp)
@@ -327,7 +332,8 @@ class LEEPDevice(DeviceBase):
 
             reply = numpy.fromstring(reply, be32)
             if (msg[:2] != reply[:2]).any():
-                _log.error('Ignore reply w/o matching nonce %s %s', msg[:2], reply[:2])
+                _log.error('Ignore reply w/o matching nonce %s %s',
+                           msg[:2], reply[:2])
                 continue
             elif (msg[2::2] != reply[2::2]).any():
                 _log.error('reply addresses are out of order')
@@ -403,7 +409,8 @@ class LEEPDevice(DeviceBase):
                 if self.regmap is not None:
                     _log.error("Ignoring additional JSON blob in ROM")
                 else:
-                    self.regmap = json.loads(zlib.decompress(blob.tostring()).decode('ascii'))
+                    self.regmap = json.loads(zlib.decompress(
+                        blob.tostring()).decode('ascii'))
 
         if self.regmap is None:
             raise RuntimeError('ROM contains no JSON')
