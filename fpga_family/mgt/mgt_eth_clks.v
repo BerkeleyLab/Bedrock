@@ -4,7 +4,10 @@
 // Low-level wrapper for clock management module and clock buffers for GbE
 // ------------------------------------
 
-module mgt_eth_clks (
+module mgt_eth_clks #(
+   parameter USR_CLK_BUF = 0, // 0 - BUFG; 1 - BUFH
+   parameter GMII_CLK_BUF = 0
+) (
    input  reset,
    input  mgt_out_clk,
    output mgt_usr_clk,
@@ -36,15 +39,19 @@ module mgt_eth_clks (
    );
 
    // Buffer clock management outputs
-   BUFG i_mgt_usr_clk_buf (
-      .I (mgt_usr_clk_l),
-      .O (mgt_usr_clk)
-   );
+   generate
+   if(USR_CLK_BUF == 0) begin
+      BUFG i_mgt_usr_clk_buf (.I (mgt_usr_clk_l), .O (mgt_usr_clk));
+   end else begin
+      BUFH i_mgt_usr_clk_buf (.I (mgt_usr_clk_l), .O (mgt_usr_clk));
+   end
 
-   BUFG i_gmii_clk_buf (
-      .I (gmii_clk_l),
-      .O (gmii_clk)
-   );
+   if(GMII_CLK_BUF == 0) begin
+      BUFG i_gmii_clk_buf (.I (gmii_clk_l), .O (gmii_clk));
+   end else begin
+      BUFH i_gmii_clk_buf (.I (gmii_clk_l), .O (gmii_clk));
+   end
+   endgenerate
 
 `else
    localparam CLK_PER_125 = 8;  // 8ns/125MHz

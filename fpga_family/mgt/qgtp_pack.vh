@@ -83,8 +83,11 @@
                           .gt0_pll1outclk_in           (pll1_outclk),\
                           .gt0_pll1outrefclk_in        (pll1_outrefclk)
 
-`define GT_OUTCLK_BUF(GTi) BUFG i_gt``GTi``_txoutclk_buf (.I (gt``GTi``_txoutclk_out_l), .O (gt``GTi``_txoutclk_out));\
-                           BUFG i_gt``GTi``_rxoutclk_buf (.I (gt``GTi``_rxoutclk_out_l), .O (gt``GTi``_rxoutclk_out));
+`define GT_OUTCLK_BUFG(GTi) BUFG i_gt``GTi``_txoutclk_buf (.I (gt``GTi``_txoutclk_out_l), .O (gt``GTi``_txoutclk_out));\
+                            BUFG i_gt``GTi``_rxoutclk_buf (.I (gt``GTi``_rxoutclk_out_l), .O (gt``GTi``_rxoutclk_out));
+
+`define GT_OUTCLK_BUFH(GTi) BUFH i_gt``GTi``_txoutclk_buf (.I (gt``GTi``_txoutclk_out_l), .O (gt``GTi``_txoutclk_out));\
+                            BUFH i_gt``GTi``_rxoutclk_buf (.I (gt``GTi``_rxoutclk_out_l), .O (gt``GTi``_rxoutclk_out));
 
 `define GTP_COMMON_WRAP_PORTS input  soft_reset_tx_in,\
                               input  soft_reset_rx_in,\

@@ -18,7 +18,11 @@ module q0_gt_wrap # (
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
-   parameter GT3_WI = 20
+   parameter GT3_WI = 20,
+   parameter GT0_BUF = 0,
+   parameter GT1_BUF = 0,
+   parameter GT2_BUF = 0,
+   parameter GT3_BUF = 0
 )(
    input         drpclk_in,
    input         soft_reset,
@@ -51,7 +55,11 @@ module q1_gt_wrap # (
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
-   parameter GT3_WI = 20
+   parameter GT3_WI = 20,
+   parameter GT0_BUF = 0,
+   parameter GT1_BUF = 0,
+   parameter GT2_BUF = 0,
+   parameter GT3_BUF = 0
 )(
    input         drpclk_in,
    input         soft_reset,
@@ -84,7 +92,11 @@ module q2_gt_wrap # (
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
-   parameter GT3_WI = 20
+   parameter GT3_WI = 20,
+   parameter GT0_BUF = 0,
+   parameter GT1_BUF = 0,
+   parameter GT2_BUF = 0,
+   parameter GT3_BUF = 0
 )(
    input         drpclk_in,
    input         soft_reset,
@@ -117,7 +129,11 @@ module q3_gt_wrap # (
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
-   parameter GT3_WI = 20
+   parameter GT3_WI = 20,
+   parameter GT0_BUF = 0,
+   parameter GT1_BUF = 0,
+   parameter GT2_BUF = 0,
+   parameter GT3_BUF = 0
 )(
    input         drpclk_in,
    input         soft_reset,
@@ -150,7 +166,11 @@ module qgt_wrap # (
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
-   parameter GT3_WI = 20
+   parameter GT3_WI = 20,
+   parameter GT0_BUF = 0,
+   parameter GT1_BUF = 0,
+   parameter GT2_BUF = 0,
+   parameter GT3_BUF = 0
 )(
    input         drpclk_in,
    input         soft_reset,
