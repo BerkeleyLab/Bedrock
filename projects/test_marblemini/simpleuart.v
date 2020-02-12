@@ -22,7 +22,7 @@
  *    send_divcnt and recv_divcnt are now only 20 bits wide
  *    reg_dat_ names are shortened to b_
  *    actual data ports are now only 8 bits wide (not padded to 32)
- *    b_busy is a new output
+ *    b_busy and b_dv are new outputs
  *    send_divcnt is now a down-counter with pipelined terminal count detect
  *
  *  Baud rate computation:

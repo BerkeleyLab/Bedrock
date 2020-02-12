@@ -42,6 +42,10 @@ GRAY_V = simplest_gray.v
 FREQ_DEMO_V = freq_demo.v dec_forward.v b2decimal.v simpleuart.v freq_multi_count_fe.v $(GRAY_V)
 freq_demo_tb: $(FREQ_DEMO_V)
 
+# =====
+# gps_test, too simple to need testing ... right
+gps_test_tb: gps_test.v simpleuart.v dpram.v
+
 # Packet Badger synthesizable code
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v spi_flash.v
 RTEFI_EXTRA_V = spi_flash_engine.v

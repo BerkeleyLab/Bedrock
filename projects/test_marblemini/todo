@@ -16,8 +16,8 @@ Gateware feature wish-list:
   step 1: [DONE] add i2cbridge and SPI micro hookup to a copy of badger/tests/rgmii_hw_test.v
   step 2: [DONE] add UDP for boot flash programming
   step 2a: add UDP for self-JTAG
-  step 3: do something with UART so hardware can be tested
-  step 4: add FMC tester support code
+  step 3: [DONE] do something with UART so hardware can be tested
+  step 4: [DONE] add FMC tester support code
   step 5a: [DONE] add SPI control of WR DACs (2 x AD5662, separate SYNC#)
   step 5b: start on some kind of White Rabbit support or at least phase-locking VCXO
   step 6: test framework for DDR3, use LiteDRAM?
@@ -31,48 +31,48 @@ Other work:
   use MMC to test features on I2C_PM bus: 2 x LM75 (thermometers),
     MAX6639 (thermometers, thermal shutdown, fans), XRP7724 (power supply)
   add MAC hookup to spi_gate, maybe try to use ENC28J60 paradigms?
-    (leave room in SPI plan for Siphash keys)
+  check that 88E1512 still works with VDDO_SEL tied low
 
-Wishlist for next rev of Marble Mini (relative to v1.0rc3)
+Wishlist for next rev of Marble Mini hardware(relative to v1.0rc3)
   fix errata according to Michal:
-- USB FTDI - reset pin connect to VUSB
-- remove R225
-- remove F1 and F2
-- rotate LEDs
-- FPGA JTAG connector pin connect to P2V5
-- wrong transistors, BSS139 -> BSS138
-- change S25FL128S to S25FL128SAGMFIR01
-  fix errata
-    LED orientation
-    transistor part number (details below)
-    two white-wires
-    mark R225 as dnf (at least for S25FL128S case)
-  rubber feet (with designated location) for desk use
-  mounting holes (standoffs)? (overlap with rubber feet)
-  physical power switch (includes barrel and PoE but not AMC?)
-  direct-attach LED or two to FPGA, maybe on interrupt line to MMC?
-  on-board SiLabs oscillator instead of U.Fl,
+  - USB FTDI - reset pin connect to VUSB
+  - remove R225
+  - remove F1 and F2
+  - rotate LEDs
+  - FPGA JTAG connector pin connect to P2V5
+  - wrong transistors, BSS139 -> BSS138
+  - change S25FL128S to S25FL128SAGMFIR01
+  add rubber feet (with designated location) for desk use
+  add mounting holes (standoffs)? (overlap with rubber feet)
+  add physical power switch (includes barrel and PoE but not AMC?)
+  add direct-attach LED or two to FPGA, maybe on interrupt line to MMC?
+  add on-board SiLabs oscillator as option for MGT_CLK_0
     prototype first with Pmod from Michael?
-  more (labeled) test points, esp. power supplies
-  if keeping J14 "Cortex Debug Connector" make a big pin-1 marking
-    can we use a keyed/shrouded option for J14? Amphenol 20021221-00010C4LF
-  more labels in general, e.g., DONE by associated LED
-  bigger silkscreen labels for user-facing parts:
-    J9, J10, J11, J12, J13, J14, J15, J16, S1, SW1, SW2, SW3, M1, M2
-  power meter (another IN219) on 12V bulk input
+  add 330 Ohm series resistor to all four FMC GA pins
+  add power meter (another IN219) on 12V bulk input
     barrel-\         /---fans
     PoE--------vvv-------XR
     AMC----/         \---FMC
       (but 3V3MP is not supplied from that path, so not included)
-  move Q19 to bottom of board to avoid needing a second reel for that part
-  see if we can use one BOM line (on one side) for all push-buttons
+  move parts between sides to reduce number of reels used in loading
+    see stray_parts.py; moving 13 components could save 13 reels
+    C2 C374 C42 D1 D2 Q19 Q2 R103 R104 R108 R160 R58 R66
   move U29 (I2C thermometer) to other end of board, near VCXOs
+  use 10 Ohm instead of F1 and F2
+  remove stray via at (272.35, 172.53)?
+  reduce BOM line count in general, push-buttons in particular
+  U4 (88E1512 Ethernet PHY): VDDO_SEL (10) should be tied low for VDDO = 2.5V
+  more (labeled) test points, esp. power supplies
+  if keeping J14 "Cortex Debug Connector" make a big pin-1 marking
+    can we use a keyed/shrouded option for J14? Amphenol 20021221-00010C4LF
+  update branding/naming on silkscreen
+  more labels in general, e.g., DONE by associated LED
+  much bigger silkscreen labels for user-facing parts:
+    J9, J10, J11, J12, J13, J14, J15, J16, S1, SW1, SW2, SW3, M1, M2
   NAD builds can mark S1 as DNF
   AMC builds should mark Pmod J12, J13, J16 as DNF
-  reduce BOM line count in general
   improve testablity in general
+  improve documentation of build options
   schematic: clarify/unify net names +3.3VP (power), 3V3PM (AMC), +3V3MP (many)
-  add 330 Ohm series resistor to all four FMC GA pins
-  use 10 Ohm instead of F1 and F2
   mark SFP TX_DIS pulldown resistors as 0 Ohm DNF: R84 R105 R185 R187
-  U4 (88E1512 Ethernet PHY): VDDO_SEL (10) should be tied low for VDDO = 2.5V
+  increase voltage rating of capacitors attached to +12V to 25V (some are 16V)

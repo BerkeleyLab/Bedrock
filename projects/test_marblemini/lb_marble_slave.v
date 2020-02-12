@@ -116,7 +116,7 @@ always @(posedge clk) gps_pins <= gps;
 reg gps_buf_reset=0;
 wire gps_buf_full;
 wire [7:0] gps_buf_out;
-wire [26:0] gps_freq;
+wire [27:0] gps_freq;
 wire [3:0] pps_cnt;
 gps_test gps_test(.gps_pins(gps_pins),
 	.clk(clk), .lb_addr(addr[9:0]), .lb_dout(gps_buf_out),
@@ -124,6 +124,7 @@ gps_test gps_test(.gps_pins(gps_pins),
 	.f_read(gps_freq), .pps_cnt(pps_cnt)
 );
 wire [8:0] gps_stat = {gps_buf_full, pps_cnt, gps_pins};
+wire [31:0] gps_pps_data = {pps_cnt, gps_freq};
 
 // Configuration ROM
 wire [15:0] config_rom_out;
@@ -239,7 +240,7 @@ always @(posedge clk) if (do_rd) begin
 		4'ha: reg_bank_0 <= wr_dac_busy;
 		4'hb: reg_bank_0 <= ctrace_running;
 		4'hc: reg_bank_0 <= gps_stat;
-		4'hd: reg_bank_0 <= gps_freq;
+		4'hd: reg_bank_0 <= gps_pps_data;
 		default: reg_bank_0 <= "zzzz";
 	endcase
 end
