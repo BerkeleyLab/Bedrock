@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>BI</name>
+  <width>600</width>
+  <height>25</height>
+  <background_color>
+    <color red="240" green="240" blue="240">
+    </color>
+  </background_color>
+  <actions>
+  </actions>
+  <widget type="led" version="2.0.0">
+    <name>Readback</name>
+    <pv_name>Readback</pv_name>
+    <x>200</x>
+    <width>200</width>
+    <height>25</height>
+    <off_label>0</off_label>
+    <on_label>1</on_label>
+    <square>true</square>
+    <actions>
+    </actions>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label</name>
+    <text>Label</text>
+    <width>200</width>
+    <height>25</height>
+    <vertical_alignment>1</vertical_alignment>
+    <wrap_words>false</wrap_words>
+    <actions>
+    </actions>
+    <border_color>
+      <color red="0" green="128" blue="255">
+      </color>
+    </border_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Scan</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>$(pv_name).PROC</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <pv_name>Readback</pv_name>
+    <text>&lt;-</text>
+    <x>400</x>
+    <width>40</width>
+    <height>25</height>
+    <background_color>
+      <color red="240" green="240" blue="240">
+      </color>
+    </background_color>
+    <tooltip>$(actions)</tooltip>
+  </widget>
+  <widget type="bool_button" version="2.0.0">
+    <name>Setting</name>
+    <pv_name>Setting</pv_name>
+    <x>440</x>
+    <width>160</width>
+    <height>25</height>
+    <off_label>0</off_label>
+    <on_label>1</on_label>
+    <background_color>
+      <color red="255" green="255" blue="255">
+      </color>
+    </background_color>
+    <actions>
+    </actions>
+  </widget>
+</display>
