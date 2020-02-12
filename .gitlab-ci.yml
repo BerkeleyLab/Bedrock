@@ -25,6 +25,10 @@ include:
   - local: .gitlab/ci/soc.gitlab-ci.yml
   - local: .gitlab/ci/comms_top.gitlab-ci.yml
 
+leep_test:
+  script:
+    - python3 -m unittest -v
+
 dsp_test:
   before_script:
     - cd dsp && export PYTHONPATH=../build-tools/
