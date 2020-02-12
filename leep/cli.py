@@ -69,7 +69,7 @@ def dumpaddrs(args, dev):
     for name, value in zip(regs, values):
         info = dev.get_reg_info(name, instance=None)
         base = info['base_addr']
-        if isinstance(base, (bytes, str, unicode)):
+        if isinstance(base, (bytes, str)):
             base = int(base, 0)
         if info.get('addr_width', 0) == 0:
             # scalar
