@@ -5,7 +5,7 @@ stages:
   - program
 
 variables:
-  DEFAULT_XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1
+  XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1
   CI_REGISTRY: mohs.dhcp.lbl.gov
   CONTAINER_IMAGE: $CI_REGISTRY/testing_base
   CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
