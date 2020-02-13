@@ -1,5 +1,6 @@
 include ../../dir_list.mk
 I2CBRIDGE_DIR = $(PERIPH_DRIVERS_DIR)/i2cbridge
+include $(I2CBRIDGE_DIR)/i2cbridge_rules.mk
 # Unisims not provided
 UNISIMS_DIR = broken
 
@@ -50,8 +51,6 @@ gps_test_tb: gps_test.v simpleuart.v dpram.v
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v spi_flash.v
 RTEFI_EXTRA_V = spi_flash_engine.v
 include $(BADGER_DIR)/rules.mk
-
-I2CBRIDGE_V = i2c_chunk.v i2c_prog.v i2c_bit.v i2c_analyze.v dpram_x.v
 
 # =====
 # auto-generated files

@@ -152,7 +152,7 @@ wire [11:0] lb_addr1 = lb_addr ^ {1'b0, lb_flip, 10'b0};
 
 wire [7:0] xbo;  // local read data
 wire [7:0] lb_dout0;
-dpram_x #(.aw(12), .dw(8),
+dpram #(.aw(12), .dw(8),
 	.initial_file(initial_file)) dpram(
 	.clka(clk), .addra(xba), .dina(xbd), .wena(xbs), .douta(xbo),
 	.clkb(clk), .addrb(lb_addr1), .doutb(lb_dout0)
