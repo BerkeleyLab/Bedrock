@@ -178,10 +178,6 @@ stretching or multi-mastering.  So officially this should be called TWI
 available I2C peripherals, including SFP modules, and none of the chips
 I've encountered actually use those exotic features.
 
-The dpram_x.v code is not identical to dpram.v in LBNL's bedrock repo.
-It is superficially compatible, and ought to be merged after more
-discussion and testing.
-
 # To do
 
 * Better design of assembler: integrate readout decoder
