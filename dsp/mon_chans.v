@@ -27,12 +27,25 @@ wire [NCHAN:0] g_reg;//, g_reg2;
 assign g_reg[NCHAN]=g_in;
 wire signed [NCHAN*(DWI+DAVR)-1:0] mout;
 wire signed [NCHAN*RWI-1:0] iout;
+
 genvar ix;
-generate for (ix=0;ix<NCHAN;ix=ix+1) begin
-mixer       #(.dwi(DWI),.davr(DAVR),.dwlo(DWLO)) mixer(.clk(clk), .adcf(adc[DWI*(ix+1)-1:DWI*ix]), .mult(mlo[DWLO*(ix+1)-1:DWLO*ix]), .mixout(mout[(DWI+DAVR)*(ix+1)-1:(DWI+DAVR)*ix]));
-double_inte #(.dwi(DWI+DAVR),.dwo(RWI))          double_inte(.clk(clk), .in(mout[(DWI+DAVR)*(ix+1)-1:(DWI+DAVR)*ix]), .out(iout[RWI*(ix+1)-1:RWI*ix]), .reset(reset_r[1]));
-serialize   #(.dwi(RWI))                         serialize(.clk(clk), .samp(samp), .data_in(iout[RWI*(ix+1)-1:RWI*ix]),
-	.stream_in(s_reg[RWI*(ix+2)-1:RWI*(ix+1)]), .stream_out(s_reg[RWI*(ix+1)-1:RWI*ix]), .gate_in(g_reg[ix+1]), .gate_out(g_reg[ix]));
+generate for (ix=0;ix<NCHAN;ix=ix+1) begin : G_MIX_INTEG_SERIAL
+   mixer #(
+      .dwi(DWI),.davr(DAVR),.dwlo(DWLO))
+   mixer(.clk(clk), .adcf(adc[DWI*(ix+1)-1:DWI*ix]), .mult(mlo[DWLO*(ix+1)-1:DWLO*ix]),
+         .mixout(mout[(DWI+DAVR)*(ix+1)-1:(DWI+DAVR)*ix]));
+
+   double_inte #(
+      .dwi(DWI+DAVR),.dwo(RWI))
+   double_inte(.clk(clk), .in(mout[(DWI+DAVR)*(ix+1)-1:(DWI+DAVR)*ix]),
+               .out(iout[RWI*(ix+1)-1:RWI*ix]), .reset(reset_r[1]));
+
+   serialize #(
+      .dwi(RWI))
+   serialize(.clk(clk), .samp(samp), .data_in(iout[RWI*(ix+1)-1:RWI*ix]),
+             .stream_in(s_reg[RWI*(ix+2)-1:RWI*(ix+1)]),
+             .stream_out(s_reg[RWI*(ix+1)-1:RWI*ix]),
+             .gate_in(g_reg[ix+1]), .gate_out(g_reg[ix]));
 end
 endgenerate
 
