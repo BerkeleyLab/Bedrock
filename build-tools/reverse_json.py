@@ -47,9 +47,9 @@ def ponder_int(s):
     return r
 
 
-def rprint(g, l, alias):
+def rprint(g, l, alias, address_offset):
     global fail
-    addr = int(g(2) + g(1), 16)
+    addr = int(g(2) + g(1), 16) + address_offset
     # Given g(2) that might have the form m_accum[1], construct
     # m_accum_1 for the JSON name, and
     # m_accum as the name with which to look up the wire properties.
@@ -96,7 +96,12 @@ f = open(argv[1], "r")
 print("{")
 sl = []
 param_db = {}
+address_offset = 0
 for l in f.read().split('\n'):
+    if "reverse_json_offset" in l:
+        m1 = re.search(r"\s*//\s*reverse_json_offset\s*:\s*(\d+)\s*", l)
+        if m1:
+            address_offset = int(m1.group(1))
     if "4'h" in l and ": reg_bank_" in l:
         m1 = re.search(r"4'h(\w):\s*reg_bank_(\w)\s*<=\s*(\S+);", l)
         if m1:
@@ -105,7 +110,7 @@ for l in f.read().split('\n'):
             if m1a:
                 # stderr.write('INFO: alias "%s"\n' % m1a.group(1))
                 alias = m1a.group(1)
-            sl += [rprint(m1.group, l, alias)]
+            sl += [rprint(m1.group, l, alias, address_offset)]
         else:
             stderr.write("WARNING: Surprising regexp failure: %s\n" % l)
     if "wire" in l:

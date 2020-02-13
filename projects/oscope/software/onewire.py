@@ -1,6 +1,3 @@
-import struct
-
-
 def onewire_crc(data):
     crc = 0
     for d in reversed(data):
@@ -64,14 +61,12 @@ def onewire_print(desc, data, ds2438=True):
     print(desc + " " + onewire_string(data, ds2438=ds2438))
 
 
-def onewire_data(prc, addr):
-    foo = prc.reg_read_alist(range(addr, addr + 64))
-    return [struct.unpack('!I', x[2])[0] for x in foo]
+def onewire_data(leep, reg_name):
+    return leep.reg_read([(reg_name)])[0]
 
 
-def onewire_status(prc, addr, desc):
-    # print "1-Wire at 0x%x"%addr, " ".join(["%2.2x"%u for u in uuu])
-    onewire_print(desc, onewire_data(prc, addr))
+def onewire_status(leep, reg_name, desc):
+    onewire_print(desc, leep.reg_read([(reg_name)])[0])
 
 
 if __name__ == "__main__":

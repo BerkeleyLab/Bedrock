@@ -21,14 +21,14 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from banyan_ch_find import banyan_ch_find
-from banyan_spurs import collect_adcs
+from get_raw_adcs import collect_adcs
 from prc import c_prc
 
 from misc import ADC, DataBlock, Processing
 
 
 def write_mask(prc, mask_int):
-    prc.reg_write([{'banyan_mask': mask_int}])
+    prc.leep.reg_write([('banyan_mask', mask_int)])
     channels = banyan_ch_find(mask_int)
     n_channels = len(channels)
     print((channels, 8 / n_channels))
@@ -36,7 +36,7 @@ def write_mask(prc, mask_int):
 
 
 def get_npt(prc):
-    banyan_status = prc.reg_read_value(['banyan_status'])[0]
+    banyan_status = prc.leep.reg_read(['banyan_status'])[0]
     npt = 1 << ((banyan_status >> 24) & 0x3F)
     if npt == 1:
         print("aborting since hardware module not present")

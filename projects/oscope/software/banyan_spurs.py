@@ -29,14 +29,14 @@ def banyan_spurs_run(ip_addr='192.168.21.11',
     prc = c_prc(
         ip_addr, port, filewritepath=filewritepath, use_spartan=use_spartan)
 
-    banyan_status = prc.reg_read_value(['banyan_status'])[0]
+    banyan_status = prc.leep.reg_read(['banyan_status'])[0]
     npt = 1 << ((banyan_status >> 24) & 0x3F)
     if npt == 1:
         print("aborting since hardware module not present")
         sys.exit(2)
 
     mask_int = int(mask, 0)
-    prc.reg_write([{'banyan_mask': mask_int}])
+    prc.leep.reg_write([('banyan_mask', mask_int)])
     channels = banyan_ch_find(mask_int)
     n_channels = len(channels)
     print((channels, 8 // n_channels))
@@ -93,7 +93,17 @@ def banyan_spurs_run(ip_addr='192.168.21.11',
     # print process_adcs(prc,npt,mask_int)#,block,timestamp);
 
 
-def pair_ram(prc, addr, count):
+def pair_ram(buff, idx, count):
+
+    buff_slice = buff[idx:idx+count]
+
+    # break 32-bit elements into 16-bit raw ADC samples
+    ram1 = [(x >> 16) & 0xffff for x in buff_slice]
+    ram2 = [x & 0xffff for x in buff_slice]
+    return [ram2, ram1]
+
+
+def pair_ram_prc(prc, addr, count):
     '''
     addr needs to be numeric
     '''
@@ -105,14 +115,14 @@ def pair_ram(prc, addr, count):
 
 
 def collect(prc, npt, print_minmax=True, allow_clk_frozen=False):
-    prc.reg_write([{'rawadc_trig': 1}])
+    prc.leep.reg_write([('rawadc_trig', 1)])
     (timestamp, minmax) = prc.slow_chain_readout()
     # if print_minmax:
     #     minmax_str = " ".join(["%d" % x for x in minmax])
     #     print(minmax_str, "%.8f" % (timestamp * 14 / 1320.0e6))
     while True:
         time.sleep(0.002)
-        status = prc.reg_read_value(['banyan_status', 'clk_status_out'])
+        status = prc.leep.reg_read(['banyan_status', 'clk_status_out'])
         b_status = status[0]
         clk_status = status[1]
         if not (b_status & 0x80000000):
@@ -126,7 +136,7 @@ def collect(prc, npt, print_minmax=True, allow_clk_frozen=False):
               ' Disaster, aborting!')
         exit(3)
     astep = 1 << ((b_status >> 24) & 0x3F)
-    addr_wave0 = prc.get_read_address('banyan_data')
+    addr_wave0 = prc.leep.reg_read([('banyan_data')])
     value = []
     for ix in range(0, 8, 2):
         value.extend(pair_ram(prc, addr_wave0 + ix * astep, npt))

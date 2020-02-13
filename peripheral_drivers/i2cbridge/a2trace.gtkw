@@ -1,0 +1,13 @@
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-13.573913 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 210
+[signals_width] 78
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+logic.SCL
+logic.SDA
+[pattern_trace] 1
+[pattern_trace] 0

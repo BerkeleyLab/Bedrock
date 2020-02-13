@@ -163,7 +163,7 @@ def erase_mem(s, ad, size):
         p = ERASE_BLOCK_64
     else:
         logging.error('Wrong buffer size to erase.')
-    logging.info('Erasing at address 0x%x...', ad)
+    logging.info('Erasing %s at address 0x%x...' % (size, ad))
     pp = p + three_bytes(ad) + 5 * READ_STATUS_1
     r, addr = do_message(s, pp)
     status_reg = r[-1]
@@ -186,6 +186,9 @@ def write_enable(s, enable):
     status_reg = r[-1]
     logging.debug('From: %s \n Tx length: %d\n Rx length: %d\n' % (addr, len(pp), len(r)))
     logging.debug('Check Write Enable Status Reg: %x' % status_reg)
+    if (status_reg & 0x60) != 0:
+        print("Aaaaugh!  Errors reported in write_enable status reg 0x%2.2x" % status_reg)
+        exit()
     return (status_reg & 0x3) == 0x2
 
 
@@ -396,6 +399,9 @@ def main():
     parser.add_argument('--reboot7', action='store_true',
                         help='Reboot chip using Xilinx 7-Series ICAPE2 primitive')
     args = parser.parse_args()
+
+    # numeric_level = getattr(logging, "DEBUG", None)
+    # logging.basicConfig(level=numeric_level)
 
     global IPADDR, PORTNUM, WAIT
     IPADDR, PORTNUM, WAIT = args.ip, args.udp, args.wait

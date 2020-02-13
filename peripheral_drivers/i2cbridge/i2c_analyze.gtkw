@@ -1,0 +1,29 @@
+[timestart] 10351
+[size] 1000 600
+[pos] 0 24
+*-6.575377 10575 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] i2c_analyze_tb.
+[sst_width] 210
+[signals_width] 134
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+i2c_analyze_tb.run
+i2c_analyze_tb.tick
+i2c_analyze_tb.data[1:0]
+i2c_analyze_tb.trace_push
+@22
+i2c_analyze_tb.trace[7:0]
+@200
+-DUT
+@28
+i2c_analyze_tb.dut.data[1:0]
+i2c_analyze_tb.dut.data1[1:0]
+i2c_analyze_tb.dut.data2[1:0]
+i2c_analyze_tb.dut.diff
+@22
+i2c_analyze_tb.dut.count[5:0]
+@28
+i2c_analyze_tb.dut.of
+[pattern_trace] 1
+[pattern_trace] 0
