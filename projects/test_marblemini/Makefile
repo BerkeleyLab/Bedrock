@@ -25,23 +25,16 @@ SYNTH_VIVADO = $(VIVADOEXEC) -mode batch -source
 
 # =====
 # Attention!!!!
-vpath %.v $(BADGER_DIR)/tests $(HOMELESS_DIR) $(DSP_DIR) $(SERIAL_IO_DIR) $(I2CBRIDGE_DIR) $(PERIPH_DRIVERS_DIR) $(BOARD_SUPPORT_DIR)/marblemini
+vpath %.v $(BADGER_DIR)/tests $(HOMELESS_DIR) $(DSP_DIR) $(SERIAL_IO_DIR) $(I2CBRIDGE_DIR) $(PERIPH_DRIVERS_DIR) $(BOARD_SUPPORT_DIR)/marblemini $(HOMELESS_DIR)/freq_demo
 vpath %.c $(BADGER_DIR)/tests
 vpath %.xdc $(BOARD_SUPPORT_DIR)/marblemini
 
+# =====
+# gets us $(FREQ_DEMO_V)
+include $(HOMELESS_DIR)/freq_demo/freq_demo_rules.mk
+
 # This must go in front of include $(BADGER_DIR)/rules.mk
-all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check b2decimal_check dec_forward_check freq_demo_tb
-
-# =====
-# Move these to bedrock?
-b2decimal_tb: b2decimal.v
-dec_forward_tb: dec_forward.v b2decimal.v
-
-# =====
-# freq_demo subsystem
-GRAY_V = simplest_gray.v
-FREQ_DEMO_V = freq_demo.v dec_forward.v b2decimal.v simpleuart.v freq_multi_count_fe.v $(GRAY_V)
-freq_demo_tb: $(FREQ_DEMO_V)
+all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check
 
 # =====
 # gps_test, too simple to need testing ... right

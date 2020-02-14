@@ -64,6 +64,11 @@ cordic_test:
   script:
     - make all
 
+freq_demo:
+  stage: test
+  script:
+    - cd homeless/freq_demo && make
+
 marble_sim:
   stage: test
   script:
