@@ -27,7 +27,7 @@ include:
 
 leep_test:
   script:
-    - python3 -m unittest -v
+    - cd projects/common && python3 -m unittest -v
 
 dsp_test:
   before_script:
