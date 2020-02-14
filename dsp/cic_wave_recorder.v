@@ -135,6 +135,27 @@ module cic_wave_recorder #(
       end
    endgenerate
 
+   // Avoid partial strobes/bursts when using buf_write
+   // Assume strobes are well formed (asserted in fchan_subset)
+   // Count beats in case there's no separation between bursts
+   reg [4:0] chan_stb_cnt=0;
+   reg wr_gated_r=0;
+
+   wire wr_gated = (chan_stb_cnt==0 && !buf_write);
+
+   always @(posedge iclk) begin
+      if (cic_stb_out) begin
+         chan_stb_cnt <= chan_stb_cnt + 1;
+
+         if (wr_gated) wr_gated_r <= 1;
+      end
+
+      if (chan_stb_cnt == n_chan-1) begin
+         chan_stb_cnt <= 0;
+         wr_gated_r <= 0;
+      end
+   end
+
    circle_buf_serial #(
       .n_chan        (n_chan),
       .lsb_mask      (lsb_mask),
@@ -145,7 +166,7 @@ module cic_wave_recorder #(
    i_circle_buf_serial (
       .iclk            (iclk),
       .sr_in           (wave_data),
-      .sr_stb          (cic_stb_out & buf_write),
+      .sr_stb          (cic_stb_out & (~wr_gated & ~wr_gated_r)),
       .chan_mask       (chan_mask),
       .oclk            (oclk),
       .buf_sync        (buf_sync),

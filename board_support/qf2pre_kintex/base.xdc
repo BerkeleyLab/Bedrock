@@ -11,9 +11,6 @@ set_property IOSTANDARD LVDS_25 [get_ports {sys_clk_n}]
 set_property PACKAGE_PIN F10    [get_ports {sys_clk_n}]
 
 # interface to Spartan
-# 3P
-set_property IOSTANDARD LVCMOS25 [get_ports {kintex_done}]
-set_property PACKAGE_PIN F14     [get_ports {kintex_done}]
 # 1N
 set_property IOSTANDARD LVDS_25 [get_ports {kintex_data_out_p}]
 set_property PACKAGE_PIN J11    [get_ports {kintex_data_out_p}]
@@ -23,9 +20,11 @@ set_property PACKAGE_PIN J10    [get_ports {kintex_data_out_n}]
 # 2P
 set_property IOSTANDARD LVDS_25 [get_ports {kintex_data_in_p}]
 set_property PACKAGE_PIN J13    [get_ports {kintex_data_in_p}]
+set_property DIFF_TERM TRUE     [get_ports {kintex_data_in_p}]
 # 2N
 set_property IOSTANDARD LVDS_25 [get_ports {kintex_data_in_n}]
 set_property PACKAGE_PIN H13    [get_ports {kintex_data_in_n}]
+set_property DIFF_TERM TRUE     [get_ports {kintex_data_in_n}]
 
 #create_clock -name clk_master -period 20.0 [get_ports EXT_CLK]
 set_property CFGBVS VCCO [current_design]

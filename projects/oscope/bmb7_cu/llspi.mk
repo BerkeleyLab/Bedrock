@@ -5,6 +5,7 @@ VVP = vvp$(ICARUS_SUFFIX) -n
 GTKWAVE = gtkwave
 AWK = awk
 SYNTH = xil_syn
+PYTHON = python3
 
 %_tb: %_tb.v
 	$(VERILOG) ${VFLAGS_$@} -o $@ $(filter %.v, $^)
@@ -32,7 +33,7 @@ PERIPH_HDL = ../../../peripheral_drivers
 llspi_tb: llspi.v $(PERIPH_HDL)/spi_eater.v $(COMMON_HDL)/shortfifo.v $(PERIPH_HDL)/ad9653_sim.v $(PERIPH_HDL)/ad7794_sim.v
 
 llspi_in.dat: llspi_in.py
-	python $< > $@
+	$(PYTHON) $< > $@
 
 llspi.vcd llspi_check: llspi_in.dat
 

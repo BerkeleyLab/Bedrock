@@ -7,18 +7,18 @@ platform-independent Verilog, and whatever it takes to get it onto FPGA platform
 
 It is currently a conglomerate of code broken into the following subdirectories:
 
-* [dsp](https://gitlab.lbl.gov/hdl-libraries/bedrock/tree/master/dsp): Various Digital Signal Processing algorithms
+* [dsp](dsp): Various Digital Signal Processing algorithms
 implemented in platform-independent (portable) Verilog, and their test benches;
 modules include DDS, Down-conversion, Up-conversion, CIC Filters,
 Low-Pass filters, High-Pass filters, Mixers
-* [cordic](https://gitlab.lbl.gov/hdl-libraries/bedrock/tree/master/cordic): A self contained Verilog implementation of a
+* [cordic](cordic): A self contained Verilog implementation of a
 [CORDIC](https://en.wikipedia.org/wiki/CORDIC);
 includes several operating modes that can be selected at build-time or run-time
 * rtsim: Real-Time simulation of various components of an RF system like a
 resonant cavity, its Electrical and Mechanical modes, ADCs, Cables, Piezos etc.
 * cmoc: Verilog implementation of an RF controller, that connects to either a
 real world ADCs or simulated components within rtsim
-* [badger](https://gitlab.lbl.gov/hdl-libraries/bedrock/tree/badger/badger): A real-time Ethernet/IP/UDP packet responder core in fabric
+* [badger](badger): A real-time Ethernet/IP/UDP packet responder core in fabric
 * fpga_family: Several FPGA specific constraint files
 * board_support: Several board specific pin mapping related files
 * projects: Instantiated projects that build and synthesize bit files that go on
@@ -54,8 +54,15 @@ Recommended:
 *  Verilator
 *  YoSys
 
-Full list: Listed in https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/master/dependencies.txt
+Full list: see [dependencies.txt](dependencies.txt) and [Dockerfile](Dockerfile).
 
 On contributing
 ===============
-See our first take [here](https://gitlab.lbl.gov/hdl-libraries/contributing-guidelines)
+See our first take [here](guidelines/CONTRIBUTING.md)
+
+************************************************************************************
+
+
+### Copyright Notice and License Agreement
+
+See [LICENSE](LICENSE.md).

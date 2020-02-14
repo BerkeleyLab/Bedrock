@@ -6,7 +6,7 @@ VERILOG = iverilog$(ICARUS_SUFFIX) -Wall -Wno-timescale
 VVP = vvp$(ICARUS_SUFFIX) -n
 GTKWAVE = gtkwave
 # Tested with python2 (2.7.3, 2.7.9, and 2.7.12) and python3 (3.4.2 and 3.5.2)
-PYTHON = python
+PYTHON = python3
 AWK = awk
 SYNTH = xil_syn
 SYNTH_VIVADO = sh vivado_batch
@@ -15,20 +15,8 @@ CFLAGS = -O2 -Wall -Wextra -pedantic -std=c99 -D_DEFAULT_SOURCE
 CFLAGS += -Wshadow -Wundef -Wstrict-prototypes -Wredundant-decls
 CFLAGS += -I .
 
-# Enable this stanza for SRF cavity detune and quench finding
-STYLE = _srf
-DATA_LEN = 6
-CONSTS_LEN = 8
-CONST_AW = 3
-
 # See README.run2
 SRF_DATA = ../run2.dat
-
-# Enable this stanza for RF distortion correction
-# STYLE = _ip3
-# DATA_LEN = 8
-# CONSTS_LEN = 4
-# CONST_AW = 2
 
 %_tb: %_tb.v
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
@@ -48,11 +36,15 @@ SRF_DATA = ../run2.dat
 %.pdf: %.tex
 	pdftex $<
 
-all: inverse_check ilookup_check match_mem match_reg accuracy detune_cw detune_pulse_test
+all: inverse_check ilookup_check match_mem match_reg accuracy detune_cw detune_pulse_test decay_slope_test
 
 # gnu make magic
 .DELETE_ON_ERROR:
 .PHONY: inverse_check ilookup_check match accuracy plot
+
+# Get Digaree program-building rules from rules.mk
+DIG_DIR = .
+include rules.mk
 
 main_tb: sf_main.v ops.vh
 
@@ -117,16 +109,10 @@ user_k7.bit: sf_user.tcl sf_user.v sf_main.v ops.vh sf_dpram.v sf_user.xdc
 .PHONY: bits
 bits: main_s6.bit main_s3.bit user_s6.bit user_s3.bit
 
-ops.h: cgen$(STYLE).py cgen_lib.py
-	$(PYTHON) $< > $@
-
 # init.dat will be read by both Verilog (user_tb.v) and C (sim1.c),
 # so it has to be kept very simple.
 init.dat: initgen$(STYLE).py
 	$(PYTHON) $< > $@
-
-ops.vh: sched.py ops.h
-	$(PYTHON) $^ > $@
 
 init2.dat: init_xindex.py init.dat ops.vh
 	$(PYTHON) $< > $@
@@ -189,6 +175,11 @@ detune_cw: detune_coeff_calc.py fitter_dat/iq_sys2_rfs2_0.dat
 detune_pulse_test: fitter_test.py fitter_dat/pulse.dat fitter_test_pulse.gold
 	$(PYTHON) $< -f $(filter %.dat, $^) > fitter_test.out
 	cmp fitter_test.out $(word 3, $^)
+	@echo "PASS"
+
+decay_slope_test: find_decay_slope.py fitter_dat/pulse.dat find_decay_slope.gold
+	$(PYTHON) $< -f $(filter %.dat, $^) > find_decay_slope.out
+	cmp find_decay_slope.out $(word 3, $^)
 	@echo "PASS"
 
 clean:

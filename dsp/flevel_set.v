@@ -2,7 +2,7 @@
 
 // Name: Set carrier level from I and Q
 //% Provide LO at cosd and sind ports
-// Essentially a dot product of the LO signal [cosa, sina] with [i_data, q_data]
+// Essentially a dot product of the LO signal [cosd, sind] with [i_data, q_data]
 // N.B.: full-scale negative is an invalid LO value.
 module flevel_set(
 	input clk,

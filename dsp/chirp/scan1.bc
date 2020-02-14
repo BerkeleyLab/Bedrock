@@ -1,0 +1,12 @@
+/* So I'm not that good at Diophantine equations */
+run_len = 98304
+dd_shift = 16
+ddphase = 8384
+for (ddphase = 8369; ddphase < 8400; ddphase = ddphase+1) {
+  for (dphase = 10471; dphase < 10502; dphase = dphase+1) {
+    q = (run_len*dphase + run_len*(run_len-1)*ddphase/2/2^dd_shift)%2^20
+    if (q > 2^19) q = q - 2^20
+    e = dphase + run_len*ddphase/2^dd_shift
+    print q, " ", ddphase, " ", dphase, " ", e, "\n"
+  }
+}

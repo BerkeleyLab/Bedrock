@@ -1,0 +1,27 @@
+[timestart] 61
+[size] 1000 600
+[pos] 205 94
+*-6.213115 232 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] b2d_tb.
+[sst_width] 210
+[signals_width] 153
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@24
+b2d_tb.bdata[15:0]
+@28
+b2d_tb.load
+@22
+b2d_tb.nibble[3:0]
+@28
+b2d_tb.nstrobe
+@200
+-DUT
+@28
+b2d_tb.dut.bdone
+b2d_tb.dut.shiftout
+b2d_tb.dut.shiftin
+@24
+b2d_tb.dut.sr[15:0]
+[pattern_trace] 1
+[pattern_trace] 0

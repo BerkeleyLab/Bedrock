@@ -1,7 +1,7 @@
 ## COMMS TOP
 
 The main purpose of this Bedrock project is to serve as a reference on how to set up
-multiple serial link protocols based on the TCL-based QGTX instantiation flow.
+multiple serial link protocols based on the TCL-based Quad MGT instantiation flow.
 
 Additionally, as part of the CI/CD, it provides coverage and protects against
 regressions in the following Bedrock sub-systems and features:
@@ -69,38 +69,38 @@ TX/RX rates (125 MHz). Both return data and RX registers are clocked at `lb_clk`
 The ChitChat wrapper relies on the GTXs to perform 8b/10b line coding. Comma characters are
 periodically transmitted and indicated by the `gtx_{tx,rx}_k` qualifier.
 
-# GTX Setup
+# MGT Setup
 
-The two serial protocols used in this design communicate over two independent GTXs co-located in
+The two serial protocols used in this design communicate over two independent MGTs co-located in
 the same Quad. Their configuration is entirely contained within `gtx_comms_top.tcl`, which is the
-entry point to the TCL-based GTX configuration flow described below.
+entry point to the TCL-based MGT configuration flow described below.
 
-## TCL-based GTX configuration
+## TCL-based MGT configuration
 
-The Quad GTX used in this system is configured with a TCL-based flow, essentially comprised of a
-TCL configuration script, `gtx_gen.tcl` and a QGTX Verilog wrapper, `qgtx_wrap.v`.
+The Quad MGT used in this system is configured with a TCL-based flow, essentially comprised of a
+TCL configuration script, `mgt_gen.tcl` and a QGT Verilog wrapper, `qgt_wrap.v`.
 
-`gtx_gen.tcl` implements two user-facing procedures:
+`mgt_gen.tcl` implements two user-facing procedures:
 
 * `proc add_aux_ip {ipname config_file module_name}`
-* `proc add_gtx_protocol {config_file quad_num gtx_num en8b10b}`
+* `proc add_gt_protocol {config_file quad_num gt_num en8b10b pll_type}`
 
 `add_aux_ip` provides a convenient way of adding arbitrary IP, that would otherwise have to be
 generated manually through the GUI wizard.
 
-`add_gtx_protocol` can be used to configure up to 4 Quad GTXs at GTX granularity. `config_file` specifies
-a TCL file containing a dictionary with all configuration parameters for a specific GTX. The remaining
-arguments associate the configuration with a specific GTX in the chip and set options that are used in
-the generation of the final Verilog modules (`q0_gtx_wrap`, `q1_gtx_wrap`, `q2_gtx_wrap`, `q3_gtx_wrap`),
-which all remain in `qgtx_wrap.v`.
+`add_gt_protocol` can be used to configure up to 4 Quad MGTs at MGT granularity. `config_file` specifies
+a TCL file containing a dictionary with all configuration parameters for a specific MGT. The remaining
+arguments associate the configuration with a specific MGT in the chip and set options that are used in
+the generation of the final Verilog modules (`q0_gt_wrap`, `q1_gt_wrap`, `q2_gt_wrap`, `q3_gt_wrap`),
+which all remain in `qgt_wrap.v`.
 
-`qgtx_wrap.v` makes extensive use of Verilog macros to generate the correct code in the presence of
-different configuration parameters. These are defined in `qgtx_wrap_stub.vh` and `qgtx_wrap_pack.vh` and
-are selectively activated based on compile-time defines set by `gtx_gen.tcl`.
+`qgt_wrap.v` makes extensive use of Verilog macros to generate the correct code in the presence of
+different configuration parameters. These are defined in `qgt_wrap_stub.vh` and `qgt_wrap_pack.vh` and
+are selectively activated based on compile-time defines set by `mgt_gen.tcl`.
 
-> An expanded version of `qgtx_wrap.v` can be generated, for debug purposes or otherwise, by running:
+> An expanded version of `qgt_wrap.v` can be generated, for debug purposes or otherwise, by running:
 
-`bedrock/fpga_family$ make qgtx_template`
+`bedrock/fpga_family$ make qgt_template`
 
 
 # (Self-)Testing

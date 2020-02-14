@@ -1,4 +1,4 @@
-// Gives a fictional off-chip microcontroller the ability to set MAC and IP
+// Gives a (fictional?) off-chip microcontroller the ability to set MAC and IP
 // addresses over an SPI bus.  This module acts as the SPI slave.
 module spi_gate(
 	// pins
@@ -14,9 +14,11 @@ module spi_gate(
 	output [7:0] config_d
 );
 
+parameter default_enable_rx = 1;
+
 reg [15:0] sr=0;  // shift register accumulating {a,d} from SPI master
 reg din=0, csb_d1=0, csb_d2=0, sclk_d1=0, sclk_d2=0, config_s_r=0;
-reg enable_r=1;  // special case initialization, enable by default
+reg enable_r=default_enable_rx;  // special case initialization
 always @(posedge config_clk) begin
 	// sync/IOB the three inputs.  Latency is not an issue.
 	din <= MOSI;

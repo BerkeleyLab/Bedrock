@@ -2,6 +2,9 @@ PRINT "Info:"
 RDW :0
 RDW :1
 
+PRINT "Auto-Negotiation status:"
+CMP :17 0x1
+
 # Disable pattern generator
 WRW :2 0x1
 

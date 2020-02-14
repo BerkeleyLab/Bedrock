@@ -8,6 +8,11 @@
 //   5. Reserved, currently zero
 // .. where words 1 and 2 have the 9th bit set to mark start-of-frame.
 // This structure must be kept consistent with decoder in construct.v.
+//
+// The datapath for the packet buffer data is reused to also produce
+// a port that can write data to an Rx MAC.  A 4 kByte buffer memory
+// is the smallest that can guarantee holding two full packets, and
+// we simply double buffer instead of trying something more complicated.
 
 module pbuf_writer #(
 	parameter paw=11  // packet address width, 11 IRL, maybe less for simulations
@@ -25,6 +30,23 @@ module pbuf_writer #(
 	// port to DPRAM, write every cycle
 	output [8:0] mem_d,
 	output [paw-1:0] mem_a,
+	// port to Rx MAC memory
+	output [7:0] rx_mac_d,
+	output [11:0] rx_mac_a,
+	output rx_mac_wen,
+	// port to Rx MAC handshake
+	// Double buffering works as follows from the host point of view:
+	//   * rx_mac_buf_status = [rx_mac_hbank_r, mac_bank]
+	//   * rx_mac_hbank_r = points to the bank currently read (and blocked) by the host
+	//     mac_bank = points to the bank the badger will write the next packet to (highest address bit)
+	//  1) badger toggles mac_bank once a packet has been completely received
+	//  2) The host knows new data is available when rx_mac_hbank_r == mac_bank
+	//  3) Host toggles rx_mac_hbank and is allowed to read the slot indexed by rx_mac_hbank_r in the next cycle
+	//  4) This allows badger to receive and write to the other slot, cycle continues from 1
+	input rx_mac_hbank,
+	output [1:0] rx_mac_buf_status,
+	// port to Rx MAC packet selector
+	input rx_mac_accept,
 	// Other
 	output [paw-1:0] gray_state,  // Valid read pointer, Rx needs to know this
 	output badge_stb  // debugging hook
@@ -71,6 +93,34 @@ end
 assign mem_a = fpp;
 assign mem_d = pxd;
 assign badge_stb = badge_stb_r;
+
+// MAC logic
+reg [10:0] mac_a0=0;
+reg mac_bank=0, rx_mac_hbank_r=1;
+wire bank_ready = mac_bank != rx_mac_hbank_r;
+assign rx_mac_buf_status = {rx_mac_hbank_r, mac_bank};
+reg mac_save=0, mac_stopping=0;
+reg mac_queue=0;
+always @(posedge clk) begin
+	rx_mac_hbank_r <= rx_mac_hbank;  // Likely clock domain crossing
+	if (trig & bank_ready) mac_save <= 1;
+	if (trig) mac_a0 <= 4;
+	else if (post_cnt==1) mac_a0 <= 0;
+	else mac_a0 <= mac_a0 + 1;
+	mac_stopping <= post_cnt == 4;
+	if (mac_stopping) mac_save <= 0;
+	if ((post_cnt==1) & mac_save & rx_mac_accept) begin
+		// At his point we know we'll forward the packet to the host
+		mac_queue <= 1;
+	end
+	if (mac_stopping & mac_queue) begin
+		mac_bank <= ~mac_bank;
+		mac_queue <= 0;
+	end
+end
+assign rx_mac_d = pxd;
+assign rx_mac_a = {mac_bank, mac_a0};
+assign rx_mac_wen = mac_save;
 
 // Convert to Gray code for Rx side, so Rx and Tx can be in different clock domains
 wire [paw-1:0] fp_gray = fp ^ {1'b0, fp[paw-1:1]};
