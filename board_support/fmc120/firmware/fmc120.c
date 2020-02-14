@@ -1196,7 +1196,22 @@ bool init_jesd204_core(void) {
         { 0x34, 0x01 },         // 0x34: Rx error reporting
         {0x80C, 0x00000000 },   // ILA Config Data 3: [11:8]: BID, [7:0]: DID
         {0x810, 0x000F0F03 },   // ILA Config Data 4: [25:24]: CS, [20:26]: N', [12:8]: N, [7:0]: M
-        {0x814, 0x80000000 },   // ILA Config Data 5: [16]: HD, [12:8]: S, [0]:SCR
+        {0x814, 0x00010000 },   // ILA Config Data 5: [16]: HD, [12:8]: S, [0]:SCR
+        {0x850, 0x000F0F03 },   // ILA Config Data 4: [25:24]: CS, [20:26]: N', [12:8]: N, [7:0]: M
+        {0x854, 0x00000000 },   // ILA Config Data 5: [16]: HD, [12:8]: S, [0]:SCR
+        {0x890, 0x000F0F03 },   // ILA Config Data 4: [25:24]: CS, [20:26]: N', [12:8]: N, [7:0]: M
+        {0x894, 0x00000000 },   // ILA Config Data 5: [16]: HD, [12:8]: S, [0]:SCR
+        {0x8D0, 0x000F0F03 },   // ILA Config Data 4: [25:24]: CS, [20:26]: N', [12:8]: N, [7:0]: M
+        {0x8D4, 0x00000000 },   // ILA Config Data 5: [16]: HD, [12:8]: S, [0]:SCR
+        {0x910, 0x000F0F03 },   // ILA Config Data 4: [25:24]: CS, [20:26]: N', [12:8]: N, [7:0]: M
+        {0x914, 0x00000000 },   // ILA Config Data 5: [16]: HD, [12:8]: S, [0]:SCR
+        {0x950, 0x000F0F03 },   // ILA Config Data 4: [25:24]: CS, [20:26]: N', [12:8]: N, [7:0]: M
+        {0x954, 0x00000000 },   // ILA Config Data 5: [16]: HD, [12:8]: S, [0]:SCR
+        {0x990, 0x000F0F03 },   // ILA Config Data 4: [25:24]: CS, [20:26]: N', [12:8]: N, [7:0]: M
+        {0x994, 0x00000000 },   // ILA Config Data 5: [16]: HD, [12:8]: S, [0]:SCR
+        {0x9D0, 0x000F0F03 },   // ILA Config Data 4: [25:24]: CS, [20:26]: N', [12:8]: N, [7:0]: M
+        {0x9D4, 0x00000000 },   // ILA Config Data 5: [16]: HD, [12:8]: S, [0]:SCR
+        { 0x04, 0x01 }          // 0x04: reset core
     };
 
     uint32_t bases[] = {
