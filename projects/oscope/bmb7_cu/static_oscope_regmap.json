@@ -3,7 +3,7 @@
         "access": "rw",
         "addr_width": 4,
         "sign": "unsigned",
-        "base_addr": 112,
+        "base_addr": 1638512,
         "data_width": 7
     },
     "hist_dout": {

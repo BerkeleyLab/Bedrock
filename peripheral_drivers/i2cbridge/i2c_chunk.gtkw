@@ -1,0 +1,83 @@
+[timestart] 0
+[size] 1295 872
+[pos] -1 -1
+*-17.961386 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] i2c_chunk_tb.
+[treeopen] i2c_chunk_tb.chunk.
+[sst_width] 210
+[signals_width] 171
+[sst_expanded] 1
+[sst_vpaned_height] 250
+@22
+i2c_chunk_tb.lb_addr[11:0]
+i2c_chunk_tb.lb_din[7:0]
+@28
+i2c_chunk_tb.lb_write
+i2c_chunk_tb.scl
+i2c_chunk_tb.sda
+i2c_chunk_tb.run
+i2c_chunk_tb.trig
+@22
+i2c_chunk_tb.hw_config[3:0]
+@200
+-DUT
+@28
+i2c_chunk_tb.chunk.tick
+@22
+i2c_chunk_tb.chunk.access[3:0]
+i2c_chunk_tb.chunk.xba[11:0]
+i2c_chunk_tb.chunk.xbd[7:0]
+@28
+i2c_chunk_tb.chunk.xbs
+@22
+i2c_chunk_tb.chunk.xbo[7:0]
+@28
+i2c_chunk_tb.chunk.buffer_flip
+i2c_chunk_tb.chunk.pingpong
+@200
+-Local Bus
+@22
+i2c_chunk_tb.chunk.lb_wbufa[11:0]
+i2c_chunk_tb.chunk.lb_wbufd[7:0]
+@28
+i2c_chunk_tb.chunk.lb_wpend
+@200
+-Trace
+@28
+i2c_chunk_tb.chunk.trace_run
+i2c_chunk_tb.chunk.trace_push
+i2c_chunk_tb.chunk.trace_k
+@22
+i2c_chunk_tb.chunk.trace_h[7:0]
+i2c_chunk_tb.chunk.trace_a[9:0]
+@200
+-Program
+@24
+i2c_chunk_tb.chunk.p_addr[9:0]
+@22
+i2c_chunk_tb.chunk.p_data[7:0]
+i2c_chunk_tb.chunk.result[7:0]
+@28
+i2c_chunk_tb.chunk.result_k
+@22
+i2c_chunk_tb.chunk.result_p[9:0]
+@200
+-i2c_prog
+@24
+i2c_chunk_tb.chunk.prog.state[2:0]
+i2c_chunk_tb.chunk.prog.bit_cnt[2:0]
+i2c_chunk_tb.chunk.prog.stream_cnt[4:0]
+@22
+i2c_chunk_tb.chunk.prog.result_addr[9:0]
+@28
+i2c_chunk_tb.chunk.prog.pause1_tick
+i2c_chunk_tb.chunk.prog.pause2_tick
+i2c_chunk_tb.chunk.prog.opcode[2:0]
+i2c_chunk_tb.chunk.prog.o_wr
+i2c_chunk_tb.chunk.prog.o_wx
+i2c_chunk_tb.chunk.prog.o_jp
+i2c_chunk_tb.chunk.prog.op_pw
+i2c_chunk_tb.chunk.prog.next_op
+i2c_chunk_tb.chunk.prog.next_data
+[pattern_trace] 1
+[pattern_trace] 0

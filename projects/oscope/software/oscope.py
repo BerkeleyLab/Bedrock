@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 import matplotlib.animation as animation
 
 from banyan_ch_find import banyan_ch_find
-from banyan_spurs import collect_adcs
+from get_raw_adcs import collect_adcs
 from prc import c_prc
 
 FOO1, FOO2 = None, None
@@ -20,7 +20,7 @@ g_data = []
 
 
 def write_mask(prc, mask_int):
-    prc.reg_write([{'banyan_mask': mask_int}])
+    prc.leep.reg_write([('banyan_mask', mask_int)])
     channels = banyan_ch_find(mask_int)
     n_channels = len(channels)
     print((channels, 8 / n_channels))
@@ -28,7 +28,7 @@ def write_mask(prc, mask_int):
 
 
 def get_npt(prc):
-    banyan_status = prc.reg_read_value(['banyan_status'])[0]
+    banyan_status = prc.leep.reg_read(['banyan_status'])[0]
     npt = 1 << ((banyan_status >> 24) & 0x3F)
     if npt == 1:
         print("aborting since hardware module not present")
@@ -66,8 +66,7 @@ def run(ip_addr='192.168.1.121',
         use_spartan=False):
 
     mask_int = int(mask, 0)
-    prc = c_prc(
-        ip_addr, port, filewritepath=filewritepath, use_spartan=use_spartan)
+    prc = c_prc(ip_addr, port, use_spartan=use_spartan)
 
     npt = get_npt(prc)
     n_channels, channels = write_mask(prc, mask_int)
@@ -109,7 +108,7 @@ def run(ip_addr='192.168.1.121',
         # collect_adcs is not normal:
         # It always collects npt * 8 data points.
         # Each channel gets [(npt * 8) // n_channels] datapoints
-        data_block, timestamp = collect_adcs(prc, npt, n_channels)
+        data_block, timestamp = collect_adcs(prc.leep, npt, n_channels)
         nblock = counts_to_volts(np.array(data_block))  # ADC count / FULL SCALE => [-1.0, 1.0]
         for j, line in enumerate(lines, start=1):
             ax = axes[j - 1]
@@ -173,8 +172,7 @@ if __name__ == "__main__":
         "-u",
         "--use_spartan",
         action="store_true",
-        help="use spartan",
-        default=True)
+        help="use spartan")
     args = parser.parse_args()
     run(ip_addr=args.ip,
         port=args.port,

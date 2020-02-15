@@ -1,0 +1,38 @@
+[timestart] 1628800
+[size] 1366 530
+[pos] -1 -1
+*-16.943096 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] dpram_tb.
+[sst_width] 310
+[signals_width] 209
+[sst_expanded] 1
+[sst_vpaned_height] 118
+@200
+-PORT A
+@28
+dpram_tb.i_dut.clka
+@24
+dpram_tb.i_dut.addra[7:0]
+@22
+dpram_tb.i_dut.dina[9:0]
+@28
+dpram_tb.i_dut.wena
+@22
+dpram_tb.i_dut.douta[9:0]
+@200
+-PORT B
+@28
+dpram_tb.i_dut.clkb
+@24
+dpram_tb.i_dut.addrb[7:0]
+@23
+dpram_tb.i_dut.doutb[9:0]
+@200
+-TB
+@28
+dpram_tb.fail
+dpram_tb.fail_a
+dpram_tb.fail_b
+dpram_tb.wr_count[1:0]
+[pattern_trace] 1
+[pattern_trace] 0

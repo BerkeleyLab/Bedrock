@@ -1,12 +1,12 @@
-[timestart] 552
-[size] 1348 577
-[pos] 34 1
-*-6.121265 708 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[timestart] 674
+[size] 1350 653
+[pos] 34 0
+*-6.121265 672 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] mem_gateway_tb.
 [sst_width] 224
-[signals_width] 224
+[signals_width] 239
 [sst_expanded] 1
-[sst_vpaned_height] 147
+[sst_vpaned_height] 173
 @24
 mem_gateway_tb.dut.len_c[10:0]
 @22
@@ -41,9 +41,11 @@ mem_gateway_tb.dut.xdata[7:0]
 @28
 mem_gateway_tb.control_strobe
 mem_gateway_tb.control_rd
+mem_gateway_tb.slave.do_rd_r
 @22
 mem_gateway_tb.addr[23:0]
 mem_gateway_tb.data_out[31:0]
+mem_gateway_tb.slave.lb_data_in[31:0]
 @28
 mem_gateway_tb.control_rd_valid
 @22
