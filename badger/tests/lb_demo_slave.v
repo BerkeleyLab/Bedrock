@@ -86,9 +86,11 @@ always @(posedge clk) if (led_tick) uptime <= uptime+1;
 
 // Very basic pipelining of two-cycle read process
 reg [23:0] addr_r=0;
-reg do_rd_r=0;
+reg do_rd_r=0, do_rd_r2=0, do_rd_r3=0;
 always @(posedge clk) begin
 	do_rd_r <= do_rd;
+	do_rd_r2 <= do_rd_r;
+	do_rd_r3 <= do_rd_r2;
 	addr_r <= addr;
 end
 
@@ -166,21 +168,25 @@ end
 assign led_user_mode = led_user_r;
 assign led1 = l1;
 assign led2 = l2;
-assign data_in = lb_data_in;
+wire drive_data_in;
+assign data_in = drive_data_in ? lb_data_in : 32'bx;
 assign rx_mac_hbank = rx_mac_hbank_r;
 
 // Bus activity trace output
 `ifdef SIMULATE
-reg [1:0] sr=0;
+assign drive_data_in = do_rd_r3;
+reg [2:0] sr=0;
 reg [23:0] addr_rr=0;
 always @(posedge clk) begin
-	sr <= {sr[0:0], control_strobe & control_rd};
+	sr <= {sr[1:0], do_rd};
 	addr_rr <= addr_r;
 	if (control_strobe & ~control_rd)
 		$display("Localbus write r[%x] = %x", addr, data_out);
-	if (sr[1])
+	if (sr[2])
 		$display("Localbus read  r[%x] = %x", addr_rr, data_in);
 end
+`else
+assign drive_data_in = 1;  // Don't ask for trouble on hardware
 `endif
 
 endmodule

@@ -12,6 +12,38 @@ module oscope_top(
 	input RGMII_RX_CTRL,
 	input RGMII_RX_CLK,
 
+	// SPI boot flash programming port
+	// BOOT_CCLK treated specially in 7-series
+	output BOOT_CS_B,
+	input  BOOT_MISO,
+	output BOOT_MOSI,
+	output CFG_D02,  // hope R209 is DNF
+
+	// One I2C bus, everything gatewayed through a TCA9548
+	output TWI_SCL,
+	inout  TWI_SDA,
+	output TWI_RST,
+	input  TWI_INT,
+
+	// SPI pins connected to microcontroller
+	input SCLK,
+	input CSB,
+	input MOSI,
+	output MISO,
+	output MMC_INT,
+
+	// White Rabbit DAC
+	output WR_DAC_SCLK,
+	output WR_DAC_DIN,
+	output WR_DAC1_SYNC,
+	output WR_DAC2_SYNC,
+
+	// UART to USB
+	// The RxD and TxD directions are with respect
+	// to the USB/UART chip, not the FPGA!
+	output FPGA_RxD,
+	input FPGA_TxD,
+
 	// Reset command to PHY
 	output PHY_RSTN,
 
@@ -131,7 +163,9 @@ marble_base base(
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
+	.aux_clk(SYSCLK_P), .GPS(4'b0),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
+	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
 `ifdef USE_I2CBRIDGE
 	.twi_scl({dum_scl, FMC2_LA_P[2] , FMC1_LA_P[2], TWI_SCL}),
 	.twi_sda({dum_sda, FMC2_LA_N[2], FMC1_LA_N[2], TWI_SDA}),

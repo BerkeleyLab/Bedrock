@@ -28,7 +28,7 @@ include:
 
 leep_test:
   script:
-    - python3 -m unittest -v
+    - cd projects/common && python3 -m unittest -v
 
 dsp_test:
   before_script:
@@ -64,6 +64,11 @@ cordic_test:
   stage: test
   script:
     - make all
+
+freq_demo:
+  stage: test
+  script:
+    - cd homeless/freq_demo && make
 
 marble_sim:
   stage: test
