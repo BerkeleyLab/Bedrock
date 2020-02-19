@@ -2,8 +2,8 @@ import argparse
 import re
 
 
-def write_xdc(fo, vc707, fmc120, ix):
-    for d in vc707:
+def write_xdc(fo, constrs, fmc120, ix):
+    for d in constrs:
         for s in fmc120:
             av57 = s[0]
             signal = s[2]
@@ -39,12 +39,12 @@ def main():
 
     with open(args.output, 'w+') as fo:
         with open(args.carrier) as f:
-            lines = [line.rstrip() for line in f]
-            vc707_fmc = [x.strip('[]\n').split(' ') for x in lines if x]
+            lines = [line.split(';')[0].rstrip() for line in f]
+            constrs = [re.split("\s+", x.strip('[]\n')) for x in lines if x]
             if args.fmc1:
-                write_xdc(fo, vc707_fmc, fmc120, 1)
+                write_xdc(fo, constrs, fmc120, 1)
             if args.fmc2:
-                write_xdc(fo, vc707_fmc, fmc120, 2)
+                write_xdc(fo, constrs, fmc120, 2)
 
 
 if __name__ == "__main__":
