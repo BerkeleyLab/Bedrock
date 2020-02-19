@@ -1145,16 +1145,19 @@ void FMC120_write_axi_regmap(uint32_t base_core, const t_reg32 *regmap, size_t l
     }
 }
 
-void reset_jesd204_core(uint32_t base_core) {
+bool reset_jesd204_core(uint32_t base_core) {
     uint32_t dword = 1;
+    size_t retries=0;
+
     write_jesd204_axi(base_core, 0x04, 0x01); // Reset core
 
-    print_str("    Core Reset wait");
-    while (dword != 0) {
+    do {
+        DELAY_US(100);
         dword = read_jesd204_axi(base_core, 0x04);
-        print_str(".");
-    }
-    print_str(" Done.\n");
+        printf("    Waiting for JESD204B Core Reset, retry=%d\n", retries);
+    } while (dword != 0 && retries < 10);
+    printf(" Done.\n");
+    return (retries < 10);
 }
 
 bool init_jesd204_core(void) {
@@ -1244,7 +1247,7 @@ bool init_jesd204_core(void) {
             base_core, jesd_cfg, (base_core == BASE2_JESD_DAC) ? size_cfg_dac : size_cfg_adc
         );
 
-        reset_jesd204_core(base_core);
+        pass &= reset_jesd204_core(base_core);
     }
     return pass;
 }

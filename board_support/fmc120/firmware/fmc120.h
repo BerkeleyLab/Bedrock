@@ -212,7 +212,7 @@ bool init_jesd204_core(void);
  * @brief Xilinx jesd204 core soft reset
  * @param base_core        - Base2 address of jesd core (e.g. BASE_JESD_ADC0)
 *******************************************************************************/
-void reset_jesd204_core(uint32_t base_core);
+bool reset_jesd204_core(uint32_t base_core);
 
 /***************************************************************************//**
  * @brief Xilinx jesd204 core check sync status by register 0x38
