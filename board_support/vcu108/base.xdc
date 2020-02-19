@@ -52,3 +52,20 @@ set_property PACKAGE_PIN BE24     [get_ports "USB_UART_RX"] ;# Bank  94 VCCO - V
 set_property IOSTANDARD  LVCMOS18 [get_ports "USB_UART_RX"] ;# Bank  94 VCCO - VCC1V8_FPGA - IO_L1P_T0L_N0_DBC_94
 set_property PACKAGE_PIN BF24     [get_ports "USB_UART_CTS"] ;# Bank  94 VCCO - VCC1V8_FPGA - IO_L1N_T0L_N1_DBC_94
 set_property IOSTANDARD  LVCMOS18 [get_ports "USB_UART_CTS"] ;# Bank  94 VCCO - VCC1V8_FPGA - IO_L1N_T0L_N1_DBC_94
+
+set_property PACKAGE_PIN BC16     [get_ports "PMOD0_7_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L20N_T3L_N3_AD1N_66
+set_property IOSTANDARD  LVCMOS18 [get_ports "PMOD0_7_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L20N_T3L_N3_AD1N_66
+set_property PACKAGE_PIN AW12     [get_ports "PMOD0_6_LS"] ;# Bank  67 VCCO - VADJ_1V8_FPGA - IO_L2P_T0L_N2_67
+set_property IOSTANDARD  LVCMOS18 [get_ports "PMOD0_6_LS"] ;# Bank  67 VCCO - VADJ_1V8_FPGA - IO_L2P_T0L_N2_67
+set_property PACKAGE_PIN BF7      [get_ports "PMOD0_5_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_T1U_N12_66
+set_property IOSTANDARD  LVCMOS18 [get_ports "PMOD0_5_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_T1U_N12_66
+set_property PACKAGE_PIN BC13     [get_ports "PMOD0_4_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L19N_T3L_N1_DBC_AD9N_66
+set_property IOSTANDARD  LVCMOS18 [get_ports "PMOD0_4_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L19N_T3L_N1_DBC_AD9N_66
+set_property PACKAGE_PIN BB16     [get_ports "PMOD0_3_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L20P_T3L_N2_AD1P_66
+set_property IOSTANDARD  LVCMOS18 [get_ports "PMOD0_3_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L20P_T3L_N2_AD1P_66
+set_property PACKAGE_PIN AW16     [get_ports "PMOD0_2_LS"] ;# Bank  67 VCCO - VADJ_1V8_FPGA - IO_T1U_N12_67
+set_property IOSTANDARD  LVCMOS18 [get_ports "PMOD0_2_LS"] ;# Bank  67 VCCO - VADJ_1V8_FPGA - IO_T1U_N12_67
+set_property PACKAGE_PIN BA10     [get_ports "PMOD0_1_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_T2U_N12_66
+set_property IOSTANDARD  LVCMOS18 [get_ports "PMOD0_1_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_T2U_N12_66
+set_property PACKAGE_PIN BC14     [get_ports "PMOD0_0_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L19P_T3L_N0_DBC_AD9P_66
+set_property IOSTANDARD  LVCMOS18 [get_ports "PMOD0_0_LS"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L19P_T3L_N0_DBC_AD9P_66
