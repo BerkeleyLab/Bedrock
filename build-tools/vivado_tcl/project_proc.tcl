@@ -48,6 +48,11 @@ proc project_create {platform_name project_name} {
         set project_part "xc7vx485tffg1761-2"
         set project_board "xilinx.com:vc707:part0:1.2"
     }
+    if [regexp "vcu108" $platform_name] {
+        set platform "vcu108"
+        set project_part " xcvu095-ffva2104-2-e"
+        set project_board "xilinx.com:vcu108:part0:1.6"
+    }
     # planahead
     #
     if {$platform eq "ml605"} {
