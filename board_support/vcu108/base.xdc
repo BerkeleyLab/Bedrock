@@ -2,20 +2,12 @@ set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
 set_property BITSTREAM.CONFIG.UNUSEDPIN Pullup [current_design]
 set_property CFGBVS GND [current_design]
 # set_property CONFIG_VOLTAGE 1.8 [current_design]
-# clock constraints
-# 300 MHz system clock, moved to project top
-# create_clock -name sysclk -period 3.3 [get_ports SYSCLK1_300_P]
-# create_clock -name sysclk -period 3.3 [get_ports SYSCLK2_300_P]
 
-# 300 MHz Clock input
-set_property PACKAGE_PIN G31      [get_ports "SYSCLK1_300_P"] ;# Bank  50 VCCO - VCC1V2_FPGA - IO_L13P_T2L_N0_GC_QBC_50
-set_property IOSTANDARD  DIFF_SSTL12 [get_ports "SYSCLK1_300_P"] ;# Bank  50 VCCO - VCC1V2_FPGA - IO_L13P_T2L_N0_GC_QBC_50
-set_property PACKAGE_PIN F31      [get_ports "SYSCLK1_300_N"] ;# Bank  50 VCCO - VCC1V2_FPGA - IO_L13N_T2L_N1_GC_QBC_50
-set_property IOSTANDARD  DIFF_SSTL12 [get_ports "SYSCLK1_300_N"] ;# Bank  50 VCCO - VCC1V2_FPGA - IO_L13N_T2L_N1_GC_QBC_50
-set_property PACKAGE_PIN G22      [get_ports "SYSCLK2_300_P"] ;# Bank  70 VCCO - VCC1V2_FPGA - IO_L13P_T2L_N0_GC_QBC_70
-set_property IOSTANDARD  DIFF_SSTL12 [get_ports "SYSCLK2_300_P"] ;# Bank  70 VCCO - VCC1V2_FPGA - IO_L13P_T2L_N0_GC_QBC_70
-set_property PACKAGE_PIN G21      [get_ports "SYSCLK2_300_N"] ;# Bank  70 VCCO - VCC1V2_FPGA - IO_L13N_T2L_N1_GC_QBC_70
-set_property IOSTANDARD  DIFF_SSTL12 [get_ports "SYSCLK2_300_N"] ;# Bank  70 VCCO - VCC1V2_FPGA - IO_L13N_T2L_N1_GC_QBC_70
+# 125 MHz Clock input
+set_property PACKAGE_PIN BC9      [get_ports "CLK_125MHZ_P"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L12P_T1U_N10_GC_66
+set_property IOSTANDARD  LVDS [get_ports "CLK_125MHZ_P"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L12P_T1U_N10_GC_66
+set_property PACKAGE_PIN BC8      [get_ports "CLK_125MHZ_N"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L12N_T1U_N11_GC_66
+set_property IOSTANDARD  LVDS [get_ports "CLK_125MHZ_N"] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L12N_T1U_N11_GC_66
 # I2C
 set_property PACKAGE_PIN AP18     [get_ports "SYSMON_SCL_LS"] ;# Bank  65 VCCO - VCC1V8_FPGA - IO_L23P_T3U_N8_I2C_SCLK_65
 set_property IOSTANDARD  LVCMOS18 [get_ports "SYSMON_SCL_LS"] ;# Bank  65 VCCO - VCC1V8_FPGA - IO_L23P_T3U_N8_I2C_SCLK_65
