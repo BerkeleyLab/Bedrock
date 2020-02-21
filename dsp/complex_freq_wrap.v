@@ -113,7 +113,7 @@ module complex_freq_wrap #(
    localparam square_sum_ex=15;  // average and decimate by 2^square_sum_ex
    wire [23:0] avg_power;
    wire avg_power_strobe;
-   simple_cic_us #(.dw(24), .ex(square_sum_ex)) cic(.clk(clk),
+   cic_simple_us #(.dw(24), .ex(square_sum_ex)) cic(.clk(clk),
       .data_in(square_sum_out), .data_in_gate(square_sum_valid),
       .roll(1'b0),
       .data_out(avg_power), .data_out_gate(avg_power_strobe)
