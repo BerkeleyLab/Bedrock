@@ -111,8 +111,6 @@ module complex_freq_wrap #(
 
    // First-order CIC filter of square_sum
    localparam square_sum_ex=15;  // average and decimate by 2^square_sum_ex
-   wire [23:0] avg_power;
-   wire avg_power_strobe;
    cic_simple_us #(.dw(24), .ex(square_sum_ex)) cic(.clk(clk),
       .data_in(square_sum_out), .data_in_gate(square_sum_valid),
       .roll(1'b0),
