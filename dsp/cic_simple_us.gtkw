@@ -1,0 +1,26 @@
+[*]
+[*] GTKWave Analyzer v3.3.79 (w)1999-2017 BSI
+[*] Mon Feb 24 17:07:22 2020
+[*]
+[dumpfile] "/home/larry/llrf/git/lcls2_llrf/firmware/submodules/bedrock/dsp/cic_simple_us.vcd"
+[dumpfile_mtime] "Mon Feb 24 17:06:55 2020"
+[dumpfile_size] 3329
+[savefile] "/home/larry/llrf/git/lcls2_llrf/firmware/submodules/bedrock/dsp/cic_simple_us.gtkw"
+[timestart] 0
+[size] 1088 335
+[pos] -270 -140
+*-11.039986 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 210
+[signals_width] 142
+[sst_expanded] 1
+[sst_vpaned_height] 61
+@28
+cic_simple_us_tb.data_in_gate
+@24
+cic_simple_us_tb.data_in[15:0]
+@28
+cic_simple_us_tb.data_out_gate
+@24
+cic_simple_us_tb.data_out[15:0]
+[pattern_trace] 1
+[pattern_trace] 0
