@@ -112,12 +112,18 @@ for ARP and IP), and the UDP destination port is transcribed from the
 source port.
 
 It is strongly recommended that UDP destination port numbers get configured
-to be < 1024.
+to be < 1024.  Up to eight clients (UDP ports) are currently supported,
+and their default ports are numbered sequentially starting at 801.
+This can be overridden at build time with Verilog parameters, or
+at run time with a local configuration bus.
 
 ## Example "live" test run
 
 Demonstrating both Packet Badger functionality, and the test framework's
 ability to attach the simulation to the host's Ethernet subsystem.
+
+Your development machine needs to provide a traditional unix-y environemnt,
+e.g., make, cc, python, awk, cmp.  Also some version of [Icarus Verilog](http://iverilog.icarus.com/); see [status.md](status.md) for more details.
 
 In one shell session (Linux terminal), try:
 

@@ -105,7 +105,7 @@ def eth_gen(
     gmii_pre = bytes([0x55]*7 + [0xd5])
     eth_head = dst_mac + src_mac + bytes([0x08, ethertype])
     content_len = len(contents)
-    eth_pad_n = max(64-14-content_len, 0)
+    eth_pad_n = max(64-14-content_len-4, 0)  # 14 for 802.3 header, 4 for CRC
     if pad is not None:
         eth_pad_n = pad
     eth_pad = bytes([0]*max(eth_pad_n, 0))

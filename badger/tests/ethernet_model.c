@@ -110,12 +110,13 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 				fprintf(stderr, "ethernet_model: Rx %d tap octets\n", rc);
 			}
 #ifdef GMII
-			if (rc < 64) {
-				/* Pad to Ethernet's minimum frame size */
-				for (int ix=rc; ix<64; ix++) {
+			if (rc < 60) {
+				/* Pad to satisfy Ethernet's minimum frame size */
+				/* 4 bytes of CRC, added next, will take it up to 64 */
+				for (int ix=rc; ix<60; ix++) {
 					inbuf.buf[DATA_BASE+ix]=0;
 				}
-				rc = 64;
+				rc = 60;
 			}
 			append_crc32(inbuf.buf+DATA_BASE, rc);
 			if (check_crc32(inbuf.buf+DATA_BASE, rc)==0) {
@@ -155,7 +156,7 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 		if (outbuf.cur < ETH_MAXLEN+12) outbuf.cur++;
 		else fprintf(stderr, "Ethernet output packet too long\n");
 	} else if (prev_out_valid) {
-		unsigned nout = outbuf.cur;
+		unsigned nout = outbuf.cur;  /* number of octets to finally write() */
 		/* write output packet */
 		outbuf.len = outbuf.cur;
 		if (ethernet_model_debug) {
@@ -169,7 +170,9 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 		} else if ((*p & 0xff) != 0xd5) {
 			fprintf(stderr, "output packet len %d missing SFD (%2.2x %2.2x)\n",
 				outbuf.cur, outbuf.buf[0], *p);
-		} else if (nout=outbuf.buf+outbuf.cur-(p+5), check_crc32(p+1, nout)==0) {
+		} else if (nout=outbuf.buf+outbuf.cur-(p+5), nout < 64-4) {
+			fprintf(stderr, "output Ethernet packet len %d too short\n", nout+4);
+		} else if (check_crc32(p+1, nout)==0) {
 			fprintf(stderr, "output packet len %d CRC failed\n",
 				outbuf.cur);
 		} else
@@ -177,6 +180,7 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 		if (1 || ethernet_model_debug) {
 			int rc = write(tapfd, p+1, nout);
 			fprintf(stderr, "ethernet_model: Tx %d GMII octets, write rc=%d\n", outbuf.cur, rc);
+			/* Note GMII octets include preamble and CRC, write rc includes neither */
 		}
 		outbuf.cur=0;
 	}

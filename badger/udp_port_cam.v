@@ -17,7 +17,7 @@
 // approximately six cycles after the port number arrives, in order to
 // get stored into MTU memory.  In real life, Ethernet packets have
 // a minimum frame size of 64 bytes.  Thus the minimal UDP packet will
-// necessarily be followed by 22 padding bytes (usually zero) before the
+// necessarily be followed by 18 padding bytes (usually zero) before the
 // CRC32.  That's plenty of time for this module to do its work.  Problems
 // could only show up in such over-simplified simulations or if attached to
 // standards-violating Ethernet hardware.  The simulation problem has been
