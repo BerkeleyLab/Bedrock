@@ -27,9 +27,13 @@ wire [len-1:0] keep_use;
 genvar ix;
 generate
 	if (KEEP_OLD==1)
-		for (ix=0; ix<len; ix=ix+1) assign keep_use[ix] = keep[len-1-ix];
+		for (ix=0; ix<len; ix=ix+1) begin : G_KEEP_OLD
+			assign keep_use[ix] = keep[len-1-ix];
+		end
 	else
-		for (ix=0; ix<len; ix=ix+1) assign keep_use[ix] = keep[ix];
+		for (ix=0; ix<len; ix=ix+1) begin : G_NKEEP_OLD
+			assign keep_use[ix] = keep[ix];
+		end
 endgenerate
 
 reg [len-1:0] live=0;

@@ -19,7 +19,7 @@
  http://www.ti.com/lit/ml/slap159/slap159.pdf
     ADC: ADS54J60
     * LMFS: 4 2 1 1
-    * ceil(17/F) ≤ K ≤ min(32, floor(1024/F))
+    * ceil(17/F) <= K <= min(32, floor(1024/F))
     * choose K = 32
     * 2 lanes at 1Gbps per channel, 2 channels per chip
     * F_LMFC = LineRate / 10 / (F*K) = 31.25MHz

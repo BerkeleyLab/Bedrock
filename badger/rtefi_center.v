@@ -8,7 +8,7 @@
 // Up to seven clients, each handling a UDP port, attach here.
 //
 // This module instantiates a series of modules for the data path
-// linking GMII Rx through to GMII Tx, shown in retefi.eps.
+// linking GMII Rx through to GMII Tx, shown in rtefi.eps.
 // The several steps have instance names starting with a through e
 // (a_scan through e_crc).
 //
@@ -30,12 +30,13 @@ module rtefi_center(
 	input config_s,  // MAC/IP address write
 	input config_p,  // UDP port number write
 	// Host side of Tx MAC
-	// I don't like having the MAC embedded here.
-	// Maybe it would be better if the DPRAM were external.
-	input host_clk,
-	input [mac_aw:0] host_waddr,
-	input host_write,
-	input [15:0] host_wdata,
+	// connect the 2 below to an external 16 bit dual port ram
+	output [mac_aw - 1: 0] host_raddr,
+	input [15:0] host_rdata,
+	// address where we should start transmitting from
+	input [mac_aw - 1: 0] buf_start_addr,
+	// set start to trigger transmission, wait for done, reset start
+	input tx_mac_start,
 	output tx_mac_done,
 	// As documented in clients.eps
 	output [10:0] len_c,
@@ -43,6 +44,17 @@ module rtefi_center(
 	output [6:0] raw_s,
 	output [7:0] idata,
 	input [7*8-1:0] mux_data_in,  // collection of odata
+	// port to Rx MAC memory
+	output [7:0] rx_mac_d,
+	output [11:0] rx_mac_a,
+	output rx_mac_wen,
+	// port to Rx MAC handshake
+	input rx_mac_hbank,
+	output [1:0] rx_mac_buf_status,
+	// port to Rx MAC packet selector
+	input rx_mac_accept,
+	output [7:0] rx_mac_status_d,
+	output rx_mac_status_s,
 	// Debugging
 	output ibadge_stb,
 	output [7:0] ibadge_data,
@@ -59,6 +71,8 @@ module rtefi_center(
 parameter paw = 11;  // packet (memory) address width, nominal 11
 parameter n_lat = 3;  // latency of client pipeline
 parameter mac_aw = 10;  // sets size (in 16-bit words) of DPRAM in Tx MAC
+parameter handle_arp = 1;
+parameter handle_icmp = 1;
 // The following parameters set the synthesis-time default, but all
 // can be overridden at run-time using the configuration port.
 // UDP ports 0 through 7 represent the index given in udp_sel.
@@ -96,7 +110,8 @@ wire scanner_busy;
 wire sdata_s, sdata_l;
 wire [10:0] pack_len;
 wire [7:0] status_vec; wire status_valid;
-scanner a_scan(.clk(rx_clk),
+scanner #(.handle_arp(handle_arp), .handle_icmp(handle_icmp)) a_scan(
+	.clk(rx_clk),
 	.eth_in(eth_in_r), .eth_in_s(eth_in_s_r), .eth_in_e(eth_in_e_r),
 	.enable_rx(enable_rx),
 	.ip_a(ip_a), .ip_d(ip_d),
@@ -105,6 +120,8 @@ scanner a_scan(.clk(rx_clk),
 	.odata(sdata), .odata_s(sdata_s), .odata_f(sdata_l),
 	.pack_len(pack_len), .status_vec(status_vec), .status_valid(status_valid)
 );
+assign rx_mac_status_d = status_vec;
+assign rx_mac_status_s = status_valid;
 
 // Second step: create data flow to DPRAM
 wire [paw-1:0] pbuf_a_rx, gray_state;
@@ -113,6 +130,9 @@ pbuf_writer #(.paw(paw)) b_write(.clk(rx_clk),
 	.data_in(sdata), .data_s(sdata_s), .data_f(sdata_l),
 	.pack_len(pack_len), .status_vec(status_vec), .status_valid(status_valid),
 	.mem_a(pbuf_a_rx), .mem_d(pbuf_din),
+	.rx_mac_d(rx_mac_d), .rx_mac_a(rx_mac_a), .rx_mac_wen(rx_mac_wen),
+	.rx_mac_hbank(rx_mac_hbank), .rx_mac_buf_status(rx_mac_buf_status),
+	.rx_mac_accept(rx_mac_accept),
 	.gray_state(gray_state),
 	.badge_stb(ibadge_stb)
 );
@@ -153,7 +173,7 @@ construct #(.paw(paw), .p_offset(p_offset)) c_construct(.clk(tx_clk),
 
 // Data multiplexer
 wire xraw_s, xraw_l;  wire [7:0] raw_d;  // Output, still needs CRC
-xformer #(.n_lat(n_lat)) d_xform(.clk(tx_clk),
+xformer #(.n_lat(n_lat), .handle_icmp(handle_icmp)) d_xform(.clk(tx_clk),
 	.pc(pc), .category(category), .udp_sel(udp_sel),
 	.idata(eth_data_out), .eth_strobe_short(eth_strobe_short), .eth_strobe_long(eth_strobe_long),
 	.len_c(len_c),
@@ -164,19 +184,33 @@ xformer #(.n_lat(n_lat)) d_xform(.clk(tx_clk),
 assign idata = eth_data_out;
 
 // Tx MAC
+// Disable by setting mac_aw=1
 // precog_latency is kind of important;
 // check resulting interpacket gap in simulations
 localparam precog_latency = (1<<paw) - p_offset + 4 + n_lat;
 wire [7:0] tx_mac_data;
 wire tx_mac_strobe_s, tx_mac_strobe_l;
-mac_subset #(.aw(mac_aw), .latency(precog_latency)) txmac(
-	.host_clk(host_clk), .host_waddr(host_waddr),
-	.host_write(host_write), .host_wdata(host_wdata),
-	.done(tx_mac_done),
+generate if (mac_aw > 1) begin: mac_b
+    mac_subset #(
+	.mac_aw(mac_aw),
+	.latency(precog_latency)
+    ) txmac (
+	.host_raddr(host_raddr),
+	.host_rdata(host_rdata),
+	.buf_start_addr(buf_start_addr),
+	.tx_mac_start(tx_mac_start),
+	.tx_mac_done(tx_mac_done),
 	.scanner_busy(scanner_busy),
-	.tx_clk(tx_clk), .mac_data(tx_mac_data),
-	.strobe_s(tx_mac_strobe_s), .strobe_l(tx_mac_strobe_l)
-);
+	.tx_clk(tx_clk),
+	.mac_data(tx_mac_data),
+	.strobe_s(tx_mac_strobe_s),
+	.strobe_l(tx_mac_strobe_l)
+    );
+end else begin
+	assign tx_mac_strobe_s = 0;
+	assign tx_mac_strobe_l = 0;
+	assign tx_mac_data = 0;
+end endgenerate
 
 // Slide data from Tx MAC in here
 // XXX no cross-checking that the MAC is avoiding collisions

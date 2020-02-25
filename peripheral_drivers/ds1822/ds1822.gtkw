@@ -1,6 +1,6 @@
 [timestart] 0
 [size] 1000 600
-[pos] 552 231
+[pos] 426 231
 *-22.140720 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] ds1822_tb.
 [sst_width] 210
@@ -11,7 +11,7 @@
 ds1822_tb.DS1
 @22
 ds1822_tb.address[5:0]
-ds1822_tb.result[7:0]
+ds1822_tb.result[8:0]
 @200
 -driver
 @28

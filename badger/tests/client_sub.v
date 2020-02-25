@@ -10,10 +10,12 @@ module client_sub(
 	output raw_l,
 	output raw_s,
 	// Data returned from DUT
-	input [7:0] odata
+	input [7:0] odata,
+	// Hint when running live
+	input thinking
 );
 
-parameter msg_len=48;  // bytes
+parameter msg_len=96;  // bytes
 parameter n_lat=3;
 parameter pst = 40;  // start time for packet stimulus
 parameter preamble_cnt = 18;  // should be 44(?) but I'm easily bored.
@@ -22,6 +24,7 @@ parameter sim_length = 250;  // for off-line runs
 reg clk_r, log;
 integer cc;
 integer udp_port;  // non-zero to enable UDP socket mode
+integer badger_client = 1; // Badger client interface
 reg [1023:0] packet_file;  // file name, fragile! limited to 128 characters
 integer data_len;
 reg [7:0] in_stream[0:msg_len-1];  // file contents
@@ -29,9 +32,9 @@ initial begin
 	log = $test$plusargs("log");
 	if (!$value$plusargs("packet_file=%s", packet_file)) packet_file="xfer1";
 	if (!$value$plusargs("udp_port=%d", udp_port))  udp_port=0;
-	if (udp_port!=0) $udp_init(udp_port);
+	if (udp_port!=0) $udp_init(udp_port, badger_client);
 	else $readmemh(packet_file, in_stream);
-	if (!$value$plusargs("data_len=%d", data_len)) data_len=48;
+	if (!$value$plusargs("data_len=%d", data_len)) data_len=msg_len;
 	// Run forever (until interrupt) when connected to UDP socket
 	for (cc=0; (udp_port!=0) || (cc<sim_length); cc=cc+1) begin
 		clk_r=0; #4;
@@ -45,7 +48,6 @@ assign clk = clk_r;
 integer jx;
 reg [7:0] oxd=0;  // o for origin
 reg payload_short=0, payload=0;
-wire thinking=0;
 reg udp_iflag=0;
 reg [7:0] udp_idata;
 reg [10:0] udp_count, len_c=0;

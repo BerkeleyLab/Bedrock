@@ -2,10 +2,10 @@
 
 module test_tx_tb;
 
-parameter aw=8;
+parameter mac_aw=8;
 reg clk;
 integer cc;
-reg [15:0] host_mem[0:(1<<aw)-1];
+reg [15:0] host_mem[0:(1<<mac_aw)-1];
 integer out_file;
 initial begin
 	if ($test$plusargs("vcd")) begin
@@ -24,7 +24,7 @@ wire strobe;  // will be xformer.v or precog?
 
 // Packet send requests hard-coded here
 reg start=0;
-reg [aw-1:0] buf_start_addr;
+reg [mac_aw-1:0] buf_start_addr;
 wire done;
 always @(posedge clk) begin
 	case (cc)
@@ -43,7 +43,7 @@ end
 // Normally host_mem would be DPRAM, but this testbench
 // doesn't need a host-write port.  Instead, it gets filled
 // by the $readmemh() above.
-wire [aw-1:0] host_addr;
+wire [mac_aw-1:0] host_addr;
 reg [15:0] host_d;
 always @(posedge clk) host_d <= host_mem[host_addr];
 
@@ -51,7 +51,7 @@ always @(posedge clk) host_d <= host_mem[host_addr];
 wire req;
 wire [10:0] len_req;
 wire [7:0] mac_data;
-test_tx_mac #(.aw(aw)) mac(.clk(clk),
+test_tx_mac #(.mac_aw(mac_aw)) mac(.clk(clk),
 	.host_addr(host_addr), .host_d(host_d),
 	.start(start), .buf_start_addr(buf_start_addr), .done(done),
 	.req(req), .len_req(len_req),

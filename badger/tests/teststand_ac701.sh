@@ -9,4 +9,5 @@ echo "So far so good"
 sleep 5
 echo "Hope links are up"
 # IP address must match that configured in hw_test.v
-python badger_lb_io.py --ip 192.168.19.8 show
+# Hard to get default python from top_rules.mk, just use python3
+python3 badger_lb_io.py --ip 192.168.19.8 show

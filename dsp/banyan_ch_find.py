@@ -81,7 +81,7 @@ def vvp_parse_test(fd, verbose):
             if fault | verbose:
                 print("{} {} {}".format(a[0], a[3], vvp), end="")
                 if fault:
-                    print("{} {} {}".format("!=", chk, "FAULT"))
+                    print("{} {} {}".format(" !=", chk, "FAULT"))
                     fail = 1
                 else:
                     print(".")

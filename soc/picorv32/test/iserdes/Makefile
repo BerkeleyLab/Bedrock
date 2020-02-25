@@ -5,7 +5,7 @@ include $(PICORV_DIR)/rules.mk
 # assume that vivado is on the PATH, this might be needed:
 # source /opt/Xilinx/Vivado/2018.2/settings64.sh
 VIVADO_BASE = $(dir $(shell which vivado))..
-MEM_SIZE     = 2048
+BLOCK_RAM_SIZE     = 2048
 SRC_V   = memory2_pack.v mpack.v munpack.v picorv32.v pico_pack.v sfr_pack.v
 SRC_V  += fmc11x/iserdes_pack.v fmc11x/idelay_wrap.v fmc11x/dco_buf.v
 SRC_V  += flag_xdomain.v dpram.v
@@ -25,7 +25,7 @@ $(TARGET).vcd: iserdes_tb
 	xsim -nolog -R $< -testplusarg vcd
 
 iserdes_tb: $(SRC_V) iserdes_tb.v $(TARGET)32.hex
-	xvlog -nolog -d MEM_SIZE=$(MEM_SIZE) $(filter %.v,$^)
+	xvlog -nolog -d BLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) $(filter %.v,$^)
 	#xvhdl -nolog $(filter %.vhd,$^)
 	xelab -nolog -L unisims_ver -L secureip $@ glbl -s $@ -timescale 1ns/1ps
 

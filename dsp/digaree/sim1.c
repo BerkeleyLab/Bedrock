@@ -9,8 +9,8 @@
 // pull in EXTRA and MW from sim1.h
 #include "sim1.h"
 #define SCE (1<<EXTRA)
-#define VMAX (131072*SCE)
-#define MUL_SHF (18 + EXTRA - MW)
+#define VMAX (1<<(PW-1+EXTRA))
+#define MUL_SHF (PW + EXTRA - MW)
 
 // The intent here is to be a bit-accurate representation
 // of the processing done on the FPGA.

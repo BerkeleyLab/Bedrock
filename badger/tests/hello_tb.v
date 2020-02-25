@@ -24,7 +24,7 @@ wire [10:0] len_c;
 wire [7:0] idata, odata;
 wire clk, raw_l, raw_s;
 client_sub #(.n_lat(n_lat)) net(.clk(clk), .len_c(len_c), .idata(idata),
-	.raw_l(raw_l), .raw_s(raw_s), .odata(odata));
+	.raw_l(raw_l), .raw_s(raw_s), .odata(odata), .thinking(1'b0));
 
 // DUT
 hello #(.n_lat(n_lat)) dut(.clk(clk),

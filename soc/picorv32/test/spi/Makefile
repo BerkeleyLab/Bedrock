@@ -2,7 +2,7 @@ include ../../../../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
 
-MEM_SIZE = 512
+BLOCK_RAM_SIZE = 512
 TARGET   = spi_test
 
 SRC_V    =  memory_pack.v mpack.v munpack.v  picorv32.v pico_pack.v

@@ -45,8 +45,13 @@ rtefi_blob #(.ip(ip), .mac(mac)) badger(
 	.enable_rx(1'b1),
 	.config_clk(gmii_tx_clk), .config_a(4'd0), .config_d(8'd0),
 	.config_s(1'b0), .config_p(1'b0),
+	// MAC support ports, not used
+	.host_rdata(16'b0),
+	.buf_start_addr(10'b0),
+	.tx_mac_start(1'b0),
+	.rx_mac_hbank(1'b0),
+	.rx_mac_accept(1'b0),
 	// Pass-through to user modules
-
 	.p2_nomangle(1'b0),
 	.p3_addr(rtefi_lb_addr),
 	.p3_control_strobe(rtefi_lb_control_strobe),

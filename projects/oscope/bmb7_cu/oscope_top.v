@@ -103,6 +103,7 @@ wire clk200; // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz
 wire idelayctrl_rdy;
 wire idelayctrl_reset;
 `ifndef SIMULATE
+	(* IODELAY_GROUP = "IODELAY_200" *)
 	IDELAYCTRL idelayctrl (.RST(idelayctrl_reset),.REFCLK(clk200),.RDY(idelayctrl_rdy));
 `endif
 
