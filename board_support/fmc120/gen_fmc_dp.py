@@ -40,7 +40,7 @@ def main():
     with open(args.output, 'w+') as fo:
         with open(args.carrier) as f:
             lines = [line.split(';')[0].rstrip() for line in f]
-            constrs = [re.split("\s+", x.strip('[]\n')) for x in lines if x]
+            constrs = [re.split(r'\s+', x.strip('[]\n')) for x in lines if x]
             if args.fmc1:
                 write_xdc(fo, constrs, fmc120, 1)
             if args.fmc2:
