@@ -1,9 +1,9 @@
-set_property PACKAGE_PIN AL19     [get_ports FMC1_HPC_PRSNT_M2C_B_LS] ;# Bank  65 VCCO - VCC1V8_FPGA - IO_L24N_T3U_N11_DOUT_CSO_B_65
-set_property PACKAGE_PIN AP22     [get_ports FMC1_HPC_PG_M2C_LS] ;# Bank  84 VCCO - VCC1V8_FPGA - IO_L19N_T3L_N1_DBC_AD9N_84
-set_property PACKAGE_PIN R9       [get_ports FMC1_HPC_GBTCLK0_M2C_C_P] ;# Bank 229 - MGTREFCLK0P_229
-set_property PACKAGE_PIN R8       [get_ports FMC1_HPC_GBTCLK0_M2C_C_N] ;# Bank 229 - MGTREFCLK0N_229
-set_property PACKAGE_PIN N9       [get_ports FMC1_HPC_GBTCLK1_M2C_C_P] ;# Bank 229 - MGTREFCLK1P_229
-set_property PACKAGE_PIN N8       [get_ports FMC1_HPC_GBTCLK1_M2C_C_N] ;# Bank 229 - MGTREFCLK1N_229
+set_property PACKAGE_PIN AL19     [get_ports FMC1_HPC_PRSNT_M2C_L] ;# Bank  65 VCCO - VCC1V8_FPGA - IO_L24N_T3U_N11_DOUT_CSO_B_65
+set_property PACKAGE_PIN AP22     [get_ports FMC1_HPC_PG_M2C_L] ;# Bank  84 VCCO - VCC1V8_FPGA - IO_L19N_T3L_N1_DBC_AD9N_84
+set_property PACKAGE_PIN R9       [get_ports FMC1_HPC_GBTCLK0_M2C_P] ;# Bank 229 - MGTREFCLK0P_229
+set_property PACKAGE_PIN R8       [get_ports FMC1_HPC_GBTCLK0_M2C_N] ;# Bank 229 - MGTREFCLK0N_229
+set_property PACKAGE_PIN N9       [get_ports FMC1_HPC_GBTCLK1_M2C_P] ;# Bank 229 - MGTREFCLK1P_229
+set_property PACKAGE_PIN N8       [get_ports FMC1_HPC_GBTCLK1_M2C_N] ;# Bank 229 - MGTREFCLK1N_229
 set_property PACKAGE_PIN BB9      [get_ports FMC1_HPC_CLK0_M2C_P] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L14P_T2L_N2_GC_66
 set_property PACKAGE_PIN BB8      [get_ports FMC1_HPC_CLK0_M2C_N] ;# Bank  66 VCCO - VADJ_1V8_FPGA - IO_L14N_T2L_N3_GC_66
 set_property PACKAGE_PIN AU14     [get_ports FMC1_HPC_CLK1_M2C_P] ;# Bank  67 VCCO - VADJ_1V8_FPGA - IO_L11P_T1U_N8_GC_67
@@ -165,12 +165,12 @@ set_property PACKAGE_PIN R13      [get_ports FMC1_HPC_HA01_CC_N] ;# Bank  68 VCC
 set_property PACKAGE_PIN N14      [get_ports FMC1_HPC_HA00_CC_P] ;# Bank  68 VCCO - VADJ_1V8_FPGA - IO_L13P_T2L_N0_GC_QBC_68
 set_property PACKAGE_PIN N13      [get_ports FMC1_HPC_HA00_CC_N] ;# Bank  68 VCCO - VADJ_1V8_FPGA - IO_L13N_T2L_N1_GC_QBC_68
 
-set_property PACKAGE_PIN BD23     [get_ports FMC2_HPC_PRSNT_M2C_B_LS] ;# Bank  94 VCCO - VCC1V8_FPGA - IO_L3P_T0L_N4_AD15P_94
-set_property PACKAGE_PIN AU24     [get_ports FMC2_HPC_PG_M2C_LS] ;# Bank  84 VCCO - VCC1V8_FPGA - IO_L16P_T2U_N6_QBC_AD3P_84
-set_property PACKAGE_PIN AC9      [get_ports FMC2_HPC_GBTCLK0_M2C_C_P] ;# Bank 227 - MGTREFCLK0P_227
-set_property PACKAGE_PIN AC8      [get_ports FMC2_HPC_GBTCLK0_M2C_C_N] ;# Bank 227 - MGTREFCLK0N_227
-set_property PACKAGE_PIN AA9      [get_ports FMC2_HPC_GBTCLK1_M2C_C_P] ;# Bank 227 - MGTREFCLK1P_227
-set_property PACKAGE_PIN AA8      [get_ports FMC2_HPC_GBTCLK1_M2C_C_N] ;# Bank 227 - MGTREFCLK1N_227
+set_property PACKAGE_PIN BD23     [get_ports FMC2_HPC_PRSNT_M2C_L] ;# Bank  94 VCCO - VCC1V8_FPGA - IO_L3P_T0L_N4_AD15P_94
+set_property PACKAGE_PIN AU24     [get_ports FMC2_HPC_PG_M2C_L] ;# Bank  84 VCCO - VCC1V8_FPGA - IO_L16P_T2U_N6_QBC_AD3P_84
+set_property PACKAGE_PIN AC9      [get_ports FMC2_HPC_GBTCLK0_M2C_P] ;# Bank 227 - MGTREFCLK0P_227
+set_property PACKAGE_PIN AC8      [get_ports FMC2_HPC_GBTCLK0_M2C_N] ;# Bank 227 - MGTREFCLK0N_227
+set_property PACKAGE_PIN AA9      [get_ports FMC2_HPC_GBTCLK1_M2C_P] ;# Bank 227 - MGTREFCLK1P_227
+set_property PACKAGE_PIN AA8      [get_ports FMC2_HPC_GBTCLK1_M2C_N] ;# Bank 227 - MGTREFCLK1N_227
 set_property PACKAGE_PIN R32      [get_ports FMC2_HPC_CLK0_M2C_P] ;# Bank  48 VCCO - VADJ_1V8_FPGA - IO_L11P_T1U_N8_GC_48
 set_property PACKAGE_PIN P32      [get_ports FMC2_HPC_CLK0_M2C_N] ;# Bank  48 VCCO - VADJ_1V8_FPGA - IO_L11N_T1U_N9_GC_48
 set_property PACKAGE_PIN AK34     [get_ports FMC2_HPC_CLK1_M2C_P] ;# Bank  47 VCCO - VADJ_1V8_FPGA - IO_L11P_T1U_N8_GC_47
