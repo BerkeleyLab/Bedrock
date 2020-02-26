@@ -1,0 +1,26 @@
+[timestart] 2891
+[size] 1080 500
+[pos] -1 -1
+*-7.017145 3084 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] host_averager_tb.
+[sst_width] 210
+[signals_width] 142
+[sst_expanded] 1
+[sst_vpaned_height] 108
+@24
+host_averager_tb.data_in[23:0]
+@28
+host_averager_tb.data_s
+host_averager_tb.read_s
+@22
+host_averager_tb.data_out[31:0]
+@24
+host_averager_tb.npt[7:0]
+host_averager_tb.average[23:0]
+@200
+-DUT
+@24
+host_averager_tb.dut.accum[31:0]
+host_averager_tb.dut.count[7:0]
+[pattern_trace] 1
+[pattern_trace] 0
