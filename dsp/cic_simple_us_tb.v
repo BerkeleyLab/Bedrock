@@ -39,12 +39,6 @@ cic_simple_us #(.dw(16), .ex(5)) dut (.clk(clk),
 	.data_out(data_out), .data_out_gate(data_out_gate)
 );
 
-// Should be built-in
-function integer abs;
-	input integer x;
-	abs = x > 0 ? x : -x;
-endfunction
-
 reg fault;
 always @(negedge clk) if (data_out_gate) begin
 	outs = outs + 1;
