@@ -23,6 +23,9 @@ module complex_freq_wrap #(
    output [16:0]      reg_amp_max,
    output [16:0]      reg_amp_min,
    output             reg_updated,
+   // Additional outputs
+   output [23:0]      avg_power,
+   output             avg_power_strobe,
    output             reg_timing_err
 );
    localparam CCFILT_OUTW = 20;
@@ -88,6 +91,8 @@ module complex_freq_wrap #(
       .time_err (fchan_time_err)
    );
 
+   wire [23:0] square_sum_out;
+   wire square_sum_valid;
    complex_freq #(
       .refcnt_w(refcnt_w))
    i_complex_freq (
@@ -99,10 +104,19 @@ module complex_freq_wrap #(
       .amp_max    (reg_amp_max),
       .amp_min    (reg_amp_min),
       .updated    (reg_updated),
-      .timing_err (cfreq_time_err)
+      .timing_err (cfreq_time_err),
+      .square_sum_out   (square_sum_out),
+      .square_sum_valid (square_sum_valid)
+   );
+
+   // First-order CIC filter of square_sum
+   localparam square_sum_ex=15;  // average and decimate by 2^square_sum_ex
+   cic_simple_us #(.dw(24), .ex(square_sum_ex)) cic(.clk(clk),
+      .data_in(square_sum_out), .data_in_gate(square_sum_valid),
+      .roll(1'b0),
+      .data_out(avg_power), .data_out_gate(avg_power_strobe)
    );
 
    assign reg_timing_err = cfreq_time_err | fchan_time_err;
-
 
 endmodule

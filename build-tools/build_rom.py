@@ -24,9 +24,11 @@ def chunk(l, flag=1):
         return [chunk_size + (flag << 14)] + l
 
 
-def sixteen(ss):
+def sixteen(ss, char_pad=''):
     if len(ss) % 2:  # need an even number of octets
-        ss += bytes(1)  # Pad with \0
+        # Pad with \0 if printable char not specified
+        pad = char_pad.encode('utf-8') if char_pad else struct.pack('!B', 0)
+        ss += pad
     return list(struct.unpack("!" + "H" * int(len(ss) / 2), ss))
 
 
@@ -49,7 +51,7 @@ def create_array(descrip, json_file):
     json_sha1_binary = [
         int(sha1sum[ix * 4 + 0:ix * 4 + 4], 16) for ix in range(10)
     ]
-    descrip_binary = sixteen(descrip)
+    descrip_binary = sixteen(descrip, char_pad='.')  # Pad description string with '.', not null (non-printable)
     final = (chunk(
         json_sha1_binary, flag=2) + chunk(
             git_binary, flag=2) + chunk(descrip_binary) + chunk(
