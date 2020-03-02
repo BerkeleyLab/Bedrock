@@ -50,7 +50,7 @@ mem_gateway #(
 
 assign lb_clk    = clk;
 assign lb_write  = control_strobe & ~control_rd;
-assign lb_read   = control_rd;
+assign lb_read   = |control_pipe_rd;
 assign lb_pre_rvalid = control_pipe_rd[read_pipe_len-1];
 
 endmodule

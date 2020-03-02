@@ -144,7 +144,7 @@ bool FMC120_Init(uint8_t clockmode, uint8_t ga, uint32_t base_addr) {
 
     // Configure the clock tree
     ret &= FMC120_InitClock(clockmode);
-    print_str(" --- FMC120 CLK Init ---: ");
+    print_str("  --- FMC120 CLK Init ---: ");
     FMC120_PrintStatus(ret);
 
     // Assert Transceiver Reset
@@ -172,6 +172,8 @@ bool FMC120_Init(uint8_t clockmode, uint8_t ga, uint32_t base_addr) {
 
     // jesd204 cores are properly configured by default.
     ret &= init_jesd204_core();
+    print_str("  --- INIT_JESD204_CORE ---: ");
+    FMC120_PrintStatus(ret);
 
     // Configure ADC0 and ADC1
     //ret &= FMC120_InitADC();
@@ -1211,10 +1213,16 @@ bool init_jesd204_core(void) {
 
     print_str("JESD204 Core Init:\n");
     for (size_t i=0; i<3; i++) {
-        // Check core versions to be 7.2.1
+        // Check core versions to be 7.2.x
+        // 7.2.1 (vivado 2017.4)
+        // 7.2.6 (vivado 2019.1)
         base_core = bases[i];
         dword = read_jesd204_axi(base_core, 0); // 0x00: Read Version
-        pass &= (dword == 0x07020100);
+        pass &= (dword>>16 == 0x0702);
+        if (!pass) {
+            print_str("JESD204 Core Version:\n");
+            print_hex(dword, 8);
+        }
 
         jesd_cfg = (base_core == BASE2_JESD_DAC) ? jesd_cfg_dac : jesd_cfg_adc;
         FMC120_write_axi_regmap(

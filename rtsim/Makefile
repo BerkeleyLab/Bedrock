@@ -22,6 +22,9 @@ NO_CHECK =
 #CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 CHK_ += a_comp_check resonator_check cav_mode_check afilter_siso_check
 
+NO_LINT =
+LNT_ = $(filter-out $(NO_LINT), $(TEST_BENCH:%_tb=%_lint))
+
 BITS_ :=
 
 VFLAGS_cav_mode_tb += -DLB_DECODE_cav_mode
@@ -76,5 +79,6 @@ CLEAN_DIRS += _xilinx
 targets: $(TGT_)
 checks: $(CHK_)
 check_all: $(CHK_)
+lint: $(LNT_)
 bits: $(BITS_)
 include $(BUILD_DIR)/bottom_rules.mk

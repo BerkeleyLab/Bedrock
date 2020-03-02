@@ -1,0 +1,15 @@
+include top_rules.mk
+
+all: b2d_check fib_check
+
+fib_check: fib.out fib.gold
+	cmp $^
+	@echo PASS
+
+b2d_tb: b2d.v
+
+fib_tb: fib.v
+
+clean:
+	rm -f *_tb *.vcd *.out
+

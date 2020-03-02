@@ -25,11 +25,25 @@ module rtefi_blob(
 	input config_s,  // MAC/IP address write
 	input config_p,  // UDP port number write
 	// Host side of Tx MAC
-	input host_clk,
-	input [mac_aw:0] host_waddr,
-	input host_write,
-	input [15:0] host_wdata,
+	// connect the 2 below to an external 16 bit dual port ram
+	output [mac_aw - 1: 0] host_raddr,
+	input [15:0] host_rdata,
+	// address where we should start transmitting from
+	input [mac_aw - 1: 0] buf_start_addr,
+	// set start to trigger transmission, wait for done, reset start
+	input tx_mac_start,
 	output tx_mac_done,
+	// port to Rx MAC memory
+	output [7:0] rx_mac_d,
+	output [11:0] rx_mac_a,
+	output rx_mac_wen,
+	// port to Rx MAC handshake
+	input rx_mac_hbank,
+	output [1:0] rx_mac_buf_status,
+	// port to Rx MAC packet selector
+	output [7:0] rx_mac_status_d,
+	output rx_mac_status_s,
+	input rx_mac_accept,
 	// Debugging
 	output ibadge_stb,
 	output [7:0] ibadge_data,
@@ -88,9 +102,15 @@ rtefi_center #(
 	.config_a(config_a), .config_d(config_d),
 	.len_c(len_c), .raw_l(raw_l), .raw_s(raw_s),
 	.idata(idata), .mux_data_in(mux_data_in),
-	.host_clk(host_clk), .host_write(host_write),
-	.host_waddr(host_waddr), .host_wdata(host_wdata),
+	.host_raddr(host_raddr),
+	.host_rdata(host_rdata),
+	.buf_start_addr(buf_start_addr),
+	.tx_mac_start(tx_mac_start),
 	.tx_mac_done(tx_mac_done),
+	.rx_mac_d(rx_mac_d), .rx_mac_a(rx_mac_a), .rx_mac_wen(rx_mac_wen),
+	.rx_mac_hbank(rx_mac_hbank), .rx_mac_buf_status(rx_mac_buf_status),
+	.rx_mac_accept(rx_mac_accept),
+	.rx_mac_status_d(rx_mac_status_d), .rx_mac_status_s(rx_mac_status_s),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),

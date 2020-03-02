@@ -1,12 +1,10 @@
 `timescale 1ps / 1ps
 
-module gmii_to_rgmii (
+module gmii_to_rgmii #(
+   parameter in_phase_tx_clk=0
+) (
 
-    // Resets
-    //input tx_reset,
-    //input tx_reset90,
-
-    //RGMII physical interface to PHY
+    // RGMII physical interface with PHY
     output [3:0] rgmii_txd, // to PHY
     output rgmii_tx_ctl,    // to PHY
     output rgmii_tx_clk,    // to PHY
@@ -14,7 +12,7 @@ module gmii_to_rgmii (
     input rgmii_rx_ctl,     // from PHY
     input rgmii_rx_clk,     // from PHY
 
-    //GMII internal interface from MAC
+    // GMII internal interface with MAC
     input gmii_tx_clk,      // from MAC
     input gmii_tx_clk90,    // from MAC
     input [7:0] gmii_txd,   // from MAC
@@ -23,7 +21,7 @@ module gmii_to_rgmii (
     output [7:0] gmii_rxd,  // to MAC
     output gmii_rx_clk,     // to MAC
     output gmii_rx_dv,      // to MAC
-    output gmii_rx_er      // to MAC
+    output gmii_rx_er       // to MAC
 );
 
 // RGMII
@@ -76,18 +74,19 @@ generate for (ix=0; ix<4; ix=ix+1)
 endgenerate
 
 // RGMII Tx, Refer to PG051 Fig 3-66
-// refer to PG051 page 154 for reason of using ODDR & 90 phase clock
-// rgmii_tx_clk
+// Refer to PG051 page 154 for reason of using ODDR & 90 phase clock.
+// Other hardware (like Marvell 88E1512 in default mode)
+// wants an in-phase clock.
+wire rgmii_tx_clk_ = in_phase_tx_clk ? gmii_tx_clk : gmii_tx_clk90;
 ODDR #(
     .DDR_CLK_EDGE  ("SAME_EDGE")
 ) rgmii_tx_clk_oddr (
     .Q(rgmii_tx_clk_buf),
-    .C(gmii_tx_clk90),
+    .C(rgmii_tx_clk_),
     .CE(1'b1),
     .D1(1'b1),
     .D2(1'b0),
     .R(1'b0),
-    //.R(tx_reset90),
     .S(1'b0)
 );
 
@@ -190,7 +189,7 @@ generate for (k=0; k<4; k=k+1)
 endgenerate
 
 // AC701 does not need RX delay
-// instanciate IDELAYCTRL & use IDELAY_VALUE for IDELAYE2 to work
+// instantiate IDELAYCTRL & use IDELAY_VALUE for IDELAYE2 to work
 `ifdef RXDELAY
 wire rgmii_rx_ctl_delay;
 wire [3:0] rgmii_rxd_delay;

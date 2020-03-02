@@ -46,7 +46,7 @@ $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
 	$(PYTHON) $< -v $@ -j $(APP_NAME)_regmap.json
 
 scalar_$(APP_NAME)_regmap.json: application_top.v
-	$(PYTHON) $(BUILD_DIR)/reverse_json.py > $@
+	$(PYTHON) $(BUILD_DIR)/reverse_json.py $< > $@
 
 $(APP_NAME)_regmap.json: $(AUTOGEN_DIR)/regmap_application_top.json scalar_$(APP_NAME)_regmap.json static_$(APP_NAME)_regmap.json merge_json.py shorten_names.py
 	$(PYTHON) merge_json.py -o $(APP_NAME)_regmap_long.json -i $(filter %.json, $^)

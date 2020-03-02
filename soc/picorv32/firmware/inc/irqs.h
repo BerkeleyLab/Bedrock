@@ -38,6 +38,10 @@ extern uint32_t _picorv32_irq_timer( uint32_t tVal );
 // a1 = second argument
 extern uint32_t _asm_test( uint32_t inpa, uint32_t inpb );
 
+// reset (jump to address 0) from within an interrupt
+extern void _picorv32_irq_reset(void);
+
+
 // --------------------------------------------------------------
 // Interrupt handler
 // --------------------------------------------------------------

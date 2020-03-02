@@ -59,9 +59,11 @@ wire any_lower = |mask_lower;
 
 // The below statement creates a Ripple-Carry chain of xors with the initial
 // bit being fed from the right (a 1'b0). The in and out refer to the circuit
+// verilator lint_off UNOPTFLAT
 wire [M:0] imbalance_in;
 wire [M-1:0] imbalance_out = imbalance_in ^ mask_upper ^ mask_lower;
 assign imbalance_in = {imbalance_out,1'b0};
+// verilator lint_on UNOPTFLAT
 
 // Priority set sources to Lower sinks when in Balance.
 // If currently NOT imbalanced, and lower is 0 and upper 1, Flip and route to Lower

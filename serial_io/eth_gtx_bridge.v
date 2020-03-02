@@ -9,63 +9,91 @@
 module eth_gtx_bridge #(
    parameter IP       = {8'd192, 8'd168, 8'd7, 8'd4},
    parameter MAC      = 48'h112233445566,
-   parameter JUMBO_DW = 14)
+   parameter JUMBO_DW = 14, // Not used, just holdover for compatibility with older eth_gtx_bridge
+   parameter GTX_DW   = 20) // Parallel GTX data width; Supported values are 10b and 20b
 (
-   input         gtx_tx_clk,  // Transceiver clock at half rate
-   input         gmii_tx_clk, // Clock for Ethernet fabric - 125 MHz for 1GbE
-   input         gmii_rx_clk,
-   input  [19:0] gtx_rxd,
-   output [19:0] gtx_txd,
+   input               gtx_tx_clk,  // Transceiver clock at half rate
+   input               gmii_tx_clk, // Clock for Ethernet fabric - 125 MHz for 1GbE
+   input               gmii_rx_clk,
+   input  [GTX_DW-1:0] gtx_rxd,
+   output [GTX_DW-1:0] gtx_txd,
+
+   // Auto-Negotiation
+   input               an_disable,
+   output [6:0]        an_status, // cfg_clk domain
 
    // Status signals
-   output        rx_mon,
-   output        tx_mon,
+   output              rx_mon,
+   output              tx_mon,
+
+   // Ethernet configuration interface
+   input               cfg_clk,
+   input               cfg_enable_rx,
+   input               cfg_valid,
+   input  [4:0]        cfg_addr, // cfg_addr[4] = {0 - MAC/IP, 1 - UDP Ports}
+   input  [7:0]        cfg_wdata,
+   // Dummy ports used to trigger newad address space generation
+   input  [7:0]        cfg_reg, // external
+   output [4:0]        cfg_reg_addr, // external
 
    // Local Bus interface
-   output        lb_valid,
-   output        lb_rnw,
-   output [23:0] lb_addr,
-   output [31:0] lb_wdata,
-   output        lb_renable,
-   input  [31:0] lb_rdata
+   output              lb_valid,
+   output              lb_rnw,
+   output [23:0]       lb_addr,
+   output [31:0]       lb_wdata,
+   output              lb_renable,
+   input  [31:0]       lb_rdata
 );
    wire [7:0] gmii_rxd, gmii_txd;
    wire [9:0] gtx_txd_10;
-   reg  [9:0] gtx_rxd_10;
    wire gmii_tx_en, gmii_rx_er, gmii_rx_dv;
 
    // ----------------------------------
    // Data width and rate conversion
    // ---------------------------------
 
-   reg  [9:0] gtx_txd_r;
-   wire [9:0] gtp_rxd_l = gtx_rxd[9:0];
-   wire [9:0] gtp_rxd_h = gtx_rxd[19:10];
-   reg  [19:0] gtx_txd_l;
-   reg even=0;
+   wire [9:0] gtx_rxd_10;
 
-   always @(posedge gmii_tx_clk) begin
-       gtx_txd_r <= gtx_txd_10;
-   end
+   generate if (GTX_DW==20) begin: G_GTX_DATA_CONV
 
-   always @(posedge gmii_rx_clk) begin
-       even       <= ~even;
-       gtx_rxd_10 <= even ? gtp_rxd_l : gtp_rxd_h;
-   end
+      reg  [9:0] gtx_rxd_10_r;
+      reg  [9:0] gtx_txd_r;
+      wire [9:0] gtp_rxd_l = gtx_rxd[9:0];
+      wire [9:0] gtp_rxd_h = gtx_rxd[19:10];
+      reg  [19:0] gtx_txd_l;
+      reg even=0;
 
-   always @(posedge gtx_tx_clk) begin
-       gtx_txd_l <= {gtx_txd_10, gtx_txd_r};
-   end
+      always @(posedge gmii_tx_clk) begin
+          gtx_txd_r <= gtx_txd_10;
+      end
 
-   assign gtx_txd = gtx_txd_l;
+      always @(posedge gmii_rx_clk) begin
+          even         <= ~even;
+          gtx_rxd_10_r <= even ? gtp_rxd_l : gtp_rxd_h;
+      end
+
+      always @(posedge gtx_tx_clk) begin
+          gtx_txd_l <= {gtx_txd_10, gtx_txd_r};
+      end
+
+      assign gtx_txd = gtx_txd_l;
+      assign gtx_rxd_10 = gtx_rxd_10_r;
+
+   end else begin
+
+      assign gtx_txd    = gtx_txd_10;
+      assign gtx_rxd_10 = gtx_rxd;
+
+   end endgenerate
+
 
    // ----------------------------------
    // PCS/PMA and GMII Bridge
    // ---------------------------------
 
-   wire [5:0] link_leds;
    wire [15:0] lacr_rx;
-   wire [1:0] an_state_mon;
+   wire [6:0] an_status_l;
+   reg  [6:0] an_status_x_cfg_clk;
 
    gmii_link i_gmii_link(
         // GMII to MAC
@@ -81,17 +109,24 @@ module eth_gtx_bridge #(
         .txdata       (gtx_txd_10),
         .rxdata       (gtx_rxd_10),
         .rx_err_los   (1'b0),
-        .an_bypass    (1'b1),     // Disable auto-negotiation
+        .an_bypass    (an_disable), // Disable auto-negotiation
         .lacr_rx      (lacr_rx),
-        .an_state_mon (an_state_mon),
-        .leds         (link_leds) // TODO: Connect this to actual LEDs
+        .an_status    (an_status_l)
    );
+
+   // Cross quasi-static an_status to cfg_clk so it can be read out by Host
+   always @(posedge cfg_clk) an_status_x_cfg_clk <= an_status_l;
+   assign an_status = an_status_x_cfg_clk;
 
    // ----------------------------------
    // Ethernet MAC
    // ---------------------------------
+   localparam SEL_MACIP = 0, SEL_UDP = 1;
 
-   rtefi_blob #(.ip(IP), .mac(MAC), .mac_aw(2)) badger(
+   wire cfg_ipmac = (cfg_addr[4]==SEL_MACIP) & cfg_valid;
+   wire cfg_udp   = (cfg_addr[4]==SEL_UDP) & cfg_valid;
+
+   rtefi_blob #(.ip(IP), .mac(MAC), .mac_aw(2), .p3_enable_bursts(1)) badger(
       // GMII Input (Rx)
       .rx_clk              (gmii_rx_clk),
       .rxd                 (gmii_rxd),
@@ -102,18 +137,20 @@ module eth_gtx_bridge #(
       .txd                 (gmii_txd),
       .tx_en               (gmii_tx_en),
       // Configuration
-      .enable_rx           (1'b1),
-      .config_clk          (gmii_tx_clk),
-      .config_a            (4'd0),
-      .config_d            (8'd0),
-      .config_s            (1'b0),
-      .config_p            (1'b0),
-      // TX MAC Host interface
-      .host_clk            (1'b0),
-      .host_waddr          (3'b0),
-      .host_write          (1'b0),
-      .host_wdata          (16'b0),
-      .tx_mac_done         (),
+      .enable_rx           (cfg_enable_rx),
+      .config_clk          (cfg_clk),
+      .config_a            (cfg_addr[3:0]),
+      .config_d            (cfg_wdata),
+      .config_s            (cfg_ipmac),
+      .config_p            (cfg_udp),
+
+      // MAC Host interface
+      .host_rdata          (16'h0),
+      .buf_start_addr      (2'h0),
+      .tx_mac_start        (1'h0),
+      .rx_mac_hbank        (1'h0),
+      .rx_mac_accept       (1'h0),
+
       // Debug ports
       .ibadge_stb          (),
       .ibadge_data         (),

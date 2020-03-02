@@ -71,7 +71,6 @@ module iq_trace #(
 
    // Set up some global signals in the right clock domain
    reg [1:0] trig_mode_r = 0;
-   reg       reset_r = 0;
    reg       trig_pending = 0;
    wire      boundary;
 
@@ -81,7 +80,6 @@ module iq_trace #(
       if (trig)     trig_pending <= 1;
 
       trig_mode_r <= trig_mode;
-      reset_r     <= reset || (trig_mode_r!=0 && trig_actual);
    end
 
    // ---------------------
@@ -133,7 +131,7 @@ module iq_trace #(
       // DI parameters
       .di_dwi        (dw+davr),
       .di_rwi        (ow),
-      .di_noise_bits (0),
+      .di_noise_bits (1), // NOTE: Setting to 1 to compensate for removed /2 from double_inte
       .cc_outw       (rw),
       .cc_halfband   (0),
       .cc_use_delay  (0),
@@ -158,7 +156,7 @@ module iq_trace #(
       // DI parameters
       .di_dwi        (dw+davr),
       .di_rwi        (ow),
-      .di_noise_bits (0),
+      .di_noise_bits (1), // NOTE: Setting to 1 to compensate for removed /2 from double_inte
       .cc_outw       (rw),
       .cc_halfband   (0),
       .cc_use_delay  (0),
@@ -228,8 +226,8 @@ module iq_trace #(
    // Form 32-bit output bus
    reg [31:0] obus;
    wire [1:0] obus_mode = ro_addr[aw+1:aw];
-   always @(*) casex (obus_mode)
-           2'b0x: obus = {circle_out[rw-1:rw-16], circle_out[2*rw-1:2*rw-16]};
+   always @(*) casez (obus_mode)
+           2'b0?: obus = {circle_out[rw-1:rw-16], circle_out[2*rw-1:2*rw-16]};
            2'b10: obus = {circle_out[  rw-1:0],  {(32-rw){1'b0}}};
            2'b11: obus = {circle_out[2*rw-1:rw], {(32-rw){1'b0}}};
    endcase

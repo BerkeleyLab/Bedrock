@@ -1,0 +1,3 @@
+Official repository for the hardware setup will be at: https://github.com/BerkeleyLab/zest
+
+This directory will hold the FMC pin map. Zest is a dual FMC mezzanine board with 8 ADCs and 2 DACs.

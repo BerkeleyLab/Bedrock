@@ -1,0 +1,22 @@
+[timestart] 0
+[size] 1639 501
+[pos] -1 -1
+*-4.609763 29 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] cpxmul_fullspeed_tb.
+[sst_width] 228
+[signals_width] 310
+[sst_expanded] 1
+[sst_vpaned_height] 105
+@28
+cpxmul_fullspeed_tb.i_dut.clk
+@420
+cpxmul_fullspeed_tb.i_dut.re_a[7:0]
+cpxmul_fullspeed_tb.i_dut.re_b[7:0]
+cpxmul_fullspeed_tb.i_dut.im_a[7:0]
+cpxmul_fullspeed_tb.i_dut.im_b[7:0]
+@421
+cpxmul_fullspeed_tb.i_dut.re_out[7:0]
+@420
+cpxmul_fullspeed_tb.i_dut.im_out[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

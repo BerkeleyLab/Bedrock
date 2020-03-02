@@ -1,5 +1,5 @@
 module test_tx_mac #(
-	parameter aw=10,  // 16-bit words
+	parameter mac_aw=10,  // 16-bit words
 	parameter big_endian=0
 ) (
 	input clk,
@@ -7,7 +7,7 @@ module test_tx_mac #(
 	// These ports access its read port, with assumed 1-cycle latency
 	// The packet length is stored as the first word of a buffer.
 	// Endian-ness is configurable.
-	output [aw-1:0] host_addr,
+	output [mac_aw-1:0] host_addr,
 	input [15:0] host_d,
 	// Request from host to transmit a packet, already converted to
 	// (or at least usable in) our clk domain.
@@ -17,7 +17,7 @@ module test_tx_mac #(
 	// static 0 at the lsb (representing granularity of buffer starts),
 	// could save a few registers in that clock domain crossing.
 	input start,
-	input [aw-1:0] buf_start_addr,
+	input [mac_aw-1:0] buf_start_addr,
 	output done,  // 4-phase handshake with start signal
 	// Connection to precog module
 	output req,
@@ -27,7 +27,7 @@ module test_tx_mac #(
 	output [7:0] mac_data
 );
 
-reg [aw-1:0] buffer_point;  // in words
+reg [mac_aw-1:0] buffer_point;  // in words
 reg [2:0] mode=0;
 reg [10:0] len_req_r=0;
 reg req_r=0, done_r=0;

@@ -4,7 +4,7 @@ include $(PICORV_DIR)/rules.mk
 
 VIVADO_BASE = $(dir $(shell which vivado))..
 
-MEM_SIZE = 512
+BLOCK_RAM_SIZE = 512
 SRC_V   = memory2_pack.v mpack.v munpack.v picorv32.v pico_pack.v sfr_pack.v
 SRC_V  += xilinx7/xadc_pack.v
 SRC_V  += $(VIVADO_BASE)/data/verilog/src/glbl.v

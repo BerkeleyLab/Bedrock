@@ -20,17 +20,22 @@
 
 #include "udp_model.h"
 unsigned short udp_port;
+int badger_client;
 
 /*
  * VPI (a.k.a. PLI 2) routines for connection to a UDP
  * port to/from a Verilog program.
  *
- * $udp_in(udp_idata, udp_iflag, udp_count, thinking);
- * $udp_outdup_odata, opack_complete);
- *   in_octet is data received from the UDP port, sent
- *      to the Verilog program.
- *   out_octet provided by the Verilog program, will be sent to
- *      the UDP port, once out_valid is low for a cycle.
+ * $udp_init(udp_port, badger_client);
+ *   badger_client: Selects between badger-client interface (1)
+                    as described in badger/clients.eps and
+                    raw bytes+strobe interface (0).
+ * $udp_in(in_octet, in_valid, in_count, thinking);
+ *   in_octet: data received from the UDP port, sent
+ *             to the Verilog program.
+ * $udp_out(out_octet, out_end);
+ *   out_octet: provided by the Verilog program; will be sent to
+ *              the UDP port once out_valid is low for a cycle.
  *
  * Written according to standards, but so far only tested on
  * Linux with Icarus Verilog.
@@ -138,8 +143,8 @@ static PLI_INT32 udp_init_compiletf(char*cd)
 	int i;
 	(void) cd;  /* parameter is unused */
 
-	/* Need one argument */
-	for (i=0; i<1; i++) {
+	/* Need two arguments */
+	for (i=0; i<2; i++) {
 		arg = vpi_scan(argv);
 		assert(arg);
 	}
@@ -152,10 +157,13 @@ static PLI_INT32 udp_init_calltf(char*cd)
 	vpiHandle sys = vpi_handle(vpiSysTfCall, 0);
 	vpiHandle argv = vpi_iterate(vpiArgument, sys);
 	vpiHandle port_num = vpi_scan(argv); assert(port_num);
+	vpiHandle is_badger = vpi_scan(argv); assert(is_badger);
 	(void) cd;  /* parameter is unused */
 	value.format = vpiIntVal;
 	vpi_get_value(port_num, &value);
 	udp_port = value.value.integer;
+	vpi_get_value(is_badger, &value);
+	badger_client = value.value.integer;
 	return 0;
 }
 

@@ -40,7 +40,7 @@ parameter [2:0]
   RX_PAYLOAD = 4,
   RX_EXTEND = 5;
 
-reg [2:0] rx_state;
+reg [2:0] rx_state=RX_NOFRAME;
 reg d_is_k; reg d_err; reg d_is_comma; reg d_is_epd;
 reg d_is_spd; reg d_is_extend; reg d_is_idle; reg d_is_lcr;
 reg [7:0] d_data;
@@ -60,14 +60,14 @@ wire rx_synced; wire rx_even;
     .synced_o(rx_synced),
     .even_o(rx_even));
 
-initial gmii_dv = 0;
-reg [7:0] gmii_pipe0=0;
-wire rx_valid = (rx_state == RX_PAYLOAD) & ~d_is_epd;
-always @(posedge clk) begin
-	gmii_dv <= rx_valid;
-	gmii_pipe0 <= dec_out;
-	gmii_data  <= rx_valid ? gmii_pipe0 : 8'd0;
-end
+  initial gmii_dv = 0;
+  reg [7:0] gmii_pipe0=0;
+  wire rx_valid = (rx_state == RX_PAYLOAD) & ~d_is_epd;
+  always @(posedge clk) begin
+    gmii_dv <= rx_valid;
+    gmii_pipe0 <= dec_out;
+    gmii_data  <= rx_valid ? gmii_pipe0 : 8'd0;
+  end
 
   assign gmii_err = fifo_error;
   always @(posedge clk) begin
@@ -89,12 +89,12 @@ end
         d_data <= dec_out;
         d_is_k <= dec_is_k;
         d_err <= 0;
-	d_is_comma  <=  (dec_out == c_k28_5) & dec_is_k;
-	d_is_extend <=  (dec_out == c_k23_7) & dec_is_k;
-	d_is_spd    <=  (dec_out == c_k27_7) & dec_is_k;
-	d_is_epd    <=  (dec_out == c_k29_7) & dec_is_k;
-	d_is_lcr    <= ((dec_out == c_d21_5) | (dec_out == c_d2_2 )) & ~dec_is_k;
-	d_is_idle   <= ((dec_out == c_d5_6 ) | (dec_out == c_d16_2)) & ~dec_is_k;
+        d_is_comma  <=  (dec_out == c_k28_5) & dec_is_k;
+        d_is_extend <=  (dec_out == c_k23_7) & dec_is_k;
+        d_is_spd    <=  (dec_out == c_k27_7) & dec_is_k;
+        d_is_epd    <=  (dec_out == c_k29_7) & dec_is_k;
+        d_is_lcr    <= ((dec_out == c_d21_5) | (dec_out == c_d2_2 )) & ~dec_is_k;
+        d_is_idle   <= ((dec_out == c_d5_6 ) | (dec_out == c_d16_2)) & ~dec_is_k;
       end
       else begin
         d_err       <= 1;
@@ -110,6 +110,7 @@ end
   end
 
   // RBCLK-driven RX state machine
+  initial lacr_rx_stb = 0;
   always @(posedge clk) begin
     if(rst) begin
       rx_state <= RX_NOFRAME;
@@ -178,7 +179,7 @@ end
             // LACR reception is enabled:
           end
           else if((lacr_rx_en)) begin
-            lacr_rx_val[15:8] <= d_data;
+            lacr_rx_val[7:0] <= d_data; // Little endian
           end
           rx_state <= RX_CR4;
         end
@@ -188,7 +189,7 @@ end
             rx_state <= RX_NOFRAME;
           end
           else if((lacr_rx_en)) begin
-            lacr_rx_val[7:0] <= d_data;
+            lacr_rx_val[15:8] <= d_data;
             lacr_rx_stb <= 1;
           end
           rx_state <= RX_NOFRAME;

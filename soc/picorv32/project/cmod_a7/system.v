@@ -68,8 +68,7 @@ wire [68:0] packed_cpu_fwd;
 wire [32:0] packed_cpu_ret;
 
 assign irqFlags[2:0] = 0;
-assign irqFlags[4]   = 0;
-assign irqFlags[31:6]= 0;
+assign irqFlags[31:4]= 0;
 
 pico_pack cpu_inst (
     .clk           ( clk            ),
@@ -148,7 +147,7 @@ gpioz_pack #(
 // --------------------------------------------------------------
 //  UART0, prints debugging info to onboard USB serial
 // --------------------------------------------------------------
-uart_fifo_pack #(
+uart_pack #(
     .DATA_WIDTH  ( 8 ),
     .BASE_ADDR   ( BASE_UART0 )
 ) uart_inst0 (

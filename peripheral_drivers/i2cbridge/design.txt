@@ -1,0 +1,171 @@
+Dedicate one 7-series Block RAM, 4K x 8
+True (or emulated) dual-port, read and write from both sides
+Everything on the I2C side is very slow, an 8-bit value is
+read or written at most every 22.5 microseconds (400 kHz bus).
+
+setup instruction stream coding:
+# set up PCA9506
+2: write 1 byte to bus selector
+8: write 5 bytes to output
+8: write 5 bytes to polarity
+8: write 5 bytes to config
+8: write 5 bytes to mask
+# set up PCA9555
+5: write 2 bytes to output
+5: write 2 bytes to polarity
+5: write 2 bytes to config
+# set up MCP3428:
+2: write config
+1: reset
+
+ read digital pins (do this on interrupt):
+# PCA9506
+3: select input register for reading
+1: read 5 bytes
+# PCA9555
+3: select input register for reading
+1: read 2 bytes
+# total 8 command bytes, 7 result bytes
+
+# read MCP3428 (do this 60 times/sec for 14-bits):
+4: read 2 data bytes and the configuration (status) byte
+2: write config to start conversion of next channel
+# will repeat 7.5 times/sec
+
+# read SFP status
+# dynamic in lower:
+# 16-bit readings at base 22, 26, 34, 36, 38, 40, 42, 44, 46, 48
+# (temperature, VCC, Rx1, Rx2, Rx3, Rx4, Tx1, Tx2, Tx3, Tx4)
+# 8-bit LOS at 3 (latching fault, clear on read)
+# 14 total command bytes, 56 for all four boards
+# static in upper:
+# [20:36] Vendor
+# [40:56] Part
+# [68:84] Serial
+# total of 48 interesting bytes
+2: set PCA9548A port
+2: set ROM read address to 20
+1: read 16
+2: set ROM read address to 40
+1: read 16
+2: set ROM read address to 68
+1: read 16
+# 11 total command bytes
+# repeat for other three devices, 44 total command bytes, 192 result bytes
+
+Memory allocation in bytes (out of 4K):
+  192 SFP static report
+  60 SFP live status
+  100 SFP command bytes
+  52 digital port setup
+  8 digital poll
+  7 digital poll result
+  48 analog poll
+  16 analog poll result
+  275 result subtotal
+  208 command subtotal
+  483 total, less than 16% full if I dedicate 1024 for logic tracer output
+  some missing features like "output address set" commands
+
+
+Build in a crude logic tracer (like ctrace) into the I2C controller
+stick to 8-bit output, so limit resolution and duration
+3-bits for SCL, SDA, and interrupt
+leaves almost 5 bits for time, span one bit time = 2.5 us at 400 kb/s
+take in a pacing clock at about 12 MHz, divide by 28 for a bit time,
+four phases per bit at 7 subticks each
+special output codes for the controller state: Idle, Tx1, Tx0, Start, Stop;
+Rx is the same as Tx1.
+
+Consider fancy page-flipping so that it emulates a smaller mailbox memory
+with atomic transfer of the results of a polling cycle:
+1K results
+1K commands
+1K logic trace
+1K invisible (results-in-progress)
+
+instruction coding:
+  10xxxxxx  1-64   read 1 to 64 bytes
+  11xxxxxx  1-64   write 1 to 64 bytes
+  01xxxxxx    0    set bus configuration (if multiple busses, reset line, ...)
+  000001xx    1    set destination pointer
+  000101xx    1    jump
+  00000001    0    stop/pause
+  00000010    0    start ctrace acquisition
+  0001xxxx    1    start countdown timer (up to 4096 bit times = 10.24 ms?)
+  00000011    0    wait for countdown timer
+bus configuration could include 100 kHz vs. 400 kHz
+
+start vectors:
+  initialize
+  interrupt
+  time slice 1 to 8
+8 bits gives resolution of 1/4 in 1K instruction/command space
+
+At some vague point in the future this could be melded with code that reads
+from Boot Flash; for now be content with linking it as a local bus slave.
+
+Single bit timing:
+                       _________
+SCL \_________________/            (or static high)
+     1 2 3 4 5 6 7 1 2 3 4 5 6 7
+capture             ^
+    ____ _______________________
+SDA ____X_______________________
+
+9/14 of 2.5 us is 1.6 us:  SCL low  time, 0.3 us larger than min. spec.
+5/14 of 2.5 us is 0.9 us:  SCL high time, 0.3 us larger than min. spec.
+SDA transition at 2/14 = 0.36 us after falling edge of SCL.
+
+Label the options 0, 1, L, H, coded in command word as 0, 1, 2, 3.
+Now a start is defined by [H, L] and stop by [L, H].
+OK to follow a 1 by a no-op H, maybe do this for the ack pulse
+to make it distinctive on the timing diagram.
+Still need to end a write operation with an oddball 0 cycle
+before the L and H that create the stop symbol.
+
+next layer out:
+  command   idle, start, stop, data
+  data[8:0] including ack
+  no distinction between read and write, to read just send ones
+  capture 9-bit data output in same shift register
+  use same "advance" semantics as i2c_bit
+  unless I tweak i2c_bit somehow, "stop" turns into [t0, stop]
+
+Write device address and one data byte, starting and ending in idle:
+... H H L d d d d d d d 0 1 H d d d d d d d d 1 0 L H H ...
+Write device address and read one data byte, ending with a NAK:
+... H H L d d d d d d d 1 1 H 1 1 1 1 1 1 1 1 1 0 L H H ...
+cycles 8, 9, 10 of a byte transfer:
+write, listen for ack, idle:   d 1 H   followed by another byte transfer
+write, listen for ack, clear:  d 1 0   followed by L H (stop)
+write, listen for ack, set:    d 1 1   followed by L (repeated start)
+read, ack, idle:               1 0 L   followed by another read cycle
+read, nak, clear:              1 1 0   followed by L H (stop)
+start is now represented by a single L, assuming it is preceded by
+a stop or idle.
+
+What's a "Repeated Start" and do I ever need to use it?  Eric confirms "yes",
+on at least some EEPROMs between address set and data read.
+See p. 12 of at24c64a.pdf
+https://en.wikipedia.org/wiki/I%C2%B2C
+
+Build-in a simple logic analyzer, pretty much just recording edges on
+SCL and SDA.  That leaves six bits for time span encoding, and steal a
+few of those codes to indicate:
+  2-bit opcode sent to bit engine
+  transitions on the reset and interrupt line
+(256-8)/4 = 62 valid lengths.  And like ctrace, going longer than 62 cycles
+just pushes another non-event into memory.  At 2.5 us per bit and 125 MHz,
+our tick (time resolution) should be about 5 clock cycles or 40 ns.
+Want multiple clock ticks anyway, since we can push as many as four events
+(SCL+SDA edge, opcode, reset, interrupt) per tick.
+
+A basic synthesizable dual-port RAM (dpram.v) is enough.  The host needs a
+private read port, since latency matters to our local bus.  All writes can
+be time-multiplexed to a single write port, allocating every-other-cycle
+to the host bus.  Even the logic analyzer writes are pretty low-bandwidth
+and predictably scheduled.  This is good for portable synthesizability.
+
+I'll know it's successful when a python-generated instruction stream can
+ping-pong two LEDs at 1 Hz.

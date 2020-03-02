@@ -62,11 +62,12 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 	static int sleepctr=0;
 	static int sleepmax=1;
 	char in_txt[15], out_txt[15];
+	int ethernet_model_debug = 0;  /* adjustable */
 
 	if (out_valid) {
-		sprintf(out_txt,"0x%2.2x",(unsigned int)(out_octet&0xff));
+		sprintf(out_txt, "0x%2.2x", (unsigned int)(out_octet&0xff));
 	} else {
-		strcpy(out_txt,"----");
+		strcpy(out_txt, "----");
 	}
 
 	if (!initialized) {
@@ -83,7 +84,7 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 		outbuf.cur = 0;
 		outbuf.len = 0;
 		initialized = 1;
-		strcpy(device,"tap0");
+		strcpy(device, "tap0");
 		if ((tapfd = tap_alloc(device)) < 0) {
 			perror("tap_alloc");
 			return 1;  /* failure */
@@ -97,7 +98,7 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 		if (rc < 0) {
 			if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) {
 				struct timespec minsleep = {0, 500000000};
-				fprintf(stderr,"TAP read failed: errno %d (%s)\n", errno, strerror(errno));
+				fprintf(stderr, "TAP read failed: errno %d (%s)\n", errno, strerror(errno));
 				nanosleep(&minsleep, NULL);
 			}
 			if (!out_valid && !thinking && sleepctr++ > sleepmax) {
@@ -105,23 +106,28 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 				nanosleep(&minsleep, NULL);
 			}
 		} else {
-			fprintf(stderr,"input packet read %d tap bytes\n", rc);
+			if (1 || ethernet_model_debug) {
+				fprintf(stderr, "ethernet_model: Rx %d tap octets\n", rc);
+			}
 #ifdef GMII
-			if (rc < 64) {
-				// Pad to Ethernet's minimum frame size
-				for (int ix=rc; ix<64; ix++) {
+			if (rc < 60) {
+				/* Pad to satisfy Ethernet's minimum frame size */
+				/* 4 bytes of CRC, added next, will take it up to 64 */
+				for (int ix=rc; ix<60; ix++) {
 					inbuf.buf[DATA_BASE+ix]=0;
 				}
-				rc = 64;
+				rc = 60;
 			}
-			append_crc32(inbuf.buf+DATA_BASE,rc);
+			append_crc32(inbuf.buf+DATA_BASE, rc);
 			if (check_crc32(inbuf.buf+DATA_BASE, rc)==0) {
 				fprintf(stderr, "CRC self-test failed\n");
 			}
 #endif
 			inbuf.len = rc+DATA_BASE+CRC_SIZE;
 			inbuf.cur = 0;
-			fputs("Rx:",stderr); print_buf(stderr, &inbuf);
+			if (ethernet_model_debug) {
+				fputs("TAP_RX:", stderr); print_buf(stderr, &inbuf);
+			}
 		}
 	}
 	if (inbuf.cur < inbuf.len) {
@@ -135,25 +141,27 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 	}
 	if (in_valid) *in_valid = val;
 	if (val) {
-		sprintf(in_txt,"0x%2.2x",(unsigned int)((*in_octet)&0xff));
+		sprintf(in_txt, "0x%2.2x", (unsigned int)((*in_octet)&0xff));
 	} else {
-		strcpy(in_txt,"----");
+		strcpy(in_txt, "----");
 	}
 	if (0) fprintf(stderr, "Ethernet model %s to Verilog, %s from Verilog\n", in_txt, out_txt);
 	activity_counter++;
-	if (activity_counter > 30) {
-		fputc('-',stderr);
+	if (ethernet_model_debug && activity_counter > 30) {
+		fputc('-', stderr);
 		activity_counter = 0;
 	}
 	if (out_valid) {
 		outbuf.buf[outbuf.cur] = out_octet;
 		if (outbuf.cur < ETH_MAXLEN+12) outbuf.cur++;
-		else fprintf(stderr,"Ethernet output packet too long\n");
+		else fprintf(stderr, "Ethernet output packet too long\n");
 	} else if (prev_out_valid) {
-		unsigned nout = outbuf.cur;
+		unsigned nout = outbuf.cur;  /* number of octets to finally write() */
 		/* write output packet */
 		outbuf.len = outbuf.cur;
-		fputs("\nTx:",stderr); print_buf(stderr, &outbuf);
+		if (ethernet_model_debug) {
+			fputs("\nTAP_TX:", stderr); print_buf(stderr, &outbuf);
+		}
 #ifdef GMII
 		const unsigned char *p=outbuf.buf;
 		while (*p==0x55 && p<(outbuf.buf+outbuf.cur)) { p++; }
@@ -162,14 +170,17 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 		} else if ((*p & 0xff) != 0xd5) {
 			fprintf(stderr, "output packet len %d missing SFD (%2.2x %2.2x)\n",
 				outbuf.cur, outbuf.buf[0], *p);
-		} else if (nout=outbuf.buf+outbuf.cur-(p+5), check_crc32(p+1, nout)==0) {
+		} else if (nout=outbuf.buf+outbuf.cur-(p+5), nout < 64-4) {
+			fprintf(stderr, "output Ethernet packet len %d too short\n", nout+4);
+		} else if (check_crc32(p+1, nout)==0) {
 			fprintf(stderr, "output packet len %d CRC failed\n",
 				outbuf.cur);
 		} else
 #endif
-		{
+		if (1 || ethernet_model_debug) {
 			int rc = write(tapfd, p+1, nout);
-			fprintf(stderr, "output packet len %d, write rc=%d\n",outbuf.cur, rc);
+			fprintf(stderr, "ethernet_model: Tx %d GMII octets, write rc=%d\n", outbuf.cur, rc);
+			/* Note GMII octets include preamble and CRC, write rc includes neither */
 		}
 		outbuf.cur=0;
 	}

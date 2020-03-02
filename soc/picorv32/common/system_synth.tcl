@@ -1,11 +1,11 @@
 if { $argc < 4 } {
     puts "Not enough arguments"
-    puts "Usage: vivado -mode batch -nojou -nolog -source synth_system.tcl -tclargs <board> <project_xdc> <MEM_SIZE> <source_files>"
+    puts "Usage: vivado -mode batch -nojou -nolog -source synth_system.tcl -tclargs <board> <project_xdc> <BLOCK_RAM_SIZE> <source_files>"
     exit
 }
 set board [lindex $argv 0]
 set vivado_xdc [lindex $argv 1]
-set mem_size [lindex $argv 2]
+set block_ram_size [lindex $argv 2]
 set vivado_files [lrange $argv 3 end]
 
 proc synth_design_platform {platform_name} {
@@ -44,7 +44,7 @@ proc synth_design_platform {platform_name} {
         set platform "vc707"
         set project_part "xc7vx485tffg1761-2"
     }
-    synth_design -part $project_part -top top -verilog_define MEM_SIZE=mem_size
+    synth_design -part $project_part -top top -verilog_define BLOCK_RAM_SIZE=block_ram_size
 }
 
 read_verilog $vivado_files

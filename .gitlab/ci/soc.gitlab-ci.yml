@@ -22,9 +22,18 @@ soc_picorv32_cmod_a7:
   before_script:
     - cd soc/picorv32/project/cmod_a7
   script:
-    - PATH=$DEFAULT_XILINX_VIVADO/bin:$PATH make system_synth.bit
+    - PATH=$XILINX_VIVADO/bin:$PATH make system_synth.bit
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week
     paths:
       - soc/picorv32/project/cmod_a7/system_synth.bit
+
+soc_picorv32_cmod_a7_run:
+  stage: program
+  dependencies:
+    - soc_picorv32_cmod_a7
+  before_script:
+    - cd soc/picorv32/project/cmod_a7
+  script:
+    - xc3sprog -c jtaghs1_fast -s 210328A6DA47 system_synth.bit && python3 hw_test.py 210328A6DA47

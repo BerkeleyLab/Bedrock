@@ -20,7 +20,7 @@ initial begin
 	trace = $test$plusargs("trace");
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("rtefi_pipe.vcd");
-		$dumpvars(5,rtefi_pipe_tb);
+		$dumpvars(6,rtefi_pipe_tb);
 	end
 	for (cc=0; continue_sim; cc=cc+1) begin
 		clk=0; #4;  // 125 MHz * 8bits/cycle -> 1 Gbit/sec
@@ -60,6 +60,28 @@ wire host_write = lb_control_strobe & ~lb_control_rd & (lb_addr[23:20]==1);
 wire [mac_aw:0] host_waddr = lb_addr[mac_aw:0];
 wire [15:0] host_wdata = lb_wdata[15:0];
 
+// memory and control signals are handled external to mac_subset.v
+// in this branch, which the testbenches were not designed for ...
+// the next few lines are patching that up
+wire [mac_aw-1:0] host_raddr;
+wire [15:0] host_rdata;
+wire [mac_aw-1:0] buf_start_addr;
+wire tx_mac_start;
+mac_compat_dpram #(
+	.mac_aw(mac_aw)
+) mac_compat_dpram_inst (
+	.host_clk(host_clk),
+	.host_waddr(host_waddr),
+	.host_write(host_write),
+	.host_wdata(host_wdata),
+// ----------------------------
+	.tx_clk(clk),
+	.host_raddr(host_raddr),
+	.host_rdata(host_rdata),
+	.buf_start_addr(buf_start_addr),
+	.tx_mac_start(tx_mac_start)
+);
+
 reg [31:0] lb_rdata=0;
 // DUT
 rtefi_blob #(.ip(ip), .mac(mac), .paw(paw), .mac_aw(mac_aw)) a(
@@ -68,14 +90,21 @@ rtefi_blob #(.ip(ip), .mac(mac), .paw(paw), .mac_aw(mac_aw)) a(
 	.tx_clk(clk), .txd(eth_out), .tx_en(eth_out_s),
 	.config_clk(clk), .config_a(4'd0), .config_d(8'd0),
 	.config_s(1'b0), .config_p(1'b0),
-	.host_clk(host_clk), .host_write(host_write),
-	.host_waddr(host_waddr), .host_wdata(host_wdata),
+
+	.host_raddr(host_raddr),
+	.host_rdata(host_rdata),
+	.buf_start_addr(buf_start_addr[mac_aw - 1 : 0]),
+	.tx_mac_start(tx_mac_start),
+	.tx_mac_done(),
+
+	.rx_mac_accept(1'b1), .rx_mac_hbank(1'b1),
 	.p2_nomangle(1'b0),
 	.p3_addr(lb_addr),
 	.p3_control_strobe(lb_control_strobe),
 	.p3_control_rd(lb_control_rd),
 	.p3_data_in(lb_rdata),
 	.p3_data_out(lb_wdata),
+	.p4_spi_miso(1'b0),
 	.in_use(thinking)
 );
 wire lb_read = lb_control_strobe && lb_control_rd;
@@ -84,7 +113,7 @@ wire lb_read = lb_control_strobe && lb_control_rd;
 // First read cycle
 wire [15:0] rom_data;
 fake_config_romx rom(
-	.clk(clk), .address(lb_addr[3:0]), .data(rom_data)
+	.clk(clk), .address(lb_addr[10:0]), .data(rom_data)
 );
 
 // match pipeline in first cycle
@@ -96,8 +125,8 @@ always @(posedge clk) begin
 end
 
 // second read cycle
-always @(posedge clk) if (lb_read_r) casex(lb_addr_r[19:0])
-	20'h1000x: lb_rdata <= {16'h0, rom_data};
+always @(posedge clk) if (lb_read_r) casez(lb_addr_r[19:0])
+	20'h1000?: lb_rdata <= {16'h0, rom_data};
 	default: lb_rdata <= 32'hdeadbeaf;
 endcase
 

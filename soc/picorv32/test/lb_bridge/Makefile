@@ -3,7 +3,7 @@ include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
 
 SRC_V    = memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v lb_bridge_tb.v lb_bridge.v lb_merge.v lb_reading.v
-MEM_SIZE = 128
+BLOCK_RAM_SIZE = 128
 TARGET   = lb_bridge
 
 all: $(TARGET)_check
