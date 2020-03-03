@@ -13,10 +13,10 @@ def merge_with_quit_on_collision(*args):
         with open(f, 'r') as json_file:
             json_dict = json.load(json_file)
             if type(json_dict) is not dict:
-                exit('file {} isnt a json dictionary'.fmt(f))
+                exit('file {} isnt a json dictionary'.format(f))
             for k in json_dict:
                 if k in final:
-                    exit('key {} in file {} already exists in a previously merged file'.fmt(k, f))
+                    exit('key {} in file {} already exists in a previously merged file'.format(k, f))
                 else:
                     final[k] = json_dict[k]
     return final
