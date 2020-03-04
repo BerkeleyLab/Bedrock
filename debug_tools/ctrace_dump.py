@@ -94,8 +94,8 @@ if __name__ == "__main__":
     #           ["tpg_count%2.2d" % jx for jx in range(7-1, -1, -1)] +\
     #           ["tpg_baseenable"]
 
-    signals = ["mrf_rxd%2.2d" % jx for jx in range(16-1, -1, -1)] +\
-              ["mrf_rxk0"]
+    signals = ["zero%2.2d" % jx for jx in range(2-1, -1, -1)] +\
+              ["adc_d%2.2d" % jx for jx in range(14-1, -1, -1)]
 
     print(signals)
     tw = 16
@@ -124,3 +124,5 @@ if __name__ == "__main__":
             with open(raw_file, 'w') as FR:
                 print("Writing raw data to: %s" % raw_file)
                 write_vcd(FH, signals, raw_dat, tstep=tstep, tw=tw, FR=FR)
+        else:
+            write_vcd(FH, signals, raw_dat, tstep=tstep, tw=tw)
