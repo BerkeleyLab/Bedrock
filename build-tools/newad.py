@@ -200,10 +200,14 @@ def print_instance_ports(inst, mod, gvar, gcnt, fd):
     so the variables mapped to the ports can get adequately defined.
     '''
     instance_ports = port_lists[mod]
-    # 'list comprehension' for the port list itself
     if fd:
-        fd.write('`define AUTOMATIC_' + inst + ' ' + ',\\\n\t'.join(
-            one_port(inst, p.name, gvar) for p in instance_ports))
+        # 'list comprehension' for the port list itself
+        this_list = [one_port(inst, p.name, gvar) for p in instance_ports]
+        if this_list:
+            tail = ' ' + ',\\\n\t'.join(this_list)
+        else:
+            tail = ''
+        fd.write('`define AUTOMATIC_' + inst + tail)
         fd.write('\n')
     #  now construct the self_ports and decoders (if any)
     for p in instance_ports:
