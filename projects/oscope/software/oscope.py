@@ -13,6 +13,7 @@ TODO:
 2. Verify the performance of gather data and plot (for now different threads)
 3.
 '''
+import copy
 import sys
 import time
 from threading import Thread
@@ -20,13 +21,11 @@ from threading import Thread
 import numpy as np
 from matplotlib import pyplot as plt
 
-from banyan_ch_find import banyan_ch_find
-from get_raw_adcs import collect_adcs
-from prc import c_prc
+from litex import RemoteClient
 
+from ltc_setup_litex_client import initLTC, get_data
 from misc import ADC, DataBlock, Processing
 
-import copy
 
 def write_mask(prc, mask_int):
     prc.leep.reg_write([('banyan_mask', mask_int)])
@@ -69,7 +68,7 @@ class Carrier():
         Logger.info('Removed subscription {}'.format(sub_id))
 
 
-class LTCOnMarble(Carrier):
+class LTCOnMarblemini(Carrier):
     def __init__(self,
                  ip_addr='192.168.1.121',
                  port=50006,
@@ -83,7 +82,7 @@ class LTCOnMarble(Carrier):
         self.n_channels = 2
         self._db = None
         self.test = test
-        self.pts_per_ch = 8096
+        self.pts_per_ch = 8192
         self.subscriptions, self.results = {}, {}
         ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
         self.wb = RemoteClient()
@@ -113,6 +112,11 @@ class ZestOnBMB7Carrier(Carrier):
                  filewritepath=None,
                  use_spartan=False,
                  test=False):
+
+        from banyan_ch_find import banyan_ch_find
+        from get_raw_adcs import collect_adcs
+        from prc import c_prc
+
         ADC.decimation_factor = 1 << log_decimation_factor
         self._db = None
         self.test = test
@@ -403,17 +407,17 @@ if __name__ == "__main__":
     args, unknown = parser.parse_known_args()
     sys.argv[1:] = unknown
     # args = parser.parse_args(sys.argv[2:])
-    carrier = ZestOnBMB7Carrier(
-        ip_addr=args.ip,
-        port=args.port,
-        mask=args.mask,
-        npt_wish=args.npt_wish,
-        count=args.count,
-        filewritepath=args.filewritepath,
-        use_spartan=args.use_spartan,
-        log_decimation_factor=args.log_decimation_factor,
-        test=False)
-    carrier = LTCOnMarble()
+    # carrier = ZestOnBMB7Carrier(
+    #     ip_addr=args.ip,
+    #     port=args.port,
+    #     mask=args.mask,
+    #     npt_wish=args.npt_wish,
+    #     count=args.count,
+    #     filewritepath=args.filewritepath,
+    #     use_spartan=args.use_spartan,
+    #     log_decimation_factor=args.log_decimation_factor,
+    #     test=False)
+    carrier = LTCOnMarblemini()
     GUIGraph.setup_gui_graphs(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
     acq_thread.daemon = True

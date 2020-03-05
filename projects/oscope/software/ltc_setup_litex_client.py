@@ -159,7 +159,9 @@ def initLTC(r, check_align=False):
 
 from matplotlib import pyplot as plt
 
-def get_data(wb):
+
+def get_data(wb, plot=False):
+    wb.regs.acq_acq_start.write(1)
     while wb.regs.acq_buf_full.read() == 0:
         time.sleep(0.1)
     data = []
@@ -169,15 +171,14 @@ def get_data(wb):
     for x in data:
         c1.append(np.int16(x & 0xffff) // 4)
         c2.append(np.int16((x & 0xffff0000) >> 16) // 4)
-    print([hex(x) for x in data[:40]])
-    print([hex(x) for x in c1[:20]])
-    print([hex(x) for x in c2[:20]])
-    if True:
+    if plot:
+        print([hex(x) for x in data[:40]])
+        print([hex(x) for x in c1[:20]])
+        print([hex(x) for x in c2[:20]])
         plt.plot(c1)
         plt.plot(c2)
         plt.show()
-    wb.regs.acq_acq_start.write(1)
-    return data
+    return np.vstack((c1, c2))
 
 
 if __name__ == "__main__":
@@ -189,5 +190,5 @@ if __name__ == "__main__":
     #ltc_spi = LTC_SPI(wb)
     #ltc_spi.setTp(0x1234)
     wb.regs.acq_acq_start.write(1)
-    get_data(wb)
+    get_data(wb, plot=True)
     wb.close()
