@@ -49,8 +49,10 @@ class Processing:
     stacked_H = {}
     stacked_data = {}
     stack_n = 100000
+    old_data = None
     fft_stack_count = {0:0, 1:0}
     H_stack_count = {0:0, 1:0}
+
     @staticmethod
     def time_domain(data_block, ch_n):
         ch_data = data_block.data[ch_n]
@@ -65,9 +67,7 @@ class Processing:
 
     @staticmethod
     def save(data_block, *args):
-        data = data_block.data
-        print(data.shape)
-        print(data.dtype)
+        data = args[0].data
         fname = time.strftime("%Y%m%d-%H%M%S")
         ADC_attrs = sorted(vdir(ADC))
         with open(fname, 'a') as f:

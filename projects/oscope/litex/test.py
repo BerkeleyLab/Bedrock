@@ -180,13 +180,14 @@ def get_data(wb):
     return data
 
 
-wb = RemoteClient()
-wb.open()
-print(wb.regs.acq_buf_full.read())
-initLTC(wb)
-# print([hex(x) for x in wb.read(wb.mems.adc_data_buffer.base, 100)])
-#ltc_spi = LTC_SPI(wb)
-#ltc_spi.setTp(0x1234)
-wb.regs.acq_acq_start.write(1)
-get_data(wb)
-wb.close()
+if __name__ == "__main__":
+    wb = RemoteClient()
+    wb.open()
+    print(wb.regs.acq_buf_full.read())
+    initLTC(wb)
+    # print([hex(x) for x in wb.read(wb.mems.adc_data_buffer.base, 100)])
+    #ltc_spi = LTC_SPI(wb)
+    #ltc_spi.setTp(0x1234)
+    wb.regs.acq_acq_start.write(1)
+    get_data(wb)
+    wb.close()

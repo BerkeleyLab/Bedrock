@@ -26,6 +26,7 @@ from prc import c_prc
 
 from misc import ADC, DataBlock, Processing
 
+import copy
 
 def write_mask(prc, mask_int):
     prc.leep.reg_write([('banyan_mask', mask_int)])
@@ -45,6 +46,62 @@ def get_npt(prc):
 
 
 class Carrier():
+    def test_data(self, *args):
+        raise NotImplementedError
+
+    def acquire_data(self, *args):
+        raise NotImplementedError
+
+    def _process_subscriptions(self):
+        # TODO: Perhaps implement something to avoid race condition on results
+        for sub_id, (single_subscribe, fn, *fn_args) in list(self.subscriptions.items()):
+            self.results[sub_id] = fn(self._db, *fn_args)
+            if single_subscribe:
+                self.remove_subscription(sub_id)
+
+    def add_subscription(self, sub_id, fn, *fn_args, single_subscribe=False):
+        # TODO: Add args/kwargs to the function
+        self.subscriptions[sub_id] = (single_subscribe, fn, *fn_args)
+        Logger.info('Added subscription {}'.format(sub_id))
+
+    def remove_subscription(self, sub_id):
+        self.subscriptions.pop(sub_id)
+        Logger.info('Removed subscription {}'.format(sub_id))
+
+
+class LTCOnMarble(Carrier):
+    def __init__(self,
+                 ip_addr='192.168.1.121',
+                 port=50006,
+                 count=10,
+                 log_decimation_factor=0,
+                 verbose=False,
+                 test=False):
+        ADC.bits = 14
+        ADC.sample_rate = 120000000.
+        ADC.decimation_factor = 1 << log_decimation_factor
+        self.n_channels = 2
+        self._db = None
+        self.test = test
+        self.pts_per_ch = 8096
+        self.subscriptions, self.results = {}, {}
+        ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
+        self.wb = RemoteClient()
+        self.wb.open()
+        print(self.wb.regs.acq_buf_full.read())
+        initLTC(self.wb)
+
+    def acquire_data(self, *args):
+        while True:
+            self.wb.regs.acq_acq_start.write(1)
+            self._db = DataBlock(get_data(self.wb), int(time.time()))
+            # ADC count / FULL SCALE => [-1.0, 1.]
+            self._process_subscriptions()
+            time.sleep(0.1)
+        self.wb.close()
+
+
+class ZestOnBMB7Carrier(Carrier):
     def __init__(self,
                  ip_addr='192.168.1.121',
                  port=50006,
@@ -57,6 +114,7 @@ class Carrier():
                  use_spartan=False,
                  test=False):
         ADC.decimation_factor = 1 << log_decimation_factor
+        self._db = None
         self.test = test
         if not test:
             self.carrier = c_prc(
@@ -99,6 +157,7 @@ class Carrier():
             # Each channel gets [(npt * 8) // n_channels] datapoints
             data_raw, ts = collect_adcs(self.carrier,
                                         self.npt, self.n_channels)
+            print(time.strftime("%Y%m%d-%H%M%S"))
             self._db = DataBlock(ADC.counts_to_volts(np.array(data_raw)), ts)
             # ADC count / FULL SCALE => [-1.0, 1.]
             self._process_subscriptions()
@@ -289,7 +348,7 @@ class Logic(BoxLayout):
 
     def save_data(self, *args):
         carrier.add_subscription(
-            'save', Processing.save, single_subscribe=True)
+            'save', Processing.save, copy.deepcopy(carrier._db), single_subscribe=True)
 
     def restack_data(self, *args):
         Processing.reset_ch_stack_count(0)
@@ -320,7 +379,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-p', '--port', help='port', dest='port', type=int, default=50006)
     parser.add_argument(
-        '-m', '--mask', help='mask', dest='mask', type=str, default='0x11')
+        '-m', '--mask', help='mask', dest='mask', type=str, default='0x33')
     parser.add_argument(
         '-n',
         '--npt_wish',
@@ -344,7 +403,7 @@ if __name__ == "__main__":
     args, unknown = parser.parse_known_args()
     sys.argv[1:] = unknown
     # args = parser.parse_args(sys.argv[2:])
-    carrier = Carrier(
+    carrier = ZestOnBMB7Carrier(
         ip_addr=args.ip,
         port=args.port,
         mask=args.mask,
@@ -354,6 +413,7 @@ if __name__ == "__main__":
         use_spartan=args.use_spartan,
         log_decimation_factor=args.log_decimation_factor,
         test=False)
+    carrier = LTCOnMarble()
     GUIGraph.setup_gui_graphs(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
     acq_thread.daemon = True
