@@ -257,7 +257,11 @@ def gen_udp_reply(in_pack, out_data):
     body = udp_gen(
         data=out_data, src_ip=src_ip, dst_ip=dst_ip,
         src_port=udp_src, dst_port=udp_dst)
-    return eth_head + body
+    full_pack = eth_head + body
+    # enforce Ethernet minimum frame length
+    if len(full_pack) < 60:
+        full_pack += bytes((60-len(full_pack)) * [0])
+    return full_pack
 
 
 # RFC-1350 only
@@ -277,9 +281,10 @@ def handle_tftp(tid, p, in_pack):
             ix += 1
         print("RRQ/WRQ filename '%s' mode '%s' tid %d" % (filename, mode, tid))
     if tftp_opcode == 1:  # RRQ
-        # opcode 3, block 1, data ABC
-        reply = gen_udp_reply(in_pack, bytes([0, 3, 0, 1, 65, 66, 67, 10]))
-        print(" ".join(["%2.2x" % x for x in reply]))
+        # opcode 3, block 1, data ABC\n
+        fdata = list(range(65, 68)) + [10]
+        reply = gen_udp_reply(in_pack, bytes([0, 3, 0, 1] + fdata))
+        print("Generated reply " + " ".join(["%2.2x" % x for x in reply]))
         return reply
     else:
         return None
