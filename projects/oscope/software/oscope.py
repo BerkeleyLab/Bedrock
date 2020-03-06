@@ -26,6 +26,10 @@ from litex import RemoteClient
 from ltc_setup_litex_client import initLTC, get_data
 from misc import ADC, DataBlock, Processing
 
+from banyan_ch_find import banyan_ch_find
+from get_raw_adcs import collect_adcs
+from prc import c_prc
+
 
 def write_mask(prc, mask_int):
     prc.leep.reg_write([('banyan_mask', mask_int)])
@@ -109,13 +113,8 @@ class ZestOnBMB7Carrier(Carrier):
                  count=10,
                  log_decimation_factor=0,
                  verbose=False,
-                 filewritepath=None,
                  use_spartan=False,
                  test=False):
-
-        from banyan_ch_find import banyan_ch_find
-        from get_raw_adcs import collect_adcs
-        from prc import c_prc
 
         ADC.decimation_factor = 1 << log_decimation_factor
         self._db = None
@@ -124,14 +123,13 @@ class ZestOnBMB7Carrier(Carrier):
             self.carrier = c_prc(
                 ip_addr,
                 port,
-                filewritepath=filewritepath,
                 use_spartan=use_spartan)
 
             self.npt = get_npt(self.carrier)
             mask_int = int(mask, 0)
             self.n_channels, channels = write_mask(self.carrier, mask_int)
-            self.carrier.reg_write([{'config_adc_downsample_ratio':
-                                     log_decimation_factor}])
+            self.carrier.leep.reg_write([('config_adc_downsample_ratio',
+                                          log_decimation_factor)])
         else:
             banyan_aw = 13
             self.npt = 2**banyan_aw
@@ -379,9 +377,9 @@ if __name__ == "__main__":
         help='ip_address',
         dest='ip',
         type=str,
-        default='192.168.1.121')
+        default='192.168.19.8')
     parser.add_argument(
-        '-p', '--port', help='port', dest='port', type=int, default=50006)
+        '-p', '--port', help='port', dest='port', type=int, default=803)
     parser.add_argument(
         '-m', '--mask', help='mask', dest='mask', type=str, default='0x33')
     parser.add_argument(
@@ -395,29 +393,25 @@ if __name__ == "__main__":
     parser.add_argument(
         '-l', '--log_decimation_factor', help='Log downsample ratio', type=int, default=2)
     parser.add_argument(
-        '-f', '--filewritepath', help='static file out', type=str, default="")
-    parser.add_argument(
         '-t', '--testmode', help='run in test mode', action='store_true')
     parser.add_argument(
         "-u",
         "--use_spartan",
         action="store_true",
-        help="use spartan",
-        default=True)
+        help="use spartan")
     args, unknown = parser.parse_known_args()
     sys.argv[1:] = unknown
-    # args = parser.parse_args(sys.argv[2:])
-    # carrier = ZestOnBMB7Carrier(
-    #     ip_addr=args.ip,
-    #     port=args.port,
-    #     mask=args.mask,
-    #     npt_wish=args.npt_wish,
-    #     count=args.count,
-    #     filewritepath=args.filewritepath,
-    #     use_spartan=args.use_spartan,
-    #     log_decimation_factor=args.log_decimation_factor,
-    #     test=False)
-    carrier = LTCOnMarblemini()
+    args = parser.parse_args(sys.argv[2:])
+    carrier = ZestOnBMB7Carrier(
+        ip_addr=args.ip,
+        port=args.port,
+        mask=args.mask,
+        npt_wish=args.npt_wish,
+        count=args.count,
+        use_spartan=args.use_spartan,
+        log_decimation_factor=args.log_decimation_factor,
+        test=False)
+    # carrier = LTCOnMarblemini()
     GUIGraph.setup_gui_graphs(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
     acq_thread.daemon = True

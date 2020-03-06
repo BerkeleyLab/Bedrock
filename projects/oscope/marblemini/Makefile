@@ -25,6 +25,9 @@ RTEFI_EXTRA_V = spi_flash_engine.v
 
 include $(BADGER_DIR)/rules.mk
 
+$(AUTOGEN_DIR)/moving_average.v: $(DSP_DIR)/moving_average/moving_average.py
+	python $(DSP_DIR)/moving_average/moving_average.py > $(AUTOGEN_DIR)/moving_average.v
+
 zest_connector.csv: remap_gen.py
 	$(PYTHON) remap_gen.py > $@
 
@@ -33,7 +36,7 @@ system_top.xdc: $(BOARD_SUPPORT_DIR)/marblemini/Marble.xdc $(BOARD_SUPPORT_DIR)/
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
 oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v
-oscope_top.v: $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) application_top_auto
+oscope_top.v: $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) application_top_auto $(AUTOGEN_DIR)/moving_average.v
 
 $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
 	$(PYTHON) $< -v $@ -j $(APP_NAME)_regmap.json

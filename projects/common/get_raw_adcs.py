@@ -94,13 +94,13 @@ def pair_ram_prc(prc, addr, count):
 
 
 def collect(dev, npt, print_minmax=True, allow_clk_frozen=False):
-    dev.reg_write([('rawadc_trig', 1)])
+    dev.leep.reg_write([('rawadc_trig', 1)])
     (timestamp, minmax) = slow_chain_readout(dev)
     if print_minmax:
         print(" ".join(["%d" % x for x in minmax]), "%.8f" % (timestamp*14/1320.0e6))
     while True:
         time.sleep(0.002)
-        status = dev.reg_read(['banyan_status', 'clk_status_out'])
+        status = dev.leep.reg_read(['banyan_status', 'clk_status_out'])
         b_status = status[0]
         clk_status = status[1]
         # print "%8.8x"%b_status
@@ -196,7 +196,7 @@ def slow_chain_unpack(readlist):
 
 
 def slow_chain_readout(dev):
-    readlist = dev.reg_read(42*[('slow_chain_out')])
+    readlist = dev.leep.reg_read(42*[('slow_chain_out')])
     return slow_chain_unpack(readlist)
 
 
