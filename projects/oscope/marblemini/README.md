@@ -1,4 +1,33 @@
-## Program Marblemini
+## Firmware related info
+prc_common.xdc
+  comes from gitlab.lbl.gov:llrf-projects/lcls2_llrf
+  firmware/prc/prc_common.xdc
+
+digitizer_digital_pin.txt  comes from gitlab.lbl.gov/hardware-designs/llrf5_board_design
+  board/digitizer/digitizer_digital_pin.txt
+  (Zest)
+  this is source; digitizer_02_fmc.sch was machine-generated from it
+
+fmc-hpc.lst
+fmc-lpc.lst
+  come from gitlab.lbl.gov:hdl-libraries/board-support
+  bmb7_kintex/fmc-hpc.lst
+  bmb7_kintex/fmc-lpc.lst
+
+BMB-7 naming convention:
+  fmc-lpc is FMC1 is P1
+  fmc-hpc is FMC2 is P2
+
+Due to different bank voltages for BMB-7 and Marble,
+  need to map LVCMOS18 to LVCMOS25
+  and LVDS to LVDS_25
+
+example column output:
+  prc_name              bmb7_iostandard  bmb7_pin  fmc_name     zest_pin
+  bus_digitizer_U3[16]  LVDS_25          H23       FMC1_LA22_P  ADC_D0A_N_1
+
+
+## Build FW and program Marblemini
 ```
 cd $BEDROCK/projects/oscope/marblemini
 make clean && make oscope_top.bit
