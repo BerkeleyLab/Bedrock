@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.1"
+   id="clients" width="12.3in" height="3.99in"  viewBox="-6 -6 2786 907">
+<desc>
+XCircuit Version 3.8
+File "clients.eps" Page 1
+</desc>
+<g stroke="black">
+<g transform="matrix(   1    0   -0    1 1660 607)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-107" y="0">n_lat cycles</tspan>
+</text></g>
+<path d="M1832,599 C1842,594 1845,594 1860,591 C1845,588 1842,588 1832,583 C1834,589 1834,593 1832,599 " fill="#000000" stroke="none" />
+<path d="M1488,599 C1478,594 1475,594 1460,591 C1475,588 1478,588 1488,583 C1486,589 1486,593 1488,599 " fill="#000000" stroke="none" />
+<path d="M1484,591 L1532,591 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1788,591 L1836,591 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 108 719)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-108" y="0">output</tspan>
+</text></g>
+<path d="M140,735 L124,719 124,687 140,671 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M300,399 L492,399 508,335 1004,335 2572,335 2588,399 2780,399 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 268 383)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-101" y="0">raw_l</tspan>
+</text></g>
+<path d="M700,223 L732,223 748,287 812,287 828,223 892,223 908,287 972,287 988,223 1052,223 1068,287 1132,287 1148,223 1212,223 1228,287 1292,287 1308,223 1372,223 1388,287 1452,287 1468,223 1532,223 1548,287 1612,287 1628,223 1692,223 1708,287 1740,287 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 268 271)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-86" y="0">idata</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 108 319)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-82" y="0">input</tspan>
+</text></g>
+<path d="M140,511 L124,495 124,127 140,111 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M300,511 L1452,511 1468,447 1724,447 2252,447 2268,511 2780,511 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 268 495)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-112" y="0">raw_s</tspan>
+</text></g>
+<path d="M700,287 L732,287 748,223 812,223 828,287 892,287 908,223 972,223 988,287 1052,287 1068,223 1132,223 1148,287 1212,287 1228,223 1292,223 1308,287 1372,287 1388,223 1452,223 1468,287 1532,287 1548,223 1612,223 1628,287 1692,287 1708,223 1740,223 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 268 159)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-95" y="0">len_c</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1500 255)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1580 255)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1660 255)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1740 255)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1820 255)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1900 255)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1980 255)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2060 255)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1860 415)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-111" y="0">len-8 cycles</tspan>
+</text></g>
+<path d="M2232,407 C2242,402 2245,402 2260,399 C2245,396 2242,396 2232,391 C2234,397 2234,401 2232,407 " fill="#000000" stroke="none" />
+<path d="M1488,407 C1478,402 1475,402 1460,399 C1475,396 1478,396 1488,391 C1486,397 1486,401 1488,407 " fill="#000000" stroke="none" />
+<path d="M1484,399 L1740,399 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1996,399 L2244,399 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1460,495 L1460,623 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M1740,223 L1772,223 1788,287 1852,287 1868,223 1932,223 1948,287 2012,287 2028,223 2092,223 2108,287 2172,287 2188,223 2252,223 2268,287 2332,287 2348,223 2412,223 2428,287 2492,287 2508,223 2572,223 2588,287 2652,287 2668,223 2732,223 2748,287 2780,287 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1740,287 L1772,287 1788,223 1852,223 1868,287 1932,287 1948,223 2012,223 2028,287 2092,287 2108,223 2172,223 2188,287 2252,287 2268,223 2332,223 2348,287 2412,287 2428,223 2492,223 2508,287 2572,287 2588,223 2652,223 2668,287 2732,287 2748,223 2780,223 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 2140 255)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2220 255)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<path d="M700,671 L732,671 748,735 812,735 828,671 892,671 908,735 972,735 988,671 1052,671 1068,735 1132,735 1148,671 1212,671 1228,735 1292,735 1308,671 1372,671 1388,735 1452,735 1468,671 1532,671 1548,735 1612,735 1628,671 1692,671 1708,735 1740,735 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 268 719)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-98" y="0">odata</tspan>
+</text></g>
+<path d="M700,735 L732,735 748,671 812,671 828,735 892,735 908,671 972,671 988,735 1052,735 1068,671 1132,671 1148,735 1212,735 1228,671 1292,671 1308,735 1372,735 1388,671 1452,671 1468,735 1532,735 1548,671 1612,671 1628,735 1692,735 1708,671 1740,671 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1900 703)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1980 703)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2060 703)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2140 703)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2220 703)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2300 703)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2380 703)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2460 703)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<path d="M1740,671 L1772,671 1788,735 1852,735 1868,671 1932,671 1948,735 2012,735 2028,671 2092,671 2108,735 2172,735 2188,671 2252,671 2268,735 2332,735 2348,671 2412,671 2428,735 2492,735 2508,671 2572,671 2588,735 2652,735 2668,671 2732,671 2748,735 2780,735 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1740,735 L1772,735 1788,671 1852,671 1868,735 1932,735 1948,671 2012,671 2028,735 2092,735 2108,671 2172,671 2188,735 2252,735 2268,671 2332,671 2348,735 2412,735 2428,671 2492,671 2508,735 2572,735 2588,671 2652,671 2668,735 2732,735 2748,671 2780,671 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 2540 703)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2620 703)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="13">d</tspan>
+</text></g>
+<path d="M1860,671 L1860,575 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 972 415)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-143" y="0">about 44 cycles</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2348 415)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">4 cycles</tspan>
+</text></g>
+<path d="M300,223 L332,223 348,287 412,287 428,223 492,223 508,287 572,287 588,223 652,223 668,287 732,287 748,223 812,223 828,287 892,287 908,223 972,223 988,287 1052,287 1068,223 1132,223 1148,287 1212,287 1228,223 1292,223 1308,287 1340,287 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M300,287 L332,287 348,223 412,223 428,287 492,287 508,223 572,223 588,287 652,287 668,223 732,223 748,287 812,287 828,223 892,223 908,287 972,287 988,223 1052,223 1068,287 1132,287 1148,223 1212,223 1228,287 1292,287 1308,223 1340,223 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M300,671 L332,671 348,735 412,735 428,671 492,671 508,735 572,735 588,671 652,671 668,735 732,735 748,671 812,671 828,735 892,735 908,671 972,671 988,735 1052,735 1068,671 1132,671 1148,735 1212,735 1228,671 1292,671 1308,735 1340,735 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M300,735 L332,735 348,671 412,671 428,735 492,735 508,671 572,671 588,735 652,735 668,671 732,671 748,735 812,735 828,671 892,671 908,735 972,735 988,671 1052,671 1068,735 1132,735 1148,671 1212,671 1228,735 1292,735 1308,671 1340,671 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M500,447 L500,383 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M1460,463 L1460,383 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M1432,391 C1442,396 1445,396 1460,399 C1445,402 1442,402 1432,407 C1434,401 1434,397 1432,391 " fill="#000000" stroke="none" />
+<path d="M528,407 C518,402 515,402 500,399 C515,396 518,396 528,391 C526,397 526,401 528,407 " fill="#000000" stroke="none" />
+<path d="M516,399 L812,399 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1444,399 L1132,399 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M2260,463 L2260,375 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M2580,383 L2580,431 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M2552,407 C2562,402 2565,402 2580,399 C2565,396 2562,396 2552,391 C2554,397 2554,401 2552,407 " fill="#000000" stroke="none" />
+<path d="M2288,407 C2278,402 2275,402 2260,399 C2275,396 2278,396 2288,391 C2286,397 2286,401 2288,407 " fill="#000000" stroke="none" />
+<path d="M2284,399 L2340,399 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M2564,399 L2508,399 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1420,175 L1452,175 1468,111 1532,111 1548,175 1612,175 1628,111 1692,111 1708,175 1772,175 1788,111 1852,111 1868,175 1932,175 1948,111 2012,111 2028,175 2092,175 2108,111 2172,111 2188,175 2252,175 2268,111 2300,111 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M2300,175 L2268,175 2252,111 2188,111 2172,175 2108,175 2092,111 2028,111 2012,175 1948,175 1932,111 1868,111 1852,175 1788,175 1772,111 1708,111 1692,175 1628,175 1612,111 1548,111 1532,175 1468,175 1452,111 1420,111 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1500 143)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-26" y="13">len</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2220 143)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-11" y="13">9</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2140 143)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-18" y="13">10</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2060 143)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-14" y="13">11</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2300 143)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="8">x</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1420 143)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="8">x</tspan>
+</text></g>
+<path d="M300,111 L1436,111 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M300,175 L1436,175 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M2300,111 L2780,111 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M2300,175 L2780,175 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 2332 479)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">(actually max(4, 34-len))</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 924 831)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">len is the RFC 768 UDP datagram length, including 8 bytes of header</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 924 895)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">n_lat is a parameter, same for all clients within one build</tspan>
+</text></g>
+<g transform="matrix( 1.2    0   -0  1.2 924  31)" fill="#000000" >
+<text stroke="none" font-family="Helvetica"  font-weight="bold" font-size="40" ><tspan x="0" y="0">Packet Badger client interface</tspan>
+</text></g>
+</g>
+</svg>

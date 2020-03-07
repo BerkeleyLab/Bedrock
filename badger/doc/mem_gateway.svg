@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.1"
+   id="mem_gateway" width="7.35in" height="4.48in"  viewBox="-6 -6 1666 1017">
+<desc>
+XCircuit Version 3.9
+File "mem_gateway.eps" Page 1
+</desc>
+<g stroke="black">
+<g transform="matrix(   1    0   -0    1 1130 675)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-189" y="0">read_pipe_len cycles</tspan>
+</text></g>
+<path d="M902,683 C912,678 915,678 930,675 C915,672 912,672 902,667 C904,673 904,677 902,683 " fill="#000000" stroke="none" />
+<path d="M718,683 C708,678 705,678 690,675 C705,672 708,672 718,667 C716,673 716,677 718,683 " fill="#000000" stroke="none" />
+<path d="M714,675 L906,675 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 122 915)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-109" y="0">driven</tspan>
+</text></g>
+<path d="M170,979 L154,963 154,931 170,915 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 458 579)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-254" y="0">control_strobe</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 458 355)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-157" y="0">data_out</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 122 435)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-109" y="0">driven</tspan>
+</text></g>
+<path d="M170,803 L154,787 154,211 170,195 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 458 467)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-178" y="0">control_rd</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 458 243)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-80" y="0">addr</tspan>
+</text></g>
+<path d="M690,579 L690,707 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 458 963)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-132" y="0">data_in</tspan>
+</text></g>
+<path d="M930,755 L930,659 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M690,211 L690,131 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M718,155 C708,150 705,150 690,147 C705,144 708,144 718,139 C716,145 716,149 718,155 " fill="#000000" stroke="none" />
+<path d="M706,147 L1002,147 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix( 1.2    0   -0  1.2 490  35)" fill="#000000" >
+<text stroke="none" font-family="Helvetica"  font-weight="bold" font-size="40" ><tspan x="0" y="0">mem_gateway bus interface</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 458 787)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-283" y="0">control_rd_valid</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 122 963)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-42" y="0">by</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 122 1011)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-94" y="0">slave</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 122 483)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-42" y="0">by</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 122 531)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-122" y="0">master</tspan>
+</text></g>
+<path d="M490,195 L682,195 698,259 1002,259 1018,195 1178,195 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M490,259 L682,259 698,195 1002,195 1018,259 1178,259 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1034  99)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">bus cycle is 8 clocks now, could</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1034 147)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">be reduced to 4 or even 2 in future.</tspan>
+</text></g>
+<path d="M490,307 L682,307 698,371 1002,371 1018,307 1178,307 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M490,371 L682,371 698,307 1002,307 1018,371 1178,371 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M490,595 L682,595 698,531 762,531 778,595 1002,595 1018,531 1082,531 1098,595 1194,595 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M490,419 L682,419 698,483 1002,483 1018,419 1178,419 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M490,483 L682,483 698,419 1002,419 1018,483 1178,483 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M490,803 L922,803 938,739 1002,739 1018,803 1178,803 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 858 947)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="10">x</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1082 947)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-10" y="10">x</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 970 947)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-11" y="15">d</tspan>
+</text></g>
+<path d="M1010,211 L1010,131 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M982,155 C992,150 995,150 1010,147 C995,144 992,144 982,139 C984,145 984,149 982,155 " fill="#000000" stroke="none" />
+<g transform="matrix(   1    0   -0    1 842 227)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-11" y="11">a</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 842 339)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-11" y="15">d</tspan>
+</text></g>
+<path d="M1178,979 L1018,979 1002,915 938,915 922,979 490,979 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1178,915 L1018,915 1002,979 938,979 922,915 490,915 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+</g>
+</svg>

@@ -361,17 +361,6 @@ VCD_ARGS_selfmac.vcd = +packet_file=$(filter %selfmac_in.dat, $^)
 gtkw_refresh:
 	for f in *.gtkw; do if test $$f != rtefi_sim.gtkw; then $(XVFB) make $${f%.gtkw}_view GTKW_OPT="-r gtkwave_nosplash.rc -S resave.tcl"; tail -n +9 $$f > temp_$$$$.gtkw && mv temp_$$$$.gtkw $$f; fi; done
 
-# =====
-# Documentation processing, maybe not not the best place for these rules
-docs: rtefi.svg clients.svg memory.svg tx_path.svg index.html status.html
-.PHONY: docs
-%.svg: %.eps
-	echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
-index.html: ../README.md
-	pandoc -t html $< | sed -e 's,<a href="\(\w*\)\.eps" class="uri">\w*\.eps</a>,<img src="\1.svg">,' -e 's,status\.md,status.html,g' > $@
-status.html: ../status.md
-	pandoc -t html -o $@ $<
-
 # Documentation from Du
 lb_timing_demo.pdf: lb_timing_demo.vcd lb_timing_demo.gtkw
 	$(XVFB) $(GTKWAVE) -r gtkwave_nosplash.rc -S gtkw_print.tcl $^

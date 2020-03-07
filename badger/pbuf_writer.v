@@ -1,5 +1,5 @@
 // Takes results from scanner and forms the 9-bit output stream for
-// the packet buffer, according to the plan shown in memory.eps.
+// the packet buffer, according to the plan shown in doc/memory.eps.
 // Five-word "badge" written at the beginning of a packet:
 //   1. Dummy, needed in case construct.v skips forward two
 //   2. Length msb
@@ -58,7 +58,7 @@ always @(posedge clk) if (status_valid) status_r <= status_vec;
 
 // Synthesize address and data for output DPRAM.
 // It's critical that we're able to fill in the badge once the packet has ended.
-// See memory.eps for a simplified description of what we're trying to accomplish.
+// See doc/memory.eps for a simplified description of what we're trying to accomplish.
 reg [paw-1:0] fp=0;   // unperturbed frame counter/pointer
 reg [paw-1:0] fpp=0;  // actual destination address
 reg [paw-1:0] origin=0;  // pointer to start of badge

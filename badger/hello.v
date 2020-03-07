@@ -1,7 +1,7 @@
 // Demo client
 module hello(
 	input clk,
-	// client interface with RTEFI, see clients.eps
+	// client interface with RTEFI, see doc/clients.eps
 	input [10:0] len_c,
 	input [7:0] idata,
 	input raw_l,

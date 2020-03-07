@@ -13,7 +13,7 @@
 
 // This is a relatively long file, but it helps that it is broken down
 // into smaller modules:
-//   scanner   top level, see rtefi.eps
+//   scanner   top level, see doc/rtefi.eps
 //    - arp_patt
 //    - ip_patt
 //    - icmp_patt
@@ -50,7 +50,7 @@ module scanner (
 	// line de-asserted as soon as the dropping condition is detected.
 	// When an incoming packet is categorized as causing a response,
 	// the keep line is asserted one cycle before busy falls.
-	// Also see precog_upg.eps
+	// Also see doc/precog_upg.eps
 	output busy,
 	output keep,
 	//

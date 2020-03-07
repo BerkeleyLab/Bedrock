@@ -52,7 +52,17 @@ code are expected to accomplish the build step by including rules.mk.
 
 ## Block Diagram
 
-[rtefi.eps](rtefi.eps)
+![block diagram](doc/rtefi.svg)
+
+## Self-tests
+
+An extensive set of self-tests and demonstrations are programmed up in
+the tests subdirectory.  These range from simple exercises for the
+input packet scanner to running a TFTP server that uses the MAC feature.
+Some of these tests attach the simulated logic to the host network.
+
+The self-tests are run as part of a Continuous Integration (CI) process.
+You can also run them on your workstation with a simple "cd tests; make".
 
 ## Functionality
 
@@ -122,7 +132,7 @@ at run time with a local configuration bus.
 Demonstrating both Packet Badger functionality, and the test framework's
 ability to attach the simulation to the host's Ethernet subsystem.
 
-Your development machine needs to provide a traditional unix-y environemnt,
+Your development machine needs to provide a traditional unix-y environment,
 e.g., make, cc, python, awk, cmp.  Also some version of [Icarus Verilog](http://iverilog.icarus.com/); see [status.md](status.md) for more details.
 
 In one shell session (Linux terminal), try:
@@ -148,18 +158,15 @@ You can now interrupt (control-C) the simulation.  That process should
 have left behind a rtefi_pipe.vcd file that can be viewed with gtkwave;
 a pre-configured gtkwave pane can be brought up with "make rtefi_pipe_view".
 
-## More Diagrams
+## Attachment of clients:
+![client interface timing diagram](doc/clients.svg)
 
-### Memory addressing:
-[memory.eps](memory.eps)
-
-### Attachment of clients:
-[clients.eps](clients.eps)
-
-### Data path in construct.v:
-[tx_path.eps](tx_path.eps)
+Each client handles one UDP port.
+Up to eight clients can be attached to a Packet Badger instance.
 
 ## Other documentation
 
 * Design notes: [rtefi_notes.txt](rtefi_notes.txt)
+* Memory addressing figure: [memory access diagram](doc/memory.svg)
+* Data path in construct.v: [data path diagram](doc/tx_path.svg)
 * Status: [status.md](status.md)
