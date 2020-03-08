@@ -30,25 +30,25 @@ cordic2.dat: cordicg_tb
 cordic3.dat: cordicg_tb
 	$(VVP) $< +op=3 > $@
 
-cordic0_test: cordic_test.awk cordic0.dat
+cordic0_test: cordic_check.py cordic0.dat
 	@echo
 	@echo "Check of x,y,theta->x,y"
-	$(AWK) -f $^
+	$(PYTHON) $< $(word 2, $^)
 
-cordic1_test: cordic_test.awk cordic1.dat
+cordic1_test: cordic_check.py cordic1.dat
 	@echo
 	@echo "Check of x,y,theta->r,theta"
-	$(AWK) -f $^
+	$(PYTHON) $< $(word 2, $^)
 
-cordic2_test: cordic2_test.awk cordic2.dat
+cordic2_test: cordic_check.py cordic2.dat
 	@echo
 	@echo "Check of downconversion bias"
-	$(AWK) -f $^
+	$(PYTHON) $< bias $(word 2, $^)
 
-cordic3_test: cordic_test.awk cordic3.dat
+cordic3_test: cordic_check.py cordic3.dat
 	@echo
 	@echo "Check of slave mode"
-	$(AWK) -f $^
+	$(PYTHON) $< $(word 2, $^)
 
 
 # synthesis targets
