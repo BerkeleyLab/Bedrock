@@ -4,7 +4,7 @@ CORDIC_DIR = .
 -include ../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 
-all: cordic_ptor_check cordic_rtop_check cordic_bias_check cordic_slve_check
+all: cordic_ptor_check cordic_rtop_check cordic_bias_check cordic_slve_check perf.png
 
 # Resource exported to projects that use us
 include rules.mk
@@ -73,6 +73,7 @@ cordic_k7.bit: cordic_wrap.v $(CORDIC_BASE_V) blank_k7.ucf
 perf.dat: perf_run.sh
 	sh $< $(NEST_MAKE) > $@
 
+# perf_plot.py now checks for excess noise
 perf.png: perf_plot.py perf.dat
 	$(PYTHON) $<
 
