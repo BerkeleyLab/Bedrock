@@ -2,20 +2,28 @@
 
 module ssb_out_tb;
 
+parameter DUT_IQ_OUT=1;
+
 reg clk, trace;
 integer cc;
-reg fail=0;
+integer out_file;
+// reg fail=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("ssb_out.vcd");
 		$dumpvars(5,ssb_out_tb);
 	end
-	trace = $test$plusargs("trace");
-	for (cc=0; cc<220; cc=cc+1) begin
+	if ($test$plusargs("trace")) begin
+		trace = 1;
+		out_file = $fopen("ssb_out.dat", "w");
+	end
+	$display("DUT_IQ_OUT=%d", DUT_IQ_OUT);
+	for (cc=0; cc<360; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("%s", fail ? "FAIL" : "PASS");
+	$display("WARNING: Not a self-checking testbench. Will always pass.");
+	$display("%s","PASS");
 	$finish();
 end
 
@@ -40,12 +48,21 @@ rot_dds #(.lo_amp(18'd74840)) dds(.clk(clk), .reset(1'b0),
 
 wire signed [17:0] out_xy;
 wire signed [15:0] dac1_out0, dac1_out1, dac2_out0, dac2_out1;
-ssb_out dut(.clk(clk), .div_state(div_state), .drive(drive), .enable(1'b1),
+ssb_out #(.IQ_OUT(DUT_IQ_OUT)) dut(
+	.clk(clk), .div_state(div_state), .drive(drive), .enable(1'b1),
 	.cosa(cosa), .sina(sina),
 	.dac1_out0(dac1_out0), .dac1_out1(dac1_out1),
 	.dac2_out0(dac2_out0), .dac2_out1(dac2_out1)
 );
 
-always @(negedge clk) if (trace) $display(dac1_out0);
+always @(negedge clk) if (trace) begin
+	if (DUT_IQ_OUT) begin
+		$fwrite(out_file, "%d %d\n", dac1_out0, dac2_out0);
+		$fwrite(out_file, "%d %d\n", dac1_out1, dac2_out1);
+	end else begin
+		$fwrite(out_file, "%d\n", dac1_out0);
+		$fwrite(out_file, "%d\n", dac1_out1);
+	end
+end
 
 endmodule

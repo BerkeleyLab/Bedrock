@@ -24,9 +24,9 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	//$display("%s", fail ? "FAIL" : "PASS");
 	$display("WARNING: Not a self-checking testbench. Will always pass.");
 	$display("%s","PASS");
+	$finish();
 end
 
 reg [1:0] div_state=0;
