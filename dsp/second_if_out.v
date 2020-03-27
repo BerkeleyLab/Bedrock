@@ -1,6 +1,6 @@
 `timescale 1ns / 1ns
 
-// (Almost) pin compatible with ssb_out,
+// Pin compatible with ssb_out,
 // but this is tuned for the LCLS-II configuration where it
 // needs to generate 145 MHz, even though the input lo (cosa,sina)
 // is at 20 MHz (7/33 of clk rate).  Only DAC1 is provided.
