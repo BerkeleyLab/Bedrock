@@ -15,11 +15,13 @@ if len(sys.argv) > 2:
 if len(sys.argv) > 3 and sys.argv[3] == "SINGLE":
     SSB_SINGLE = True
 
-# second_if_out_tb and ssb_out_tb use different settings:
-ssb_fs, ssb_if = 1313.0/8.0, 13.0
-sec_fs, sec_if = 1320.0/7.0, IF_OUT
+# second_if_out_tb and ssb_out_tb use different settings
+# Number of FFT points calculated so that IF line falls exactly in freq bucket;
+# this removes the need for a window function
+ssb_fs, ssb_if, ssb_npt = 1313.0/8.0, 13.0, 101*2
+sec_fs, sec_if, sec_npt = 1320.0/7.0, IF_OUT, 132*2
 
-f_samp, if_out = (ssb_fs, ssb_if) if SSB_OUT else (sec_fs, sec_if)
+f_samp, if_out, npt = (ssb_fs, ssb_if, ssb_npt) if SSB_OUT else (sec_fs, sec_if, sec_npt)
 
 with open(fname, 'r') as f:
     if SSB_OUT and not SSB_SINGLE:
@@ -36,7 +38,6 @@ with open(fname, 'r') as f:
 if if_out > 0.5*f_samp:  # Second nyquist zone
     if_out = f_samp - if_out
 
-npt = 132*2
 dat = dat[300:300+npt]
 ss = np.abs(fft(dat))
 dt = 1.0/f_samp
