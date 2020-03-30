@@ -21,6 +21,9 @@ if len(sys.argv) > 3 and sys.argv[3] == "SINGLE":
 ssb_fs, ssb_if, ssb_npt = 1313.0/8.0, 13.0, 101*2
 sec_fs, sec_if, sec_npt = 1320.0/7.0, IF_OUT, 132*2
 
+# Normalized amplitude check is based on drive+LO settings of second_if_out_tb and ssb_out_tb
+amp_out = 0.86
+
 f_samp, if_out, npt = (ssb_fs, ssb_if, ssb_npt) if SSB_OUT else (sec_fs, sec_if, sec_npt)
 
 with open(fname, 'r') as f:
@@ -29,17 +32,22 @@ with open(fname, 'r') as f:
         dat = []
         for l in f.readlines():
             x = l.split()
-            dat_i, dat_q = int(x[0]), int(x[1])
-            dat.append(dat_i + dat_q)
+            dat_i, dat_q = float(x[0])/(2**15), float(x[1])/(2**15)
+
+            # Sum and normalize
+            iq_sum = dat_i + dat_q
+            iq_norm = iq_sum/np.sqrt(2)
+
+            dat.append(iq_norm)
     else:
-        dat = [int(x) for x in f.readlines()]
+        dat = [float(x)/(2**15) for x in f.readlines()]
 
 
 if if_out > 0.5*f_samp:  # Second nyquist zone
     if_out = f_samp - if_out
 
 dat = dat[300:300+npt]
-ss = np.abs(fft(dat))
+ss = 2*np.abs(fft(dat))/len(dat)  # Normalize and double since we only care about positive peak
 dt = 1.0/f_samp
 freq_bins = fftfreq(len(dat), d=dt)
 
@@ -62,5 +70,11 @@ for ix in range(int(npt/2)):
         if abs(freq_bins[ix] - if_out) > e_delta:
             print("FAIL: Unexpected spur", float(if_out))
             fail = 1
+
+if abs(peak - amp_out) > e_delta:
+    print("FAIL: Unexpected peak amplitude: %.4e. Expected: %.4e" % (peak, amp_out))
+    fail = 1
+
 print("FAIL" if fail else "PASS")
+
 sys.exit(fail)

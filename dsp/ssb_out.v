@@ -15,7 +15,7 @@ module ssb_out #(
 	parameter [15:0] AFTB_COEFF = 18646, // Coefficient to correct for the linear interpolation between
 				             // two consecutive samples; see afterburner.v for details.
 				             // Example based on FNAL test:
-				             // 1313 MHz LO as timebase / 16 to get 82.0625 MHz ADC clk
+				             // 1313 MHz LO as timebase, / 16 to get 82.0625 MHz ADC clk
 				             // IF is 13 MHz, 16/101 = 0.1584 of ADC clk
 				             // coeff = ceil(32768*0.5*sec(2*pi*16/101/2))
 	parameter IQ_OUT =1 // 0 - Single output; One DAC DDR output
@@ -48,8 +48,6 @@ wire signed [15:0] out1, out2;
 // SSB modulation scheme (Hartley modulator) using dot-product for LSB selection:
 // (I, Q) . (cos(wLO*t), sin(wLO*t)) = I*cos(wLO*t) + Q*cos(wLO*t)
 
-// Second (optional) dot-product done against 90deg-rotated drive IQ to obtain quadrature component
-
 // In-phase portion of SSB drive signal
 flevel_set level1(.clk(clk),
 	.cosd(cosa), .sind(sina),
@@ -66,6 +64,8 @@ afterburner afterburner1(.clk(clk),
 
 assign dac1_out0 = {~dac1_ob0[15], dac1_ob0[14:0]};
 assign dac1_out1 = {~dac1_ob1[15], dac1_ob1[14:0]};
+
+// Second (optional) dot-product with 90deg-rotated drive IQ to obtain quadrature component
 
 generate if (IQ_OUT) begin : G_IQ_DRIVE
 

@@ -1,30 +1,32 @@
-[timestart] 189
-[size] 1000 600
-[pos] 270 13
-*-7.731632 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
-[sst_width] 210
-[signals_width] 196
+[timestart] 646
+[size] 1592 502
+[pos] 162 0
+*-7.731632 1435 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] ssb_out_tb.
+[treeopen] ssb_out_tb.dut.
+[sst_width] 228
+[signals_width] 211
 [sst_expanded] 1
-[sst_vpaned_height] 154
+[sst_vpaned_height] 115
 @28
 ssb_out_tb.iq
 @8420
 ssb_out_tb.drive[17:0]
 @20000
 -
-@8024
+@10420
 ssb_out_tb.dac1_out0[15:0]
 @20000
 -
-@8024
+@10421
 ssb_out_tb.dac1_out1[15:0]
 @20000
 -
-@8024
+@10420
 ssb_out_tb.dac2_out0[15:0]
-@20000
+@30000
 -
-@8024
+@10420
 ssb_out_tb.dac2_out1[15:0]
 @20000
 -
