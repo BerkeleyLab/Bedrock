@@ -6,7 +6,6 @@ reg clk, trace=0;
 integer cc;
 integer out_file;
 reg lo_mode;
-//reg fail=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("second_if_out.vcd");
@@ -24,8 +23,8 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("WARNING: Not a self-checking testbench. Will always pass.");
-	$display("%s","PASS");
+	if (trace) $display("Please use contents of second_if_out.dat for functional validation");
+	else $display("WARNING: Not a self-checking testbench. Will always pass.");
 	$finish();
 end
 

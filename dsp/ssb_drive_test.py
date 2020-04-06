@@ -63,15 +63,12 @@ peak = np.max(ss)
 peak_freq = freq_bins[np.argmax(ss)]
 print("Peak at %.3f MHz, Amp=%.4e" % (peak_freq, peak))
 fail = 0
-e_delta = 0.05
 for ix in range(int(npt/2)):
-    if ss[ix] > 0.003*peak:  # require spurs less than -50 dBc
-        print("%.3f MHz: amplitude %.4e" % (freq_bins[ix], ss[ix]))
-        if abs(freq_bins[ix] - if_out) > e_delta:
-            print("FAIL: Unexpected spur", float(if_out))
-            fail = 1
+    if abs(freq_bins[ix] - if_out) > 1e-6 and ss[ix] > 0.003*peak:  # require spurs less than -50 dBc
+        print("FAIL: Unexpected spur at %.3f MHz, amplitude %.4e" % (freq_bins[ix], ss[ix]))
+        fail = 1
 
-if abs(peak - amp_out) > e_delta:
+if abs(peak - amp_out) > 0.05:
     print("FAIL: Unexpected peak amplitude: %.4e. Expected: %.4e" % (peak, amp_out))
     fail = 1
 

@@ -7,7 +7,6 @@ parameter DUT_IQ_OUT=1;
 reg clk, trace;
 integer cc;
 integer out_file;
-// reg fail=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("ssb_out.vcd");
@@ -22,8 +21,8 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("WARNING: Not a self-checking testbench. Will always pass.");
-	$display("%s","PASS");
+	if (trace) $display("Please use contents of ssb_out.dat for functional validation");
+	else $display("WARNING: Not a self-checking testbench. Will always pass.");
 	$finish();
 end
 
