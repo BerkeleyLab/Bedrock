@@ -34,11 +34,10 @@ with open(fname, 'r') as f:
             x = l.split()
             dat_i, dat_q = float(x[0])/(2**15), float(x[1])/(2**15)
 
-            # Sum and normalize
-            iq_sum = dat_i + dat_q
-            iq_norm = iq_sum/np.sqrt(2)
-
-            dat.append(iq_norm)
+            # Using positive sign here will interpret SSB input as -13 MHz
+            # XXX Explain why or fix the Verilog!
+            iq_cpx = dat_i - 1j*dat_q
+            dat.append(iq_cpx*0.5)
     else:
         dat = [float(x)/(2**15) for x in f.readlines()]
 
@@ -63,7 +62,10 @@ peak = np.max(ss)
 peak_freq = freq_bins[np.argmax(ss)]
 print("Peak at %.3f MHz, Amp=%.4e" % (peak_freq, peak))
 fail = 0
-for ix in range(int(npt/2)):
+# In the real SSB case, make sure to scan both positive and negative frequencies
+# so we can correctly pick up the suppressed sideband as a potential spur.
+npt_scan = npt if SSB_OUT and not SSB_SINGLE else int(npt/2)
+for ix in range(npt_scan):
     if abs(freq_bins[ix] - if_out) > 1e-6 and ss[ix] > 0.003*peak:  # require spurs less than -50 dBc
         print("FAIL: Unexpected spur at %.3f MHz, amplitude %.4e" % (freq_bins[ix], ss[ix]))
         fail = 1
