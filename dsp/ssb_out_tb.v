@@ -48,9 +48,11 @@ rot_dds #(.lo_amp(18'd74840)) dds(.clk(clk), .reset(1'b0),
 
 wire signed [17:0] out_xy;
 wire signed [15:0] dac1_out0, dac1_out1, dac2_out0, dac2_out1;
+wire ssb_flip = single_out ? 1'bx : 1'b0; // In single-drive mode, ssb_flip should be no-op
+
 ssb_out dut(
 	.clk(clk), .div_state(div_state), .drive(drive), .enable(1'b1),
-	.ssb_flip(1'b0), .aftb_coeff(16'd18646),
+	.ssb_flip(ssb_flip), .aftb_coeff(16'd18646),
 	.cosa(cosa), .sina(sina),
 	.dac1_out0(dac1_out0), .dac1_out1(dac1_out1),
 	.dac2_out0(dac2_out0), .dac2_out1(dac2_out1)
