@@ -2,21 +2,22 @@
 
 module ssb_out_tb;
 
-parameter DUT_IQ_OUT=1;
-
 reg clk, trace;
 integer cc;
 integer out_file;
+
+reg single_out=0;
+
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("ssb_out.vcd");
 		$dumpvars(5,ssb_out_tb);
 	end
+	if ($test$plusargs("single")) single_out = 1;
 	if ($test$plusargs("trace")) begin
 		trace = 1;
 		out_file = $fopen("ssb_out.dat", "w");
 	end
-	$display("DUT_IQ_OUT=%d", DUT_IQ_OUT);
 	for (cc=0; cc<360; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
@@ -47,15 +48,16 @@ rot_dds #(.lo_amp(18'd74840)) dds(.clk(clk), .reset(1'b0),
 
 wire signed [17:0] out_xy;
 wire signed [15:0] dac1_out0, dac1_out1, dac2_out0, dac2_out1;
-ssb_out #(.IQ_OUT(DUT_IQ_OUT)) dut(
+ssb_out dut(
 	.clk(clk), .div_state(div_state), .drive(drive), .enable(1'b1),
+	.ssb_flip(1'b0), .aftb_coeff(16'd18646),
 	.cosa(cosa), .sina(sina),
 	.dac1_out0(dac1_out0), .dac1_out1(dac1_out1),
 	.dac2_out0(dac2_out0), .dac2_out1(dac2_out1)
 );
 
 always @(negedge clk) if (trace) begin
-	if (DUT_IQ_OUT) begin
+	if (!single_out) begin
 		$fwrite(out_file, "%d %d\n", dac1_out0, dac2_out0);
 		$fwrite(out_file, "%d %d\n", dac1_out1, dac2_out1);
 	end else begin

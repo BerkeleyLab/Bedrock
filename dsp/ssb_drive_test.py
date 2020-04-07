@@ -32,11 +32,10 @@ with open(fname, 'r') as f:
         dat = []
         for l in f.readlines():
             x = l.split()
+            # DAC1 is I, DAC2 is Q
             dat_i, dat_q = float(x[0])/(2**15), float(x[1])/(2**15)
 
-            # Using positive sign here will interpret SSB input as -13 MHz
-            # XXX Explain why or fix the Verilog!
-            iq_cpx = dat_i - 1j*dat_q
+            iq_cpx = dat_i + 1j*dat_q
             dat.append(iq_cpx*0.5)
     else:
         dat = [float(x)/(2**15) for x in f.readlines()]

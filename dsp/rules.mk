@@ -85,15 +85,9 @@ second_if_out_check: second_if_out_tb $(SSB_TEST_PY)
 	$(VVP) $< +trace +if_lo=0 && $(PYTHON) $(word 2, $^) second_if_out.dat 145
 	$(VVP) $< +trace +if_lo=1 && $(PYTHON) $(word 2, $^) second_if_out.dat 60
 
-VFLAGS_ssb_out_single_tb = -Pssb_out_tb.DUT_IQ_OUT=0
-ssb_out_single_tb: ssb_out_tb.v
-	$(VERILOG_TB)
-
 ssb_out_check: ssb_out_tb $(SSB_TEST_PY)
 	$(VVP) $< +trace && $(PYTHON) $(word 2, $^) ssb_out.dat SSB_OUT
-
-ssb_out_single_check: ssb_out_single_tb $(SSB_TEST_PY)
-	$(VVP) $< +trace && $(PYTHON) $(word 2, $^) ssb_out.dat SSB_OUT SINGLE
+	$(VVP) $< +trace +single && $(PYTHON) $(word 2, $^) ssb_out.dat SSB_OUT SINGLE
 
 CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat *.lxt *~
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cordicg_b22.v second_if_out.dat ssb_*.dat
