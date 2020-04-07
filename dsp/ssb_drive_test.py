@@ -22,7 +22,7 @@ ssb_fs, ssb_if, ssb_npt = 1313.0/8.0, 13.0, 101*2
 sec_fs, sec_if, sec_npt = 1320.0/7.0, IF_OUT, 132*2
 
 # Normalized amplitude check is based on drive+LO settings of second_if_out_tb and ssb_out_tb
-amp_out = 0.86
+amp_out = 0.86085
 
 f_samp, if_out, npt = (ssb_fs, ssb_if, ssb_npt) if SSB_OUT else (sec_fs, sec_if, sec_npt)
 
@@ -69,7 +69,8 @@ for ix in range(npt_scan):
         print("FAIL: Unexpected spur at %.3f MHz, amplitude %.4e" % (freq_bins[ix], ss[ix]))
         fail = 1
 
-if abs(peak - amp_out) > 0.05:
+# possibly over-tight spec, but does work in all modes today with a comfortable margin
+if abs(peak - amp_out) > 0.0001:
     print("FAIL: Unexpected peak amplitude: %.4e. Expected: %.4e" % (peak, amp_out))
     fail = 1
 

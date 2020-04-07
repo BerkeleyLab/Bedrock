@@ -23,7 +23,7 @@ module ssb_out (
 				    // Example based on FNAL test:
 				    // 1313 MHz LO as timebase, / 16 to get 82.0625 MHz ADC clk
 				    // IF is 13 MHz, 16/101 = 0.1584 of ADC clk
-				    // coeff = ceil(32768*0.5*sec(2*pi*16/101/2)) = 18646
+				    // aftb_coeff = ceil(32768*0.5*sec(2*pi*16/101/2)) = 18646
 	// local oscillator
 	input signed [17:0] cosa,
 	input signed [17:0] sina,
@@ -45,7 +45,7 @@ fiq_interp interp(.clk(clk),
 wire signed [15:0] out1, out2;
 
 // SSB modulation scheme (Hartley modulator) using dot-product for LSB selection:
-// (I, Q) . (cos(wLO*t), sin(wLO*t)) = I*cos(wLO*t) + Q*cos(wLO*t)
+// (I, Q) . (cos(wLO*t), sin(wLO*t)) = I*cos(wLO*t) + Q*sin(wLO*t)
 
 // In-phase portion of SSB drive signal
 flevel_set level1(.clk(clk),

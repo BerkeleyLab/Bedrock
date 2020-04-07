@@ -6,14 +6,14 @@ reg clk, trace;
 integer cc;
 integer out_file;
 
-reg single_out=0;
+reg single_out;
 
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("ssb_out.vcd");
 		$dumpvars(5,ssb_out_tb);
 	end
-	if ($test$plusargs("single")) single_out = 1;
+	single_out = $test$plusargs("single");
 	if ($test$plusargs("trace")) begin
 		trace = 1;
 		out_file = $fopen("ssb_out.dat", "w");
