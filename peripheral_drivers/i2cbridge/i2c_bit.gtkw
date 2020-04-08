@@ -1,0 +1,36 @@
+[timestart] 59720
+[size] 1154 601
+[pos] 78 0
+*-13.674325 84891 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] i2c_bit_tb.
+[sst_width] 210
+[signals_width] 126
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+i2c_bit_tb.tick
+i2c_bit_tb.advance
+@420
+i2c_bit_tb.ix
+@24
+i2c_bit_tb.command[1:0]
+@28
+i2c_bit_tb.scl_v
+i2c_bit_tb.sda_v
+i2c_bit_tb.sda_h
+@200
+-DUT
+@28
+i2c_bit_tb.dut.old_bit
+i2c_bit_tb.dut.new_bit
+@24
+i2c_bit_tb.dut.cmd[1:0]
+@28
+i2c_bit_tb.dut.scl_o
+i2c_bit_tb.dut.sda_o
+@200
+-Slave
+@28
+i2c_bit_tb.slave.sda_o
+[pattern_trace] 1
+[pattern_trace] 0

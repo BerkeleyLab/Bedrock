@@ -1,0 +1,60 @@
+[timestart] 0
+[size] 1196 671
+[pos] 84 14
+*-14.583513 15160 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] i2c_prog_tb.
+[sst_width] 210
+[signals_width] 178
+[sst_expanded] 1
+[sst_vpaned_height] 179
+@28
+i2c_prog_tb.run_cmd
+@24
+i2c_prog_tb.p_addr[9:0]
+@22
+i2c_prog_tb.command[7:0]
+@28
+i2c_prog_tb.bit_adv
+i2c_prog_tb.bit_cmd[1:0]
+i2c_prog_tb.scl_v
+i2c_prog_tb.sda_v
+i2c_prog_tb.sda_o
+i2c_prog_tb.sda_h
+i2c_prog_tb.result_stb
+@22
+i2c_prog_tb.result[7:0]
+@200
+-DUT
+@28
+i2c_prog_tb.prog.start_me_up
+i2c_prog_tb.prog.ok_to_stop
+i2c_prog_tb.prog.natural_stop
+i2c_prog_tb.prog.run_stat_r
+@24
+i2c_prog_tb.prog.state[2:0]
+i2c_prog_tb.prog.pc[9:0]
+i2c_prog_tb.prog.next_pc[9:0]
+@28
+i2c_prog_tb.prog.opcode[2:0]
+@22
+i2c_prog_tb.prog.stream_cnt[4:0]
+@28
+i2c_prog_tb.prog.stream_end
+@24
+i2c_prog_tb.prog.bit_cnt[2:0]
+@28
+i2c_prog_tb.prog.bit_end
+@22
+i2c_prog_tb.prog.sr[7:0]
+@28
+i2c_prog_tb.prog.next_op
+i2c_prog_tb.prog.next_data
+i2c_prog_tb.prog.stream0
+i2c_prog_tb.prog.rd_cycle
+i2c_prog_tb.prog.wr_cycle
+@200
+-Slave
+@28
+i2c_prog_tb.slave.sda_o
+[pattern_trace] 1
+[pattern_trace] 0

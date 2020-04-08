@@ -13,6 +13,7 @@ TODO:
 2. Verify the performance of gather data and plot (for now different threads)
 3.
 '''
+import copy
 import sys
 import time
 from threading import Thread
@@ -20,15 +21,18 @@ from threading import Thread
 import numpy as np
 from matplotlib import pyplot as plt
 
-from banyan_ch_find import banyan_ch_find
-from banyan_spurs import collect_adcs
-from prc import c_prc
+from litex import RemoteClient
 
+from ltc_setup_litex_client import initLTC, get_data
 from misc import ADC, DataBlock, Processing
+
+from banyan_ch_find import banyan_ch_find
+from get_raw_adcs import collect_adcs
+from prc import c_prc
 
 
 def write_mask(prc, mask_int):
-    prc.reg_write([{'banyan_mask': mask_int}])
+    prc.leep.reg_write([('banyan_mask', mask_int)])
     channels = banyan_ch_find(mask_int)
     n_channels = len(channels)
     print((channels, 8 / n_channels))
@@ -36,7 +40,7 @@ def write_mask(prc, mask_int):
 
 
 def get_npt(prc):
-    banyan_status = prc.reg_read_value(['banyan_status'])[0]
+    banyan_status = prc.leep.reg_read(['banyan_status'])[0]
     npt = 1 << ((banyan_status >> 24) & 0x3F)
     if npt == 1:
         print("aborting since hardware module not present")
@@ -45,6 +49,62 @@ def get_npt(prc):
 
 
 class Carrier():
+    def test_data(self, *args):
+        raise NotImplementedError
+
+    def acquire_data(self, *args):
+        raise NotImplementedError
+
+    def _process_subscriptions(self):
+        # TODO: Perhaps implement something to avoid race condition on results
+        for sub_id, (single_subscribe, fn, *fn_args) in list(self.subscriptions.items()):
+            self.results[sub_id] = fn(self._db, *fn_args)
+            if single_subscribe:
+                self.remove_subscription(sub_id)
+
+    def add_subscription(self, sub_id, fn, *fn_args, single_subscribe=False):
+        # TODO: Add args/kwargs to the function
+        self.subscriptions[sub_id] = (single_subscribe, fn, *fn_args)
+        Logger.info('Added subscription {}'.format(sub_id))
+
+    def remove_subscription(self, sub_id):
+        self.subscriptions.pop(sub_id)
+        Logger.info('Removed subscription {}'.format(sub_id))
+
+
+class LTCOnMarblemini(Carrier):
+    def __init__(self,
+                 ip_addr='192.168.1.121',
+                 port=50006,
+                 count=10,
+                 log_decimation_factor=0,
+                 verbose=False,
+                 test=False):
+        ADC.bits = 14
+        ADC.sample_rate = 120000000.
+        ADC.decimation_factor = 1 << log_decimation_factor
+        self.n_channels = 2
+        self._db = None
+        self.test = test
+        self.pts_per_ch = 8192
+        self.subscriptions, self.results = {}, {}
+        ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
+        self.wb = RemoteClient()
+        self.wb.open()
+        print(self.wb.regs.acq_buf_full.read())
+        initLTC(self.wb)
+
+    def acquire_data(self, *args):
+        while True:
+            self.wb.regs.acq_acq_start.write(1)
+            self._db = DataBlock(get_data(self.wb), int(time.time()))
+            # ADC count / FULL SCALE => [-1.0, 1.]
+            self._process_subscriptions()
+            time.sleep(0.1)
+        self.wb.close()
+
+
+class ZestOnBMB7Carrier(Carrier):
     def __init__(self,
                  ip_addr='192.168.1.121',
                  port=50006,
@@ -53,23 +113,23 @@ class Carrier():
                  count=10,
                  log_decimation_factor=0,
                  verbose=False,
-                 filewritepath=None,
                  use_spartan=False,
                  test=False):
+
         ADC.decimation_factor = 1 << log_decimation_factor
+        self._db = None
         self.test = test
         if not test:
             self.carrier = c_prc(
                 ip_addr,
                 port,
-                filewritepath=filewritepath,
                 use_spartan=use_spartan)
 
             self.npt = get_npt(self.carrier)
             mask_int = int(mask, 0)
             self.n_channels, channels = write_mask(self.carrier, mask_int)
-            self.carrier.reg_write([{'config_adc_downsample_ratio':
-                                     log_decimation_factor}])
+            self.carrier.leep.reg_write([('config_adc_downsample_ratio',
+                                          log_decimation_factor)])
         else:
             banyan_aw = 13
             self.npt = 2**banyan_aw
@@ -99,6 +159,7 @@ class Carrier():
             # Each channel gets [(npt * 8) // n_channels] datapoints
             data_raw, ts = collect_adcs(self.carrier,
                                         self.npt, self.n_channels)
+            print(time.strftime("%Y%m%d-%H%M%S"))
             self._db = DataBlock(ADC.counts_to_volts(np.array(data_raw)), ts)
             # ADC count / FULL SCALE => [-1.0, 1.]
             self._process_subscriptions()
@@ -106,8 +167,7 @@ class Carrier():
 
     def _process_subscriptions(self):
         # TODO: Perhaps implement something to avoid race condition on results
-        for sub_id, (single_subscribe, fn,
-                     *fn_args) in list(self.subscriptions.items()):
+        for sub_id, (single_subscribe, fn, *fn_args) in list(self.subscriptions.items()):
             self.results[sub_id] = fn(self._db, *fn_args)
             if single_subscribe:
                 self.remove_subscription(sub_id)
@@ -182,8 +242,8 @@ class GUIGraph:
                                                  xlim=[0, 0.01], ylim=[-1., 1.])
         g_plot_type_limits['F'] = GUIGraphLimits('F', xlabel='Frequency [Hz]',
                                                  ylabel='[V/sqrt(Hz)]',
-                                                 xlim=[0, 5e7],
-                                                 ylim=[1e-11, 200],
+                                                 xlim=[0, 5e6],
+                                                 ylim=[1e-11, 60000],
                                                  autoscale=True)
         # Create 2 GUI graphs for each channel of data coming from the carrier
         # 2 graphs, 1 for T and 1 for F
@@ -273,7 +333,8 @@ class Logic(BoxLayout):
                 carrier.add_subscription(plot_id, Processing.stacking_fft,
                                          int(plot_id[1]), 'hanning')
             elif plot_type == '3':
-                carrier.add_subscription('3', Processing.csd,
+                print(self.csd_channels)
+                carrier.add_subscription('3', Processing.H,
                                          self.csd_channels[0],
                                          self.csd_channels[1], 'hanning')
         else:
@@ -295,7 +356,11 @@ class Logic(BoxLayout):
 
     def save_data(self, *args):
         carrier.add_subscription(
-            'save', Processing.save, single_subscribe=True)
+            'save', Processing.save, copy.deepcopy(carrier._db), single_subscribe=True)
+
+    def restack_data(self, *args):
+        Processing.reset_ch_stack_count(0)
+        Processing.reset_ch_stack_count(1)
 
     def update_graph(self, dt):
         for _, ch in g_scope_channels.items():
@@ -318,11 +383,11 @@ if __name__ == "__main__":
         help='ip_address',
         dest='ip',
         type=str,
-        default='192.168.1.121')
+        default='192.168.19.8')
     parser.add_argument(
-        '-p', '--port', help='port', dest='port', type=int, default=50006)
+        '-p', '--port', help='port', dest='port', type=int, default=803)
     parser.add_argument(
-        '-m', '--mask', help='mask', dest='mask', type=str, default='0x11')
+        '-m', '--mask', help='mask', dest='mask', type=str, default='0x33')
     parser.add_argument(
         '-n',
         '--npt_wish',
@@ -332,30 +397,27 @@ if __name__ == "__main__":
     parser.add_argument(
         '-c', '--count', help='number of acquisitions', type=int, default=1)
     parser.add_argument(
-        '-l', '--log_decimation_factor', help='Log downsample ratio', type=int, default=0)
-    parser.add_argument(
-        '-f', '--filewritepath', help='static file out', type=str, default="")
+        '-l', '--log_decimation_factor', help='Log downsample ratio', type=int, default=2)
     parser.add_argument(
         '-t', '--testmode', help='run in test mode', action='store_true')
     parser.add_argument(
         "-u",
         "--use_spartan",
         action="store_true",
-        help="use spartan",
-        default=True)
+        help="use spartan")
     args, unknown = parser.parse_known_args()
     sys.argv[1:] = unknown
-    # args = parser.parse_args(sys.argv[2:])
-    carrier = Carrier(
+    args = parser.parse_args(sys.argv[2:])
+    carrier = ZestOnBMB7Carrier(
         ip_addr=args.ip,
         port=args.port,
         mask=args.mask,
         npt_wish=args.npt_wish,
         count=args.count,
-        filewritepath=args.filewritepath,
         use_spartan=args.use_spartan,
         log_decimation_factor=args.log_decimation_factor,
         test=False)
+    # carrier = LTCOnMarblemini()
     GUIGraph.setup_gui_graphs(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
     acq_thread.daemon = True

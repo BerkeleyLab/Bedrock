@@ -4,7 +4,7 @@
  */
 
 MEMORY{
-    blockRam (RWXAI) : ORIGIN = 0x00000000, LENGTH = MEM_SIZE
+    blockRam (RWXAI) : ORIGIN = 0x00000000, LENGTH = BLOCK_RAM_SIZE
 }
 
 ENTRY(start);

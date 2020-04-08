@@ -12,6 +12,7 @@ module xilinx7_clocks #(
     output clk_out0,
     output clk_out1,
     output clk_out2,
+    output clk_out3f,
     output locked
 );
 
@@ -37,6 +38,7 @@ wire mmcm_clkfbout;
 wire clk_out0_int;
 wire clk_out1_int;
 wire clk_out2_int;
+wire clk_out3f;
 MMCME2_BASE #(
     .BANDWIDTH          ("OPTIMIZED"),
     .CLKOUT4_CASCADE    ("FALSE"),
@@ -55,11 +57,14 @@ MMCME2_BASE #(
     .CLKOUT2_DIVIDE     (DIV0),
     .CLKOUT2_DUTY_CYCLE (0.5),
     .CLKOUT2_PHASE      (90.0),
+    // CLKOUT3 for high-speed testing
+    .CLKOUT3_DIVIDE     (4),
     .REF_JITTER1        (0.01)
 ) MMCME2_BASE_inst (
     .CLKOUT0            (clk_out0_int),
     .CLKOUT1            (clk_out1_int),
     .CLKOUT2            (clk_out2_int),
+    .CLKOUT3            (clk_out3f),
     .LOCKED             (locked),
     .CLKIN1             (sysclk_buf),
     .PWRDWN             (1'b0),

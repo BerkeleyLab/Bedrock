@@ -1,0 +1,19 @@
+all: b2d_check fib_check
+
+# self-checking
+b2d_check: b2d_tb
+	vvp -N b2d_tb
+
+b2d_tb: b2d_tb.v b2d.v
+	iverilog -o b2d_tb b2d_tb.v b2d.v
+
+# check against golden output file
+fib_check: fib.out fib.gold
+	cmp fib.out fib.gold
+	@echo PASS
+
+fib.out: fib_tb
+	vvp -N fib_tb > $@
+
+fib_tb: fib_tb.v fib.v
+	iverilog -o fib_tb fib_tb.v fib.v

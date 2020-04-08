@@ -6,8 +6,8 @@
 // Artix or Kintex should be even better.
 module llspi #(
 	parameter dbg = "false",
-	parameter pace_set = 6   // Can override to 2 or 3 for testing
-	,parameter infifo_aw=5
+	parameter pace_set = 6,   // Can override to 2 or 3 for testing
+	parameter infifo_aw=5
 ) (
 	input clk,  // timespec 5.3 ns
 	// Physical FMC pins connected to digitizer board
@@ -39,10 +39,10 @@ module llspi #(
 	output [7:0] status,
 	// Host read port
 	input result_re,
-	output reg [7:0] host_result=8'hcc
-	,input sdi
-	,output sdo
-	,output sdio_as_i
+	output reg [7:0] host_result=8'hcc,
+	input sdi,
+	output sdo,
+	output sdio_as_i
 );
 
 initial begin

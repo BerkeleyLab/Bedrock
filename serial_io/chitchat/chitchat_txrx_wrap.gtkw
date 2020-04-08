@@ -1,15 +1,13 @@
 [timestart] 0
 [size] 1717 821
 [pos] -1 -1
-*-11.226988 1520 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-10.761273 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] chitchat_txrx_wrap_tb.
 [treeopen] chitchat_txrx_wrap_tb.i_dut.
 [sst_width] 292
 [signals_width] 341
 [sst_expanded] 1
 [sst_vpaned_height] 195
-@28
-chitchat_txrx_wrap_tb.tx_valid
 @22
 chitchat_txrx_wrap_tb.corrupt[15:0]
 @28
@@ -24,9 +22,10 @@ chitchat_txrx_wrap_tb.tx_cnt
 -i_cc_tx
 @28
 chitchat_txrx_wrap_tb.i_dut.i_chitchat_tx.tx_transmit_en
+chitchat_txrx_wrap_tb.i_dut.tx_valid0
+chitchat_txrx_wrap_tb.i_dut.tx_valid1
 @22
 chitchat_txrx_wrap_tb.i_dut.i_chitchat_tx.tx_data0[31:0]
-@23
 chitchat_txrx_wrap_tb.i_dut.i_chitchat_tx.tx_data1[31:0]
 @28
 chitchat_txrx_wrap_tb.i_dut.i_chitchat_tx.tx_location[2:0]

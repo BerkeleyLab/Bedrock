@@ -1,0 +1,64 @@
+[timestart] 116770
+[size] 1218 772
+[pos] 111 9
+*-13.466099 53780 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] freq_demo_tb.
+[treeopen] freq_demo_tb.dut.
+[treeopen] freq_demo_tb.dut.dec.
+[sst_width] 210
+[signals_width] 171
+[sst_expanded] 1
+[sst_vpaned_height] 214
+@800022
+freq_demo_tb.unk_clk[3:0]
+@28
+(0)freq_demo_tb.unk_clk[3:0]
+(1)freq_demo_tb.unk_clk[3:0]
+(2)freq_demo_tb.unk_clk[3:0]
+(3)freq_demo_tb.unk_clk[3:0]
+@1001200
+-group_end
+@28
+freq_demo_tb.dut.refclk
+freq_demo_tb.dut.refcnt_zero
+freq_demo_tb.dut.reset_fe
+@24
+freq_demo_tb.dut.clksel[1:0]
+@28
+freq_demo_tb.dut.refcnt_ending
+@22
+freq_demo_tb.dut.nib_out[3:0]
+@28
+freq_demo_tb.dut.rts
+freq_demo_tb.dut.cts
+@200
+-b2decimal
+@28
+freq_demo_tb.dut.dec.b2d.load
+@22
+freq_demo_tb.dut.dec.b2d.sr[11:0]
+@24
+freq_demo_tb.dut.dec.b2d.bdata[11:0]
+@22
+freq_demo_tb.dut.dec.b2d.nibble[3:0]
+@28
+freq_demo_tb.dut.dec.b2d.nstrobe
+@22
+freq_demo_tb.dut.dec.npt[3:0]
+@200
+-message
+@24
+freq_demo_tb.dut.msg_ctr[4:0]
+@820
+freq_demo_tb.dut.msg_pre_byte[7:0]
+@28
+freq_demo_tb.dut.msg_digit
+@820
+freq_demo_tb.dut.msg_byte[7:0]
+@28
+freq_demo_tb.dut.rts
+freq_demo_tb.dut.rts2
+freq_demo_tb.dut.busy
+freq_demo_tb.uart_tx
+[pattern_trace] 1
+[pattern_trace] 0

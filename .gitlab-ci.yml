@@ -5,7 +5,7 @@ stages:
   - program
 
 variables:
-  DEFAULT_XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1
+  XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1
   CI_REGISTRY: mohs.dhcp.lbl.gov
   CONTAINER_IMAGE: $CI_REGISTRY/testing_base
   CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
@@ -15,7 +15,7 @@ variables:
 image: $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
 
 services:
-  - name: docker:dind
+  - name: docker:18.09.7-dind
     entrypoint: ["dockerd-entrypoint.sh"]
     command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
 
@@ -24,6 +24,11 @@ include:
   - local: .gitlab/ci/serial_io.gitlab-ci.yml
   - local: .gitlab/ci/soc.gitlab-ci.yml
   - local: .gitlab/ci/oscope.gitlab-ci.yml
+  - local: .gitlab/ci/comms_top.gitlab-ci.yml
+
+leep_test:
+  script:
+    - cd projects/common && python3 -m unittest -v
 
 dsp_test:
   before_script:
@@ -39,6 +44,13 @@ digaree_test:
   script:
     - make
 
+chirp_test:
+  before_script:
+    - cd dsp/chirp
+  stage: test
+  script:
+    - make && make checks
+
 cmoc_test:
   before_script:
     - cd cmoc && export PYTHONPATH=../build-tools/
@@ -53,12 +65,43 @@ cordic_test:
   script:
     - make all
 
+freq_demo:
+  stage: test
+  script:
+    - cd homeless/freq_demo && make
+
+marble_sim:
+  stage: test
+  script:
+    - cd projects/test_marblemini && make all net_slave_check
+
+marble_synth:
+  before_script:
+    - cd projects/test_marblemini && ls /non-free
+  stage: synthesis
+  script:
+    - PATH=$XILINX_VIVADO/bin:$PATH make marble1.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 2 days
+    paths:
+      - projects/test_marblemini/marble1.bit
+      - projects/test_marblemini/vivado.log
+      - projects/test_marblemini/_xilinx/marble1.runs/impl_1/marble1_utilization_placed.rpt
+
 rtsim_test:
   before_script:
     - cd rtsim && make clean && make
   stage: test
   script:
     - make clean && make checks && make rtsim.dat
+
+make_docs:
+  before_script:
+    - cd build-tools/make-demo && make clean
+  stage: test
+  script:
+    - make check && make makefile.md && cmp ../makefile.md makefile.md
 
 flake8:
   stage: synthesis
@@ -70,33 +113,24 @@ badger_test:
     - cd badger/tests && make clean
   stage: test
   script:
-    - make && make Vrtefi_blob
+    - make
 
 peripheral_test:
   before_script:
-    - cd peripheral_drivers/idelay_scanner
+    - cd peripheral_drivers
   stage: test
   script:
     - make
-
-comms_top:
-  before_script:
-    - cd projects/comms_top && ls /non-free
-  stage: synthesis
-  script:
-    - XILINX_VIVADO=$DEFAULT_XILINX_VIVADO PATH=$DEFAULT_XILINX_VIVADO/bin:$PATH make comms_top.bit
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
-    expire_in: 1 week
-    paths:
-      - projects/comms_top/comms_top.bit
+    - cd idelay_scanner && make ; cd -
+    - cd ds1822 && make ; cd -
+    - cd i2cbridge && make
 
 badger_ac701:
   stage: synthesis
   before_script:
     - cd badger/tests && ls /non-free
   script:
-    - XILINX_VIVADO=$DEFAULT_XILINX_VIVADO PATH=$DEFAULT_XILINX_VIVADO/bin:$PATH make ac701_rgmii_vtest.bit
+    - PATH=$XILINX_VIVADO/bin:$PATH make ac701_rgmii_vtest.bit
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 2 days
@@ -105,6 +139,8 @@ badger_ac701:
 
 badger_ac701_run:
   stage: program
+  tags:
+    - deploy
   dependencies:
     - badger_ac701
   script:

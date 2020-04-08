@@ -1,0 +1,34 @@
+[timestart] 0
+[size] 1030 444
+[pos] -187 -167
+*-3.943416 20 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tmds_test_tb.
+[sst_width] 210
+[signals_width] 118
+[sst_expanded] 1
+[sst_vpaned_height] 99
+@28
+tmds_test_tb.dut.test_a
+tmds_test_tb.dut.test_b
+tmds_test_tb.dut.test_c
+tmds_test_tb.dut.test_d
+@800022
+tmds_test_tb.dut.tmds_p[3:0]
+@28
+(0)tmds_test_tb.dut.tmds_p[3:0]
+(1)tmds_test_tb.dut.tmds_p[3:0]
+(2)tmds_test_tb.dut.tmds_p[3:0]
+(3)tmds_test_tb.dut.tmds_p[3:0]
+@1001200
+-group_end
+@800022
+tmds_test_tb.dut.tmds_n[3:0]
+@28
+(0)tmds_test_tb.dut.tmds_n[3:0]
+(1)tmds_test_tb.dut.tmds_n[3:0]
+(2)tmds_test_tb.dut.tmds_n[3:0]
+(3)tmds_test_tb.dut.tmds_n[3:0]
+@1001200
+-group_end
+[pattern_trace] 1
+[pattern_trace] 0

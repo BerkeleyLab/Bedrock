@@ -1,0 +1,69 @@
+## Marble Mini meta-xdc file process with
+##   python ../meta-xdc.py Marble.xdc pin_map.csv > marblem_rgmii.xdc
+## Explicit dependence on Marble.xdc generated from
+##   git@github.com:BerkeleyLab/Marble.git
+
+## First column is pin name listed in Marble.xdc
+## Second column is pin name as needed by rgmii_hw_test.v
+
+# RGMII Rx
+RGMII_RX_CLK  RGMII_RX_CLK
+RGMII_RX_DV   RGMII_RX_CTRL
+RGMII_RXD0    {RGMII_RXD[0]}
+RGMII_RXD1    {RGMII_RXD[1]}
+RGMII_RXD2    {RGMII_RXD[2]}
+RGMII_RXD3    {RGMII_RXD[3]}
+
+# RGMII Tx
+RGMII_TX_CLK  RGMII_TX_CLK
+RGMII_TX_EN   RGMII_TX_CTRL
+RGMII_TXD0    {RGMII_TXD[0]}
+RGMII_TXD1    {RGMII_TXD[1]}
+RGMII_TXD2    {RGMII_TXD[2]}
+RGMII_TXD3    {RGMII_TXD[3]}
+
+# QSPI Boot Flash
+CFG_FCS    BOOT_CS_B
+CFG_MOSI   BOOT_MOSI
+CFG_DIN    BOOT_MISO
+
+# Debugging LEDs
+Pmod1_0    {LED[0]}
+Pmod1_1    {LED[1]}
+Pmod1_2    {LED[2]}
+Pmod1_3    {LED[3]}
+
+# MMC microcontroller for configuration - for real!?
+FPGA_SCK   SCLK
+FPGA_SSEL  CSB
+FPGA_MOSI  MOSI
+
+# 125 MHz from White Rabbit comes in via MGTREFCLK;
+# we should really turn on the GTP and use its TXOUTCLK.
+# 20 MHz from Y3 is a poor substitute
+CLK20_VCXO SYSCLK_P
+
+# Miscellaneous
+PHY_RSTn   PHY_RSTN
+Pmod1_4    RESET
+VCXO_EN    VCXO_EN
+
+# Literal output follows
+
+# Special pin properties for RGMII
+# Invalid to flag RGMII_RX_CLK as IOB TRUE
+set_property IOB TRUE [get_ports {RGMII_RX_CTRL}]
+set_property IOB TRUE [get_ports {RGMII_RXD*}]
+set_property IOB TRUE [get_ports {RGMII_TX*}]
+set_property SLEW FAST [get_ports {RGMII_TX*}]
+
+# Bank 0 setup
+set_property CFGBVS VCCO [current_design]
+set_property CONFIG_VOLTAGE 3.3 [current_design]
+
+# Clocks
+create_clock -name sys_clk -period 50.00 [get_ports SYSCLK_P]
+create_clock -period 8.00 -name rx_clk [get_ports RGMII_RX_CLK]
+set_clock_groups -name async_clks -asynchronous \
+  -group [get_clocks -include_generated_clocks sys_clk] \
+  -group [get_clocks -include_generated_clocks rx_clk]

@@ -1,4 +1,3 @@
-`timescale 1ns / 1ns
 module spi_flash_engine(
 	input clk,
 	// 4-wire to e.g., Winbond W25X16
@@ -18,6 +17,9 @@ module spi_flash_engine(
 	output pack_write_strobe,  // single-cycle for each data byte
 	output [7:0] pack_data_out
 );
+
+parameter xc6slx = 0;  // Include gateway to an ICAP_SPARTAN6
+parameter seven = 0;  // Include gateway to an ICAPE2 on Xilinx 7-series
 
 // packet write, and indeed the whole engine, will stall until
 // pack_write_ack is received.  The ack will often happen immediately,
@@ -111,18 +113,24 @@ wire [15:0] icap_wdata = {icap_upper_data,pack_data_in_rev};
 wire [15:0] icap_result;
 wire icap_busy;
 
-//`define SP60X 1
-`ifdef SP60X
-// 16-bit I port (for writing) and O port (for reading)
-ICAP_SPARTAN6 intern(.CLK(icap_clk),
+generate if (xc6slx == 1) begin: ICAP6
+    // 16-bit I port (for writing) and O port (for reading)
+    ICAP_SPARTAN6 intern(.CLK(icap_clk),
 	.CE(~icap_en), // icap_en is active high, CE "pin" is active low
 	.WRITE(1'b0), // funny name for a pin where "0" means write
 	.I(icap_wdata),
 	.O(icap_result), .BUSY(icap_busy));
-`else
-assign icap_result=0;
-assign icap_busy=0;
-`endif
+end else if (seven == 1) begin: ICAP7
+    // see UG953 and
+    // https://opencores.org/projects/wbicapetwo by Dan Gisselquist
+    ICAPE2 #(.ICAP_WIDTH("X16")) reconfig(.CLK(icap_clk),
+	.CSIB(~icap_en), .RDWRB(1'b0),
+	.I(icap_wdata), .O(icap_result));
+    assign icap_busy=0;
+end else begin
+    assign icap_result=0;
+    assign icap_busy=0;
+end endgenerate
 wire [7:0] icap_result_byte={7'b1010000,icap_busy};  // XXX useless for actually reading data
 
 assign pack_read_strobe=word2&running;

@@ -1,5 +1,7 @@
 `timescale 1ns / 1ns
 // 2 steps of CIC integration. Reset to 0
+// *** N.B: USES AN UNDOCUMENTED IMPLIED DIVIDE-BY-TWO
+
 module double_inte(
 	input clk,  // timespec 8.4 ns
 	input signed [dwi-1:0] in,  // possibly muxed

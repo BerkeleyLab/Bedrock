@@ -1,0 +1,36 @@
+[timestart] 0
+[size] 1000 600
+[pos] 175 34
+*-7.796319 324 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] ad5662_tb.
+[sst_width] 210
+[signals_width] 110
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+ad5662_tb.tick
+@22
+ad5662_tb.data[15:0]
+@28
+ad5662_tb.send
+ad5662_tb.sclk
+ad5662_tb.sdo
+@800028
+ad5662_tb.sync_[1:0]
+@28
+(0)ad5662_tb.sync_[1:0]
+(1)ad5662_tb.sync_[1:0]
+ad5662_tb.busy
+@1001200
+-group_end
+@200
+-DUT
+@24
+ad5662_tb.dut.count[5:0]
+@28
+ad5662_tb.dut.running
+ad5662_tb.dut.shift
+@22
+ad5662_tb.dut.sr[23:0]
+[pattern_trace] 1
+[pattern_trace] 0

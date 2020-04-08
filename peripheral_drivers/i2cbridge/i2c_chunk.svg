@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="288" >
+<line x1="90" y1="48" x2="70" y2="48" stroke="blue" stroke-width="1" />
+<text x="97" y="53" font-family="Verdana, sans-serif" font-size="16" text-anchor="start">clk</text>
+<line x1="90" y1="72" x2="70" y2="72" stroke="blue" stroke-width="3" />
+<text x="97" y="77" font-family="Verdana, sans-serif" font-size="16" text-anchor="start">lb_addr</text>
+<line x1="90" y1="96" x2="70" y2="96" stroke="blue" stroke-width="3" />
+<text x="97" y="101" font-family="Verdana, sans-serif" font-size="16" text-anchor="start">lb_din</text>
+<line x1="90" y1="120" x2="70" y2="120" stroke="blue" stroke-width="1" />
+<text x="97" y="125" font-family="Verdana, sans-serif" font-size="16" text-anchor="start">lb_write</text>
+<line x1="282" y1="72" x2="302" y2="72" stroke="blue" stroke-width="3" />
+<text x="275" y="77" font-family="Verdana, sans-serif" font-size="16" text-anchor="end">lb_dout</text>
+<line x1="90" y1="144" x2="70" y2="144" stroke="blue" stroke-width="1" />
+<text x="97" y="149" font-family="Verdana, sans-serif" font-size="16" text-anchor="start">run_cmd</text>
+<line x1="90" y1="168" x2="70" y2="168" stroke="blue" stroke-width="1" />
+<text x="97" y="173" font-family="Verdana, sans-serif" font-size="16" text-anchor="start">freeze</text>
+<line x1="282" y1="96" x2="302" y2="96" stroke="blue" stroke-width="1" />
+<text x="275" y="101" font-family="Verdana, sans-serif" font-size="16" text-anchor="end">run_stat</text>
+<line x1="282" y1="120" x2="302" y2="120" stroke="blue" stroke-width="1" />
+<text x="275" y="125" font-family="Verdana, sans-serif" font-size="16" text-anchor="end">updated</text>
+<line x1="282" y1="144" x2="302" y2="144" stroke="blue" stroke-width="1" />
+<text x="275" y="149" font-family="Verdana, sans-serif" font-size="16" text-anchor="end">err_flag</text>
+<line x1="282" y1="168" x2="302" y2="168" stroke="blue" stroke-width="3" />
+<text x="275" y="173" font-family="Verdana, sans-serif" font-size="16" text-anchor="end">hw_config</text>
+<line x1="282" y1="192" x2="302" y2="192" stroke="blue" stroke-width="1" />
+<text x="275" y="197" font-family="Verdana, sans-serif" font-size="16" text-anchor="end">scl</text>
+<line x1="282" y1="216" x2="302" y2="216" stroke="blue" stroke-width="1" />
+<text x="275" y="221" font-family="Verdana, sans-serif" font-size="16" text-anchor="end">sda_drive</text>
+<line x1="90" y1="192" x2="70" y2="192" stroke="blue" stroke-width="1" />
+<text x="97" y="197" font-family="Verdana, sans-serif" font-size="16" text-anchor="start">sda_sense</text>
+<line x1="90" y1="216" x2="70" y2="216" stroke="blue" stroke-width="1" />
+<text x="97" y="221" font-family="Verdana, sans-serif" font-size="16" text-anchor="start">rst</text>
+<line x1="90" y1="240" x2="70" y2="240" stroke="blue" stroke-width="1" />
+<text x="97" y="245" font-family="Verdana, sans-serif" font-size="16" text-anchor="start">intp</text>
+<line x1="90" y1="24" x2="282" y2="24" stroke="blue" stroke-width="2" />
+<line x1="90" y1="264" x2="282" y2="264" stroke="blue" stroke-width="2" />
+<line x1="90" y1="24" x2="90" y2="264" stroke="blue" stroke-width="2" />
+<line x1="282" y1="24" x2="282" y2="264" stroke="blue" stroke-width="2" />
+</svg>

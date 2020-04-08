@@ -8,6 +8,7 @@
 
 #include "udp_model.h"
 unsigned short udp_port;  /* Global, set below */
+int badger_client;        /* Global, set below */
 
 // Current simulation time (64-bit unsigned)
 vluint64_t main_time = 0;
@@ -49,6 +50,7 @@ int main(int argc, char** argv, char** env) {
 
 	// Determine UDP port number from command line options
 	udp_port = 3010;  // default
+	badger_client = 1;  // only configuration used here
 	const char* flag2 = Verilated::commandArgsPlusMatch("udp_port=");
 	if (flag2) {
 		udp_port = atoi(flag2+10);
@@ -113,7 +115,7 @@ int main(int argc, char** argv, char** env) {
 	top->final();
 	if (tfp) { tfp->close(); tfp = NULL; }
 
-    //  Coverage analysis (since test passed)
+	//  Coverage analysis (since test passed)
 #if VM_COVERAGE
 	Verilated::mkdir("logs");
 	VerilatedCov::write("logs/coverage.dat");

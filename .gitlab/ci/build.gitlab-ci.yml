@@ -3,6 +3,7 @@ build:
   stage: build
   before_script:
     - cat /etc/hosts
+    - cat /etc/resolv.conf
     - docker info
     - echo $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
     - echo $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME
