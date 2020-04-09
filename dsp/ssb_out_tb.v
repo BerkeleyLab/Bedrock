@@ -4,18 +4,26 @@ module ssb_out_tb;
 
 reg clk, trace;
 integer cc;
-reg fail=0;
+integer out_file;
+
+reg single_out;
+
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("ssb_out.vcd");
 		$dumpvars(5,ssb_out_tb);
 	end
-	trace = $test$plusargs("trace");
-	for (cc=0; cc<220; cc=cc+1) begin
+	single_out = $test$plusargs("single");
+	if ($test$plusargs("trace")) begin
+		trace = 1;
+		out_file = $fopen("ssb_out.dat", "w");
+	end
+	for (cc=0; cc<360; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("%s", fail ? "FAIL" : "PASS");
+	if (trace) $display("Please use contents of ssb_out.dat for functional validation");
+	else $display("WARNING: Not a self-checking testbench. Will always pass.");
 	$finish();
 end
 
@@ -40,12 +48,24 @@ rot_dds #(.lo_amp(18'd74840)) dds(.clk(clk), .reset(1'b0),
 
 wire signed [17:0] out_xy;
 wire signed [15:0] dac1_out0, dac1_out1, dac2_out0, dac2_out1;
-ssb_out dut(.clk(clk), .div_state(div_state), .drive(drive), .enable(1'b1),
+wire ssb_flip = single_out ? 1'bx : 1'b0; // In single-drive mode, ssb_flip should be no-op
+
+ssb_out dut(
+	.clk(clk), .div_state(div_state), .drive(drive), .enable(1'b1),
+	.ssb_flip(ssb_flip), .aftb_coeff(16'd18646),
 	.cosa(cosa), .sina(sina),
 	.dac1_out0(dac1_out0), .dac1_out1(dac1_out1),
 	.dac2_out0(dac2_out0), .dac2_out1(dac2_out1)
 );
 
-always @(negedge clk) if (trace) $display(dac1_out0);
+always @(negedge clk) if (trace) begin
+	if (!single_out) begin
+		$fwrite(out_file, "%d %d\n", dac1_out0, dac2_out0);
+		$fwrite(out_file, "%d %d\n", dac1_out1, dac2_out1);
+	end else begin
+		$fwrite(out_file, "%d\n", dac1_out0);
+		$fwrite(out_file, "%d\n", dac1_out1);
+	end
+end
 
 endmodule

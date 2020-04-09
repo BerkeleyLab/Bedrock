@@ -8,7 +8,7 @@
 // Up to seven clients, each handling a UDP port, attach here.
 //
 // This module instantiates a series of modules for the data path
-// linking GMII Rx through to GMII Tx, shown in rtefi.eps.
+// linking GMII Rx through to GMII Tx, shown in doc/rtefi.eps.
 // The several steps have instance names starting with a through e
 // (a_scan through e_crc).
 //
@@ -38,7 +38,7 @@ module rtefi_center(
 	// set start to trigger transmission, wait for done, reset start
 	input tx_mac_start,
 	output tx_mac_done,
-	// As documented in clients.eps
+	// As documented in doc/clients.eps
 	output [10:0] len_c,
 	output [6:0] raw_l,
 	output [6:0] raw_s,

@@ -1,0 +1,98 @@
+<h1 id="packet-badger-status-progress">Packet Badger Status / Progress</h1>
+<ul>
+<li>2018-11-02: Input scanner (scanner.v) can properly detect Ethernet, ARP, IP, ICMP, and UDP. Makefile includes useful regression tests.</li>
+<li>2018-11-13: Simulation constructs working ARP and ICMP echo (ping) replies, verified with Linux tap interface.</li>
+<li>2018-11-15: Simulation (Linux tap) also gives UDP echo.</li>
+<li>2018-11-18: Hardware (SP605) responds to ARP and ICMP echo.</li>
+<li>2018-11-20: ARP, ICMP echo, and UDP all work reliably with tap using either Icarus or Verilator, and on SP605.</li>
+<li>2018-11-23: Responds only to configured set of UDP ports</li>
+<li>2018-11-24: Multiplexes between (trivial) UDP port sources</li>
+<li>2018-11-28: Documented, tested, and used client interface</li>
+<li>2018-12-05: Working mem_gateway, with regression test, confirmed on SP605</li>
+<li>2018-12-10: Fixed dropped-packets problem, tested with &gt; 10^8 packets</li>
+<li>2018-12-20: Demonstrated functional on AC701/RGMII, synthesizing with XST</li>
+<li>2018-12-21: Demonstrated functional on AC701 when synthesizing with Vivado</li>
+<li>2019-03-26: Refactored udp-vpi.c to enable Verilator test of mem_gateway.v</li>
+<li>2019-04-29: Demonstrated Tx MAC working on hardware</li>
+<li>2019-05-31: MAC supporting TFTP works in simulation</li>
+</ul>
+<p>Synthesized by XST 14.7 for Spartan-6:</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><strong>module</strong></th>
+<th style="text-align: center;"><strong>LUTs</strong></th>
+<th style="text-align: center;"><strong>RAMB16</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">scanner.v</td>
+<td style="text-align: center;">275</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">construct.v</td>
+<td style="text-align: center;">192</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">xformer.v</td>
+<td style="text-align: center;">93</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">ethernet_crc_add.v</td>
+<td style="text-align: center;">94</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">udp_port_cam_v</td>
+<td style="text-align: center;">31</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">rtefi_blob.v</td>
+<td style="text-align: center;">1024</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">gmii_hw_test.v</td>
+<td style="text-align: center;">1242</td>
+<td style="text-align: center;">4</td>
+</tr>
+</tbody>
+</table>
+<p>This Verilog code is intentionally portable and standards-based. It has been tested using:</p>
+<ul>
+<li>verilator 3.900 (stock Debian stretch)</li>
+<li>verilator 4.008 (git from December 2018)</li>
+<li>iverilog 10.1 (stock Debian stretch)</li>
+<li>iverilog 11.0 (git from December 2018)</li>
+<li>Xilinx XST 14.7</li>
+<li>Xilinx Vivado 2015.3, 2017.4, 2018.1</li>
+</ul>
+<p>All the .eps files here are created with and editable by xcircuit.</p>
+<p>Files in tests/local/ are (or should be) exact copies of files found in other LBNL/ATG repos, and would presumably not be duplicated after this code is fully attached to the LBNL/ATG project infrastructure. Some of the files in tests/sp605/, tests/ac701/, and tests/kc705/ might also be in that category.</p>
+<p>Next steps, pretty much unordered:</p>
+<ul>
+<li>Rename modules, signals, and project</li>
+<li>Create an instantiation template along with rtefi_blob.v</li>
+<li>Update documentation</li>
+<li>Analyze, test, and document limits on p_offset</li>
+<li>Better force or test that all GMII signals are latched in IOBs</li>
+<li>Do something with GMII_RX_ER, test</li>
+<li>Decrement TTL as part of echo loop mitigation strategy?</li>
+<li>Consider dropping UDP packets with zero data length</li>
+<li>UDP Rx checksum?</li>
+<li>Add SPI clients</li>
+<li>Find help to exercise this on an Altera board</li>
+<li>Increase minimum number of 0x55 in Tx preamble</li>
+<li>Hook to allow use of TAP device other than tap0</li>
+<li>Add monitoring hooks, like packet, byte, and error counts</li>
+<li>Add authentication option</li>
+<li>Refactor and rewrite for clarity and reduced LUT count</li>
+<li>Attach Tx and Rx MAC to a soft core</li>
+<li>Add IEEE-1588 (PTP) feature to MAC</li>
+<li>Make optional based on parameters: ARP and ICMP echo</li>
+</ul>

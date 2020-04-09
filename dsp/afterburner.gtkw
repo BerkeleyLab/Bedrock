@@ -1,0 +1,20 @@
+[timestart] 188
+[size] 1493 417
+[pos] 37 -64
+*-7.323990 505 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] afterburner_tb.
+[sst_width] 264
+[signals_width] 203
+[sst_expanded] 1
+[sst_vpaned_height] 77
+@10420
+afterburner_tb.dut.data[16:0]
+afterburner_tb.dut.data_out0[15:0]
+afterburner_tb.dut.data_out1[15:0]
+afterburner_tb.outs[15:0]
+afterburner_tb.wave2[16:0]
+@28
+afterburner_tb.fail1
+afterburner_tb.fail
+[pattern_trace] 1
+[pattern_trace] 0

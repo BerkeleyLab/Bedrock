@@ -4,7 +4,7 @@ CORDIC_DIR = .
 -include ../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 
-all: cordic0_test cordic1_test cordic2_test cordic3_test
+all: cordic_ptor_check cordic_rtop_check cordic_bias_check cordic_slve_check perf.png
 
 # Resource exported to projects that use us
 include rules.mk
@@ -18,37 +18,37 @@ CORDIC_BASE_V = cordicg_b$(DPW).v cstageg.v addsubg.v
 cordicg_tb: $(CORDIC_BASE_V)
 VFLAGS_cordicg_tb = -DDPW=$(DPW) -pnstg=$(NSTG)
 
-cordic0.dat: cordicg_tb
+cordic_ptor.dat: cordicg_tb
 	$(VVP) $< +op=0 > $@
 
-cordic1.dat: cordicg_tb
+cordic_rtop.dat: cordicg_tb
 	$(VVP) $< +op=1 > $@
 
-cordic2.dat: cordicg_tb
+cordic_bias.dat: cordicg_tb
 	$(VVP) $< +rmix=1 > $@
 
-cordic3.dat: cordicg_tb
+cordic_slve.dat: cordicg_tb
 	$(VVP) $< +op=3 > $@
 
-cordic0_test: cordic_test.awk cordic0.dat
+cordic_ptor_check: cordic_check.py cordic_ptor.dat
 	@echo
 	@echo "Check of x,y,theta->x,y"
-	$(AWK) -f $^
+	$(PYTHON) $< $(word 2, $^)
 
-cordic1_test: cordic_test.awk cordic1.dat
+cordic_rtop_check: cordic_check.py cordic_rtop.dat
 	@echo
 	@echo "Check of x,y,theta->r,theta"
-	$(AWK) -f $^
+	$(PYTHON) $< $(word 2, $^)
 
-cordic2_test: cordic2_test.awk cordic2.dat
+cordic_bias_check: cordic_check.py cordic_bias.dat
 	@echo
 	@echo "Check of downconversion bias"
-	$(AWK) -f $^
+	$(PYTHON) $< bias $(word 2, $^)
 
-cordic3_test: cordic_test.awk cordic3.dat
+cordic_slve_check: cordic_check.py cordic_slve.dat
 	@echo
 	@echo "Check of slave mode"
-	$(AWK) -f $^
+	$(PYTHON) $< $(word 2, $^)
 
 
 # synthesis targets
@@ -73,9 +73,10 @@ cordic_k7.bit: cordic_wrap.v $(CORDIC_BASE_V) blank_k7.ucf
 perf.dat: perf_run.sh
 	sh $< $(NEST_MAKE) > $@
 
+# perf_plot.py now checks for excess noise
 perf.png: perf_plot.py perf.dat
 	$(PYTHON) $<
 
-clean:
-	rm -rf _xilinx _autogen
-	rm -f cordicg_b[1-9]*.v cordicg_tb cordic?.dat cordic_*.bit perf.png
+CLEAN += cordicg_b[1-9]*.v cordicg_tb cordic_*.dat cordic_*.bit perf.png
+CLEAN_DIRS += _xilinx
+include $(BUILD_DIR)/bottom_rules.mk
