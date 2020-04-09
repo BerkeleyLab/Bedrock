@@ -23,11 +23,13 @@ RUN cd software && \
 FROM debian:buster-slim as basic-iverilog
 
 # Vivado needs libtinfo5, at least for Artix?
+# libz-dev required for Verilator FST support
 RUN apt-get update && \
 	apt-get install -y \
 	git \
 	iverilog \
 	verilator \
+	libz-dev \
 	libbsd-dev \
 	xc3sprog \
 	build-essential \
