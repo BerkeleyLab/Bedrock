@@ -300,7 +300,6 @@ wire cavity1_detune_stb;
 wire [6:0] cavity0_sat_count;
 wire [6:0] cavity1_sat_count;
 wire [2:0] dtrace_status;
-wire [23:0] trace_lb_out;
 wire [21:0] telem_monitor;
 wire signed [13:0] fdbk_drive_lb_out;
 wire [25:0] freq_multi_count_out;
@@ -446,7 +445,6 @@ always @(posedge lb_clk) begin
 	  //24'b1???_????_????_????_????_????: lb_din <= mirror_out_0;  // automatic address map
 		24'h10????: lb_din <= hist_dout;
 		24'h11????: lb_din <= phasex_dout;
-		24'h12????: lb_din <= banyan_data;
 		24'h13????: lb_din <= scanner_result_val;
 		24'h14????: lb_din <= trace_data;
 		24'h18????: lb_din <= slow_data[7:0];
@@ -457,7 +455,7 @@ always @(posedge lb_clk) begin
 		24'h19??4?: lb_din <= reg_bank_4;
 		24'h19??5?: lb_din <= reg_bank_5;
 		24'h19007?: lb_din <= idelay_mirror_val;  // xxxxf0 through xxxff
-		24'h1c????: lb_din <= trace_lb_out;
+		24'b0001_11??_????_????_????_????: lb_din <= banyan_data;
 		24'b????_????_????_1???_????_????: lb_din <= config_rom_out;  // xxx800 through xxxfff, 2K
 		default: lb_din <= 32'hfaceface;
 	endcase

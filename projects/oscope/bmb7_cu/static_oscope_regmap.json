@@ -24,7 +24,7 @@
         "access": "r",
         "addr_width": 17,
         "sign": "unsigned",
-        "base_addr": 2097152,
+        "base_addr": 1835008,
         "data_width": 32
     },
     "scanner_result": {

@@ -91,7 +91,7 @@ always @(posedge clk) begin
 	P2_SDI         <= mosi & ~poll_sel; // & ~adc_sel;
 	P2_POLL_SCLK   <= sclk & poll_sel;
 	P2_POLL_MOSI   <= mosi & poll_sel;
-	P2_ADC_SDIO_DIR <= ctl_bits[4];
+	P2_ADC_SDIO_DIR <= ~ctl_bits[4];
 	P2_adc_grab <= adcsdio_asi;
 	P2_dac_grab <= P2_DAC_SDO;
 	adc_sdio_iob <= mosi & adc_sel;
