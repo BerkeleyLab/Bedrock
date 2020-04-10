@@ -7,7 +7,7 @@ DAUGHTER = base
 XILINX_TOOL := VIVADO
 
 include ../../../dir_list.mk
-OSCOPE_COMMON_DIR=../bmb7_cu
+OSCOPE_COMMON_DIR=../common
 
 APP_NAME = oscope
 
