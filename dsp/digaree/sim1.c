@@ -76,12 +76,41 @@ static int inv(int a, int shift)
 	return shifter(r, shift, "inv");
 }
 
-void set_result_ab(int a, int b)
+static int invsqrt(int a, int shift)
+{
+	// Using convention that a represents -1 to 1, start by taking abs(a).
+	// Design input range 1/64 to 1, output range 1 to 1/8.
+	// Actual function approximated is therefore 1/(8*sqrt(a)).
+	// Table is segmented into three ranges of two octaves each; see sqrt1.py.
+	// Lots of ugly special cases.
+	const unsigned int iscale = 8;
+	unsigned int u = (a<0) ? -a : a;
+	u = u >> (18+EXTRA-2-iscale);
+	unsigned int u0 = u;  // almost just for printing
+	unsigned int ur;
+	for (ur = 512; u>7; ur = ur >> 1) u = u >> 2;
+	switch(u) {
+	  case 2: ur = ur + 3*ur/4; break;
+	  case 3: ur = ur + ur/2; break;
+	  case 4: ur = ur + ur/4; break;
+	  case 5: ur = ur + ur/4; break;
+	  default: break;
+	}
+	if (u0<2) ur=1023;
+	// printf("LUT in %d out %d\n", u0, ur);
+	int r = (a<0) ? -ur : ur;
+	r = r << (18+4+EXTRA-3-iscale);
+	if (TRACE) printf("invsqrt %d (%.5f) [%u] %d (%.5f)\n", a, F(a), u, r, F(r));
+	return shifter(r, shift, "invsqrt");
+}
+
+
+static void set_result_ab(int a, int b)
 {
 	printf("result_ab %.6f %.6f\n", F(a), F(b));
 }
 
-void set_result_cd(int a, int b)
+static void set_result_cd(int a, int b)
 {
 	printf("result_cd %.6f %.6f\n", F(a), F(b));
 }
@@ -92,7 +121,7 @@ void set_result_cd(int a, int b)
 struct persist_var { char *name; int value; } persist_list[MAX_PERSIST];
 unsigned persist_count = 0;
 
-int persist_get(const char *name)
+static int persist_get(const char *name)
 {
 	for (unsigned u=0; u<persist_count; u++) {
 		if (strcmp(name, persist_list[u].name) == 0) {
@@ -121,55 +150,94 @@ static int init=1;
 init = 0;
 }
 
-void invcheck(void)
+static void invcheck(void)
 {
 	// See invcheck.py
 	int two = 131072;  // 1/16.0
 	for (int x = 2500; x < 2090000; x += 7*x/300) {
 		int s_guess = inv(x, 0);
+		// refinement 1
 		int s_r2_e = mul(s_guess, x, 3);
 		int s_r2_f = sub(two, s_r2_e, 3);
 		int s_r2 = mul(s_guess, s_r2_f, 3);
+		// refinement 2
 		int s_r1_e = mul(s_r2, x, 3);
 		int s_r1_f = sub(two, s_r1_e, 3);
 		int s_r1 = mul(s_r2, s_r1_f, 3);
+		// refinement 3
 		int s_e = mul(s_r1, x, 3);
 		int s_f = sub(two, s_e, 3);
 		int s = mul(s_r1, s_f, 3);
+		//
 		long int perfect = 17179869184L / (long) x;
 		printf("plot %7d %7d %7d %7d %7d %7ld\n", x, s_guess, s_r2, s_r1, s, perfect);
 	}
 }
 
-void file_loop(const char *fname, int given[], unsigned given_size)
+static int invsqrtcheck(void)
+{
+	int three = 786432;  // 3/8.0
+	int fail = 0;
+	for (int x = 2500; x < 2090000; x += 7*x/300) {
+		int s_r0 = invsqrt(x, 0);
+		// refinement 1
+		int s_r0_s = mul(s_r0, s_r0, 0);
+		int s_r0_p = mul(s_r0_s, x, 3);
+		int s_r0_d = sub(three, s_r0_p, 1);
+		int s_r1 = mul(s_r0, s_r0_d, 2);
+		// refinement 2
+		int s_r1_s = mul(s_r1, s_r1, 0);
+		int s_r1_p = mul(s_r1_s, x, 3);
+		int s_r1_d = sub(three, s_r1_p, 1);
+		int s_r2 = mul(s_r1, s_r1_d, 2);
+		// refinement 3
+		int s_r2_s = mul(s_r2, s_r2, 0);
+		int s_r2_p = mul(s_r2_s, x, 3);
+		int s_r2_d = sub(three, s_r2_p, 1);
+		int s = mul(s_r2, s_r2_d, 2);
+		//
+		double check = ((long int)s*(long int)s)/2097152*x/68719476736.0;
+		int fault = (x > 32768) && ((check > 1.0005 || check < 0.9999));
+		if (fault) fail = 1;
+		printf("plot %7d %7d %7d %7d %7d %.6f %s\n", x, s_r0, s_r1, s_r2, s, check, fault ? "BAD" : ".");
+	}
+	return fail;
+}
+
+static void file_loop(const char *fname, int given[], unsigned given_size)
 {
 	char iline[80];
-        FILE *file2 = fopen(fname, "r");
-        long int r[8];
-        const int fs = 64;  // Input file is 16 bits, simulator is 22 bits
-        while (fgets(iline, sizeof(iline), file2)) {
-                // printf("%s", iline);
-                char *ss = iline;
-                for (unsigned jx=0; jx<8 && ss; jx++) {
-                        r[jx] = strtol(ss, &ss, 0);
-                        // printf("%ld\n", r[jx]);
-                }
-                // Provision for channel remapping, not used, hurray!
-                given[0] = r[2]*fs;  given[1] = r[3]*fs;  // forward
-                given[2] = r[4]*fs;  given[3] = r[5]*fs;  // reverse
-                given[4] = r[6]*fs;  given[5] = r[7]*fs;  // cavity
-                for (unsigned u=0; u<given_size; u++) {
-                        printf("%3u: given %9d (%+8.5f)\n", u, given[u], (double)given[u]/(double)VMAX);
-                }
-                cycle(given);
-        }
+	FILE *file2 = fopen(fname, "r");
+	long int r[8];
+	const int fs = 64;  // Input file is 16 bits, simulator is 22 bits
+	while (fgets(iline, sizeof(iline), file2)) {
+		// printf("%s", iline);
+		char *ss = iline;
+		for (unsigned jx=0; jx<8 && ss; jx++) {
+			r[jx] = strtol(ss, &ss, 0);
+			// printf("%ld\n", r[jx]);
+		}
+		// Provision for channel remapping, not used, hurray!
+		given[0] = r[2]*fs;  given[1] = r[3]*fs;  // forward
+		given[2] = r[4]*fs;  given[3] = r[5]*fs;  // reverse
+		given[4] = r[6]*fs;  given[5] = r[7]*fs;  // cavity
+		for (unsigned u=0; u<given_size; u++) {
+			printf("%3u: given %9d (%+8.5f)\n", u, given[u], (double)given[u]/(double)VMAX);
+		}
+		cycle(given);
+	}
 }
 
 int main(int argc, char *argv[])
 {
-	if ((argc > 1) && strcmp(argv[1],"invcheck")==0) {
+	if ((argc > 1) && strcmp(argv[1], "invcheck")==0) {
 		invcheck();
 		return 0;
+	}
+	if ((argc > 1) && strcmp(argv[1], "invsqrtcheck")==0) {
+		int rc =invsqrtcheck();
+		printf(rc ? "FAIL\n" : "PASS\n");
+		return rc;
 	}
 	unsigned int u, given_size;
 	int given[16];

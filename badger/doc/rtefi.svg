@@ -1,0 +1,284 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.1"
+   id="rtefi" width="10.5in" height="7.77in"  viewBox="-6 -6 2694 1996">
+<desc>
+XCircuit Version 3.8
+File "rtefi.eps" Page 1
+</desc>
+<g stroke="black">
+<g transform="matrix( 1.2    0   -0  1.2 1354 160)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-791" y="0">LBNL ATG's Real-Time Ethernet Fabric Infrastructure (building on PSPEPS experience)</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1  42 960)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-42" y="13">GMII</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1  42 912)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-43" y="13">Input</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 602 928)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-120" y="13">Input scanner</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1098 928)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-70" y="13">DPRAM</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 730 1648)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">Status known by end of each packet:</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 778 1936)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">CRC32 OK</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 778 1984)" fill="#999999" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">Authentication passed</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 778 1888)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">UDP</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 778 1696)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">MAC match</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 778 1744)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">IP match</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 778 1840)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">ICMP echo</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 778 1792)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">ARP request</tspan>
+</text></g>
+<path d="M458,880 L458,976 746,976 746,880 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M106,928 L442,928 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M430,936 C440,931 443,931 458,928 C443,925 440,925 430,920 C432,926 432,930 430,936 " fill="#000000" stroke="none" />
+<path d="M1002,880 L1002,976 1194,976 1194,880 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M922,928 L986,928 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M974,936 C984,931 987,931 1002,928 C987,925 984,925 974,920 C976,926 976,930 974,936 " fill="#000000" stroke="none" />
+<path d="M1098,256 L1098,880 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M1098,976 L1098,1200 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1130 304)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">Tx clock domain</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1066 304)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-288" y="0">Rx clock domain</tspan>
+</text></g>
+<path d="M2426,928 L2538,928 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M2526,936 C2536,931 2539,931 2554,928 C2539,925 2536,925 2526,920 C2528,926 2528,930 2526,936 " fill="#000000" stroke="none" />
+<g transform="matrix(   1    0   -0    1 2570 976)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">GMII</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2570 928)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">Output</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 346 1072)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-69" y="13">MAC/IP</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 346 1120)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-56" y="13">Config</tspan>
+</text></g>
+<path d="M250,1040 L250,1168 442,1168 442,1040 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 362 1312)" fill="#999999" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-41" y="13">keys</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 346 1264)" fill="#999999" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-122" y="13">authentication</tspan>
+</text></g>
+<path d="M202,1232 L202,1360 490,1360 490,1232 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#999999" />
+<path d="M506,992 L506,1104 458,1104 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M570,992 L570,1296 506,1296 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#999999" />
+<path d="M470,1112 C460,1107 457,1107 442,1104 C457,1101 460,1101 470,1096 C468,1102 468,1106 470,1112 " fill="#000000" stroke="none" />
+<path d="M534,1304 C524,1299 521,1299 506,1296 C521,1293 524,1293 534,1288 C532,1294 532,1298 534,1304 " fill="#999999" stroke="none" />
+<path d="M514,1004 C509,994 509,991 506,976 C503,991 503,994 498,1004 C504,1002 508,1002 514,1004 " fill="#000000" stroke="none" />
+<path d="M578,1004 C573,994 573,991 570,976 C567,991 567,994 562,1004 C568,1002 572,1002 578,1004 " fill="#999999" stroke="none" />
+<path d="M634,976 L634,1632 698,1632 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M686,1640 C696,1635 699,1635 714,1632 C699,1629 696,1629 686,1624 C688,1630 688,1634 686,1640 " fill="#000000" stroke="none" />
+<path d="M2170,816 L2170,1040 2426,1040 2426,816 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 2298 928)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-81" y="13">signature</tspan>
+</text></g>
+<path d="M2142,936 C2152,931 2155,931 2170,928 C2155,925 2152,925 2142,920 C2144,926 2144,930 2142,936 " fill="#000000" stroke="none" />
+<g transform="matrix(   1    0   -0    1 2298 992)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-74" y="13">insertion</tspan>
+</text></g>
+<path d="M2298,1056 L2298,1296 2234,1296 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#cccccc" />
+<path d="M2246,1304 C2236,1299 2233,1299 2218,1296 C2233,1293 2236,1293 2246,1288 C2244,1294 2244,1298 2246,1304 " fill="#cccccc" stroke="none" />
+<path d="M2306,1068 C2301,1058 2301,1055 2298,1040 C2295,1055 2295,1058 2290,1068 C2296,1066 2300,1066 2306,1068 " fill="#cccccc" stroke="none" />
+<g transform="matrix(   1    0   -0    1 2298 864)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-101" y="13">CRC32 and</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1594 1648)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">Length and status bits are written as trusted "badge,"</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1594 1824)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">All clients (except soft-core MAC) have matched,</tspan>
+</text></g>
+<path d="M1514,1328 L1514,1424 1770,1424 1770,1328 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1818 496)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-132" y="13">mem_gateway</tspan>
+</text></g>
+<path d="M1642,320 L1642,416 1994,416 1994,320 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#999999" />
+<path d="M1642,448 L1642,544 1994,544 1994,448 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1818 752)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-40" y="13">hello</tspan>
+</text></g>
+<path d="M1642,576 L1642,672 1994,672 1994,576 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1642,704 L1642,800 1994,800 1994,704 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1642 1872)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">fixed latency; therefore no collisions possible</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1594 1760)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">DPRAM is (mostly) a 1 MTU (12 &#956;s) shift register</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1594 1984)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">See additional notes for details</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2074 1312)" fill="#cccccc" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-41" y="13">keys</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 2074 1264)" fill="#cccccc" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-122" y="13">authentication</tspan>
+</text></g>
+<path d="M1930,1232 L1930,1360 2218,1360 2218,1232 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#cccccc" />
+<path d="M1274,880 L1274,976 1466,976 1466,880 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1370 928)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-82" y="13">construct</tspan>
+</text></g>
+<path d="M1194,928 L1258,928 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1246,936 C1256,931 1259,931 1274,928 C1259,925 1256,925 1246,920 C1248,926 1248,930 1246,936 " fill="#000000" stroke="none" />
+<path d="M874,880 L938,816 1258,816 1306,864 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(0.75    0   -0 0.75 890 800)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">Gray code</tspan>
+</text></g>
+<path d="M1297,866 C1307,869 1309,872 1322,880 C1314,867 1311,865 1308,855 C1305,860 1302,863 1297,866 " fill="#000000" stroke="none" />
+<path d="M1466,928 L1530,928 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1518,936 C1528,931 1531,931 1546,928 C1531,925 1528,925 1518,920 C1520,926 1520,930 1518,936 " fill="#000000" stroke="none" />
+<path d="M1546,864 L1546,976 2090,976 2090,864 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1818 896)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-154" y="13">data transformer</tspan>
+</text></g>
+<g transform="matrix(0.75    0   -0 0.75 1818 944)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-217" y="13">built-in ARP, ICMP echo</tspan>
+</text></g>
+<path d="M2090,928 L2154,928 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1818 624)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-99" y="13">speed_test</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1818 368)" fill="#999999" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-36" y="13">???</tspan>
+</text></g>
+<path d="M2066,836 C2061,846 2061,849 2058,864 C2055,849 2055,846 2050,836 C2056,838 2060,838 2066,836 " fill="#000000" stroke="none" />
+<path d="M2058,368 L2058,848 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1994,368 L2058,368 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1994,496 L2058,496 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1994,624 L2058,624 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1994,752 L2058,752 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<ellipse cx="2058" cy="496" rx="6" ry="6" fill="#000000" stroke="none" />
+<ellipse cx="2058" cy="624" rx="6" ry="6" fill="#000000" stroke="none" />
+<ellipse cx="2058" cy="752" rx="6" ry="6" fill="#000000" stroke="none" />
+<path d="M1626,368 L1578,368 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1578,368 L1578,864 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1626,496 L1578,496 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1626,624 L1578,624 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1626,752 L1578,752 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<ellipse cx="1578" cy="496" rx="6" ry="6" fill="#000000" stroke="none" />
+<ellipse cx="1578" cy="624" rx="6" ry="6" fill="#000000" stroke="none" />
+<ellipse cx="1578" cy="752" rx="6" ry="6" fill="#000000" stroke="none" />
+<path d="M1614,760 C1624,755 1627,755 1642,752 C1627,749 1624,749 1614,744 C1616,750 1616,754 1614,760 " fill="#000000" stroke="none" />
+<path d="M1614,632 C1624,627 1627,627 1642,624 C1627,621 1624,621 1614,616 C1616,622 1616,626 1614,632 " fill="#000000" stroke="none" />
+<path d="M1614,504 C1624,499 1627,499 1642,496 C1627,493 1624,493 1614,488 C1616,494 1616,498 1614,504 " fill="#000000" stroke="none" />
+<path d="M1614,376 C1624,371 1627,371 1642,368 C1627,365 1624,365 1614,360 C1616,366 1616,370 1614,376 " fill="#000000" stroke="none" />
+<g transform="matrix(   1    0   -0    1 1258 1072)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-69" y="13">MAC/IP</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1258 1120)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-56" y="13">Config</tspan>
+</text></g>
+<path d="M1162,1040 L1162,1168 1354,1168 1354,1040 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1418,992 L1418,1104 1370,1104 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1382,1112 C1372,1107 1369,1107 1354,1104 C1369,1101 1372,1101 1382,1096 C1380,1102 1380,1106 1382,1112 " fill="#000000" stroke="none" />
+<path d="M1426,1004 C1421,994 1421,991 1418,976 C1415,991 1415,994 1410,1004 C1416,1002 1420,1002 1426,1004 " fill="#000000" stroke="none" />
+<g transform="matrix(   1    0   -0    1 1642 1376)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-74" y="13">Tx MAC</tspan>
+</text></g>
+<g transform="matrix(0.75    0   -0 0.75 906 1216)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="26">busy</tspan>
+</text></g>
+<path d="M1002,1296 L1002,1200 1194,1200 1194,1296 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1098 1248)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-59" y="8">precog</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 378 736)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-83" y="13">UDP port</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 378 784)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-44" y="13">CAM</tspan>
+</text></g>
+<path d="M282,816 L282,688 474,688 474,816 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M538,864 L538,752 490,752 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M502,744 C492,749 489,749 474,752 C489,755 492,755 502,760 C500,754 500,750 502,744 " fill="#000000" stroke="none" />
+<path d="M546,852 C541,862 541,865 538,880 C535,865 535,862 530,852 C536,854 540,854 546,852 " fill="#000000" stroke="none" />
+<g transform="matrix( 2.8    0   -0  2.8 1354  80)" fill="#000000" >
+<text stroke="none" font-family="Times" font-size="40" ><tspan x="-121" y="0">Packet Badger</tspan>
+</text></g>
+<path d="M1738,0 L1738,80 1818,80 1818,0 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M890,0 L890,80 970,80 970,0 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1898,0 L1898,80 1978,80 1978,0 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M730,0 L730,80 810,80 810,0 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1546,832 L2090,832 2170,752 2458,752 2458,1488 170,1488 170,576 1290,576 1546,832 " fill="none" style="stroke-dasharray:1,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<g transform="matrix(0.75    0   -0 0.75 874 1008)" fill="#000000" >
+<text stroke="none" font-family="Helvetica"  font-style="oblique" font-size="40" ><tspan x="0" y="0">pbuf_writer.v</tspan>
+</text></g>
+<g transform="matrix(0.75    0   -0 0.75 2202 1520)" fill="#000000" >
+<text stroke="none" font-family="Helvetica"  font-style="oblique" font-size="40" ><tspan x="0" y="0">rtefi_center.v</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1642 1920)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">at Tx (xformer.v) mux</tspan>
+</text></g>
+<path d="M138,256 L138,1536 2490,1536 2490,256 z" fill="none" style="stroke-dasharray:1,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<g transform="matrix(0.75    0   -0 0.75 1690 1568)" fill="#000000" >
+<text stroke="none" font-family="Helvetica"  font-style="oblique" font-size="40" ><tspan x="0" y="0">rtefi_blob.v (machine-generated basd on list of clients)</tspan>
+</text></g>
+<g transform="matrix(0.75    0   -0 0.75 1370 1008)" fill="#000000" >
+<text stroke="none" font-family="Helvetica"  font-style="oblique" font-size="40" ><tspan x="-196" y="0">construct.v</tspan>
+</text></g>
+<g transform="matrix(0.75    0   -0 0.75 2042 1008)" fill="#000000" >
+<text stroke="none" font-family="Helvetica"  font-style="oblique" font-size="40" ><tspan x="-176" y="0">xformer.v</tspan>
+</text></g>
+<g transform="matrix(0.75    0   -0 0.75 2266 1072)" fill="#000000" >
+<text stroke="none" font-family="Helvetica"  font-style="oblique" font-size="40" ><tspan x="-348" y="0">ethernet_crc_add.v</tspan>
+</text></g>
+<g transform="matrix(0.75    0   -0 0.75 282 848)" fill="#000000" >
+<text stroke="none" font-family="Helvetica"  font-style="oblique" font-size="40" ><tspan x="0" y="0">udp_port_cam.v</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 1642 1696)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">prepended to each packet in DPRAM</tspan>
+</text></g>
+<g transform="matrix(   1    0   -0    1 906 1376)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-75" y="13">Rx MAC</tspan>
+</text></g>
+<path d="M778,1328 L778,1424 1034,1424 1034,1328 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M746,928 L810,928 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M798,936 C808,931 811,931 826,928 C811,925 808,925 798,920 C800,926 800,930 798,936 " fill="#000000" stroke="none" />
+<path d="M826,880 L826,976 922,976 922,880 z" fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<g transform="matrix(0.75    0   -0 0.75 618 864)" fill="#000000" >
+<text stroke="none" font-family="Helvetica"  font-style="oblique" font-size="40" ><tspan x="0" y="0">scanner.v</tspan>
+</text></g>
+<path d="M858,976 L858,1312 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M866,1300 C861,1310 861,1313 858,1328 C855,1313 855,1310 850,1300 C856,1302 860,1302 866,1300 " fill="#000000" stroke="none" />
+<path d="M1650,1004 C1645,994 1645,991 1642,976 C1639,991 1639,994 1634,1004 C1640,1002 1644,1002 1650,1004 " fill="#000000" stroke="none" />
+<path d="M1642,1328 L1642,992 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M730,1536 L730,1376 778,1376 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M1034,1376 L1514,1376 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M1770,1376 L1818,1376 1818,1536 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<g transform="matrix(   1    0   -0    1 1274 1424)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="-163" y="0">Host clock domain</tspan>
+</text></g>
+<path d="M1210,1248 L1578,1248 1578,1312 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M1222,1256 C1212,1251 1209,1251 1194,1248 C1209,1245 1212,1245 1222,1240 C1220,1246 1220,1250 1222,1256 " fill="#000000" stroke="none" />
+<path d="M1586,1300 C1581,1310 1581,1313 1578,1328 C1575,1313 1575,1310 1570,1300 C1576,1302 1580,1302 1586,1300 " fill="#000000" stroke="none" />
+<g transform="matrix(0.75    0   -0 0.75 1290 1232)" fill="#000000" >
+<text stroke="none" font-family="Helvetica" font-size="40" ><tspan x="0" y="0">length, trigger</tspan>
+</text></g>
+<path d="M1098,1296 L1098,1376 " fill="none" style="stroke-dasharray:4,4" stroke-width="2" stroke-linecap="butt" stroke-linejoin="bevel" stroke="#000000" />
+<path d="M698,976 L698,1248 970,1248 " fill="none" stroke-width="2" stroke-linejoin="bevel" stroke-linecap="round" stroke="#000000" />
+<path d="M974,1256 C984,1251 987,1251 1002,1248 C987,1245 984,1245 974,1240 C976,1246 976,1250 974,1256 " fill="#000000" stroke="none" />
+</g>
+</svg>

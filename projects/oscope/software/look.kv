@@ -4,81 +4,126 @@ Logic:
     BoxLayout:
         orientation: "vertical"
         BoxLayout:
-            size_hint: [0, 0]
+            size_hint: [1, 0.05]
             id: settings_box
             orientation: "horizontal"
-            Label:
-                text: "CH1"
-                id: ch_name
-            Label:
-                size_hint: [0.3, 1]
-                text: "xlim"
-            TextInput:
-                id: xlim
-                on_text: root.update_lim("X", *args)
-            Label:
-                text: "ylim"
-            TextInput:
-                id: ylim
-                on_text: root.update_lim("Y", *args)
             BoxLayout:
-                orientation: "horizontal"
+                size_hint: [0.2, 1]
+                orientation: "vertical"
                 Label:
-                    text: "Autoscale"
-                CheckBox:
-                    on_active: root.update_lim("autoscale", *args)
-                    active: root.autoscale
-            Label:
-                text: "window"
-            TextInput:
-                id: window
+                    text: "CH1"
+                    bold: True
+                    id: ch_name
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: [0.6, 1]
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "xlim"
+                        size_hint: [0.3, 1]
+                    TextInput:
+                        id: xlim
+                        on_text: root.update_lim("X", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "ylim"
+                        size_hint: [0.3, 1]
+                    TextInput:
+                        id: ylim
+                        on_text: root.update_lim("Y", *args)
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: [0.2, 1]
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "Autoscale"
+                    CheckBox:
+                        on_active: root.update_lim("autoscale", *args)
+                        active: root.autoscale
+                Button:
+                    size_hint: [0.5, 0.2]
+                    text: "SAVE"
+                    bold: True
+                    center: self.parent.center
+                    on_press: root.save_data()
+            # BoxLayout:
+            #     orientation: "vertical"
+            #     Label:
+            #         text: "window"
+            #     TextInput:
+            #         id: window
         BoxLayout:
-            size_hint: [1, .05]
+            size_hint: [1, 0.05]
             orientation: "horizontal"
-            Label:
-                text: "CH1"
             BoxLayout:
-                orientation: "horizontal"
+                orientation: "vertical"
                 Label:
-                    text: "T"
-                CheckBox:
-                    on_active: root.plot_select("00", *args)
-                Label:
-                    text: "F"
-                CheckBox:
-                    on_active: root.plot_select("10", *args)
-            Label:
-                text: "CH2"
+                    text: "CH1"
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "T"
+                    CheckBox:
+                        on_active: root.plot_select("00", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "F"
+                    CheckBox:
+                        on_active: root.plot_select("10", *args)
             BoxLayout:
-                orientation: "horizontal"
+                orientation: "vertical"
                 Label:
-                    text: "T"
-                CheckBox:
-                    on_active: root.plot_select("01", *args)
-                Label:
-                    text: "F"
-                CheckBox:
-                    on_active: root.plot_select("11", *args)
-            Label:
-                text: "CH3"
+                    text: "CH2"
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "T"
+                    CheckBox:
+                        on_active: root.plot_select("01", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "F"
+                    CheckBox:
+                        on_active: root.plot_select("11", *args)
             BoxLayout:
-                orientation: "horizontal"
+                orientation: "vertical"
                 Label:
-                    text: "T"
-                CheckBox:
-                    on_active: root.plot_select("02", *args)
-                Label:
-                    text: "F"
-                CheckBox:
-                    on_active: root.plot_select("12", *args)
-            Label:
-                text: "CH4"
+                    text: "CH3"
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "T"
+                    CheckBox:
+                        on_active: root.plot_select("02", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "F"
+                    CheckBox:
+                        on_active: root.plot_select("12", *args)
             BoxLayout:
-                orientation: "horizontal"
+                orientation: "vertical"
                 Label:
-                    text: "T"
-                CheckBox:
-                    on_active: root.plot_select("03", *args)
+                    text: "CH4"
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "T"
+                    CheckBox:
+                        on_active: root.plot_select("03", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "F"
+                    CheckBox:
+                        on_active: root.plot_select("13", *args)
+            BoxLayout:
+                orientation: "vertical"
                 Label:
                     text: "F"
                 CheckBox:

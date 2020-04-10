@@ -1,11 +1,10 @@
 %!PS-Adobe-3.0 EPSF-3.0
-%%Title: tx_path.eps
+%%Title: mem_gateway.eps
 %%Creator: XCircuit v3.8 rev78
-%%CreationDate: Fri May 31 14:07:58 2019
+%%CreationDate: Wed Mar 27 15:48:05 2019
 %%Pages: 1
-%%BoundingBox: 68 68 650 493
-%%DocumentNeededResources: font Helvetica Helvetica-Bold Helvetica-Oblique
-%%+ font Times-Roman Symbol
+%%BoundingBox: 68 68 612 396
+%%DocumentNeededResources: font Helvetica Helvetica-Bold
 %%EndComments
 %%BeginProlog
 %
@@ -177,15 +176,6 @@
 
 %%BeginSetup
 
-/generic::dot {
-% trivial
-begingate
-248 1.000 0 0 6 0.000 360.000 xcarc
-1.000 0.000 0.000 scb
-(x) {/Times-Roman cf} 2 29 0 1.000 0 0 pinlabel
-endgate
-} def
-
 /generic::arrowhead {
 % nonetwork
 begingate
@@ -201,96 +191,57 @@ endgate
 
 %%EndSetup
 
-%%Page: tx_path 1
+%%Page: mem_gateway 1
 %%PageOrientation: Portrait
 /pgsave save def bop
-0.8000 inchscale
-2.6000 setlinewidth 1071 447 translate
+0.8500 inchscale
+2.6000 setlinewidth 1665 417 translate
 
-1 1.000 320 400 432 352 432 256 320 208 320 400 5 polygon
-0 1.000 -832 528 -832 368 -544 368 -544 528 4 polygon
-(input packet) {/Helvetica cf} 2 21 0 1.000 -704 448 label
-0 1.000 -832 816 -832 720 -544 720 -544 816 4 polygon
-(pc) {/Helvetica cf} 2 21 0 1.000 -688 768 label
-1 1.000 -288 560 -384 528 -384 432 -288 400 -288 560 5 polygon
-(fp_offset) {/Helvetica cf} 2 29 0 1.000 -64 432 label
-(cf_offset) {/Helvetica cf} 2 29 0 1.000 -64 176 label
-(S) {/Symbol cf} 2 21 0 1.200 -336 480 label
-1 1.000 -288 304 -384 272 -384 176 -288 144 -288 304 5 polygon
-(S) {/Symbol cf} 2 21 0 1.200 -336 224 label
-1 1.000 -384 480 -528 480 2 polygon
-(A) {/Helvetica cf} 2 23 0 1.000 -560 480 label
-(D) {/Helvetica cf} 2 23 0 1.000 -560 416 label
-0 1.000 -832 272 -832 112 -544 112 -544 272 4 polygon
-(MAC/IP cfg) {/Helvetica cf} 2 21 0 1.000 -704 192 label
-(A) {/Helvetica cf} 2 23 0 1.000 -560 224 label
-(D) {/Helvetica cf} 2 23 0 1.000 -560 160 label
-1 1.000 -384 224 -528 224 2 polygon
-1 1.000 -544 768 -192 768 -192 512 -272 512 4 polygon
-1 1.000 -192 512 -192 256 -272 256 3 polygon
-1.000 0 -192 512 generic::dot
-0 1.000 -16 864 -16 704 272 704 272 864 4 polygon
-(program ROM) {/Helvetica cf} 2 21 0 1.000 128 784 label
-1 1.000 -192 768 -32 768 2 polygon
-1.000 0 -192 768 generic::dot
-(IP/ARP) {/Helvetica cf} 2 23 0 1.000 0 992 label
-1 1.000 -544 416 -464 416 -400 352 192 352 192 352 304 352 6 polygon
-1 1.000 176 704 176 560 384 560 384 376 4 polygon
-0 1.000 384 176 384 32 608 32 608 176 4 polygon
-(IP header) {/Helvetica cf} 2 21 0 1.000 496 128 label
-(checksum) {/Helvetica cf} 2 21 0 1.000 496 80 label
-1 1.000 608 -16 720 -64 720 -160 608 -208 608 -16 5 polygon
-1 1.000 720 -112 864 -112 2 polygon
-1.000 90 880 -112 generic::arrowhead
-(Tx stream) {/Helvetica cf} 2 20 0 1.000 896 -112 label
-1.000 90 608 -64 generic::arrowhead
-1 1.000 224 704 224 624 672 624 672 -40 4 polygon
-1 1.000 432 304 496 304 496 192 3 polygon
-1 1.000 496 32 496 -64 592 -64 3 polygon
-1.000 180 496 176 generic::arrowhead
-1 1.000 192 352 192 -96 592 -96 3 polygon
-1 1.000 -544 160 -464 160 -400 96 160 96 160 304 304 304 6 polygon
-1.000 0 192 352 generic::dot
-1 1.000 160 176 160 -128 592 -128 3 polygon
-1.000 0 160 96 generic::dot
-1.000 90 608 -96 generic::arrowhead
-1.000 90 608 -128 generic::arrowhead
-1.000 90 608 -160 generic::arrowhead
-1.000 90 320 352 generic::arrowhead
-1.000 90 320 304 generic::arrowhead
-1.000 90 320 256 generic::arrowhead
-1.000 270 -544 480 generic::arrowhead
-1.000 270 -544 224 generic::arrowhead
-1.000 90 -16 816 generic::arrowhead
-1 1.000 -272 192 80 192 80 704 3 polygon
-1 1.000 -272 448 32 448 32 704 3 polygon
-1.000 90 -16 768 generic::arrowhead
-1 1.000 128 704 128 -160 592 -160 3 polygon
-1 1.000 304 256 128 256 2 polygon
-1.000 0 128 256 generic::dot
-(template) {/Helvetica cf} 2 29 0 1.000 256 -176 label
-0 1.000 -400 1008 -400 912 -144 912 -144 1008 4 polygon
-(status) {/Helvetica cf} 2 21 0 1.000 -272 960 label
-0 1.000 -400 1184 -400 1088 -144 1088 -144 1184 4 polygon
-(length) {/Helvetica cf} 2 21 0 1.000 -272 1136 label
-1 1.000 -464 416 -464 1136 -416 1136 3 polygon
-1.000 90 -400 1136 generic::arrowhead
-1.000 90 -400 960 generic::arrowhead
-1 1.000 -464 960 -416 960 2 polygon
-1.000 0 -464 960 generic::dot
-1 1.000 -144 960 -80 960 -80 816 -32 816 4 polygon
-1.000 0 -464 416 generic::dot
-1.000 270 -288 512 generic::arrowhead
-1.000 270 -288 448 generic::arrowhead
-1.000 270 -288 256 generic::arrowhead
-1.000 270 -288 192 generic::arrowhead
-(out) {/Helvetica cf} 2 29 0 1.000 512 608 label
-(chk_in) {/Helvetica cf} 2 29 0 1.000 272 544 label
-(construct_tx_table.v) {/Helvetica-Oblique cf} 2 16 0 0.800 0 880 label
-(Simplified data path implemented) {/Helvetica-Bold cf} 2 16 0 1.200 128 1152
+(read_pipe_len cycles) {/Helvetica cf} 2 17 0 1.000 -304 144 label
+1.000 90 -504 144 generic::arrowhead
+-1.000 270 -744 144 generic::arrowhead
+1 1.000 -720 144 -528 144 2 polygon
+(driven) {/Helvetica cf} 2 19 0 1.000 -1312 -96 label
+1 1.000 -1264 -160 -1280 -144 -1280 -112 -1264 -96 4 polygon
+(control_strobe) {/Helvetica cf} 2 19 0 1.000 -976 240 label
+(data_out) {/Helvetica cf} 2 19 0 1.000 -976 464 label
+(driven) {/Helvetica cf} 2 19 0 1.000 -1312 384 label
+1 1.000 -1264 16 -1280 32 -1280 608 -1264 624 4 polygon
+(control_rd) {/Helvetica cf} 2 19 0 1.000 -976 352 label
+(addr) {/Helvetica cf} 2 19 0 1.000 -976 576 label
+3 1.000 -744 240 -744 112 2 polygon
+(data_in) {/Helvetica cf} 2 19 0 1.000 -976 -144 label
+3 1.000 -504 64 -504 160 2 polygon
+3 1.000 -744 608 -744 688 2 polygon
+-1.000 270 -744 672 generic::arrowhead
+1 1.000 -728 672 -432 672 2 polygon
+(mem_gateway bus interface) {/Helvetica-Bold cf} 2 16 0 1.200 -944 784 label
+(control_rd_valid) {/Helvetica cf} 2 19 0 1.000 -976 32 label
+(by) {/Helvetica cf} 2 19 0 1.000 -1312 -144 label
+(slave) {/Helvetica cf} 2 19 0 1.000 -1312 -192 label
+(by) {/Helvetica cf} 2 19 0 1.000 -1312 336 label
+(master) {/Helvetica cf} 2 19 0 1.000 -1312 288 label
+1 1.000 -944 624 -752 624 -736 560 -432 560 -416 624 -256 624 6 polygon
+1 1.000 -944 560 -752 560 -736 624 -432 624 -416 560 -256 560 6 polygon
+(bus cycle is 8 clocks now, could) {/Helvetica cf} 2 16 0 1.000 -400 720 label
+(be reduced to 4 or even 2 in future.) {/Helvetica cf} 2 16 0 1.000 -400 672
 label
-(in construct.v) {/Helvetica-Bold cf} 2 16 0 1.200 128 1088 label
-(Pipelining not shown) {/Helvetica cf} 2 16 0 1.000 128 1008 label
+1 1.000 -944 512 -752 512 -736 448 -432 448 -416 512 -256 512 6 polygon
+1 1.000 -944 448 -752 448 -736 512 -432 512 -416 448 -256 448 6 polygon
+1 1.000 -944 224 -752 224 -736 288 -672 288 -656 224 -432 224 -416 288 -352 288
+-336 224 -240 224 10 polygon
+1 1.000 -944 400 -752 400 -736 336 -432 336 -416 400 -256 400 6 polygon
+1 1.000 -944 336 -752 336 -736 400 -432 400 -416 336 -256 336 6 polygon
+1 1.000 -944 16 -512 16 -496 80 -432 80 -416 16 -256 16 6 polygon
+(x) {/Helvetica cf} 2 21 0 1.000 -576 -128 label
+(x) {/Helvetica cf} 2 21 0 1.000 -352 -128 label
+(d) {/Helvetica cf} 2 21 0 1.000 -464 -128 label
+3 1.000 -424 608 -424 688 2 polygon
+1.000 90 -424 672 generic::arrowhead
+(a) {/Helvetica cf} 2 21 0 1.000 -592 592 label
+(d) {/Helvetica cf} 2 21 0 1.000 -592 480 label
+1 1.000 -256 -160 -416 -160 -432 -96 -496 -96 -512 -160 -944 -160 6 polygon
+1 1.000 -256 -96 -416 -96 -432 -160 -496 -160 -512 -96 -944 -96 6 polygon
 pgsave restore showpage
 
 %%Trailer

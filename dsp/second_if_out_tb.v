@@ -6,7 +6,6 @@ reg clk, trace=0;
 integer cc;
 integer out_file;
 reg lo_mode;
-//reg fail=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("second_if_out.vcd");
@@ -24,9 +23,9 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	//$display("%s", fail ? "FAIL" : "PASS");
-	$display("WARNING: Not a self-checking testbench. Will always pass.");
-	$display("%s","PASS");
+	if (trace) $display("Please use contents of second_if_out.dat for functional validation");
+	else $display("WARNING: Not a self-checking testbench. Will always pass.");
+	$finish();
 end
 
 reg [1:0] div_state=0;
@@ -42,12 +41,27 @@ wire [19:0] phase_step_h = 222425;
 wire [11:0] phase_step_l = 868;
 wire [11:0] modulo = 4;
 wire signed [17:0] cosa, sina;
-// was 74840, but divide by abs(1+i/16)
-rot_dds #(.lo_amp(18'd74694)) dds(.clk(clk), .reset(1'b0),
-	.cosa(cosa), .sina(sina),
+wire signed [17:0] cosa_145, sina_145;
+wire signed [17:0] cosa_60, sina_60;
+
+// Raw LO = 74840
+// For 145 MHz IF output, divide LO by abs(1+i/16) to account for internal multiplication
+localparam [17:0] lo_amp_145 = 74694;
+localparam [17:0] lo_amp_60 = 74840;
+
+rot_dds #(.lo_amp(lo_amp_145)) dds_145 (.clk(clk), .reset(1'b0),
+	.cosa(cosa_145), .sina(sina_145),
 	.phase_step_h(phase_step_h), .phase_step_l(phase_step_l),
 	.modulo(modulo)
 );
+rot_dds #(.lo_amp(lo_amp_60)) dds_60 (.clk(clk), .reset(1'b0),
+	.cosa(cosa_60), .sina(sina_60),
+	.phase_step_h(phase_step_h), .phase_step_l(phase_step_l),
+	.modulo(modulo)
+);
+
+assign cosa = lo_mode==0 ? cosa_145: cosa_60;
+assign sina = lo_mode==0 ? sina_145: sina_60;
 
 wire signed [17:0] out_xy;
 wire signed [15:0] dac1_out0, dac1_out1, dac2_out0, dac2_out1;

@@ -12,8 +12,9 @@ SYNTH = xil_syn
 SYNTH_VIVADO = sh vivado_batch
 # Tested with gcc, clang, and tcc
 CFLAGS = -O2 -Wall -Wextra -pedantic -std=c99 -D_DEFAULT_SOURCE
-CFLAGS += -Wshadow -Wundef -Wstrict-prototypes -Wredundant-decls
+CFLAGS += -Wshadow -Wundef -Wstrict-prototypes -Wmissing-prototypes -Wredundant-decls
 CFLAGS += -I .
+LDLIBS += $(LDLIBS_$@)
 
 # See README.run2
 SRF_DATA = ../run2.dat
@@ -37,14 +38,15 @@ SRF_DATA = ../run2.dat
 	pdftex $<
 
 all: inverse_check ilookup_check match_mem match_reg accuracy detune_cw detune_pulse_test decay_slope_test
+all: sqrt_check1 sqrt_check2
 
 # gnu make magic
 .DELETE_ON_ERROR:
-.PHONY: inverse_check ilookup_check match accuracy plot
+.PHONY: inverse_check sqrt_check1 sqrt_check2 ilookup_check match accuracy plot
 
 # Get Digaree program-building rules from rules.mk
 DIG_DIR = .
-include rules.mk
+include $(DIG_DIR)/rules.mk
 
 main_tb: sf_main.v ops.vh
 
@@ -123,6 +125,7 @@ sim1.h: paramh.py user_tb.v
 sim1.o: ops.h sim1.h
 
 sim1: sim1.o
+LDLIBS_sim1 = -lm
 
 sim1.trace: sim1 init.dat
 	./sim1 < init.dat > sim1.dat_$$$$ && grep -v "^static " < ops.h > ops.h_$$$$ && paste -d " " sim1.dat_$$$$ ops.h_$$$$ > $@; rm sim1.dat_$$$$ ops.h_$$$$
@@ -147,6 +150,13 @@ ilookup_check: ilookup_check.sh inverse.dat inverse.out
 
 match_%: sim1.results user_%.results
 	cmp $^
+	@echo PASS
+
+# inverse-sqrt() finder WIP
+sqrt_check1: sqrt1.py
+	$(PYTHON) $<
+sqrt_check2: sim1
+	./sim1 invsqrtcheck > /dev/null
 	@echo PASS
 
 match_mem:

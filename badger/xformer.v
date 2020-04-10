@@ -9,7 +9,7 @@ module xformer(
 	input [7:0] idata,
 	input eth_strobe_short,
 	input eth_strobe_long,
-	// As documented in clients.eps
+	// As documented in doc/clients.eps
 	output [10:0] len_c,
 	// don't bother with data output port, it's the same as idata above
 	// 7 of these strobes for the 7 possible clients
@@ -83,7 +83,7 @@ always @(posedge clk) begin
 	if (pdata_count == 9) pdata_down <= 0;
 end
 
-// Signals documented in clients.eps
+// Signals documented in doc/clients.eps
 // Fan out the strobes based on udp_sel
 wire [7:0] mask = 1 << udp_sel;
 assign len_c = pdata_count;
