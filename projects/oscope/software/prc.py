@@ -799,14 +799,13 @@ class c_prc(c_llrf_bmb7):
         p9 = self.pn9
         offset = p9.index(data[0]) if data[0] in p9 else (p9.index(data[1])-1 if data[1] in p9 else 0)
         pn9l = len(p9)
-        for i in range(len(data)):
-            d = data[i]
+        for i, d in enumerate(data):
             p = p9[(i+offset) % pn9l]
             if p != d:
                 cnt += 1
             if d-p and False:
                 print("%d %04x %04x %d" % (i, d, p, p-d))
-            # print 'chan', chan, 'error:', cnt
+            # print('chan', chan, 'error:', cnt)
         return cnt
 
     def pntest(self):

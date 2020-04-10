@@ -21,9 +21,6 @@ from threading import Thread
 import numpy as np
 from matplotlib import pyplot as plt
 
-from litex import RemoteClient
-
-from ltc_setup_litex_client import initLTC, get_data
 from misc import ADC, DataBlock, Processing
 
 from banyan_ch_find import banyan_ch_find
@@ -89,6 +86,10 @@ class LTCOnMarblemini(Carrier):
         self.pts_per_ch = 8192
         self.subscriptions, self.results = {}, {}
         ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
+
+        from litex import RemoteClient
+        from ltc_setup_litex_client import initLTC, get_data
+
         self.wb = RemoteClient()
         self.wb.open()
         print(self.wb.regs.acq_buf_full.read())
@@ -157,7 +158,7 @@ class ZestOnBMB7Carrier(Carrier):
             # collect_adcs is not normal:
             # It always collects npt * 8 data points.
             # Each channel gets [(npt * 8) // n_channels] datapoints
-            data_raw, ts = collect_adcs(self.carrier,
+            data_raw, ts = collect_adcs(self.carrier.leep,
                                         self.npt, self.n_channels)
             print(time.strftime("%Y%m%d-%H%M%S"))
             self._db = DataBlock(ADC.counts_to_volts(np.array(data_raw)), ts)
@@ -238,7 +239,7 @@ class GUIGraph:
         # Load possible types of limits: For now T for time domain,
         #                                and F for frequency
         g_plot_type_limits['T'] = GUIGraphLimits('T', xlabel='Time [s]',
-                                                 ylabel='Volts',
+                                                 ylabel='ADC count',
                                                  xlim=[0, 0.01], ylim=[-1., 1.])
         g_plot_type_limits['F'] = GUIGraphLimits('F', xlabel='Frequency [Hz]',
                                                  ylabel='[V/sqrt(Hz)]',
