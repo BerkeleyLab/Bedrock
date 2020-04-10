@@ -50,15 +50,16 @@ class Processing:
     stacked_data = {}
     stack_n = 100000
     old_data = None
-    fft_stack_count = {0:0, 1:0}
-    H_stack_count = {0:0, 1:0}
+    fft_stack_count = {0: 0, 1: 0}
+    H_stack_count = {0: 0, 1: 0}
 
     @staticmethod
     def time_domain(data_block, ch_n):
         ch_data = data_block.data[ch_n]
         with open('td_file', 'a') as f:
             f.write('{}, {}, {}, {}, {}\n'.format(np.max(ch_data),
-                                                  np.max(ch_data) - np.min(ch_data),
+                                                  np.max(ch_data) -
+                                                  np.min(ch_data),
                                                   Processing.max_val_freq,
                                                   Processing.max_val,
                                                   ch_n))
@@ -100,7 +101,8 @@ class Processing:
         if count == 0:
             Processing.stacked_fft[ch_n] = fft_result
         else:
-            Processing.stacked_fft[ch_n] = np.amax([fft_result, Processing.stacked_fft[ch_n]], axis=0)
+            Processing.stacked_fft[ch_n] = np.amax(
+                [fft_result, Processing.stacked_fft[ch_n]], axis=0)
             Processing.stacked_fft[ch_n] = fft_result
         amax = np.argmax(fft_result[10:])
         Processing.max_val_freq = fft_x[10:][amax]
@@ -116,7 +118,7 @@ class Processing:
         ch_data = data_block.data[ch_n]
         count = Processing.fft_stack_count[ch_n] % Processing.stack_n
         fft_x = np.fft.rfftfreq(len(ch_data), d=1 / ADC.fpga_output_rate)
-        #fft_result = np.abs(np.fft.rfft(ch_data))
+        # fft_result = np.abs(np.fft.rfft(ch_data))
         fft_result = (np.fft.rfft(ch_data))
         if count == 0:
             Processing.stacked_fft[ch_n] = fft_result
@@ -130,8 +132,6 @@ class Processing:
                 Processing.stacked_fft[ch_n][10:] / (count + 1),
                 Processing.max_val_freq,
                 Processing.max_val)
-
-
 
     @staticmethod
     def psd(data_block, ch_n, window='hanning'):
@@ -170,7 +170,7 @@ class Processing:
             Processing.stacked_H[ch_2] += fft2
         Processing.H_stack_count[ch_1] += 1
         return (x[10:],
-                (Processing.stacked_H[ch_1][10:]/
+                (Processing.stacked_H[ch_1][10:] /
                  Processing.stacked_H[ch_2][10:]),
                 0,
                 0)

@@ -2,6 +2,8 @@
 
 import time
 
+import numpy as np
+
 from litex import RemoteClient
 
 
@@ -117,7 +119,6 @@ def autoBitslip(r):
         r.regs.lvds_bitslip_csr.write(1)
     raise RuntimeError("autoBitslip(): failed alignment :(")
 
-import numpy as np
 
 def initLTC(r, check_align=False):
     print("Resetting LTC")
@@ -187,8 +188,8 @@ if __name__ == "__main__":
     print(wb.regs.acq_buf_full.read())
     initLTC(wb)
     # print([hex(x) for x in wb.read(wb.mems.adc_data_buffer.base, 100)])
-    #ltc_spi = LTC_SPI(wb)
-    #ltc_spi.setTp(0x1234)
+    # ltc_spi = LTC_SPI(wb)
+    # ltc_spi.setTp(0x1234)
     wb.regs.acq_acq_start.write(1)
     get_data(wb, plot=True)
     wb.close()

@@ -1,18 +1,18 @@
 import argparse
 
-from migen import *
+from migen import Signal, Memory, If, Cat, Module
 from migen.genlib.cdc import PulseSynchronizer
-from migen.genlib.fifo import AsyncFIFO
+# from migen.genlib.fifo import AsyncFIFO
 
-from litex.soc.cores.freqmeter import FreqMeter
+# from litex.soc.cores.freqmeter import FreqMeter
 from litex.soc.cores import spi
 from litex.soc.interconnect import wishbone
 from litex.soc.integration.soc_sdram import soc_sdram_args, soc_sdram_argdict
 from litex.soc.integration.builder import builder_args, builder_argdict, Builder
 from litex.soc.interconnect.csr import CSRStatus, CSRField, AutoCSR, CSRStorage
 
-from litex_boards.platforms import ltc, marblemini
-from litex_boards.community.targets.marblemini import EthernetSoC
+from litex_boards.platforms import ltc
+from litex_boards.community.targets.marblemini import EthernetSoC, BaseSoC
 
 from ltc_phy import LTCPhy
 
@@ -38,20 +38,21 @@ class DumpToRAM(Module, AutoCSR):
         self._acq_start = CSRStorage(fields=[
             CSRField("acq_start", size=1, offset=0, pulse=True)])
         w_addr = Signal(16, reset=0)
-        self.comb += [self._buf_full.fields.acq_complete.eq(w_addr == depth),
-                      acq_start.eq(self._acq_start.fields.acq_start),
-                      port.adr.eq(w_addr),
-                      port.dat_w.eq(adc_data),
-                      port.we.eq(w_addr != depth),
+        self.comb += [
+            self._buf_full.fields.acq_complete.eq(w_addr == depth),
+            acq_start.eq(self._acq_start.fields.acq_start),
+            port.adr.eq(w_addr),
+            port.dat_w.eq(adc_data),
+            port.we.eq(w_addr != depth)
         ]
         self.submodules.ps = PulseSynchronizer("sys", "sample")
         self.comb += [
             self.ps.i.eq(acq_start),
             acq_start_x.eq(self.ps.o)
         ]
-        self.sync.sample += [If(acq_start_x & (w_addr == depth),
-                                w_addr.eq(0)
-                             ).Elif(w_addr != depth, w_addr.eq(w_addr + 1))
+        self.sync.sample += [
+            If(acq_start_x & (w_addr == depth),
+               w_addr.eq(0)).Elif(w_addr != depth, w_addr.eq(w_addr + 1))
         ]
 
 
@@ -122,8 +123,9 @@ def main():
     if False:
         soc.analyzer.do_exit(vns)
 
-    prog = soc.platform.create_programmer()
+    # prog = soc.platform.create_programmer()
     # prog.load_bitstream('soc_basesoc_marblemini/gateware/top.bit')
+
 
 if __name__ == "__main__":
     main()

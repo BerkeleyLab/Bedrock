@@ -86,10 +86,6 @@ class LTCOnMarblemini(Carrier):
         self.pts_per_ch = 8192
         self.subscriptions, self.results = {}, {}
         ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
-
-        from litex import RemoteClient
-        from ltc_setup_litex_client import initLTC, get_data
-
         self.wb = RemoteClient()
         self.wb.open()
         print(self.wb.regs.acq_buf_full.read())
@@ -257,8 +253,7 @@ class GUIGraph:
                                                label='CH{}-Frequency'.format(i))
         ch_id = "3"
         g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
-                                               label='CSD'.format(i))
-
+                                           label='CSD'.format(i))
 
 
 class Logic(BoxLayout):
@@ -418,6 +413,8 @@ if __name__ == "__main__":
         use_spartan=args.use_spartan,
         log_decimation_factor=args.log_decimation_factor,
         test=False)
+    from litex import RemoteClient
+    from ltc_setup_litex_client import initLTC, get_data
     # carrier = LTCOnMarblemini()
     GUIGraph.setup_gui_graphs(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
