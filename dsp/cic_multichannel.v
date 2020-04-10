@@ -45,7 +45,8 @@ module cic_multichannel #(
    parameter cc_outw=20,      // CCFilt output width; Must be 20 if using half-band filter
    parameter cc_halfband=1,
    parameter cc_use_delay=0,  // Match pipeline length of filt_halfband=1
-   parameter cc_shift_base=0) // Bits to discard from previous acc step
+   parameter cc_shift_base=0, // Bits to discard from previous acc step
+   parameter cc_shift_wi=4)
 (
    // Incoming stream
    input                       clk,
@@ -56,7 +57,7 @@ module cic_multichannel #(
 
    // CC Filter controls
    input                       cc_sample,  // CCFilt sampling signal
-   input [3:0]                 cc_shift,   // controls scaling of filter result
+   input [cc_shift_wi-1:0]     cc_shift,   // controls scaling of filter result
 
    // Post-integrator conveyor belt tap
    output                      di_stb_out,
@@ -152,6 +153,7 @@ module cic_multichannel #(
    ccfilt #(
       .dw         (di_rwi-di_noise_bits),
       .outw       (cc_outw),
+      .shift_wi   (cc_shift_wi),
       .shift_base (cc_shift_base),
       .dsr_len    (n_chan),
       .use_hb     (cc_halfband),
