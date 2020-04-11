@@ -22,11 +22,11 @@ oscope_top_marblemini:
     paths:
       - projects/oscope/marblemini/oscope_top.bit
 
-oscope_program:
-  before_script:
-    - cd projects/oscope/software/bmb7 && wget -r -nH http://sliderule.dhcp.lbl.gov:8000/{r1,configuration} && cd ..
-  stage: program
-  dependencies:
-    - oscope_top_bmb7
-  script:
-    - export PYTHONPATH=$PYTHONPATH:../../../build-tools/:../../../dsp && python prc.py -a 192.168.1.121 -r -b ../bmb7_cu/oscope_top.bit
+# oscope_program:
+#   before_script:
+#     - cd projects/oscope/software/bmb7 && wget -r -nH http://sliderule.dhcp.lbl.gov:8000/{r1,configuration} && cd ..
+#   stage: program
+#   dependencies:
+#     - oscope_top_bmb7
+#   script:
+#     - export PYTHONPATH=$PYTHONPATH:../../../build-tools/:../../../dsp && python prc.py -a 192.168.1.121 -r -b ../bmb7_cu/oscope_top.bit
