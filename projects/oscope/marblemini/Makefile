@@ -26,7 +26,7 @@ RTEFI_EXTRA_V = spi_flash_engine.v
 include $(BADGER_DIR)/rules.mk
 
 $(AUTOGEN_DIR)/moving_average.v: $(DSP_DIR)/moving_average/moving_average.py
-	python $(DSP_DIR)/moving_average/moving_average.py > $(AUTOGEN_DIR)/moving_average.v
+	$(PYTHON) $(DSP_DIR)/moving_average/moving_average.py > $(AUTOGEN_DIR)/moving_average.v
 
 zest_connector.csv: remap_gen.py
 	$(PYTHON) remap_gen.py > $@
