@@ -92,7 +92,7 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 
 # Yosys
 RUN git clone https://github.com/cliffordwolf/yosys.git && \
-	cd yosys && \
+	cd yosys && git checkout yosys-0.9 && \
 	apt-get update && \
 	apt-get install -y clang libreadline-dev tcl-dev libffi-dev graphviz \
 	xdot libboost-system-dev libboost-python-dev libboost-filesystem-dev zlib1g-dev && \
