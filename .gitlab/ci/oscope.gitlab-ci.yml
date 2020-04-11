@@ -12,7 +12,7 @@ oscope_top:
 
 oscope_top:
   before_script:
-    - cd projects/oscope/marblemini && ls /non-free && apt-get install -y yosys
+    - cd projects/oscope/marblemini && ls /non-free && apt-get update && apt-get install -y yosys
   stage: synthesis
   script:
     - XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH make oscope_top.bit
