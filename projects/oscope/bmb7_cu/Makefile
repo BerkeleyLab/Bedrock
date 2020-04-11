@@ -37,7 +37,7 @@ include $(BOARD_SUPPORT_DIR)/rules.mk
 NEWAD_DIRS += $(OSCOPE_COMMON_DIR)
 
 $(AUTOGEN_DIR)/moving_average.v: $(DSP_DIR)/moving_average/moving_average.py
-	python $(DSP_DIR)/moving_average/moving_average.py > $(AUTOGEN_DIR)/moving_average.v
+	$(PYTHON) $(DSP_DIR)/moving_average/moving_average.py > $(AUTOGEN_DIR)/moving_average.v
 	exit
 
 oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v

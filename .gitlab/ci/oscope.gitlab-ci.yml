@@ -10,6 +10,18 @@ oscope_top:
     paths:
       - projects/oscope/bmb7_cu/oscope_top.bit
 
+oscope_top:
+  before_script:
+    - cd projects/oscope/marblemini && ls /non-free
+  stage: synthesis
+  script:
+    - XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH make oscope_top.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - projects/oscope/marblemini/oscope_top.bit
+
 oscope_program:
   before_script:
     - cd projects/oscope/software/bmb7 && wget -r -nH http://sliderule.dhcp.lbl.gov:8000/{r1,configuration} && cd ..
