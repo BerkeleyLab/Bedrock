@@ -90,4 +90,14 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 	cd .. && \
 	rm -rf vhd2vl
 
+# Yosys
+RUN git clone https://github.com/cliffordwolf/yosys.git && \
+	cd yosys && \
+	apt-get update && \
+	apt-get install -y clang libreadline-dev tcl-dev libffi-dev graphviz \
+	xdot libboost-system-dev libboost-python-dev libboost-filesystem-dev zlib1g-dev && \
+	make config-clang && make -j4 && make install && \
+	cd .. && rm -rf yosys && \
+	rm -rf /var/lib/apt/lists/*
+
 RUN pip3 install pyyaml nmigen
