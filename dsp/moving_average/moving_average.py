@@ -13,7 +13,7 @@ class MovingAverage(Elaboratable):
         self.i, self.o = (Signal((self._dw, True), name='i'),
                           Signal((self._dw, True), name='o'))
         self.data_valid = Signal(name='data_valid')
-        # log_downsample_ratio must be a power of 2. Unsure how to assert this inside verilog
+        # log_downsample_ratio must be a power of 2.
         self.log_downsample_ratio = Signal(MAX_DELAY_BITS, name='log_downsample_ratio')
 
     def elaborate(self, platform):
