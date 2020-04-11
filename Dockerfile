@@ -90,4 +90,4 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 	cd .. && \
 	rm -rf vhd2vl
 
-RUN pip3 install pyyaml
+RUN pip3 install pyyaml nmigen
