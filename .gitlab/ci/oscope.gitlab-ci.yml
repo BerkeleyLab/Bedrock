@@ -1,4 +1,4 @@
-oscope_top:
+oscope_top_bmb7:
   before_script:
     - cd projects/oscope/bmb7_cu && ls /non-free
   stage: synthesis
@@ -10,7 +10,7 @@ oscope_top:
     paths:
       - projects/oscope/bmb7_cu/oscope_top.bit
 
-oscope_top:
+oscope_top_marblemini:
   before_script:
     - cd projects/oscope/marblemini && ls /non-free && apt-get update && apt-get install -y yosys
   stage: synthesis
