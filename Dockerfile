@@ -47,28 +47,11 @@ RUN apt-get update && \
 	python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
 	pip3 --version
 
-# The rest of this file defines a "stable" environment,
-# but LiteX is the exception.  It's an open question whether LiteX-based designs
-# should currently be considered usable for production.  If so, it would be
-# helpful to freeze a version of LiteX here -- preferably an upstream one that
-# doesn't involve yetifrisstlama.
-FROM basic-iverilog as litex
-
-ENV LITEX_VERSION=master
-ENV LITEX_ROOT_URL="http://github.com/yetifrisstlama/"
-RUN mkdir litex_setup_dir && \
-	cd litex_setup_dir && \
-	wget https://raw.githubusercontent.com/yetifrisstlama/litex/${LITEX_VERSION}/litex_setup.py && \
-	python3 litex_setup.py init install && \
-	ln -s /non-free/Xilinx /opt/Xilinx
+FROM basic-iverilog as testing_base
 
 COPY --from=riscv-builder /riscv32i /riscv32i
 
 ENV PATH="/riscv32i/bin:${PATH}"
-
-RUN pip3 install git+https://github.com/m-labs/nmigen.git
-
-FROM litex as testing_base
 
 # flex and bison required for building vhd2vl
 RUN apt-get update && \
@@ -91,6 +74,14 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 	rm -rf vhd2vl
 
 # Yosys
+# For now we need to build yosys-0.9 from source, since Debian Buster
+# is stuck at yosys-0.8 that doesn't have the features we need.
+# Revisit this choice when Debian cetches up, maybe in Bullseye,
+# and hope to get back to "apt-get install yosys" then.
+
+# Note that the standard yosys build process used here requires
+# network access to download abc from https://github.com/berkeley-abc/abc.
+
 RUN git clone https://github.com/cliffordwolf/yosys.git && \
 	cd yosys && git checkout yosys-0.9 && \
 	apt-get update && \
