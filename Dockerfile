@@ -91,4 +91,4 @@ RUN git clone https://github.com/cliffordwolf/yosys.git && \
 	cd .. && rm -rf yosys && \
 	rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install pyyaml nmigen
+RUN pip3 install pyyaml nmigen pyserial
