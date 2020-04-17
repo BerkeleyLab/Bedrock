@@ -3,25 +3,15 @@
 `include "application_top_auto.vh"
 
 module application_top(
-	input bmb7_U7_clkout,
-	input bmb7_U7_clk4xout,
-	output [7:0] port_50006_word_k7tos6,
-	input [7:0] port_50006_word_s6tok7,
-	output port_50006_tx_available,
-	input port_50006_rx_available,
-	output port_50006_tx_complete,
-	input port_50006_rx_complete,
-	input port_50006_word_read,
-	output [7:0] port_50007_word_k7tos6,
-	input [7:0] port_50007_word_s6tok7,
-	input port_50007_tx_available,
-	input port_50007_rx_available,
-	input port_50007_tx_complete,
-	input port_50007_rx_complete,
-	input port_50007_word_read,
-	input s6_to_k7_clk_out,
+        input         lb_clk,
+        input         lb_write,
+        input         lb_strobe,
+        input         lb_rd,
+        input [23:0]  lb_addr,
+        input [31:0]  lb_data,
+        output reg [31:0] lb_din,
 
-	output clk200,
+	input clk200,
 	input idelayctrl_rdy,
 	output idelayctrl_reset,
 	input [63:0] U2_dout,
@@ -136,7 +126,6 @@ module application_top(
 	output U3_sdio_as_i
 );
 
-wire lb_clk=bmb7_U7_clkout;
 assign U15_sclk_in=1'b0;
 assign U15_mosi_in=1'b0;
 assign U15_ssb_in=1'b1;
@@ -212,21 +201,6 @@ assign trig_ext = 0;
 // );
 // always @(posedge lb_clk) if (uart_rx_tvalid) uart_rx_hold <= uart_rx_tdata;
 
-// Generate localbus based on link to Spartan
-wire [23:0] lb_addr;
-wire [31:0] lb_dout;
-reg [31:0] lb_din=0;
-wire lb_strobe, lb_rd;
-jxj_gate jxjgate(
-	.clk(lb_clk),
-	.rx_din(port_50006_word_s6tok7), .rx_stb(port_50006_rx_available), .rx_end(port_50006_rx_complete),
-	.tx_dout(port_50006_word_k7tos6), .tx_rdy(port_50006_tx_available), .tx_end(port_50006_tx_complete), .tx_stb(port_50006_word_read),
-	.lb_addr(lb_addr), .lb_dout(lb_dout), .lb_din(lb_din),
-	.lb_strobe(lb_strobe), .lb_rd(lb_rd)
-);
-wire lb_write = lb_strobe & ~lb_rd;
-wire [31:0] lb_data = lb_dout;
-
 // clk1x for ADC-related registers including sel4v controller
 assign clk1x_clk = adc_clk;
 wire [31:0] clk1x_data;
@@ -243,8 +217,8 @@ data_xdomain #(.size(32+24)) lb_to_adc(
 // logic here in Verilog.  We DO use the auto-generated address decode strobe, based
 // on the scan_trigger port of digitizer_config, so this slightly hack-ish solution is
 // still fully integrated with the automatic addressing features.
-reg scan_trigger=0; always @(posedge lb_clk) scan_trigger <= we_digitizer_config_scan_trigger_we & lb_dout[0:0];
-reg autoset_enable=0; always @(posedge lb_clk) if (we_digitizer_config_scan_trigger_we) autoset_enable <= lb_dout[1:1];
+reg scan_trigger=0; always @(posedge lb_clk) scan_trigger <= we_digitizer_config_scan_trigger_we & lb_data[0:0];
+reg autoset_enable=0; always @(posedge lb_clk) if (we_digitizer_config_scan_trigger_we) autoset_enable <= lb_data[1:1];
 
 // reg [1:0] adc_mmcm; top-level single-cycle
 wire adc_mmcm_psen = adc_mmcm[0];
@@ -258,10 +232,9 @@ wire adc_mmcm_psincdec = adc_mmcm[1];
 
 // Most reads are passive; these are not
 // TODO: There is no real way to automate this before we start automating the read address space
-wire slow_read_lb = lb_strobe & lb_rd & (lb_addr==8'h43);
+wire slow_read_lb = lb_strobe & lb_rd & (lb_addr==(24'h190000 + 8'h43));
 // llspi lb address decoding
-//wire llspi_we = lb_strobe & ~lb_rd & (lb_addr==5);
-wire llspi_re = lb_strobe &  lb_rd & (lb_addr==5);
+wire llspi_re = lb_strobe &  lb_rd & (lb_addr==(24'h190000 + 5));
 
 // ADC channel data setup and mapping
 reg signed [15:0] U2DA=0, U2DB=0, U2DC=0, U2DD=0;
@@ -373,6 +346,7 @@ always @ (posedge lb_clk) begin
 		lb_addr_r <= lb_addr;
 end
 
+// reverse_json_offset : 1638400
 // Stupid test rig -- help us, Vamsi!
 reg [31:0]
 	reg_bank_0=0,
@@ -481,15 +455,15 @@ always @(posedge lb_clk) begin
 		24'h13????: lb_din <= scanner_result_val;
 		24'h14????: lb_din <= trace_data;
 		24'h18????: lb_din <= slow_data[7:0];
-		24'h19??7?: lb_din <= idelay_mirror_val;  // xxxx70 through xxx7f [changed from xxx7x to 19007x Marblemini]
+		24'h19??0?: lb_din <= reg_bank_0;
+		24'h19??1?: lb_din <= reg_bank_1;
+		24'h19??2?: lb_din <= reg_bank_2;
+		24'h19??3?: lb_din <= reg_bank_3;
+		24'h19??4?: lb_din <= reg_bank_4;
+		24'h19??5?: lb_din <= reg_bank_5;
+		24'h19??7?: lb_din <= idelay_mirror_val;  // xx70 through xx7f
 		24'b0001_11??_????_????_????_????: lb_din <= banyan_data;
 		24'b????_????_????_1???_????_????: lb_din <= config_rom_out;  // xxx800 through xxxfff, 2K
-		24'h????0?: lb_din <= reg_bank_0;
-		24'h????1?: lb_din <= reg_bank_1;
-		24'h????2?: lb_din <= reg_bank_2;
-		24'h????3?: lb_din <= reg_bank_3;
-		24'h????4?: lb_din <= reg_bank_4;
-		24'h????5?: lb_din <= reg_bank_5;
 		default: lb_din <= 32'hfaceface;
 	endcase
 end
@@ -499,8 +473,8 @@ wire llspi_sdi = U2_sdi;
 wire llspi_sdo;
 assign U3_sdo = llspi_sdo;
 assign U2_sdo = llspi_sdo;
-assign U3_sdio_as_i = U27dir;
-assign U2_sdio_as_i = U27dir;
+assign U3_sdio_as_i = ~U27dir;
+assign U2_sdio_as_i = ~U27dir;
 
 wire rawadc_trig_x;
 digitizer_config digitizer_config // auto
@@ -509,12 +483,12 @@ digitizer_config digitizer_config // auto
 	.lb_strobe(lb_strobe),
 	.lb_rd(lb_rd),
 	.lb_addr(lb_addr),
-	.lb_dout(lb_dout),
+	.lb_dout(lb_data),
 	.U1_clkout3(U1_clkout3),
 	.U2_clk_div_bufg(U2_clk_div_bufg),
 	.U2_clk_div_bufr(U2_clk_div_bufr),
 	.U3_clk_div_bufr(U3_clk_div_bufr),
-	.bmb7_U7_clk4xout(bmb7_U7_clk4xout),
+	.bmb7_U7_clk4xout(clk200),
 	.U4_dco_clk_out(U4_dco_clk_out),
 	.U18_clk_in(U18_clk_in),
 	.U33U1_pwr_sync(U33U1_pwr_sync),
@@ -604,7 +578,6 @@ assign U3_mmcm_psen = 0;
 assign U3_mmcm_psincdec = 0;
 // Do not attach to U3_mmcm_psdone
 
-assign clk200=bmb7_U7_clk4xout; // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz
 assign U4_dci = U4_dco_clk_out;
 
 assign D4rgb[0] = 1'b1;

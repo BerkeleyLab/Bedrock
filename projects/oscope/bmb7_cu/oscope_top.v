@@ -378,25 +378,25 @@ digitizer_U18(
 	.adcclk(U18_clk_in)
 );
 
+wire lb_clk=bmb7_U7_clkout;
+
+// Generate localbus based on link to Spartan
+wire [23:0] lb_addr;
+wire [31:0] lb_dout;
+wire [31:0] lb_din=0;
+wire lb_strobe, lb_rd;
+jxj_gate jxjgate(
+	.clk(lb_clk),
+	.rx_din(port_50006_word_s6tok7), .rx_stb(port_50006_rx_available), .rx_end(port_50006_rx_complete),
+	.tx_dout(port_50006_word_k7tos6), .tx_rdy(port_50006_tx_available), .tx_end(port_50006_tx_complete), .tx_stb(port_50006_word_read),
+	.lb_addr(lb_addr), .lb_dout(lb_dout), .lb_din(lb_din),
+	.lb_strobe(lb_strobe), .lb_rd(lb_rd)
+);
+wire lb_write = lb_strobe & ~lb_rd;
+wire [31:0] lb_data = lb_dout;
+
 // Here's the real work
 application_top application_top(
-	.bmb7_U7_clkout(bmb7_U7_clkout),
-	.bmb7_U7_clk4xout(bmb7_U7_clk4xout),
-	.port_50006_word_k7tos6(port_50006_word_k7tos6),
-	.port_50007_word_k7tos6(port_50007_word_k7tos6),
-	.port_50007_word_s6tok7(port_50007_word_s6tok7),
-	.port_50006_word_s6tok7(port_50006_word_s6tok7),
-	.port_50006_tx_available(port_50006_tx_available),
-	.port_50006_tx_complete(port_50006_tx_complete),
-	.port_50007_tx_available(port_50007_tx_available),
-	.port_50007_tx_complete(port_50007_tx_complete),
-	.port_50006_rx_available(port_50006_rx_available),
-	.port_50006_rx_complete(port_50006_rx_complete),
-	.port_50007_rx_available(port_50007_rx_available),
-	.port_50007_rx_complete(port_50007_rx_complete),
-	.port_50006_word_read(port_50006_word_read),
-	.port_50007_word_read(port_50007_word_read),
-	.s6_to_k7_clk_out(s6_to_k7_clk_out),
 	//,.lb_clk(lb_clk)
 	//,.llspi_we(llspi_we)
 	//,.llspi_re(llspi_re)
@@ -404,6 +404,13 @@ application_top application_top(
 	//,.llspi_result(llspi_result)
 	//,.host_din(host_din)
 	//,.adc_sdio_dir(adc_sdio_dir)
+	.lb_clk(lb_clk),
+	.lb_write(lb_write),
+	.lb_strobe(lb_strobe),
+	.lb_rd(lb_rd),
+	.lb_addr(lb_addr),
+	.lb_data(lb_dout),
+	.lb_din(lb_din),
 	.clk200(clk200),
 	.idelayctrl_rdy(idelayctrl_rdy),
 	.idelayctrl_reset(idelayctrl_reset),
