@@ -20,6 +20,7 @@ VERILOG_DEFINE_FLAGS = ""
 SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
 
 include $(BUILD_DIR)/top_rules.mk
+include $(OSCOPE_COMMON_DIR)/rules.mk
 
 VFLAGS_DEP += -y$(DSP_DIR) -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR) -y$(ISERDES_DIR) -y$(XILINX_DIR) -y$(SERIAL_IO_DIR) -y. -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/idelay_scanner -y$(OSCOPE_COMMON_DIR)
 
@@ -49,8 +50,17 @@ system_top.xdc: $(APP_NAME)_orig_special.xdc $(APP_NAME)_common.xdc
 $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
 	$(PYTHON) $< -v $@ -j $(APP_NAME)_regmap.json
 
-scalar_$(APP_NAME)_regmap.json: application_top.v
+scalar_$(APP_NAME)_regmap.json: $(OSCOPE_COMMON_DIR)/application_top.v
 	$(PYTHON) $(BUILD_DIR)/reverse_json.py $< > $@
+
+$(AUTOGEN_DIR)/%_auto.vh: $(OSCOPE_COMMON_DIR)/%.v
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -o $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
+
+$(AUTOGEN_DIR)/addr_map_%.vh: $(OSCOPE_COMMON_DIR)/%.v
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -a $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
+
+$(AUTOGEN_DIR)/regmap_application_top.json: $(OSCOPE_COMMON_DIR)/application_top.v
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
 
 $(APP_NAME)_regmap.json: $(AUTOGEN_DIR)/regmap_application_top.json scalar_$(APP_NAME)_regmap.json $(OSCOPE_COMMON_DIR)/static_$(APP_NAME)_regmap.json $(OSCOPE_COMMON_DIR)/merge_json.py $(OSCOPE_COMMON_DIR)/shorten_names.py
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/merge_json.py -o $(APP_NAME)_regmap_long.json -i $(filter %.json, $^)
