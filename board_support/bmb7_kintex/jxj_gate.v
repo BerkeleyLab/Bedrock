@@ -36,12 +36,9 @@ module jxj_gate #(
 
 reg nonce_done=0;  // set once we're past the nonce
 reg [63:0] rx_sr=0;
-reg rx_do=0;
 reg lb_strobe_r=0;
 assign lb_strobe = lb_strobe_r;
 (* mark_debug = dbg *) reg xfer_strobe=0;
-reg xfer_read_mode=0;
-
 reg ctl_add_strobe=0, ctl_add_mode=0;
 
 always @(posedge clk) begin
@@ -64,7 +61,6 @@ always @(posedge clk) begin
 	if (xfer_strobe) ctl_add_mode <= 0;
 
 	xfer_strobe <= rx_stb & (&cnt8) & ctl_add_mode;
-	if (xfer_strobe) xfer_read_mode <= nonce_done & rx_sr[32+28];
 end
 
 // Keep track of outstanding transactions to easily identify last tx
@@ -106,19 +102,18 @@ wire tx_sr_load = tx_pipe[7];
 always @(posedge clk) begin
 	xfer_pipe <= {xfer_strobe , xfer_pipe[pipe_del+7:1]};
 	drive_fifo_tx <= |tx_pipe;
-	drive_fifo_done = tx_pipe[0]; // Mark last byte
+	drive_fifo_done <= tx_pipe[0]; // Mark last byte
 	if (|tx_pipe) tx_sr <= tx_sr_load ? {ctl_add_dout, lb_din} : {tx_sr[55:0], 8'b0};
 end
 
 // Store cmd+addr in FIFO to cope with varying pipe_del
-wire ctl_add_full;
 wire [31:0] ctl_add_din = rx_sr[63:32];
 wire [31:0] ctl_add_dout;
 
 shortfifo #(.dw(32), .aw(2)) i_ctl_add_fifo (
 	.clk(clk),
 	.din(ctl_add_din), .we(xfer_strobe),
-	.dout(ctl_add_dout), .re(tx_sr_load), .full(ctl_add_full));
+	.dout(ctl_add_dout), .re(tx_sr_load), .full());
 
 // First 8 bytes are simply looped back (nonce + cmd)
 wire rx_loopback = ~s1 & rx_stb;
