@@ -30,7 +30,6 @@ end
 
 // Pull apart the 4 + 5 + 2 bit address
 wire [4:0] idelay = addr[6:2];
-wire [1:0] micro  = addr[1:0];
 
 // Pretty much the same algorithm as in prc.py top2idelay()
 reg [7:0] goodness=0, best=0, center=0;
