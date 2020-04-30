@@ -67,18 +67,24 @@ parameter dbg = "true";
 parameter [DWIDTH-1:0] FLIP_D=0;
 parameter FLIP_DCO=0;
 parameter FLIP_FRAME=0;
+parameter INFER_IOBUF=0;
 
 assign PDWN = pdwn_in;
 
 generate
-if (SPIMODE=="passthrough")begin
+if (SPIMODE=="passthrough") begin
 	assign CSB  = csb_in;
 	assign SCLK = sclk_in;
+	if (INFER_IOBUF == 0) begin
 `ifndef SIMULATE
 	IOBUF IOBUF(.O(sdi), .T(sdio_as_i), .I(sdo), .IO(SDIO));
 `endif
+	end else begin
+		// Inferred IOBUF
+		assign SDIO = sdio_as_i ? sdo : 1'bz;
+		assign sdi = SDIO;
+	end
 end
-
 endgenerate
 
 wire frameout;
