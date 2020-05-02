@@ -81,7 +81,7 @@ if (SPIMODE=="passthrough") begin
 `endif
 	end else begin
 		// Inferred IOBUF
-		assign SDIO = sdio_as_i ? sdo : 1'bz;
+		assign SDIO = sdio_as_i ? 1'bz : sdo;
 		assign sdi = SDIO;
 	end
 end
