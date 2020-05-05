@@ -95,6 +95,7 @@ def make_decoder_inner(inst, mod, p):
     '''
     Constructs a decoder for a port p.
     p: is an instance of Port
+    # TODO: clarify what different signal_types are exactly
     '''
     # print '// make_decoder',inst,mod,a
     if p.direction != 'output':
@@ -242,23 +243,13 @@ def construct_map(inst, p, gcnt, mod):
             self_map[mod].append('assign %s = %s;\\\n' % (expanded, array_el))
 
 
-INSTANTIATION_SITE = r'^\s*(\w+)\s+(#\(.*\) *)?(\w+)\s*//\s*auto(\(\w+,\d+\))?\s+((\w+)(\[(\w+)\])?)?'
-# Search for port with register width defined 'input (signed)? [%d:%d] name // <...>'
-PORT_WIDTH_MULTI = r'^\s*,?(input|output)\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+),?\s*'
-PORT_WIDTH_MULTI += r'//\s*external\s*(single-cycle|strobe|we-strobe|plus-we)?'
-# Search for port with register width 1 'input (signed)? name // <...>'
-PORT_WIDTH_SINGLE = r'^\s*,?(input|output)\s+(signed)?\s*(\w+),?\s*//\s*external\s*(single-cycle|strobe|we-strobe)?'
-TOP_LEVEL_REG = r'^\s*//\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*top-level\s*(single-cycle|strobe|we-strobe)?'
-
-DESCRIPTION_ATTRIBUTE = r'^\s*\(\*\s*BIDS_description\s*=\s*\"(.+?)\"\s*\*\)\s*$'
-
 from v2j import v2j
 from read_attributes import read_attributes
 
 
 # TODO: Refactor filepath
 
-def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
+def parse_vfile_yosys(stack, fin, fd, dlist, clk_domain, cd_indexed):
     '''
     Given a filename, parse Verilog:
     (a) looking for module instantiations marked automatic,
@@ -272,7 +263,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
     #       there are multiple modules in a single file, as there is no check
     #       for module declaration per se, also doesn't support other fancy
     #       declarations like "input [15:0] a, b,".
-    fd.write('// parse_vfile %s %s\n' % (stack, fin))
+    fd.write('// parse_vfile_yosys %s %s\n' % (stack, fin))
     searchpath = dirname(fin)
     fname = basename(fin)
     if not isfile(fin):
@@ -315,9 +306,9 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
                  (mod, inst, gvar, str(gcnt)))
         if mod not in port_lists:
             # recurse
-            parse_vfile(stack + ':' + fin,
-                        searchpath + '/' + mod + '.v',
-                        fd, dlist, clk_domain_l, cd_indexed_l)
+            parse_vfile_yosys(stack + ':' + fin,
+                              searchpath + '/' + mod + '.v',
+                              fd, dlist, clk_domain_l, cd_indexed_l)
         if not stack:
             if gvar is None or ig == 0:
                 print_instance_ports(inst, mod, gvar, gcnt, fd)
@@ -370,8 +361,17 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
     port_lists[this_mod] = this_port_list
 
 
+INSTANTIATION_SITE = r'^\s*(\w+)\s+(#\(.*\) *)?(\w+)\s*//\s*auto(\(\w+,\d+\))?\s+((\w+)(\[(\w+)\])?)?'
+# Search for port with register width defined 'input (signed)? [%d:%d] name // <...>'
+PORT_WIDTH_MULTI = r'^\s*,?(input|output)\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+),?\s*'
+PORT_WIDTH_MULTI += r'//\s*external\s*(single-cycle|strobe|we-strobe|plus-we)?'
+# Search for port with register width 1 'input (signed)? name // <...>'
+PORT_WIDTH_SINGLE = r'^\s*,?(input|output)\s+(signed)?\s*(\w+),?\s*//\s*external\s*(single-cycle|strobe|we-strobe)?'
+TOP_LEVEL_REG = r'^\s*//\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*top-level\s*(single-cycle|strobe|we-strobe)?'
+DESCRIPTION_ATTRIBUTE = r'^\s*\(\*\s*BIDS_description\s*=\s*\"(.+?)\"\s*\*\)\s*$'
 
-def parse_vfile_old(stack, fin, fd, dlist, clk_domain, cd_indexed):
+
+def parse_vfile_comments(stack, fin, fd, dlist, clk_domain, cd_indexed):
     '''
     Given a filename, parse Verilog:
     (a) looking for module instantiations marked automatic,
@@ -380,7 +380,7 @@ def parse_vfile_old(stack, fin, fd, dlist, clk_domain, cd_indexed):
     (b) looking for input/output ports labeled 'external'.
     Record them in the port_lists dictionary for this module.
     '''
-    fd.write('// parse_vfile %s %s\n' % (stack, fin))
+    fd.write('// parse_vfile_comments %s %s\n' % (stack, fin))
     searchpath = dirname(fin)
     fname = basename(fin)
     if not isfile(fin):
@@ -434,8 +434,8 @@ def parse_vfile_old(stack, fin, fd, dlist, clk_domain, cd_indexed):
                      (mod, inst, gvar, str(gcnt)))
             if mod not in port_lists:
                 # recurse
-                parse_vfile(stack + ':' + fin, searchpath + '/' + mod + '.v',
-                            fd, dlist, clk_domain_l, cd_indexed_l)
+                parse_vfile_comments(stack + ':' + fin, searchpath + '/' + mod + '.v',
+                                     fd, dlist, clk_domain_l, cd_indexed_l)
             if not stack:
                 print_instance_ports(inst, mod, gvar, gcnt, fd)
             # add this instance's ports to our own port list
@@ -654,9 +654,12 @@ def address_allocation(fd,
                               plot_map)
 
 
-def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror):
+def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror, use_yosys):
     obuf = StringIO()
-    parse_vfile('', fi, obuf, dir_list, 'lb', False)
+    if use_yosys:
+        parse_vfile_yosys('', fi, obuf, dir_list, 'lb', False)
+    else:
+        parse_vfile_comments('', fi, obuf, dir_list, 'lb', False)
     obuf.write('// machine-generated by newad.py\n')
     obuf.write('`ifdef LB_DECODE_%s\n' % modname)
     obuf.write('`include \"addr_map_%s.vh\"\n' % modname)
@@ -744,23 +747,25 @@ def main(argv):
         default='',
         help='Outputs generated address map in json format')
     parser.add_argument(
+        '-y',
+        '--yosys',
+        action='store_true',
+        help='Use yosys for backend, as opposed to poor mans parsing')
+    parser.add_argument(
         '-l',
         '--low_res',
         action='store_true',
-        default=False,
         help='When not selected generates a seperate address name for each')
     parser.add_argument(
         '-m',
         '--gen_mirror',
         action='store_true',
-        default=False,
         help='Generates a mirror where all registers and register arrays with size < {}'
         'are available for readback'.format(MIN_MIRROR_ARRAY_SIZE))
     parser.add_argument(
         '-pl',
         '--plot_map',
         action='store_true',
-        default=False,
         help='Plots the register map using a broken bar graph')
     parser.add_argument(
         '-w',
@@ -790,7 +795,7 @@ def main(argv):
     regmap_fname = args.regmap
 
     print_decode_header(input_fname, modname, args.output, dir_list,
-                        args.lb_width, args.gen_mirror)
+                        args.lb_width, args.gen_mirror, args.yosys)
 
     if addr_header_fname:
         write_address_header(input_fname, addr_header_fname, args.low_res,
