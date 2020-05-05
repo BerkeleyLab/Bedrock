@@ -1,5 +1,3 @@
-import json
-
 from v2j import v2j
 
 

@@ -18,6 +18,8 @@
 `define ADDR_HIT_dut_lp_notch_lp1b_kx 0
 `define ADDR_HIT_dut_lp_notch_lp1b_ky 0
 
+`define AUTOMATIC_decode
+`define AUTOMATIC_dut
 `define LB_DECODE_rf_controller_tb
 `include "rf_controller_tb_auto.vh"
 
@@ -27,8 +29,9 @@ reg clk;
 reg lb_clk;
 integer cc;
 reg trace;
-real phase;
 reg [16:0] fiber_i, fiber_q;
+`ifdef SIMULATE
+real phase;
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("rf_controller.vcd");
@@ -43,6 +46,7 @@ initial begin
 		clk=1; #5;
 	end
 end
+`endif //  `ifdef SIMULATE
 
 // Local bus (not used in this test bench)
 reg signed [31:0] lb_data;
@@ -54,10 +58,12 @@ reg lb_write=0;
 reg signed [15:0] a_field=0, a_forward=0, a_reflect=0, a_phref=0;
 // put a sine wave on a_field
 reg signed [15:0] cos_r=0;
+`ifdef SIMULATE
 always @(posedge clk) begin
 	cos_r = $floor(12000.0*$cos((2.0*3.14159265359*cc*7.0/33.0) + phase)+0.5);
 	a_field <= cos_r;
 end
+`endif //  `ifdef SIMULATE
 
 reg [16:0] iq_recv=0;
 reg [3:0] fiber_state=0;
@@ -72,6 +78,7 @@ reg master_cic_tick=0;
 wire [19:0] mon_result;
 wire mon_strobe, mon_boundary;
 
+(* lb_automatic *)
 rf_controller dut // auto
 	(.clk(clk),
 	.a_field(a_field), .a_forward(a_forward), .a_reflect(a_reflect), .a_phref(a_phref),

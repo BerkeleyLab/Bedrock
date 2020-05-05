@@ -1,5 +1,9 @@
 `define LB_DECODE_application_top
 
+`define AUTOMATIC_decode
+`define AUTOMATIC_digitizer_config
+`define AUTOMATIC_digitizer_slowread
+
 `include "application_top_auto.vh"
 
 module application_top(
@@ -150,7 +154,6 @@ assign U18_clkin=lb_clk;
 // Needs placing before usage of any top-level registers
 wire clk1x_clk, clk2x_clk, lb4_clk;
 `AUTOMATIC_decode
-//`AUTOMATIC_map
 
 wire buf_trig_out;  // sourced later by digitizer_dsp
 wire trig_ext;  // used by digitizer_dsp
@@ -477,6 +480,7 @@ assign U3_sdio_as_i = ~U27dir;
 assign U2_sdio_as_i = ~U27dir;
 
 wire rawadc_trig_x;
+(* lb_automatic *)
 digitizer_config digitizer_config // auto
 (
 	.lb_clk(lb_clk),
@@ -555,6 +559,7 @@ digitizer_config digitizer_config // auto
 );
 
 wire slow_snap = rawadc_trig_x;
+(* lb_automatic *)
 digitizer_slowread digitizer_slowread // auto
 (
 	.lb_clk(lb_clk),

@@ -20,9 +20,13 @@ module lp(
 	input clk,  // timespec 6.66 ns
 	input iq,
 	input signed [17:0] x,
+	(* external *)
 	input signed [17:0] kx,  // external
+	(* external *)
 	output [0:0] kx_addr,    // external address for kx
+	(* external *)
 	input signed [17:0] ky,  // external
+	(* external *)
 	output [0:0] ky_addr,    // external address for ky
 	output signed [19:0] y
 );

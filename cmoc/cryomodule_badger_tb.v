@@ -15,6 +15,7 @@ integer cc;
 reg [127:0] packet_file;
 integer data_len;
 reg use_tap=1;
+`ifdef SIMULATE
 initial begin
 	if ($value$plusargs("packet_file=%s", packet_file)) begin
 		$readmemh(packet_file,pack_mem);
@@ -30,6 +31,7 @@ initial begin
 		clk=1; #4;
 	end
 end
+`endif //  `ifdef SIMULATE
 
 reg [7:0] eth_in=0, eth_in_=0;
 reg eth_in_s=0, eth_in_s_=0;
@@ -38,6 +40,7 @@ wire eth_out_s;
 
 reg eth_out_s1=0, ok_to_print=1;
 integer ci;
+`ifdef SIMULATE
 always @(posedge clk) begin
 	ci = cc % (data_len+150);
 	if (use_tap) begin
@@ -57,6 +60,7 @@ always @(posedge clk) begin
 	if (eth_out_s1 & ~eth_out_s) ok_to_print <= 0;
 	if (eth_out_s & ok_to_print) $display("octet %x",eth_out);
 end
+`endif //  `ifdef SIMULATE
 
 // ADC clock and its second-harmonic
 // Should match stanza larger_tb.v

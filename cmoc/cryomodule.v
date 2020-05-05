@@ -2,6 +2,13 @@
 
 `define LB_DECODE_cryomodule
 
+`define AUTOMATIC_decode
+`define AUTOMATIC_map
+`define AUTOMATIC_beam
+`define AUTOMATIC_cavity
+`define AUTOMATIC_llrf
+`define AUTOMATIC_cav_mech
+`define AUTOMATIC_tgen
 `include "cryomodule_auto.vh"
 
 // Combination of LLRF controller and cavity emulator.
@@ -163,6 +170,7 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    // Beam timing generator
    // beam_timing output is limited to [0,phase_step].
    wire [11:0] beam_timing;
+   (* lb_automatic, gvar="cavity_n", gcnt=2, cd="clk2x" *)
    beam beam  // auto(cavity_n,2) clk2x
      (.clk(clk2x), .ena(iq), .reset(1'b0), .pulse(beam_timing),
       `AUTOMATIC_beam);
@@ -171,6 +179,7 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    wire signed [17:0] piezo_eig_drive;
    // Parameter settings here should be mirrored in param.py
    // Instantiating the Station module here:
+   (* lb_automatic, gvar="cavity_n", gcnt=2, cd="clk2x" *)
    station #(.mode_count(mode_count), .mode_shift(mode_shift), .n_mech_modes(n_mech_modes), .df_scale(df_scale)) cavity // auto(cavity_n,2) clk2x
      (.clk(clk2x),
       .beam_timing(beam_timing), .mech_x(mech_x), .cav_eig_drive(cav_eig_drive),
@@ -230,6 +239,9 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    // Make our own additions to slow shift register
    // equivalence circle_stat: circle_fault 1, circle_wrap 1, circle_addr 14
 `define SLOW_SR_DATA { circle_count, circle_stat }
+   // TODO: These `we_*` wires below, are taken from the decode signals that are auto generated
+   wire [7:0] slow_shell_out;
+
    reg [sr_length-1:0] slow_read=0;
    always @(posedge clk1x) if (slow_op) begin
       slow_read <= slow_snap ? `SLOW_SR_DATA : {slow_read[sr_length-9:0],slow_shell_out};
@@ -240,14 +252,13 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    // Instantiate controller in clk domain
    wire ext_trig=buf_sync;
 
-   // TODO: These `we_*` wires below, are taken from the decode signals that are auto generated
-   wire [7:0] slow_shell_out;
 
    // Timing generator, interposes on local bus
    wire collision, collision1;
 
 `define USE_TGEN
 `ifdef USE_TGEN
+   (* lb_automatic, gvar="cavity_n", gcnt=2, cd="lb2", cd_indexed *)
    tgen tgen // auto(cavity_n,2) lb2[cavity_n]
      (.clk(clk1x), .trig(ext_trig), .collision(collision1),
       .lb_data(clk1x_data), .lb_write(clk1x_write), .lb_addr(clk1x_addr),
@@ -279,6 +290,7 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    assign collision = 0;
 `endif
 
+   (* lb_automatic, gvar="cavity_n", gcnt=2, cd="lb2", cd_indexed *)
    llrf_shell llrf // auto(cavity_n,2) lb2[cavity_n]
      (.clk(clk1x),
       .a_field(a_field), .a_forward(a_forward), .a_reflect(a_reflect),
@@ -341,6 +353,7 @@ end endgenerate
 reg signed [17:0] eig_drive0=0, total_eig_drive=0;
 wire signed [17:0] noise_eig_drive;
 wire res_clip;
+(* lb_automatic, cd="clk2x" *)
 cav_mech #(.n_mech_modes(n_mech_modes)) cav_mech // auto clk2x
   (.clk(clk2x),
    .start_eig(start_eig), .noise_eig_drive(noise_eig_drive), .eig_drive(total_eig_drive),

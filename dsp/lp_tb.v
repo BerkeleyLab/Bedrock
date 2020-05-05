@@ -3,6 +3,8 @@
 `define ADDR_HIT_dut_kx 0
 `define ADDR_HIT_dut_ky 0
 
+`define AUTOMATIC_decode
+`define AUTOMATIC_dut
 `define LB_DECODE_lp_tb
 `include "lp_tb_auto.vh"
 
@@ -10,6 +12,7 @@ module lp_tb;
 
 reg clk;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("lp.vcd");
@@ -20,15 +23,18 @@ initial begin
 		clk=1; #5;
 	end
 end
+`endif //  `ifdef SIMULATE
 
 // Output file (if any) for dumping the results
 integer out_file;
 reg [255:0] out_file_name;
+`ifdef SIMULATE
 initial begin
 	out_file = 0;
 	if ($value$plusargs("out_file=%s", out_file_name))
 		out_file = $fopen(out_file_name,"w");
 end
+`endif //  `ifdef SIMULATE
 
 reg signed [17:0] x=0;
 reg [2:0] state=0;
@@ -49,6 +55,7 @@ reg lb_write=0;
 `AUTOMATIC_decode
 
 wire signed [19:0] y;
+(* lb_automatic *)
 lp dut // auto
 	(.clk(clk), .iq(iq), .x(x), .y(y), `AUTOMATIC_dut);
 

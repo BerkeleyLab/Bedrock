@@ -33,7 +33,9 @@ module eth_gtx_bridge #(
    input  [4:0]        cfg_addr, // cfg_addr[4] = {0 - MAC/IP, 1 - UDP Ports}
    input  [7:0]        cfg_wdata,
    // Dummy ports used to trigger newad address space generation
+   (* external *)
    input  [7:0]        cfg_reg, // external
+   (* external *)
    output [4:0]        cfg_reg_addr, // external
 
    // Local Bus interface

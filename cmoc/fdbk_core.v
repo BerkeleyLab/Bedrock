@@ -16,7 +16,9 @@
 // Thus to generate a chirp, the AM part goes to lim_X_hi and lim_X_lo,
 // propagating to drv_x.  The phase part goes to ph_offset, with sel_en=0,
 // which then propagates to drv_p.
-
+`define AUTOMATIC_self
+`define AUTOMATIC_decode
+`define AUTOMATIC_mp_proc
 `define LB_DECODE 1
 `include "fdbk_core_auto.vh"
 
@@ -27,6 +29,7 @@ module fdbk_core(
 	input signed [17:0] in_xy,
 	output signed [17:0] out_xy,
 	output [11:0] cmp_event,  // see mp_proc.v
+	(* external *)
 	input [1:0] coarse_scale,  // external
 	`AUTOMATIC_self
 );
@@ -74,7 +77,9 @@ assign cordic_in_xy = use_mp_proc ? proc_out_xy : iq ? out_mp : 0;
 
 // Establish strobe for magnitude and phase processor input
 wire sync3 = stb[1];
+
 // Instantiate magnitude and phase processor
+(* lb_automatic *)
 mp_proc mp_proc // auto
 	(.clk(clk), .sync(sync3),
 	.in_mp(out_mp), // .state(state),

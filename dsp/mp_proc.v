@@ -37,15 +37,24 @@ module mp_proc(
 	// Input from cordic_mux
 	input signed [17:0] in_mp,
 	// Host-writable simple controls
+	(* external *)
 	input [0:0] sel_en,  // external
+	(* external *)
 	input signed [17:0] ph_offset,  // external
+	(* external *)
 	input signed [17:0] sel_thresh,  // external
 	// Host-settable channel-multiplexed controls
+	(* external *)
 	input signed [17:0] setmp,  // external
+	(* external *)
 	input signed [17:0] coeff,  // external
+	(* external *)
 	input signed [17:0] lim,  // external
+	(* external *)
 	output [1:0] setmp_addr,  // external address for setmp
+	(* external *)
 	output [1:0] coeff_addr,  // external address for coeff
+	(* external *)
 	output [1:0] lim_addr,  // external address for lim
 	// Final output, back to cordic_mux
 	output out_sync,

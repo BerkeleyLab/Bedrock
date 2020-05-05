@@ -10,7 +10,7 @@ NEWAD_DIRS += $(DSP_DIR) $(RTSIM_DIR)
 
 VERILOG_AUTOGEN += "cordicg_b22.v $(RTEFI_V) "
 
-rf_controller_auto: fdbk_core_auto piezo_control_auto lp_notch_auto
+rf_controller_auto: fdbk_core_auto piezo_control_auto lp_notch_auto lo_lut_f40.v lo_lut_f40_05.v
 
 fdbk_core_auto: cordicg_b22.v
 cryomodule_auto: cordicg_b22.v llrf_shell_auto rf_controller_auto fdbk_core_auto station_auto prng_auto cav_mode_auto cav_mech_auto cav_elec_auto lp_notch_auto lo_lut_f40.v lo_lut_f40_05.v

@@ -8,7 +8,13 @@
 `define ADDR_HIT_dut_mp_proc_lim 0
 
 `define LB_DECODE_fdbk_core_tb
+`define AUTOMATIC_decode
+`define AUTOMATIC_dut
+
+`ifdef SIMULATE
 `include "constants.vams"
+`endif //  `ifdef SIMULATE
+
 `include "fdbk_core_tb_auto.vh"
 
 module fdbk_core_tb;
@@ -33,7 +39,7 @@ reg clk;
 // Local bus and test-bench on the same clock domain
 wire lb_clk=clk;
 integer cc;
-
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("fdbk_core.vcd");
@@ -45,12 +51,13 @@ initial begin
 	end
 	$finish();
 end
+`endif //  `ifdef SIMULATE
 
 // Input file for initial register sets and output file to dump the results
 integer in_file, out_file;
 reg [255:0] in_file_name;
 reg [255:0] out_file_name;
-
+`ifdef SIMULATE
 // The command-line arguments depend on the test type in question
 initial begin
 	if (!$value$plusargs("in_file=%s", in_file_name)) in_file_name="fdbk_core_in.dat";
@@ -78,6 +85,7 @@ initial begin
 		lim_step_file = $fopen(lim_step_file_name,"r");
 	end
 end
+`endif //  `ifdef SIMULATE
 
 reg [2:0] state=0;
 wire iq=state[0];
@@ -118,6 +126,7 @@ reg [15:0] lb_addr, ca;
 reg lb_write=0;
 integer control_cnt=0;
 // Read register sets from configuration file and drive the local bus
+`ifdef SIMULATE
 always @(posedge lb_clk) begin
 	control_cnt <= control_cnt+1;
 	if (control_cnt > 5 && control_cnt%3==1 && rc1==2) begin
@@ -154,12 +163,14 @@ always @(posedge lb_clk) begin
 		lb_write <= 0;
 	end
 end
+`endif //  `ifdef SIMULATE
 
 // Magic Local Bus decoder
 `AUTOMATIC_decode
 
 wire sync1=(state==7);
 wire signed [17:0] out_xy;
+(* lb_automatic *)
 fdbk_core #(.use_mp_proc(1), .use_ll_prop(0)) dut // auto
 	(.clk(clk),
 	.sync(sync1), .iq(iq), .in_xy(in1), .out_xy(out_xy),
@@ -209,12 +220,14 @@ always @(posedge clk) begin
 	sync_d <= sync3;
 	sync_d2 <= sync_d;
 
+`ifdef SIMULATE
 	// Write aligned input, set-point and error signals onto file (set-point scaling test)
 	if (out_file != 0 && sync_d2 && (test_type==0 || test_type==1)) $fwrite(out_file," %d %d %d %d %d %d\n", setmp_d2, setmp_d, in_mp_d2, in_mp_d, mp_err_d, mp_err);
 
 	// Write aligned input and output signals onto file (feedback gain scaling test)
 	if (out_file != 0 && ~iq && (test_type==2 || test_type==3)) $fwrite(out_file," %d %d %d %d %d %d\n", setmp_d, setmp, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
 	if (out_file != 0 && ~iq && test_type==4) $fwrite(out_file," %d %d %d %d %d %d\n", in1_d, in1, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
+`endif
 	if (sync_d) count_syncs <= count_syncs + 1'b1;
 end
 

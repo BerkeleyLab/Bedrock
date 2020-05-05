@@ -4,6 +4,7 @@ module tgen_tb;
 
 reg clk;
 integer cc, errors;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("tgen.vcd");
@@ -17,13 +18,15 @@ initial begin
 	//$display("%s",errors==0?"PASS":"FAIL");
 	$finish();
 end
-
+`endif //  `ifdef SIMULATE
 integer file1;
 reg [255:0] file1_name;
+`ifdef SIMULATE
 initial begin
 	if (!$value$plusargs("tgen_seq=%s", file1_name)) file1_name="tgen_seq.dat";
 	file1 = $fopen(file1_name,"r");
 end
+`endif //  `ifdef SIMULATE
 
 integer rc=2;
 reg [31:0] control_data, cd;
@@ -31,6 +34,7 @@ reg [16:0] control_addr, ca;
 reg control_strobe=0;
 integer control_cnt=0;
 integer wait_horizon=5;
+`ifdef SIMULATE
 always @(posedge clk) begin
 	control_cnt <= control_cnt+1;
 	if (control_cnt>wait_horizon && control_cnt%3==1 && rc==2) begin
@@ -51,7 +55,9 @@ always @(posedge clk) begin
 		control_addr <= 7'hx;
 		control_strobe <= 0;
 	end
-end
+end // always @ (posedge clk)
+`endif //  `ifdef SIMULATE
+
 wire dests_write = control_addr[16:12] == 1;  // matches addresses 4096-8191; see tgen_seq.dat
 
 reg trig=0;

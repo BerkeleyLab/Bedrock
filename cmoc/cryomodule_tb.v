@@ -7,6 +7,7 @@ module cryomodule_tb;
 
 reg clk, trace;
 integer cc, errors;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("cryomodule.vcd");
@@ -21,6 +22,7 @@ initial begin
 	//$display("%s",errors==0?"PASS":"FAIL");
 	$finish();
 end
+`endif //  `ifdef SIMULATE
 
 reg clk1x=0, clk2x=0;
 always begin
@@ -32,12 +34,14 @@ end
 integer file1, file2;
 reg [255:0] file1_name;
 reg [255:0] file2_name;
+`ifdef SIMULATE
 initial begin
 	if (!$value$plusargs("dfile=%s", file1_name)) file1_name="cryomodule_in.dat";
 	file1 = $fopen(file1_name,"r");
 	file2 = 0;
 	if ($value$plusargs("pfile=%s", file2_name)) file2 = $fopen(file2_name,"w");
 end
+`endif //  `ifdef SIMULATE
 
 integer rc=2;
 wire control_clk=clk;
@@ -52,7 +56,9 @@ integer wait_horizon=5;
 always @(posedge control_clk) begin
 	control_cnt <= control_cnt+1;
 	if (control_cnt > wait_horizon && control_cnt%3==1 && rc==2) begin
+		`ifdef SIMULATE
 		rc=$fscanf(file1,"%d %d\n",ca,cd);
+		`endif
 		if (rc==2) begin
 			if (ca == 555) begin
 				$display("stall %d cycles",cd);
@@ -119,6 +125,7 @@ cryomodule #(.circle_aw(10), .cavity_count(2)) l(.clk1x(clk1x), .clk2x(clk2x),
 
 wire signed [15:0] mem_val = read_result;  // unsigned -> signed
 integer dptr0, ix, drow[0:7];
+`ifdef SIMULATE
 always @(posedge control_clk) if (control_read_d && control_cnt>2000) begin
 	if (trace) begin
 	   $display("read value[%d] = %d",control_addr_d-24576,mem_val);
@@ -132,6 +139,7 @@ always @(posedge control_clk) if (control_read_d && control_cnt>2000) begin
 		$fwrite(file2,"\n");
 	end
 end
+`endif //  `ifdef SIMULATE
 
 initial begin
 	#1; // lose races

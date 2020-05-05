@@ -290,7 +290,7 @@ def parse_vfile_yosys(stack, fin, fd, dlist, clk_domain, cd_indexed):
         mod_attrs = mod_info['attributes']
         mod = mod_info['type']
         clk_domain_l = mod_attrs['cd'] if 'cd' in mod_attrs else clk_domain  # Assume same cd unless specified
-        cd_indexed_l = True if 'cd_index' in mod_attrs else cd_indexed
+        cd_indexed_l = True if 'cd_indexed' in mod_attrs else cd_indexed
         gvar = mod_attrs['gvar'] if 'gvar' in mod_attrs else None
         gcnt = int(mod_attrs['gcnt'], 2) if 'gcnt' in mod_attrs else None
 
@@ -444,7 +444,6 @@ def parse_vfile_comments(stack, fin, fd, dlist, clk_domain, cd_indexed):
                     p_p = deepcopy(p)  # p_prime
                     this_port_list.append(p_p.port_prefix_set(inst + ':'))
                 else:
-                    print(p, inst)
                     for ig in range(gcnt):
                         p_p = deepcopy(p)  # p_prime
                         p_p = p_p.port_prefix_set('%s_%d:' % (inst, ig))
