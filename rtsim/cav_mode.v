@@ -32,6 +32,9 @@
 // pretty far from what I think should be the 3.8 ns limit from the
 // CORDIC elements.  The IIR element in lp_pair tests by itself at
 // 3.0 ns, so that's not it.
+`define AUTOMATIC_self
+`define AUTOMATIC_decode
+`define AUTOMATIC_out_couple
 
 `include "cav_mode_auto.vh"
 
@@ -51,8 +54,11 @@ module cav_mode(
 	// (adequate to represent 8pi/9 and 7pi/9 modes).
 	input signed [27:0] mech_freq,
 	output signed [17:0] v_squared,
+	(* external *)
 	input signed [17:0] drive_coupling,  // external
+	(* external *)
 	input signed [17:0] beam_coupling,  // external
+	(* external *)
 	input signed [17:0] bw,  // external
 	`AUTOMATIC_self
 );
@@ -116,6 +122,8 @@ lp_pair #(.shift(shift)) lp_pair(.clk(clk), .drive(mul_result),
 // Also upconverts to IF, as provided by lo_phase input.
 reg [18:0] out_phase=0;
 always @(posedge clk) out_phase <= lo_phase - mech_phase;
+
+(* lb_automatic *)
 pair_couple out_couple // auto
 	(.clk(clk), .iq(iq),
 	.drive(res), .lo_phase(out_phase),

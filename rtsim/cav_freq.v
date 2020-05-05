@@ -5,6 +5,7 @@ module cav_freq(
 	input signed [17:0] fine,
 	// getting the following control into the address map is the
 	// whole point of this module:
+	(* external *)
 	input signed [27:0] coarse_freq, // external
 	output signed [27:0] out
 );

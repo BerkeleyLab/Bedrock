@@ -13,6 +13,7 @@ module a_compress(
 	input signed [17:0] d_in,
 	output signed [17:0] d_out,
 	// Adjust saturation characteristics
+	(*external*)
 	input [15:0] sat_ctl   // external
 );
 

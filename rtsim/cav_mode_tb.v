@@ -1,6 +1,7 @@
 `timescale 1ns / 1ns
 
 `define LB_DECODE_cav_mode_tb
+`define AUTOMATIC_decode
 `include "cav_mode_tb_auto.vh"
 
 module cav_mode_tb;
@@ -11,6 +12,7 @@ reg clk;
 reg lb_clk;
 reg trace;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	trace = $test$plusargs("trace");
 	if ($test$plusargs("vcd")) begin
@@ -22,6 +24,7 @@ initial begin
 		clk=1; #3;
 	end
 end
+`endif //  `ifdef SIMULATE
 
 // Local bus, not really used in this test bench
 reg [31:0] lb_data=0;

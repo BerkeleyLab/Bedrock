@@ -68,9 +68,9 @@ class Port:
 
 
 def consider_port(p, fd):
-    # Consider what to do with a port
     # 5-element list is (input/output) (signed/None) lsb msb name
     if p.direction == 'output':
+        # TODO: Another idiosyncracy, moved to an attribute as per new spec
         bp = re.sub('_addr$', '', p.name)
         fd.write('// found output address in module %s, base=%s\n' % (p.module,
                                                                       bp))
@@ -252,8 +252,126 @@ TOP_LEVEL_REG = r'^\s*//\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*top-l
 
 DESCRIPTION_ATTRIBUTE = r'^\s*\(\*\s*BIDS_description\s*=\s*\"(.+?)\"\s*\*\)\s*$'
 
+from v2j import v2j
+from read_attributes import read_attributes
+
+
+# TODO: Refactor filepath
 
 def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
+    '''
+    Given a filename, parse Verilog:
+    (a) looking for module instantiations marked automatic,
+    for which we need to generate port assignments.
+    When such an instantiation is found, recurse.
+    (b) looking for input/output ports labeled 'external'.
+    Record them in the port_lists dictionary for this module.
+    '''
+    # TODO: Take care of top-level
+    # TODO: Old newad doesn't really take care of the case where
+    #       there are multiple modules in a single file, as there is no check
+    #       for module declaration per se, also doesn't support other fancy
+    #       declarations like "input [15:0] a, b,".
+    fd.write('// parse_vfile %s %s\n' % (stack, fin))
+    searchpath = dirname(fin)
+    fname = basename(fin)
+    if not isfile(fin):
+        for d in dlist:
+            x = d + '/' + fname
+            if isfile(x):
+                fin = x
+                break
+    if not isfile(fin):
+        print("File not found:", fin)
+        print("(from hierarchy %s)" % stack)
+        global file_not_found
+        file_not_found += 1
+        return
+    if searchpath == '':
+        searchpath = '.'
+    this_mod = fin.split('/')[-1].split('.')[0]
+
+    parsed_mod = read_attributes(v2j(fin))
+    this_port_list = []
+    attributes = {}
+    for inst, mod_info in parsed_mod['automatic_cells'].items():
+        # print(inst, mod_info)
+        mod_attrs = mod_info['attributes']
+        mod = mod_info['type']
+        clk_domain_l = mod_attrs['cd'] if 'cd' in mod_attrs else clk_domain  # Assume same cd unless specified
+        cd_indexed_l = True if 'cd_index' in mod_attrs else cd_indexed
+        gvar = mod_attrs['gvar'] if 'gvar' in mod_attrs else None
+        gcnt = int(mod_attrs['gcnt'], 2) if 'gcnt' in mod_attrs else None
+
+        if gvar is not None:
+            # When the instantiation is inside a genvar, yosys_json already unrolls the loop and creates
+            # a cell per iteration
+            inst_name_info = inst.split('.')
+            inst = inst_name_info[1]
+            ig = int(inst_name_info[0].split('[')[1][0])  # TODO: This is a total hack to maintain old newad API
+
+        # TODO: Look for CD attribute
+        fd.write('// module=%s instance=%s gvar=%s gcnt=%s\n' %
+                 (mod, inst, gvar, str(gcnt)))
+        if mod not in port_lists:
+            # recurse
+            parse_vfile(stack + ':' + fin,
+                        searchpath + '/' + mod + '.v',
+                        fd, dlist, clk_domain_l, cd_indexed_l)
+        if not stack:
+            if gvar is None or ig == 0:
+                print_instance_ports(inst, mod, gvar, gcnt, fd)
+
+        # add this instance's external ports to our own port list
+        for p in port_lists[mod] if mod in port_lists else []:
+            if gcnt is None:
+                p_p = deepcopy(p)  # p_prime
+                this_port_list.append(p_p.port_prefix_set(inst + ':'))
+            else:
+                p_p = deepcopy(p)  # p_prime
+                p_p = p_p.port_prefix_set('{}_{}:'.format(inst, ig))
+                if cd_indexed_l:
+                    p_p.cd_index = ig  # TODO: to be fixed
+                this_port_list.append(p_p)
+                if ig == 0:
+                    if this_mod not in self_map:
+                        self_map[this_mod] = []
+                    construct_map(inst, p, gcnt, this_mod)
+
+    for port, (net_info, port_info) in parsed_mod['external_nets'].items():
+        signal_type = net_info['attributes']['signal_type'] if 'signal_type' in net_info['attributes'] else None
+        signed = 'signed' if 'signed' in port_info else None
+        p = Port(port,
+                 # TODO: This is a hack needs to be fixed
+                 (len(net_info['bits']) - 1, 0),
+                 port_info['direction'],
+                 signed,
+                 this_mod,
+                 signal_type,
+                 clk_domain,
+                 cd_indexed,
+                 **attributes)
+        this_port_list.append(p)
+        consider_port(p, fd)
+        if signal_type == 'plus-we':
+            p = Port(port + '_we',
+                     (0, 0),
+                     port_info['direction'],
+                     None,
+                     this_mod,
+                     'plus-we-VOID',
+                     clk_domain,
+                     cd_indexed,
+                     **attributes)
+            this_port_list.append(p)
+            consider_port(p, fd)
+        attributes = {}
+
+    port_lists[this_mod] = this_port_list
+
+
+
+def parse_vfile_old(stack, fin, fd, dlist, clk_domain, cd_indexed):
     '''
     Given a filename, parse Verilog:
     (a) looking for module instantiations marked automatic,
@@ -326,6 +444,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
                     p_p = deepcopy(p)  # p_prime
                     this_port_list.append(p_p.port_prefix_set(inst + ':'))
                 else:
+                    print(p, inst)
                     for ig in range(gcnt):
                         p_p = deepcopy(p)  # p_prime
                         p_p = p_p.port_prefix_set('%s_%d:' % (inst, ig))

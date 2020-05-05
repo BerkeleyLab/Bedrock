@@ -12,9 +12,12 @@ module beam(
 	input ena,
 	input reset,  // active high, synchronous with clk and ena
 	output [11:0] pulse,
+	(* external *)
 	input [11:0] phase_step, // external
+	(* external *)
 	input [11:0] modulo,  // external
 	// Initial phase value to align beam with individual cavities
+	(* external *)
 	input [11:0] phase_init  // external
 );
 

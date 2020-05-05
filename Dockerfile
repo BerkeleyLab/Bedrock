@@ -82,8 +82,8 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 # Note that the standard yosys build process used here requires
 # network access to download abc from https://github.com/berkeley-abc/abc.
 
-RUN git clone https://github.com/cliffordwolf/yosys.git && \
-	cd yosys && git checkout yosys-0.9 && \
+RUN git clone https://github.com/jersey99/yosys.git && \
+	cd yosys && git checkout signed-in-rtlil-wire && \
 	apt-get update && \
 	apt-get install -y clang libreadline-dev tcl-dev libffi-dev graphviz \
 	xdot libboost-system-dev libboost-python-dev libboost-filesystem-dev zlib1g-dev && \

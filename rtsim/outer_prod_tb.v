@@ -1,5 +1,7 @@
 `timescale 1ns / 1ns
 
+`define AUTOMATIC_decode
+`define AUTOMATIC_outer_prod
 `define LB_DECODE_outer_prod_tb
 `include "outer_prod_tb_auto.vh"
 
@@ -11,6 +13,7 @@ reg clk;
 reg lb_clk;
 reg trace;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	trace = $test$plusargs("trace");
 	if ($test$plusargs("vcd")) begin
@@ -22,6 +25,7 @@ initial begin
 		clk=1; #3;
 	end
 end
+`endif
 
 // Local bus
 reg [31:0] lb_data=0;
@@ -43,6 +47,7 @@ always @(posedge clk) begin
 end
 
 wire signed [17:0] result;
+(* lb_automatic *)
 outer_prod outer_prod  // auto
 	(.clk(clk), .start(start),
 	.x(x), .result(result),

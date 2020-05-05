@@ -6,6 +6,7 @@ reg clk;
 reg reset;
 integer cc;
 reg trace;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("beam.vcd");
@@ -18,6 +19,7 @@ initial begin
 		clk=1; #5;
 	end
 end
+`endif //  `ifdef SIMULATE
 
 // Beam pulse rate = 1300 MHz / 1400 = 928.57 kHz
 // Clock rate = 1320 MHz / 14 = 94.286 MHz
