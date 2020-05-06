@@ -354,7 +354,7 @@ def parse_vfile_yosys(stack, fin, fd, dlist, clk_domain, cd_indexed):
                  port_info != {},
                  **attributes)
         this_port_list.append(p)
-        if not stack:
+        if not stack and port_info == {}:
             make_decoder(None, this_mod, p, None)
         else:
             consider_port(p, fd)

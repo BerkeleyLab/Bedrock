@@ -12,6 +12,7 @@ reg clk;
 reg lb_clk;
 reg trace;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	trace = $test$plusargs("trace");
 	if ($test$plusargs("vcd")) begin
@@ -23,6 +24,7 @@ initial begin
 		clk=1; #3;
 	end
 end
+`endif //  `ifdef SIMULATE
 
 // Local bus
 reg [31:0] lb_data=0;

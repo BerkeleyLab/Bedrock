@@ -1,9 +1,5 @@
 `timescale 1ns / 1ns
 
-`define LB_DECODE_cav_mode_tb
-`define AUTOMATIC_decode
-`include "cav_mode_tb_auto.vh"
-
 module cav_mode_tb;
 
 // Nominal clock is 188.6 MHz, corresponding to 94.3 MHz ADC clock.
@@ -31,7 +27,6 @@ reg [31:0] lb_data=0;
 reg [14:0] lb_addr=0;
 reg lb_write=0;
 
-`AUTOMATIC_decode
 
 reg iq=0;
 reg signed [17:0] drive=0;
