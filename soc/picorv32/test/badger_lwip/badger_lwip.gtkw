@@ -1,11 +1,3 @@
-[*]
-[*] GTKWave Analyzer v3.3.101 (w)1999-2019 BSI
-[*] Sat Jul 27 06:56:52 2019
-[*]
-[dumpfile] "/home/michael/fpga_wsp/bedrock/soc/picorv32/test/badger_lwip/badger_lwip.vcd"
-[dumpfile_mtime] "Sat Jul 27 06:55:34 2019"
-[dumpfile_size] 263759745
-[savefile] "/home/michael/fpga_wsp/bedrock/soc/picorv32/test/badger_lwip/badger_lwip.gtkw"
 [timestart] 1064610
 [size] 1020 1105
 [pos] -1 -1
