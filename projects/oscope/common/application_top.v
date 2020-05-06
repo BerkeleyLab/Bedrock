@@ -153,6 +153,14 @@ assign U18_clkin=lb_clk;
 // Magic
 // Needs placing before usage of any top-level registers
 wire clk1x_clk, clk2x_clk, lb4_clk;
+
+(* external, signal_type="single-cycle" *) reg [0:0] lamp_test_trig = 0;
+(* external, signal_type="single-cycle" *) reg [1:0] adc_mmcm = 0;
+(* external, signal_type="single-cycle" *) reg [0:0] ctrace_start = 0;
+(* external *) reg [31:0] icc_cfg = 0;
+(* external *) reg [7:0] tag_now = 0;
+(* external *) reg [1:0] domain_jump_realign = 0;
+
 `AUTOMATIC_decode
 
 wire buf_trig_out;  // sourced later by digitizer_dsp

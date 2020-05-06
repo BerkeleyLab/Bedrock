@@ -126,7 +126,6 @@ module digitizer_config(
 	input phasex_trig, // external single-cycle
 	(* external, signal_type="we-strobe" *)
 	input llspi_we,  // external we-strobe
-	(* external *)
 	input llspi_re,  // -- external strobe
 	(* external, signal_type="we-strobe" *)
 	input clk_status_we,  // external we-strobe
@@ -137,7 +136,7 @@ module digitizer_config(
 	(* external, signal_type="we-strobe" *)
 	input scan_trigger_we,  // external we-strobe
 	// lb_clk domain, but only because I flag_xdomain to adc_clk
-	(* external *)
+	(* external, signal_type="single-cycle" *)
 	input rawadc_trig,  // external single-cycle
 	(* external *)
 	input [9:0] adc_downsample_ratio,  // external

@@ -6,7 +6,7 @@
 # * Mirror read and write clk is currently hard-coded to lb_clk
 # * Remove hierarchy from address_allocation
 # * Currently we-strobe is being abused to generate registers of width > 1
-# * Can we do a quick search in the string before a full re match in parse_vfile?
+# * Remove AUTOMATIC_map, still seems to be used in cryomodule.v
 
 import argparse
 import json
@@ -41,6 +41,7 @@ class Port:
                  signal_type,
                  clk_domain='lb',
                  cd_indexed=False,
+                 needs_declaration=True,
                  description=''):
         self.name = name
         self.downto = downto
@@ -51,6 +52,7 @@ class Port:
         self.clk_domain = clk_domain
         self.cd_indexed = cd_indexed
         self.cd_index = None
+        self.needs_declaration = needs_declaration
         self.description = description
 
     def port_prefix_set(self, prefix):
@@ -136,9 +138,13 @@ def make_decoder_inner(inst, mod, p):
             gch[sig_name] = (addr_width, mod, sign, data_width, clk_prefix,
                              cd_index_str, p.description)
         elif p.signal_type == 'single-cycle':
-            reg_def = 'reg [%d:%d] %s=0; always @(posedge %s_clk) '\
+            if p.needs_declaration:
+                reg_decl = 'reg [{}:{}] {}=0;'.format(msb, lsb, sig_name)
+            else:
+                reg_decl = ''
+            reg_def = '%s always @(posedge %s_clk) '\
                       '%s <= we_%s ? %s_data%s[%d:%d] : %d\'b0;\\\n' %\
-                      (msb, lsb, sig_name, clk_prefix, sig_name, sig_name,
+                      (reg_decl, clk_prefix, sig_name, sig_name,
                        clk_prefix, cd_index_str, msb, lsb, data_width)
             decodes.append(decode_def + reg_def)
             gch[sig_name] = (0, mod, sign, data_width, clk_prefix,
@@ -161,9 +167,13 @@ def make_decoder_inner(inst, mod, p):
                 we_def = 'wire %s_we = we_%s;\\\n' % (sig_name, sig_name)
             else:
                 we_def = ''
-            reg_def = 'reg [%d:%d] %s=0; always @(posedge %s_clk) '\
+            if p.needs_declaration:
+                reg_decl = 'reg [{}:{}] {}=0;'.format(msb, lsb, sig_name)
+            else:
+                reg_decl = ''
+            reg_def = '%s always @(posedge %s_clk) '\
                       'if (we_%s) %s <= %s_data%s;\\\n' %\
-                      (msb, lsb, sig_name, clk_prefix, sig_name, sig_name,
+                      (reg_decl, clk_prefix, sig_name, sig_name,
                        clk_prefix, cd_index_str)
             decodes.append(decode_def + we_def + reg_def)
             gch[sig_name] = (0, mod, sign, data_width, clk_prefix,
@@ -258,7 +268,6 @@ def parse_vfile_yosys(stack, fin, fd, dlist, clk_domain, cd_indexed):
     (b) looking for input/output ports labeled 'external'.
     Record them in the port_lists dictionary for this module.
     '''
-    # TODO: Take care of top-level
     # TODO: Old newad doesn't really take care of the case where
     #       there are multiple modules in a single file, as there is no check
     #       for module declaration per se, also doesn't support other fancy
@@ -331,31 +340,40 @@ def parse_vfile_yosys(stack, fin, fd, dlist, clk_domain, cd_indexed):
 
     for port, (net_info, port_info) in parsed_mod['external_nets'].items():
         signal_type = net_info['attributes']['signal_type'] if 'signal_type' in net_info['attributes'] else None
-        signed = 'signed' if 'signed' in port_info else None
+        signed = 'signed' if 'signed' in net_info else None
+        direction = port_info['direction'] if 'direction' in port_info else None
         p = Port(port,
                  # TODO: This is a hack needs to be fixed
                  (len(net_info['bits']) - 1, 0),
-                 port_info['direction'],
+                 direction,
                  signed,
                  this_mod,
                  signal_type,
                  clk_domain,
                  cd_indexed,
+                 port_info != {},
                  **attributes)
         this_port_list.append(p)
-        consider_port(p, fd)
+        if not stack:
+            make_decoder(None, this_mod, p, None)
+        else:
+            consider_port(p, fd)
         if signal_type == 'plus-we':
             p = Port(port + '_we',
                      (0, 0),
-                     port_info['direction'],
+                     direction,
                      None,
                      this_mod,
                      'plus-we-VOID',
                      clk_domain,
                      cd_indexed,
+                     port_info != {},
                      **attributes)
             this_port_list.append(p)
-            consider_port(p, fd)
+            if not stack:
+                make_decoder(None, this_mod, p, None)
+            else:
+                consider_port(p, fd)
         attributes = {}
 
     port_lists[this_mod] = this_port_list
@@ -485,7 +503,7 @@ def parse_vfile_comments(stack, fin, fd, dlist, clk_domain, cd_indexed):
             if m:
                 info = [m.group(i) for i in range(6)]
                 p = Port(info[4], (info[2], info[3]), 'top_level', info[1],
-                         this_mod, info[5], clk_domain, cd_indexed,
+                         this_mod, info[5], clk_domain, cd_indexed, False,
                          **attributes)
                 this_port_list.append(p)
                 # Since these are top level registers, decoders can be generated here
@@ -662,8 +680,8 @@ def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror, use_yos
     obuf.write('// machine-generated by newad.py\n')
     obuf.write('`ifdef LB_DECODE_%s\n' % modname)
     obuf.write('`include \"addr_map_%s.vh\"\n' % modname)
-    # TODO: Merging clock domains: This doesn't need to be there?
-    # needed for at least some test benches, like in rtsim
+    # TODO: Merging clock domains: Does this HAVE to be there?
+    # still, needed for at least some test benches, like in rtsim
     clk_prefix = "lb"
     obuf.write('`define AUTOMATIC_self input %s_clk, input [31:0] %s_data,'
                ' input %s_write, input [%d:0] %s_addr\n' %
