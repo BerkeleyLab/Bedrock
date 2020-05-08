@@ -34,7 +34,6 @@ reg pull_fifo_r = 0, mode=0, running=0;
 reg [2:0] bit_cnt = 0;
 reg [7:0] shift_reg = 0;
 reg [7:0] ctrl_reg = 0;
-reg have_one = 0;
 wire want_another = mode | (bit_cnt==7);
 reg push_result=0;
 reg miso_hold=0;
