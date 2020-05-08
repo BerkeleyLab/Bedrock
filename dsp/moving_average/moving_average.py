@@ -64,5 +64,5 @@ with pysim.Simulator(ma, vcd_file=open('foo.vcd', 'w')) as sim:
         plt.plot(signal_in)
         plt.plot(signal_out)
         plt.show()
-    except Exception as e:
+    except Exception:
         print("// Skipped plot")
