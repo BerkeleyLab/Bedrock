@@ -309,7 +309,7 @@ assign phase_status_U3 = 0;
 `define CONFIG_BANYAN
 `ifdef CONFIG_BANYAN
 // Banyan-routed memory, simple one-shot fill for now
-parameter banyan_aw = 14;  // 8 blocks of RAM, each 8K x 16
+parameter banyan_aw = 14;  // 8 blocks of RAM, each 16K x 16
 reg banyan_run=0, banyan_run_d=0;
 wire rollover, full;
 wire [banyan_aw+3-1:0] pointer;
