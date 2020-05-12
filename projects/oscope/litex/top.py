@@ -12,21 +12,9 @@ from litex.soc.integration.builder import builder_args, builder_argdict, Builder
 from litex.soc.interconnect.csr import CSRStatus, CSRField, AutoCSR, CSRStorage
 
 from litex_boards.platforms import ltc
-from litex_boards.community.targets.marblemini import EthernetSoC, BaseSoC
+from litex_boards.targets.marblemini import EthernetSoC, BaseSoC
 
 from ltc_phy import LTCPhy
-
-
-# class BanyanMemory(Module, AutoCSR):
-#     def __init__(self, clk_signal, adc_data, **kwargs):
-#         self.specials += Instance("banyan_mem",
-#                                   p_aw=10,
-#                                   p_dw=16,
-#                                   i_clk=clk_signal,
-#                                   i_adc_data=adc_data,
-#         )
-
-#         banyan_mask = CSR()
 
 
 class DumpToRAM(Module, AutoCSR):
