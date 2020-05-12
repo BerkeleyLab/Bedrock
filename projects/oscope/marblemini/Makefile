@@ -7,13 +7,14 @@ DAUGHTER = base
 XILINX_TOOL := VIVADO
 
 include ../../../dir_list.mk
-OSCOPE_COMMON_DIR=../bmb7_cu
+OSCOPE_COMMON_DIR=../common
 
 APP_NAME = oscope
 
 vpath %.v $(DSP_DIR)
 
 include $(BUILD_DIR)/top_rules.mk
+include $(OSCOPE_COMMON_DIR)/rules.mk
 
 VFLAGS_DEP += -y$(DSP_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/iserdes -y$(ISERDES_DIR) -y$(XILINX_DIR) -y$(SERIAL_IO_DIR) -y. -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/idelay_scanner -y$(OSCOPE_COMMON_DIR) -y$(HOMELESS_DIR) -y$(BADGER_DIR) -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y../../test_marblemini/ -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y$(HOMELESS_DIR)/freq_demo -DSIMULATE -DUSE_I2CBRIDGE
 
@@ -25,6 +26,9 @@ RTEFI_EXTRA_V = spi_flash_engine.v
 
 include $(BADGER_DIR)/rules.mk
 
+$(AUTOGEN_DIR)/moving_average.v: $(DSP_DIR)/moving_average/moving_average.py
+	$(PYTHON) $(DSP_DIR)/moving_average/moving_average.py > $(AUTOGEN_DIR)/moving_average.v
+
 zest_connector.csv: remap_gen.py
 	$(PYTHON) remap_gen.py > $@
 
@@ -33,15 +37,23 @@ system_top.xdc: $(BOARD_SUPPORT_DIR)/marblemini/Marble.xdc $(BOARD_SUPPORT_DIR)/
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
 oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v
-oscope_top.v: $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) application_top_auto
+oscope_top.v: $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) application_top_auto $(AUTOGEN_DIR)/moving_average.v
 
 $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
 	$(PYTHON) $< -v $@ -j $(APP_NAME)_regmap.json
 
-scalar_$(APP_NAME)_regmap.json: application_top.v
+scalar_$(APP_NAME)_regmap.json: $(OSCOPE_COMMON_DIR)/application_top.v
 	$(PYTHON) $(BUILD_DIR)/reverse_json.py $< > $@
 
-# TODO: Remove relative path to static_oscope and to bmb7_cu
+$(AUTOGEN_DIR)/%_auto.vh: $(OSCOPE_COMMON_DIR)/%.v
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -o $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
+
+$(AUTOGEN_DIR)/addr_map_%.vh: $(OSCOPE_COMMON_DIR)/%.v
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -a $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
+
+$(AUTOGEN_DIR)/regmap_application_top.json: $(OSCOPE_COMMON_DIR)/application_top.v
+	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
+
 $(APP_NAME)_regmap.json: $(AUTOGEN_DIR)/regmap_application_top.json scalar_$(APP_NAME)_regmap.json $(OSCOPE_COMMON_DIR)/static_$(APP_NAME)_regmap.json $(OSCOPE_COMMON_DIR)/merge_json.py $(OSCOPE_COMMON_DIR)/shorten_names.py
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/merge_json.py -o $(APP_NAME)_regmap_long.json -i $(filter %.json, $^)
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/shorten_names.py -o $@ -i $(APP_NAME)_regmap_long.json
