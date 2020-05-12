@@ -230,8 +230,8 @@ class c_prc(c_llrf_bmb7):
         print("addr  U2  U3")
         for addr in sorted(self.ad9653_regname.keys()):
             foo = self.spi_readn(adc_list, addr)
-            x = [v[2].encode('hex')[-2:] for v in foo]
-            print("%3.3x  " % addr + "  ".join(x) + " " + self.ad9653_regname[addr])
+            x = ['{:02x}'.format(v[2]) for v in foo]
+            print("%3.3x  " % addr + "  ".join(x) + "  " + self.ad9653_regname[addr])
 
     def amc_write(self, pg, saddr, val):
         # print 'amc write pg', pg, 'saddr', hex(saddr), 'val', hex(val)
@@ -334,25 +334,6 @@ class c_prc(c_llrf_bmb7):
             self.leep.reg_read([('llspi_result')]*please_read)  # perform read please_read times
             print("spi_flush: discarded %d FIFO entries" % please_read)
 
-    def spi_read(self, obj, addr):
-        # print 'spi_read addr', addr
-        please_read = self.verbose_send(obj.read(addr))
-        if please_read:
-            result = self.leep.reg_read([('llspi_result')]*please_read)  # perform read please_read times
-            return self.parse_readvalue(result)
-
-    def parse_readvalue(self, readvalue):
-        lastn = int(len(readvalue) / 8) * 8
-        readvalue = readvalue[8:lastn]
-        result = []
-        while len(readvalue) > 7:
-            cmd = readvalue[0]
-            addr = readvalue[1:4]
-            value = readvalue[4:8]
-            result.append((cmd, addr, value))
-            readvalue = readvalue[8:]
-        return result
-
     def spi_readn(self, obj_list, addr):
         please_read = self.verbose_send(sum([adc.read(addr) for adc in obj_list], []))
         lol = len(obj_list)
@@ -360,8 +341,7 @@ class c_prc(c_llrf_bmb7):
             print("spi_readn mismatch please_read %d  len(obj_list) %d" % (please_read, lol))
         if please_read:
             result1 = self.leep.reg_read([('llspi_result')]*please_read)
-            result2 = self.parse_readvalue(result1)
-            return result2
+            return [(None, None, x) for x in result1]
 
     def adc_reg(self):
         adc = self.leep.reg_read([('U3dout_msb'), ('U3dout_lsb'), ('U2dout_msb'), ('U2dout_lsb')])
@@ -539,7 +519,7 @@ class c_prc(c_llrf_bmb7):
             0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
             0x0f, 0x10, 0x11, 0x12, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f]
         for addr in alist:
-            bb = [d[2].encode('hex') for d in self.spi_read(self.dac_spi, addr)]
+            bb = ['{:08x}'.format(d[2]) for d in self.spi_readn([self.dac_spi], addr)]
             print('dac spi addr 0x%x ' % addr + repr(bb))
         print("done")
         sys.stdout.flush()
@@ -735,7 +715,7 @@ class c_prc(c_llrf_bmb7):
     def seeksethldsmp(self, SET, HLD, SMP, display=0):
         self.spi_write(self.dac_spi, 4, self.reg4(SET, HLD))
         self.spi_write(self.dac_spi, 5, self.reg5(SMP))
-        reg6 = self.spi_read(self.dac_spi, 6)
+        reg6 = self.spi_readn([self.dac_spi], 6)
         SEEK = struct.unpack('!I', reg6[0][2])[0] & 0x1
         if display:
             print('working SMP %d SET %d HLD %d SEEK %d' % (SMP, SET, HLD, SEEK))
@@ -799,14 +779,13 @@ class c_prc(c_llrf_bmb7):
         p9 = self.pn9
         offset = p9.index(data[0]) if data[0] in p9 else (p9.index(data[1])-1 if data[1] in p9 else 0)
         pn9l = len(p9)
-        for i in range(len(data)):
-            d = data[i]
+        for i, d in enumerate(data):
             p = p9[(i+offset) % pn9l]
             if p != d:
                 cnt += 1
             if d-p and False:
                 print("%d %04x %04x %d" % (i, d, p, p-d))
-            # print 'chan', chan, 'error:', cnt
+            # print('chan', chan, 'error:', cnt)
         return cnt
 
     def pntest(self):
