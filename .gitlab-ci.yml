@@ -23,6 +23,7 @@ include:
   - local: .gitlab/ci/build.gitlab-ci.yml
   - local: .gitlab/ci/serial_io.gitlab-ci.yml
   - local: .gitlab/ci/soc.gitlab-ci.yml
+  - local: .gitlab/ci/oscope.gitlab-ci.yml
   - local: .gitlab/ci/comms_top.gitlab-ci.yml
 
 leep_test:
@@ -123,18 +124,6 @@ peripheral_test:
     - cd idelay_scanner && make ; cd -
     - cd ds1822 && make ; cd -
     - cd i2cbridge && make
-
-oscope_top:
-  before_script:
-    - cd projects/oscope/bmb7_cu && ls /non-free
-  stage: synthesis
-  script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make oscope_top.bit
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
-    expire_in: 1 week
-    paths:
-      - projects/oscope/bmb7_cu/oscope_top.bit
 
 badger_ac701:
   stage: synthesis

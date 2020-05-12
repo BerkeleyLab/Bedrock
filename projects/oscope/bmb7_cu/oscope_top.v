@@ -1,23 +1,20 @@
 // Note: BMB7 vR1 is only supported
 module oscope_top(
-	output [2:0] bus_bmb7_D4,
-	output [2:0] bus_bmb7_D5,
+	output [5:0] LEDS,
 	inout [18:0] bus_bmb7_U7,
-	inout [0:0] bus_bmb7_J28,
-	inout [0:0] bus_bmb7_J4,
-	inout [0:0] bus_digitizer_U27,
+	inout [0:0]  bus_bmb7_J28,
+	inout [0:0]  bus_bmb7_J4,
+	inout [0:0]  bus_digitizer_U27,
 	inout [38:0] bus_digitizer_U4,
-	inout [6:0] bus_digitizer_U1,
+	inout [6:0]  bus_digitizer_U1,
 	inout [26:0] bus_digitizer_U2,
 	inout [26:0] bus_digitizer_U3,
-	inout [3:0] bus_digitizer_U15,
-	inout [4:0] bus_digitizer_U18,
-	inout [7:0] bus_digitizer_J17,
-	inout [7:0] bus_digitizer_J18,
-	inout [1:0] bus_digitizer_U33U1
+	inout [3:0]  bus_digitizer_U15,
+	inout [4:0]  bus_digitizer_U18,
+	inout [7:0]  bus_digitizer_J17,
+	inout [7:0]  bus_digitizer_J18,
+	inout [1:0]  bus_digitizer_U33U1
 );
-
-parameter BUF_AW=13;
 
 wire bmb7_U7_clkout;
 wire bmb7_U7_clk4xout;
@@ -298,12 +295,11 @@ assign J28_pout = bus_bmb7_J28[0];
 wire [2:0] D4rgb;
 wire [2:0] D5rgb;
 
-assign bus_bmb7_D4 = D4rgb;
-assign bus_bmb7_D5 = D5rgb;
+assign LEDS = {D4rgb, D5rgb};
 
 wire U27dir;
 
-assign bus_digitizer_U27 = U27dir;
+assign bus_digitizer_U27 = ~U27dir;
 
 // pin    EN is    IO_L7N_T1_32 bank  32 bus_digitizer_U33U1[1]  AA15
 // pin  SYNC is    IO_L7P_T1_32 bank  32 bus_digitizer_U33U1[0]  AA14
@@ -382,25 +378,25 @@ digitizer_U18(
 	.adcclk(U18_clk_in)
 );
 
+wire lb_clk=bmb7_U7_clkout;
+
+// Generate localbus based on link to Spartan
+wire [23:0] lb_addr;
+wire [31:0] lb_dout;
+wire [31:0] lb_din=0;
+wire lb_strobe, lb_rd;
+jxj_gate jxjgate(
+	.clk(lb_clk),
+	.rx_din(port_50006_word_s6tok7), .rx_stb(port_50006_rx_available), .rx_end(port_50006_rx_complete),
+	.tx_dout(port_50006_word_k7tos6), .tx_rdy(port_50006_tx_available), .tx_end(port_50006_tx_complete), .tx_stb(port_50006_word_read),
+	.lb_addr(lb_addr), .lb_dout(lb_dout), .lb_din(lb_din),
+	.lb_strobe(lb_strobe), .lb_rd(lb_rd)
+);
+wire lb_write = lb_strobe & ~lb_rd;
+wire [31:0] lb_data = lb_dout;
+
 // Here's the real work
 application_top application_top(
-	.bmb7_U7_clkout(bmb7_U7_clkout),
-	.bmb7_U7_clk4xout(bmb7_U7_clk4xout),
-	.port_50006_word_k7tos6(port_50006_word_k7tos6),
-	.port_50007_word_k7tos6(port_50007_word_k7tos6),
-	.port_50007_word_s6tok7(port_50007_word_s6tok7),
-	.port_50006_word_s6tok7(port_50006_word_s6tok7),
-	.port_50006_tx_available(port_50006_tx_available),
-	.port_50006_tx_complete(port_50006_tx_complete),
-	.port_50007_tx_available(port_50007_tx_available),
-	.port_50007_tx_complete(port_50007_tx_complete),
-	.port_50006_rx_available(port_50006_rx_available),
-	.port_50006_rx_complete(port_50006_rx_complete),
-	.port_50007_rx_available(port_50007_rx_available),
-	.port_50007_rx_complete(port_50007_rx_complete),
-	.port_50006_word_read(port_50006_word_read),
-	.port_50007_word_read(port_50007_word_read),
-	.s6_to_k7_clk_out(s6_to_k7_clk_out),
 	//,.lb_clk(lb_clk)
 	//,.llspi_we(llspi_we)
 	//,.llspi_re(llspi_re)
@@ -408,6 +404,13 @@ application_top application_top(
 	//,.llspi_result(llspi_result)
 	//,.host_din(host_din)
 	//,.adc_sdio_dir(adc_sdio_dir)
+	.lb_clk(lb_clk),
+	.lb_write(lb_write),
+	.lb_strobe(lb_strobe),
+	.lb_rd(lb_rd),
+	.lb_addr(lb_addr),
+	.lb_data(lb_dout),
+	.lb_din(lb_din),
 	.clk200(clk200),
 	.idelayctrl_rdy(idelayctrl_rdy),
 	.idelayctrl_reset(idelayctrl_reset),

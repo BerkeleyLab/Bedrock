@@ -118,6 +118,7 @@ module digitizer_config(
 	input scan_trigger_we,  // external we-strobe
 	// lb_clk domain, but only because I flag_xdomain to adc_clk
 	input rawadc_trig,  // external single-cycle
+	input [9:0] adc_downsample_ratio,  // external
 	// adc_clk domain
 	input [9:0] sync_ad7794_cset,  // external
 	input [5:0] sync_tps62210_cset  // external
@@ -308,7 +309,7 @@ assign phase_status_U3 = 0;
 `define CONFIG_BANYAN
 `ifdef CONFIG_BANYAN
 // Banyan-routed memory, simple one-shot fill for now
-parameter banyan_aw = 13;  // 8 blocks of RAM, each 8K x 16
+parameter banyan_aw = 14;  // 8 blocks of RAM, each 16K x 16
 reg banyan_run=0, banyan_run_d=0;
 wire rollover, full;
 wire [banyan_aw+3-1:0] pointer;
@@ -324,11 +325,26 @@ always @(posedge lb_clk) actual_banyan_mask <= scan_running ? scanner_banyan_mas
 reg [7:0] banyan_mask_x=0;
 always @(posedge adc_clk) banyan_mask_x <= actual_banyan_mask;
 
+
+// Pass adc_data through a moving average filter
+wire [7: 0] adc_data_valid;
+wire [8*16-1:0] adc_data_decimated;
+genvar ix;
+generate for (ix=0; ix<8; ix=ix+1) begin: mavg_set
+        moving_average mavg(.o(adc_data_decimated[(ix+1)*16-1 -: 16]),
+		       .data_valid(adc_data_valid[ix]),
+		       .log_downsample_ratio(adc_downsample_ratio[4:0]),
+		       .clk(adc_clk),
+		       .rst(1'b0),
+		       .i(          adc_data[(ix+1)*16-1 -: 16])
+	);
+end endgenerate
+
 // Gloss over the fact that actual_banyan_mask crosses clock domains
 //wire [127:0] banyan_adc = {U2DD, U2DC, U2DB, U2DA, U3DD, U3DC, U3DB, U3DA};
 banyan_mem #(.aw(banyan_aw), .dw(16)) banyan_mem(.clk(adc_clk),
-	.adc_data(adc_data), .banyan_mask(banyan_mask_x),
-	.reset(rawadc_trig_x), .run(banyan_run),
+	.adc_data(adc_data_decimated), .banyan_mask(banyan_mask_x),
+	.reset(rawadc_trig_x), .run(banyan_run & adc_data_valid[0]),
 	.pointer(pointer), .rollover(rollover), .full(full),
 	.permuted_data(permuted_data),
 	.ro_clk(lb_clk), .ro_addr(lb_addr[banyan_aw+3-1:0]), .ro_data(banyan_data[15:0]), .ro_data2(banyan_data[31:16])
