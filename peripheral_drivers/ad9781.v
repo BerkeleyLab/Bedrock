@@ -34,7 +34,7 @@ module ad9781 (
 	output      RESET,
 	output      CSB,
 	output      SCLK,
-	inout       SDIO,
+	output      SDIO,
 	input       SDO,
 	input [13:0] data_i,
 	input [13:0] data_q,
@@ -44,15 +44,15 @@ module ad9781 (
 	input       csb_in,
 	input       sclk_in,
 	output      sdo_out,
-	inout       sdio_inout
+	input       sdio_inout
 );
 parameter SPIMODE="passthrough";
 generate
 if (SPIMODE=="passthrough")begin
-	assign CSB=csb_in;
-	assign SCLK=sclk_in;
-	assign sdo_out =SDO;
-	via sdiovia(sdio_inout,SDIO);
+	assign CSB  = csb_in;
+	assign SCLK = sclk_in;
+	assign sdo_out = SDO;
+	assign SDIO = sdio_inout;
 end
 endgenerate
 assign RESET=reset_in;
@@ -68,25 +68,26 @@ assign {D13N,D12N,D11N,D10N,D9N,D8N,D7N,D6N,D5N,D4N,D3N,D2N,D1N,D0N}=d_n;
 wire dco_p=DCOP;
 wire dco_n=DCON;
 `ifndef SIMULATE
-IBUFDS ibuf_dco(.I(flip_dco ? dco_n : dco_p), .IB(flip_dco? dco_p : dco_n), .O(dco_clk_ds));
-//BUFIO bufio_dco(.I(dco_clk), .O(dco_clk_buf));
+IBUFDS ibuf_dco(.I  (flip_dco ? dco_n : dco_p),
+		.IB (flip_dco ? dco_p : dco_n), .O(dco_clk_ds));
+
 BUFG bufg_dco(.I(dco_clk_ds), .O(dco_clk_out));
-//wire [13:0] data_in_buf= dci ? data_i : data_q;
+
 wire [13:0] data_in_buf;
 wire dci_ddr;
-ODDR oddr_dci(.C(dco_clk_out),.CE(1'b1),.D1(flip_dci),.D2(~flip_dci),.Q(dci_ddr));
-OBUFDS obuf_dci(
-	.O(DCIP),
-	.OB(DCIN),
-	.I(dci_ddr)
-	);
+ODDR oddr_dci(.C(dco_clk_out), .CE(1'b1), .D1(flip_dci), .D2(~flip_dci), .Q(dci_ddr));
+
+OBUFDS obuf_dci(.O  (DCIP),
+		.OB (DCIN),
+		.I  (dci_ddr));
+
 genvar ix;
 generate for (ix=0; ix < width; ix=ix+1) begin: in_cell
-	ODDR oddr(.C(dco_clk_out),.CE(1'b1),.D1(data_i[ix]),.D2(data_q[ix]),.Q(data_in_buf[ix]));
+	ODDR oddr(.C(dco_clk_out), .CE(1'b1), .D1(data_i[ix]), .D2(data_q[ix]), .Q(data_in_buf[ix]));
 	OBUFDS obuf_d(
-		.O(d_p[ix]),
-		.OB(d_n[ix]),
-		.I(flip_d[ix] ? ~data_in_buf[ix] : data_in_buf[ix])
+		.O  (d_p[ix]),
+		.OB (d_n[ix]),
+		.I  (flip_d[ix] ? ~data_in_buf[ix] : data_in_buf[ix])
 	);
 end
 endgenerate

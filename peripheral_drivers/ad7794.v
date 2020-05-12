@@ -1,6 +1,6 @@
 module ad7794
 #(parameter DEBUG="true",parameter ADDR_WIDTH=8,parameter DATA_WIDTH=24,parameter SPIMODE="passthrough")
-(inout CLK,inout CS,inout DIN,inout DOUT_RDY,inout SCLK
+(output CLK,output CS,output DIN,input DOUT_RDY,output SCLK
 ,input clkin
 ,input spi_start
 ,input [ADDR_WIDTH-1:0] spi_addr
