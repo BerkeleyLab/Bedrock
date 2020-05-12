@@ -11,7 +11,7 @@
 import argparse
 import json
 import re
-from os.path import dirname, basename, isfile
+from os.path import dirname, basename, isfile, splitext
 from copy import deepcopy
 try:
     from StringIO import StringIO
@@ -253,7 +253,7 @@ TOP_LEVEL_REG = r'^\s*//\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*top-l
 DESCRIPTION_ATTRIBUTE = r'^\s*\(\*\s*BIDS_description\s*=\s*\"(.+?)\"\s*\*\)\s*$'
 
 
-def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
+def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
     '''
     Given a filename, parse Verilog:
     (a) looking for module instantiations marked automatic,
@@ -262,21 +262,32 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
     (b) looking for input/output ports labeled 'external'.
     Record them in the port_lists dictionary for this module.
     '''
-    fd.write('// parse_vfile %s %s\n' % (stack, fin))
+    fin_sv = splitext(fin)[0] + '.sv'
     searchpath = dirname(fin)
     fname = basename(fin)
-    if not isfile(fin):
+    fname_sv = basename(fin_sv)
+    fsearch = [fname, fname_sv] if try_sv else [fname]
+    found = False
+    for fn in fsearch:
+        if isfile(fn):
+            fin = fn
+            break
         for d in dlist:
-            x = d + '/' + fname
+            x = d + '/' + fn
             if isfile(x):
                 fin = x
+                found = True
                 break
+        if found:
+            break
+
     if not isfile(fin):
         print("File not found:", fin)
         print("(from hierarchy %s)" % stack)
         global file_not_found
         file_not_found += 1
         return
+    fd.write('// parse_vfile %s %s\n' % (stack, fin))
     if searchpath == '':
         searchpath = '.'
     this_mod = fin.split('/')[-1].split('.')[0]
