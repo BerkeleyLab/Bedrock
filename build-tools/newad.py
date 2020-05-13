@@ -257,7 +257,26 @@ from v2j import v2j
 from read_attributes import read_attributes
 
 
-# TODO: Refactor filepath
+def search_verilog_files(dlist, fin, stack):
+    '''
+    Find a .v, and .sv files in that order
+    '''
+    fname = basename(fin)
+    fname_sv = splitext(fname)[0] + '.sv'
+    for d in dlist:
+        vfile = d + '/' + fname
+        if isfile(vfile):
+            return vfile
+        else:
+            vfile = d + '/' + fname_sv
+            if isfile(vfile):
+                return vfile
+    print("File not found:", fin)
+    print("(from hierarchy %s)" % stack)
+    global file_not_found
+    file_not_found += 1
+    return False
+
 
 def parse_vfile_yosys(stack, fin, fd, dlist, clk_domain, cd_indexed):
     '''
@@ -272,21 +291,15 @@ def parse_vfile_yosys(stack, fin, fd, dlist, clk_domain, cd_indexed):
     #       there are multiple modules in a single file, as there is no check
     #       for module declaration per se, also doesn't support other fancy
     #       declarations like "input [15:0] a, b,".
-    fd.write('// parse_vfile_yosys %s %s\n' % (stack, fin))
     searchpath = dirname(fin)
-    fname = basename(fin)
-    if not isfile(fin):
-        for d in dlist:
-            x = d + '/' + fname
-            if isfile(x):
-                fin = x
-                break
-    if not isfile(fin):
-        print("File not found:", fin)
-        print("(from hierarchy %s)" % stack)
-        global file_not_found
-        file_not_found += 1
+    file_found = search_verilog_files(dlist, fin, stack)
+
+    if not file_found:
         return
+    else:
+        fin = file_found
+
+    fd.write('// parse_vfile_yosys %s %s\n' % (stack, fin))
     if searchpath == '':
         searchpath = '.'
     this_mod = fin.split('/')[-1].split('.')[0]
@@ -389,23 +402,6 @@ TOP_LEVEL_REG = r'^\s*//\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*top-l
 DESCRIPTION_ATTRIBUTE = r'^\s*\(\*\s*BIDS_description\s*=\s*\"(.+?)\"\s*\*\)\s*$'
 
 
-def search_verilog_files(dlist, fin):
-    '''
-    Find a .v, and .sv files in that order
-    '''
-    fname = basename(fin)
-    fname_sv = splitext(fname)[0] + '.sv'
-    for d in dlist:
-        vfile = d + '/' + fname
-        if isfile(vfile):
-            return vfile
-        else:
-            vfile = d + '/' + fname_sv
-            if isfile(vfile):
-                return vfile
-    return False
-
-
 def parse_vfile_comments(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
     '''
     Given a filename, parse Verilog:
@@ -415,19 +411,15 @@ def parse_vfile_comments(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=T
     (b) looking for input/output ports labeled 'external'.
     Record them in the port_lists dictionary for this module.
     '''
-    fd.write('// parse_vfile_comments %s %s\n' % (stack, fin))
     searchpath = dirname(fin)
-    file_found = search_verilog_files(dlist, fin)
+    file_found = search_verilog_files(dlist, fin, stack)
 
     if not file_found:
-        print("File not found:", fin)
-        print("(from hierarchy %s)" % stack)
-        global file_not_found
-        file_not_found += 1
         return
     else:
         fin = file_found
-    fd.write('// parse_vfile %s %s\n' % (stack, fin))
+
+    fd.write('// parse_vfile_comments %s %s\n' % (stack, fin))
     if searchpath == '':
         searchpath = '.'
     this_mod = fin.split('/')[-1].split('.')[0]
