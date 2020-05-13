@@ -261,6 +261,8 @@ def search_verilog_files(dlist, fin, stack):
     '''
     Find a .v, and .sv files in that order
     '''
+    if isfile(fin):
+        return fin
     fname = basename(fin)
     fname_sv = splitext(fname)[0] + '.sv'
     for d in dlist:
