@@ -1,3 +1,10 @@
+## Context
+Marble-Mini is an Open Hardware FMC carrier board based on Xilinx Artix:
+  see [github](https://github.com/BerkeleyLab/Marble-Mini)
+
+Zest is an Open Hardware FMC mezzanine board with eight 125 MS/s ADC channels and two 250 MS/s DAC channels:
+  see [github](https://github.com/BerkeleyLab/Zest)
+
 ## Firmware related info
 prc_common.xdc
   comes from gitlab.lbl.gov:llrf-projects/lcls2_llrf
@@ -18,16 +25,17 @@ BMB-7 naming convention:
   fmc-lpc is FMC1 is P1
   fmc-hpc is FMC2 is P2
 
-Due to different bank voltages for BMB-7 and Marble,
+Due to different P2 bank voltages for BMB-7 and Marble,
   need to map LVCMOS18 to LVCMOS25
   and LVDS to LVDS_25
+(the P1 bank voltage is 2.5V in both cases)
 
 example column output:
   prc_name              bmb7_iostandard  bmb7_pin  fmc_name     zest_pin
   bus_digitizer_U3[16]  LVDS_25          H23       FMC1_LA22_P  ADC_D0A_N_1
 
 
-## Build FW and program Marblemini
+## Build FW and program Marble-Mini
 ```
 cd $BEDROCK/projects/oscope/marblemini
 make clean && make oscope_top.bit

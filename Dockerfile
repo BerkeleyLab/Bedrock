@@ -23,11 +23,13 @@ RUN cd software && \
 FROM debian:buster-slim as basic-iverilog
 
 # Vivado needs libtinfo5, at least for Artix?
+# libz-dev required for Verilator FST support
 RUN apt-get update && \
 	apt-get install -y \
 	git \
 	iverilog \
 	verilator \
+	libz-dev \
 	libbsd-dev \
 	xc3sprog \
 	build-essential \
@@ -76,7 +78,7 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 # Yosys
 # For now we need to build yosys-0.9 from source, since Debian Buster
 # is stuck at yosys-0.8 that doesn't have the features we need.
-# Revisit this choice when Debian cetches up, maybe in Bullseye,
+# Revisit this choice when Debian catches up, maybe in Bullseye,
 # and hope to get back to "apt-get install yosys" then.
 
 # Note that the standard yosys build process used here requires
@@ -91,4 +93,4 @@ RUN git clone https://github.com/jersey99/yosys.git && \
 	cd .. && rm -rf yosys && \
 	rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install pyyaml nmigen pyserial
+RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4

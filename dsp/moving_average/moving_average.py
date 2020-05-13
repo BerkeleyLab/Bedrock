@@ -59,7 +59,10 @@ with pysim.Simulator(ma, vcd_file=open('foo.vcd', 'w')) as sim:
     tb = moving_average_tb(ma, 0, signal_in, signal_out)
     sim.add_sync_process(tb)
     sim.run()
-    from matplotlib import pyplot as plt
-    plt.plot(signal_in)
-    plt.plot(signal_out)
-    plt.show()
+    try:
+        from matplotlib import pyplot as plt
+        plt.plot(signal_in)
+        plt.plot(signal_out)
+        plt.show()
+    except Exception:
+        print("// Skipped plot")

@@ -73,7 +73,6 @@ assign sck= SCK_RISING_SHIFT ? sck_in_cs : ~sck_in_cs;
 wire cs_falling_edge=~cs_r&cs_r_d;
 reg [ADDR_WIDTH+DATA_WIDTH-1:0] sdi_value=0;
 reg [DATA_WIDTH-1:0] sdo_rdbk_sr=0;
-reg temp_rdbk=0;
 always @(posedge clk) begin
 		//if (~cs_r) begin
 		//if (spi_start&~spi_start_r) begin

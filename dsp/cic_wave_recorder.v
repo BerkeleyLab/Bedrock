@@ -35,6 +35,7 @@ module cic_wave_recorder #(
    parameter cc_halfband=1,
    parameter cc_use_delay=0,  // Match pipeline length of filt_halfband=1
    parameter cc_shift_base=0, // Bits to discard from previous acc step
+   parameter cc_shift_wi=4,
 
 
    // Circular Buffer parameters
@@ -50,7 +51,7 @@ module cic_wave_recorder #(
 (
    input                      iclk,
    input                      reset,
-   input                      stb_in,     // Strobe signal for input samples
+   input                      stb_in,          // Strobe signal for input samples
    input [n_chan*di_dwi-1:0]  d_in,            // Flattened array of unprocessed data streams. CH0 in LSBs
    input                      cic_sample,      // CIC base sampling signal
 
@@ -60,7 +61,7 @@ module cic_wave_recorder #(
 
    // CC Filter controls
    input                      cc_sample,       // CCFilt sampling signal
-   input [3:0]                cc_shift,        // controls scaling of filter result
+   input [cc_shift_wi-1:0]    cc_shift,        // controls scaling of filter result
 
    // Channel selector controls
    input [n_chan-1:0]         chan_mask,       // Bitmask of channels to record
@@ -99,7 +100,8 @@ module cic_wave_recorder #(
       .cc_outw       (cc_outw),
       .cc_halfband   (cc_halfband),
       .cc_use_delay  (cc_use_delay),
-      .cc_shift_base (cc_shift_base))
+      .cc_shift_base (cc_shift_base),
+      .cc_shift_wi   (cc_shift_wi))
    i_cic_multichannel
    (
       .clk           (iclk),
