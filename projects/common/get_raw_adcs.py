@@ -107,10 +107,10 @@ def collect(dev, npt, print_minmax=True, allow_clk_frozen=False):
         if not (b_status & 0x80000000):
             break
     # See logic for clk_status_r in digitizer_config.v, and associated comments.
-    # The allow_clk_frozen feature is needed because collect() is called by prc.py
+    # The allow_clk_frozen feature is needed because collect() is called by zest_setup.py
     # as part of the data transfer verification process.
     if not (clk_status == 2 or allow_clk_frozen and clk_status == 1):
-        print('Loss of clock detected!  Rerun "prc.py -r" to recover.  Disaster, aborting!')
+        print('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
         exit(3)
     astep = 1 << ((b_status >> 24) & 0x3F)
 
@@ -135,10 +135,10 @@ def collect_prc(prc, npt, print_minmax=True, allow_clk_frozen=False):
         if not (b_status & 0x80000000):
             break
     # See logic for clk_status_r in digitizer_config.v, and associated comments.
-    # The allow_clk_frozen feature is needed because collect() is called by prc.py
+    # The allow_clk_frozen feature is needed because collect() is called by zest_setup.py
     # as part of the data transfer verification process.
     if not (clk_status == 2 or allow_clk_frozen and clk_status == 1):
-        print('Loss of clock detected!  Rerun "prc.py -r" to recover.  Disaster, aborting!')
+        print('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
         exit(3)
     astep = 1 << ((b_status >> 24) & 0x3F)
     addr_wave0 = prc.get_read_address('banyan_data')

@@ -52,7 +52,7 @@ Currently OSCOPE lb/system clock works in 125MHz domain.
 
 With below ADC clock domain can be set to 100MHz
 
-LMK dividers in prc.py for zest are set to divide the below 1400MHz down to 100MHz [This can be changed Inside prc.py .. good luck]
+LMK dividers in zest_setup.py for zest are set to divide the below 1400MHz down to 100MHz [This can be changed Inside zest_setup.py .. good luck]
 For waveforms, using Si***_loader from:
 https://github.com/yetifrisstlama/Si5xx-5x7-EVV_autoloader
 ```
@@ -65,12 +65,12 @@ Setup the right python path for software dependencies sprayed around bedrock. An
 
 ```
 cd $BEDROCK/projects/oscope/software
-export PYTHONPATH=../../../dsp/:../../../build-tools:../../..:../../common:../../../board_support/zest:/home/fubar/work/lbl/lcls2_llrf/software/bmb7
+export PYTHONPATH=../../../dsp/:../../common:../../../board_support/zest:/home/w/work/lbl/lcls2_llrf/software/bmb7
 ```
 
 ### Configure zest and run oscope
-Setup idelays etc on zest with prc.py [this should be changed to zest.py]
+Setup idelays etc on zest with zest_setup.py
 ```
-python prc.py -a 192.168.19.8 -p 803 -r -f 125
+python ../../../board_support/zest/zest_setup.py -a 192.168.19.8 -p 803 -r -f 125
 python oscope.py -a 192.168.19.8 -p 803
 ```

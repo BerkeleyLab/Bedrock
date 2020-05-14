@@ -964,7 +964,7 @@ class c_prc(c_llrf_bmb7):
 
 
 def usage():
-    print("python prc.py -a $IP [-r [-b bitfile] ]")
+    print("python zest_setup.py -a $IP [-r [-b bitfile] ]")
 
 
 if __name__ == "__main__":
