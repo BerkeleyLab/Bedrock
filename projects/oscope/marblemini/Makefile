@@ -30,7 +30,7 @@ $(AUTOGEN_DIR)/moving_average.v: $(DSP_DIR)/moving_average/moving_average.py
 	$(PYTHON) $(DSP_DIR)/moving_average/moving_average.py > $(AUTOGEN_DIR)/moving_average.v
 
 zest_connector.csv: remap_gen.py
-	$(PYTHON) remap_gen.py > $@
+	$(PYTHON) remap_gen.py -p $(BEDROCK_DIR) > $@
 
 # TODO: Remove the relative path digilent pmod dependency
 system_top.xdc: $(BOARD_SUPPORT_DIR)/marblemini/Marble.xdc $(BOARD_SUPPORT_DIR)/marblemini/pin_map.csv digilent_led_pmod.csv zest_connector.csv oscope_rules.csv
