@@ -52,6 +52,7 @@ reg [17:0] lb_addr=0;
 `AUTOMATIC_decode
 
 reg signed [17:0] out_x=0,out_y=0;
+reg signed [17:0] ff_setm=0, ff_setp=0;
 initial begin
 	#1;
 	dut_sel_en = 1;
@@ -75,6 +76,11 @@ initial begin
 	@(cc==92); verify(1000,0);
 	dp_dut_lim.mem[0] = 500;  // lim X hi
 	@(cc==116); verify(500,0);
+
+	// Switch to port-controlled setpoints
+	dut_ff_en = 1;
+	ff_setm = 200;
+	ff_setp = 0;
 	dp_dut_lim.mem[0] = 2500;  // lim X hi
 	dp_dut_coeff.mem[0] =  1800;  // coeff X I
 	dp_dut_lim.mem[1] = 2000;  // lim Y hi
@@ -96,6 +102,7 @@ wire out_sync;
 mp_proc dut  // auto
 	(.clk(clk), .sync(sync), .in_mp(in_mp),
 	.out_xy(out_xy), .out_ph(out_ph), .out_sync(out_sync),
+	.ff_setm(ff_setm), .ff_setp(ff_setp),
 	`AUTOMATIC_dut
 );
 

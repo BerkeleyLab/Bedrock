@@ -47,6 +47,10 @@ module mp_proc(
 	output [1:0] setmp_addr,  // external address for setmp
 	output [1:0] coeff_addr,  // external address for coeff
 	output [1:0] lim_addr,  // external address for lim
+	// Setpoint control for feed-forward feedback
+	input signed [17:0] ff_setm, // Magnitude setpoint
+	input signed [17:0] ff_setp, // Phase setpoint
+	input [0:0] ff_en, // external
 	// Final output, back to cordic_mux
 	output out_sync,
 	output signed [17:0] out_xy,
@@ -101,13 +105,21 @@ always @(posedge clk) begin
 	end
 end
 
+// Setpoint muxing - pipelined to ease timing
+reg signed [17:0] ff_setmp=0;
+always @(posedge clk) begin
+	ff_setmp = state[0] ? ff_setm : ff_setp;
+end
+
+wire signed [17:0] setmp_mux = ff_en ? ff_setmp : setmp;
+
 // Subtract setpoint, add offset
 reg signed [17:0] mp_err=0, phout=0;
 // drv_p only valid during sync cycles
 wire signed [17:0] drv_p = (sel_en&sel_amp_ok) ? in_mp + ph_offset : 0; // XXX can't change phase unless SEL?
 always @(posedge clk) begin
-	mp_err <= in_mp - setmp;  // XXX saturate magnitude only?
-	phout <= stb[0] ? drv_p : setmp;
+	mp_err <= in_mp - setmp_mux;  // XXX saturate magnitude only?
+	phout <= stb[0] ? drv_p : setmp_mux;
 end
 wire signed [17:0] mp_err2;
 pdetect #(.w(18)) pdetect(.clk(clk), .ang_in(mp_err), .strobe_in(stb[1]),
@@ -131,7 +143,7 @@ xy_pi_clip pi(.clk(clk), .in_xy(mp_err2), .sync(stb[1]),
 // terrible waste of a multiplier
 reg signed [35:0] set1=0;
 always @(posedge clk) begin
-	set1 <= setmp * 96667;  // 2^17*2/(1.646760258)^2
+	set1 <= setmp_mux * 96667;  // 2^17*2/(1.646760258)^2
 end
 wire signed [17:0] set1s = set1[34:17];
 
@@ -161,7 +173,7 @@ always @(posedge clk) begin
 	// in amplitude, and 0.002 radian, .. 0.00024 radian in phase,
 	// equivalent to 0.11 degree, .. 0.014 degree.  Note that 20861 is
 	// one radian, expressed as 17-bit fraction of a revolution.
-	thresh1 <= stb[1] ? (setmp >>> thresh_shift1): stb[2] ? (20861 >>> thresh_shift1) : thresh2 >> 1;
+	thresh1 <= stb[1] ? (setmp_mux >>> thresh_shift1): stb[2] ? (20861 >>> thresh_shift1) : thresh2 >> 1;
 	thresh2 <= thresh1;
 	over_thresh <= mp_err3 > thresh1;
 end

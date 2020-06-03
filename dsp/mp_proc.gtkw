@@ -1,10 +1,10 @@
-[timestart] 1168
+[timestart] 1096
 [size] 1205 732
-[pos] 224 40
-*-5.364307 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] 446 129
+*-5.364307 1199 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] mp_proc_tb.
 [treeopen] mp_proc_tb.dut.
-[sst_width] 210
+[sst_width] 228
 [signals_width] 205
 [sst_expanded] 1
 [sst_vpaned_height] 205
@@ -23,8 +23,13 @@ mp_proc_tb.out_ph[18:0]
 mp_proc_tb.dut_setmp[17:0]
 mp_proc_tb.dut_coeff[17:0]
 mp_proc_tb.dut_lim[17:0]
-@200
+@201
 -dut
+@28
+mp_proc_tb.dut.ff_en
+@24
+mp_proc_tb.dut.ff_setm[17:0]
+mp_proc_tb.dut.ff_setmp[17:0]
 @420
 mp_proc_tb.dut.mp_err[17:0]
 mp_proc_tb.dut.mp_err2[17:0]
