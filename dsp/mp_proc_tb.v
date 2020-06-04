@@ -78,7 +78,7 @@ initial begin
 	dp_dut_lim.mem[0] = 500;  // lim X hi
 	@(cc==116); verify(500,0);
 
-	// Switch on feedforward setpoints (should be no-op because we're clipped)
+	// Switch on feedforward setpoints (should be no-op since we're clipped)
 	dut_ff_en = 1;
 	ff_setm = 200;
 	ff_setp = 0;
@@ -95,12 +95,20 @@ initial begin
 	dp_dut_coeff.mem[1] =   -450;  // coeff Y I
 	@(cc==300); verify(2500,60);
 	@(cc==340); verify(2500,-1000);
-	// Make feedforward setpoint track input magnitude (in_mp[0]); open limits
+
+	// Make feedforward setpoint track input magnitude (in_mp[0]), i.e., no feedback error
 	ff_setm = 1000;
+
+	// open limits
+	@(cc==360);
 	dp_dut_lim.mem[0] = 3500;  // lim X hi
-	@(cc==380); verify(2851,-1000); // Remain clipped because err = 0 TODO: Explain jump to 2851
-	@(cc==420); verify(2851,-1000); // Remain clipped because err = 0
-	ff_drive = 80000; // Turn on ff drive TODO: Understand scaling
+	@(cc==380); verify(2500,-1000); // Remain clipped because err = 0
+	@(cc==420); verify(2500,-1000);
+
+	// Turn on ff drive; 2**12 accounts for internal scaling
+	ff_drive = 30*(1<<12);
+	@(cc==443); verify(2530,-1000); // Cross-check for derivative
+	@(cc==453); verify(2560,-1000);
 	@(cc==760); verify(3500,-1000);
 end
 
