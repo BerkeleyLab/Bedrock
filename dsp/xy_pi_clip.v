@@ -44,6 +44,10 @@ module xy_pi_clip(
 	// 8-way muxed configuration
 	input signed [17:0] coeff,
 	input signed [17:0] lim,
+	// feed-forward input drive derivative
+	input ff_en,
+	input signed [17:0] ff_drive, // FF drive (derivative) to be accumulated
+	input signed [17:0] ff_phase, // Placeholder - currently unused
 	// Output clipped, four bits are vs. {x_hi, y_hi, x_lo, y_lo}
 	output [3:0] clipped
 );
@@ -59,9 +63,21 @@ wire signed [17:0] in_xy1;
 reg_delay #(.dw(18), .len(2))
 	pi_match(.clk(clk), .reset(1'b0), .gate(1'b1), .din(in_xy), .dout(in_xy1));
 
-reg signed [35:0] mr=0;
+// FF drive to be sampled during 'integral' cycles only. Phase tie-in still incomplete
+// Pipelined to ease timing
 reg signed [41:0] mr_scale=0;
-reg signed [29:0] mr_sat=0;
+reg signed [17:0] ff_mp=0;
+reg signed [42:0] mr_ff=0;
+always @(posedge clk) begin
+	ff_mp <= 0;
+	if (ff_en) ff_mp <= stb[1] ? ff_drive : 18'b0;
+	// Avoid 3-way add by pre-computing mr_scale + ff_mp
+	mr_ff <= mr_scale + ff_mp;  // outputs on stb 3, 4, 5, 6
+end
+
+wire signed [29:0] mr_sat = `SAT(mr_ff,42,29);
+
+reg signed [35:0] mr=0;
 reg signed [30:0] lim1=0;
 reg signed [30:0] accum1=0, accum2=0, accum3=0, accum4=0, accum5=0, accum6=0;
 reg signed [17:0] val=0;
@@ -77,7 +93,6 @@ always @(posedge clk) begin
 	val <= (sync|stb[0]) ? in_xy : in_xy1;  // outputs on stb 0, 1, 2, 3
 	mr <= coeff * val;  // outputs on stb 1, 2, 3, 4
 	mr_scale <= p_term ? (mr <<< 6) : mr;  // this step determines K_P vs. K_I scaling
-	mr_sat <= `SAT(mr_scale,41,29);  // outputs on stb 3, 4, 5, 6
 	accum1 <= clip_recirc ? accum4 : (mr_sat + (p_term2 ? accum6 : accum4));
 	accum2 <= accum1;
 	cmp <= accum1_upper < lim;

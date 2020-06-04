@@ -48,9 +48,11 @@ module mp_proc(
 	output [1:0] coeff_addr,  // external address for coeff
 	output [1:0] lim_addr,  // external address for lim
 	// Setpoint control for feed-forward feedback
+	input [0:0] ff_en, // external
 	input signed [17:0] ff_setm, // Magnitude setpoint
 	input signed [17:0] ff_setp, // Phase setpoint
-	input [0:0] ff_en, // external
+	input signed [17:0] ff_drive, // Drive (derivative)
+	input signed [17:0] ff_phase, // Phase - unused
 	// Final output, back to cordic_mux
 	output out_sync,
 	output signed [17:0] out_xy,
@@ -108,7 +110,7 @@ end
 // Setpoint muxing - pipelined to ease timing
 reg signed [17:0] ff_setmp=0;
 always @(posedge clk) begin
-	ff_setmp = state[0] ? ff_setm : ff_setp;
+	ff_setmp <= state[0] ? ff_setm : ff_setp;
 end
 
 wire signed [17:0] setmp_mux = ff_en ? ff_setmp : setmp;
@@ -137,7 +139,8 @@ wire pi_sync;  // not used
 wire signed [17:0] xy_drive;
 wire [3:0] clipped;
 xy_pi_clip pi(.clk(clk), .in_xy(mp_err2), .sync(stb[1]),
-	.out_xy(xy_drive), .o_sync(pi_sync), .coeff(coeff), .lim(lim), .clipped(clipped)
+	.out_xy(xy_drive), .o_sync(pi_sync), .coeff(coeff), .lim(lim), .clipped(clipped),
+	.ff_en(ff_en), .ff_drive(ff_drive), .ff_phase(ff_phase)
 );
 
 // terrible waste of a multiplier

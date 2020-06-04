@@ -20,7 +20,7 @@ initial begin
 		$dumpfile("mp_proc.vcd");
 		$dumpvars(5,mp_proc_tb);
 	end
-	for (cc=0; cc<350; cc=cc+1) begin
+	for (cc=0; cc<800; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
@@ -53,6 +53,7 @@ reg [17:0] lb_addr=0;
 
 reg signed [17:0] out_x=0,out_y=0;
 reg signed [17:0] ff_setm=0, ff_setp=0;
+reg signed [17:0] ff_drive=0, ff_phase=0;
 initial begin
 	#1;
 	dut_sel_en = 1;
@@ -77,7 +78,7 @@ initial begin
 	dp_dut_lim.mem[0] = 500;  // lim X hi
 	@(cc==116); verify(500,0);
 
-	// Switch to port-controlled setpoints
+	// Switch on feedforward setpoints (should be no-op because we're clipped)
 	dut_ff_en = 1;
 	ff_setm = 200;
 	ff_setp = 0;
@@ -94,6 +95,13 @@ initial begin
 	dp_dut_coeff.mem[1] =   -450;  // coeff Y I
 	@(cc==300); verify(2500,60);
 	@(cc==340); verify(2500,-1000);
+	// Make feedforward setpoint track input magnitude (in_mp[0]); open limits
+	ff_setm = 1000;
+	dp_dut_lim.mem[0] = 3500;  // lim X hi
+	@(cc==380); verify(2851,-1000); // Remain clipped because err = 0 TODO: Explain jump to 2851
+	@(cc==420); verify(2851,-1000); // Remain clipped because err = 0
+	ff_drive = 80000; // Turn on ff drive TODO: Understand scaling
+	@(cc==760); verify(3500,-1000);
 end
 
 wire signed [17:0] out_xy;
@@ -102,7 +110,7 @@ wire out_sync;
 mp_proc dut  // auto
 	(.clk(clk), .sync(sync), .in_mp(in_mp),
 	.out_xy(out_xy), .out_ph(out_ph), .out_sync(out_sync),
-	.ff_setm(ff_setm), .ff_setp(ff_setp),
+	.ff_setm(ff_setm), .ff_setp(ff_setp), .ff_drive(ff_drive), .ff_phase(ff_phase),
 	`AUTOMATIC_dut
 );
 
