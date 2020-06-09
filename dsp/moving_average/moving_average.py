@@ -1,7 +1,7 @@
 '''
 nMigen based
 '''
-from nmigen import Signal, Elaboratable, Module, Array
+from nmigen import Signal, Elaboratable, Module, Array, signed
 from nmigen.back import verilog, pysim
 
 
@@ -10,8 +10,8 @@ class MovingAverage(Elaboratable):
         self._dw = dw
         self.MAX_DELAY_BITS = MAX_DELAY_BITS
         self._SREG_LEN = 2**MAX_DELAY_BITS
-        self.i, self.o = (Signal((self._dw, True), name='i'),
-                          Signal((self._dw, True), name='o'))
+        self.i, self.o = (Signal((self._dw), name='i'),
+                          Signal(signed(self._dw), name='o'))
         self.data_valid = Signal(name='data_valid')
         # log_downsample_ratio must be a power of 2.
         self.log_downsample_ratio = Signal(MAX_DELAY_BITS, name='log_downsample_ratio')
