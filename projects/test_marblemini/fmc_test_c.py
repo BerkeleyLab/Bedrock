@@ -42,6 +42,7 @@ def start_one(chip, sig_num):
 
 
 def download_prog(chip, prog):
+    chip.exchange([327687], [0])  # stop
     i2c_base = 0x040000
     addr = range(i2c_base, i2c_base+len(prog))
     chip.exchange(addr, values=prog)
