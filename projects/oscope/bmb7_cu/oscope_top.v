@@ -97,6 +97,8 @@ lmk01801 digitizer_U1(
 );
 
 wire clk200; // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz
+assign clk200 = bmb7_U7_clk4xout;
+
 wire idelayctrl_rdy;
 wire idelayctrl_reset;
 `ifndef SIMULATE
@@ -299,7 +301,7 @@ assign LEDS = {D4rgb, D5rgb};
 
 wire U27dir;
 
-assign bus_digitizer_U27 = ~U27dir;
+assign bus_digitizer_U27 = U27dir;
 
 // pin    EN is    IO_L7N_T1_32 bank  32 bus_digitizer_U33U1[1]  AA15
 // pin  SYNC is    IO_L7P_T1_32 bank  32 bus_digitizer_U33U1[0]  AA14
@@ -383,7 +385,7 @@ wire lb_clk=bmb7_U7_clkout;
 // Generate localbus based on link to Spartan
 wire [23:0] lb_addr;
 wire [31:0] lb_dout;
-wire [31:0] lb_din=0;
+wire [31:0] lb_din;
 wire lb_strobe, lb_rd;
 jxj_gate jxjgate(
 	.clk(lb_clk),
@@ -393,7 +395,6 @@ jxj_gate jxjgate(
 	.lb_strobe(lb_strobe), .lb_rd(lb_rd)
 );
 wire lb_write = lb_strobe & ~lb_rd;
-wire [31:0] lb_data = lb_dout;
 
 // Here's the real work
 application_top application_top(

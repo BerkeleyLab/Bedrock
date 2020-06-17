@@ -427,22 +427,12 @@ class c_prc(c_llrf_bmb7):
         sys.stdout.write("start lmk setup -")
         self.spi_write(self.lmk_spi, 15, self.lmk_spi.R15(uWireLock="0"))
         self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(RESET='1'))
-        if True:
-            # Check this if running on sliderule.dhcp with 377MHz input clock
-            self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
-                RESET='0',
-                CLKin0_DIV="111",
-                CLKin1_DIV="000",
-                CLKin1_MUX="01",
-                CLKin0_MUX="01"))
-        else:
-            self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
-                RESET='0',
-                CLKin0_DIV="111",
-                CLKin1_DIV="000",
-                CLKin1_MUX="01",
-                CLKin0_MUX="01"))
-        # , CLKout4_7_PD='1', CLKout0_3_PD='0'))#, CLKin0_DIV='011'))
+        self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
+            RESET='0',
+            CLKin0_DIV="111",
+            CLKin1_DIV="000",
+            CLKin1_MUX="01",
+            CLKin0_MUX="01"))
         self.spi_write(self.lmk_spi, 1, self.lmk_spi.R1(
             CLKout7_TYPE="0000",  # Powerdown
             CLKout4_TYPE="0000",  # Powerdown
