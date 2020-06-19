@@ -108,17 +108,14 @@ class c_prc(c_llrf_bmb7):
             exit(2)
         sys.stdout.flush()
 
-
     def _freq_get_convert(self, reg_name):
         freq_count = self.leep.reg_read([(reg_name)])[0]
         return freq_count * self.ref_freq * 0.5**24
-
 
     def clock_check(self):
         print('4x Frequncy      %.3f MHz' % self._freq_get_convert("frequency_4xout"))
         print('clkout3 Frequncy %.3f MHz' % self._freq_get_convert("frequency_clkout3"))
         print('DCO Frequncy     %.3f MHz' % self._freq_get_convert("frequency_dco"))
-
 
     def hardware_reset(self):
         print("Entering hardware_reset")

@@ -80,6 +80,8 @@ parameter in_phase_tx_clk = 1;
 wire tx_clk, tx_clk90;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
+
+(* dont_touch = "true" *)
 wire clk200; // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz
 
 `define USE_GTPCLK
