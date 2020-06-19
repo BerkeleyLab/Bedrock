@@ -28,8 +28,11 @@ module zest_wrap (
    // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz
    `ifndef SIMULATE
    (* IODELAY_GROUP = "IODELAY_200" *)
-   IDELAYCTRL idelayctrl (.RST(zif_cfg.IDELAY_ctrl_rst),
-                          .REFCLK(clk_200),.RDY(zif_cfg.IDELAY_ctrl_rdy));
+   IDELAYCTRL idelayctrl (
+	.RST(zif_cfg.IDELAY_ctrl_rst),
+	.REFCLK(clk_200),
+	.RDY(zif_cfg.IDELAY_ctrl_rdy)
+	);
    `endif
 
    // 2x AD9653 - U2, U3 - Fast ADC
@@ -78,7 +81,7 @@ module zest_wrap (
       .idelay_value_in  (zif_cfg.U2_idelay_value_in),
       .idelay_value_out (zif_cfg.U2_idelay_value_out),
       .idelay_ld        (zif_cfg.U2_idelay_ld),
-      .pdwn_in          (zif_cfg.U2_pdwn_in));
+      .pdwn_in          (zif_cfg.U2_pdwn));
 
    // SPI programming pins are shared (P2_{SCLK, SDIO, ADC_DIR})
    // Driving P2 pins through U2 wrapper above
@@ -133,7 +136,7 @@ module zest_wrap (
       .idelay_value_in  (zif_cfg.U3_idelay_value_in),
       .idelay_value_out (zif_cfg.U3_idelay_value_out),
       .idelay_ld        (zif_cfg.U3_idelay_ld),
-      .pdwn_in          (zif_cfg.U3_pdwn_in));
+      .pdwn_in          (zif_cfg.U3_pdwn));
 
    // AD9781 - U4 - Fast DAC
    wire U4_SDIO;
@@ -166,7 +169,7 @@ module zest_wrap (
       .data_q      (zif_cfg.U4_data_q),
       .dco_clk_out (zif_cfg.U4_dco_clk_out),
       .dci         (zif_cfg.U4_dci),
-      .reset_in    (zif_cfg.U4_reset_in));
+      .reset_in    (zif_cfg.U4_reset));
 
    // Shared - P2_SDI
    assign zif.U4_SDIO = U4_SDIO | U1_DATAUWIRE;

@@ -14,8 +14,7 @@ interface zest_cfg_if;
         U2_clk_reset, U2_mmcm_reset, U2_mmcm_locked, U2_mmcm_psclk,
         U2_mmcm_psen, U2_mmcm_psincdec, U2_mmcm_psdone, U2_iserdes_reset,
         U2_clk_div_bufr, U2_clk_div_bufg,
-        U2_clk_div_in, U2_dco_clk_out, U2_dco_clk_in, U2_pdwn_in;
-
+        U2_clk_div_in, U2_dco_clk_out, U2_dco_clk_in, U2_pdwn;
    wire [63:0] U3_dout;
    wire [39:0] U3_idelay_value_in, U3_idelay_value_out;
    wire [ 7:0] U3_bitslip, U3_idelay_ld;
@@ -23,12 +22,12 @@ interface zest_cfg_if;
    wire U3_csb_in, U3_sclk_in, U3_sdi, U3_sdo, U3_sdio_as_i,
         U3_clk_reset, U3_mmcm_reset, U3_mmcm_locked, U3_mmcm_psclk, U3_mmcm_psen,
         U3_mmcm_psincdec, U3_mmcm_psdone,
-        U3_clk_div_bufr, U3_clk_div_bufg, U3_dco_clk_out, U3_pdwn_in;
+        U3_clk_div_bufr, U3_clk_div_bufg, U3_dco_clk_out, U3_pdwn;
 
    // AD9781 - U4 - Fast DAC
    wire [13:0] U4_data_i, U4_data_q;
    wire U4_csb_in, U4_sclk_in, U4_sdo_out, U4_sdio_inout,
-        U4_dco_clk_out, U4_dci, U4_reset_in;
+        U4_dco_clk_out, U4_dci, U4_reset;
 
    // NXP_74AVC4T245 - U27 - Bi-dir direction selector
    wire U27_dir;
@@ -59,21 +58,22 @@ interface zest_cfg_if;
       // AD9653_mst
       input  U2_dout, U2_dco_clk_out, U2_idelay_value_out, U2_mmcm_psdone,
              U2_mmcm_locked, U2_sdi, U2_clk_div_bufg, U2_clk_div_bufr,
-      output U2_idelay_value_in, U2_bitslip, U2_idelay_ld, U2_pdwn_in,
+      output U2_idelay_value_in, U2_bitslip, U2_idelay_ld, U2_pdwn,
              U2_iserdes_reset, U2_clk_reset, U2_mmcm_psclk, U2_mmcm_psen,
              U2_mmcm_psincdec, U2_mmcm_reset, U2_sdo,
              U2_dco_clk_in, U2_clk_div_in,
              U2_sdio_as_i, U2_csb_in, U2_sclk_in,
       input  U3_dout, U3_dco_clk_out, U3_idelay_value_out, U3_mmcm_psdone,
              U3_mmcm_locked, U3_sdi, U3_clk_div_bufg, U3_clk_div_bufr,
-      output U3_idelay_value_in, U3_bitslip, U3_idelay_ld, U3_pdwn_in,
+      output U3_idelay_value_in, U3_bitslip, U3_idelay_ld, U3_pdwn,
              U3_iserdes_reset, U3_clk_reset, U3_mmcm_psclk, U3_mmcm_psen,
              U3_mmcm_psincdec, U3_mmcm_reset, U3_sdo,
              U3_dco_clk_in, U3_clk_div_in,
              U3_sdio_as_i, U3_csb_in, U3_sclk_in,
       // AD9781_mst
       output U4_csb_in, U4_sclk_in, U4_sdio_inout, U4_data_i, U4_data_q,
-             U4_dci, U4_reset_in,
+             U4_dci, U4_reset,
+
       input  U4_sdo_out, U4_dco_clk_out,
       // NXP_74AVC4T245_mst
       output U27_dir,
@@ -100,21 +100,21 @@ interface zest_cfg_if;
       // AD9653_slv
       output U2_dout, U2_dco_clk_out, U2_idelay_value_out, U2_mmcm_psdone,
              U2_mmcm_locked, U2_sdi, U2_clk_div_bufg, U2_clk_div_bufr,
-      input  U2_idelay_value_in, U2_bitslip, U2_idelay_ld, U2_pdwn_in,
+      input  U2_idelay_value_in, U2_bitslip, U2_idelay_ld, U2_pdwn,
              U2_iserdes_reset, U2_clk_reset, U2_mmcm_psclk, U2_mmcm_psen,
              U2_mmcm_psincdec, U2_mmcm_reset, U2_sdo,
              U2_dco_clk_in, U2_clk_div_in,
              U2_sdio_as_i, U2_csb_in, U2_sclk_in,
       output U3_dout, U3_dco_clk_out, U3_idelay_value_out, U3_mmcm_psdone,
              U3_mmcm_locked, U3_sdi, U3_clk_div_bufg, U3_clk_div_bufr,
-      input  U3_idelay_value_in, U3_bitslip, U3_idelay_ld, U3_pdwn_in,
+      input  U3_idelay_value_in, U3_bitslip, U3_idelay_ld, U3_pdwn,
              U3_iserdes_reset, U3_clk_reset, U3_mmcm_psclk, U3_mmcm_psen,
              U3_mmcm_psincdec, U3_mmcm_reset, U3_sdo,
              U3_dco_clk_in, U3_clk_div_in,
              U3_sdio_as_i, U3_csb_in, U3_sclk_in,
       // AD9781_slv
       input  U4_csb_in, U4_sclk_in, U4_sdio_inout, U4_data_i, U4_data_q,
-             U4_dci, U4_reset_in,
+             U4_dci, U4_reset,
       output U4_sdo_out, U4_dco_clk_out,
       // NXP_74AVC4T245_slv
       input U27_dir,

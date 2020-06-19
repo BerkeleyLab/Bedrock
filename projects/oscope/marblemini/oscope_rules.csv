@@ -1,6 +1,6 @@
 # Literal output follows
 
 # This is to silence ERROR: [Place 30-574], as the pins above aren't clock dedicated
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets digitizer_U1/clk_ibufgds]
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets i_zest_wrap/U1_lmk01801/clk_ibufgds]
 
 create_clock -name clk200 -period 5.00 [get_nets clk200]

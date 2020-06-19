@@ -45,7 +45,8 @@ MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@
 
 VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I.
 VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY
-VERILATOR_LINT = $(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $(filter %.v, $^)
+VERILATOR_LINT = $(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $(filter %.v %.sv, $^)
+VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-TIMESCALEMOD -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN --MMD --Mdir $(DEPDIR)
 
 FMC_MAP = awk -F\" 'NR==FNR{a[$$2]=$$4;next}$$4 in a{printf "NET %-15s LOC = %-4s | IOSTANDARD = %10s; \# %s\n",$$2,a[$$4],$$6,$$4}'
 XDC_MAP = awk -F"[ \"\t]+" 'NR==FNR{gsub(/]/,"",$$8);a[$$8]=$$4;next}($$3 in a){printf "set_property -dict \"PACKAGE_PIN %-4s IOSTANDARD %s\" [get_ports %s]\n",a[$$3], $$4, $$2}'
@@ -134,8 +135,9 @@ ifeq ($(XILINX_TOOL), VIVADO)
 
 %_$(DAUGHTER1).xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/%.xdc  $(BOARD_SUPPORT_DIR)/$(DAUGHTER1)/fmc.map
 	$(XDC_MAP) $^ > $@
+
 # vivado synth
-%.bit: system_top.xdc %.v
+%.bit: system_top.xdc $(wildcard %.sv) $(wildcard %.v)
 	$(VIVADO_SYNTH) $(HARDWARE) $* "$(SYNTH_OPT)" $^
 
 # Uncomment below for remote synth
@@ -169,6 +171,9 @@ UNISIM_CRAP = 'BUFGCE|IOBUF|BUFG|IBUFDS_GTE2|ICAPE2|IOBUF|STARTUPE2|MMCME2_BASE'
 # Auto-generated verilog entities shall be set by globally appending to this variable
 $(DEPDIR)/%.bit.d: %.v $(VERILOG_AUTOGEN)
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*.bit $@: "; sort -u $@.$$$$ | grep -Ee $(UNISIM_CRAP) -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
+
+$(DEPDIR)/%.bit.d: %.sv $(VERILOG_AUTOGEN)
+	set -e; mkdir -p $(DEPDIR); $(VERILATOR_MAKEDEP) && ( cp $(DEPDIR)/V"$*"__verFiles.dat $@.$$$$; printf "$*.bit $@: "; tail -n+3 $@.$$$$ | rev | cut -d' ' -f1|rev|tr -d '\"' | sort -u | grep -Ee $(UNISIM_CRAP) -v | grep -Ee "dev/null|verilator_bin|__verFiles.dat|__ver.d" -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
 $(DEPDIR)/%_tb.d: %_tb.v $(VERILOG_AUTOGEN)
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$

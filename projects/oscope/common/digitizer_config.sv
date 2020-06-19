@@ -7,67 +7,22 @@
 module digitizer_config(
 
 	// local bus -- minimize or eliminate uses
-	input lb_clk,
-	input lb_strobe,
-	input lb_rd,
-	input [23:0] lb_addr,
-	input [31:0] lb_dout,
+	input 	      lb_clk,
+	input 	      lb_strobe,
+	input 	      lb_rd,
+	input [23:0]  lb_addr,
+	input [31:0]  lb_dout,
+	zest_cfg_if.master zif_cfg,
 
 	// clocks for frequency and phase measurement
-	input U1_clkout3,
-	input U2_clk_div_bufg,
-	input U2_clk_div_bufr,
-	input U3_clk_div_bufr,
-	input bmb7_U7_clk4xout,
-	input U4_dco_clk_out,
-
-	// passed out to prc.v
-	output U18_clk_in,
-	output U33U1_pwr_sync,
-	output [7:0] U2_idelay_ld,
-	output [7:0] U3_idelay_ld,
-	output [39:0] U2_idelay_value_in,
-	output [39:0] U3_idelay_value_in,
-	output        U15_spi_start,
-	output        U15_spi_read,
-	output [15:0] U15_spi_data,
-	output [15:0] U15_spi_addr,
-	output        U18_spi_start,
-	output        U18_spi_read,
-	output [23:0] U18_spi_data,
-	output  [7:0] U18_spi_addr,
-	output U4_reset,
-	output mmcm_reset,
-	input mmcm_locked,
-	output U33U1_pwr_en,
-	output idelayctrl_reset,
+	input 	      clk200,
 
 	// llspi physical I/O
-	output U2_pdwn,
-	output U3_pdwn,
-	output U2_sclk_in,
-	inout U4_sdio_inout,
-	output U1_leuwire_in,
-	output U27dir,
-	output U2_csb_in,
-	output U3_csb_in,
-	output U4_csb_in,
-	input U4_sdo_out,
-	input U15_miso_out,
-	input U18_miso_out,
-	input llspi_sdi,
-	output llspi_sdo,
 	// slightly less physical
-	output U2_clk_reset,
-	output U3_clk_reset,
-	output [7:0] U2_bitslip,
-	output [7:0] U3_bitslip,
-	output U2_iserdes_reset,
-	output U3_iserdes_reset,
-	output rawadc_trig_x,
+	output 	      rawadc_trig_x,
 
 	// 8 channels high-speed 16-bit parallel ADC data
-	input adc_clk,
+	input 	      adc_clk,
 	input [127:0] adc_data,
 
 	// outputs to host read register map
@@ -75,96 +30,103 @@ module digitizer_config(
 	output [15:0] phasex_dout,
 	output [31:0] phase_status_U2,
 	output [31:0] phase_status_U3,
-	output  [0:0] phasex_ready,
-	output  [0:0] phasex_present,
-	output [7:0] llspi_status,
-	output [7:0] llspi_result,
-	output  [6:0] idelay_mirror_val,  // special
-	output  [7:0] scanner_result_val,  // special
-	output [31:0] banyan_data,  // special
+	output [0:0]  phasex_ready,
+	output [0:0]  phasex_present,
+	output [7:0]  llspi_status,
+	output [7:0]  llspi_result,
+	output [6:0]  idelay_mirror_val, // special
+	output [7:0]  scanner_result_val, // special
+	output [31:0] banyan_data, // special
 	output [27:0] frequency,
 	output [27:0] frequency_4xout,
 	output [27:0] frequency_clkout3,
 	output [27:0] frequency_dac_dco,
-	output [1:0] clk_status,
+	output [1:0]  clk_status,
 
 	// software-settable
-	input [31:0] periph_config,    // external
-	input [15:0] bitslip,          // external
-	input [1:0] U15_spi_read_and_start_r,  // external
+	input [31:0]  periph_config, // external
+	input [15:0]  bitslip, // external
+	input [1:0]   U15_spi_read_and_start_r, // external
 	//input        U15_spi_read_r,   // external
-	input [31:0] U15_spi_data_addr_r,   // external
+	input [31:0]  U15_spi_data_addr_r, // external
 	//input [15:0] U15_spi_addr_r,   // external
-	input [1:0] U18_spi_read_and_start_r,  // external
+	input [1:0]   U18_spi_read_and_start_r, // external
 	//input        U18_spi_read_r,   // external
-	input [31:0] U18_spi_data_addr_r,   // external
+	input [31:0]  U18_spi_data_addr_r, // external
 	//input  [7:0] U18_spi_addr_r,   // external
-	input        U2_clk_reset_r,   // external
-	input        U3_clk_reset_r,   // external
-	input        U2_iserdes_reset_r, // external
-	input        U3_iserdes_reset_r, // external
-	input        U4_reset_r,         // external
-	input        mmcm_reset_r,       // external
-	input        idelayctrl_reset_r, // external
+	input 	      U2_clk_reset_r, // external
+	input 	      U3_clk_reset_r, // external
+	input 	      U2_iserdes_reset_r, // external
+	input 	      U3_iserdes_reset_r, // external
+	input 	      U4_reset_r, // external
+	input 	      mmcm_reset_r, // external
+	input 	      idelayctrl_reset_r, // external
 	// lb_clk domain
-	input [7:0] banyan_mask, // external
-	input phasex_trig, // external single-cycle
-	input llspi_we,  // external we-strobe
-	input llspi_re,  // -- external strobe
-	input clk_status_we,  // external we-strobe
-	input [4:0] scanner_debug, // external
-	input autoset_enable,  // -- external
-	input scan_trigger,  // -- external single-cycle
-	input scan_trigger_we,  // external we-strobe
+	input [7:0]   banyan_mask, // external
+	input 	      phasex_trig, // external single-cycle
+	input 	      llspi_we, // external we-strobe
+	input 	      llspi_re, // -- external strobe
+	input 	      clk_status_we, // external we-strobe
+	input [4:0]   scanner_debug, // external
+	input 	      autoset_enable, // -- external
+	input 	      scan_trigger, // -- external single-cycle
+	input 	      scan_trigger_we, // external we-strobe
 	// lb_clk domain, but only because I flag_xdomain to adc_clk
-	input rawadc_trig,  // external single-cycle
-	input [9:0] adc_downsample_ratio,  // external
+	input 	      rawadc_trig, // external single-cycle
+	input [9:0]   adc_downsample_ratio, // external
 	// adc_clk domain
-	input [9:0] sync_ad7794_cset,  // external
-	input [5:0] sync_tps62210_cset  // external
+	input [9:0]   sync_ad7794_cset, // external
+	input [5:0]   sync_tps62210_cset  // external
 );
 
 // Propagate these (mirrored) host-settable registers to output ports of this module
-assign U15_spi_start = U15_spi_read_and_start_r[0];
-assign U15_spi_read = U15_spi_read_and_start_r[1];
-assign U15_spi_data = U15_spi_data_addr_r[31:16];
-assign U15_spi_addr = U15_spi_data_addr_r[15:0];
-assign U18_spi_start = U18_spi_read_and_start_r[0];
-assign U18_spi_read = U18_spi_read_and_start_r[1];
-assign U18_spi_data = U18_spi_data_addr_r[31:8];
-assign U18_spi_addr = U18_spi_data_addr_r[7:0];
-assign U2_clk_reset = U2_clk_reset_r;
-assign U3_clk_reset = U3_clk_reset_r;
+assign zif_cfg.U15_spi_start = U15_spi_read_and_start_r[0];
+assign zif_cfg.U15_spi_read = U15_spi_read_and_start_r[1];
+assign zif_cfg.U15_spi_data = U15_spi_data_addr_r[31:16];
+assign zif_cfg.U15_spi_addr = U15_spi_data_addr_r[15:0];
+assign zif_cfg.U18_spi_start = U18_spi_read_and_start_r[0];
+assign zif_cfg.U18_spi_read = U18_spi_read_and_start_r[1];
+assign zif_cfg.U18_spi_data = U18_spi_data_addr_r[31:8];
+assign zif_cfg.U18_spi_addr = U18_spi_data_addr_r[7:0];
+assign zif_cfg.U2_clk_reset = U2_clk_reset_r;
+assign zif_cfg.U3_clk_reset = U3_clk_reset_r;
 
-assign U2_bitslip = bitslip[7:0];
-assign U2_pdwn = periph_config[1];
-assign U2_iserdes_reset = U2_iserdes_reset_r;
-assign U3_bitslip = bitslip[15:8];
-assign U3_pdwn = periph_config[1];
-assign U3_iserdes_reset = U3_iserdes_reset_r;
+assign zif_cfg.U2_bitslip = bitslip[7:0];
+assign zif_cfg.U2_pdwn = periph_config[1];
+assign zif_cfg.U2_iserdes_reset = U2_iserdes_reset_r;
+assign zif_cfg.U3_bitslip = bitslip[15:8];
+assign zif_cfg.U3_pdwn = periph_config[1];
+assign zif_cfg.U3_iserdes_reset = U3_iserdes_reset_r;
 
-assign U4_reset = U4_reset_r;
-assign mmcm_reset = mmcm_reset_r;
-assign U33U1_pwr_en = periph_config[0];
-assign idelayctrl_reset = idelayctrl_reset_r;
+assign zif_cfg.U4_reset = U4_reset_r;
+assign zif_cfg.U2_mmcm_reset = mmcm_reset_r;
+assign zif_cfg.U3_mmcm_reset = mmcm_reset_r;
+assign zif_cfg.U33U1_pwr_en = periph_config[0];
+assign zif_cfg.IDELAY_ctrl_rst = idelayctrl_reset_r;
 
 `define CONFIG_LLSPI
 `ifdef CONFIG_LLSPI
+
+assign zif_cfg.U3_sdio_as_i = ~zif_cfg.U27_dir;
+assign zif_cfg.U2_sdio_as_i = ~zif_cfg.U27_dir;
+
+assign zif_cfg.U3_sdo = zif_cfg.U2_sdo;
+
 wire [8:0] host_din = lb_dout[8:0];
 llspi llspi(
 	.clk(lb_clk),
 	// Physical FMC pins connected to digitizer board
-	.P2_SCLK(U2_sclk_in),//bus_digitizer_U4[26]),
-	.P2_SDI(U4_sdio_inout),//bus_digitizer_U4[0]),
-	.P2_LMK_LEuWire(U1_leuwire_in),//bus_digitizer_U1[5]),
+	.P2_SCLK(zif_cfg.U2_sclk_in),//bus_digitizer_U4[26]),
+	.P2_SDI(zif_cfg.U4_sdio_inout),//bus_digitizer_U4[0]),
+	.P2_LMK_LEuWire(zif_cfg.U1_leuwire_in),//bus_digitizer_U1[5]),
 //    .P2_ADC_SDIO(U23_sdio_inout),//bus_digitizer_U4[1]),
-	.sdi(llspi_sdi),
-	.sdo(llspi_sdo),
-	.P2_ADC_SDIO_DIR(U27dir),
-	.P2_ADC_CSB_0(U2_csb_in),//bus_digitizer_U2[22]),
-	.P2_ADC_CSB_1(U3_csb_in),//bus_digitizer_U3[11]),
-	.P2_DAC_CSB(U4_csb_in),//bus_digitizer_U4[19]),
-	.P2_DAC_SDO(U4_sdo_out),//bus_digitizer_U4[12]),
+	.sdi(zif_cfg.U2_sdi),
+	.sdo(zif_cfg.U2_sdo),
+	.P2_ADC_SDIO_DIR(zif_cfg.U27_dir),
+	.P2_ADC_CSB_0(zif_cfg.U2_csb_in),//bus_digitizer_U2[22]),
+	.P2_ADC_CSB_1(zif_cfg.U3_csb_in),//bus_digitizer_U3[11]),
+	.P2_DAC_CSB(zif_cfg.U4_csb_in),//bus_digitizer_U4[19]),
+	.P2_DAC_SDO(zif_cfg.U4_sdo_out),//bus_digitizer_U4[12]),
 `ifdef POLL_WITH_LLSPI
 // Following four llspi outputs can be left unused if
 // llspi isn't driving the chips
@@ -175,8 +137,8 @@ llspi llspi(
 `endif
 // OK to attach the following two llspi input pins even if
 // llspi isn't driving the chips; no floating-input warnings this way
-	.P2_AMC7823_SPI_MISO(U15_miso_out),//bus_digitizer_U15[1]),  // AB19
-	.P2_AD7794_DOUT(U18_miso_out),//bus_digitizer_U18[1]),  // AF17
+	.P2_AMC7823_SPI_MISO(zif_cfg.U15_miso_out),//bus_digitizer_U15[1]),  // AB19
+	.P2_AD7794_DOUT(zif_cfg.U18_miso_out),//bus_digitizer_U18[1]),  // AF17
 	// Host write port
 	.host_din(host_din),// assign host_din = lb_dout[8:0]),
 	.host_we(llspi_we),
@@ -198,7 +160,7 @@ always @(posedge lb_clk) begin
 		if (lb_dout[0]) clk_status_r <= 1;
 		if (lb_dout[1] & (clk_status_r==1)) clk_status_r <= 2;
 	end
-	if (~mmcm_locked) clk_status_r <= 0;
+	if (~zif_cfg.U2_mmcm_locked) clk_status_r <= 0;
 end
 assign clk_status = clk_status_r;
 
@@ -216,7 +178,7 @@ wire [7:0] scanner_banyan_mask;
 wire [2:0] scanner_adc_num;  // not used
 wire [127:0] permuted_data;  // from banyan_mem
 wire [15:0] scanner_adc_val = permuted_data[15:0];
-wire lb_idelay_write = lb_strobe & ~lb_rd & (lb_addr[23:4] == 7);
+wire lb_idelay_write = lb_strobe & ~lb_rd & (lb_addr[23:4] == 20'h19007);
 idelay_scanner #(.use_decider(1)) scanner(
 	.lb_clk(lb_clk), .lb_addr(lb_addr[3:0]), .lb_data(lb_dout[4:0]),
 	.lb_id_write(lb_idelay_write),
@@ -252,33 +214,35 @@ genvar ixd;
 generate for (ixd=0; ixd<16; ixd=ixd+1) begin: gixd
 	always @(posedge lb_clk) idelay_stb_mask[ixd] <= |idelay_sr & (idelay_addr == (15-ixd));
 end endgenerate
-assign U2_idelay_ld = idelay_stb_mask[7:0];
-assign U3_idelay_ld = idelay_stb_mask[15:8];
-assign U2_idelay_value_in = {8{idelay_hold}};
-assign U3_idelay_value_in = {8{idelay_hold}};
+
+assign zif_cfg.U2_idelay_ld = idelay_stb_mask[7:0];
+assign zif_cfg.U2_idelay_value_in = {8{idelay_hold}};
+
+assign zif_cfg.U3_idelay_ld = idelay_stb_mask[15:8];
+assign zif_cfg.U3_idelay_value_in = {8{idelay_hold}};
 
 `define CONFIG_SYNC_GEN
 `ifdef CONFIG_SYNC_GEN
 // This is sloppy use of clock domains for sync_ad7794_cset and sync_tps62210_cset
 sync_generate #(.cw(10), .minc(256)) sync_ad7794(.clk(adc_clk),
-	.cset(sync_ad7794_cset), .sync(U18_clk_in));
+	.cset(sync_ad7794_cset), .sync(zif_cfg.U18_clkin));
 sync_generate #(.cw(6), .minc(32)) sync_tps62210(.clk(adc_clk),
-	.cset(sync_tps62210_cset), .sync(U33U1_pwr_sync));
+	.cset(sync_tps62210_cset), .sync(zif_cfg.U33U1_pwr_sync));
 `else
-assign U18_clk_in = 0;
-assign U33U1_pwr_sync = 0;
+assign zif_cfg.U18_clkin = 0;
+assign zif_cfg.U33U1_pwr_sync = 0;
 `endif
 
-freq_count freq_count          (.f_in(U3_clk_div_bufr), .sysclk(lb_clk), .frequency(frequency));
-freq_count freq_count_clk4xout (.f_in(bmb7_U7_clk4xout),.sysclk(lb_clk), .frequency(frequency_4xout));
-freq_count freq_count_clkout3  (.f_in(U1_clkout3),      .sysclk(lb_clk), .frequency(frequency_clkout3));
-freq_count freq_count_dac_dco  (.f_in(U4_dco_clk_out),  .sysclk(lb_clk), .frequency(frequency_dac_dco));
+freq_count freq_count          (.f_in(zif_cfg.U3_clk_div_bufr), .sysclk(lb_clk), .frequency(frequency));
+freq_count freq_count_clk4xout (.f_in(clk200),                  .sysclk(lb_clk), .frequency(frequency_4xout));
+freq_count freq_count_clkout3  (.f_in(zif_cfg.U1_clkout),       .sysclk(lb_clk), .frequency(frequency_clkout3));
+freq_count freq_count_dac_dco  (.f_in(zif_cfg.U4_dco_clk_out),  .sysclk(lb_clk), .frequency(frequency_dac_dco));
 
 
 `define CONFIG_PHASEX
 `ifdef CONFIG_PHASEX
 assign phasex_present = 1;
-phasex #(.aw(10)) phasex(.uclk1(U2_clk_div_bufg), .uclk2(U3_clk_div_bufr), .sclk(bmb7_U7_clk4xout),
+phasex #(.aw(10)) phasex(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U3_clk_div_bufr), .sclk(clk200),
 	.rclk(lb_clk), .trig(phasex_trig), .ready(phasex_ready),
 	.addr(lb_addr[9:0]), .dout(phasex_dout));
 `else
@@ -293,11 +257,11 @@ assign phasex_dout = 0;
 wire [12:0] clk_phase_diff_out_U2,  clk_phase_diff_out_U3;
 wire [13:0] clk_phase_diff_freq_U2, clk_phase_diff_freq_U3;
 wire        clk_phase_diff_err_U2,  clk_phase_diff_err_U3;
-phase_diff phase_diff_U2(.uclk1(U2_clk_div_bufg), .uclk2(U2_clk_div_bufr), .sclk(bmb7_U7_clk4xout),
+phase_diff phase_diff_U2(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U2_clk_div_bufr), .sclk(clk200),
 	.rclk(lb_clk), .phdiff_out(clk_phase_diff_out_U2),
 	.vfreq_out(clk_phase_diff_freq_U2), .err(clk_phase_diff_err_U2));
-assign phase_status_U2 = {clk_phase_diff_err_U2,clk_phase_diff_freq_U2,4'b0,clk_phase_diff_out_U2};
-phase_diff phase_diff_U3(.uclk1(U2_clk_div_bufg), .uclk2(U3_clk_div_bufr), .sclk(bmb7_U7_clk4xout),
+assign phase_status_U2 = {clk_phase_diff_err_U2, clk_phase_diff_freq_U2,4'b0, clk_phase_diff_out_U2};
+phase_diff phase_diff_U3(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U3_clk_div_bufr), .sclk(clk200),
 	.rclk(lb_clk), .phdiff_out(clk_phase_diff_out_U3),
 	.vfreq_out(clk_phase_diff_freq_U3), .err(clk_phase_diff_err_U3));
 assign phase_status_U3 = {clk_phase_diff_err_U3,clk_phase_diff_freq_U3,4'b0,clk_phase_diff_out_U3};
