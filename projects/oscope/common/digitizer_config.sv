@@ -130,10 +130,10 @@ llspi llspi(
 `ifdef POLL_WITH_LLSPI
 // Following four llspi outputs can be left unused if
 // llspi isn't driving the chips
-	.P2_POLL_SCLK(U18_sclk_in),  // Y5
-	.P2_POLL_MOSI(U18_mosi_in),  // V19
-	.P2_AMC7823_SPI_SS(U15_ss_in),  // AB20
-	.P2_AD7794_CSb(U18_ss_in),  // AE17
+	.P2_POLL_SCLK(zif_cfg.U18_sclk_in),  // Y5
+	.P2_POLL_MOSI(zif_cfg.U18_mosi_in),  // V19
+	.P2_AMC7823_SPI_SS(zif_cfg.U15_ss_in),  // AB20
+	.P2_AD7794_CSb(zif_cfg.U18_ss_in),  // AE17
 `endif
 // OK to attach the following two llspi input pins even if
 // llspi isn't driving the chips; no floating-input warnings this way
@@ -225,11 +225,11 @@ assign zif_cfg.U3_idelay_value_in = {8{idelay_hold}};
 `ifdef CONFIG_SYNC_GEN
 // This is sloppy use of clock domains for sync_ad7794_cset and sync_tps62210_cset
 sync_generate #(.cw(10), .minc(256)) sync_ad7794(.clk(adc_clk),
-	.cset(sync_ad7794_cset), .sync(zif_cfg.U18_clkin));
+	.cset(sync_ad7794_cset), .sync(zif_cfg.U18_adcclk));
 sync_generate #(.cw(6), .minc(32)) sync_tps62210(.clk(adc_clk),
 	.cset(sync_tps62210_cset), .sync(zif_cfg.U33U1_pwr_sync));
 `else
-assign zif_cfg.U18_clkin = 0;
+assign zif_cfg.U18_adcclk = 0;
 assign zif_cfg.U33U1_pwr_sync = 0;
 `endif
 

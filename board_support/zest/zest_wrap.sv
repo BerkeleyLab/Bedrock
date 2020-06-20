@@ -1,6 +1,6 @@
 // Generic wrappers for Zest (digitizer) peripherals
 
-module zest_wrap (
+module zest_wrap #(parameter u15_u18_spi_mode="passthrough") (
    input clk_200,
    // Zest peripheral pins
    zest_if.carrier   zif,
@@ -114,7 +114,7 @@ module zest_wrap (
       .SCLK (), // P2_SCLK
       .csb_in           (zif_cfg.U3_csb_in),
       .sclk_in          (1'b0),
-      .sdi              (zif_cfg.U3_sdi),
+      .sdi              (zif_cfg.U3_sdi),  // TODO: Be consistent with above
       .sdo              (zif_cfg.U3_sdo),
       .sdio_as_i        (zif_cfg.U3_sdio_as_i),
       .clk_reset        (zif_cfg.U3_clk_reset),
@@ -182,14 +182,12 @@ module zest_wrap (
    assign zif.U33U1_pwr_sync = zif_cfg.U33U1_pwr_sync;
 
    // AMC7823 - U15 - Multichannel ADC/DAC for monitoring/control
-   wire U15_sclk_out;
-   wire U15_mosi_out;
 
-   amc7823 U15_amc7823 (
+   amc7823 #(.SPIMODE(u15_u18_spi_mode)) U15_amc7823 (
       .ss          (zif.U15_SS),
       .miso        (zif.U15_MISO),
-      .mosi        (U15_mosi_out),
-      .sclk        (U15_sclk_out),
+      .mosi        (zif_cfg.U15_mosi_out),
+      .sclk        (zif_cfg.U15_sclk_out),
       .clk         (zif_cfg.U15_clk),
       .spi_start   (zif_cfg.U15_spi_start),
       .spi_addr    (zif_cfg.U15_spi_addr),
@@ -207,15 +205,13 @@ module zest_wrap (
       .spi_ssb_out (zif_cfg.U15_spi_ssb_out));
 
    // AD7794 - U18 - Thermometer readout
-   wire U18_sclk_out;
-   wire U18_mosi_out;
 
-   ad7794 U18_ad7794 (
+   ad7794 #(.SPIMODE(u15_u18_spi_mode)) U18_ad7794 (
       .CLK         (zif.U18_CLK),
       .CS          (zif.U18_CS),
-      .DIN         (U18_mosi_out),
       .DOUT_RDY    (zif.U18_DOUT_RDY),
-      .SCLK        (U18_sclk_out),
+      .DIN         (zif_cfg.U18_mosi_out),
+      .SCLK        (zif_cfg.U18_sclk_out),
       .clkin       (zif_cfg.U18_clkin),
       .spi_start   (zif_cfg.U18_spi_start),
       .spi_addr    (zif_cfg.U18_spi_addr),
@@ -233,7 +229,12 @@ module zest_wrap (
       .spi_ssb_out (zif_cfg.U18_spi_ssb_out),
       .adcclk      (zif_cfg.U18_adcclk));
 
-   assign zif.U18_DIN  = U18_mosi_out | U15_mosi_out;
-   assign zif.U18_SCLK = U18_sclk_out | U15_sclk_out;
+   generate if (u15_u18_spi_mode == "passthrough") begin: passthrough
+     assign zif.U18_DIN  = zif_cfg.U18_mosi_out | zif_cfg.U15_mosi_out;
+     assign zif.U18_SCLK = zif_cfg.U18_sclk_out | zif_cfg.U15_sclk_out;
+   end else begin
+     assign zif.U18_DIN  = zif_cfg.U15_U18_mosi;
+     assign zif.U18_SCLK = zif_cfg.U15_U18_sclk;
+   end endgenerate
 
 endmodule

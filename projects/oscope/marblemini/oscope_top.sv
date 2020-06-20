@@ -215,7 +215,7 @@ zest_if zif (
 	.U33U1 (bus_digitizer_U33U1)
 );
 
-zest_wrap i_zest_wrap (
+zest_wrap #(.u15_u18_spi_mode("chain"))  i_zest_wrap (
 	.clk_200  (clk200),
 	.zif      (zif.carrier),
 	.zif_cfg  (zif_cfg.slave)
