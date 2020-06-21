@@ -1,9 +1,9 @@
-// This is free and unencumbered software released into the public domain.
-//
-// Anyone is free to copy, modify, publish, use, compile, sell, or
-// distribute this software, either in source code form or as a compiled
-// binary, for any purpose, commercial or non-commercial, and by any
-// means.
+# This is free and unencumbered software released into the public domain.
+#
+# Anyone is free to copy, modify, publish, use, compile, sell, or
+# distribute this software, either in source code form or as a compiled
+# binary, for any purpose, commercial or non-commercial, and by any
+# means.
 
 #define regnum_q0   0
 #define regnum_q1   1
@@ -76,7 +76,7 @@
 #define regnum_t5  30
 #define regnum_t6  31
 
-// x8 is s0 and also fp
+# x8 is s0 and also fp
 #define regnum_fp   8
 
 #define r_type_insn(_f7, _rs2, _rs1, _f3, _rd, _opc) \
