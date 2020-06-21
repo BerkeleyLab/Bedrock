@@ -1,6 +1,6 @@
 `timescale 1 ns / 1 ns
 
-module uart_tb;
+module uart_fifo_tb;
     localparam CLK_PERIOD = 10;    // Simulated clock period in [ns]
     reg mem_clk=1;
     always #(CLK_PERIOD/2)   mem_clk = ~mem_clk;
@@ -12,8 +12,8 @@ module uart_tb;
     reg pass=1;
     initial begin
         if ($test$plusargs("vcd")) begin
-            $dumpfile("uart.vcd");
-            $dumpvars(5,uart_tb);
+            $dumpfile("uart_fifo.vcd");
+            $dumpvars(5,uart_fifo_tb);
         end
         repeat (10) @(posedge mem_clk);
         reset <= 0;
@@ -77,7 +77,7 @@ module uart_tb;
     //  Instantiate the memory (holds data and program!)
     // --------------------------------------------------------------
     memory2_pack #(
-        .MEM_INIT      ("./uart32.hex"  ),
+        .MEM_INIT      ("./uart_fifo32.hex"  ),
         .BASE_ADDR     ( 8'h00          )
     ) mem_inst (
         // Hardware interface
