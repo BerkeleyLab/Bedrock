@@ -231,7 +231,7 @@ sp605_gmii_test_iobs: sp605_gmii_test.bit
 # =====
 # Make a bitfile for a KC705 with Xilinx Vivado
 # first just a syntax check (kc705_gmii_test.v is empty)
-SYNTH_SOURCE_KC705 = gmii_hw_test.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) kc705/gmii_clock_handle.v kc705/xilinx7_clocks.v
+SYNTH_SOURCE_KC705 = gmii_hw_test.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) kc705/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
 kc705_gmii_test_tb: $(SYNTH_SOURCE_KC705) kc705/ODDR.v kc705/BUFG.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v
 kc705_gmii_test.d: $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
 	echo $^ | tr ' ' '\n' > $@
@@ -254,7 +254,7 @@ ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC
 	mv _xilinx/ac701_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
 # =====
-SYNTH_SOURCE_MARBLEM = rgmii_hw_test.v gmii_to_rgmii.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) marble/gmii_clock_handle.v kc705/xilinx7_clocks.v
+SYNTH_SOURCE_MARBLEM = rgmii_hw_test.v gmii_to_rgmii.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
 marblem_rgmii_test.d: $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
 marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
@@ -315,7 +315,7 @@ rtefi_blob_tb: $(RTEFI_V)
 # Experimental
 rtefi_blob_synth.v: $(RTEFI_V)
 hw_test_synth.v: $(SYNTH_SOURCE_EXTRA) $(RTEFI_V)
-SYNTH_SOURCE_AC701X = rgmii_hw_test.v hw_test_synth.v kc705/gmii_clock_handle.v kc705/xilinx7_clocks.v gmii_to_rgmii.v
+SYNTH_SOURCE_AC701X = rgmii_hw_test.v hw_test_synth.v kc705/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v
 ac701_rgmii_testx_tb: $(SYNTH_SOURCE_AC701X) kc705/ODDR.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v $(HOME)/share/yosys/xilinx/cells_sim.v
 # ac701_rgmii_testx_tb won't work until I have a viable RAMB18E1
 ac701_rgmii_testx.d: $(SYNTH_SOURCE_AC701X) ac701/ac701_rgmii.xdc
