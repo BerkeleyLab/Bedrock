@@ -6,7 +6,7 @@ COMMON_DIR     = $(PICORV_DIR)/common
 LDLIBS         = -lgcc
 INC_DIR        = -I$(LIB_DIR)/inc -I./
 
-vpath %.v $(GATEWARE_DIR) $(DSP_DIR)
+vpath %.v $(GATEWARE_DIR) $(DSP_DIR) $(FPGA_FAMILY_DIR)/xilinx
 vpath %.S $(COMMON_DIR)
 vpath %.lds $(COMMON_DIR)
 vpath %.c $(LIB_DIR)/src

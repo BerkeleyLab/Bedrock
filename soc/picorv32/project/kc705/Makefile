@@ -14,7 +14,7 @@ COMMON_V += memory_pack.v memory2_pack.v
 COMMON_V += pb_debouncer.v
 COMMON_V += sfr_pack.v gpio_pack.v gpioz_pack.v
 COMMON_V += lb_bridge.v lb_merge.v lb_reading.v xadc_mon.v dpram.v
-SYNTH_V   = $(COMMON_V) top.v xilinx7/xilinx7_clocks.v
+SYNTH_V   = $(COMMON_V) top.v xilinx7_clocks.v
 SIM_V     = $(COMMON_V) i2c_slave.v
 
 # Define C sources here
