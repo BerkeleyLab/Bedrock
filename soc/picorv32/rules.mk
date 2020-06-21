@@ -34,7 +34,7 @@ LDFLAGS = $(CFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,
 	$(PYTHON) $(COMMON_DIR)/hex8tohex32.py $< > $@
 
 %_load: %32.hex
-	$(PYTHON) $(COMMON_DIR)/boot_load.py $< $(USB_SERIAL)
+	$(PYTHON) $(COMMON_DIR)/boot_load.py $< $(BOOTLOADER_SERIAL) --baud_rate $(BOOTLOADER_BAUDRATE)
 
 # All testbenches use $stop, eliminating the `awk` dependency
 %_check: %_tb $(BUILD_DIR)/testcode.awk

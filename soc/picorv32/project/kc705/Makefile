@@ -4,7 +4,8 @@ include $(PICORV_DIR)/rules.mk
 
 #size of the blockRam [bytes]
 BLOCK_RAM_SIZE = 8192
-USB_SERIAL = /dev/ttyUSB0
+BOOTLOADER_SERIAL = /dev/ttyUSB1
+BOOTLOADER_BAUDRATE = 115200
 TARGET     = system
 
 # Define Verilog sources here
@@ -22,9 +23,9 @@ OBJS      =  $(subst .c,.o,$(SRCS)) startup.o bootloader.o
 
 # Verilog / C flags for compiler, assembler, linker and simulator
 # Note: flags for the synthesizer need to be defined in system_synth.tcl
-VFLAGS   += -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
 # CFLAGS   += -Os -march=rv32imc
 # -ffunction-sections -fdata-sections
+CFLAGS += -DBOOTLOADER_BAUDRATE=$(BOOTLOADER_BAUDRATE)
 
 all: $(TARGET)_synth.bit
 

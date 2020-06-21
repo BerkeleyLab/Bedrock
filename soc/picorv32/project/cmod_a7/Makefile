@@ -6,7 +6,9 @@
 include ../../../../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
-USB_SERIAL = /dev/ttyUSB0
+
+BOOTLOADER_SERIAL = /dev/ttyUSB1
+BOOTLOADER_BAUDRATE = 115200
 
 COMMON_V  = picorv32.v system.v uart_pack.v uart_rx.v uart_tx.v mpack.v munpack.v pico_pack.v
 COMMON_V += memory_pack.v memory2_pack.v
@@ -22,9 +24,9 @@ OBJS      = $(subst .c,.o,$(SRCS)) startup_irq.o bootloader.o
 
 #size of the blockRam [bytes]
 BLOCK_RAM_SIZE = 16384
-CFLAGS   += -DGIT_VERSION=\"$(GIT_VERSION)\" -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
+CFLAGS   += -DGIT_VERSION=\"$(GIT_VERSION)\" -DBOOTLOADER_BAUDRATE=$(BOOTLOADER_BAUDRATE)
 CFLAGS   += -ffunction-sections
-VFLAGS   += -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) -DMEMORY_PACK_FAST
+VFLAGS   += -DMEMORY_PACK_FAST
 
 all: $(TARGET)_synth.bit
 

@@ -25,7 +25,7 @@
 start_bootloader:
     // Set UART baud-rate register
     li    gp, BASE_UART0
-    li    t0, F_CLK/(BOOTLOADER_BAUDRATE*8) | 1
+    li    t0, F_CLK / (BOOTLOADER_BAUDRATE * 8)
     sw    t0, 0x0C(gp)
 
     // Write ook\n

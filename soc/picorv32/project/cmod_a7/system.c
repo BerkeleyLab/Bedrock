@@ -7,13 +7,15 @@
 #include "timer.h"
 #include "test.h"
 
-void _putchar(char c){
+void _putchar(char c)
+{
     // hook for all print_* functions
     UART_PUTC(BASE_UART0, c);
 }
 
 volatile unsigned chars_received = 0;
-uint32_t *irq(uint32_t *regs, uint32_t irqs) {
+uint32_t *irq(uint32_t *regs, uint32_t irqs)
+{
     // called for all 32 interrupts
     // *regs = context save X-registers
     // irqs = q1 = bitmask of all IRQs to be handled
@@ -28,7 +30,8 @@ uint32_t *irq(uint32_t *regs, uint32_t irqs) {
     return regs;
 }
 
-int main(void) {
+int main(void)
+{
     unsigned hash;
 
     UART_INIT(BASE_UART0, BOOTLOADER_BAUDRATE);  // Debug print (USB serial)

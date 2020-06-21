@@ -16,10 +16,10 @@
 
 #ifdef SIMULATION
     #define BOOTLOADER_DELAY    1
+    #undef BOOTLOADER_BAUDRATE
     #define BOOTLOADER_BAUDRATE 9216000       // Used for fast simulation
 #else
     #define BOOTLOADER_DELAY    (F_CLK/1000)  // How long to wait in the bootloader for a connection
-    #define BOOTLOADER_BAUDRATE 115200        // Used for real hardware
 #endif
 
 // GPIO PIN assignments (must match top.v)
