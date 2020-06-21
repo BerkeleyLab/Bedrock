@@ -15,7 +15,7 @@ TARGET = onewire
 all: $(TARGET)_check
 
 $(TARGET).elf: 0x000.lds $(OBJS)
-$(TARGET)_tb: $(SRC_V) ds1822.v ds1822_state.v
+$(TARGET)_tb: $(SRC_V) ds1822.v $(PERIPH_DRIVERS_DIR)/ds1822/ds1822_state.v
 $(TARGET).vcd $(TARGET)_check: $(TARGET)32.hex
 
 include $(BUILD_DIR)/bottom_rules.mk
