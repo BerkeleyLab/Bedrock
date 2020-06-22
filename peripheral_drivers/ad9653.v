@@ -55,10 +55,11 @@ parameter BANK_CNT=1;
 parameter BANK_CNT_WIDTH=clog2(BANK_CNT)+1;
 function integer clog2;
 	input integer value;
+	integer local_value;
 	begin
-		value = value-1;
-		for (clog2=0; value>0; clog2=clog2+1)
-			value = value>>1;
+		local_value = value-1;
+		for (clog2=0; local_value>0; clog2=clog2+1)
+			local_value = local_value>>1;
 	end
 endfunction
 parameter [DWIDTH*BANK_CNT_WIDTH-1:0] BANK_SEL=0;

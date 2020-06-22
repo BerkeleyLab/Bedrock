@@ -41,7 +41,6 @@ interface zest_if (
         U3_D1NA, U3_D1NB, U3_D1NC, U3_D1ND, U3_D1PA, U3_D1PB, U3_D1PC, U3_D1PD,
         U3_DCON, U3_DCOP, U3_FCON, U3_FCOP;
    wire U3_PDWN, U3_CSB;
-   wire U3_SDIO;
 
    assign {U3_D0NA, U3_D0NB, U3_D0NC, U3_D0ND} = {U3[16], U3[13], U3[12], U3[7]};
    assign {U3_D0PA, U3_D0PB, U3_D0PC, U3_D0PD} = {U3[18], U3[25], U3[19], U3[9]};
