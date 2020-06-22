@@ -31,15 +31,7 @@ module application_top(
 	// input 		  U3_sdi,
 );
 
-assign zif_cfg.U15_sclk_in    = 1'b0;
-assign zif_cfg.U15_mosi_in    = 1'b0;
-assign zif_cfg.U15_spi_ssb_in = 1'b1;
 
-assign zif_cfg.U18_sclk_in    = zif_cfg.U15_sclk_out;
-assign zif_cfg.U18_mosi_in    = zif_cfg.U15_mosi_out;
-assign zif_cfg.U18_spi_ssb_in = zif_cfg.U15_spi_ssb_out;
-assign zif_cfg.U15_U18_sclk   = zif_cfg.U18_sclk_out;
-assign zif_cfg.U15_U18_mosi   = zif_cfg.U18_mosi_out;
 
 //wire clk=bmb7_U7_clkout;
 //`define BMB7_STANDALONE
@@ -50,9 +42,6 @@ assign zif_cfg.U15_U18_mosi   = zif_cfg.U18_mosi_out;
 	// Clock DSP from external clock source at 1320/14 MHz
 	wire adc_clk=zif_cfg.U2_clk_div_bufg;
 `endif
-
-assign zif_cfg.U15_clk=lb_clk;
-assign zif_cfg.U18_clkin=lb_clk;
 
 // Magic
 // Needs placing before usage of any top-level registers
@@ -128,9 +117,6 @@ data_xdomain #(.size(32+24)) lb_to_adc(
 reg scan_trigger=0; always @(posedge lb_clk) scan_trigger <= we_digitizer_config_scan_trigger_we & lb_data[0:0];
 reg autoset_enable=0; always @(posedge lb_clk) if (we_digitizer_config_scan_trigger_we) autoset_enable <= lb_data[1:1];
 
-// reg [1:0] adc_mmcm; top-level single-cycle
-wire adc_mmcm_psen = adc_mmcm[0];
-wire adc_mmcm_psincdec = adc_mmcm[1];
 
 // reg [0:0] ctrace_start; top-level single-cycle
 
@@ -425,15 +411,6 @@ digitizer_slowread digitizer_slowread // auto
 );
 
 
-// Need a better home for these
-assign zif_cfg.U2_mmcm_psclk = lb_clk;
-assign zif_cfg.U2_mmcm_psen = adc_mmcm_psen;
-assign zif_cfg.U2_mmcm_psincdec = adc_mmcm_psincdec;
-// Maybe no need to attach to U2_mmcm_psdone
-assign zif_cfg.U3_mmcm_psclk = 0;
-assign zif_cfg.U3_mmcm_psen = 0;
-assign zif_cfg.U3_mmcm_psincdec = 0;
-// Do not attach to U3_mmcm_psdone
 
 assign zif_cfg.U4_dci = zif_cfg.U4_dco_clk_out;
 

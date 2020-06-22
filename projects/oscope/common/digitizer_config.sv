@@ -12,7 +12,7 @@ module digitizer_config(
 	input 	      lb_rd,
 	input [23:0]  lb_addr,
 	input [31:0]  lb_dout,
-	zest_cfg_if.master zif_cfg,
+		      zest_cfg_if.master zif_cfg,
 
 	// clocks for frequency and phase measurement
 	input 	      clk200,
@@ -56,6 +56,7 @@ module digitizer_config(
 	//input  [7:0] U18_spi_addr_r,   // external
 	input 	      U2_clk_reset_r, // external
 	input 	      U3_clk_reset_r, // external
+	input [1:0]   adc_mmcm, // external single-cycle
 	input 	      U2_iserdes_reset_r, // external
 	input 	      U3_iserdes_reset_r, // external
 	input 	      U4_reset_r, // external
@@ -79,6 +80,19 @@ module digitizer_config(
 	input [5:0]   sync_tps62210_cset  // external
 );
 
+assign zif_cfg.U15_sclk_in    = 1'b0;
+assign zif_cfg.U15_mosi_in    = 1'b0;
+assign zif_cfg.U15_spi_ssb_in = 1'b1;
+
+assign zif_cfg.U18_sclk_in    = zif_cfg.U15_sclk_out;
+assign zif_cfg.U18_mosi_in    = zif_cfg.U15_mosi_out;
+assign zif_cfg.U18_spi_ssb_in = zif_cfg.U15_spi_ssb_out;
+assign zif_cfg.U15_U18_sclk   = zif_cfg.U18_sclk_out;
+assign zif_cfg.U15_U18_mosi   = zif_cfg.U18_mosi_out;
+
+assign zif_cfg.U15_clk=lb_clk;
+assign zif_cfg.U18_clkin=lb_clk;
+
 // Propagate these (mirrored) host-settable registers to output ports of this module
 assign zif_cfg.U15_spi_start = U15_spi_read_and_start_r[0];
 assign zif_cfg.U15_spi_read = U15_spi_read_and_start_r[1];
@@ -99,10 +113,19 @@ assign zif_cfg.U3_pdwn = periph_config[1];
 assign zif_cfg.U3_iserdes_reset = U3_iserdes_reset_r;
 
 assign zif_cfg.U4_reset = U4_reset_r;
-assign zif_cfg.U2_mmcm_reset = mmcm_reset_r;
-assign zif_cfg.U3_mmcm_reset = mmcm_reset_r;
 assign zif_cfg.U33U1_pwr_en = periph_config[0];
 assign zif_cfg.IDELAY_ctrl_rst = idelayctrl_reset_r;
+
+assign zif_cfg.U2_mmcm_reset = mmcm_reset_r;
+assign zif_cfg.U2_mmcm_psclk = lb_clk;
+assign zif_cfg.U2_mmcm_psen = adc_mmcm[0];
+assign zif_cfg.U2_mmcm_psincdec = adc_mmcm[1];
+// Maybe no need to attach to U2_mmcm_psdone
+assign zif_cfg.U3_mmcm_reset = mmcm_reset_r;
+assign zif_cfg.U3_mmcm_psclk = 0;
+assign zif_cfg.U3_mmcm_psincdec = 0;
+assign zif_cfg.U3_mmcm_psen = 0;
+// Do not attach to U3_mmcm_psdone
 
 `define CONFIG_LLSPI
 `ifdef CONFIG_LLSPI
@@ -111,6 +134,10 @@ assign zif_cfg.U3_sdio_as_i = ~zif_cfg.U27_dir;
 assign zif_cfg.U2_sdio_as_i = ~zif_cfg.U27_dir;
 
 assign zif_cfg.U3_sdo = zif_cfg.U2_sdo;
+assign zif_cfg.U3_sclk_in = 1'b0;
+// DAC (U4) unused for now
+assign zif_cfg.U4_sclk_in = 1'b0;
+assign zif_cfg.U1_clkuwire_in = 1'b0;
 
 wire [8:0] host_din = lb_dout[8:0];
 llspi llspi(
@@ -238,6 +265,9 @@ freq_count freq_count_clk4xout (.f_in(clk200),                  .sysclk(lb_clk),
 freq_count freq_count_clkout3  (.f_in(zif_cfg.U1_clkout),       .sysclk(lb_clk), .frequency(frequency_clkout3));
 freq_count freq_count_dac_dco  (.f_in(zif_cfg.U4_dco_clk_out),  .sysclk(lb_clk), .frequency(frequency_dac_dco));
 
+assign zif_cfg.U3_dco_clk_in[0] = zif_cfg.U3_dco_clk_out;
+assign zif_cfg.U3_dco_clk_in[1] = zif_cfg.U2_dco_clk_out;
+assign zif_cfg.U2_dco_clk_in = zif_cfg.U2_dco_clk_out;
 
 `define CONFIG_PHASEX
 `ifdef CONFIG_PHASEX
@@ -250,6 +280,10 @@ assign phasex_present = 0;
 assign phasex_ready = 0;
 assign phasex_dout = 0;
 `endif
+
+assign zif_cfg.U3_clk_div_in[0] = zif_cfg.U3_clk_div_bufr;
+assign zif_cfg.U3_clk_div_in[1] = zif_cfg.U2_clk_div_bufr;
+assign zif_cfg.U2_clk_div_in = zif_cfg.U2_clk_div_bufr;
 
 `define CONFIG_PHASE_DIFF
 `ifdef CONFIG_PHASE_DIFF

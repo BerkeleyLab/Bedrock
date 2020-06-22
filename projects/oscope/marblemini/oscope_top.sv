@@ -223,11 +223,7 @@ zest_wrap #(.u15_u18_spi_mode("chain"))  i_zest_wrap (
 
 // Choose between llspi and spi_master to drive U15 and U18
 //`define POLL_WITH_LLSPI
-wire U18_sclk_out, U18_mosi_out;  //  to  application_top
-wire U15_U18_sclk, U15_U18_mosi;  // from application_top
-assign bus_digitizer_U18[3] = U15_U18_mosi;
-assign bus_digitizer_U18[4] = U15_U18_sclk;
-wire U18_clk_in;  // from application_top (for 64kHz or 128kHz CLK pin)
+// wire U18_clk_in;  // from application_top (for 64kHz or 128kHz CLK pin)
 //`ifdef POLL_WITH_LLSPI
 //assign bus_digitizer_U18[0] = U18_clk_in;
 //`endif
@@ -240,8 +236,6 @@ assign J28_pout = bus_bmb7_J28[0];
 // These are meaningful LEDs, one could use them
 wire [2:0] D4rgb;
 wire [2:0] D5rgb;
-
-wire U27dir;
 
 // Here's the real work
 application_top application_top(

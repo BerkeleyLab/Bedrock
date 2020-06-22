@@ -60,8 +60,8 @@ module zest_wrap #(parameter u15_u18_spi_mode="passthrough") (
       .csb_in           (zif_cfg.U2_csb_in),
       .sclk_in          (P2_SCLK),
       .sdi              (P2_ADC_SDI),
-      .sdo              (P2_ADC_SDO),
-      .sdio_as_i        (P2_ADC_DIR),
+      .sdo              (zif_cfg.U2_sdo),
+      .sdio_as_i        (zif_cfg.U2_sdio_as_i),
       .clk_reset        (zif_cfg.U2_clk_reset),
       .mmcm_reset       (zif_cfg.U2_mmcm_reset),
       .mmcm_locked      (zif_cfg.U2_mmcm_locked),
@@ -90,8 +90,8 @@ module zest_wrap #(parameter u15_u18_spi_mode="passthrough") (
                        zif_cfg.U1_clkuwire_in |
                        zif_cfg.U4_sclk_in;
 
-   assign P2_ADC_DIR = zif_cfg.U2_sdio_as_i | zif_cfg.U3_sdio_as_i;
-   assign P2_ADC_SDO = zif_cfg.U2_sdo | zif_cfg.U3_sdo; // Mutually exclusive
+   // assign P2_ADC_DIR = zif_cfg.U2_sdio_as_i | zif_cfg.U3_sdio_as_i;
+   // assign P2_ADC_SDO = zif_cfg.U2_sdo | zif_cfg.U3_sdo; // Mutually exclusive
    assign zif_cfg.U2_sdi = P2_ADC_SDI;
    assign zif_cfg.U3_sdi = P2_ADC_SDI;
 
