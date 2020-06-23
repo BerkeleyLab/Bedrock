@@ -5,11 +5,11 @@
 `timescale 1 ns / 1 ns
 
 module general_tb;
-    localparam F_CLK = 100000000;                      // Simulated clock rate in [Hz]
-    localparam CLK_PERIOD_NS = 1000000000/F_CLK;       // Simulated clock period in [ns]
-    localparam BAUD_RATE = 9216000;                    // debug text baudrate
+    localparam F_CLK = 75000000;                    // Simulated clock rate in [Hz]
+    localparam CLK_PERIOD_NS = 1000000000 / F_CLK;  // Simulated clock period in [ns]
+    localparam BAUD_RATE = 9216000;                 // debug text baudrate
     reg clk_p=1, clk_n=0;
-    always #(CLK_PERIOD_NS/2) begin
+    always #(CLK_PERIOD_NS / 2) begin
         clk_p = ~clk_p;
         clk_n = ~clk_n;
     end
@@ -38,6 +38,13 @@ module general_tb;
     wire uart_tx0;
     wire uart_rx0;
     wire [31:0]gpio_z;
+
+    wire [ 7:0] ram_data_z;
+    wire [23:0] ram_address;
+    wire        ram_nce;
+    wire        ram_noe;
+    wire        ram_nwe;
+
     `define DEBUGREGS
     system #(
         .SYSTEM_HEX_PATH("./system32.hex")
@@ -47,8 +54,24 @@ module general_tb;
         .uart_tx0   (uart_tx0   ),
         .uart_rx0   (uart_rx0   ),
         .gpio_z     (gpio_z     ),
-        .trap       (trap       )
+        .trap       (trap       ),
+
+          // SRAM Hardware interface
+        .ram_data_z  (ram_data_z),
+        .ram_address (ram_address),
+        .ram_nce     (ram_nce),
+        .ram_noe     (ram_noe),
+        .ram_nwe     (ram_nwe)
     );
+
+    sram_model sram_model_inst (
+        .we_n(ram_nwe),
+        .ce_n(ram_nce),
+        .oe_n(ram_noe),
+        .addr(ram_address[18:0]),
+        .data(ram_data_z)
+    );
+
     assign gpio_z[31:0] = 0;
 
     // ------------------------------------------------------------------------
@@ -114,7 +137,7 @@ module general_tb;
         #200000
         wchar(8'h14);
         // test sieving
-        #400000
+        #200000
         wchar("s");
     end
 

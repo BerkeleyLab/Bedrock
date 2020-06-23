@@ -8,13 +8,15 @@
 // and need to be defined even if not used
 
 // Base addresses of Peripherals
-#define BASE_GPIO              0x01000000
-#define BASE_UART0             0x02000000    // Debug UART connected to USB port on CMOD A7 board
-#define BASE_DEBUG_UART        BASE_UART0
-
+#define BASE_BRAM              0x00000000
+#define BASE_SRAM              0x01000000
+#define BASE_GPIO              0x02000000
+#define BASE_UART0             0x03000000
 #define IRQ_UART0_RX           0x03
 
-#define F_CLK                  100000000     // [Hz] for CMODA7
+#define SRAM_SIZE               (1 << 19)  // [bytes]
+
+#define F_CLK                  50000000     // [Hz] for CMODA7
 
 #ifdef SIMULATION
     #define BOOTLOADER_DELAY    1

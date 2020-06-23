@@ -2,10 +2,10 @@
 #include "test.h"
 #include "print.h"
 
-uint32_t xorshift32(uint32_t *state)
+unsigned xorshift32(unsigned *state)
 {
 	/* Algorithm "xor" from p. 4 of Marsaglia, "Xorshift RNGs" */
-	uint32_t x = *state;
+	unsigned x = *state;
 	x ^= x << 13;
 	x ^= x >> 17;
 	x ^= x << 5;
@@ -14,65 +14,58 @@ uint32_t xorshift32(uint32_t *state)
 	return x;
 }
 
-int cmd_memtest(void)
+int cmd_memtest(volatile unsigned *base, unsigned len, unsigned stride, unsigned cycles)
 {
-	// copied from:
-	// https://github.com/cliffordwolf/picorv32/blob/master/picosoc/firmware.c
-	unsigned cyc_count = 5;
-	int stride = 256;
-	uint32_t state;
+    // copied from:
+    // https://github.com/cliffordwolf/picorv32/blob/master/picosoc/firmware.c
+    unsigned state;
+    volatile uint8_t *base_byte = (volatile uint8_t*)base;
 
-	volatile uint32_t *base_word = (uint32_t *) 0;
-	volatile uint8_t *base_byte = (uint8_t *) 0;
+    for (unsigned i = 1; i <= cycles; i++) {
+        // Walk in stride increments, word access
+        state = i;
+        for (unsigned word = 0; word < len / 4; word += stride) {
+            base[word] = xorshift32(&state);
+        }
 
-	print_str("Running memtest ");
+        state = i;
+        for (unsigned word = 0; word < len / 4; word += stride) {
+            if (base[word] != xorshift32(&state)) {
+                print_str(" ***FAILED WORD*** at ");
+                print_hex(4 * word, 6);
+                _putchar('\n');
+                return -1;
+            }
+        }
 
-	// Walk in stride increments, word access
-	for (unsigned i = 1; i <= cyc_count; i++) {
-		state = i;
+        // Byte access
+        for (unsigned byte=0; byte<len; byte+=stride) {
+            base_byte[byte] = (uint8_t)byte;
+        }
 
-		for (unsigned word = 0; word < BLOCK_RAM_SIZE / sizeof(unsigned); word += stride) {
-			*(base_word + word) = xorshift32(&state);
-		}
+        for (unsigned byte=0; byte<len; byte+=stride) {
+            if (base_byte[byte] != (uint8_t)byte) {
+                print_str(" ***FAILED BYTE*** at ");
+                print_hex(byte, 6);
+                _putchar('\n');
+                return -1;
+            }
+        }
 
-		state = i;
-
-		for (unsigned word = 0; word < BLOCK_RAM_SIZE / sizeof(unsigned); word += stride) {
-			if (*(base_word + word) != xorshift32(&state)) {
-				print_str(" ***FAILED WORD*** at ");
-				print_hex(4*word, 4);
-				_putchar('\n');
-				return -1;
-			}
-		}
-		_putchar('.');
+        _putchar('.');
 	}
 
-	// Byte access
-	for (unsigned byte = 0; byte < 128; byte++) {
-		*(base_byte + byte) = (uint8_t) byte;
-	}
-
-	for (unsigned byte = 0; byte < 128; byte++) {
-		if (*(base_byte + byte) != (uint8_t) byte) {
-			print_str(" ***FAILED BYTE*** at ");
-			print_hex(byte, 4);
-			_putchar('\n');
-			return -1;
-		}
-	}
-
-	print_str(" passed\n");
-	return 0;
+    print_str(" ok\n");
+    return 0;
 }
 
 // A simple Sieve of Eratosthenes
 // copied from:
 // https://github.com/cliffordwolf/picorv32/blob/master/firmware/sieve.c
-static uint32_t bitmap[BITMAP_SIZE/32];
-static uint32_t hash;
+static unsigned bitmap[BITMAP_SIZE/32];
+static unsigned hash;
 
-static uint32_t mkhash(uint32_t a, uint32_t b)
+static unsigned mkhash(unsigned a, unsigned b)
 {
 	// The XOR version of DJB2
 	return ((a << 5) + a) ^ b;
@@ -122,6 +115,5 @@ unsigned sieve(unsigned nPrimes)
 
 	print_str("\nchecksum: ");
 	print_hex(hash, 8);
-	_putchar('\n');
 	return hash;
 }

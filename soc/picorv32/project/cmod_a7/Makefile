@@ -7,6 +7,8 @@ include ../../../../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
 
+vpath %.v $(PICORV_DIR)/test/sram
+
 BOOTLOADER_SERIAL = /dev/ttyUSB1
 BOOTLOADER_BAUDRATE = 115200
 
@@ -14,13 +16,12 @@ COMMON_V  = picorv32.v system.v uart_pack.v uart_rx.v uart_tx.v mpack.v munpack.
 COMMON_V += memory_pack.v memory2_pack.v
 COMMON_V += stream_fifo.v shortfifo.v uart_fifo_pack.v uart_stream.v
 COMMON_V += sfr_pack.v gpio_pack.v gpioz_pack.v
-COMMON_V += pb_debouncer.v
-SIM_V     = system_tb.v $(COMMON_V)
+COMMON_V += pb_debouncer.v sram_pack.v sram2_pack.v
+SIM_V     = system_tb.v sram_model.v $(COMMON_V)
 SYNTH_V   = top.v xilinx7_clocks.v $(COMMON_V)
 
 TARGET    = system
-SRCS      = system.c print.c timer.c test.c common.c
-OBJS      = $(subst .c,.o,$(SRCS)) startup_irq.o bootloader.o
+OBJS      = system.o print.o timer.o test.o common.o startup_irq.o bootloader.o
 
 #size of the blockRam [bytes]
 BLOCK_RAM_SIZE = 16384

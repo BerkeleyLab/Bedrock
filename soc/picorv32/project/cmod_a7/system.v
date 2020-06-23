@@ -21,10 +21,17 @@ module system #(
     // GPIO
     inout  [31:0]       gpio_z,
 
+    // UART
     output              uart_tx0,
     input               uart_rx0,
 
-    // UART
+    // SRAM Hardware interface
+    inout  [ 7:0] ram_data_z,
+    output [23:0] ram_address,
+    output        ram_nce,
+    output        ram_noe,
+    output        ram_nwe,
+
     output              trap
 );
 
@@ -42,9 +49,10 @@ localparam IRQ_UART0_RX     = 8'h03;      //IRQ when byte received. Cleared when
 //  Highest byte of the memory address selects peripherals
 // --------------------------------------------------------------
 // should match settings.h
-localparam BASE_MEM         = 8'h00;
-localparam BASE_GPIO        = 8'h01;
-localparam BASE_UART0       = 8'h02;
+localparam BASE_BRAM         = 8'h00;
+localparam BASE_SRAM        = 8'h01;
+localparam BASE_GPIO        = 8'h02;
+localparam BASE_UART0       = 8'h03;
 
 // --------------------------------------------------------------
 //  Internal reset generator
@@ -88,9 +96,11 @@ pico_pack cpu_inst (
 //  32 bit Memory Bus
 // --------------------------------------------------------------
 wire [32:0] packed_mem_ret;
+wire [32:0] packed_sram_ret;
 wire [32:0] packed_gpio_ret;
 wire [32:0] packed_URT0_ret;
 assign packed_cpu_ret = packed_mem_ret |
+                        packed_sram_ret |
                         packed_gpio_ret |
                         packed_URT0_ret;
 
@@ -101,7 +111,7 @@ assign packed_cpu_ret = packed_mem_ret |
 `ifdef MEMORY_PACK_FAST
 memory2_pack #(
     .MEM_INIT      (SYSTEM_HEX_PATH ),
-    .BASE_ADDR     (BASE_MEM        )
+    .BASE_ADDR     (BASE_BRAM        )
 ) mem_inst (
     // Hardware interface
     .clk           (clk             ),
@@ -118,7 +128,7 @@ memory2_pack #(
 `else
 memory_pack #(
     .MEM_INIT      ( SYSTEM_HEX_PATH ),
-    .BASE_ADDR     ( BASE_MEM )
+    .BASE_ADDR     ( BASE_BRAM )
 ) mem_inst (
     // Hardware interface
     .clk           ( clk            ),
@@ -126,6 +136,53 @@ memory_pack #(
     .mem_packed_fwd( packed_cpu_fwd ), //CPU > MEM
     .mem_packed_ret( packed_mem_ret )  //CPU < MEM
 );
+`endif
+
+ // --------------------------------------------------------------
+//  SRAM module
+// --------------------------------------------------------------
+`ifdef MEMORY_PACK_FAST
+    sram2_pack #(
+        .BASE_ADDR     (BASE_SRAM)
+    ) sram (
+        // Hardware interface
+        .clk           (clk),
+
+        // Look ahead interface
+        .mem_la_read   (mem_la_read),
+        .mem_la_write  (mem_la_write),
+        .mem_la_addr   (mem_la_addr),
+        .mem_la_wdata  (mem_la_wdata),
+        .mem_la_wstrb  (mem_la_wstrb),
+
+        // PicoRV32 packed MEM Bus interface
+        .mem_packed_ret(packed_sram_ret),
+
+        // Hardware interface
+        .ram_data_z    (ram_data_z),
+        .ram_address   (ram_address),
+        .ram_nce       (ram_nce),
+        .ram_noe       (ram_noe),
+        .ram_nwe       (ram_nwe)
+    );
+`else
+    sram_pack #(
+        .BASE_ADDR     (BASE_SRAM)
+    ) sram (
+        // Hardware interface
+        .clk           (clk),
+
+        // PicoRV32 packed MEM Bus interface
+        .mem_packed_fwd(packed_cpu_fwd),
+        .mem_packed_ret(packed_sram_ret),
+
+        // Hardware interface
+        .ram_data_z    (ram_data_z),
+        .ram_address   (ram_address),
+        .ram_nce       (ram_nce),
+        .ram_noe       (ram_noe),
+        .ram_nwe       (ram_nwe)
+    );
 `endif
 
 // --------------------------------------------------------------

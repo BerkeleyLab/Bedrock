@@ -1,3 +1,4 @@
+# iserdes, xadc disabled as they require the xilinx unisims library on CI
 all: clean
 	$(MAKE) -C ./badger_loopback
 	$(MAKE) -C ./bootLoad
@@ -12,7 +13,7 @@ all: clean
 	$(MAKE) -C ./uart
 	$(MAKE) -C ./uart_fifo
 #    $(MAKE) -C ./xadc
-# iserdes, xadc disabled as they require the xilinx unisims library on CI
+	$(MAKE) -C ./sram
 
 clean:
 	$(MAKE) -C ./badger_loopback clean
@@ -28,3 +29,6 @@ clean:
 	$(MAKE) -C ./uart      clean
 	$(MAKE) -C ./uart_fifo clean
 	$(MAKE) -C ./xadc      clean
+	$(MAKE) -C ./sram      clean
+	$(MAKE) -C ./sram/cmod_a7 clean
+
