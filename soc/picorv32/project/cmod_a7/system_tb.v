@@ -5,9 +5,9 @@
 `timescale 1 ns / 1 ns
 
 module general_tb;
-    localparam F_CLK = 75000000;                    // Simulated clock rate in [Hz]
+    localparam F_CLK = 50000000;                    // Simulated clock rate in [Hz]
     localparam CLK_PERIOD_NS = 1000000000 / F_CLK;  // Simulated clock period in [ns]
-    localparam BAUD_RATE = 9216000;                 // debug text baudrate
+    localparam BAUD_RATE = 6250000;                 // debug text baudrate
     reg clk_p=1, clk_n=0;
     always #(CLK_PERIOD_NS / 2) begin
         clk_p = ~clk_p;

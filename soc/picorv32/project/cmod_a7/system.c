@@ -62,7 +62,7 @@ int main(void)
     }
     print_str(" ok\n");
 
-    volatile uint32_t *p = (volatile uint32_t *)BASE_SRAM;
+    volatile unsigned *p = (volatile unsigned*)BASE_SRAM;
 
     // read / write the SRAM
     // TODO fails at > 50 MHz, why?
@@ -73,7 +73,7 @@ int main(void)
         print_str("First 32 words:\n");
         for (unsigned i=0; i<32; i++)
             p[i] = ((i + 3) << 24) |((i + 2) << 16) | ((i + 1) << 8) | i;
-        hexDump32(p, 32);
+        hexDump32((uint32_t *)p, 32);
         print_str("\n\nFAIL\n");
         while(1);
     }
