@@ -30,5 +30,4 @@ clean:
 	$(MAKE) -C ./uart_fifo clean
 	$(MAKE) -C ./xadc      clean
 	$(MAKE) -C ./sram      clean
-	$(MAKE) -C ./sram/cmod_a7 clean
 
