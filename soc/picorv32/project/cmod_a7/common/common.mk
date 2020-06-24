@@ -4,8 +4,9 @@ include ../../../../../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
 
-vpath %.c ../common
-vpath system.v ../common
+COM_DIR=$(PICORV_DIR)/project/cmod_a7/common
+vpath %.c $(COM_DIR)
+vpath system.v $(COM_DIR)
 vpath sram_model.v $(PICORV_DIR)/test/sram
 
 SRC_V += picorv32.v system.v uart_pack.v uart_rx.v uart_tx.v mpack.v munpack.v
