@@ -23,7 +23,7 @@ unsigned xorshift32(unsigned *state)
 
 int cmd_memtest(volatile unsigned *base, unsigned len, unsigned stride, unsigned cycles)
 {
-    // copied from:
+    // adapted from:
     // https://github.com/cliffordwolf/picorv32/blob/master/picosoc/firmware.c
     unsigned state;
     volatile uint8_t *base_byte = (volatile uint8_t*)base;

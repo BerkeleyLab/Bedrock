@@ -38,21 +38,21 @@ module system #(
 // --------------------------------------------------------------
 //  Interrupt mapping
 // --------------------------------------------------------------
-// Irq 0-15 = level triggered. Irq 16-31 rising edge triggered
-localparam IRQ_TIMER0       = 8'h00;      // picorv internal irq bit index
-localparam IRQ_EBREAK       = 8'h01;      // picorv internal irq bit index
-localparam IRQ_BUSERR       = 8'h02;      // picorv internal irq bit index
-localparam IRQ_UART0_RX     = 8'h03;      //IRQ when byte received. Cleared when byte read from UART_RX_REG
-//localparam IRQ_UART0_TX     = 8'h04;    //IRQ on IDLE?
+// IRQ 0 - 15 = level triggered. IRQ 16 - 31 rising edge triggered
+localparam IRQ_TIMER0 = 8'h00;
+localparam IRQ_EBREAK = 8'h01;
+localparam IRQ_BUSERR = 8'h02;
+// Triggers when byte received. Cleared when byte read from UART_RX_REG
+localparam IRQ_UART0_RX = 8'h03;
 
 // --------------------------------------------------------------
 //  Highest byte of the memory address selects peripherals
 // --------------------------------------------------------------
-// should match settings.h
-localparam BASE_BRAM        = 8'h00;
-localparam BASE_SRAM        = 8'h01;
-localparam BASE_GPIO        = 8'h02;
-localparam BASE_UART0       = 8'h03;
+// match settings.h
+localparam BASE_BRAM =  8'h00;
+localparam BASE_SRAM =  8'h01;
+localparam BASE_GPIO =  8'h02;
+localparam BASE_UART0 = 8'h03;
 
 // --------------------------------------------------------------
 //  Internal reset generator
@@ -105,8 +105,7 @@ assign packed_cpu_ret = packed_mem_ret |
                         packed_URT0_ret;
 
 // --------------------------------------------------------------
-//  Instantiate the memory (holds data and program!)
-//  Active from mem_addr = 0 ... MEM_SIZE-1
+//  internal block-ram memory
 // --------------------------------------------------------------
 `ifdef MEMORY_PACK_FAST
 memory2_pack #(
@@ -138,8 +137,8 @@ memory_pack #(
 );
 `endif
 
- // --------------------------------------------------------------
-//  SRAM module
+// --------------------------------------------------------------
+//  external 512 kByte SRAM module (5x slower than BRAM)
 // --------------------------------------------------------------
 `ifdef MEMORY_PACK_FAST
     sram2_pack #(

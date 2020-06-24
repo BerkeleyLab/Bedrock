@@ -90,7 +90,7 @@ int main(void)
 
     print_str("PASS\n");
     LED(0b010);
-    #ifndef SIMULATION
+#ifndef SIMULATION
         // Blink LEDs on test success
         int i=0;
         while(1){
@@ -98,6 +98,7 @@ int main(void)
             LED(i);
             i++;
         }
-    #endif
+#endif
+    // Let testbench know we are happy
     return 0x1234;
 }
