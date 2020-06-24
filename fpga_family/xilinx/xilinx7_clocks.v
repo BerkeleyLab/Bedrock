@@ -38,7 +38,7 @@ wire mmcm_clkfbout;
 wire clk_out0_int;
 wire clk_out1_int;
 wire clk_out2_int;
-wire clk_out3f;
+
 MMCME2_BASE #(
     .BANDWIDTH          ("OPTIMIZED"),
     .CLKOUT4_CASCADE    ("FALSE"),
