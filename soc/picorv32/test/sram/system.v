@@ -11,6 +11,9 @@ module system #(
     output              uart_tx0,  // debug
     input               uart_rx0,
 
+    // GPIO
+    inout  [31:0]       gpio_z,
+
     // SRAM Hardware interface
     inout  [ 7:0] ram_data_z,
     output [23:0] ram_address,
@@ -20,9 +23,10 @@ module system #(
 );
     localparam IRQ_UART0_RX     = 8'h03;
 
-    localparam BASE_MEM         = 8'h00;
+    localparam BASE_BRAM        = 8'h00;
     localparam BASE_SRAM        = 8'h01;
     localparam BASE_UART0       = 8'h02;
+    localparam BASE_GPIO        = 8'h03;
 
     wire        mem_la_read;
     wire        mem_la_write;
@@ -54,8 +58,12 @@ module system #(
     );
     wire [32:0] packed_mem_ret;
     wire [32:0] packed_sram_ret;
+    wire [32:0] packed_gpio_ret;
     wire [32:0] packed_URT0_ret;
-    assign packed_cpu_ret = packed_mem_ret | packed_sram_ret | packed_URT0_ret;
+    assign packed_cpu_ret = packed_mem_ret |
+                            packed_sram_ret |
+                            packed_URT0_ret |
+                            packed_gpio_ret;
 
     // --------------------------------------------------------------
     //  Instantiate the memory (holds data and program!)
@@ -63,7 +71,7 @@ module system #(
     `ifdef MEMORY_PACK_FAST
         memory2_pack #(
             .MEM_INIT      (SYSTEM_HEX_PATH),
-            .BASE_ADDR     (BASE_MEM)
+            .BASE_ADDR     (BASE_BRAM)
         ) mem_inst (
             // Hardware interface
             .clk           (clk),
@@ -82,7 +90,7 @@ module system #(
     `else
         memory_pack #(
             .MEM_INIT      (SYSTEM_HEX_PATH),
-            .BASE_ADDR     (BASE_MEM)
+            .BASE_ADDR     (BASE_BRAM)
         ) mem_inst (
             // Hardware interface
             .clk           (clk),
@@ -109,6 +117,22 @@ module system #(
         // PicoRV32 packed MEM Bus interface
         .mem_packed_fwd(packed_cpu_fwd), //CPU > URT
         .mem_packed_ret(packed_URT0_ret)  //CPU < URT
+    );
+
+    // --------------------------------------------------------------
+    //  GPIO module
+    // --------------------------------------------------------------
+    gpioz_pack #(
+        .BASE_ADDR   ( BASE_GPIO )
+    ) gpio (
+        // Hardware interface
+        .clk           ( clk            ),
+        .reset         ( reset          ),
+        // PicoRV32 packed MEM Bus interface
+        .mem_packed_fwd( packed_cpu_fwd ), //CPU > GPIO
+        .mem_packed_ret( packed_gpio_ret), //CPU < GPIO
+        // Hardware interface
+        .gpio_z        ( gpio_z         )
     );
 
     // --------------------------------------------------------------

@@ -42,6 +42,7 @@ module sram_tb;
         // $fflush();
     end
 
+    wire [31:0] gpio_z = 32'h0;
     wire [ 7:0] ram_data_z;
     wire [23:0] ram_address;
     wire        ram_nce;
@@ -56,8 +57,10 @@ module sram_tb;
         .reset      (reset),
         .trap       (trap),
 
+        .gpio_z     (gpio_z),
         .uart_tx0   (),
         .uart_rx0   (1'b1),
+
 
         // SRAM Hardware interface
         .ram_data_z  (ram_data_z),
