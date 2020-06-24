@@ -51,7 +51,9 @@ int main(void)
     SET_GPIO8(BASE_GPIO, GPIO_OE_REG, 0, 0xFF);  // Drive LEDs
 
     print_str("\n---------------------------------------\n");
-    print_str(" LBL pico_soc "); print_str(GIT_VERSION);
+    print_str(" LBL pico_soc @");
+    print_udec_fix(((F_CLK / 1000) << 8) / 1000, 8, 3);
+    print_str(" MHz, " GIT_VERSION);
     print_str("\n---------------------------------------\n");
     print_str("running UART0 at ");
     print_dec(BOOTLOADER_BAUDRATE);
