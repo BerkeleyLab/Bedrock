@@ -4,9 +4,9 @@ include ../../../../../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
 
-COM_DIR=$(PICORV_DIR)/project/cmod_a7/common
-vpath %.c $(COM_DIR)
-vpath system.v $(COM_DIR)
+CMOD_DIR=$(PROJECT_DIR)/cmod_a7/common
+vpath %.c $(CMOD_DIR)
+vpath system.v $(CMOD_DIR)
 vpath sram_model.v $(PICORV_DIR)/test/sram
 
 SRC_V += picorv32.v system.v uart_pack.v uart_rx.v uart_tx.v mpack.v munpack.v
@@ -24,6 +24,3 @@ SYNTH_OPT += -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
 CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\" -I../common
 CFLAGS += -DBOOTLOADER_BAUDRATE=$(BOOTLOADER_BAUDRATE)
 CFLAGS += -ffunction-sections
-
-CLEAN += $(TARGET).bit
-CLEAN_DIRS += _xilinx .Xil
