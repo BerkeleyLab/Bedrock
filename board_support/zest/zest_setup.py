@@ -689,7 +689,7 @@ class c_prc(c_llrf_bmb7):
         s1, adc_values = self.adc_bufr_reset1(
             adc_values, 'BUFR 1', 0, 'U3_clk_reset_r', self.U3_adc_iserdes_reset)
         s2, adc_values = self.adc_bufr_reset1(
-            adc_values, 'BUFR 2', 2, 'U2_clk_reset_r', self.U2_adc_iserdes_reset)
+            adc_values, 'BUFR 2', 4, 'U2_clk_reset_r', self.U2_adc_iserdes_reset)
         return s1 and s2
 
     def adc_bitslip(self):

@@ -25,7 +25,7 @@ from misc import ADC, DataBlock, Processing
 
 from banyan_ch_find import banyan_ch_find
 from get_raw_adcs import collect_adcs
-from prc import c_prc
+from zest_setup import c_prc
 
 
 def write_mask(prc, mask_int):
