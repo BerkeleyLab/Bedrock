@@ -46,7 +46,7 @@ xilinx7_clocks #(
 
 wire [31:0] gpio_z;
 system #(
-    .SYSTEM_HEX_PATH ("/home/michael/fpga_wsp/bedrock/soc/picorv32/project/cmod_a7/synth/system32.hex")
+    .SYSTEM_HEX_PATH ("system32.dat")
 ) system_inst (
     .clk        (clk),
     .cpu_reset  (~locked),

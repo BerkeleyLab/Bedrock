@@ -33,6 +33,10 @@ LDFLAGS = $(CFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,
 %32.hex: %8.hex
 	$(PYTHON) $(COMMON_DIR)/hex8tohex32.py $< > $@
 
+# for vivado in project mode, hex-files need to end with .dat
+%32.dat: %32.hex
+	cp $< $@
+
 %_load: %32.hex
 	$(PYTHON) $(COMMON_DIR)/boot_load.py $< $(BOOTLOADER_SERIAL) --baud_rate $(BOOTLOADER_BAUDRATE)
 
@@ -58,4 +62,4 @@ LDFLAGS = $(CFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,
 	xc3sprog -c jtaghs1_fast $(patsubst %_config,%_synth.bit,$@)
 
 CLEAN += $(TARGET).vcd $(TARGET)_tb $(TARGET).map $(TARGET).lst  $(TARGET).elf pico.trace
-CLEAN += $(TARGET)8.hex $(TARGET)32.hex $(TARGET).o $(OBJS)
+CLEAN += $(TARGET)8.hex $(TARGET)32.hex $(TARGET)32.dat $(TARGET).o $(OBJS)
