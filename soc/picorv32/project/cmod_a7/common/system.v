@@ -49,7 +49,7 @@ localparam IRQ_UART0_RX     = 8'h03;      //IRQ when byte received. Cleared when
 //  Highest byte of the memory address selects peripherals
 // --------------------------------------------------------------
 // should match settings.h
-localparam BASE_BRAM         = 8'h00;
+localparam BASE_BRAM        = 8'h00;
 localparam BASE_SRAM        = 8'h01;
 localparam BASE_GPIO        = 8'h02;
 localparam BASE_UART0       = 8'h03;

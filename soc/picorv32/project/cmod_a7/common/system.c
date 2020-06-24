@@ -7,6 +7,19 @@
 #include "timer.h"
 #include "test.h"
 
+#define LED(val) SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, ((~val) & 0x7))
+
+#ifdef SIMULATION
+    // Need to speed up things when running in iverilog
+    #define N_PRIMES 16
+    #define HASH 0x36dbe6ba  // magic number from get_hash.py
+    #define EXIT() return(-1)
+#else
+    #define N_PRIMES 1024
+    #define HASH 0x6bc508b6
+    #define EXIT() while(1)
+#endif
+
 void _putchar(char c)
 {
     // hook for all print_* functions
@@ -32,8 +45,6 @@ uint32_t *irq(uint32_t *regs, uint32_t irqs)
 
 int main(void)
 {
-    unsigned hash;
-
     UART_INIT(BASE_UART0, BOOTLOADER_BAUDRATE);  // Debug print (USB serial)
     _picorv32_irq_enable(1 << IRQ_UART0_RX);
     SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0);
@@ -46,48 +57,47 @@ int main(void)
     print_dec(BOOTLOADER_BAUDRATE);
     print_str(" baud/s\n\n");
     print_str("CTRL+T for reset, `any key` to start sieving for prime numbers ...\n");
-    // Ready for test = yellow
-    SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0100);
+    LED(0b011);  // Ready for test, LED = yellow
     while(chars_received == 0);
 
-    // Test running, LED = white
-    SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0000);
-    hash = sieve(1024);
-    // magic number from get_hash.py
-    if (hash != 0x6bc508b6) {
-        // Test failed, LED = red
-        SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0110);
-        print_str("FAIL\n");
-        while(1);
+    LED(0b111);  // Test running, LED = white
+    unsigned calc_hash = sieve(N_PRIMES);
+    if (calc_hash != HASH) {
+        LED(0b001);  // Test failed, LED = red
+        print_str("\n\nFAIL\n");
+        EXIT();
     }
     print_str(" ok\n");
 
     volatile unsigned *p = (volatile unsigned*)BASE_SRAM;
 
     // read / write the SRAM
-    // TODO fails at > 50 MHz, why?
     print_str("Running SRAM memtest ");
-    if (cmd_memtest(p, SRAM_SIZE, 1, 32) != 0) {
-        // Test failed, LED = red
-        SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0110);
-        print_str("First 32 words:\n");
+#ifdef SIMULATION
+    int ret = cmd_memtest(p, 32, 1, 1);
+#else
+    int ret = cmd_memtest(p, SRAM_SIZE, 1, 32);
+#endif
+    if (ret != 0) {
+        LED(0b001);
         for (unsigned i=0; i<32; i++)
             p[i] = ((i + 3) << 24) |((i + 2) << 16) | ((i + 1) << 8) | i;
+        print_str("First 32 test-pattern words:\n");
         hexDump32((uint32_t *)p, 32);
         print_str("\n\nFAIL\n");
-        while(1);
+        EXIT();
     }
 
     print_str("PASS\n");
-    SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0b0101);
+    LED(0b010);
     #ifndef SIMULATION
         // Blink LEDs on test success
         int i=0;
         while(1){
             DELAY_MS(300);
-            SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, ~i & 0b0111);
+            LED(i);
             i++;
         }
     #endif
-    return 0;
+    return 0x1234;
 }

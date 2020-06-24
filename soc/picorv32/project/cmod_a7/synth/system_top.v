@@ -1,6 +1,6 @@
 `timescale 1 ns / 1 ns
 
-module top (
+module system_top (
     input            SYSCLK,
     input [1:0]      BTNS,
     output [1:0]     LEDS,
@@ -32,7 +32,7 @@ xilinx7_clocks #(
     .DIFF_CLKIN     ("FALSE"),  // Single ended
     .CLKIN_PERIOD   (83.333),   // 12 MHz
     .MULT           (62.500),   // 750 MHz
-    .DIV0           (15),       // 50 MHz
+    .DIV0           (9),        // 83.3 MHz
     .DIV1           (7.500)     // 100 MHz
 ) clk_inst(
     .sysclk_p (SYSCLK),
@@ -46,7 +46,7 @@ xilinx7_clocks #(
 
 wire [31:0] gpio_z;
 system #(
-    .SYSTEM_HEX_PATH ("./system32.hex")
+    .SYSTEM_HEX_PATH ("/home/michael/fpga_wsp/bedrock/soc/picorv32/project/cmod_a7/synth/system32.hex")
 ) system_inst (
     .clk        (clk),
     .cpu_reset  (~locked),

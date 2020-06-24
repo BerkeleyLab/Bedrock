@@ -16,7 +16,7 @@
 
 #define SRAM_SIZE               (1 << 19)  // [bytes]
 
-#define F_CLK                  50000000     // [Hz] for CMODA7
+#define F_CLK                  (1200000 * 625 / 9)  // 83.3 MHz
 
 #ifdef SIMULATION
     #define BOOTLOADER_DELAY    1

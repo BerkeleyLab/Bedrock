@@ -2,6 +2,13 @@
 #include "test.h"
 #include "print.h"
 
+// Maximum prime number value <= 1 + 2 * (BITMAP_SIZE - 1)
+#ifdef SIMULATION
+    #define BITMAP_SIZE 64
+#else
+    #define BITMAP_SIZE 4096
+#endif
+
 unsigned xorshift32(unsigned *state)
 {
 	/* Algorithm "xor" from p. 4 of Marsaglia, "Xorshift RNGs" */
