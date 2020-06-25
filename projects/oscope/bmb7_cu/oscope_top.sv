@@ -117,7 +117,7 @@ zest_if zif (
 	.U33U1 (bus_digitizer_U33U1)
 );
 
-wire clk200;
+wire clk200=bmb7_U7_clk4xout;
 
 zest_wrap #(.u15_u18_spi_mode("chain"))  i_zest_wrap (
 	.clk_200  (clk200),
