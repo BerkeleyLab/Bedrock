@@ -89,7 +89,7 @@ end
 endgenerate
 
 wire frameout;
-lvds_frame #(.flip_frame(FLIP_FRAME)) frame (.frame_p(FCOP), .frame_n(FCON),.frame(frameout));
+lvds_frame #(.flip_frame(FLIP_FRAME)) lv_frame (.frame_p(FCOP), .frame_n(FCON),.frame(frameout));
 
 lvds_dco #(.flip_dco(FLIP_DCO)) dco (
 	.clk_reset(clk_reset),
