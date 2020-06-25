@@ -82,9 +82,9 @@ module uart_stream #(
         .prescale           (uprescale  )
     );
 
+    wire rx_fifo_empty;
     assign uart_status = {frame_error, overrun_error, rx_busy || !rx_fifo_empty, tx_busy || !tx_fifo_empty};
 
-    wire rx_fifo_empty;
     stream_fifo #(
         .DW(DW), .AW(AW)
     ) rx_fifo (
