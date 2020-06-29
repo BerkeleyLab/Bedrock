@@ -355,6 +355,7 @@ wire [5:0] banyan_aw_fix = banyan_aw;
 wire [19:0] pointer_fix = pointer;
 // Abuse this register a little by adding the idelay_scanner status.
 // Not so bad, because that scanner depends on data provided by the banyan switch.
+/// banyan_status = {banyan_run_s (1'b), full (1'b), banyan_aw_fix (6'b), 2'b0, autoset_enable (1'b), scan_running (1'b), pointer_fix (20'b)};
 assign banyan_status = {banyan_run_s, full, banyan_aw_fix, 2'b0, autoset_enable, scan_running, pointer_fix};
 `else
 assign banyan_status = 0;

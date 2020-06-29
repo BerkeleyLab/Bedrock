@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+# Considering KIVY itself has no args, the following helps transfer
+# the CLargs to python
+import os
+os.environ["KIVY_NO_ARGS"] = "1"
+
 from kivy.logger import Logger
 from kivy.garden.matplotlib.backend_kivyagg import FigureCanvas
 from kivy.clock import Clock
@@ -16,6 +23,7 @@ TODO:
 import copy
 import sys
 import time
+
 from threading import Thread
 
 import numpy as np
@@ -28,8 +36,8 @@ from get_raw_adcs import collect_adcs
 from zest_setup import c_prc
 
 
-def write_mask(prc, mask_int):
-    prc.leep.reg_write([('banyan_mask', mask_int)])
+def write_mask(carrier, mask_int):
+    carrier.leep.reg_write([('banyan_mask', mask_int)])
     channels = banyan_ch_find(mask_int)
     n_channels = len(channels)
     print((channels, 8 / n_channels))
@@ -154,13 +162,14 @@ class ZestOnBMB7Carrier(Carrier):
             # collect_adcs is not normal:
             # It always collects npt * 8 data points.
             # Each channel gets [(npt * 8) // n_channels] datapoints
+            start = time.time()
             data_raw, ts = collect_adcs(self.carrier.leep,
                                         self.npt, self.n_channels)
-            print(time.strftime("%Y%m%d-%H%M%S"))
+            print(self.npt, self.n_channels, time.time()-start)
             self._db = DataBlock(ADC.counts_to_volts(np.array(data_raw)), ts)
             # ADC count / FULL SCALE => [-1.0, 1.]
             self._process_subscriptions()
-            time.sleep(0.1)
+            # time.sleep(0.1)  # This is now unnecessary, as this routine is the bottleneck
 
     def _process_subscriptions(self):
         # TODO: Perhaps implement something to avoid race condition on results
@@ -203,29 +212,35 @@ class GUIGraph:
         self.fig = plt.figure()
         self.wid = FigureCanvas(self.fig)
         self.ax = self.fig.add_subplot(111, **kwargs)
-        self.plot = self.ax.plot(range(100), [1 / 2] * 100, label=self.label)[0]
+        self.line = self.ax.plot(range(100), [1 / 2] * 100, label=self.label)[0]
         self.ax.set_xlabel(plot_info.xlabel)
         self.ax.set_ylabel(plot_info.ylabel)
         self.ax.legend()
         self.carrier_ch_n = int(ch_id[1]) if int(ch_id[0]) < 2 else None
         self.plot_info = plot_info
+        self._old_results = []
 
     def update_data(self):
         if self.ch_id not in carrier.results:
             # Logger.critical('No data found')
             return
+        if carrier.results[self.ch_id] is self._old_results:
+            return
         if self.plot_info.plot_type == 'T':
-            x_data, y_data, y_max = carrier.results[self.ch_id]
+            x_data, y_data, y_max, ts = carrier.results[self.ch_id]
         elif self.plot_info.plot_type == 'F':
             x_data, y_data, xargmax, y_max = carrier.results[self.ch_id]
-        self.plot.set_xdata(x_data)
-        self.plot.set_ydata(y_data)
+        self.line.set_xdata(x_data)
+        self.line.set_ydata(y_data)
+        self._old_results = carrier.results[self.ch_id]
         if not self.plot_info.autoscale:
             self.ax.set_xlim(self.plot_info.xlim)
             self.ax.set_ylim(self.plot_info.ylim)
         else:
             self.ax.relim()
             self.ax.autoscale()
+        self.wid.draw()
+        self.wid.flush_events()
 
     def set_plot_active(self, b):
         self.show = b
@@ -262,7 +277,7 @@ class Logic(BoxLayout):
     def __init__(self, **kwargs):
         super(Logic, self).__init__()
         self.csd_channels = 0, 1
-        Clock.schedule_interval(self.update_graph, 0.01)
+        Clock.schedule_interval(self.update_graph, 1/5)
         self.plot_id = '00'
         self.plot_Q = []
 
@@ -362,7 +377,6 @@ class Logic(BoxLayout):
         for _, ch in g_scope_channels.items():
             if ch.show:
                 ch.update_data()
-                ch.wid.draw()
 
 
 class Oscope(App):
@@ -401,9 +415,7 @@ if __name__ == "__main__":
         "--use_spartan",
         action="store_true",
         help="use spartan")
-    args, unknown = parser.parse_known_args()
-    sys.argv[1:] = unknown
-    args = parser.parse_args(sys.argv[2:])
+    args = parser.parse_args()
     carrier = ZestOnBMB7Carrier(
         ip_addr=args.ip,
         port=args.port,

@@ -71,19 +71,6 @@ def get_raw_adcs_run(dev, filewritepath='raw_adcs_', mask="0xff", npt_wish=0, co
             numpy.savetxt(filename, nblock, fmt="%d", header=header)
     return header, filename, block
 
-    # print 'try this'
-    # print process_adcs(dev,npt,mask_int)#,block,timestamp);
-
-
-def pair_ram(buff, idx, count):
-
-    buff_slice = buff[idx:idx+count]
-
-    # break 32-bit elements into 16-bit raw ADC samples
-    ram1 = [(x >> 16) & 0xffff for x in buff_slice]
-    ram2 = [x & 0xffff for x in buff_slice]
-    return [ram2, ram1]
-
 
 def pair_ram_prc(prc, addr, count):
     foo = prc.reg_read_alist(range(addr, addr+count))
@@ -91,6 +78,24 @@ def pair_ram_prc(prc, addr, count):
     ram1 = [x[1] for x in uuu]
     ram2 = [x[0] for x in uuu]
     return [ram1, ram2]
+
+
+def reshape_buffer(buf, astep, npt):
+    # TODO: This copy can be avoided if leep/raw.py spits out numpy arrays,
+    #       which we should look into
+    data = numpy.array(buf)
+    # Read the upper and lower part of the banyan buffer
+    p1, p2 = (data & 0xffff).astype('int16'), ((data >> 16) & 0xffff).astype('int16')
+    out = numpy.empty((8, 2*astep))
+    # Interleave p1 and p2
+    out[::2, :] = p1.reshape(4, 2*astep)
+    out[1::2, :] = p2.reshape(4, 2*astep)
+    out = out[:, :npt]
+    return out
+
+
+def gen_test_data(npt):
+    return numpy.hstack([numpy.ones(npt).astype(numpy.int32) * (i+1) for i in range(8)])
 
 
 def collect(dev, npt, print_minmax=True, allow_clk_frozen=False):
@@ -114,11 +119,11 @@ def collect(dev, npt, print_minmax=True, allow_clk_frozen=False):
         exit(3)
     astep = 1 << ((b_status >> 24) & 0x3F)
 
+    # TODO: The I/O call here takes twice as long, as leep/raw.py is not aware of the banyan, dual
+    #       read option. The old collect_prc takes advantage of that but not leep.
     full_buffer, = dev.reg_read([('banyan_data')])
-    value = []
-    for ix in range(0, 8, 2):
-        value.extend(pair_ram(full_buffer, ix*astep, npt))
-    return (value, timestamp)
+    # full_buffer = gen_test_data(npt)  # For debugging
+    return reshape_buffer(full_buffer, astep, npt), timestamp
 
 
 def collect_prc(prc, npt, print_minmax=True, allow_clk_frozen=False):
@@ -148,21 +153,19 @@ def collect_prc(prc, npt, print_minmax=True, allow_clk_frozen=False):
     return (value, timestamp)
 
 
-# nchans must be the result of len(banyan_ch_find())
 def collect_adcs(dev, npt, nchans, print_minmax=True):
-    (value, timestamp) = collect(dev, npt, print_minmax)
+    '''
+    nchans must be the result of len(banyan_ch_find())
+    '''
+    value, timestamp = collect(dev, npt, print_minmax)
     # value holds 8 raw RAM blocks
     # block will have these assembled into ADC channels
-    mult = 8/nchans
+    mult = 8//nchans
     block = []
     for ix in range(nchans):
-        aaa = [value[jx] for jx in range(int(ix*mult), int(ix*mult+mult))]
-        block.append(sum(aaa, []))
-    block2 = []
-    for bx in block:
-        bx2 = [x if x < 32768 else x-65536 for x in bx]
-        block2.append(bx2)
-    return (block2, timestamp)
+        ch_data = value[ix*mult:ix*mult+mult].reshape(mult*npt)
+        block.append(ch_data)
+    return block, timestamp
 
 
 def process_adcs(dev, npt, mask_int):  # ,block,timestamp):
