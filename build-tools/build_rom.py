@@ -10,18 +10,18 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../badger"))
 from lbus_access import lbus_access
 
 
-def chunk(l, flag=1):
+def chunk(li, flag=1):
     '''
     l: list of 16-bit ints
     flag: type
     Each chunk has an ID that preceeds it
     ID is 16-bit {2 bits: type, 14 bits: length of the chunk}
     '''
-    chunk_size = len(l)
+    chunk_size = len(li)
     if chunk_size >= (1 << 14):
         raise Exception
     else:
-        return [chunk_size + (flag << 14)] + l
+        return [chunk_size + (flag << 14)] + li
 
 
 def sixteen(ss, pad=b'\0'):

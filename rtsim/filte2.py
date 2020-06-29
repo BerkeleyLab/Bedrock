@@ -91,9 +91,9 @@ def time_plot(a, g, lab):
     # Verilog version
     y3 = []
     with verilog_pipe(a, g) as result_file:
-        for l in result_file.read().decode("utf-8").split('\n'):
-            if "output" in l:
-                y3 += [int(l.split()[2])/30000.0]
+        for line in result_file.read().decode("utf-8").split('\n'):
+            if "output" in line:
+                y3 += [int(line.split()[2])/30000.0]
                 # 30000 is drive level for u in afilter_siso_tb.v
 
     # Explicit state-space run

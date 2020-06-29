@@ -14,16 +14,16 @@ def close(a, b):
 
 
 # process a line from sim1.trace
-def do_trace_line(l):
-    a = l.split()
+def do_trace_line(line):
+    a = line.split()
     if len(a) < 5 or a[4] != "int":
         return
     sim_result[a[5]] = "%8s  %s" % (a[2], a[3])
 
 
 # process a line from init.dat
-def do_init_line(l):
-    a = l.split()
+def do_init_line(line):
+    a = line.split()
     if len(a) < 2 or a[1][0] != "(":
         return
     var = a[-1].replace('(', '').replace(')', '')

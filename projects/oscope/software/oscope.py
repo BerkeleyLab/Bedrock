@@ -268,7 +268,7 @@ class GUIGraph:
                                                label='CH{}-Frequency'.format(i))
         ch_id = "3"
         g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
-                                           label='CSD'.format(i))
+                                           label='CSD')
 
 
 class Logic(BoxLayout):
@@ -359,7 +359,7 @@ class Logic(BoxLayout):
                 map(lambda x: int(x) - 1, args[1].split('-')))
             if any([x >= carrier.n_channels for x in self.csd_channels]):
                 raise Exception
-            Logger.info('Set CSD channels to: '.format(args[1]))
+            Logger.info('Set CSD channels to: {}'.format(args[1]))
             carrier.add_subscription('3', Processing.csd, self.csd_channels[0],
                                      self.csd_channels[1], 'hanning')
         except Exception:

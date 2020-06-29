@@ -100,7 +100,7 @@ def gen_test_data(npt):
 
 def collect(dev, npt, print_minmax=True, allow_clk_frozen=False):
     dev.reg_write([('rawadc_trig', 1)])
-    (timestamp, minmax) = slow_chain_readout(dev)
+    timestamp, minmax = slow_chain_readout(dev)
     if print_minmax:
         print(" ".join(["%d" % x for x in minmax]), "%.8f" % (timestamp*14/1320.0e6))
     while True:
