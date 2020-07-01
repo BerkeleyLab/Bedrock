@@ -10,17 +10,10 @@
 // Base addresses of Peripherals
 #define BASE_GPIO              0x01000000
 #define BASE_UART0             0x02000000    // Debug UART
-#define BASE_DEBUG_UART        BASE_UART0
 
 #define F_CLK                   125000000     // [Hz] for KC705
 
-#ifdef SIMULATION
-    #define BOOTLOADER_DELAY    1
-    #undef BOOTLOADER_BAUDRATE
-    #define BOOTLOADER_BAUDRATE 9216000       // Used for fast simulation
-#else
-    #define BOOTLOADER_DELAY    (F_CLK/1000)  // How long to wait in the bootloader for a connection
-#endif
+#define BOOTLOADER_DELAY    (F_CLK/1000)  // How long to wait in the bootloader for a connection
 
 // GPIO PIN assignments (must match top.v)
 #define PIN_I2C_SDA              0

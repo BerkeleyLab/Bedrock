@@ -6,11 +6,11 @@
 
 module system_tb;
     localparam F_CLK = 125000000;                      // Simulated clock rate in [Hz]
-    localparam CLK_PERIOD_NS = 1000000000/F_CLK/2;     // Simulated clock period in [ns]
-    localparam BAUD_RATE = 9216000;                    // debug text baudrate
+    localparam CLK_PERIOD_NS = 1000000000 / F_CLK;     // Simulated clock period in [ns]
+    localparam UART_CLK_DIV = F_CLK / `BOOTLOADER_BAUDRATE / 8;
     reg clk=1, clk_n=0;
     integer pass=0;
-    always #CLK_PERIOD_NS begin
+    always #(CLK_PERIOD_NS / 2) begin
         clk = ~clk;
     end
 
@@ -18,19 +18,17 @@ module system_tb;
     //  Handle the power on Reset
     // ------------------------------------------------------------------------
     reg reset = 1;
-    reg [15:0] baud_rate=0;
     initial begin
         if ($test$plusargs("vcd")) begin
             $dumpfile("system.vcd");
             $dumpvars(5,system_tb);
         end
-        baud_rate = F_CLK/(BAUD_RATE*8);
-        $write("Baud rate: %d\n", BAUD_RATE);
-        $fflush();
+        $display(
+            "UART0 baud_rate: %8d (clk_div: %4d)",
+            `BOOTLOADER_BAUDRATE, UART_CLK_DIV
+        );
         repeat (100) @(posedge clk);
         reset <= 0;
-        $write("UART baud_rate: %d\n", BAUD_RATE);
-        $fflush();
         #500000 $display("Simulation finish.");
         //$display("\n%8s", pass ? "PASS" : "FAIL" );
         $finish;
@@ -44,8 +42,9 @@ module system_tb;
     wire uart_rx;
     wire [31:0] gpio_z;
 
+    `define DEBUGREGS
     system #(
-        .SYSTEM_HEX_PATH("./system32.hex")
+        .SYSTEM_HEX_PATH("system32.hex")
     ) uut (
         .clk        (clk),
         .cpu_reset  (reset),
@@ -66,7 +65,7 @@ module system_tb;
     uart_rx #(
         .DATA_WIDTH(8)                // We transmit / receive 8 bit words + 1 start and stop bit
     ) uart_debug0 (
-        .prescale( baud_rate ),
+        .prescale(UART_CLK_DIV[15:0]),
         .clk ( clk ),
         .rst ( reset  ),            // UART expects an active high reset
         // axi output
@@ -91,13 +90,12 @@ module system_tb;
     // But wait until the UART is done receiving the last character
     always @(posedge clk) begin
         if (!reset && trap && !uart_debug0.busy) begin
-            $write("\n");
-            $display("CPU Trap. Stop.");
-            $finish;
+            #10000
+            $display("TRAP");
+            $stop;
         end
     end
 
-    // XXX matching settings.h
     wire i2c_scl = gpio_z[1];
     wire i2c_sda = gpio_z[0];
     pullup (i2c_scl);
@@ -105,11 +103,11 @@ module system_tb;
 
     wire [7:0] i2c_ioout;
     i2c_slave #(
-        .I2C_ADR    ( 7'h74   )
+        .I2C_ADR    (7'h74)
     ) i2c_slave (
-        .SDA        ( i2c_sda ),
-        .SCL        ( i2c_scl ),
-        .IOout      ( i2c_ioout)
+        .SDA        (i2c_sda),
+        .SCL        (i2c_scl),
+        .IOout      (i2c_ioout)
     );
 
 endmodule

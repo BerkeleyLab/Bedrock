@@ -1,11 +1,4 @@
-[*]
-[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Tue Jun 23 16:20:32 2020
-[*]
-[dumpfile] "/home/michael/fpga_wsp/bedrock/soc/picorv32/test/sram/sram.vcd"
-[dumpfile_mtime] "Tue Jun 23 16:19:31 2020"
-[dumpfile_size] 255542
-[savefile] "/home/michael/fpga_wsp/bedrock/soc/picorv32/test/sram/sram.gtkw"
+[dumpfile] "sram.vcd"
 [timestart] 2339000
 [size] 1916 507
 [pos] -1 -1

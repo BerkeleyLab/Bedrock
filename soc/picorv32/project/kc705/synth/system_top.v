@@ -1,6 +1,6 @@
 `timescale 1 ns / 1 ns
 
-module top (
+module system_top (
     input            SYSCLK_P,
     input            SYSCLK_N,
     output           UART_RTS,
@@ -46,7 +46,7 @@ xilinx7_clocks clk_inst(
 
 wire [31:0] gpio_z;
 system #(
-    .SYSTEM_HEX_PATH ("./system32.hex")
+    .SYSTEM_HEX_PATH ("system32.dat")
 )system_inst (
     .clk            (clk),
     .cpu_reset      (~locked),
