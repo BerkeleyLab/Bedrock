@@ -19,39 +19,26 @@ module oscope_top(
 
 wire bmb7_U7_clkout;
 wire bmb7_U7_clk4xout;
-wire [7:0] port_50006_word_k7tos6;
-wire [7:0] port_50007_word_k7tos6;
-wire [7:0] port_50007_word_s6tok7;
-wire [7:0] port_50006_word_s6tok7;
-wire port_50006_tx_available,port_50006_tx_complete;
-wire port_50007_tx_available,port_50007_tx_complete;
-wire port_50006_rx_available,port_50006_rx_complete;
-wire port_50007_rx_available,port_50007_rx_complete;
-wire port_50006_word_read;
-wire port_50007_word_read;
+logic [7:0] port_50006_word_k7tos6;
+logic [7:0] port_50007_word_k7tos6;
+logic [7:0] port_50007_word_s6tok7;
+logic [7:0] port_50006_word_s6tok7;
+logic port_50006_tx_available, port_50006_tx_complete;
+logic port_50007_tx_available, port_50007_tx_complete;
+logic port_50006_rx_available, port_50006_rx_complete;
+logic port_50007_rx_available, port_50007_rx_complete;
+logic port_50006_word_read;
+logic port_50007_word_read;
 wire s6_to_k7_clk_out;
 
+`ifndef VERILATOR_SIM
 // ====== BMB7 version, includes pre-2018 QF2-pre Spartan
 k7_s6 bmb7_U7(
 	.K7_S6_IO_0(bus_bmb7_U7[0]),
 	.K7_S6_IO_1(bus_bmb7_U7[1]),
-	.K7_S6_IO_10(bus_bmb7_U7[2]),
-	.K7_S6_IO_11(bus_bmb7_U7[3]),
 	.K7_S6_IO_2(bus_bmb7_U7[4]),
 	.K7_S6_IO_3(bus_bmb7_U7[5]),
-	.K7_S6_IO_4(bus_bmb7_U7[6]),
-	.K7_S6_IO_5(bus_bmb7_U7[7]),
-	.K7_S6_IO_6(bus_bmb7_U7[8]),
-	.K7_S6_IO_7(bus_bmb7_U7[9]),
-	.K7_S6_IO_8(bus_bmb7_U7[10]),
-	.K7_S6_IO_9(bus_bmb7_U7[11]),
-	.K7_TO_S6_CLK_0(bus_bmb7_U7[12]),
-	.K7_TO_S6_CLK_1(bus_bmb7_U7[13]),
-	.K7_TO_S6_CLK_2(bus_bmb7_U7[14]),
-	.S6_TO_K7_CLK_0(bus_bmb7_U7[15]),
 	.S6_TO_K7_CLK_1(bus_bmb7_U7[16]),
-	.S6_TO_K7_CLK_2(bus_bmb7_U7[17]),
-	.S6_TO_K7_CLK_3(bus_bmb7_U7[18]),
 	.port_50006_word_k7tos6(port_50006_word_k7tos6),
 	.port_50006_word_s6tok7(port_50006_word_s6tok7),
 	.port_50006_tx_available(port_50006_tx_available),
@@ -68,8 +55,10 @@ k7_s6 bmb7_U7(
 	.port_50007_word_read(port_50007_word_read),
 	.clkout(bmb7_U7_clkout),
 	.clk4xout(bmb7_U7_clk4xout),
+	.clk2xout(),
 	.s6_to_k7_clk_out(s6_to_k7_clk_out)
 );
+`endif
 
 
 wire J4_pout;
@@ -82,7 +71,31 @@ wire [2:0] D5rgb;
 
 assign LEDS = {D4rgb, D5rgb};
 
-wire lb_clk=bmb7_U7_clkout;
+`ifdef VERILATOR_SIM
+// To be force-set by hierarchical reference in simulation
+reg sim_sys_clk /*verilator public_flat_rw */;
+assign bmb7_U7_clkout = sim_sys_clk;
+assign bmb7_U7_clk4xout = sim_sys_clk;
+
+// Register forces from Verilator to avoid cycle glitches
+reg [7:0] p_50006_word_k7tos6_r, p_50006_word_s6tok7_r;
+reg p_50006_tx_available_r, p_50006_tx_complete_r;
+reg p_50006_rx_available_r, p_50006_rx_complete_r;
+reg p_50006_word_read_r;
+reg p_50007_word_read_r;
+
+always @(posedge lb_clk) begin
+	port_50006_word_s6tok7  <= p_50006_word_s6tok7_r;
+	port_50006_rx_available <= p_50006_rx_available_r;
+	port_50006_rx_complete  <= p_50006_rx_complete_r;
+	p_50006_word_k7tos6_r   <= port_50006_word_k7tos6;
+	p_50006_tx_available_r  <= port_50006_tx_available;
+	p_50006_tx_complete_r   <= port_50006_tx_complete;
+	port_50006_word_read    <= p_50006_word_read_r;
+end
+`endif
+
+wire lb_clk = bmb7_U7_clkout;
 
 // Generate localbus based on link to Spartan
 wire [23:0] lb_addr;

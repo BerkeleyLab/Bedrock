@@ -31,6 +31,7 @@ VLATOR_LINT_IGNORE += -Wno-TIMESCALEMOD
 CLEAN += *.bit $(APP_NAME)_regmap*.json scalar_$(APP_NAME)_regmap.json
 CLEAN_DIRS += _xilinx
 CLEAN_DIRS += ./.Xil
+CLEAN_DIRS += ./obj_dir
 
 vpath %.v $(DSP_DIR)
 
@@ -46,6 +47,16 @@ $(AUTOGEN_DIR)/moving_average.v: $(DSP_DIR)/moving_average/moving_average.py
 oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v
 
 oscope_top.sv: $(AUTOGEN_DIR)/config_romx.v application_top_auto $(AUTOGEN_DIR)/moving_average.v
+
+Voscope_top_CLIB := $(BADGER_DIR)/tests
+Voscope_top_tb: oscope_top.sv Voscope_top_tb.cpp $(BADGER_DIR)/tests/udp_model.c
+
+# Run UDP simulation, use leep CLI to read out register list and compare against golden reference
+Voscope_top_leep: Voscope_top_tb $(APP_NAME)_regmap.json
+	@echo "----- Oscope leep list self-test -----"
+	timeout 20 ./$< &
+	PYTHONPATH=$(PROJECTS_DIR)/common/ $(PYTHON) -m leep.cli leep://localhost:3010 list > leep_list.txt
+	awk -F'"' '/ {/{print $$2}' $(APP_NAME)_regmap.json | cmp leep_list.txt -
 
 system_top.xdc: $(APP_NAME)_orig_special.xdc $(APP_NAME)_common.xdc
 
@@ -76,4 +87,7 @@ ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     else
 -include $(MAKECMDGOALS:%.bit=$(DEPDIR)/%.bit.d)
     endif
+endif
+ifneq (,$(findstring _tb,$(MAKECMDGOALS)))
+    -include $(MAKECMDGOALS:%_tb=$(DEPDIR)/%_tb.d)
 endif

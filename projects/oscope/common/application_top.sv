@@ -38,6 +38,10 @@ module application_top(
 `ifdef BMB7_STANDALONE
 	// Clock DSP with 125 MHz
 	wire adc_clk=rxusrclk_u50_i[0];
+`elsif VERILATOR
+        // To be force-set by hierarchical reference in simulation
+        reg sim_adc_clk /*verilator public_flat_rw */;
+        wire adc_clk = sim_adc_clk;
 `else
 	// Clock DSP from external clock source at 1320/14 MHz
 	wire adc_clk=zif_cfg.U2_clk_div_bufg;

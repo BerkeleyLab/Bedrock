@@ -1,3 +1,10 @@
+oscope_top_test:
+  before_script:
+    - cd projects/oscope/bmb7_cu
+  stage: test
+  script:
+    - make Voscope_top_tb && make Voscope_top_leep && make clean
+
 oscope_top_bmb7:
   before_script:
     - cd projects/oscope/bmb7_cu && ls /non-free

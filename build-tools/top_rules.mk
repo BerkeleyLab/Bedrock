@@ -43,11 +43,11 @@ VERILOG_RUN = $(VVP) $@
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@.$$$$ $<
 
-VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I.
+VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I. -Wno-TIMESCALEMOD
 VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY
 VERILATOR_LINT = $(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $(filter %.v %.sv, $^)
-# TODO: Decide on what to do with -Wno-TIMESCALEMOD
 VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN --MMD --Mdir $(DEPDIR)
+VERILATOR_SIM = $(VERILATOR) --trace-fst -O2 $(VLATOR_LINT_IGNORE) $(VG_ALL) +define+VERILATOR_SIM
 
 FMC_MAP = awk -F\" 'NR==FNR{a[$$2]=$$4;next}$$4 in a{printf "NET %-15s LOC = %-4s | IOSTANDARD = %10s; \# %s\n",$$2,a[$$4],$$6,$$4}'
 XDC_MAP = awk -F"[ \"\t]+" 'NR==FNR{gsub(/]/,"",$$8);a[$$8]=$$4;next}($$3 in a){printf "set_property -dict \"PACKAGE_PIN %-4s IOSTANDARD %s\" [get_ports %s]\n",a[$$3], $$4, $$2}'
@@ -111,6 +111,11 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 
 %_lint: %.v %_auto
 	$(VERILATOR_LINT)
+
+V%_tb: $(wildcard *.sv) $(wildcard *.v)
+	$(VERILATOR_SIM) -I$(V$*_CLIB) -cc --exe $(filter %.v %.sv %.cpp %.c, $^) --top-module $* -y $(AUTOGEN_DIR)
+	MAKEFLAGS="" make -C obj_dir -f V$*.mk USER_CPPFLAGS="-I$(V$*_CLIB)"
+	mv obj_dir/V$* $@
 
 %: %.m
 	$(OCTAVE_SILENT)
@@ -178,6 +183,9 @@ $(DEPDIR)/%.bit.d: %.sv $(VERILOG_AUTOGEN)
 
 $(DEPDIR)/%_tb.d: %_tb.v $(VERILOG_AUTOGEN)
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
+
+$(DEPDIR)/V%_tb.d: %.sv $(VERILOG_AUTOGEN)
+	set -e; mkdir -p $(DEPDIR); $(VERILATOR_MAKEDEP) && ( cp $(DEPDIR)/V"$*"__verFiles.dat $@.$$$$; printf "V$*_tb $@: "; tail -n+3 $@.$$$$ | rev | cut -d' ' -f1|rev|tr -d '\"' | sort -u | grep -Ee "dev/null|verilator_bin|__verFiles.dat|__ver.d" -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
 LB_AW = 10
 EMPTY :=
