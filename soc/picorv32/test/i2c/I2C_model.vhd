@@ -4,6 +4,7 @@
 -- Author    : Peter Samarin <peter.samarin@gmail.com>
 ------------------------------------------------------------
 -- Copyright (c) 2016 Peter Samarin
+-- MIT-Licensed, see https://github.com/oetr/FPGA-I2C-Minion
 ------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;

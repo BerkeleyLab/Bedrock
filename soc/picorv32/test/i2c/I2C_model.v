@@ -25,6 +25,7 @@
 // Author    : Peter Samarin <peter.samarin@gmail.com>
 //----------------------------------------------------------
 // Copyright (c) 2016 Peter Samarin
+// MIT-Licensed, see https://github.com/oetr/FPGA-I2C-Minion
 //----------------------------------------------------------
 //----------------------------------------------------------
 // no timescale needed
