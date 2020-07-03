@@ -3,7 +3,8 @@ include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
 vpath system.v ..
 
-SRC_V += memory_pack.v memory2_pack.v mpack.v munpack.v picorv32.v pico_pack.v
+# builds can use memory_pack.v or memory_pack2.v, depending on MEMORY_PACK_FAST
+SRC_V += memory2_pack.v mpack.v munpack.v picorv32.v pico_pack.v
 SRC_V += uart_pack.v uart_rx.v uart_tx.v sram_pack.v sram2_pack.v
 SRC_V += system.v sfr_pack.v gpio_pack.v gpioz_pack.v
 

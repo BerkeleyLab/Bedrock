@@ -153,6 +153,10 @@ rtefi_blob #(
     .rx_mac_status_s  (rx_mac_status_s),
     .rx_mac_status_d  (rx_mac_status_d),
 
+    // Application ports
+    .p2_nomangle(1'b0),
+    .p3_data_in(32'b0),
+
     // Dumb stuff to get LEDs blinking
     .rx_mon         (),
     .tx_mon         (),

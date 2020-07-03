@@ -10,7 +10,8 @@ vpath system.v $(CMOD_DIR)
 vpath sram_model.v $(PICORV_DIR)/test/sram
 
 SRC_V += picorv32.v system.v uart_pack.v uart_rx.v uart_tx.v mpack.v munpack.v
-SRC_V += memory_pack.v memory2_pack.v pico_pack.v
+# builds can use memory_pack.v or memory_pack2.v, depending on MEMORY_PACK_FAST
+SRC_V += memory2_pack.v pico_pack.v
 SRC_V += stream_fifo.v shortfifo.v uart_fifo_pack.v uart_stream.v
 SRC_V += sfr_pack.v gpio_pack.v gpioz_pack.v
 SRC_V += pb_debouncer.v sram_pack.v sram2_pack.v

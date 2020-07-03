@@ -17,6 +17,7 @@ module system_tb;
 
     // UART clock dividers (they have an additional /8 divider inside)
     localparam UART_CLK_DIV = F_CLK / `BOOTLOADER_BAUDRATE / 8;
+    wire [15:0] uart_prescale = UART_CLK_DIV;
 
     reg clk_p=1, clk_n=0;
     always #(CLK_PERIOD_NS / 2) begin
@@ -98,7 +99,7 @@ module system_tb;
     uart_rx #(
         .DATA_WIDTH(8)
     ) uart_debug_rx (
-        .prescale           (UART_CLK_DIV),
+        .prescale           (uart_prescale),
         .clk                (clk_p),
         .rst                (reset),   // UART expects an active high reset
         // axi output
@@ -125,7 +126,7 @@ module system_tb;
     uart_tx #(
         .DATA_WIDTH(8)
     ) uart_debug_tx (
-        .prescale         (UART_CLK_DIV),
+        .prescale         (uart_prescale),
         .clk              (clk_p),
         .rst              (reset),
         .input_axis_tdata (utx_tdata),
