@@ -1,5 +1,5 @@
 ------------------------------------------------------------
--- File      : I2C_slave.vhd
+-- File      : I2C_model.vhd
 ------------------------------------------------------------
 -- Author    : Peter Samarin <peter.samarin@gmail.com>
 ------------------------------------------------------------
@@ -9,9 +9,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 ------------------------------------------------------------
-entity I2C_slave is
+entity I2C_model is
   generic (
-    SLAVE_ADDR : std_logic_vector(6 downto 0));
+    ADDR : std_logic_vector(6 downto 0));
   port (
     scl              : inout std_logic;
     sda              : inout std_logic;
@@ -22,9 +22,9 @@ entity I2C_slave is
     data_to_master   : in    std_logic_vector(7 downto 0);
     data_valid       : out   std_logic;
     data_from_master : out   std_logic_vector(7 downto 0));
-end entity I2C_slave;
+end entity I2C_model;
 ------------------------------------------------------------
-architecture arch of I2C_slave is
+architecture arch of I2C_model is
 
   type state_t is (idle, get_address_and_cmd,
                    answer_ack_start, write,
@@ -54,11 +54,11 @@ architecture arch of I2C_slave is
   signal data_from_master_reg : std_logic_vector(7 downto 0) := (others => '0');
 
   signal scl_prev_reg : std_logic := '1';
-  -- Slave writes on scl
+  -- writes on scl
   signal scl_wen_reg  : std_logic := '0';
   signal scl_o_reg    : std_logic := '0';
   signal sda_prev_reg : std_logic := '1';
-  -- Slave writes on sda
+  -- writes on sda
   signal sda_wen_reg  : std_logic := '0';
   signal sda_o_reg    : std_logic := '0';
 
@@ -141,7 +141,7 @@ begin
 
           if bits_processed_reg = 8 and scl_falling_reg = '1' then
             bits_processed_reg <= 0;
-            if addr_reg = SLAVE_ADDR then  -- check req address
+            if addr_reg = ADDR then  -- check req address
               state_reg <= answer_ack_start;
               if cmd_reg = '1' then  -- issue read request
                 read_req_reg       <= '1';
@@ -149,7 +149,7 @@ begin
               end if;
             else
               --assert false
-              --  report ("I2C: target/slave address mismatch (data is being sent to another slave).")
+              --  report ("I2C: target address mismatch.")
               --  severity note;
               state_reg <= idle;
             end if;

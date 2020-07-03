@@ -8,7 +8,7 @@ include ../common/common.mk
 BOOTLOADER_BAUDRATE = 15625000
 VFLAGS += -DMEMORY_PACK_FAST -DBOOTLOADER_BAUDRATE=$(BOOTLOADER_BAUDRATE)
 CFLAGS += -DSIMULATION
-SRC_V += system_tb.v i2c_slave.v
+SRC_V += system_tb.v i2c_model.v
 OBJS += 0x000.lds
 
 $(TARGET).vcd: $(TARGET)32.hex

@@ -1,6 +1,6 @@
 // from 88E111 datasheet
 `timescale 1ns / 1ns
-module mdio_slave #(
+module mdio_model #(
     parameter [4:0] ADDR=5'h10
 ) (
     input reset_b,

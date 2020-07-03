@@ -6,7 +6,7 @@
 module spi_test_tb;
     localparam CLK_PERIOD = 8;    // Simulated clock period in [ns]
     localparam MAX_SIM    = 84000;   // ns
-    localparam N_SLAVES   = 2;
+    localparam N_MODELS   = 2;
     reg mem_clk=1;
     always #(CLK_PERIOD/2)   mem_clk = ~mem_clk;
 
@@ -96,10 +96,10 @@ module spi_test_tb;
     // --------------------------------------------------------------
     //  SPI master
     // --------------------------------------------------------------
-    wire [N_SLAVES-1:0] spi_ss;
-    wire [N_SLAVES-1:0] spi_sck;
-    wire [N_SLAVES-1:0] spi_mosi;
-    wire [N_SLAVES-1:0] spi_miso;
+    wire [N_MODELS-1:0] spi_ss;
+    wire [N_MODELS-1:0] spi_sck;
+    wire [N_MODELS-1:0] spi_mosi;
+    wire [N_MODELS-1:0] spi_miso;
     spi_pack #(
         .BASE_ADDR  (8'h04)
     ) dut (
@@ -129,11 +129,11 @@ module spi_test_tb;
     );
 
     // --------------------------------------------------------------
-    //  SPI slave (hardware)
+    //  SPI model (hardware)
     // --------------------------------------------------------------
     localparam ROM0 = 32'hdeadbeaf;
     localparam ROM1 = 24'h123456;
-    spi_slave #(.ID(0), .CPOL(0), .DW(32)) spi_slave0_inst (
+    spi_model #(.ID(0), .CPOL(0), .DW(32)) spi_model0_inst (
         .ROM  (ROM0),
         .ss   (spi_ss[0]  ),
         .sck  (spi_sck[0] ),
@@ -141,7 +141,7 @@ module spi_test_tb;
         .miso (spi_miso[0])
     );
 
-    spi_slave #(.ID(1), .CPOL(1), .DW(24)) spi_slave1_inst (
+    spi_model #(.ID(1), .CPOL(1), .DW(24)) spi_model1_inst (
         .ROM  (ROM1),
         .ss   (spi_ss[1]  ),
         .sck  (spi_sck[1] ),
@@ -187,9 +187,9 @@ module spi_test_tb;
                 pass &= cpu.mem_rdata == ROM1;
         end
         if (spi_start0)
-            $display("spi_start slave 0, halfperiod: %d", dut.spi_inst.cfg_sckhalfperiod[7:0]);
+            $display("spi_start model 0, halfperiod: %d", dut.spi_inst.cfg_sckhalfperiod[7:0]);
         if (spi_start1)
-            $display("spi_start slave 1, halfperiod: %d", dut1.spi_inst.cfg_sckhalfperiod[7:0]);
+            $display("spi_start model 1, halfperiod: %d", dut1.spi_inst.cfg_sckhalfperiod[7:0]);
         //$monitor("time: %8g ns, spi_ss: %2b, spi_miso: %2b", $time, spi_ss, spi_miso);
     end
 endmodule

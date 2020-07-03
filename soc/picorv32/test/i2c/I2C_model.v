@@ -1,4 +1,4 @@
-// File I2C_slave.vhd translated with vhd2vl v2.5 VHDL to Verilog RTL translator
+// File I2C_model.vhd translated with vhd2vl v2.5 VHDL to Verilog RTL translator
 // vhd2vl settings:
 //  * Verilog Module Declaration Style: 2001
 
@@ -20,7 +20,7 @@
 // considered unchanged from the original VHDL.
 
 //----------------------------------------------------------
-// File      : I2C_slave.vhd
+// File      : I2C_model.vhd
 //----------------------------------------------------------
 // Author    : Peter Samarin <peter.samarin@gmail.com>
 //----------------------------------------------------------
@@ -29,18 +29,18 @@
 //----------------------------------------------------------
 // no timescale needed
 
-module I2C_slave(
+module I2C_model(
 inout wire scl,
 inout wire sda,
 input wire clk,
 input wire rst,
 output wire read_req,
-input wire [7:0] data_to_master,
+input wire [7:0] data_to_tb,
 output wire data_valid,
-output wire [7:0] data_from_master
+output wire [7:0] data_from_tb
 );
 
-parameter [6:0] SLAVE_ADDR = 0;
+parameter [6:0] ADDR = 0;
 // User interface
 
 
@@ -72,10 +72,10 @@ reg scl_falling_reg = 1'b 0;  // Address and data received from master
 reg [6:0] addr_reg = 0;
 reg [6:0] data_reg = 0;
 reg [7:0] data_from_master_reg = 0;
-reg scl_prev_reg = 1'b 1;  // Slave writes on scl
+reg scl_prev_reg = 1'b 1;  // writes on scl
 wire scl_wen_reg = 1'b 0;
 wire scl_o_reg = 1'b 0;
-reg sda_prev_reg = 1'b 1;  // Slave writes on sda
+reg sda_prev_reg = 1'b 1;  // writes on sda
 reg sda_wen_reg = 1'b 0;
 reg sda_o_reg = 1'b 0;  // User interface
 reg data_valid_reg = 1'b 0;
@@ -142,18 +142,18 @@ reg [7:0] data_to_master_reg = 0;
       end
       if(bits_processed_reg == 8 && scl_falling_reg == 1'b 1) begin
         bits_processed_reg <= 0;
-        if(addr_reg == SLAVE_ADDR) begin
+        if(addr_reg == ADDR) begin
           // check req address
           state_reg <= answer_ack_start;
           if(cmd_reg == 1'b 1) begin
             // issue read request
             read_req_reg <= 1'b 1;
-            data_to_master_reg <= data_to_master;
+            data_to_master_reg <= data_to_tb;
           end
         end
         else begin
           //assert false
-          $display("I2C: target/slave address mismatch (data is being sent to another slave).");
+          $display("I2C: address mismatch.");
           //  severity note;
           state_reg <= idle;
         end
@@ -225,7 +225,7 @@ reg [7:0] data_to_master_reg = 0;
           continue_reg <= 1'b 1;
           read_req_reg <= 1'b 1;
           // request reg byte
-          data_to_master_reg <= data_to_master;
+          data_to_master_reg <= data_to_tb;
         end
       end
     end
@@ -281,7 +281,7 @@ reg [7:0] data_to_master_reg = 0;
   //--------------------------------------------------------
   // Master writes
   assign data_valid = data_valid_reg;
-  assign data_from_master = data_from_master_reg;
+  assign data_from_tb = data_from_master_reg;
   // Master reads
   assign read_req = read_req_reg;
 

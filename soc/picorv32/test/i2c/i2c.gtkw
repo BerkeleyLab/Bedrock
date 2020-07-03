@@ -32,10 +32,10 @@ i2c_soft_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
 @1000200
 -CPU
 @28
-i2c_soft_tb.i2c_slave.scl
-i2c_soft_tb.i2c_slave.sda
+i2c_soft_tb.i2c_model.scl
+i2c_soft_tb.i2c_model.sda
 @c00200
--I2C_SLAVE
+-I2C_model
 @22
 i2c_soft_tb.data_from_master[7:0]
 @28
@@ -45,18 +45,18 @@ i2c_soft_tb.data_to_master[7:0]
 @28
 i2c_soft_tb.read_req
 @22
-i2c_soft_tb.i2c_slave.data_to_master_reg[7:0]
+i2c_soft_tb.i2c_model.data_to_master_reg[7:0]
 @28
-i2c_soft_tb.i2c_slave.start_reg
-i2c_soft_tb.i2c_slave.stop_reg
+i2c_soft_tb.i2c_model.start_reg
+i2c_soft_tb.i2c_model.stop_reg
 @24
-i2c_soft_tb.i2c_slave.state_reg[2:0]
+i2c_soft_tb.i2c_model.state_reg[2:0]
 @28
-i2c_soft_tb.i2c_slave.continue_reg
-i2c_soft_tb.i2c_slave.cmd_reg
-i2c_soft_tb.i2c_slave.sda_wen_reg
-i2c_soft_tb.i2c_slave.sda_o_reg
+i2c_soft_tb.i2c_model.continue_reg
+i2c_soft_tb.i2c_model.cmd_reg
+i2c_soft_tb.i2c_model.sda_wen_reg
+i2c_soft_tb.i2c_model.sda_o_reg
 @1401200
--I2C_SLAVE
+-I2C_model
 [pattern_trace] 1
 [pattern_trace] 0

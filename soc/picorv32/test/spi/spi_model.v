@@ -1,4 +1,4 @@
-module spi_slave #(
+module spi_model #(
     parameter DW=32,
     parameter CPOL=0,
     parameter integer ID=0
@@ -28,7 +28,7 @@ always @(negedge sck_edge) if (~ss) begin
     if (cnt == 1) read = mosi;  // only response to 'read' cmd
     shift = {shift[DW-2:0], mosi};
     if (cnt == DW) begin
-        $display("Time:     %g ns, spi_slave_%1d got: 0x%x, '%c'", $time, ID, shift, shift);
+        $display("Time:     %g ns, spi_model_%1d got: 0x%x, '%c'", $time, ID, shift, shift);
         read = 0;
     end
 end

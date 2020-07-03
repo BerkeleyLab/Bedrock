@@ -102,9 +102,9 @@ module system_tb;
     pullup (i2c_sda);
 
     wire [7:0] i2c_ioout;
-    i2c_slave #(
+    i2c_model #(
         .I2C_ADR    (7'h74)
-    ) i2c_slave (
+    ) i2c_model (
         .SDA        (i2c_sda),
         .SCL        (i2c_scl),
         .IOout      (i2c_ioout)

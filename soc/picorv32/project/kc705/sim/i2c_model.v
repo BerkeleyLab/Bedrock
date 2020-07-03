@@ -1,5 +1,5 @@
 // http://www.fpga4fun.com/I2C_2.html
-module i2c_slave #(
+module i2c_model #(
     parameter I2C_ADR = 7'h27
 ) (
     inout       SDA,

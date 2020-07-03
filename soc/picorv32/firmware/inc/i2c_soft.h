@@ -47,13 +47,13 @@ int i2c_read_regs( uint8_t i2cAddr, uint8_t regAddr, uint8_t *buffer, uint16_t l
 void i2c_scan(void);
 
 // Read data over I2C and print it as a hex-dump to UART
-// i2cAddr= 7 bit i2c slave address
+// i2cAddr= 7 bit i2c address
 // regAddr= register offset
 // nBytes = number of bytes to read
 int i2c_dump( uint8_t i2cAddr, uint8_t regAddr, int nBytes );
 
 // Read data over I2C and directly print it as characters to UART
-// adr    = 7 bit i2c slave address
+// adr    = 7 bit i2c address
 // regAddr= register offset
 // nBytes = number of bytes to read
 int i2c_read_ascii( uint8_t i2cAddr, uint8_t regAddr, int nBytes );

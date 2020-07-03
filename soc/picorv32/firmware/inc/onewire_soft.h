@@ -35,20 +35,12 @@ int onewire_read_regs( uint8_t i2cAddr, uint8_t regAddr, uint8_t *buffer, uint16
 //-------------------------------------------------
 // Debugging functions (printing stuff)
 //-------------------------------------------------
-// Scan through all I2C addresses, try to write and
+// Scan through all addresses, try to write and
 // reports the ones which respond with an ack
 void onewire_scan(void);
 
-// Read data over I2C and print it as a hex-dump to UART
-// i2cAddr= 7 bit i2c slave address
-// regAddr= register offset
-// nBytes = number of bytes to read
 int onewire_dump( uint8_t i2cAddr, uint8_t regAddr, int nBytes );
 
-// Read data over I2C and directly print it as characters to UART
-// adr    = 7 bit i2c slave address
-// regAddr= register offset
-// nBytes = number of bytes to read
 int onewire_read_ascii( uint8_t i2cAddr, uint8_t regAddr, int nBytes );
 
 #endif
