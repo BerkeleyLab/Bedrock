@@ -106,7 +106,7 @@ read_sfp.dat: read_sfp.py
 
 # =====
 # bitfile
-MARBLE_SYNTH_SOURCE = marble1.v tmds_test.v marble/gmii_clock_handle.v kc705/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_sfp.dat marble1.xdc
+MARBLE_SYNTH_SOURCE = marble1.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_sfp.dat marble1.xdc
 marble1.d: $(MARBLE_SYNTH_SOURCE)
 	echo $^ | tr ' ' '\n' > $@
 marble1.bit: marble1.tcl marble1.d $(MARBLE_SYNTH_SOURCE)

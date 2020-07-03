@@ -51,7 +51,7 @@ int i2c_tx( uint8_t dat ){
         dat <<= 1;
         SCL0();
     }
-    // Receive ack from slave
+    // Receive ack
     SDA1();
     SCL1();
     int ack = SDAR() == 0;
@@ -68,7 +68,7 @@ uint8_t i2c_rx( int ack ){
         dat |= SDAR();
         SCL0();
     }
-    // Send ack to slave
+    // Send ack
     SCL0();
     if ( ack ){
         SDA0();

@@ -1,5 +1,5 @@
 // --------------------------------------------------------------
-//  memory_pack.v
+//  memory2_pack.v
 // --------------------------------------------------------------
 // This memory can look into the future with the picorv look-ahead interface
 // hence ready goes high at the same time as valid
