@@ -1,6 +1,5 @@
-
-# XDC File for CMOD A7 dip module
-##################################
+# Based on the MIT-Licensed Cmod-A7-Master.xdc file in
+# https://github.com/Digilent/digilent-xdc
 
 ## This file is a general .xdc for the CmodA7 rev. B
 ## To use it in a project:
