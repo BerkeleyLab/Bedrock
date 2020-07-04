@@ -62,6 +62,7 @@ lp dut // auto
 // Set control registers from command line
 // See also notch_setup.py
 reg signed [17:0] kxr, kxi, kyr, kyi;
+`ifdef SIMULATE
 initial begin
 	if (!$value$plusargs("kxr=%d", kxr)) kxr =  71000;
 	if (!$value$plusargs("kxi=%d", kxi)) kxi =      0;
@@ -73,6 +74,8 @@ initial begin
 	dp_dut_ky.mem[0] = kyr;  // k_Y  real part
 	dp_dut_ky.mem[1] = kyi;  // k_Y  imag part
 end
+`endif //  `ifdef SIMULATE
+
 // As further discussed in lp.v,
 // y*z = y + ky*z^{-1}*y + kx*x
 // k_X and k_Y are scaled by 2^{19} from their real values.
@@ -95,7 +98,9 @@ always @(posedge clk) begin
 	if (~iq) y_q <= y;
 	if (~iq) x_i <= x1;
 	if (~iq) x_q <= x;
+`ifdef SIMULATE
 	if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d\n", x_i, x_q, y_i, y_q);
+`endif
 end
 
 endmodule

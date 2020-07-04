@@ -67,6 +67,7 @@ reg signed [17:0] x=0, sint, cost;
 reg [2:0] state=0;
 wire iq=state[0];
 integer dds=0;
+`ifdef SIMULATE
 always @(posedge clk) begin
 	state <= state+1;
 	if (~iq) begin
@@ -77,6 +78,7 @@ always @(posedge clk) begin
 	if (cc>5 && cc<DRIVE_TIME) x <= ~iq ? cost : sint;
 	else x <= 0;
 end
+`endif //  `ifdef SIMULATE
 
 // Local bus (not used in this test bench)
 wire lb_clk=clk;
@@ -96,6 +98,7 @@ lp_notch dut // auto
 reg signed [17:0] kaxr, kaxi, kayr, kayi;
 reg signed [17:0] kbxr, kbxi, kbyr, kbyi;
 initial begin
+`ifdef SIMULATE
 	if (!$value$plusargs("kaxr=%d", kaxr)) kaxr =  71000;
 	if (!$value$plusargs("kaxi=%d", kaxi)) kaxi =      0;
 	if (!$value$plusargs("kayr=%d", kayr)) kayr = -70000;
@@ -104,6 +107,7 @@ initial begin
 	if (!$value$plusargs("kbxi=%d", kbxi)) kbxi =      0;
 	if (!$value$plusargs("kbyr=%d", kbyr)) kbyr =      0;
 	if (!$value$plusargs("kbyi=%d", kbyi)) kbyi =      0;
+`endif
 	#1;
 	dp_dut_lp1a_kx.mem[0] = kaxr;  // k_X  real part
 	dp_dut_lp1a_kx.mem[1] = kaxi;  // k_X  imag part
@@ -127,8 +131,10 @@ always @(posedge clk) begin
 	if (~iq) y_q <= y;
 	if (~iq) x_i <= x1;
 	if (~iq) x_q <= x;
+`ifdef SIMULATE
 	if (drive_en)
 		if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d\n", x_i, x_q, y_i, y_q);
+`endif
 end
 
 endmodule
