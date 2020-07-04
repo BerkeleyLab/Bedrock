@@ -54,6 +54,7 @@ def run_set(xchip, fmc_bus_sel):
     a = build_i2c_reader(fmc_bus_hw)
     download_prog(xchip.dev, a)
     fault = False
+    gas = {}
     for ix in range(66):
         want = fmc_goal(ix)
         #
@@ -64,13 +65,25 @@ def run_set(xchip, fmc_bus_sel):
         xchip.wait_for_stop(verbose=False)
         result = xchip.read_result(result_len=10, running=False)
         #
-        found = fmc_decode(fmc_bus_sel, result, squelch=True, verbose=False)
+        found, ga = fmc_decode(fmc_bus_sel, result, squelch=True, verbose=False)
+        # print("GA = %d" % ga)
+        gas[ga] = True
         if len(found) == 1 and found[0] == want:
             print(want + " good")
         else:
             print(want + " oops")
             fmc_decode(fmc_bus_sel, result, squelch=True)
             fault = True
+    if len(gas) == 1:
+        ga = gas.keys()[0]
+        ok = fmc_bus_sel == ga
+        ok_msg = "OK" if ok else "BAD"
+        print("FMC%d:  GA value %d  %s" % (fmc_bus_sel, ga, ok_msg))
+        if not ok:
+            fault = True
+    else:
+        print("FMC%d:  Non-constant GA value" % fmc_bus_sel)
+        fault = True
     return fault
 
 
