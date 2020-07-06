@@ -7,12 +7,13 @@ parameter SCKCNT_WIDTH = clog2(ADDR_WIDTH+DATA_WIDTH+1);
 parameter TSCKW= clog2(TSCKHALF)+1; //tsck is 2^5 time ts
 parameter DEBUG="false";
 function integer clog2;
-    input integer value;
-    begin
-        value = value-1;
-        for (clog2=0; value>0; clog2=clog2+1)
-            value = value>>1;
-    end
+	input integer value;
+	integer local_value;
+	begin
+		local_value = value-1;
+		for (clog2=0; local_value>0; clog2=clog2+1)
+			local_value = local_value>>1;
+	end
 endfunction
 parameter SCK_RISING_SHIFT=1;
 input clk;

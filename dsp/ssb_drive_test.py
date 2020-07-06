@@ -30,8 +30,8 @@ with open(fname, 'r') as f:
     if SSB_OUT and not SSB_SINGLE:
         # Combine I and Q components
         dat = []
-        for l in f.readlines():
-            x = l.split()
+        for line in f.readlines():
+            x = line.split()
             # DAC1 is I, DAC2 is Q
             dat_i, dat_q = float(x[0])/(2**15), float(x[1])/(2**15)
 

@@ -51,7 +51,7 @@ module banyan #(
 
 localparam M = np/2;   // number of swap-boxes
 wire two_or_more;  // use balance mode, when more than one bit of mask is set
-two_set #(.dw(np)) two(.d(mask_in), .two(two_or_more));
+two_set #(.dw(np)) two_set(.d(mask_in), .two(two_or_more));
 
 wire [M-1:0] mask_upper = mask_in[2*M-1:M];
 wire [M-1:0] mask_lower = mask_in[  M-1:0];

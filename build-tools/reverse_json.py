@@ -47,7 +47,7 @@ def ponder_int(s):
     return r
 
 
-def rprint(g, l, alias, address_offset):
+def rprint(g, line, alias, address_offset):
     global fail
     addr = int(g(2) + g(1), 16) + address_offset
     # Given g(2) that might have the form m_accum[1], construct
@@ -57,7 +57,7 @@ def rprint(g, l, alias, address_offset):
     if alias is not None:
         name = alias
     wname = g(3).split('[')[0]
-    # print addr, name, wname, g(1), g(2), g(3), l
+    # print addr, name, wname, g(1), g(2), g(3), line
     if name in name_found:
         stderr.write('ERROR: Duplicate name "%s"\n' % name)
         fail = 1
@@ -97,38 +97,38 @@ print("{")
 sl = []
 param_db = {}
 address_offset = 0
-for l in f.read().split('\n'):
-    if "reverse_json_offset" in l:
-        m1 = re.search(r"\s*//\s*reverse_json_offset\s*:\s*(\d+)\s*", l)
+for line in f.read().split('\n'):
+    if "reverse_json_offset" in line:
+        m1 = re.search(r"\s*//\s*reverse_json_offset\s*:\s*(\d+)\s*", line)
         if m1:
             address_offset = int(m1.group(1))
-    if "4'h" in l and ": reg_bank_" in l:
-        m1 = re.search(r"4'h(\w):\s*reg_bank_(\w)\s*<=\s*(\S+);", l)
+    if "4'h" in line and ": reg_bank_" in line:
+        m1 = re.search(r"4'h(\w):\s*reg_bank_(\w)\s*<=\s*(\S+);", line)
         if m1:
             alias = None
-            m1a = re.search(r";\s*//\s*alias:\s*(\w+)", l)
+            m1a = re.search(r";\s*//\s*alias:\s*(\w+)", line)
             if m1a:
                 # stderr.write('INFO: alias "%s"\n' % m1a.group(1))
                 alias = m1a.group(1)
-            sl += [rprint(m1.group, l, alias, address_offset)]
+            sl += [rprint(m1.group, line, alias, address_offset)]
         else:
-            stderr.write("WARNING: Surprising regexp failure: %s\n" % l)
-    if "wire" in l:
-        m2 = re.search(r"wire\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", l)
+            stderr.write("WARNING: Surprising regexp failure: %s\n" % line)
+    if "wire" in line:
+        m2 = re.search(r"wire\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", line)
         if m2:
             memorize(m2.group)
-    if "reg " in l:
-        m2 = re.search(r"reg\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", l)
+    if "reg " in line:
+        m2 = re.search(r"reg\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", line)
         if m2:
             memorize(m2.group)
-    if any(x in l for x in ["parameter ", "localparam "]):
-        m3 = re.search(r"(?:parameter|localparam)\s+(\w+)\s*=\s*(\d+);", l)
+    if any(x in line for x in ["parameter ", "localparam "]):
+        m3 = re.search(r"(?:parameter|localparam)\s+(\w+)\s*=\s*(\d+);", line)
         if m3:
             p, v = m3.group(1), int(m3.group(2))
             param_db[p] = v
             # stderr.write('INFO: found parameter "%s" with value %d\n' % (p, v))
-    if "localparam " in l:
-        m3 = re.search(r"localparam\s+(\w+)\s*=\s*(\d+);", l)
+    if "localparam " in line:
+        m3 = re.search(r"localparam\s+(\w+)\s*=\s*(\d+);", line)
         if m3:
             p, v = m3.group(1), int(m3.group(2))
             param_db[p] = v

@@ -74,8 +74,8 @@ def given(ov, sl):
     print("// given(%s, %s) pc=%d" % (ov, sl, new_op.pc))
 
 
-def unmatched(l):
-    print("// unmatched: "+l)
+def unmatched(line):
+    print("// unmatched: " + line)
 
 
 ifile = open(argv[1], 'r')

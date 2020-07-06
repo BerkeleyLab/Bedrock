@@ -47,7 +47,7 @@ always @(posedge sclk) begin
 end
 
 // Store the result
-dpram #(.aw(aw), .dw(16)) mem(.clka(sclk), .clkb(rclk),
+dpram #(.aw(aw), .dw(16)) phmem(.clka(sclk), .clkb(rclk),
 	.addra(waddr), .dina(shiftr), .wena(wen),
 	.addrb(addr), .doutb(dout));
 

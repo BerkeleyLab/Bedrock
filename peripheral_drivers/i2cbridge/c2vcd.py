@@ -63,10 +63,10 @@ if __name__ == "__main__":
     ofile = sys.stdout
     old_v = None
     with open(sys.argv[1], 'r') as f:
-        for l in f.read().split('\n'):
-            if not l:
+        for line in f.read().split('\n'):
+            if not line:
                 break
-            a = l.split()
+            a = line.split()
             if a[0] == "#":
                 mtime = 1 << int(a[1])
                 dw = int(a[2])
