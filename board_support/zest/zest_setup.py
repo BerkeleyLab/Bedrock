@@ -76,8 +76,7 @@ class c_prc(c_llrf_bmb7):
             0x109: 'Sync'
         }
 
-        # Open communication with the RFS/PRC
-        # _log.info('IP address is %s', self.ip)
+        # Open communication with the carrier board
         print('Carrier board address %s' % leep_addr)
 
         self.leep = leep.open(leep_addr, instance=[])
@@ -113,9 +112,9 @@ class c_prc(c_llrf_bmb7):
         return freq_count * self.ref_freq * 0.5**24
 
     def clock_check(self):
-        print('4x Frequncy      %.3f MHz' % self._freq_get_convert("frequency_4xout"))
-        print('clkout3 Frequncy %.3f MHz' % self._freq_get_convert("frequency_clkout3"))
-        print('DCO Frequncy     %.3f MHz' % self._freq_get_convert("frequency_dco"))
+        print('4x Frequency      %.3f MHz' % self._freq_get_convert("frequency_4xout"))
+        print('clkout3 Frequency %.3f MHz' % self._freq_get_convert("frequency_clkout3"))
+        print('DCO Frequency     %.3f MHz' % self._freq_get_convert("frequency_dco"))
 
     def hardware_reset(self):
         print("Entering hardware_reset")
@@ -982,16 +981,16 @@ if __name__ == "__main__":
 
     from argparse import ArgumentParser
 
-    parser = ArgumentParser(description="RFS/PRC HW Setup script")
+    parser = ArgumentParser(description="Zest Digitizer Setup script")
 
     parser.add_argument('-a', '--address', dest="dev_addr", default=None,
-                        help='RFS/PRC URL (leep://<IP> or ca://<PREFIX>)')
+                        help='FPGA carrier URL (leep://<IP> or ca://<PREFIX>)')
     parser.add_argument('-p', '--port', default=803, type=int,
                         help='Application port number in badger')
     parser.add_argument('-r', '--reset', action='store_true', dest='reset', default=False,
                         help='Run HW reset routines')
     parser.add_argument('-b', '--bitfile', dest="bitfilepath", default=None,
-                        help='RFS/PRC FPGA bitstream file')
+                        help='FPGA carrier bitstream file')
     parser.add_argument('-s', '--scan', dest='scan', default=None, type=int,
                         help='Run MMCM scan')
     parser.add_argument('-f', '--ref_freq', dest='ref_freq', default=50., type=float,
