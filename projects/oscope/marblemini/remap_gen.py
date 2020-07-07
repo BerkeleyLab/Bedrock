@@ -1,3 +1,5 @@
+import argparse
+
 fpga_pin_to_fmc = {}
 fmc_name_to_zest = {}
 fmc_grid_to_name = {}
@@ -18,9 +20,9 @@ def mapin(fname, fmc_prefix):
             fmc_grid_to_name[fmc_grid] = fmc_name
 
 
-def gen_map():
-    mapin("../../../board_support/bmb7_kintex/fmc-lpc.lst", "FMC1_")
-    mapin("../../../board_support/bmb7_kintex/fmc-hpc.lst", "FMC2_")
+def gen_map(prefix="../../.."):
+    mapin(prefix + "/board_support/bmb7_kintex/fmc-lpc.lst", "FMC1_")
+    mapin(prefix + "/board_support/bmb7_kintex/fmc-hpc.lst", "FMC2_")
 
 
 def fmc_name_mangle(name):
@@ -76,9 +78,12 @@ def zest_in(fname):
 
 
 if __name__ == "__main__":
-    gen_map()
-    zest_in("../../../board_support/zest/digitizer_digital_pin.txt")
+    parser = argparse.ArgumentParser(description='Remap FMC PINs for generating constraints')
+    parser.add_argument('-p', '--prefix', default='../../..', help='bedrock_dir path')
+    args = parser.parse_args()
+    gen_map(args.prefix)
+    zest_in(args.prefix + "/board_support/zest/digitizer_digital_pin.txt")
     if False:
         for a in sorted(fpga_pin_to_fmc.keys()):
             print("%s: %s" % (a, fpga_pin_to_fmc[a]))
-    cycle_xdc("../bmb7_cu/oscope_common.xdc")
+    cycle_xdc(args.prefix + "/projects/oscope/bmb7_cu/oscope_common.xdc")
