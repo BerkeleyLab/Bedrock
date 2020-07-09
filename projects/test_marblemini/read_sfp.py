@@ -12,9 +12,8 @@ def busmux_sel(s, port_n):
 
 
 # Read static info from lower bank
-def sfp_init(s, port_n):
-    a = busmux_sel(s, port_n)
-    a += s.read(0xe0, 0, 1, addr_bytes=0)
+def sfp_init(s):
+    a = s.read(0xe0, 0, 1, addr_bytes=0)
     a += s.read(0xa0, 20, 16)  # Vendor
     a += s.read(0xa0, 40, 16)  # Part
     a += s.read(0xa0, 68, 16)  # Serial
@@ -24,9 +23,8 @@ def sfp_init(s, port_n):
 
 
 # Read dynamic component from upper bank
-def sfp_poll(s, port_n):
-    a = busmux_sel(s, port_n)
-    a += s.read(0xa2, 96, 10)  # 5 x 16-bit raw ADC values
+def sfp_poll(s):
+    a = s.read(0xa2, 96, 10)  # 5 x 16-bit raw ADC values
     return a
 
 
@@ -50,7 +48,7 @@ def hw_test_prog():
     fmc_list = [0, 1]
     a = []
     a += s.pause(2)  # ignored?
-    a += s.set_resx(3)  # avoid any confusion
+    a += s.set_resx(4)  # avoid any confusion
     a += busmux_reset(s)
     #
     a += busmux_sel(s, 6)  # App bus
@@ -62,7 +60,8 @@ def hw_test_prog():
     for ax in ina_list:
         a += s.read(ax, 0, 2)  # config
     for sfp_port in sfp_list:
-        a += sfp_init(s, sfp_port)
+        a += busmux_sel(s, sfp_port)
+        a += sfp_init(s)
     a += s.trig_analyz()
     for fmc_port in fmc_list:
         a += busmux_sel(s, fmc_port)
@@ -74,6 +73,10 @@ def hw_test_prog():
         # (can't see it on the 12V current, since IC7 is powered from P3V3)
         for xppr in [0xE3, 0xEB, 0xF3, 0xFB, 0xDB, 0xD3, 0xCB, 0xC3]:
             a += s.write(0x90, xppr, [0])
+    for cfg in [2, 4]:  # EVGIO
+        a += s.hw_config(cfg)
+        a += sfp_init(s)
+    a += s.hw_config(0)
     #
     jump_n = 9
     a += s.jump(jump_n)
@@ -91,7 +94,8 @@ def hw_test_prog():
         a += s.read(ax, 2, 2)  # bus voltage
     #
     for sfp_port in sfp_list:
-        a += sfp_poll(s, sfp_port)
+        a += busmux_sel(s, sfp_port)
+        a += sfp_poll(s)
     # FMC carrier tester card possible on FMC1 and FMC2
     # Set of six MCP23017 on application I2C bus (LA_02_P and LA_02_N)
     for cfg in [2, 4]:
@@ -106,6 +110,10 @@ def hw_test_prog():
         for chan_7797 in [6, 7, 8]:
             apb_7797 = (chan_7797+7) << 4
             a += s.read(0x46, apb_7797, 2)  # convert and read specified channel
+    for cfg in [2, 4]:  # EVGIO
+        a += s.hw_config(cfg)
+        a += sfp_poll(s)
+    a += s.hw_config(0)
     a += s.buffer_flip()  # Flip right away, so most info is minimally stale
     # This does mean that the second readout of the PCA9555 will be extra-stale
     # or even (on the first trip through) invalid.
