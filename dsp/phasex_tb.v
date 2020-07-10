@@ -1,8 +1,8 @@
 `timescale 1ns / 1ps
 
 module phasex_tb;
-parameter FREQ1         =   500.0*11/12/2; // MHz
-parameter F_RATIO       =   2;             // FREQ1/FREQ2
+parameter FREQ1         =   500.0*11/12/4; // MHz
+parameter F_RATIO       =   1;             // FREQ1/FREQ2
 parameter FREQ2         =   FREQ1/F_RATIO; // MHz
 parameter REF_FREQ      =   200.0;         // MHz
 
@@ -33,6 +33,7 @@ initial begin
         rclk=0; #5;
         rclk=1; #5;
     end
+    $display("ADV: %d", ADV);
     $display("Expected phase: %d, Calculated phase: %d",
         phase_expect, phase_diff);
     $display("%s",errors==0?"# PASS":"# FAIL");
