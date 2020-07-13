@@ -143,8 +143,8 @@ generate for (ix=0; ix < DW; ix=ix+1) begin: in_cell
     assign dout[8*ix+7 : 8*ix] = dq;
 
     // Remap to ADC_out
-    // Ad9653 Table 23 and Figure 2.
-    // LTC2175
+    // Supports Ad9653 Table 23 and Figure 2, in ZEST.
+    // Supports LTC2175 in FMC11x.
     for (jx=0;jx<8;jx=jx+1) assign adc_out[DW*jx+ix] = dout[jx];
 
     // XXX cross domains, data has to be a static training pattern

@@ -1,0 +1,54 @@
+[*]
+[*] GTKWave Analyzer v3.3.98 (w)1999-2019 BSI
+[*] Mon Jul 13 19:49:43 2020
+[*]
+[dumpfile] "/home/du/work/picorv32soc/test/wfm/wfm.vcd"
+[dumpfile_mtime] "Mon Jul 13 19:48:55 2020"
+[dumpfile_size] 427020
+[savefile] "/home/du/work/picorv32soc/test/wfm/wfm.sav"
+[timestart] 1685
+[size] 1000 600
+[pos] -1 -1
+*-7.394356 2192 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] wfm_tb.
+[treeopen] wfm_tb.cpu.
+[treeopen] wfm_tb.dut.
+[sst_width] 213
+[signals_width] 282
+[sst_expanded] 1
+[sst_vpaned_height] 151
+@800200
+-cpu
+@22
+wfm_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+wfm_tb.cpu.picorv32_core.dbg_ascii_state[127:0]
+wfm_tb.cpu.picorv32_core.dbg_insn_addr[31:0]
+wfm_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+wfm_tb.cpu.picorv32_core.dbg_mem_rdata[31:0]
+@28
+wfm_tb.cpu.picorv32_core.dbg_mem_ready
+wfm_tb.cpu.picorv32_core.dbg_mem_valid
+@22
+wfm_tb.cpu.picorv32_core.dbg_mem_wdata[31:0]
+wfm_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+@1000200
+-cpu
+@28
+wfm_tb.dsp_clk
+@22
+wfm_tb.adc_out_data[31:0]
+@24
+wfm_tb.dut.wfm_len[15:0]
+@28
+wfm_tb.dut.counting
+@24
+wfm_tb.dut.pc[4:0]
+@28
+wfm_tb.dut.trig
+@29
+wfm_tb.dut.adc_trigger
+@22
+wfm_tb.dut.sfRegsOut[31:0]
+wfm_tb.dut.sfRegsWrt[31:0]
+[pattern_trace] 1
+[pattern_trace] 0
