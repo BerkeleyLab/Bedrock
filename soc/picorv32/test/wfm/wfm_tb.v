@@ -98,6 +98,7 @@ module wfm_tb;
     parameter [7:0] BASE_WFM = 8'h03;
     wfm_pack #(
         .BASE_ADDR     (BASE_WFM),
+        .BASE2_ADDR    (8'h00),
         .N_CH          (2)
     ) dut (
         // Hardware interface
@@ -117,6 +118,6 @@ module wfm_tb;
     wire [15:0] v_rdata = cpu.mem_rdata[15:0];
     always @(posedge mem_clk) if (mem_read_stb) begin
         $display("Time: %g ns: addr: 0x%x, data : 0x%x\n", $time, v_addr, v_rdata);
-        if (v_addr % 2 == 0 && v_rdata == 16'hbeaf) pass = 1;
+        if (v_addr % 2 == 1 && v_rdata == 16'hdead) pass = 1;
     end
 endmodule

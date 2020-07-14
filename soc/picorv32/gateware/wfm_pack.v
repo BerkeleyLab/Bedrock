@@ -1,8 +1,8 @@
 module wfm_pack #(
     parameter N_CH  = 8,
     parameter AW    = 5,
-    parameter  [7:0]  BASE_ADDR=8'h00,
-    parameter  [7:0]  BASE2_ADDR=8'h20
+    parameter [7:0] BASE_ADDR  =8'h00,
+    parameter [7:0] BASE2_ADDR =8'h00
 ) (
     input               dsp_clk,
     input [16*N_CH-1:0] adc_out_data,
@@ -14,35 +14,15 @@ module wfm_pack #(
     output [32:0]       mem_packed_ret   //DEC < SFR
 );
 
-/// #define WFM_BASE2_ADDR 0x200000
-/// #define WFM_BASE2_SFR  0x100000
-localparam [7:0] BASE2_SFR  = 8'h10;
-
-wire [32:0] mem_packed_sfr_ret;
-wire [32:0] mem_packed_wfm_ret;
-assign mem_packed_ret = mem_packed_sfr_ret | mem_packed_wfm_ret;
-
-wire [31:0] sfRegsOut, sfRegsInp, sfRegsWrt;
-sfr_pack #(
-    .BASE_ADDR      ( BASE_ADDR      ),
-    .BASE2_ADDR     ( BASE2_SFR      ),
-    .N_REGS         ( 1              )
-) sfrInst (
-    .clk            ( clk            ),
-    .rst            ( rst            ),
-    .mem_packed_fwd ( mem_packed_fwd ),
-    .mem_packed_ret ( mem_packed_sfr_ret ),
-    .sfRegsOut      ( sfRegsOut      ),
-    .sfRegsIn       ( sfRegsInp      ),
-    .sfRegsWrStr    ( sfRegsWrt      )
-);
-
-/// #define SFR_BYTE_WFM_LEN  1
-/// #define SFR_BYTE_CHAN_SEL 0
-/// #define SFR_WST_BIT_TRIG  7
-wire [ 3:0] ch     = sfRegsOut[3:0];
-wire [15:0] wfm_len= sfRegsOut[8+:16];
-wire        trig0  = sfRegsOut[7];
+/// #define WFM_CFG_ADDR          0x1000
+/// #define WFM_CFG_BYTE_CHAN_SEL 0
+/// #define WFM_CFG_BYTE_WFM_LEN  1
+/// #define WFM_CFG_BYTE_TRIG     3
+reg [31:0] config_reg=32'h1000;
+localparam [15:0] CONFIG_ADDR = 16'h1000;
+wire [ 3:0] ch     = config_reg[3:0];
+wire [15:0] wfm_len= config_reg[8+:16];
+wire        trig0  = config_reg[24];
 reg trig1=0;
 always @(posedge clk) trig1 <= trig0;
 wire trig = trig0 & ~trig1;
@@ -59,7 +39,7 @@ wire [31:0] mem_rdata;
 reg         mem_ready;
 munpack mu (
     .mem_packed_fwd( mem_packed_fwd ),
-    .mem_packed_ret( mem_packed_wfm_ret ),
+    .mem_packed_ret( mem_packed_ret ),
     .mem_wdata ( mem_wdata    ),
     .mem_wstrb ( mem_wstrb    ),
     .mem_valid ( mem_valid    ),
@@ -69,18 +49,28 @@ munpack mu (
 );
 
 wire mem_addr_hit = mem_valid && mem_addr[31:16]=={BASE_ADDR,BASE2_ADDR};
+wire cfg_addr_hit = mem_addr_hit && mem_addr[15:0]==CONFIG_ADDR;
 // only react on 32 bit writes
-wire mem_write = (&mem_wstrb) && mem_addr_hit;
 wire mem_read  = !(|mem_wstrb) && mem_addr_hit;
 
 wire [15:0] dpram_dout;
-assign mem_rdata = dpram_dout;
 always @(posedge clk) begin
     mem_ready <= 0;
-    if ( mem_valid && !mem_ready && mem_read) begin
-        mem_ready <= 1'b1;
+    if (rst)
+        config_reg <= 32'h1000;
+    else begin
+        if ( !mem_ready && mem_addr_hit ) begin
+            if (cfg_addr_hit) begin
+                if (mem_wstrb[0]) config_reg[ 0+:8] <= mem_wdata[ 0+:8];
+                if (mem_wstrb[1]) config_reg[ 8+:8] <= mem_wdata[ 8+:8];
+                if (mem_wstrb[2]) config_reg[16+:8] <= mem_wdata[16+:8];
+                if (mem_wstrb[3]) config_reg[24+:8] <= mem_wdata[24+:8];
+            end
+            mem_ready <= 1'b1;
+        end
     end
 end
+assign mem_rdata = cfg_addr_hit ? config_reg : {16'h0, dpram_dout};
 
 wire adc_trigger;
 flag_xdomain flag_trig (
