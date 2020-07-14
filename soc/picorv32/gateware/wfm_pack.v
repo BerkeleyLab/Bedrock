@@ -15,13 +15,13 @@ module wfm_pack #(
 );
 
 /// #define WFM_CFG_ADDR          0x1000
-/// #define WFM_CFG_BYTE_CHAN_SEL 0
-/// #define WFM_CFG_BYTE_WFM_LEN  1
+/// #define WFM_CFG_BYTE_WFM_LEN  0
+/// #define WFM_CFG_BYTE_CHAN_SEL 2
 /// #define WFM_CFG_BYTE_TRIG     3
-reg [31:0] config_reg=32'h1000;
+reg [31:0] config_reg=32'h0010;
 localparam [15:0] CONFIG_ADDR = 16'h1000;
-wire [ 3:0] ch     = config_reg[3:0];
-wire [15:0] wfm_len= config_reg[8+:16];
+wire [15:0] wfm_len= config_reg[ 0+:16];
+wire [ 3:0] ch     = config_reg[16+:4];
 wire        trig0  = config_reg[24];
 reg trig1=0;
 always @(posedge clk) trig1 <= trig0;
@@ -57,7 +57,7 @@ wire [15:0] dpram_dout;
 always @(posedge clk) begin
     mem_ready <= 0;
     if (rst)
-        config_reg <= 32'h1000;
+        config_reg <= 32'h10;
     else begin
         if ( !mem_ready && mem_addr_hit ) begin
             if (cfg_addr_hit) begin
