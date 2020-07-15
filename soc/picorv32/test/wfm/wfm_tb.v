@@ -118,6 +118,6 @@ module wfm_tb;
     wire [15:0] v_rdata = cpu.mem_rdata[15:0];
     always @(posedge mem_clk) if (mem_read_stb) begin
         $display("Time: %g ns: addr: 0x%x, data : 0x%x\n", $time, v_addr, v_rdata);
-        if (v_addr % 2 == 1 && v_rdata == 16'hdead) pass = 1;
+        if (v_addr % 2 == 0 && v_rdata == 16'hdead) pass = 1;
     end
 endmodule

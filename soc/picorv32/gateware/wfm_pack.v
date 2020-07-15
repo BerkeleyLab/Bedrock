@@ -35,7 +35,7 @@ wire [31:0] mem_wdata;
 wire [ 3:0] mem_wstrb;
 wire        mem_valid;
 wire [31:0] mem_addr;
-wire [31:0] mem_rdata;
+reg  [31:0] mem_rdata=0;
 reg         mem_ready;
 munpack mu (
     .mem_packed_fwd( mem_packed_fwd ),
@@ -53,9 +53,12 @@ wire cfg_addr_hit = mem_addr_hit && mem_addr[15:0]==CONFIG_ADDR;
 // only react on 32 bit writes
 wire mem_read  = !(|mem_wstrb) && mem_addr_hit;
 
+reg ready1=0;
 wire [15:0] dpram_dout;
 always @(posedge clk) begin
     mem_ready <= 0;
+    ready1 <= 0;
+    mem_rdata <= 0;
     if (rst)
         config_reg <= 32'h10;
     else begin
@@ -65,12 +68,16 @@ always @(posedge clk) begin
                 if (mem_wstrb[1]) config_reg[ 8+:8] <= mem_wdata[ 8+:8];
                 if (mem_wstrb[2]) config_reg[16+:8] <= mem_wdata[16+:8];
                 if (mem_wstrb[3]) config_reg[24+:8] <= mem_wdata[24+:8];
+                mem_rdata <= config_reg;
+            end else begin
+                mem_rdata <= dpram_dout;
             end
-            mem_ready <= 1'b1;
+            ready1 <= 1'b1;
+            mem_ready <= ready1;
         end
     end
 end
-assign mem_rdata = cfg_addr_hit ? config_reg : {16'h0, dpram_dout};
+// assign mem_rdata = cfg_addr_hit ? config_reg : {16'h0, dpram_dout};
 
 wire adc_trigger;
 flag_xdomain flag_trig (
