@@ -8,18 +8,25 @@
 `timescale 1ns / 1ns
 
 module phaset #(
+	parameter order=1,
 	parameter dw=14,
 	parameter adv=3861,
-	parameter delta=264  // 8*33
+	parameter delta=264,  // 8*33
+	parameter ext_div_en=0
 ) (
 	input uclk,
 	input sclk,
+	input ext_div,
 	output [dw-1:0] phase,
 	output fault  // single cycle
 );
 
 // _Still_ draw analogy to the AD9901
-reg div=0; always @(posedge uclk) div <= ~div;
+// Generalize to a Johnson counter
+reg [order-1:0] ishr=0;
+always @(posedge uclk) ishr <= (ishr << 1) | {{order-1{1'b0}},~ishr[order-1]};
+wire div = ishr[0];
+//reg div=0; always @(posedge uclk) div <= ~div;
 
 // Test bench fails for some initial phase_r values between 14900 and 15050.
 // In that case the fault output signals the problem.
@@ -34,7 +41,7 @@ wire dir  = ~nsb;
 wire dn = move &  dir;
 wire up = move & ~dir;
 always @(posedge sclk) begin
-	capture <= div;
+	capture <= ext_div_en ? ext_div : div;
 	if (move) phase_r <= phase_r + (dir ? -delta : delta);
 	fault_r <= move & peak;
 	osc <= osc + adv;

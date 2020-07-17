@@ -52,5 +52,5 @@ def prnd(seed, width):
 
 
 if __name__ == "__main__":
-    outseq = prnd(seed=0x92, width=16)
+    outseq = prnd(seed=0x1ff, width=16)
     print(('\n'.join([format(i, '04x') for i in outseq])))
