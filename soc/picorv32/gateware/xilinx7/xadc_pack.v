@@ -148,7 +148,7 @@ XADC #(
     .SIM_MONITOR_FILE(SIM_MONITOR_FILE)// Analog Stimulus file for simulation
 ) xadc_inst (
         .CONVST         (trig),
-        .CONVSTCLK      (clk),
+        .CONVSTCLK      (trig),
         .DADDR          (daddr_in),
         .DCLK           (clk),
         .DEN            (den_in),
