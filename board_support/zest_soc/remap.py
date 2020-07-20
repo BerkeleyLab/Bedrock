@@ -95,8 +95,7 @@ def zest_in(fname):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-            description='Remap FMC PINs for generating constraints')
+    parser = argparse.ArgumentParser(description='Remap FMC PINs for generating constraints')
     parser.add_argument(
         '-p', '--prefix',
         default='./bedrock', help='bedrock_dir path')
@@ -108,8 +107,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     pin_to_name = map_in(args.vita57)
-    p1, p2 = zest_in(
-            args.prefix + '/board_support/zest/digitizer_digital_pin.txt')
+    p1, p2 = zest_in(args.prefix + '/board_support/zest/digitizer_digital_pin.txt')
 
     with open(args.output, 'w+') as fo:
         for pin in sorted(p1.keys()):
