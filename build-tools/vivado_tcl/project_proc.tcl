@@ -63,6 +63,7 @@ proc project_create {platform_name project_name} {
     if {$project_board ne "none"} {
         set_property board_part $project_board [current_project]
     }
+    set_property top $project_name [current_fileset]
 }
 
 proc project_bd_design {library_dir project_name} {
