@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 // https://en.wikipedia.org/wiki/Pseudorandom_binary_sequence
-// PRBS9 in 16-bit parrallel reprensentaion
+// PRBS9 in 16-bit parallel representation
 int main(int argc, char* argv[]) {
     uint16_t start = 0x1ff;
     uint16_t p = 0;
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     uint8_t newbit;
     for (int i = 1; i <= 512*16; i++) {
         printf("XXX Step=%4d, 16bit: %#06x, state: %#06x\n", i, p, sr);
-        p = ((p << 1) | ((sr>>8) & 1)); // shift to parrallel
+        p = ((p << 1) | ((sr>>8) & 1)); // shift to parallel
         if (i % 16 == 0) printf("Step=%4d, 16bit: %#06x, state: %#06x\n", i, p, sr);
         newbit = (((sr >> 8) ^ (sr >> 4)) & 1);
         sr = ((sr << 1) | newbit) & 0x1ff;

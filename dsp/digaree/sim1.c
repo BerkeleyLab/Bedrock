@@ -144,7 +144,7 @@ static void persist_set(const char *name, int val)
 
 static void cycle(int given[])
 {
-// suck in the machine-gnenerated instruction sequence
+// suck in the machine-generated instruction sequence
 static int init=1;
 #include "ops.h"
 init = 0;
