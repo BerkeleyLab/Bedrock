@@ -73,7 +73,7 @@ end
 
 wire signed [width-1:0] xout, yout;
 wire [width:0] pout;
-// testing slave mode: op==3, interleave opp=3 with opp=1
+// testing follow mode: op==3, interleave opp=3 with opp=1
 wire [1:0] opp = op&{interleave,1'b1};
 localparam cordic_delay = nstg;
 cordicg_b`DPW #(.width(width), .nstg(nstg)) dut(clk, opp, xin, yin, phasein, xout, yout, pout);

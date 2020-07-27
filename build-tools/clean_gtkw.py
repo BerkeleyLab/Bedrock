@@ -20,16 +20,16 @@ N_LINES = 8
 BAD_PREFIXES = ['[*]', '[dumpfile_', '[savefile]']
 
 
-def clean_line(l):
+def clean_line(line):
     ''' returns a cleaned up version of l '''
-    if any((l.startswith(p) for p in BAD_PREFIXES)):
+    if any((line.startswith(p) for p in BAD_PREFIXES)):
         return ''
     # do not allow absolute path to the .vcd file
-    m = match(r'\[dumpfile\] "(.*)"', l)
+    m = match(r'\[dumpfile\] "(.*)"', line)
     if m:
         # replace by filename only
         return '[dumpfile] "{:}"\n'.format(basename(m.group(1)))
-    return l
+    return line
 
 
 def clean_gtkw_file(fName, overwrite=False):

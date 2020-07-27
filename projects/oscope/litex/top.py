@@ -97,6 +97,8 @@ def main():
                         help="enable Ethernet support")
     parser.add_argument("--ethernet-phy", default="rgmii",
                         help="select Ethernet PHY (rgmii or 1000basex)")
+    parser.add_argument("-p", "--program-only", action="store_true",
+                        help="select Ethernet PHY (rgmii or 1000basex)")
     args = parser.parse_args()
 
     if args.with_ethernet:
@@ -105,14 +107,17 @@ def main():
         # soc = EthernetSoC(phy=args.ethernet_phy, **soc_core_argdict(args))
     else:
         soc = BaseSoC(**soc_sdram_argdict(args))
+
     builder = Builder(soc, **builder_argdict(args))
-    vns = builder.build()
+    if not args.program_only:
+        vns = builder.build()
 
-    if False:
-        soc.analyzer.do_exit(vns)
+        if False:
+            soc.analyzer.do_exit(vns)
 
-    # prog = soc.platform.create_programmer()
-    # prog.load_bitstream('soc_basesoc_marblemini/gateware/top.bit')
+    prog = soc.platform.create_programmer()
+    import os
+    prog.load_bitstream(os.path.join(builder.gateware_dir, "top.bit"))
 
 
 if __name__ == "__main__":

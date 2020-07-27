@@ -84,18 +84,13 @@ wire  [ 4:0] addr_reg_b = mem_addr[ 9+: 5];    // Which register for mode 1, 2
 // --------------------------------------------------------------
 //  Read / write the special function register file
 // --------------------------------------------------------------
-integer x;
 always @(posedge clk) begin
     mem_ready <= 0;
     mem_rdata <= 0;
     // Make all Write strobes pulsed signals
-    for (x=0; x<N_REGS*32; x=x+1) begin
-        sfRegsWrStr[x] <= 1'b0;
-    end
+    sfRegsWrStr <= {N_REGS{32'h0}};
     if( rst ) begin         // Copy INITIAL_STATE to registers on reset
-        for (x=0; x<N_REGS*32; x=x+1) begin
-            sfRegsOut[x] <= INITIAL_STATE[x];
-        end
+        sfRegsOut <= INITIAL_STATE;
     end else if ( mem_valid && !mem_ready && addr_base=={BASE_ADDR,BASE2_ADDR,2'b00} ) begin
         mem_ready <= 1;     // For now, never stall CPU when addressed
         case (addr_mode)

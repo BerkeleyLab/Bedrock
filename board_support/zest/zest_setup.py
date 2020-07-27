@@ -76,8 +76,7 @@ class c_prc(c_llrf_bmb7):
             0x109: 'Sync'
         }
 
-        # Open communication with the RFS/PRC
-        # _log.info('IP address is %s', self.ip)
+        # Open communication with the carrier board
         print('Carrier board address %s' % leep_addr)
 
         self.leep = leep.open(leep_addr, instance=[])
@@ -108,9 +107,20 @@ class c_prc(c_llrf_bmb7):
             exit(2)
         sys.stdout.flush()
 
+    def _freq_get_convert(self, reg_name):
+        freq_count = self.leep.reg_read([(reg_name)])[0]
+        return freq_count * self.ref_freq * 0.5**24
+
+    def clock_check(self):
+        print('4x Frequency      %.3f MHz' % self._freq_get_convert("frequency_4xout"))
+        print('clkout3 Frequency %.3f MHz' % self._freq_get_convert("frequency_clkout3"))
+        print('DCO Frequency     %.3f MHz' % self._freq_get_convert("frequency_dco"))
+
     def hardware_reset(self):
         print("Entering hardware_reset")
         self.digitizer_spi_init()
+
+        self.clock_check()
 
         if not self.amc7823_print(check_channels=[3, 5, 7]):
             print("amc7823_print failed")
@@ -367,9 +377,9 @@ class c_prc(c_llrf_bmb7):
 
     def set_test_mode(self, tp):
         if tp != self.test_mode_now:
-            for adc in [self.U2_adc_spi, self.U3_adc_spi]:
+            for adc in self.U2_adc_spi, self.U3_adc_spi:
                 self.spi_write(adc, 0xd, tp)
-        self.test_mode_now = tp
+            self.test_mode_now = tp
         return tp  # self.spi_read(adc, 0xd)[0][2].encode('hex')
 
     def bitslip_calc(self, value=0xa19c):
@@ -678,7 +688,7 @@ class c_prc(c_llrf_bmb7):
         s1, adc_values = self.adc_bufr_reset1(
             adc_values, 'BUFR 1', 0, 'U3_clk_reset_r', self.U3_adc_iserdes_reset)
         s2, adc_values = self.adc_bufr_reset1(
-            adc_values, 'BUFR 2', 2, 'U2_clk_reset_r', self.U2_adc_iserdes_reset)
+            adc_values, 'BUFR 2', 4, 'U2_clk_reset_r', self.U2_adc_iserdes_reset)
         return s1 and s2
 
     def adc_bitslip(self):
@@ -964,23 +974,23 @@ class c_prc(c_llrf_bmb7):
 
 
 def usage():
-    print("python prc.py -a $IP [-r [-b bitfile] ]")
+    print("python zest_setup.py -a $IP [-r [-b bitfile] ]")
 
 
 if __name__ == "__main__":
 
     from argparse import ArgumentParser
 
-    parser = ArgumentParser(description="RFS/PRC HW Setup script")
+    parser = ArgumentParser(description="Zest Digitizer Setup script")
 
     parser.add_argument('-a', '--address', dest="dev_addr", default=None,
-                        help='RFS/PRC URL (leep://<IP> or ca://<PREFIX>)')
+                        help='FPGA carrier URL (leep://<IP> or ca://<PREFIX>)')
     parser.add_argument('-p', '--port', default=803, type=int,
                         help='Application port number in badger')
     parser.add_argument('-r', '--reset', action='store_true', dest='reset', default=False,
                         help='Run HW reset routines')
     parser.add_argument('-b', '--bitfile', dest="bitfilepath", default=None,
-                        help='RFS/PRC FPGA bitstream file')
+                        help='FPGA carrier bitstream file')
     parser.add_argument('-s', '--scan', dest='scan', default=None, type=int,
                         help='Run MMCM scan')
     parser.add_argument('-f', '--ref_freq', dest='ref_freq', default=50., type=float,

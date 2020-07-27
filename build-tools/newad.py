@@ -298,14 +298,14 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
         verilog_file_lines = f.readlines()
     this_port_list = []
     attributes = {}
-    for l in verilog_file_lines:
+    for line in verilog_file_lines:
         # Search for attributes
-        m = re.search(DESCRIPTION_ATTRIBUTE, l)
+        m = re.search(DESCRIPTION_ATTRIBUTE, line)
         if m:
             value = m.group(1)
             attributes['description'] = value
         # (a) instantiations
-        m = re.search(INSTANTIATION_SITE, l)
+        m = re.search(INSTANTIATION_SITE, line)
         if m:
             mod = m.group(1)
             inst = m.group(3)
@@ -348,7 +348,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
                     construct_map(inst, p, gcnt, this_mod)
         # (b) ports
         # Search for port with register width defined 'input (signed)? [%d:%d] name // <...>'
-        m = re.search(PORT_WIDTH_MULTI, l)
+        m = re.search(PORT_WIDTH_MULTI, line)
         if m:
             info = [m.group(i) for i in range(7)]
             p = Port(info[5], (info[3], info[4]), info[1], info[2], this_mod,
@@ -363,7 +363,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
                 consider_port(p, fd)
             attributes = {}
         else:
-            m = re.search(PORT_WIDTH_SINGLE, l)
+            m = re.search(PORT_WIDTH_SINGLE, line)
             if m:
                 info = [m.group(i) for i in range(5)]
                 p = Port(info[3], (0, 0), info[1], info[2], this_mod, info[4],
@@ -374,7 +374,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
 
         # (c) registers in the top-level file
         if not stack:
-            m = re.search(TOP_LEVEL_REG, l)
+            m = re.search(TOP_LEVEL_REG, line)
             if m:
                 info = [m.group(i) for i in range(6)]
                 p = Port(info[4], (info[2], info[3]), 'top_level', info[1],

@@ -1,4 +1,5 @@
 module xadc_pack #(
+    parameter SIM_MONITOR_FILE="design.txt",
     parameter  [7:0] BASE_ADDR=8'h01
 ) (
     // XADC hardware pin
@@ -144,10 +145,10 @@ XADC #(
     .INIT_58(16'h5999), // VCCBRAM upper alarm limit
     .INIT_5C(16'h5111), //  VCCBRAM lower alarm limit
     .SIM_DEVICE("7SERIES"),
-    .SIM_MONITOR_FILE("design.txt")// Analog Stimulus file for simulation
+    .SIM_MONITOR_FILE(SIM_MONITOR_FILE)// Analog Stimulus file for simulation
 ) xadc_inst (
         .CONVST         (trig),
-        .CONVSTCLK      (clk),
+        .CONVSTCLK      (trig),
         .DADDR          (daddr_in),
         .DCLK           (clk),
         .DEN            (den_in),

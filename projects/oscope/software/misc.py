@@ -56,15 +56,15 @@ class Processing:
     @staticmethod
     def time_domain(data_block, ch_n):
         ch_data = data_block.data[ch_n]
-        with open('td_file', 'a') as f:
-            f.write('{}, {}, {}, {}, {}\n'.format(np.max(ch_data),
-                                                  np.max(ch_data) -
-                                                  np.min(ch_data),
-                                                  Processing.max_val_freq,
-                                                  Processing.max_val,
-                                                  ch_n))
+        # with open('td_file', 'a') as f:
+        #     f.write('{}, {}, {}, {}, {}\n'.format(np.max(ch_data),
+        #                                           np.max(ch_data) -
+        #                                           np.min(ch_data),
+        #                                           Processing.max_val_freq,
+        #                                           Processing.max_val,
+        #                                           ch_n))
         T = np.arange(len(ch_data)) / ADC.fpga_output_rate  # in seconds
-        return T, ch_data, np.max(ch_data) - np.min(ch_data)
+        return T, ch_data, np.max(ch_data) - np.min(ch_data), data_block.ts
 
     @staticmethod
     def save(data_block, *args):

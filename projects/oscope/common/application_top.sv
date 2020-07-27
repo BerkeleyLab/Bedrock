@@ -3,149 +3,50 @@
 `include "application_top_auto.vh"
 
 module application_top(
-        input         lb_clk,
-        input         lb_write,
-        input         lb_strobe,
-        input         lb_rd,
-        input [23:0]  lb_addr,
-        input [31:0]  lb_data,
+        input 		  lb_clk,
+        input 		  lb_write,
+        input 		  lb_strobe,
+        input 		  lb_rd,
+        input [23:0] 	  lb_addr,
+        input [31:0] 	  lb_data,
         output reg [31:0] lb_din,
 
-	input clk200,
-	input idelayctrl_rdy,
-	output idelayctrl_reset,
-	input [63:0] U2_dout,
-	input [63:0] U3_dout,
-	input U2_clk_div_bufg,
-	input U3_clk_div_bufg,  // purposefully unused
-	input U2_clk_div_bufr,
-	input U3_clk_div_bufr,
-	input U2_dco_clk_out,
-	input U3_dco_clk_out,
-	output [39:0] U2_idelay_value_in,
-	output [39:0] U3_idelay_value_in,
-	input [39:0] U2_idelay_value_out,
-	input [39:0] U3_idelay_value_out,
-	output [7:0] U2_bitslip,
-	output [7:0] U3_bitslip,
-	output [7:0] U2_idelay_ld,
-	output [7:0] U3_idelay_ld,
-	output U2_pdwn,
-	output U3_pdwn,
-	output U2_iserdes_reset,
-	output U3_iserdes_reset,
+	input 		  clk200,
 
-	output U2_clk_reset,
-	output U3_clk_reset,
-	output mmcm_reset,
-	input mmcm_locked,
+	// Zest related
+	zest_cfg_if.master zif_cfg,
 
-	output U2_mmcm_psclk,
-	output U2_mmcm_psen,
-	output U2_mmcm_psincdec,
-	input U2_mmcm_psdone,
+	output [2:0] 	  D4rgb,
+	output [2:0] 	  D5rgb,
+	inout [3:0] 	  J17_pmod_4321, // top row of pins,       J17_pmod_4321[3] next to ground pin
+	inout [3:0] 	  J17_pmod_a987, // row adjacent to board, J17_pmod_a987[3] next to ground pin
+	inout [3:0] 	  J18_pmod_4321, // top row of pins,       J18_pmod_4321[3] next to ground pin
+	inout [3:0] 	  J18_pmod_a987, // row adjacent to board, J18_pmod_a987[3] next to ground pin
+	inout [5:0] 	  J19_hdmi_data,
+	inout [5:0] 	  J19_hdmi_ctrl
 
-	output U3_mmcm_psclk,
-	output U3_mmcm_psen,
-	output U3_mmcm_psincdec,
-	input U3_mmcm_psdone,
 
-	input U1_clkout3,
-	input U4_dco_clk_out,
-	output U4_dci,
-	output U4_reset,
-	output [13:0] U4_data_i,
-	output [13:0] U4_data_q,
-	output [2:0] D4rgb,
-	output [2:0] D5rgb,
-	output U27dir,
-	inout [3:0] J17_pmod_4321,   // top row of pins,       J17_pmod_4321[3] next to ground pin
-	inout [3:0] J17_pmod_a987,   // row adjacent to board, J17_pmod_a987[3] next to ground pin
-	inout [3:0] J18_pmod_4321,   // top row of pins,       J18_pmod_4321[3] next to ground pin
-	inout [3:0] J18_pmod_a987,   // row adjacent to board, J18_pmod_a987[3] next to ground pin
-	inout [5:0] J19_hdmi_data,
-	inout [5:0] J19_hdmi_ctrl,
-	output U15_clk,
-	output U15_spi_start,
-	output [15:0] U15_spi_addr,
-	output U15_spi_read,
-	output [15:0] U15_spi_data,
-	input [15:0] U15_sdo_addr,
-	input [15:0] U15_spi_rdbk,
-	input U15_spi_ready,
-	input U15_sdio_as_sdo,
-	output U18_clkin,
-	output U18_spi_start,
-	output [7:0] U18_spi_addr,
-	output U18_spi_read,
-	output [23:0] U18_spi_data,
-	input [7:0] U18_sdo_addr,
-	input [23:0] U18_spi_rdbk,
-	input U18_spi_ready,
-	input U18_sdio_as_sdo,
+	// inout 		  U1_datauwire_inout,  TODO: current status is skeptical
 
-	output U15_sclk_in,
-	output U15_mosi_in,
-	output U15_ss_in,
-	input U15_miso_out,
-	output U15_ssb_in,
-	input U15_sclk_out,
-	input U15_mosi_out,
-	input U15_ssb_out,
-	output U18_sclk_in,
-	output U18_mosi_in,
-	output U18_ssb_in,
-	output U18_clk_in,
-	input U18_sclk_out,
-	input U18_mosi_out,
-	output U18_ss_in,
-	input U18_miso_out,
-	input U18_ssb_out,
-
-	output U15_U18_sclk,
-	output U15_U18_mosi,
-	output U33U1_pwr_sync,
-	output U33U1_pwr_en,
-	output U4_csb_in,
-	output U4_sclk_in,
-	input U4_sdo_out,
-	inout U4_sdio_inout,
-	output U1_clkuwire_in,
-	inout U1_datauwire_inout,
-	output U1_leuwire_in,
-	output U2_csb_in,
-	output U2_sclk_in,
-
-	input U2_sdi,
-	output U2_sdo,
-	output U2_sdio_as_i,
-	output U3_csb_in,
-	output U3_sclk_in,
-	input U3_sdi,
-	output U3_sdo,
-	output U3_sdio_as_i
+	// input 		  U3_sdi,
 );
 
-assign U15_sclk_in=1'b0;
-assign U15_mosi_in=1'b0;
-assign U15_ssb_in=1'b1;
-assign U18_sclk_in=U15_sclk_out;
-assign U18_mosi_in=U15_mosi_out;
-assign U18_ssb_in=U15_ssb_out;
-assign U15_U18_sclk=U18_sclk_out;
-assign U15_U18_mosi=U18_mosi_out;
+
+
 //wire clk=bmb7_U7_clkout;
 //`define BMB7_STANDALONE
 `ifdef BMB7_STANDALONE
 	// Clock DSP with 125 MHz
 	wire adc_clk=rxusrclk_u50_i[0];
+`elsif VERILATOR
+        // To be force-set by hierarchical reference in simulation
+        reg sim_adc_clk /*verilator public_flat_rw */;
+        wire adc_clk = sim_adc_clk;
 `else
 	// Clock DSP from external clock source at 1320/14 MHz
-	wire adc_clk=U2_clk_div_bufg;
+	wire adc_clk=zif_cfg.U2_clk_div_bufg;
 `endif
 
-assign U15_clk=lb_clk;
-assign U18_clkin=lb_clk;
 // Magic
 // Needs placing before usage of any top-level registers
 wire clk1x_clk, clk2x_clk, lb4_clk;
@@ -220,9 +121,6 @@ data_xdomain #(.size(32+24)) lb_to_adc(
 reg scan_trigger=0; always @(posedge lb_clk) scan_trigger <= we_digitizer_config_scan_trigger_we & lb_data[0:0];
 reg autoset_enable=0; always @(posedge lb_clk) if (we_digitizer_config_scan_trigger_we) autoset_enable <= lb_data[1:1];
 
-// reg [1:0] adc_mmcm; top-level single-cycle
-wire adc_mmcm_psen = adc_mmcm[0];
-wire adc_mmcm_psincdec = adc_mmcm[1];
 
 // reg [0:0] ctrace_start; top-level single-cycle
 
@@ -240,14 +138,14 @@ wire llspi_re = lb_strobe &  lb_rd & (lb_addr==(24'h190000 + 5));
 reg signed [15:0] U2DA=0, U2DB=0, U2DC=0, U2DD=0;
 reg signed [15:0] U3DA=0, U3DB=0, U3DC=0, U3DD=0;
 always @(posedge adc_clk) begin
-	U2DA <= U2_dout[63:48];
-	U2DB <= U2_dout[47:32];
-	U2DC <= U2_dout[31:16];
-	U2DD <= U2_dout[15: 0];
-	U3DA <= U3_dout[63:48];
-	U3DB <= U3_dout[47:32];
-	U3DC <= U3_dout[31:16];
-	U3DD <= U3_dout[15: 0];
+	U2DA <= zif_cfg.U2_dout[63:48];
+	U2DB <= zif_cfg.U2_dout[47:32];
+	U2DC <= zif_cfg.U2_dout[31:16];
+	U2DD <= zif_cfg.U2_dout[15: 0];
+	U3DA <= zif_cfg.U3_dout[63:48];
+	U3DB <= zif_cfg.U3_dout[47:32];
+	U3DC <= zif_cfg.U3_dout[31:16];
+	U3DD <= zif_cfg.U3_dout[15: 0];
 end
 wire [127:0] adc_data = {U2DD, U2DC, U2DB, U2DA, U3DD, U3DC, U3DB, U3DA};
 
@@ -311,10 +209,10 @@ wire [21:0] telem_monitor;
 wire signed [13:0] fdbk_drive_lb_out;
 wire [25:0] freq_multi_count_out;
 wire [1:0] dac_enabled;
-wire [31:0] U15_spi_addr_rdbk = {U15_sdo_addr, U15_spi_rdbk};
-wire [1:0] U15_spi_status = {U15_spi_ready, U15_sdio_as_sdo};
-wire [31:0] U18_spi_addr_rdbk = {U18_sdo_addr, U18_spi_rdbk};
-wire [1:0] U18_spi_status = {U18_spi_ready, U18_sdio_as_sdo};
+wire [31:0] U15_spi_addr_rdbk = {zif_cfg.U15_sdo_addr,  zif_cfg.U15_spi_rdbk};
+wire [1:0] U15_spi_status     = {zif_cfg.U15_spi_ready, zif_cfg.U15_sdio_as_sdo};
+wire [31:0] U18_spi_addr_rdbk = {zif_cfg.U18_sdo_addr,  zif_cfg.U18_spi_rdbk};
+wire [1:0] U18_spi_status     = {zif_cfg.U18_spi_ready, zif_cfg.U18_sdio_as_sdo};
 wire [3:0] J18_debug = {de9_dsr, de9_rxd, j4_24v, j5_24v};
 
 // this 2K x 16 ROM should be automatically generated
@@ -330,14 +228,14 @@ wire [31:0] hello_1 = "o wo";
 wire [31:0] hello_2 = "rld!";
 wire [31:0] hello_3 = 32'h0d0a0d0a;
 wire [31:0] ffffffff = 32'hffffffff;
-wire [31:0] U2dout_lsb = U2_dout[31:0];
-wire [31:0] U2dout_msb = U2_dout[63:32];
-wire [31:0] U3dout_lsb = U3_dout[31:0];
-wire [31:0] U3dout_msb = U3_dout[63:32];
-wire [19:0] idelay_value_out_U2_lsb = U2_idelay_value_out[19:0];
-wire [19:0] idelay_value_out_U2_msb = U2_idelay_value_out[39:20];
-wire [19:0] idelay_value_out_U3_lsb = U3_idelay_value_out[19:0];
-wire [19:0] idelay_value_out_U3_msb = U3_idelay_value_out[39:20];
+wire [31:0] U2dout_lsb = zif_cfg.U2_dout[31:0];
+wire [31:0] U2dout_msb = zif_cfg.U2_dout[63:32];
+wire [31:0] U3dout_lsb = zif_cfg.U3_dout[31:0];
+wire [31:0] U3dout_msb = zif_cfg.U3_dout[63:32];
+wire [19:0] idelay_value_out_U2_lsb = zif_cfg.U2_idelay_value_out[19:0];
+wire [19:0] idelay_value_out_U2_msb = zif_cfg.U2_idelay_value_out[39:20];
+wire [19:0] idelay_value_out_U3_lsb = zif_cfg.U3_idelay_value_out[19:0];
+wire [19:0] idelay_value_out_U3_msb = zif_cfg.U3_idelay_value_out[39:20];
 
 // Very basic pipelining of read process
 reg [23:0] lb_addr_r=0;
@@ -468,91 +366,40 @@ always @(posedge lb_clk) begin
 	endcase
 end
 
-// llspi routing
-wire llspi_sdi = U2_sdi;
-wire llspi_sdo;
-assign U3_sdo = llspi_sdo;
-assign U2_sdo = llspi_sdo;
-assign U3_sdio_as_i = ~U27dir;
-assign U2_sdio_as_i = ~U27dir;
-
 wire rawadc_trig_x;
 digitizer_config digitizer_config // auto
-(
-	.lb_clk(lb_clk),
-	.lb_strobe(lb_strobe),
-	.lb_rd(lb_rd),
-	.lb_addr(lb_addr),
-	.lb_dout(lb_data),
-	.U1_clkout3(U1_clkout3),
-	.U2_clk_div_bufg(U2_clk_div_bufg),
-	.U2_clk_div_bufr(U2_clk_div_bufr),
-	.U3_clk_div_bufr(U3_clk_div_bufr),
-	.bmb7_U7_clk4xout(clk200),
-	.U4_dco_clk_out(U4_dco_clk_out),
-	.U18_clk_in(U18_clk_in),
-	.U33U1_pwr_sync(U33U1_pwr_sync),
-	.U2_idelay_ld(U2_idelay_ld),
-	.U3_idelay_ld(U3_idelay_ld),
-	.U2_idelay_value_in(U2_idelay_value_in),
-	.U3_idelay_value_in(U3_idelay_value_in),
-	.U15_spi_start(U15_spi_start),
-	.U15_spi_read(U15_spi_read),
-	.U15_spi_data(U15_spi_data),
-	.U15_spi_addr(U15_spi_addr),
-	.U18_spi_start(U18_spi_start),
-	.U18_spi_read(U18_spi_read),
-	.U18_spi_data(U18_spi_data),
-	.U18_spi_addr(U18_spi_addr),
-	.U4_reset(U4_reset),
-	.mmcm_reset(mmcm_reset),
-	.mmcm_locked(mmcm_locked),
-	.U33U1_pwr_en(U33U1_pwr_en),
-	.idelayctrl_reset(idelayctrl_reset),
-	.U2_pdwn(U2_pdwn),
-	.U3_pdwn(U3_pdwn),
-	.U2_sclk_in(U2_sclk_in),
-	.U4_sdio_inout(U4_sdio_inout),
-	.U1_leuwire_in(U1_leuwire_in),
-	.U27dir(U27dir),
-	.U2_csb_in(U2_csb_in),
-	.U3_csb_in(U3_csb_in),
-	.U4_csb_in(U4_csb_in),
-	.U4_sdo_out(U4_sdo_out),
-	.U15_miso_out(U15_miso_out),
-	.U18_miso_out(U18_miso_out),
-	.llspi_sdi(llspi_sdi),
-	.llspi_sdo(llspi_sdo),
-	.U2_clk_reset(U2_clk_reset),
-	.U3_clk_reset(U3_clk_reset),
-	.U2_bitslip(U2_bitslip),
-	.U3_bitslip(U3_bitslip),
-	.U2_iserdes_reset(U2_iserdes_reset),
-	.U3_iserdes_reset(U3_iserdes_reset),
-	.rawadc_trig_x(rawadc_trig_x),
-	.adc_clk(adc_clk),
-	.adc_data(adc_data),
-	.banyan_status(banyan_status),
-	.phasex_dout(phasex_dout),
-	.phase_status_U2(phase_status_U2),
-	.phase_status_U3(phase_status_U3),
-	.phasex_ready(phasex_ready),
-	.phasex_present(phasex_present),
-	.llspi_status(llspi_status),
-	.llspi_result(llspi_result),
-	.idelay_mirror_val(idelay_mirror_val),
-	.scanner_result_val(scanner_result_val),
-	.banyan_data(banyan_data),
-	.frequency(frequency_adc),
-	.frequency_4xout(frequency_4xout),
-	.frequency_clkout3(frequency_clkout3),
-	.frequency_dac_dco(frequency_dac_dco),
-	.clk_status(clk_status),
-	.llspi_re(llspi_re),
-	.autoset_enable(autoset_enable),
-	.scan_trigger(scan_trigger),
-	`AUTOMATIC_digitizer_config
-);
+  (
+   .lb_clk(lb_clk),
+   .lb_strobe(lb_strobe),
+   .lb_rd(lb_rd),
+   .lb_addr(lb_addr),
+   .lb_dout(lb_data),
+   .zif_cfg(zif_cfg),
+   .clk200(clk200),
+   .rawadc_trig_x(rawadc_trig_x),
+   .adc_clk(adc_clk),
+   .adc_data(adc_data),
+   .banyan_status(banyan_status),
+   .phasex_dout(phasex_dout),
+   .phase_status_U2(phase_status_U2),
+   .phase_status_U3(phase_status_U3),
+   .phasex_ready(phasex_ready),
+   .phasex_present(phasex_present),
+   .llspi_status(llspi_status),
+   .llspi_result(llspi_result),
+   .idelay_mirror_val(idelay_mirror_val),
+   .scanner_result_val(scanner_result_val),
+   .banyan_data(banyan_data),
+   .frequency(frequency_adc),
+   .frequency_4xout(frequency_4xout),
+   .frequency_clkout3(frequency_clkout3),
+   .frequency_dac_dco(frequency_dac_dco),
+   .clk_status(clk_status),
+   .llspi_re(llspi_re),
+   .autoset_enable(autoset_enable),
+   .scan_trigger(scan_trigger),
+   `AUTOMATIC_digitizer_config
+   );
 
 wire slow_snap = rawadc_trig_x;
 digitizer_slowread digitizer_slowread // auto
@@ -568,18 +415,10 @@ digitizer_slowread digitizer_slowread // auto
 );
 
 
-// Need a better home for these
-assign U2_mmcm_psclk = lb_clk;
-assign U2_mmcm_psen = adc_mmcm_psen;
-assign U2_mmcm_psincdec = adc_mmcm_psincdec;
-// Maybe no need to attach to U2_mmcm_psdone
-assign U3_mmcm_psclk = 0;
-assign U3_mmcm_psen = 0;
-assign U3_mmcm_psincdec = 0;
-// Do not attach to U3_mmcm_psdone
 
-assign U4_dci = U4_dco_clk_out;
+assign zif_cfg.U4_dci = zif_cfg.U4_dco_clk_out;
 
+// UNUSED BMB7/QF2 stuff
 assign D4rgb[0] = 1'b1;
 assign D5rgb[0] = 1'b1;
 assign D4rgb[1] = 1'b1;

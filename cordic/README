@@ -49,13 +49,13 @@ The 2-bit op input selects the operation mode as follows:
   0  Polar->Rectangular  "rotation" (phaseout will be close to zero)
   1  Rectangular->Polar  "vectoring" (yout will be close to zero)
   2  not used
-  3  Slave
+  3  Follow
 All three data inputs are used in all modes.  To get an ordinary P->R
 computation with op=0, set yin to zero.  It`s also possible to use that
 mode for general vector rotation of the input (x,y) vector by angle
 phasein.  To get an ordinary R->P computation with op=1, set phasein
 to zero.  A non-zero phasein in that mode will simply be added to the
-answer.  See below for info on slave mode.
+answer.  See below for info on follow mode.
 
 The op input is allowed to vary cycle-by-cycle.  Feel free to interleave
 R->P with P->R computations.  One pipelined CORDIC computation, based on the
@@ -96,12 +96,12 @@ non-LUT resources on the chip are valueless.
 Semi-incompatible change between versions 24 and 25: the op parameter
 is two bits instead of one.  Just pad on the left with zero (as will be
 performed by default in Verilog), and there will be no change in function.
-The new bit enables slave mode, where the rotation phase is the negative
+The new bit enables follow mode, where the rotation phase is the negative
 of the previous operation.  For such cycles, the input phase is ignored.
 The hardware required to implement this new mode is small, about one logic
 cell per stage, and even that should be stripped away by the synthesizer
-if op[1] is hard wired to zero.  The slave mode's computation can be also
-performed by two successive passes through the CORDIC engine; using slave
+if op[1] is hard wired to zero.  The follow mode's computation can be also
+performed by two successive passes through the CORDIC engine; using follow
 mode saves a factor of two in latency, and reduces round-off error.
 
 Incompatible change between versions 23 and 24: the phase of the
@@ -147,7 +147,7 @@ averages 0.027 -0.007
 PASS
 vvp -N cordicg_tb +op=3 > cordic_slve.dat
 
-Check of slave mode
+Check of follow mode
 python3 cordic_check.py cordic_slve.dat
 test covers 11968 points, maximum amplitude is 129001 counts
 peak error   3.27 bits, 0.0025 %

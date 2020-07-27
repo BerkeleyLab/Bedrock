@@ -27,7 +27,7 @@ wire out_crc_sel;
 
 // Instantiation
 wire [7:0] crc_out;
-crc8e_guts #(.wid(32)) crc(.clk(clk), .gate(gate_crc),
+crc8e_guts #(.wid(32)) crc8e(.clk(clk), .gate(gate_crc),
 	.first(first_crc), .d_in(out_crc_sel ? ~crc_out : raw_d),
 	.d_out(crc_out), .zero());
 

@@ -182,7 +182,7 @@ wire pass_sum;   cksum_chk chk_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pa
 
 // CRC32
 wire crc_zero;
-crc8e_guts crc(.clk(clk), .gate(h_data_d1), .first(data_first),
+crc8e_guts crc8e(.clk(clk), .gate(h_data_d1), .first(data_first),
 	.d_in(data_d1), .zero(crc_zero));
 wire final_octet = h_data_d1 & ~h_data;
 

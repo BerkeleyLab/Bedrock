@@ -20,7 +20,7 @@ vadj_n = [
 
 # Lookup from IO_VSADJ_ number to FMC signal name
 fmc_n = {
-    1: "HPC_PRESENT",
+    1: "VREF_A_M2C",
     2: "LA02_P",
     3: "LA02_N",
     4: "LA04_P",
@@ -118,22 +118,26 @@ def fmc_decode(n, a, squelch=True, verbose=True):
     #  TDO_FROM_FMC
     #  TMS_TO_FMC
     #  TRST_TO_FMC
-    #  GA0
-    #  GA1
     #  TCK_TO_FMC
+    #  VREF_A_M2C
     #  PG_C2M
-    sb = [0x00, 0x00, 0x00, 0x00, 0x44, 0xe4, 0x04, 0x00, 0x00, 0x02]
+    sb = [0x00, 0x00, 0x00, 0x00, 0x44, 0xc0, 0x04, 0x00, 0x01, 0x02]
     found = []
+    ga = 0
     for ix in range(10):
         bits = tobin(a[ix] & ~sb[ix]) if squelch else tobin(a[ix])
         # print(bits)
         for jx in range(8):
             bname = fmc_n[vadj_n[ix*8+jx]]
-            if bits[jx] == 1:
+            if bname == "GA0":
+                ga = ga + bits[jx]
+            elif bname == "GA1":
+                ga = ga + bits[jx]*2
+            elif bits[jx] == 1:
                 found += [bname]
                 if verbose:
                     print("  FMC%d on: %s" % (n+1, bname))
-    return found
+    return found, ga
 
 
 def fmc_goal(n):
