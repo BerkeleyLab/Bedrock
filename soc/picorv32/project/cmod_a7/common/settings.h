@@ -12,6 +12,8 @@
 #define BASE_SRAM               0x01000000
 #define BASE_GPIO               0x02000000
 #define BASE_UART0              0x03000000
+#define BASE_MEMIO              0x04000000
+
 #define IRQ_UART0_RX            0x03
 
 #define SRAM_SIZE               (1 << 19)  // [bytes]

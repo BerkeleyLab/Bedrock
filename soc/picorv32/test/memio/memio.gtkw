@@ -1,0 +1,48 @@
+[*]
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Mon Jul 27 00:24:12 2020
+[*]
+[dumpfile] "/home/michael/fpga_wsp/bedrock/soc/picorv32/test/memio/sram.vcd"
+[dumpfile_mtime] "Mon Jul 27 00:23:32 2020"
+[dumpfile_size] 630621
+[savefile] "/home/michael/fpga_wsp/bedrock/soc/picorv32/test/memio/memio.gtkw"
+[timestart] 0
+[size] 2044 1108
+[pos] -1 -1
+*-22.396069 12278000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] sram_tb.
+[treeopen] sram_tb.sys_inst.
+[treeopen] sram_tb.sys_inst.memio_inst.
+[treeopen] sram_tb.sys_inst.memio_inst.mio.
+[sst_width] 214
+[signals_width] 262
+[sst_expanded] 1
+[sst_vpaned_height] 462
+@28
+sram_tb.mem_clk
+sram_tb.sys_inst.cpu.mem_valid
+@22
+sram_tb.sys_inst.cpu.mem_addr[31:0]
+sram_tb.sys_inst.cpu.mem_rdata[31:0]
+@28
+sram_tb.sys_inst.cpu.mem_ready
+@200
+-
+@28
+sram_tb.sys_inst.memio_inst.isFlashSelect
+[color] 2
+sram_tb.sys_inst.flash_clk
+[color] 2
+sram_tb.sys_inst.flash_csb
+@800022
+[color] 2
+sram_tb.sys_inst.flash_dz[3:0]
+@28
+(0)sram_tb.sys_inst.flash_dz[3:0]
+(1)sram_tb.sys_inst.flash_dz[3:0]
+(2)sram_tb.sys_inst.flash_dz[3:0]
+(3)sram_tb.sys_inst.flash_dz[3:0]
+@1001200
+-group_end
+[pattern_trace] 1
+[pattern_trace] 0

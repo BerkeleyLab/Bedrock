@@ -61,6 +61,10 @@ module system_tb;
     wire        ram_noe;
     wire        ram_nwe;
 
+    wire       flash_csb;
+    wire       flash_clk;
+    wire [3:0] flash_dz;
+
     `define DEBUGREGS
     system #(
         .SYSTEM_HEX_PATH("system32.hex")
@@ -72,20 +76,40 @@ module system_tb;
         .gpio_z     (gpio_z     ),
         .trap       (trap       ),
 
-          // SRAM Hardware interface
+        // SRAM Hardware interface
         .ram_data_z  (ram_data_z),
         .ram_address (ram_address),
         .ram_nce     (ram_nce),
         .ram_noe     (ram_noe),
-        .ram_nwe     (ram_nwe)
+        .ram_nwe     (ram_nwe),
+
+        // SPI flash Hardware interface
+        .flash_csb  (flash_csb),
+        .flash_clk  (flash_clk),
+        .flash_dz   (flash_dz)
     );
 
+    // --------------------------------------------------------------
+    //  Simulated SRAM chip
+    // --------------------------------------------------------------
     sram_model sram_model_inst (
         .we_n(ram_nwe),
         .ce_n(ram_nce),
         .oe_n(ram_noe),
         .addr(ram_address[18:0]),
         .data(ram_data_z)
+    );
+
+    // --------------------------------------------------------------
+    //  Simulated QSPI flash chip
+    // --------------------------------------------------------------
+    spiflash #() spiMemChip (
+        .csb(flash_csb),
+        .clk(flash_clk),
+        .io0(flash_dz[0]), // COPI
+        .io1(flash_dz[1]), // CIPO
+        .io2(flash_dz[2]),
+        .io3(flash_dz[3])
     );
 
     assign gpio_z[31:0] = 0;

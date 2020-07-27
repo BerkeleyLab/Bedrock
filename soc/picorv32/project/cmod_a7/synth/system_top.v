@@ -17,7 +17,10 @@ module system_top (
     output [18:0] MemAdr,
     output        RamOEn,
     output        RamWEn,
-    output        RamCEn
+    output        RamCEn,
+
+    output        qspi_cs,
+    inout [3:0]   qspi_dq
 );
 
 wire pll_reset, sysclk_buf;
@@ -45,6 +48,21 @@ xilinx7_clocks #(
 );
 
 wire [31:0] gpio_z;
+
+wire       flash_clk;
+
+STARTUPE2 SUP_INST (
+    .CLK        (0),
+    .GSR        (0),
+    .GTS        (0),
+    .KEYCLEARB  (0),
+    .PACK       (1),
+    .USRCCLKO   (flash_clk),
+    .USRCCLKTS  (0),
+    .USRDONEO   (1),
+    .USRDONETS  (0)
+);
+
 system #(
     .SYSTEM_HEX_PATH ("system32.dat")
 ) system_inst (
@@ -61,7 +79,12 @@ system #(
     .ram_address (MemAdr),
     .ram_nce     (RamCEn),
     .ram_noe     (RamOEn),
-    .ram_nwe     (RamWEn)
+    .ram_nwe     (RamWEn),
+
+    // SPI flash Hardware interface
+    .flash_csb  (qspi_cs),
+    .flash_clk  (flash_clk),
+    .flash_dz   (qspi_dq)
 );
 
 assign LEDS[1:0] = gpio_z[7:6];

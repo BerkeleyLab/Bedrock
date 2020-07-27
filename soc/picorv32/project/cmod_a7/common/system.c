@@ -6,6 +6,7 @@
 #include "gpio.h"
 #include "timer.h"
 #include "test.h"
+#include "spi_memio.h"
 
 #define LED(val) SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, ((~val) & 0x7))
 
@@ -49,6 +50,11 @@ int main(void)
     _picorv32_irq_enable(1 << IRQ_UART0_RX);
     SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0);
     SET_GPIO8(BASE_GPIO, GPIO_OE_REG, 0, 0xFF);  // Drive LEDs
+
+    volatile uint32_t *p_memio = (uint32_t *)BASE_MEMIO;
+    MEMIO_CFG(BASE_MEMIO, 0, 0, 1, 8);
+    hexDump32(p_memio, 128);
+    _putchar('\n');
 
     print_str("\n---------------------------------------\n");
     print_str(" LBL pico_soc @");

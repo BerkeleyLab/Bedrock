@@ -26,11 +26,16 @@ module system #(
     input               uart_rx0,
 
     // SRAM Hardware interface
-    inout  [ 7:0] ram_data_z,
-    output [23:0] ram_address,
-    output        ram_nce,
-    output        ram_noe,
-    output        ram_nwe,
+    inout  [ 7:0]       ram_data_z,
+    output [23:0]       ram_address,
+    output              ram_nce,
+    output              ram_noe,
+    output              ram_nwe,
+
+    // quad SPI flash
+    output              flash_csb,
+    output              flash_clk,
+    inout  [3:0]        flash_dz,
 
     output              trap
 );
@@ -53,6 +58,7 @@ localparam BASE_BRAM =  8'h00;
 localparam BASE_SRAM =  8'h01;
 localparam BASE_GPIO =  8'h02;
 localparam BASE_UART0 = 8'h03;
+localparam BASE_MEMIO = 8'h04;
 
 // --------------------------------------------------------------
 //  Internal reset generator
@@ -99,10 +105,12 @@ wire [32:0] packed_mem_ret;
 wire [32:0] packed_sram_ret;
 wire [32:0] packed_gpio_ret;
 wire [32:0] packed_URT0_ret;
+wire [32:0] packed_memio_ret;
 assign packed_cpu_ret = packed_mem_ret |
                         packed_sram_ret |
                         packed_gpio_ret |
-                        packed_URT0_ret;
+                        packed_URT0_ret |
+                        packed_memio_ret;
 
 // --------------------------------------------------------------
 //  internal block-ram memory
@@ -183,6 +191,26 @@ memory_pack #(
         .ram_nwe       (ram_nwe)
     );
 `endif
+
+// --------------------------------------------------------------
+//  Memory mapped SPI flash (MEMIO)
+// --------------------------------------------------------------
+spimemio_pack #(
+    .BASE_ADDR     (BASE_MEMIO)
+) memio_inst (
+    // Hardware interface
+    .clk           (clk),
+    .resetn        (!reset),
+
+    // PicoRV32 packed MEM Bus interface
+    .mem_packed_fwd(packed_cpu_fwd),
+    .mem_packed_ret(packed_memio_ret),
+
+    // SPI FLASH interface
+    .flash_csb     (flash_csb),
+    .flash_clk     (flash_clk),
+    .flash_dz      (flash_dz)
+);
 
 // --------------------------------------------------------------
 //  GPIO module
