@@ -31,7 +31,9 @@
 // drv_p = (sel_en ? in_mp : 0) + ph_offset
 // set_p and gain_p
 
-module mp_proc(
+module mp_proc # (
+	parameter thresh_shift = 9 // Threshold shift; typically 9 for SRF use
+)(
 	input clk,
 	input sync,
 	// Input from cordic_mux
@@ -170,18 +172,17 @@ end
 // Set up the thresholds for comparison
 reg [16:0] thresh1=0, thresh2=0;
 reg over_thresh=0;
-localparam thresh_shift1 = 9;
 always @(posedge clk) begin
-	// When thresh_shift1 = 9, thresholds at 0.2%, 0.1%, 0.05%, and 0.024%
+	// When thresh_shift = 9, thresholds at 0.2%, 0.1%, 0.05%, and 0.024%
 	// in amplitude, and 0.002 radian, .. 0.00024 radian in phase,
 	// equivalent to 0.11 degree, .. 0.014 degree.  Note that 20861 is
 	// one radian, expressed as 17-bit fraction of a revolution.
-	thresh1 <= stb[1] ? (setmp_mux >>> thresh_shift1): stb[2] ? (20861 >>> thresh_shift1) : thresh2 >> 1;
+	thresh1 <= stb[1] ? (setmp_mux >>> thresh_shift): stb[2] ? (20861 >>> thresh_shift) : thresh2 >> 1;
 	thresh2 <= thresh1;
 	over_thresh <= mp_err3 > thresh1;
 end
 
-// Spit out oever-threshold events;
+// Spit out over-threshold events;
 // someone else will have to latch these, and reset on slow capture.
 wire [7:0] over_event = {8{over_thresh}} & {stb[2:0], stb[7:3]};
 assign cmp_event = {clipped, over_event};
