@@ -18,7 +18,7 @@
 
 #define SRAM_SIZE               (1 << 19)  // [bytes]
 
-#define F_CLK                   (1200000 * 625 / 9)  // 83.3 MHz
+#define F_CLK                   (1200000 * 625 / 11)  // 68.2 MHz
 
 // How long to wait in the bootloader for a connection
 #define BOOTLOADER_DELAY        (F_CLK / 1000)

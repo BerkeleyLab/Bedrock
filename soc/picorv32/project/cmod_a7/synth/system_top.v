@@ -35,7 +35,7 @@ xilinx7_clocks #(
     .DIFF_CLKIN     ("FALSE"),  // Single ended
     .CLKIN_PERIOD   (83.333),   // 12 MHz
     .MULT           (62.500),   // 750 MHz
-    .DIV0           (9),        // 83.3 MHz
+    .DIV0           (11),       // 68.2 MHz
     .DIV1           (7.500)     // 100 MHz
 ) clk_inst(
     .sysclk_p (SYSCLK),

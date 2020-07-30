@@ -51,10 +51,18 @@ int main(void)
     SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0);
     SET_GPIO8(BASE_GPIO, GPIO_OE_REG, 0, 0xFF);  // Drive LEDs
 
-    volatile uint32_t *p_memio = (uint32_t *)BASE_MEMIO;
-    MEMIO_CFG(BASE_MEMIO, 0, 0, 1, 8);
-    hexDump32(p_memio, 128);
-    _putchar('\n');
+    // while (1) {
+    //     volatile uint32_t *p_memio = (uint32_t *)BASE_MEMIO;
+    //     MEMIO_CFG(BASE_MEMIO, 0, 1, 1, 8);
+
+    //     unsigned hash = 5381;
+    //     for (unsigned i=0; i<548003; i++)
+    //         hash = mkhash(hash, p_memio[i]);
+    //     print_str("\nchecksum: ");
+    //     print_hex(hash, 8);
+    //     if (hash != 0x74A2CFD4)
+    //         print_str(" !!! ERROR !!!");
+    // }
 
     print_str("\n---------------------------------------\n");
     print_str(" LBL pico_soc @");

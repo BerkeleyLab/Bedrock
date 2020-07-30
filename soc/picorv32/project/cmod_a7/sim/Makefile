@@ -5,7 +5,7 @@ all: $(TARGET).vcd
 include ../common/common.mk
 
 # max. baudrate is F_CLK / 8
-BOOTLOADER_BAUDRATE = 10416666
+BOOTLOADER_BAUDRATE = 8522727
 VFLAGS += -DMEMORY_PACK_FAST -DBOOTLOADER_BAUDRATE=$(BOOTLOADER_BAUDRATE)
 # virtual SPI flash contents
 VCD_ARGS += +firmware=$(PICORV_DIR)/test/memio/flashdata8.hex
@@ -18,3 +18,5 @@ $(TARGET).elf: $(OBJS)
 $(TARGET)_tb: $(SRC_V)
 
 include $(BUILD_DIR)/bottom_rules.mk
+
+.PRECIOUS: $(TARGET).vcd

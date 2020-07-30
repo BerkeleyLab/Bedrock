@@ -1,6 +1,8 @@
 // Maps QSPI memory into the picorv address space.
 // Maximum 24 bit = 16 Mbyte
 // Config reg. at address 0x__FFFFFC
+// almost works at 75 MHz on CMODA7 (fails if it gets hot)
+// stable at 68.2 MHz
 
 module spimemio_pack #(
 	parameter BASE_ADDR=8'h00
