@@ -68,9 +68,10 @@ reg_delay #(.dw(18), .len(2))
 reg signed [41:0] mr_scale=0;
 reg signed [17:0] ff_mp=0;
 reg signed [42:0] mr_ff=0;
+wire signed [17:0] ff_drive_l = ff_drive <<< 12; // Account for down-shifting on output
 always @(posedge clk) begin
 	ff_mp <= 0;
-	if (ff_en) ff_mp <= stb[1] ? ff_drive : 18'b0;
+	if (ff_en) ff_mp <= stb[1] ? ff_drive_l : 18'b0;
 	// Avoid 3-way add by pre-computing mr_scale + ff_mp
 	mr_ff <= mr_scale + ff_mp;  // outputs on stb 3, 4, 5, 6
 end

@@ -105,8 +105,8 @@ initial begin
 	@(cc==380); verify(2500,-1000); // Remain clipped because err = 0
 	@(cc==420); verify(2500,-1000);
 
-	// Turn on ff drive; 2**12 accounts for internal scaling
-	ff_drive = 30*(1<<12);
+	// Turn on ff drive
+	ff_drive = 30;
 	@(cc==443); verify(2530,-1000); // Cross-check for derivative
 	@(cc==453); verify(2560,-1000);
 	@(cc==760); verify(3500,-1000);

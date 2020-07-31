@@ -32,7 +32,8 @@ always @(posedge clk) begin
 	error_r <= carry1 != sr1[17+shift];
 end
 assign error = error_r;
-assign drive_delta = squelch & (subcycle != 1) ? 18'bx : delta;
+wire signed [17:0] drive_delta_l = squelch & (subcycle != 1) ? 18'bx : delta;
+assign drive_delta = drive_delta_l >>> shift;
 assign drive = squelch & (subcycle != 2) ? 18'bx : sr1 >>> shift;
 
 endmodule
