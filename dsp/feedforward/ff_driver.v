@@ -10,6 +10,9 @@
    each block N times, determined by 2**MEM_REP.
 
    Output updates every 4 clock cycles.
+
+   NOTE: cav_ddrive expects to be down-shifted at instantiation-site. This
+         is deliberately not done here to avoid unnecessary loss of precision.
 */
 
 module ff_driver # (
@@ -34,7 +37,8 @@ module ff_driver # (
    output        [10:0] mem_addr,   // external address for FF memory
 
    output signed [17:0] cav_drive,  // Drive; expect to use one of drive or ddrive
-   output signed [17:0] cav_ddrive, // Drive derivative
+   output signed [17:0] cav_ddrive, // Drive derivative.
+                                    // NOTE: Expects (>>> CIC_SHIFT) at instantiation site
    output signed [17:0] cav_mag,    // Cavity model magnitude
    output signed [17:0] cav_ph,     // Cavity model phase
    output        [1:0]  error       // 0 - cav model error; 1 - cic bank error

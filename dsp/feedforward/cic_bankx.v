@@ -14,7 +14,7 @@ module cic_bankx #(
 	input [1:0] subcycle,
 	input init,
 	input signed [17:0] mem_v,
-	output signed [17:0] drive_delta,
+	output signed [17:0] drive_delta, // Expects (>>> shift) at instantiation site
 	output signed [17:0] drive,
 	output error
 );
@@ -32,8 +32,8 @@ always @(posedge clk) begin
 	error_r <= carry1 != sr1[17+shift];
 end
 assign error = error_r;
-wire signed [17:0] drive_delta_l = squelch & (subcycle != 1) ? 18'bx : delta;
-assign drive_delta = drive_delta_l >>> shift;
+assign drive_delta = squelch & (subcycle != 1) ? 18'bx : delta; // Scaling by (>>> shift) deferred
+                                                                // to instantiation site
 assign drive = squelch & (subcycle != 2) ? 18'bx : sr1 >>> shift;
 
 endmodule

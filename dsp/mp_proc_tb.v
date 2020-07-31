@@ -53,7 +53,7 @@ reg [17:0] lb_addr=0;
 
 reg signed [17:0] out_x=0,out_y=0;
 reg signed [17:0] ff_setm=0, ff_setp=0;
-reg signed [17:0] ff_drive=0, ff_phase=0;
+reg signed [17:0] ff_ddrive=0, ff_phase=0;
 initial begin
 	#1;
 	dut_sel_en = 1;
@@ -106,7 +106,7 @@ initial begin
 	@(cc==420); verify(2500,-1000);
 
 	// Turn on ff drive
-	ff_drive = 30;
+	ff_ddrive = 30;
 	@(cc==443); verify(2530,-1000); // Cross-check for derivative
 	@(cc==453); verify(2560,-1000);
 	@(cc==760); verify(3500,-1000);
@@ -118,7 +118,7 @@ wire out_sync;
 mp_proc dut  // auto
 	(.clk(clk), .sync(sync), .in_mp(in_mp),
 	.out_xy(out_xy), .out_ph(out_ph), .out_sync(out_sync),
-	.ff_setm(ff_setm), .ff_setp(ff_setp), .ff_drive(ff_drive), .ff_phase(ff_phase),
+	.ff_setm(ff_setm), .ff_setp(ff_setp), .ff_ddrive(ff_ddrive), .ff_phase(ff_phase),
 	`AUTOMATIC_dut
 );
 

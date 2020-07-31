@@ -32,7 +32,8 @@
 // set_p and gain_p
 
 module mp_proc # (
-	parameter thresh_shift = 9 // Threshold shift; typically 9 for SRF use
+	parameter thresh_shift = 9, // Threshold shift; typically 9 for SRF use
+	parameter ff_dshift = 0     // Deferred ff_ddrive downshift
 )(
 	input clk,
 	input sync,
@@ -53,7 +54,7 @@ module mp_proc # (
 	input [0:0] ff_en, // external
 	input signed [17:0] ff_setm, // Magnitude setpoint
 	input signed [17:0] ff_setp, // Phase setpoint
-	input signed [17:0] ff_drive, // Drive (derivative)
+	input signed [17:0] ff_ddrive, // Drive (derivative)
 	input signed [17:0] ff_phase, // Phase - unused
 	// Final output, back to cordic_mux
 	output out_sync,
@@ -140,9 +141,9 @@ assign out_ph = {out_ph_w,1'b0};  // Hmmmm....
 wire pi_sync;  // not used
 wire signed [17:0] xy_drive;
 wire [3:0] clipped;
-xy_pi_clip pi(.clk(clk), .in_xy(mp_err2), .sync(stb[1]),
+xy_pi_clip #(.ff_dshift(ff_dshift)) pi (.clk(clk), .in_xy(mp_err2), .sync(stb[1]),
 	.out_xy(xy_drive), .o_sync(pi_sync), .coeff(coeff), .lim(lim), .clipped(clipped),
-	.ff_en(ff_en), .ff_drive(ff_drive), .ff_phase(ff_phase)
+	.ff_en(ff_en), .ff_ddrive(ff_ddrive), .ff_phase(ff_phase)
 );
 
 // terrible waste of a multiplier

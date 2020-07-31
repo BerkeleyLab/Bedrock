@@ -35,7 +35,9 @@
 //  .     .      .       y_lo
 //  .     .      .       .      o_sync  out_x
 //  .     .      .       .      .       out_y
-module xy_pi_clip(
+module xy_pi_clip #(
+	parameter ff_dshift = 0 // Deferred ff_ddrive downshift
+)(
 	input clk,  // timespec 6.8 ns
 	input sync,  // high for the first of the xy pair
 	input signed [17:0] in_xy,
@@ -46,8 +48,8 @@ module xy_pi_clip(
 	input signed [17:0] lim,
 	// feed-forward input drive derivative
 	input ff_en,
-	input signed [17:0] ff_drive, // FF drive (derivative) to be accumulated
-	input signed [17:0] ff_phase, // Placeholder - currently unused
+	input signed [17:0] ff_ddrive, // FF drive (derivative) to be accumulated
+	input signed [17:0] ff_phase,  // Placeholder - currently unused
 	// Output clipped, four bits are vs. {x_hi, y_hi, x_lo, y_lo}
 	output [3:0] clipped
 );
@@ -66,12 +68,21 @@ reg_delay #(.dw(18), .len(2))
 // FF drive to be sampled during 'integral' cycles only. Phase tie-in still incomplete
 // Pipelined to ease timing
 reg signed [41:0] mr_scale=0;
-reg signed [17:0] ff_mp=0;
 reg signed [42:0] mr_ff=0;
-wire signed [17:0] ff_drive_l = ff_drive <<< 12; // Account for down-shifting on output
+reg signed [18+12-1:0] ff_mp=0;
+wire signed [18+12-1:0] ff_ddrive_l; // Worst-case bit-sizing
+
+// Perform deferred down-shifting of ff_ddrive here by combining with up-shifting by 12
+// required by the accumulator construction below.
+generate if (ff_dshift > 12) begin: g_dshift
+	assign ff_ddrive_l = ff_ddrive >>> (ff_dshift-12);
+end else begin: g_ushift
+	assign ff_ddrive_l = ff_ddrive <<< (12-ff_dshift);
+end endgenerate
+
 always @(posedge clk) begin
 	ff_mp <= 0;
-	if (ff_en) ff_mp <= stb[1] ? ff_drive_l : 18'b0;
+	if (ff_en) ff_mp <= stb[1] ? ff_ddrive_l : 18'b0;
 	// Avoid 3-way add by pre-computing mr_scale + ff_mp
 	mr_ff <= mr_scale + ff_mp;  // outputs on stb 3, 4, 5, 6
 end
