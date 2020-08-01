@@ -7,7 +7,6 @@
 # ---------------------------------------------------------------------------------------
 #  Init script to run C programs
 # ---------------------------------------------------------------------------------------
-# assuming 2048 words memory, with interrupt support
 # requires this function to be present in C program:
 # uint32_t *irq(uint32_t *regs, uint32_t irqs){ return regs; }
 #include "custom_ops.S"
@@ -113,15 +112,6 @@ irq_vec:
 	picorv32_getq_insn(x2, q2)
 
 	picorv32_retirq_insn()
-
-irq_regs:
-	# registers are saved to this memory region during interrupt handling
-	# the program counter is saved as register 0
-	.fill 32,4
-
-	# stack for the interrupt handler
-	.fill 128,4
-irq_stack:
 
 init_for_c:
 	lui   t0,     %hi(_bss_start)
@@ -247,3 +237,14 @@ _picorv32_irq_reset:
 _picorv32_irq_timer:
 	picorv32_timer_insn(a0, a0)
 	ret
+
+# IRQ stack
+.section .bss
+irq_regs:
+	# registers are saved to this memory region during interrupt handling
+	# the program counter is saved as register 0
+	.fill 32,4
+
+	# stack for the interrupt handler
+	.fill 128,4
+irq_stack:
