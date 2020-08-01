@@ -32,13 +32,20 @@
 #define SPI_GET_STATUS(spi_base_addr) \
   GET_REG(spi_base_addr+(SPI_CFG_REG<<2))
 
+// Shift in/out N bits per transaction
+#define SPI_SET_N(spi_base, N) \
+  SET_REG8(spi_base + SPI_CFG_REG * 4 + 1, N)
+
+#define SPI_SET_LSB(spi_base, lsb) \
+  SET_SFR1(spi_base, SPI_CFG_REG, BIT_LSB, lsb)
+
 // Returns 1 if a transmission is in progress, otherwise 0
 #define SPI_IS_BUSY(spi_base_addr) \
   GET_SFR1(spi_base_addr, SPI_CFG_REG, BIT_BUSY )
 
 // Set the CS pin high / low (BIT_CS_CTRL must be set)
 #define SPI_CS_SET(spi_base_addr, val ) \
-  SET_SFR1(spi_base_addr, SPI_CFG_REG, BIT_CS_CTRL, val )
+  SET_SFR1(spi_base_addr, SPI_CFG_REG, BIT_CS_CTRL, val)
 
 // Returns the last received data word
 #define SPI_GET_DAT(spi_base_addr) \
@@ -57,7 +64,7 @@
 // transmit N (1 - 32) bits of val
 #define SPI_SEND_N(spi_base, N, val) { \
   while(SPI_IS_BUSY(spi_base)); \
-  SET_REG8(spi_base + SPI_CFG_REG * 4 + 1, N); \
+  SPI_SET_N(spi_base, N);  \
   SPI_SET_DAT(spi_base, val); \
 }
 
