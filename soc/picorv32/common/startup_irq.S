@@ -190,6 +190,15 @@ _asm_test:
 	addi a0, a1, 0  # return( inpb );
 	ret
 
+# extern uint64_t _picorv32_rd_cycle_64(void);
+.globl _picorv32_rd_cycle_64
+_picorv32_rd_cycle_64:
+	rdcycleh     a1
+	rdcycle      a0
+	rdcycleh     t0
+	bne          a1, t0, _picorv32_rd_cycle_64
+	ret
+
 # extern uint32_t _picorv32_irq_mask( uint32_t iMask );
 # setting a bit in `iMask` disables the corresponding interrupt
 # returns the previous interrupt mask
