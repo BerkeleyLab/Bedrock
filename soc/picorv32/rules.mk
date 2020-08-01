@@ -59,7 +59,7 @@ LDFLAGS = $(CFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,
 	vivado -nojou -mode batch -source $(filter %.tcl, $^) -tclargs $(basename $@) $(BLOCK_RAM_SIZE) $(filter %.v, $^)
 
 %_config:
-	xc3sprog -c jtaghs1_fast $(patsubst %_config,%_synth.bit,$@)
+	xc3sprog -c jtaghs1_fast $(patsubst %_config,%.bit,$@)
 
 CLEAN += $(TARGET).vcd $(TARGET)_tb $(TARGET).map $(TARGET).lst  $(TARGET).elf pico.trace
 CLEAN += $(TARGET)8.hex $(TARGET)32.hex $(TARGET)32.dat $(TARGET).o $(OBJS)
