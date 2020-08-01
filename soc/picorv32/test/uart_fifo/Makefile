@@ -12,7 +12,7 @@ TARGET = uart_fifo
 
 all: $(TARGET)_check
 
-OBJS = startup.o common.o
+OBJS = startup.o
 
 $(TARGET).elf: 0x000.lds $(OBJS)
 $(TARGET)_tb: $(SRC_V)

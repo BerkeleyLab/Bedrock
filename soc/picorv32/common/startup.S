@@ -60,3 +60,12 @@ initRegs:
     sw zero,12(sp)
     jal ra, main              # call main()
     ebreak                    # returned from main, put on the ebreak
+
+# extern uint64_t _picorv32_rd_cycle_64(void);
+.globl _picorv32_rd_cycle_64
+_picorv32_rd_cycle_64:
+    rdcycleh     a1
+    rdcycle      a0
+    rdcycleh     t0
+    bne          a1, t0, _picorv32_rd_cycle_64
+    ret

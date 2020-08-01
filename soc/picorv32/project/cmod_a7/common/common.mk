@@ -17,7 +17,7 @@ SRC_V += stream_fifo.v shortfifo.v uart_fifo_pack.v uart_stream.v
 SRC_V += sfr_pack.v gpio_pack.v gpioz_pack.v spimemio.v spimemio_pack.v
 SRC_V += pb_debouncer.v sram_pack.v sram2_pack.v
 
-OBJS += system.o print.o timer.o test.o common.o startup_irq.o
+OBJS += system.o print.o timer.o test.o startup_irq.o
 
 #size of the blockRam [bytes]
 BLOCK_RAM_SIZE = 16384
