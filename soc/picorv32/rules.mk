@@ -4,7 +4,7 @@ PROJECT_DIR    = $(PICORV_DIR)/project
 TEST_DIR       = $(PICORV_DIR)/test
 COMMON_DIR     = $(PICORV_DIR)/common
 LDLIBS         = -lgcc
-INC_DIR        = -I$(LIB_DIR)/inc -I./
+INC_DIR        = -I$(LIB_DIR)/inc -I./ -I$(COMMON_DIR)
 
 vpath %.v $(GATEWARE_DIR) $(DSP_DIR) $(FPGA_FAMILY_DIR)/xilinx
 vpath %.S $(COMMON_DIR)
