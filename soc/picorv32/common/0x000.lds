@@ -28,11 +28,12 @@ SECTIONS {
         _bss_end = .;
     }
 
-    /* get rid of .riscv.attributes sections,
-       which have been appearing since GNU Binutils 2.32
-       ... absolutely no idea what they are used for. */
+    /*
+    get rid of some unneeded sections to save space
+    */
     ./DISCARD/ : {
-        *(.riscv.attributes)
+        *(.riscv.attributes);
+        *(.comment);
     }
 
     .theRest : { *(*); . = ALIGN(4); }
