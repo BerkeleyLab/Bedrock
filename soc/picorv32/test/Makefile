@@ -14,6 +14,7 @@ all: clean
 	$(MAKE) -C ./uart_fifo
 #    $(MAKE) -C ./xadc
 	$(MAKE) -C ./sram
+	$(MAKE) -C ./memio
 	$(MAKE) -C ../project/cmod_a7/sim
 
 clean:
@@ -31,5 +32,6 @@ clean:
 	$(MAKE) -C ./uart_fifo clean
 	$(MAKE) -C ./xadc      clean
 	$(MAKE) -C ./sram      clean
+	$(MAKE) -C ./memio     clean
 	$(MAKE) -C ../project/cmod_a7/sim clean
 

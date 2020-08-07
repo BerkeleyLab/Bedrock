@@ -10,10 +10,10 @@ SRC_V    += spi_pack.v sfr_pack.v spi_engine.v spi_model.v
 SRC_V    += stream_fifo.v shortfifo.v
 OBJS     += startup.o
 
-all: $(TARGET)_check
+all: $(TARGET).vcd
 
 $(TARGET).elf: 0x000.lds $(OBJS)
 $(TARGET)_tb: $(SRC_V)
-$(TARGET).vcd $(TARGET)_check: $(TARGET)32.hex
+$(TARGET).vcd: $(TARGET)32.hex
 
 include $(BUILD_DIR)/bottom_rules.mk

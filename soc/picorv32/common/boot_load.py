@@ -98,7 +98,13 @@ def bootload(bin_buffer, ser_port, baud_rate, byte_offset,
     print('Sent 0x{:02x} / 0x{:02x} bytes'.format(nSent, nBytes))
     # Read and verify memory
     print('Verifying ... ', end='')
-    readBackData = s.read(nBytes)
+    readBackData = bytearray(0)
+    readBackData += s.read(nBytes)
+    while len(readBackData) < nBytes:
+        b = s.read(nBytes - len(readBackData))
+        if len(b) == 0:
+            break
+        readBackData += b
     s.close()
     if readBackData == bin_buffer:
         print('passed.')

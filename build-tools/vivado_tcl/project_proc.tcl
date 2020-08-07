@@ -63,6 +63,7 @@ proc project_create {platform_name project_name} {
     if {$project_board ne "none"} {
         set_property board_part $project_board [current_project]
     }
+    set_property top $project_name [current_fileset]
 }
 
 proc project_bd_design {library_dir project_name} {
@@ -169,5 +170,7 @@ proc project_write_bitstream {platform} {
         set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [get_designs impl_1]
     }
     set_property BITSTREAM.CONFIG.CONFIGRATE 33 [get_designs impl_1]
+
     write_bitstream -force [current_project].bit
+    write_cfgmem -force -format bin -interface spix4 -size 16 -loadbit "up 0x0 [current_project].bit" -file [current_project].bin
 }

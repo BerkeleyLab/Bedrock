@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 #include "common.h"
 #include "settings.h"
 #include "uart.h"

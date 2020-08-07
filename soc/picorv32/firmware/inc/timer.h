@@ -19,8 +19,14 @@
 // Delay in milliseconds
 #define DELAY_MS(msecs) DELAY_US(msecs*1000)
 
-// Returns number of CPU cycles since power up
+// Returns number of CPU cycles since power up as 32 bit number
 uint32_t getCycles(void);
+
+// Returns number of CPU cycles since power up as 64 bit number
+extern uint64_t _picorv32_rd_cycle_64(void);
+
+// Elapsed time since power up in [ms]
+uint32_t millis(void);
 
 // Set timer ticks to zero
 void resetTimer(void);
@@ -29,6 +35,6 @@ void resetTimer(void);
 uint32_t getTimer(void);
 
 // Block for `nCycles`, ~45 cycles overhead
-void delayCycles( const uint32_t nCycles );
+void delayCycles(const uint32_t nCycles);
 
 #endif

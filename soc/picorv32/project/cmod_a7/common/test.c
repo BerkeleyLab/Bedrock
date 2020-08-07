@@ -72,7 +72,7 @@ int cmd_memtest(volatile unsigned *base, unsigned len, unsigned stride, unsigned
 static unsigned bitmap[BITMAP_SIZE/32];
 static unsigned hash;
 
-static unsigned mkhash(unsigned a, unsigned b)
+unsigned mkhash(unsigned a, unsigned b)
 {
 	// The XOR version of DJB2
 	return ((a << 5) + a) ^ b;
