@@ -1,11 +1,3 @@
-[*]
-[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Mon Jul 27 00:24:12 2020
-[*]
-[dumpfile] "/home/michael/fpga_wsp/bedrock/soc/picorv32/test/memio/sram.vcd"
-[dumpfile_mtime] "Mon Jul 27 00:23:32 2020"
-[dumpfile_size] 630621
-[savefile] "/home/michael/fpga_wsp/bedrock/soc/picorv32/test/memio/memio.gtkw"
 [timestart] 0
 [size] 2044 1108
 [pos] -1 -1
