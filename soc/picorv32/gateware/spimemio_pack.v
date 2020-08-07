@@ -12,12 +12,12 @@ module spimemio_pack #(
 	output        flash_csb,
 	output        flash_clk,
 
-    // Tristate Data IO pins
-    inout  [ 3:0] flash_dz,
+	// Tristate Data IO pins
+	inout  [ 3:0] flash_dz,
 
 	// PicoRV32 packed MEM Bus interface
-    input  [68:0] mem_packed_fwd,  //DEC > GPO
-    output [32:0] mem_packed_ret   //DEC < GPO
+	input  [68:0] mem_packed_fwd,  //DEC > GPO
+	output [32:0] mem_packed_ret   //DEC < GPO
 );
 
 localparam SPIMEM_CFG_REG  =  24'hFFFFFC;
@@ -55,27 +55,27 @@ wire  [ 3:0] flash_do;
 wire  [ 3:0] flash_doe;
 
 spimemio mio (
-	.clk 			(clk		 ),
-	.resetn 		(resetn 	 ),
-	.flash_csb 		(flash_csb 	 ),
-	.flash_clk 		(flash_clk 	 ),
-	.flash_io0_oe	(flash_doe[0]),
-	.flash_io1_oe	(flash_doe[1]),
-	.flash_io2_oe	(flash_doe[2]),
-	.flash_io3_oe	(flash_doe[3]),
-	.flash_io0_do	(flash_do[0] ),
-	.flash_io1_do	(flash_do[1] ),
-	.flash_io2_do	(flash_do[2] ),
-	.flash_io3_do	(flash_do[3] ),
-	.flash_io0_di	(flash_di[0] ),
-	.flash_io1_di	(flash_di[1] ),
-	.flash_io2_di	(flash_di[2] ),
-	.flash_io3_di	(flash_di[3] ),
+	.clk            (clk         ),
+	.resetn         (resetn      ),
+	.flash_csb      (flash_csb   ),
+	.flash_clk      (flash_clk   ),
+	.flash_io0_oe   (flash_doe[0]),
+	.flash_io1_oe   (flash_doe[1]),
+	.flash_io2_oe   (flash_doe[2]),
+	.flash_io3_oe   (flash_doe[3]),
+	.flash_io0_do   (flash_do[0] ),
+	.flash_io1_do   (flash_do[1] ),
+	.flash_io2_do   (flash_do[2] ),
+	.flash_io3_do   (flash_do[3] ),
+	.flash_io0_di   (flash_di[0] ),
+	.flash_io1_di   (flash_di[1] ),
+	.flash_io2_di   (flash_di[2] ),
+	.flash_io3_di   (flash_di[3] ),
 
 	.valid          ( isFlashSelect && !isAddrCfg ),
-	.ready 			( mem_ready_mem ),
-	.addr 			( mem_flash_addr ),
-	.rdata 			( mem_rdata_mem ),
+	.ready          ( mem_ready_mem ),
+	.addr           ( mem_flash_addr ),
+	.rdata          ( mem_rdata_mem ),
 
 	.cfgreg_we      ( (isFlashSelect&&isAddrCfg) ? mem_wstrb : 4'h0 ),
 	.cfgreg_di      ( mem_wdata ),
