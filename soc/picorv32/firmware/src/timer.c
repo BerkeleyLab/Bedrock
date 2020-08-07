@@ -28,3 +28,9 @@ void delayCycles( const uint32_t nCycles ){
       curValue -= startValue;
     } while( curValue < nCycles );
 }
+
+uint32_t millis(void)
+{
+    uint64_t cs = _picorv32_rd_cycle_64();
+    return cs / (F_CLK / 1000);
+}
