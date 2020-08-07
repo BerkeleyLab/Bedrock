@@ -1,13 +1,13 @@
-# quick display of the results of "make chirp_wrap.out"
+# quick display of the results of "make chirp_driver.out"
 import sys
 import numpy as np
 from matplotlib import pyplot
 
-d = np.loadtxt('chirp_wrap.out')
+d = np.loadtxt('chirp_driver.out')
 y = d.transpose()[0]
 a = d.transpose()[1]
 
-# Must match chirp_wrap_tb settings
+# Must match chirp_driver_tb settings
 dt = (8.0*14.0)/(1320.0e6)
 if len(sys.argv) < 2:
     t = dt * np.arange(len(y))
@@ -36,7 +36,7 @@ min_freq = np.min(freq_band)
 max_freq = np.max(freq_band)
 print("Peak freq = {} Hz, Min/Max -6dB Peak freq = ({},{}) Hz".format(freq_pk, min_freq, max_freq))
 
-# Must match chirp_wrap_tb settings
+# Must match chirp_driver_tb settings
 dsgn_fmin = -50e3
 dsgn_fmax = 50e3
 fail = True if min_freq < dsgn_fmin or max_freq > dsgn_fmax else False
