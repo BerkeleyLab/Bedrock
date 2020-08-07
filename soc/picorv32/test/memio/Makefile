@@ -18,6 +18,6 @@ $(TARGET).elf: 0x000.lds $(OBJS)
 $(TARGET)_tb: $(SRC_V)
 $(TARGET).vcd: $(TARGET)32.hex flashdata32.hex
 
-CLEAN += flashdata32.hex
+CLEAN += flashdata32.hex sram.vcd
 
 include $(BUILD_DIR)/bottom_rules.mk
