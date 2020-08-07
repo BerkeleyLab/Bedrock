@@ -171,15 +171,6 @@ initRegs:
 #-----------------------------------------------
 # C-wrappers for the custom instructions
 #-----------------------------------------------
-# extern uint32_t _asm_test( uint32_t inpa, uint32_t inpb );
-# for testing how to in- and output values to GCC
-# a0 = first argument & return value
-# a1 = second argument
-# .globl _asm_test
-# _asm_test:
-# 	addi a0, a1, 0  # return( inpb );
-# 	ret
-
 # extern uint64_t _picorv32_rd_cycle_64(void);
 .globl _picorv32_rd_cycle_64
 _picorv32_rd_cycle_64:
