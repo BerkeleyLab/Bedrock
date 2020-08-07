@@ -1,6 +1,6 @@
 `timescale 1ns / 1ns
 
-module chirp_wrap_tb;
+module chirp_driver_tb;
 
    localparam SIM_TIME = 80000;
 
@@ -9,8 +9,8 @@ module chirp_wrap_tb;
    integer n_chirp, full_sim=0;
    initial begin
       if ($test$plusargs("vcd")) begin
-         $dumpfile("chirp_wrap.vcd");
-         $dumpvars(5, chirp_wrap_tb);
+         $dumpfile("chirp_driver.vcd");
+         $dumpvars(5, chirp_driver_tb);
       end
       if (!$value$plusargs("n_chirp=%d", n_chirp)) n_chirp=1;
       if ($test$plusargs("full")) full_sim=1;
@@ -57,30 +57,13 @@ module chirp_wrap_tb;
    localparam FAST_DPHASE  = -9105331; // -0.00424 * 2**(PH_WI-1)
    localparam FAST_DDPHASE = 395824; // 7.2e-7 * 2**(PH_WI+DD_SHIFT-1)
 
-   wire [15:0] base_divide = 3; // Technically 8, but set as fast as possible for simulation. Min is 3
+   localparam [15:0] CHIRP_RATE = 3; // Technically 8, but set as fast as possible for simulation. Min is 3
    wire [AMP_WI-1:0] amp_max = 600000;  // account for CORDIC gain
    wire [AMP_WI-1:0] amp_slope = 600000/(run_len/8); // .125 of total run length
 
    wire [LEN_WI-1:0] run_len = (full_sim) ? SLOW_RUN_LEN : FAST_RUN_LEN;
    wire signed [PH_WI-1:0] dphase = (full_sim) ? SLOW_DPHASE : FAST_DPHASE;
    wire signed [PH_WI-1:0] ddphase = (full_sim) ? SLOW_DDPHASE : FAST_DDPHASE;
-
-   wire etrig;
-
-   multi_sampler #(
-      .sample_period_wi(16))
-   i_multi_sampler (
-      .clk(clk),
-      .ext_trig(1'b1),
-      .sample_period(base_divide),
-      .dsample0_period(8'h0),
-      .dsample1_period(8'h0),
-      .dsample2_period(8'h0),
-      .sample_out(etrig),
-      .dsample0_stb(),
-      .dsample1_stb(),
-      .dsample2_stb()
-   );
 
    // ---------------------
    // Instantiate DUT
@@ -92,58 +75,35 @@ module chirp_wrap_tb;
    wire                          chirp_status;
    wire [2:0]                    chirp_error;
 
-   chirp_wrap # (
-      .DD_SHIFT  (DD_SHIFT),
-      .AMP_WI    (AMP_WI),
-      .PH_WI     (PH_WI),
-      .LEN_WI    (LEN_WI),
-      .CORDIC_WI (CORDIC_WI))
+   wire signed [CORDIC_WI-1:0] cosa, sina;
+
+   chirp_driver #(
+      .DD_SHIFT   (DD_SHIFT),
+      .PH_WI      (PH_WI),
+      .AMP_WI     (AMP_WI),
+      .CHIRP_RATE (CHIRP_RATE)) // CORDIC update rate; minimum is 3
    i_dut (
       .clk             (clk),
-      .ext_trig        (etrig),
       .chirp_start     (chirp_start),
 
-      // Chirp parameters
+      .chirp_en        (1'b1),
       .chirp_len       (run_len),
       .chirp_dphase    (dphase),
       .chirp_ddphase   (ddphase),
       .chirp_amp_slope (amp_slope),
       .chirp_amp_max   (amp_max),
 
+      .cordic_cos      (cosa),
+      .cordic_sin      (sina),
       .cordic_trig     (cordic_trig),
-      .cordic_amp      (cordic_amp),
-      .cordic_phase    (cordic_phase),
-
       .chirp_status    (chirp_status),
       .chirp_error     (chirp_error)
    );
 
-   // ---------------------
-   // Instantiate CORDIC
-   // ---------------------
-
-   localparam CORDIC_STAGE = 20;
-   localparam CORDIC_LAT = CORDIC_STAGE+1;
-
-   wire signed [CORDIC_WI-1:0] cosa, sina;
-   cordicg_b22 #(
-      .width  (CORDIC_WI),
-      .nstg   (CORDIC_STAGE),
-      .def_op (0))
-   i_cordicg_b22 (
-      .clk      (clk),
-      .opin     (2'b00),
-      .xin      (18'b0),
-      .yin      (cordic_amp),
-      .phasein  ({cordic_phase}),
-      .xout     (cosa),
-      .yout     (sina),
-      .phaseout ()
-   );
-
    wire signed [17:0] dac_out = sina[CORDIC_WI-1:CORDIC_WI-18];
 
-
+   localparam CORDIC_STAGE = 20; // Hardcoded in chirp_driver
+   localparam CORDIC_LAT = CORDIC_STAGE + 1;
    wire [CORDIC_WI-1:0]   cordic_amp_r;
    wire [CORDIC_WI+1-1:0] cordic_phase_r;
    wire cordic_update;
@@ -151,7 +111,7 @@ module chirp_wrap_tb;
    // Pipeline cordic_amp and cordic_phase to match latency of CORDIC engine
    reg_delay #(.dw(CORDIC_WI+(CORDIC_WI+1)), .len(CORDIC_LAT))
    i_delay_cordic_in (.clk(clk), .reset(1'b0),
-                      .gate(1'b1), .din({cordic_amp, cordic_phase}),
+                      .gate(1'b1), .din({i_dut.cordic_amp, i_dut.cordic_phase}),
                       .dout({cordic_amp_r, cordic_phase_r}));
 
    reg_delay #(.dw(1), .len(CORDIC_LAT))

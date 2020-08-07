@@ -111,7 +111,7 @@ char AD7193_Init() {
 
     AD7193_PrintStatus();
 
-    // enter continous sampling mode
+    // enter continuous sampling mode
     AD7193_SetReg(AD7193_REG_COMM, 0x5c0000);
     return 0;
 }

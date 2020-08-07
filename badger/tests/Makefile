@@ -35,6 +35,7 @@ VERILOG += -Wno-timescale -DSIMULATE
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
 VERILATOR = verilator
+VERILATOR_WARNS = -Wno-PINMISSING -Wno-WIDTH -Wno-TIMESCALEMOD
 YOSYS = yosys
 PERL = perl
 XCIRCUIT = xcircuit
@@ -279,7 +280,7 @@ tap_start: rtefi_live tap-vpi.vpi
 # My first ever attempt!  Probably full of bogosities, but it does work.
 Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -Wno-TIMESCALEMOD -cc --exe $^
+	$(VERILATOR) --trace $(VERILATOR_WARNS) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vrtefi_blob.mk
 	mv obj_dir/$@ $@
 
@@ -287,7 +288,7 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 # Verilator, slightly larger scope
 Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -Wno-TIMESCALEMOD -cc --exe $^
+	$(VERILATOR) --trace $(VERILATOR_WARNS) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
 	mv obj_dir/$@ $@
 # TFTP server demo:
@@ -301,7 +302,7 @@ Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) $(R
 # WIP
 Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) mem_gateway_sim.cpp udp_model.c
 	rm -f udp_model.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -Wno-TIMESCALEMOD -cc --exe $^
+	$(VERILATOR) --trace $(VERILATOR_WARNS) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmem_gateway_wrap.mk
 	mv obj_dir/$@ $@
 Vmem_gateway_check: Vmem_gateway_wrap
