@@ -1,0 +1,40 @@
+CLK20_VCXO   SYSCLK
+
+# Pmod1 J12
+Pmod1_0    {Pmod1[0]}
+Pmod1_1    {Pmod1[1]}
+Pmod1_2    {Pmod1[2]}
+Pmod1_3    {Pmod1[3]}
+Pmod1_4    {Pmod1[4]}
+Pmod1_5    {Pmod1[5]}
+Pmod1_6    {Pmod1[6]}
+Pmod1_7    {Pmod1[7]}
+
+# Wish to add I2C bus
+
+# UART to USB
+# FPGA_RxD and FPGA_TxD names are based on pins of the USB/UART chip,
+# not the FPGA!  Connect Tx to RX and vice versa.
+FPGA_TxD   UART_RXD
+FPGA_RxD   UART_TXD
+
+# QSPI Boot Flash
+CFG_FCS    qspi_cs
+CFG_MOSI   {qspi_dq[0]}
+CFG_DIN    {qspi_dq[1]}
+CFG_D02    {qspi_dq[2]}
+CFG_D03    {qspi_dq[3]}
+
+# Miscellaneous
+VCXO_EN    VCXO_EN
+
+# Literal output follows
+
+# Bank 0 setup
+set_property CFGBVS VCCO [current_design]
+set_property CONFIG_VOLTAGE 3.3 [current_design]
+
+# Clocks
+create_clock -name sys_clk -period 50.00 [get_ports SYSCLK]
+set_clock_groups -name async_clks -asynchronous \
+  -group [get_clocks -include_generated_clocks sys_clk]
