@@ -49,5 +49,5 @@ The goal here is to upconvert the feedback loop output IQ baseband stream to a D
 2. Perform IQ interpolation (described above) to bring the interleaved data stream up to regular rate.
 3. Upconvert the data by multiplying the IQ datastream with LO, use level set to generate Real and Imaginary components and add upconverted data together.
 
-![Block diagram of DSB] <img src="../dsp/dsb.png" width="100%">
+![Block diagram of DSB] (https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/dsb/dsp/dsb.png)
 
