@@ -40,3 +40,13 @@ The goal here is to upconvert the feedback loop output IQ baseband stream to a D
 4. Use afterburner.v to interpolate the mid-points of the IQ streams.
 
 [Code](https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/master/dsp/ssb_out.v)
+
+#### DSB - Digital-sideband Modulator [up-conversion]
+
+The goal here is to upconvert the feedback loop output IQ baseband stream to a DAC output stream. The IQ stream is running at half the data rate (see down-conversion above) assuming the DACs are running at the same frequency as the ADCs.
+
+1. Input of an IQ interleaved data stream.
+2. Perform IQ interpolation (described above) to bring the interleaved data stream up to regular rate.
+3. Upconvert the data by multiplying the IQ datastream with LO, use level set to generate Real and Imaginary components and add upconverted data together.
+
+![Block diagram of DSB](https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/dsb/dsp/dsb.png)
