@@ -1,20 +1,20 @@
 `timescale 1ns / 1ns
 
-//Up-conversion using Double-sideband Modulator 
-//check out pg. 268 from https://cds.cern.ch/record/1100538/files/p249.pdf
-//Digital quadrature modulation followed by analog up-conversion mixer
-//rf_out = I*cos(wt) + Q*sin(wt)
+// Up-conversion using Double-sideband Modulator
+// check out pg. 268 from https://cds.cern.ch/record/1100538/files/p249.pdf
+// Digital quadrature modulation followed by analog up-conversion mixer
+// rf_out = I*cos(wt) + Q*sin(wt)
 
 module dsb (
 	input clk,
-	input div_state,     //div_state I-Q signal 
-	input signed [17:0] drive, //Based interleaved I-Q
-	
-	// DDS
-	input signed [17:0] cosa, 
-	input signed [17:0] sina, 
+	input div_state,     // div_state I-Q signal
+	input signed [17:0] drive, // Baseband interleaved I-Q
 
-	//DAC output 
+	// DDS
+	input signed [17:0] cosa,
+	input signed [17:0] sina,
+
+	//DAC output
 	output signed [15:0] dac_out
 );
 
