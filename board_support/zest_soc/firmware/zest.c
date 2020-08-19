@@ -32,7 +32,7 @@ const uint8_t g_zest_adcs[] = {
 };
 
 bool get_spi_ready(void) {
-    return !CHECK_BIT(SPI_GET_STATUS(g_base_spi), BIT_MISO);
+    return !CHECK_BIT(SPI_GET_STATUS(g_base_spi), BIT_CIPO);
 }
 
 uint32_t wait_ad7794_spi_ready(void) {
