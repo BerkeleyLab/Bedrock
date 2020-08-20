@@ -35,6 +35,7 @@ wire [31:0] mem_rdata;
 wire [31:0] mem_rdata_cfg;
 wire [31:0] mem_rdata_mem;
 munpack mu (
+	.clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
     .mem_wdata ( mem_wdata    ),

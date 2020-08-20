@@ -31,11 +31,13 @@ localparam UART_BAUDRATE = 4'hC;
 wire [31:0] mem_wdata;
 wire [ 3:0] mem_wstrb;
 wire        mem_valid;
+reg         mem_valid_ = 0;
 wire [31:0] mem_addr;
 wire  [3:0] mem_short_addr = mem_addr[3:0];
 reg         mem_ready=0;
 reg  [31:0] mem_rdata;
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
 
@@ -92,7 +94,7 @@ always @(posedge clk) begin
     mem_rdata <= 32'h00000000;
     utx_tvalid <= 0;
     urx_tready <= 0;
-    if ( mem_valid && !mem_ready && mem_addr[31:24]==BASE_ADDR ) begin
+    if ( mem_valid && !mem_valid_ && mem_addr[31:24]==BASE_ADDR ) begin
         (* parallel_case *)
         case (1)
             // -----------------------------
@@ -147,5 +149,6 @@ always @(posedge clk) begin
             end
         endcase
     end
+    mem_valid_ <= mem_valid;
 end
 endmodule

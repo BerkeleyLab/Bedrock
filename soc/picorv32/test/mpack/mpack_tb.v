@@ -40,6 +40,7 @@ module mem_pack_unpack_tb;
     );
 
     munpack mu (
+        .clk           (clk),
         .mem_packed_fwd( packed_fwd ),
         .mem_packed_ret( packed_ret ),
 

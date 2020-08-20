@@ -22,11 +22,13 @@ module memory_pack #(
 wire [31:0] mem_wdata;
 wire [ 3:0] mem_wstrb;
 wire        mem_valid;
+reg        mem_valid_ = 1'b0;
 wire [31:0] mem_addr;
 wire [21:0] word_addr = mem_addr[23:2];// [words] Addressing 4 byte words
 reg  [31:0] mem_rdata=0;
 reg         mem_ready=0;
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
 
@@ -60,22 +62,24 @@ always @( posedge clk ) begin
     // Initialize status lines operating with single clock wide pulses
     mem_ready <=  1'b0;
     mem_rdata <= 32'h00000000;
-    if ( mem_valid && !mem_ready && mem_addr[31:24]==BASE_ADDR ) begin
+    if ( mem_valid && !mem_valid_ && mem_addr[31:24]==BASE_ADDR ) begin
         // ------------------------
         // --- Read from memory ---
         // ------------------------
         // In a read transfer mem_wstrb has the value 0 and mem_wdata is unused.
         mem_rdata <= memory[word_addr];
-        mem_ready <= 1;
+
         // -----------------------
         // --- Write to memory ---
         // -----------------------
-        //In a write transfer mem_wstrb != 0 encodes the number of bytes to write in one go.
+        // In a write transfer mem_wstrb != 0 encodes the number of bytes to write in one go.
         if (mem_wstrb[0]) memory[word_addr][ 7: 0] <= mem_wdata[ 7: 0];
         if (mem_wstrb[1]) memory[word_addr][15: 8] <= mem_wdata[15: 8];
         if (mem_wstrb[2]) memory[word_addr][23:16] <= mem_wdata[23:16];
         if (mem_wstrb[3]) memory[word_addr][31:24] <= mem_wdata[31:24];
+
         mem_ready <= 1;
     end
+    mem_valid_ <= mem_valid;
 end
 endmodule
