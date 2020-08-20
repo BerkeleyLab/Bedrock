@@ -9,7 +9,7 @@
 /// Notice `downscale`, this is meant to downscale the input into the accumulator
 /// Useful in times of high "natural" integration gain: like running with a superconducting cavity
 ///
-/// `correction` comes from your non-linear correcting factor you learnt, say from "last" time around
+/// `correction` comes from some externally-supplied feedforward, maybe derived from the previous pulse
 module multiply_accumulate (
 	input clk,
 	input reset,

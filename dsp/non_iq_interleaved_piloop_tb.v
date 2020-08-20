@@ -47,10 +47,11 @@ always @ (posedge clk) begin
 end
 
 non_iq_interleaved_piloop piloop (.clk(clk),
+	.feedback_enable(1'b1),
 	.Kp_I(kp), .Kp_Q(kp), .Ki_over_Kp(ki),
 	.err_i(err_i), .err_q(err_q),
-	.feedback_enable(1'b1),
-	.integrator_enable(1'b1),
+	.integrator_gate(1'b1),
+	.integrator_reset(1'b0),
 	.post_mult_shift(post_mult_shift),
 	.fdfwd_i(17'b0),
 	.fdfwd_q(17'b0),

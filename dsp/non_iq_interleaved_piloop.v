@@ -44,7 +44,8 @@ module non_iq_interleaved_piloop (
 
 	input signed [16:0] fdfwd_i,
 	input signed [16:0] fdfwd_q,
-	input integrator_enable, // external
+	input integrator_gate,
+	input integrator_reset,
 
 	output reg signed [17:0] pi_out_i,
 	output reg signed [17:0] pi_out_q
@@ -78,11 +79,11 @@ wire signed [17:0] prop_out_g_Q = feedback_enable ? prop_out_Q : 18'd0;
 // Stage 3: K_i mul and Integrator
 // DELAY: 2 cycles
 wire signed [20:0] integrator_out_I, integrator_out_Q;
-multiply_accumulate #(.KW(KW)) mi_I(.clk(clk), .enable(integrator_enable),
-	.reset(1'b0), .constant(Ki_over_Kp), .downscale(post_mult_shift),
+multiply_accumulate #(.KW(KW)) mi_I(.clk(clk), .enable(integrator_gate),
+	.reset(integrator_reset), .constant(Ki_over_Kp), .downscale(post_mult_shift),
 	.signal(prop_out_g_I), .correction(fdfwd_i), .accumulated(integrator_out_I));
-multiply_accumulate #(.KW(KW)) mi_Q(.clk(clk), .enable(integrator_enable),
-	.reset(1'b0), .constant(Ki_over_Kp), .downscale(post_mult_shift),
+multiply_accumulate #(.KW(KW)) mi_Q(.clk(clk), .enable(integrator_gate),
+	.reset(integrator_reset), .constant(Ki_over_Kp), .downscale(post_mult_shift),
 	.signal(prop_out_g_Q), .correction(fdfwd_q), .accumulated(integrator_out_Q));
 
 // Stage 4: Kp + Ki
