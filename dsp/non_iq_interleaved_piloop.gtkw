@@ -1,0 +1,35 @@
+[dumpfile] "non_iq_interleaved_piloop.vcd"
+[timestart] 13008
+[size] 956 1161
+[pos] 959 -788
+*-5.677876 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] non_iq_interleaved_piloop_tb.
+[treeopen] non_iq_interleaved_piloop_tb.piloop.
+[sst_width] 213
+[signals_width] 230
+[sst_expanded] 1
+[sst_vpaned_height] 455
+@420
+non_iq_interleaved_piloop_tb.piloop.Ki_over_Kp[17:0]
+non_iq_interleaved_piloop_tb.piloop.Kp_I[17:0]
+non_iq_interleaved_piloop_tb.piloop.Kp_Q[17:0]
+@28
+non_iq_interleaved_piloop_tb.piloop.clk
+@420
+non_iq_interleaved_piloop_tb.piloop.setpoint_i[17:0]
+non_iq_interleaved_piloop_tb.piloop.setpoint_q[17:0]
+non_iq_interleaved_piloop_tb.piloop.measured_i[17:0]
+non_iq_interleaved_piloop_tb.piloop.measured_q[17:0]
+non_iq_interleaved_piloop_tb.piloop.err_i[18:0]
+non_iq_interleaved_piloop_tb.piloop.err_q[18:0]
+non_iq_interleaved_piloop_tb.piloop.prop_out_I[17:0]
+non_iq_interleaved_piloop_tb.piloop.prop_out_Q[17:0]
+@28
+non_iq_interleaved_piloop_tb.piloop.mi_I.enable
+@420
+non_iq_interleaved_piloop_tb.piloop.integrator_out_I[20:0]
+non_iq_interleaved_piloop_tb.piloop.integrator_out_Q[20:0]
+non_iq_interleaved_piloop_tb.corr_i[17:0]
+non_iq_interleaved_piloop_tb.corr_q[17:0]
+[pattern_trace] 1
+[pattern_trace] 0
