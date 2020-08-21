@@ -145,7 +145,6 @@ module lb_bridge_tb;
     reg pass = 1'b0;
     always @(posedge mem_clk) begin
         if (~reset && trap) begin
-            // TODO fix & improve PASS / FAIL logic
             $display("%8d collisions. Expected %8d.", collisions, 0);
             $display("%8d write retries. Expected %8d.", w_retries, 2);
             $display("%8d read retries. Expected %8d.", r_retries, 3);
@@ -159,22 +158,25 @@ module lb_bridge_tb;
         end
     end
 
-    always @(posedge lb_clk) begin
+    wire cpu_la_read = cpu.mem_la_read && (cpu.mem_la_addr[31:24]==8'h04);
+    initial begin
         #500;
         // write through
         lb1_write_task( 20'h20000, 32'hfaceface );
         // collision
-        #(2*CLK_PERIOD); // simulate both write. w_retry
+        @ (posedge bridge.mem_write); // simulate both write. w_retry
         lb1_write_task( 20'h30000, 32'hdeadbeaf );
-        #(20*CLK_PERIOD);
-        lb1_read_task ( 20'h00010, lb1_rdata);
-        #(6*CLK_PERIOD); // simulate both read, LB first. r_retry
+        @ (posedge cpu_la_read);  // simulate both read, LB first. r_retry
         lb1_read_task ( 20'h00020, lb1_rdata);
-        #(10*CLK_PERIOD); // simulate both read, CPU first. r_retry
+        @ (posedge bridge.mem_read); // simulate both read, CPU first. r_retry
+        # (2*CLK_PERIOD);
         lb1_read_task ( 20'h00030, lb1_rdata);
-        #(13*CLK_PERIOD); // simulate LB read while CPU write. w_retry
+
+        // TODO fix lb_bridge.S, see gtkwave @ 1344ns.
+        // Otherwise cpu stalls before the following runs
+        @ (posedge bridge.mem_write); // simulate LB read while CPU write. w_retry
         lb1_read_task ( 20'h00040, lb1_rdata);
-        #(9*CLK_PERIOD); // simulate LB write while CPU read. r_retry
+        @ (posedge bridge.mem_read); // simulate LB write while CPU read. r_retry
         lb1_write_task( 20'h00050, 32'hfaceface );
     end
 
@@ -208,6 +210,7 @@ module lb_bridge_tb;
         end
     endtask
 
+    // 4 + READ_DELAY due to mem_gateway timing
     lb_reading #(.READ_DELAY(4+READ_DELAY)) reading_lb1 (
         .clk        (lb_clk),
         .reset      (1'b0),
