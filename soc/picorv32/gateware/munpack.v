@@ -28,14 +28,14 @@ assign mem_valid      = mem_packed_fwd[    0];
 // wire [31:0] rdata = mem_ready ? mem_rdata : 0;
 // assign mem_packed_ret = { mem_ready, rdata };
 
-reg[32:0] mem_packed_ret_ = 33'h0;
-wire [33:0] temp = {mem_ready, mem_rdata};
-always @(posedge clk) mem_packed_ret_ <= temp;
+wire [32:0] temp = {mem_ready, mem_rdata};
 
 // 0 cycles extra delay
-assign mem_packed_ret = temp;
+// assign mem_packed_ret = temp;
 
 // 1 cycle extra delay
-// assign mem_packed_ret = mem_packed_ret_;
+reg[32:0] mem_packed_ret_ = 33'h0;
+always @(posedge clk) mem_packed_ret_ <= temp;
+assign mem_packed_ret = mem_packed_ret_;
 
 endmodule

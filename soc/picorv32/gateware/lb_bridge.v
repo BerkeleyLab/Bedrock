@@ -26,8 +26,12 @@ wire [31:0] mem_wdata;
 wire [ 3:0] mem_wstrb;
 wire        mem_valid;
 wire [31:0] mem_addr;
-wire [31:0] mem_rdata;
-wire mem_ready;
+reg [31:0] mem_rdata = 32'h0;
+
+reg mem_ready = 0;
+reg mem_ready_ = 0;
+wire ready_sum = mem_ready || mem_ready_;
+
 munpack mu (
     .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
@@ -44,8 +48,8 @@ wire  [7:0] mem_addr_base = mem_addr[31:24];// Which peripheral   (BASE_ADDR)
 
 assign lb_wdata = mem_wdata;
 // only react on 32 bit writes
-wire mem_write = mem_valid &&  (&mem_wstrb) && (mem_addr_base==BASE_ADDR);
-wire mem_read  = mem_valid && !(|mem_wstrb) && (mem_addr_base==BASE_ADDR);
+wire mem_write = mem_valid && !ready_sum &&  (&mem_wstrb) && (mem_addr_base==BASE_ADDR);
+wire mem_read  = mem_valid && !ready_sum && !(|mem_wstrb) && (mem_addr_base==BASE_ADDR);
 
 assign lb_write = mem_write & ~busy;
 assign lb_read = mem_read & ~busy;
@@ -60,8 +64,10 @@ lb_reading #(.READ_DELAY(READ_DELAY)) reading (
 );
 
 wire lb_write_ready = mem_write & ~busy;
-assign mem_ready = lb_write_ready | lb_rvalid;
-// assign mem_rdata = lb_rdata;
-assign mem_rdata = lb_rvalid ? lb_rdata : 32'd0;
+always @(posedge clk) begin
+    mem_ready <= lb_write_ready | lb_rvalid;
+    mem_rdata <= lb_rvalid ? lb_rdata : 32'd0;
+    mem_ready_ <= mem_ready;
+end
 
 endmodule

@@ -54,7 +54,7 @@ module mem_pack_unpack_tb;
 
     integer pass = 1;
     initial begin
-        repeat (1) @(posedge clk);
+        repeat (2) @(posedge clk);
 
         $write("\n");
         $write("packed_fwd %24x\n", packed_fwd);

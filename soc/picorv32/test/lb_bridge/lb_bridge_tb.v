@@ -145,6 +145,7 @@ module lb_bridge_tb;
     reg pass = 1'b0;
     always @(posedge mem_clk) begin
         if (~reset && trap) begin
+            // TODO fix & improve PASS / FAIL logic
             $display("%8d collisions. Expected %8d.", collisions, 0);
             $display("%8d write retries. Expected %8d.", w_retries, 2);
             $display("%8d read retries. Expected %8d.", r_retries, 3);
@@ -215,12 +216,9 @@ module lb_bridge_tb;
     );
 
     integer time0=0;
-    wire cpu_write_lb     = cpu.mem_valid & &cpu.mem_wstrb & (bridge.mem_addr_base==8'h4);
-    wire cpu_read_lb      = cpu.mem_valid & ~|cpu.mem_wstrb & (bridge.mem_addr_base==8'h4);
-    wire cpu_read_lb_ack  = cpu.mem_ready & cpu_read_lb;
     always @(negedge lb_clk) begin
         time0 = $time-(CLK_PERIOD)/2;
-        if (cpu_write_lb)
+        if (bridge.mem_write)
             $display("Time: %8g CPU Write  : ADDR 0x%08x DATA 0x%08x %c",
                       time0, lbo_addr, lbo_wdata, lbo_wdata & 16'hff);
         if (lb1_write)
@@ -237,10 +235,10 @@ module lb_bridge_tb;
             $display("Time: %8g === CPU read retry ===", time0);
             r_retries <= r_retries + 1;
         end
-        if (cpu_read_lb)
+        if (bridge.mem_read)
             $display("Time: %8g CPU Reading: ADDR 0x%08x", time0, cpu.mem_addr);
-        if (cpu_read_lb_ack)
-            $display("Time: %8g CPU Readack: ADDR 0x%08x DATA 0x%08x", time0, cpu.mem_addr, cpu.mem_rdata);
+        if (bridge.lb_rvalid)
+            $display("Time: %8g CPU Readack: ADDR 0x%08x DATA 0x%08x", time0, bridge.mem_addr, bridge.lb_rdata);
         if (lb1_read)
             $display("Time: %8g LB  Read   : ADDR 0x%08x", time0, lb1_addr);
         if (lb1_rvalid)

@@ -36,12 +36,14 @@ localparam UART_RX_REG   = 4'h8;
 wire [31:0] mem_wdata;
 wire [ 3:0] mem_wstrb;
 wire        mem_valid;
-reg         mem_valid_ = 0;
-reg         isStalled = 0;  // high as long as a picorv32 request is processed
 wire [31:0] mem_addr;
 wire  [3:0] mem_short_addr = mem_addr[3:0];
-reg         mem_ready=0;
 reg  [31:0] mem_rdata;
+
+reg mem_ready = 0;
+reg mem_ready_ = 0;
+wire ready_sum = mem_ready || mem_ready_;
+
 munpack mu (
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
@@ -81,8 +83,7 @@ always @(posedge clk) begin
     mem_rdata <= 0;
     utx_tvalid <= 0;
     urx_tready <= 0;
-    if (mem_valid && !mem_valid_ && mem_addr[31:24]==BASE_ADDR || isStalled) begin
-        isStalled <= 0;
+    if (mem_valid && !ready_sum && mem_addr[31:24]==BASE_ADDR) begin
 
         (* parallel_case *)
         case (1)
@@ -100,7 +101,6 @@ always @(posedge clk) begin
                         mem_ready <= 1;
                     end else begin
                         mem_ready <= 0;         // !!! STALL !!! (until UART is ready)
-                        isStalled <= 1;
                     end
                 end
             end
@@ -115,7 +115,7 @@ always @(posedge clk) begin
             end
         endcase
     end
-    mem_valid_ <= mem_valid;
+    mem_ready_ <= mem_ready;
 end
 
 endmodule

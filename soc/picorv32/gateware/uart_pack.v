@@ -47,12 +47,14 @@ localparam UART_BAUDRATE = 4'hC;
 wire [31:0] mem_wdata;
 wire [ 3:0] mem_wstrb;
 wire        mem_valid;
-reg         mem_valid_ = 0;
-reg         isStalled = 0;  // high as long as a picorv32 request is processed
 wire [31:0] mem_addr;
 wire  [3:0] mem_short_addr = mem_addr[3:0];
-reg         mem_ready=0;
 reg  [31:0] mem_rdata;
+
+reg mem_ready = 0;
+reg mem_ready_ = 0;
+wire ready_sum = mem_ready || mem_ready_;
+
 munpack mu (
     .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
@@ -118,9 +120,7 @@ always @(posedge clk) begin
     mem_rdata <= 32'h00000000;
     utx_tvalid <= 0;
     urx_tready <= 0;
-    if ( mem_valid && !mem_valid_ && mem_addr[31:24]==BASE_ADDR || isStalled) begin
-        isStalled <= 0;
-
+    if (mem_valid && !ready_sum && mem_addr[31:24]==BASE_ADDR) begin
         (* parallel_case *)
         case (1)
             // -----------------------------
@@ -138,13 +138,12 @@ always @(posedge clk) begin
                 if (mem_wstrb[1] && DATA_WIDTH>8 ) utx_tdata[15: 8] <= mem_wdata[15: 8];
                 // Writing to the lowest byte starts the transmission
                 if (mem_wstrb[0]) begin
-                    if ( utx_tready ) begin
+                    if (utx_tready) begin
                         utx_tdata[7:0] <= mem_wdata[7:0];
                         utx_tvalid <= 1;
                         mem_ready <= 1;
                     end else begin
                         mem_ready <= 0;         // !!! STALL !!! (until UART is ready)
-                        isStalled <= 1;
                     end
                 end
             end
@@ -178,7 +177,7 @@ always @(posedge clk) begin
             end
         endcase
     end
-    mem_valid_ <= mem_valid;
+    mem_ready_ <= mem_ready;
 end
 
 endmodule

@@ -22,11 +22,19 @@ module memory_pack #(
 wire [31:0] mem_wdata;
 wire [ 3:0] mem_wstrb;
 wire        mem_valid;
-reg        mem_valid_ = 1'b0;
 wire [31:0] mem_addr;
 wire [21:0] word_addr = mem_addr[23:2];// [words] Addressing 4 byte words
-reg  [31:0] mem_rdata=0;
-reg         mem_ready=0;
+reg  [31:0] mem_rdata = 0;
+
+// mem_ready is a single cycle pulse to acknowledge data going to the picrov.
+// ready_sum is a 2 cycle pulse, which is used internally to
+// wait an extra dummy cycle at the end of each request
+// this allows mem_ready to be (optionally) latched once more (in munpack.v)
+// before entering the picorv
+reg mem_ready = 0;
+reg mem_ready_ = 0;
+wire ready_sum = mem_ready || mem_ready_;
+
 munpack mu (
     .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
@@ -62,11 +70,11 @@ always @( posedge clk ) begin
     // Initialize status lines operating with single clock wide pulses
     mem_ready <=  1'b0;
     mem_rdata <= 32'h00000000;
-    if ( mem_valid && !mem_valid_ && mem_addr[31:24]==BASE_ADDR ) begin
+    if (mem_valid && !ready_sum && mem_addr[31:24]==BASE_ADDR) begin
         // ------------------------
         // --- Read from memory ---
         // ------------------------
-        // In a read transfer mem_wstrb has the value 0 and mem_wdata is unused.
+        // In a readmem_ready_ transfer mem_wstrb has the value 0 and mem_wdata is unused.
         mem_rdata <= memory[word_addr];
 
         // -----------------------
@@ -80,6 +88,6 @@ always @( posedge clk ) begin
 
         mem_ready <= 1;
     end
-    mem_valid_ <= mem_valid;
+    mem_ready_ <= mem_ready;
 end
 endmodule
