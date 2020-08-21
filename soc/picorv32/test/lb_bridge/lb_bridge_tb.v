@@ -172,8 +172,6 @@ module lb_bridge_tb;
         # (2*CLK_PERIOD);
         lb1_read_task ( 20'h00030, lb1_rdata);
 
-        // TODO fix lb_bridge.S, see gtkwave @ 1344ns.
-        // Otherwise cpu stalls before the following runs
         @ (posedge bridge.mem_write); // simulate LB read while CPU write. w_retry
         lb1_read_task ( 20'h00040, lb1_rdata);
         @ (posedge bridge.mem_read); // simulate LB write while CPU read. r_retry
