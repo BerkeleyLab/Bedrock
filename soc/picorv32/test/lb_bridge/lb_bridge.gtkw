@@ -1,11 +1,4 @@
-[*]
-[*] GTKWave Analyzer v3.3.98 (w)1999-2019 BSI
-[*] Fri Aug 21 06:02:52 2020
-[*]
-[dumpfile] "/home/du/work/bedrock/soc/picorv32/test/lb_bridge/lb_bridge.vcd"
-[dumpfile_mtime] "Fri Aug 21 06:01:18 2020"
-[dumpfile_size] 137063
-[savefile] "/home/du/work/bedrock/soc/picorv32/test/lb_bridge/lb_bridge.gtkw"
+[dumpfile] "lb_bridge.vcd"
 [timestart] 0
 [size] 1390 1145
 [pos] -1 -1
