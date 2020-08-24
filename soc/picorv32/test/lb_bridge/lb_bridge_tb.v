@@ -158,13 +158,14 @@ module lb_bridge_tb;
         end
     end
 
+    wire cpu_la_write = cpu.mem_la_write && (cpu.mem_la_addr[31:24]==8'h04);
     wire cpu_la_read = cpu.mem_la_read && (cpu.mem_la_addr[31:24]==8'h04);
     initial begin
         #500;
         // write through
         lb1_write_task( 20'h20000, 32'hfaceface );
         // collision
-        @ (posedge bridge.mem_write); // simulate both write. w_retry
+        @ (posedge cpu_la_write); // simulate both write. w_retry
         lb1_write_task( 20'h30000, 32'hdeadbeaf );
         @ (posedge cpu_la_read);  // simulate both read, LB first. r_retry
         lb1_read_task ( 20'h00020, lb1_rdata);
@@ -172,7 +173,7 @@ module lb_bridge_tb;
         # (2*CLK_PERIOD);
         lb1_read_task ( 20'h00030, lb1_rdata);
 
-        @ (posedge bridge.mem_write); // simulate LB read while CPU write. w_retry
+        @ (posedge cpu_la_write);  // simulate LB read while CPU write. w_retry
         lb1_read_task ( 20'h00040, lb1_rdata);
         @ (posedge bridge.mem_read); // simulate LB write while CPU read. r_retry
         lb1_write_task( 20'h00050, 32'hfaceface );

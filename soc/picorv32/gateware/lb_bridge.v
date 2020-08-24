@@ -48,8 +48,8 @@ wire  [7:0] mem_addr_base = mem_addr[31:24];// Which peripheral   (BASE_ADDR)
 
 assign lb_wdata = mem_wdata;
 // only react on 32 bit writes
-wire mem_write = mem_valid &&  (&mem_wstrb) && (mem_addr_base==BASE_ADDR);
-wire mem_read  = mem_valid && !(|mem_wstrb) && (mem_addr_base==BASE_ADDR);
+wire mem_write = mem_valid && !ready_sum &&  (&mem_wstrb) && (mem_addr_base==BASE_ADDR);
+wire mem_read  = mem_valid && !ready_sum && !(|mem_wstrb) && (mem_addr_base==BASE_ADDR);
 
 assign lb_write = mem_write & ~busy;
 assign lb_read = mem_read & ~busy;
