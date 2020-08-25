@@ -132,7 +132,7 @@ class ZestOnBMB7Carrier(Carrier):
 
             self.npt = get_npt(self.carrier)
             mask_int = int(mask, 0)
-            self.n_channels, channels = write_mask(self.carrier, mask_int)
+            self.n_channels, self.channel_order = write_mask(self.carrier, mask_int)
             self.carrier.leep.reg_write([('config_adc_downsample_ratio',
                                           log_decimation_factor)])
         else:
@@ -163,9 +163,10 @@ class ZestOnBMB7Carrier(Carrier):
             # It always collects npt * 8 data points.
             # Each channel gets [(npt * 8) // n_channels] datapoints
             start = time.time()
-            data_raw, ts = collect_adcs(self.carrier.leep,
+            data_raw_, ts = collect_adcs(self.carrier.leep,
                                         self.npt, self.n_channels)
-            print(self.npt, self.n_channels, time.time()-start)
+            data_raw = [data_raw_[ch] for ch in self.channel_order]
+            print(self.npt, self.n_channels, time.time()-start, self.channel_order)
             self._db = DataBlock(ADC.counts_to_volts(np.array(data_raw)), ts)
             # ADC count / FULL SCALE => [-1.0, 1.]
             self._process_subscriptions()
@@ -397,7 +398,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-p', '--port', help='port', dest='port', type=int, default=803)
     parser.add_argument(
-        '-m', '--mask', help='mask', dest='mask', type=str, default='0x33')
+        '-m', '--mask', help='mask', dest='mask', type=str, default='0x0f')
     parser.add_argument(
         '-n',
         '--npt_wish',
