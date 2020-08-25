@@ -50,7 +50,7 @@ class Processing:
     stacked_data = {}
     stack_n = 100000
     old_data = None
-    fft_stack_count = {0: 0, 1: 0}
+    fft_stack_count = {0: 0, 1: 0, 2:0, 3:0}
     H_stack_count = {0: 0, 1: 0}
 
     @staticmethod
