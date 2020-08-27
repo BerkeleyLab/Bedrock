@@ -189,23 +189,47 @@ class ZestOnBMB7Carrier(Carrier):
         Logger.info('Removed subscription {}'.format(sub_id))
 
 
-g_scope_channels, g_plot_type_limits = {}, {}
+g_plot_type_limits = {}
 
+import dataclasses, json
 
+@dataclasses.dataclass
 class GUIGraphLimits:
-    def __init__(self, plot_type, **kwargs):
-        self.plot_type = plot_type
-        self.xlim = kwargs.get('xlim')
-        self.ylim = kwargs.get('ylim')
-        self.xlabel = kwargs.get('xlabel')
-        self.ylabel = kwargs.get('ylabel')
-        self.ylog = kwargs.get('ylog')
-        self.xlog = kwargs.get('xlog')
-        self.autoscale = kwargs.pop('autoscale', False)
+    plot_type: str
+    xlim: (float, float)
+    ylim: (float, float)
+    xlabel: str
+    ylabel: str
+    ylog: bool
+    xlog: bool
+    autoscale: bool
 
 
 # TODO: Should convert this to a dataclass for python 3.7+
 class GUIGraph:
+    graphs = {}
+    oscope_default_state = {
+        'T': {'plot_type': 'T',
+              'xlabel': 'Time [s]',
+              'ylabel':'ADC count',
+              'xlim'  : [0, 0.01],
+              'ylim'  : [-1., 1.],
+              'autoscale': False,
+              'ylog'  : False,
+              'xlog'  : False
+        },
+        'F': {'plot_type': 'F',
+              'xlabel' : 'Frequency [Hz]',
+              'ylabel' : '[V/sqrt(Hz)]',
+              'xlim'   : [0, 5e6],
+              'ylim'   : [1e-11, 60000],
+              'autoscale' : True,
+              'ylog'  : False,
+              'xlog'  : False
+        },
+        'active_graphs': []
+    }
+
     def __init__(self, ch_id, plot_info, show=False, label='Noname', **kwargs):
         self.ch_id = ch_id
         self.show = show
@@ -247,29 +271,51 @@ class GUIGraph:
         self.show = b
 
     @staticmethod
+    def load_settings(settings_file='oscope_state.json'):
+        try:
+            with open(settings_file, 'r') as jf:
+                oscope_state = json.load(jf)
+        except IOError as e:
+            Logger.warning(f'{e} occured while reading settings_file, loading default settings')
+            oscope_state = GUIGraph.oscope_default_state
+        except json.JSONDecodeError as e:
+            Logger.warning(f'{e} occured while reading settings_file, loading default settings')
+            oscope_state = GUIGraph.oscope_default_state
+        return oscope_state
+
+    @staticmethod
+    def save_settings(settings_file='oscope_state.json'):
+        GUIGraph.oscope_state['T'] = dataclasses.asdict(g_plot_type_limits['T'])
+        GUIGraph.oscope_state['F'] = dataclasses.asdict(g_plot_type_limits['F'])
+        GUIGraph.oscope_state['active_graphs'] = [g.ch_id for g in GUIGraph.graphs.values() if g.show]
+        try:
+            with open(settings_file, 'w') as jf:
+                json.dump(GUIGraph.oscope_state, jf)
+        except IOError as e:
+            Logger.warning('State of oscope couldn\'t be saved')
+
+    @staticmethod
     def setup_gui_graphs(carrier):
+        GUIGraph.oscope_state = GUIGraph.load_settings()
         # Load possible types of limits: For now T for time domain,
         #                                and F for frequency
-        g_plot_type_limits['T'] = GUIGraphLimits('T', xlabel='Time [s]',
-                                                 ylabel='ADC count',
-                                                 xlim=[0, 0.01], ylim=[-1., 1.])
-        g_plot_type_limits['F'] = GUIGraphLimits('F', xlabel='Frequency [Hz]',
-                                                 ylabel='[V/sqrt(Hz)]',
-                                                 xlim=[0, 5e6],
-                                                 ylim=[1e-11, 60000],
-                                                 autoscale=True)
+        g_plot_type_limits['T'] = GUIGraphLimits(**GUIGraph.oscope_state['T'])
+        g_plot_type_limits['F'] = GUIGraphLimits(**GUIGraph.oscope_state['F'])
         # Create 2 GUI graphs for each channel of data coming from the carrier
         # 2 graphs, 1 for T and 1 for F
         for i in range(carrier.n_channels):
             ch_id = "0" + str(i)
-            g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['T'],
-                                               label='CH{}-TimeDomain'.format(i))
+            GUIGraph.graphs[ch_id] = GUIGraph(ch_id, g_plot_type_limits['T'],
+                                              show=ch_id in GUIGraph.oscope_state['active_graphs'],
+                                              label='CH{}-TimeDomain'.format(i))
             ch_id = "1" + str(i)
-            g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
-                                               label='CH{}-Frequency'.format(i))
+            GUIGraph.graphs[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
+                                              show=ch_id in GUIGraph.oscope_state['active_graphs'],
+                                              label='CH{}-Frequency'.format(i))
         ch_id = "3"
-        g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
-                                           label='CSD')
+        GUIGraph.graphs[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
+                                          show=ch_id in GUIGraph.oscope_state['active_graphs'],
+                                          label='CSD')
 
 
 class Logic(BoxLayout):
@@ -283,10 +329,14 @@ class Logic(BoxLayout):
         self.plot_Q = []
 
     def update_lim(self, axis, *args):
-        CH = g_scope_channels[self.plot_id]
+        '''
+        Called from .kv
+        '''
+        CH = GUIGraph.graphs[self.plot_id]
         plot_limits = g_plot_type_limits[CH.plot_info.plot_type]
         if axis == 'autoscale':
             plot_limits.autoscale = args[1]
+            GUIGraph.save_settings()
             return
         text = args[1]
         try:
@@ -296,6 +346,7 @@ class Logic(BoxLayout):
                 plot_limits.ylim = eval(text)
         except Exception:
             Logger.warning('Invalid limits: ' + text)
+        GUIGraph.save_settings()
 
     def plot_settings_update(self, plot_id, plot_selected):
         if plot_selected:
@@ -310,7 +361,7 @@ class Logic(BoxLayout):
             self.ids.settings_box.size_hint = [1, .1]
 
         self.plot_id = self.plot_Q[-1]
-        CH = g_scope_channels[self.plot_id]
+        CH = GUIGraph.graphs[self.plot_id]
         plot_limits = g_plot_type_limits[CH.plot_info.plot_type]
         try:
             self.ids.ch_name.text = str('CH' + str(int(self.plot_id[1]) + 1) + ' ' +
@@ -323,6 +374,7 @@ class Logic(BoxLayout):
 
     def plot_select(self, plot_id, *args):
         '''
+        Called from .kv
         plot_id == plot_type + channel_number
         plot_type is '0' for Timeseries, '1' for FFT, '3' for Cross Spectral Density
         TODO: We don't need to handle plot types in this messy way if they are formalized
@@ -330,7 +382,7 @@ class Logic(BoxLayout):
         '''
         plot_selected = args[-1]  # Adds the plot when True, else removes it
 
-        CH = g_scope_channels[plot_id]
+        CH = GUIGraph.graphs[plot_id]
 
         self.plot_settings_update(plot_id, plot_selected)
 
@@ -353,6 +405,7 @@ class Logic(BoxLayout):
             CH.set_plot_active(False)
             self.remove_widget(CH.wid)
             carrier.remove_subscription(plot_id)
+        GUIGraph.save_settings()
 
     def csd_validate(self, *args):
         try:
@@ -375,7 +428,7 @@ class Logic(BoxLayout):
         Processing.reset_ch_stack_count(1)
 
     def update_graph(self, dt):
-        for _, ch in g_scope_channels.items():
+        for _, ch in GUIGraph.graphs.items():
             if ch.show:
                 ch.update_data()
 
