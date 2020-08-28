@@ -1,28 +1,32 @@
 import time
+import dataclasses
 
 import numpy as np
 from scipy import signal
 
 
+@dataclasses.dataclass
 class ADC:
-    bits = 16
-    scale = 1 << (bits - 1)  # signed
-    sample_rate = 100000000.
-    count_to_1volt = 1. / scale
+    bits: int = 16
+    scale: int = 1 << (bits - 1)  # signed
+    sample_rate: float = 100000000.
+    count_to_1volt: float = 1. / scale
     # 6dbm = 10 * log10(P/1e-3W)
     # 10 ** (6 / 10) = P / 1e-3
     # 10 ** (0.6) * 1e-3 = P
     # Assuming P = V**2 / 50 Ohms
     # V**2 = 1e-3 * (10 ** 0.6) * 50
     # V = np.sqrt(1e-3 * (10 ** 0.6) * 50)
-    dbm_to_Vrms = np.sqrt(1e-3 * (10**0.6) * 50)
-    Vzp = dbm_to_Vrms * np.sqrt(2)
-    count_to_v = Vzp / scale
-    count_to_v = 1.
-    downsample_ratio = 1
-    Units = 'ADC Count'
+    dbm_to_Vrms: float = np.sqrt(1e-3 * (10**0.6) * 50)
+    Vzp: float = dbm_to_Vrms * np.sqrt(2)
+    # count_to_v: float = Vzp / scale
+    count_to_v: float = 1.
+    downsample_ratio: int = 1
+    Units: str = 'ADC Count'
     # 1.7V saturates 765kHz
+    decimation_factor: int = 1
 
+    @staticmethod
     def counts_to_volts(raw_counts):
         # TODO: This should be adjusted to ADC.Vzp and verified
         return raw_counts
@@ -50,7 +54,7 @@ class Processing:
     stacked_data = {}
     stack_n = 100000
     old_data = None
-    fft_stack_count = {0: 0, 1: 0, 2:0, 3:0}
+    fft_stack_count = {0: 0, 1: 0, 2: 0, 3: 0}
     H_stack_count = {0: 0, 1: 0}
 
     @staticmethod
