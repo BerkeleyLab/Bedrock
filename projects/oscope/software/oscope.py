@@ -2,6 +2,8 @@
 
 # Considering KIVY itself has no args, the following helps transfer
 # the CLargs to python
+import dataclasses
+import json
 import os
 os.environ["KIVY_NO_ARGS"] = "1"
 
@@ -21,6 +23,7 @@ TODO:
 3.
 '''
 import copy
+import socket
 import sys
 import time
 
@@ -36,26 +39,16 @@ from get_raw_adcs import collect_adcs
 from zest_setup import c_prc
 
 
-def write_mask(carrier, mask_int):
-    carrier.leep.reg_write([('banyan_mask', mask_int)])
-    channels = banyan_ch_find(mask_int)
-    n_channels = len(channels)
-    print((channels, 8 / n_channels))
-    return n_channels, channels
-
-
-def get_npt(prc):
-    banyan_status = prc.leep.reg_read(['banyan_status'])[0]
-    npt = 1 << ((banyan_status >> 24) & 0x3F)
-    if npt == 1:
-        print("aborting since hardware module not present")
-        sys.exit(2)
-    return npt
-
-
 class Carrier():
     def test_data(self, *args):
-        raise NotImplementedError
+        while True:
+            # https://docs.python.org/3/tutorial/classes.html#private-variables
+            self._db = DataBlock(
+                np.array([np.random.random_sample(self.pts_per_ch)
+                          for _ in range(self.n_channels)]),
+                time.time())
+            self._process_subscriptions()
+            time.sleep(0.2)
 
     def acquire_data(self, *args):
         raise NotImplementedError
@@ -83,23 +76,33 @@ class LTCOnMarblemini(Carrier):
                  port=50006,
                  count=10,
                  log_decimation_factor=0,
-                 verbose=False,
                  test=False):
         ADC.bits = 14
         ADC.sample_rate = 120000000.
-        ADC.decimation_factor = 1 << log_decimation_factor
         self.n_channels = 2
         self._db = None
         self.test = test
         self.pts_per_ch = 8192
         self.subscriptions, self.results = {}, {}
-        ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
+        self.set_log_decimation_factor(log_decimation_factor)
         self.wb = RemoteClient()
         self.wb.open()
         print(self.wb.regs.acq_buf_full.read())
         initLTC(self.wb)
 
+    def set_log_decimation_factor(self, ldf):
+        ADC.decimation_factor = 1 << ldf
+        ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
+        if ldf != 0:
+            '''
+            This feature is missing in gateware
+            '''
+            raise NotImplementedError
+
     def acquire_data(self, *args):
+        if self.test:
+            return self.test_data(*args)
+
         while True:
             self.wb.regs.acq_acq_start.write(1)
             self._db = DataBlock(get_data(self.wb), int(time.time()))
@@ -110,6 +113,9 @@ class LTCOnMarblemini(Carrier):
 
 
 class ZestOnBMB7Carrier(Carrier):
+    '''
+    Zest on BMB7 or Marblemini
+    '''
     def __init__(self,
                  ip_addr='192.168.1.121',
                  port=50006,
@@ -117,42 +123,39 @@ class ZestOnBMB7Carrier(Carrier):
                  npt_wish=0,
                  count=10,
                  log_decimation_factor=0,
-                 verbose=False,
                  use_spartan=False,
                  test=False):
 
-        ADC.decimation_factor = 1 << log_decimation_factor
         self._db = None
         self.test = test
-        if not test:
+        self.log_decimation_factor = 0
+        if self.test:
+            banyan_aw = 13
+            self.npt = 2**banyan_aw
+            self.n_channels = 2
+        else:
             self.carrier = c_prc(
                 ip_addr,
                 port,
                 use_spartan=use_spartan)
-
-            self.npt = get_npt(self.carrier)
+            self.npt = ZestOnBMB7Carrier.get_npt(self.carrier)
             mask_int = int(mask, 0)
-            self.n_channels, self.channel_order = write_mask(self.carrier, mask_int)
-            self.carrier.leep.reg_write([('config_adc_downsample_ratio',
-                                          log_decimation_factor)])
-        else:
-            banyan_aw = 13
-            self.npt = 2**banyan_aw
-            self.n_channels = 2
+            self.n_channels, self.channel_order = ZestOnBMB7Carrier.write_mask(self.carrier, mask_int)
 
+        self.set_log_decimation_factor(log_decimation_factor)
         self.pts_per_ch = self.npt * 8 // self.n_channels
         self.subscriptions, self.results = {}, {}
-        ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
 
-    def test_data(self, *args):
-        while True:
-            # https://docs.python.org/3/tutorial/classes.html#private-variables
-            self._db = DataBlock(
-                np.array([np.random.random_sample(self.pts_per_ch)
-                          for _ in range(self.n_channels)]),
-                time.time())
-            self._process_subscriptions()
-            time.sleep(0.2)
+    def set_log_decimation_factor(self, ldf):
+        Logger.info(f'Changed log_decimation factor from {self.log_decimation_factor} to {ldf}')
+        ADC.decimation_factor = 1 << ldf
+        if not self.test:
+            try:
+                self.carrier.leep.reg_write([('config_adc_downsample_ratio', ldf)])
+            except socket.timeout:
+                self.set_log_decimation_factor(ldf)
+        ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
+        self.log_decimation_factor = ldf
 
     def acquire_data(self, *args):
         if self.test:
@@ -163,9 +166,13 @@ class ZestOnBMB7Carrier(Carrier):
             # It always collects npt * 8 data points.
             # Each channel gets [(npt * 8) // n_channels] datapoints
             start = time.time()
-            data_raw_, ts = collect_adcs(self.carrier.leep,
-                                        self.npt, self.n_channels)
-            data_raw = [data_raw_[ch] for ch in self.channel_order]
+            try:
+                data_raw_, ts = collect_adcs(self.carrier.leep,
+                                             self.npt, self.n_channels)
+            except socket.timeout:
+                print('foo')
+                continue
+            data_raw = [y for _, y in sorted(zip(self.channel_order, data_raw_))]
             print(self.npt, self.n_channels, time.time()-start, self.channel_order)
             self._db = DataBlock(ADC.counts_to_volts(np.array(data_raw)), ts)
             # ADC count / FULL SCALE => [-1.0, 1.]
@@ -188,10 +195,26 @@ class ZestOnBMB7Carrier(Carrier):
         self.subscriptions.pop(sub_id)
         Logger.info('Removed subscription {}'.format(sub_id))
 
+    @staticmethod
+    def write_mask(carrier, mask_int):
+        carrier.leep.reg_write([('banyan_mask', mask_int)])
+        channels = banyan_ch_find(mask_int)
+        n_channels = len(channels)
+        print((channels, 8 / n_channels))
+        return n_channels, channels
+
+    @staticmethod
+    def get_npt(prc):
+        banyan_status = prc.leep.reg_read(['banyan_status'])[0]
+        npt = 1 << ((banyan_status >> 24) & 0x3F)
+        if npt == 1:
+            print("aborting since hardware module not present")
+            sys.exit(2)
+        return npt
+
 
 g_plot_type_limits = {}
 
-import dataclasses, json
 
 @dataclasses.dataclass
 class GUIGraphLimits:
@@ -211,22 +234,20 @@ class GUIGraph:
     oscope_default_state = {
         'T': {'plot_type': 'T',
               'xlabel': 'Time [s]',
-              'ylabel':'ADC count',
-              'xlim'  : [0, 0.01],
-              'ylim'  : [-1., 1.],
+              'ylabel': 'ADC count',
+              'xlim': [0, 0.01],
+              'ylim': [-1., 1.],
               'autoscale': False,
-              'ylog'  : False,
-              'xlog'  : False
-        },
+              'ylog': False,
+              'xlog': False},
         'F': {'plot_type': 'F',
-              'xlabel' : 'Frequency [Hz]',
-              'ylabel' : '[V/sqrt(Hz)]',
-              'xlim'   : [0, 5e6],
-              'ylim'   : [1e-11, 60000],
-              'autoscale' : True,
-              'ylog'  : False,
-              'xlog'  : False
-        },
+              'xlabel': 'Frequency [Hz]',
+              'ylabel': '[V/sqrt(Hz)]',
+              'xlim': [0, 5e6],
+              'ylim': [1e-11, 60000],
+              'autoscale': True,
+              'ylog': False,
+              'xlog': False},
         'active_graphs': []
     }
 
@@ -241,6 +262,7 @@ class GUIGraph:
         self.ax.set_xlabel(plot_info.xlabel)
         self.ax.set_ylabel(plot_info.ylabel)
         self.ax.legend()
+        self.ax.grid(True)
         self.carrier_ch_n = int(ch_id[1]) if int(ch_id[0]) < 2 else None
         self.plot_info = plot_info
         self._old_results = []
@@ -291,7 +313,7 @@ class GUIGraph:
         try:
             with open(settings_file, 'w') as jf:
                 json.dump(GUIGraph.oscope_state, jf)
-        except IOError as e:
+        except IOError:
             Logger.warning('State of oscope couldn\'t be saved')
 
     @staticmethod
@@ -327,6 +349,13 @@ class Logic(BoxLayout):
         Clock.schedule_interval(self.update_graph, 1/5)
         self.plot_id = '00'
         self.plot_Q = []
+
+    def update_ldf(self, *args):
+        ldf = args[-1]
+        ldf = ldf.text
+        ldf = int(str(ldf))
+        assert(ldf < 32)
+        carrier.set_log_decimation_factor(ldf)
 
     def update_lim(self, axis, *args):
         '''
