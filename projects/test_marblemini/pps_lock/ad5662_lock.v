@@ -22,7 +22,7 @@ always @(posedge clk) if (host_write_cr) config_r <= host_data;
 wire run_request = config_r[0];  // When this is 0, we get
 // 100% software compatiblity with simpler (non-lockable) previous behavior.
 wire err_sign = config_r[1];
-wire lock_sel = config_r[3:2];
+wire [1:0] lock_sel = config_r[3:2];
 
 // Slightly strange, peek at writes to DAC
 // I bet I could reduce resource usage if I tried.

@@ -3,7 +3,7 @@ import argparse
 import sys
 import os
 import time
-sys.path.append(os.path.join(os.path.dirname(__file__), "bedrock/badger"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../badger"))
 from lbus_access import lbus_access
 
 

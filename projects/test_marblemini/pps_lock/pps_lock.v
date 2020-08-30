@@ -43,19 +43,19 @@ reg count_active=0, dac_preset_stb=0, dsp_ready=0, dsp_strobe=0;
 assign count_init = pps_edge & arm;
 reg dsp_on=0;  // Final run status; internal errors will turn this off
 always @(posedge clk) begin
-	count_active <= count[26:12] == 0;
+	count_active <= (count[26:12] == 0) | arm;
 	run_req1 <= run_request;
 	if (run_request & ~run_req1) arm <= 1;
+	dac_preset_stb <= count_init;
 	if (count_init) begin
 		arm <= 0;
 		dsp_on <= 1;
 	end
-	dac_preset_stb <= pps_edge & arm;
+	if (pps_edge) phase_r <= count[11:0];
 	pd_overflow <= pps_edge1 & ~count_active;
 	if (~run_request | pd_overflow) dsp_on <= 0;
-	if (pps_edge) phase_r <= count[11:0];
 	if (pps_edge & dsp_on) dsp_ready <= 1;
-	if (~count_active) dsp_ready <=0;
+	if (~count_active) dsp_ready <= 0;
 	dsp_strobe <= dsp_ready & ~count_active;
 end
 
