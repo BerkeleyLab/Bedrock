@@ -5,6 +5,8 @@ import os
 import time
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../badger"))
 from lbus_access import lbus_access
+global old_pps_cnt
+old_pps_cnt = None
 
 
 def set_lock(chip, v, dac=1, verbose=False):
@@ -19,15 +21,15 @@ def set_lock(chip, v, dac=1, verbose=False):
     else:
         print("Invalid DAC choice")
         exit(1)
-    print("DAC v = %d (%x)" % ((v&0xffff), v))
+    print("DAC v = %d (%x)" % ((v & 0xffff), v))
     chip.exchange([327692], [0])  # pps_config
     chip.exchange([327689], [v])  # wr_dac
     time.sleep(0.1)
     chip.exchange([327692], [cfg])  # pps_config
 
 
-old_pps_cnt = None
 def poll_lock(chip, verbose=False):
+    global old_pps_cnt
     while True:
         dsp_status, gps_status, cfg = chip.exchange([14, 12, 327692])
         dac = dsp_status >> 16
@@ -37,7 +39,6 @@ def poll_lock(chip, verbose=False):
         pha = dsp_status & 0xfff
         if verbose or pps_cnt != old_pps_cnt:
             break
-    global old_pps_cnt
     old_pps_cnt = pps_cnt
     ss = "%d %d %d %d %d %d" % (dac, dsp_on, dsp_arm, pha, pps_cnt, cfg)
     return ss
