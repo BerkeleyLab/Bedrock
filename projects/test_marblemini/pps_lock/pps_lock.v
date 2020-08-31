@@ -73,7 +73,6 @@ end
 
 // Instantiate the loop filter (PI controller)
 wire dsp_ovf;
-wire signed [15:0] dac_val;
 wire signed [11:0] phase_sign = phase_r ^ (1<<11);  // convert from offset binary to signed
 wire signed [11:0] phase_dsp = phase_sign ^ {12{err_sign}};
 pps_loop_filter plf(.clk(clk),
@@ -81,9 +80,8 @@ pps_loop_filter plf(.clk(clk),
 	.dac_preset_stb(dac_preset_stb), .dac_preset_val(dac_preset_val),
 	.overflow(dsp_ovf),
 	.dac_stb(dac_send),
-	.dac_val(dac_val)
+	.dac_val(dac_data)
 );
-assign dac_data = dac_val ^ (1<<15);  // convert from signed to offset binary
 assign pps_out = count_active;  // not phase-aligned with pps_in
 assign dsp_status = {dsp_on, arm, phase_r};
 

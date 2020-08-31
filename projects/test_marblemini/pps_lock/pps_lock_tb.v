@@ -34,7 +34,7 @@ end
 reg run_request=0;
 always @(posedge clk) run_request <= cc>5000;
 
-reg signed [15:0] dac_preset_val = 20000;
+reg [15:0] dac_preset_val = 45000;
 wire [15:0] dac_data;
 wire dac_send, pps_out;
 wire err_sign=0;

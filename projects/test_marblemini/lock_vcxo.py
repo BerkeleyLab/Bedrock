@@ -11,7 +11,6 @@ def set_lock(chip, v, dac=1, verbose=False):
     '''
     experimental
     '''
-    print("DAC v = %d" % v)
     prefix_map = {1: 0x10000, 2: 0x20000}  # 1=25 MHz VCTCXO, 2=20 MHz VCXO
     cfg = 1
     if dac in prefix_map:
@@ -20,19 +19,26 @@ def set_lock(chip, v, dac=1, verbose=False):
     else:
         print("Invalid DAC choice")
         exit(1)
+    print("DAC v = %d (%x)" % ((v&0xffff), v))
     chip.exchange([327692], [0])  # pps_config
     chip.exchange([327689], [v])  # wr_dac
     time.sleep(0.1)
     chip.exchange([327692], [cfg])  # pps_config
 
 
-def poll_lock(chip):
-    dsp_status, gps_status, cfg = chip.exchange([14, 12, 327692])
-    dac = dsp_status >> 16
-    dsp_arm = (dsp_status >> 12) & 1
-    dsp_on = (dsp_status >> 13) & 1
-    pps_cnt = (gps_status >> 4) & 0xf
-    pha = dsp_status & 0xfff
+old_pps_cnt = None
+def poll_lock(chip, verbose=False):
+    while True:
+        dsp_status, gps_status, cfg = chip.exchange([14, 12, 327692])
+        dac = dsp_status >> 16
+        dsp_arm = (dsp_status >> 12) & 1
+        dsp_on = (dsp_status >> 13) & 1
+        pps_cnt = (gps_status >> 4) & 0xf
+        pha = dsp_status & 0xfff
+        if verbose or pps_cnt != old_pps_cnt:
+            break
+    global old_pps_cnt
+    old_pps_cnt = pps_cnt
     ss = "%d %d %d %d %d %d" % (dac, dsp_on, dsp_arm, pha, pps_cnt, cfg)
     return ss
 
@@ -53,7 +59,7 @@ if __name__ == "__main__":
 
     chip = lbus_access(args.ip, port=args.port)
     set_lock(chip, int(args.val), dac=int(args.dac), verbose=args.verbose)
-    for ix in range(16):
-        ss = poll_lock(chip)
+    for ix in range(60):
+        ss = poll_lock(chip, verbose=args.verbose)
         print(ss)
         time.sleep(0.35)
