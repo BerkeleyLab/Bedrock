@@ -33,11 +33,12 @@ always @(posedge clk) if (host_write_dac) dac_preset_r <= host_data;
 wire [15:0] lock_data;
 wire lock_send;
 wire pps_out;
+wire [13:0] dsp_substatus;
 pps_lock #(.count_period(count_period)) dut(.clk(clk),
 	.pps_in(pps_in), .err_sign(err_sign),
 	.run_request(run_request), .dac_preset_val(dac_preset_r),
 	.dac_data(lock_data), .dac_send(lock_send),
-	.dsp_status(dsp_status), .pps_out(pps_out)
+	.dsp_status(dsp_substatus), .pps_out(pps_out)
 );
 
 // Multiplex host and PLL sources
@@ -52,5 +53,10 @@ ad5662 #(.nch(2)) wr_dac(.clk(clk), .tick(tick),
 	.ctl(ctl), .send(send), .busy(spi_busy),
 	.sclk(sclk), .sync_(sync_), .sdo(sdo)
 );
+
+// Build debug status
+reg [17:0] dac_sent=0;
+always @(posedge clk) if (sel) dac_sent <= {data, sel};
+assign dsp_status = {dac_sent, dsp_substatus};
 
 endmodule

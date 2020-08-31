@@ -20,7 +20,7 @@ def measure_1(chip, v, dac=2, pause=1.1, repeat=1, gps=False, verbose=False):
         exit(1)
     if gps:
         pause = 0.3*pause
-    chip.exchange([327689], [v])
+    chip.exchange([327692, 327689], [0, v])  # pps_config, wr_dac
     ppm = []
     oldn = None
     while len(ppm) < repeat:

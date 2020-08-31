@@ -45,15 +45,11 @@ if __name__ == "__main__":
                    help="UDP port for I/O")
     p.add_argument('--dac', default=1,
                    help="DAC (1 or 2), 1 tunes precision 25 MHz")
-    p.add_argument('--plot', action='store_true',
-                   help="Plot data")
     p.add_argument('--val', default=0,
                    help="Initial DAC value")
     p.add_argument('--verbose', action='store_true',
                    help="Produce extra chatter")
     args = p.parse_args()
-    if args.plot:
-        from matplotlib import pyplot
 
     chip = lbus_access(args.ip, port=args.port)
     set_lock(chip, int(args.val), dac=int(args.dac), verbose=args.verbose)
