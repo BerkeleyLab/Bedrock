@@ -63,4 +63,5 @@ if __name__ == "__main__":
     for ix in range(60):
         ss = poll_lock(chip, verbose=args.verbose)
         print(ss)
+        sys.stdout.flush()
         time.sleep(0.35)
