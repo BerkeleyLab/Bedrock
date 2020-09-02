@@ -239,7 +239,7 @@ if __name__ == "__main__":
     # import importlib
     parser = argparse.ArgumentParser(
         description="Utility for working with i2cbridge attached to Packet Badger")
-    parser.add_argument('--ip', default='192.168.19.8', help='IP address')
+    parser.add_argument('--ip', default='192.168.19.10', help='IP address')
     parser.add_argument('--udp', type=int, default=0, help='UDP Port number')
     parser.add_argument('--sim', action='store_true', help='simulation context')
     parser.add_argument('--ramtest', action='store_true', help='RAM test program')

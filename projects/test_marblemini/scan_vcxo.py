@@ -45,7 +45,7 @@ def measure_1(chip, v, dac=2, pause=1.1, repeat=1, gps=False, verbose=False):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--ip', default="192.168.19.8",
+    p.add_argument('--ip', default="192.168.19.10",
                    help="IP address of FPGA")
     p.add_argument('--port', default=803,
                    help="UDP port for I/O")

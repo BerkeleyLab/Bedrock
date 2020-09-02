@@ -87,8 +87,8 @@ parameter [47:0] mac = 48'h12555500012d;
 parameter [31:0] ip = {8'd192, 8'd168, 8'd19, 8'd9};  // 192.168.19.9
 parameter [47:0] mac = 48'h12555500022d;
 `else
-parameter [31:0] ip = {8'd192, 8'd168, 8'd19, 8'd8};  // 192.168.19.8
-parameter [47:0] mac = 48'h12555500012d;
+parameter [31:0] ip = {8'd192, 8'd168, 8'd19, 8'd10};  // 192.168.19.10
+parameter [47:0] mac = 48'h12555500032d;
 `endif
 `endif
 

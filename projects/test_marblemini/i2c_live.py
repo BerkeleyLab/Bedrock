@@ -88,7 +88,7 @@ class i2c_live:
 
 
 def i2c_live_pre_args(parser):
-    parser.add_argument('--ip', default='192.168.19.8', help='IP address')
+    parser.add_argument('--ip', default='192.168.19.10', help='IP address')
     parser.add_argument('--udp', type=int, default=0, help='UDP Port number')
     parser.add_argument('--sim', action='store_true', help='simulation context')
     parser.add_argument('--stop', action='store_true', help='stop after run')
