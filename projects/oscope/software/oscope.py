@@ -16,18 +16,16 @@ from kivy.properties import ObjectProperty
 import copy
 import dataclasses
 import json
-import socket
-import sys
-import time
 
 from threading import Thread
 
 from matplotlib import pyplot as plt
 
 from carrier import ZestOnBMB7Carrier, LTCOnMarblemini
-from misc import ADC, DataBlock, Processing
+from misc import Processing
 
 g_plot_type_limits = {}
+
 
 @dataclasses.dataclass
 class GUIGraphLimits:
@@ -314,7 +312,7 @@ if __name__ == "__main__":
         action="store_true",
         help="use spartan")
     args = parser.parse_args()
-    if args.board == ltc:
+    if args.board == 'ltc':
         carrier = LTCOnMarblemini()
     else:
         carrier = ZestOnBMB7Carrier(

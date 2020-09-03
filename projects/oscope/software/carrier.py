@@ -1,10 +1,10 @@
 import logging
 Logger = logging.getLogger(__name__)
+import socket
 import sys
 import time
 
 import numpy as np
-from matplotlib import pyplot as plt
 
 from litex import RemoteClient
 
@@ -13,6 +13,7 @@ from banyan_ch_find import banyan_ch_find
 from get_raw_adcs import collect_adcs
 from zest_setup import c_prc
 from ltc_setup_litex_client import initLTC, get_data
+
 
 class Carrier():
     def test_data(self, *args):
