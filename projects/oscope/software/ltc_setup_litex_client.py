@@ -159,15 +159,29 @@ def initLTC(r, check_align=False):
 
 
 from matplotlib import pyplot as plt
-
+import socket
 
 def get_data(wb, plot=False):
     wb.regs.acq_acq_start.write(1)
-    while wb.regs.acq_buf_full.read() == 0:
-        time.sleep(0.1)
+    time.sleep(0.1)
+    try:
+        while wb.regs.acq_buf_full.read() == 0:
+            time.sleep(0.1)
+    except socket.timeout:
+        print('to1')
+        return None
     data = []
-    for i in range(8192//256):
-        data += wb.read(wb.mems.adc_data_buffer.base + i * 256, 255)
+    try:
+        for i in range(8192//128):
+            d = wb.read(wb.mems.adc_data_buffer.base + i * 128, 128)
+            if len(d) != 128:
+                print(len(d), d)
+                return None
+            data += d
+    except socket.timeout:
+        print('to2')
+        return None
+    print(len(data))
     c1, c2 = [], []
     for x in data:
         c1.append(np.int16(x & 0xffff) // 4)

@@ -1,10 +1,10 @@
 import argparse
 
-from migen import Signal, Memory, If, Cat, Module
+from migen import Signal, Memory, If, Cat, Module, ClockSignal
 from migen.genlib.cdc import PulseSynchronizer
 # from migen.genlib.fifo import AsyncFIFO
 
-# from litex.soc.cores.freqmeter import FreqMeter
+from litex.soc.cores.freqmeter import FreqMeter
 from litex.soc.cores import spi
 from litex.soc.interconnect import wishbone
 from litex.soc.integration.soc_sdram import soc_sdram_args, soc_sdram_argdict
@@ -61,8 +61,8 @@ class LTCSocDev(EthernetSoC, AutoCSR):
             self.lvds.pads_dco
         )
         # Frequency counter for received sample clock
-        # self.submodules.f_sample = FreqMeter(self.sys_clk_freq)
-        # self.comb += self.f_sample.clk.eq(ClockSignal("sample"))
+        self.submodules.f_sample = FreqMeter(self.sys_clk_freq)
+        self.comb += self.f_sample.clk.eq(ClockSignal("sample"))
 
         spi_pads = self.platform.request("LTC_SPI")
         self.submodules.spi = spi.SPIMaster(spi_pads, 16, self.sys_clk_freq, self.sys_clk_freq/32)
@@ -117,7 +117,7 @@ def main():
 
     prog = soc.platform.create_programmer()
     import os
-    prog.load_bitstream(os.path.join(builder.gateware_dir, "top.bit"))
+    prog.load_bitstream(os.path.join(builder.gateware_dir, "marblemini.bit"))
 
 
 if __name__ == "__main__":
