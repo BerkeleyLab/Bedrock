@@ -161,6 +161,7 @@ def initLTC(r, check_align=False):
 from matplotlib import pyplot as plt
 import socket
 
+
 def get_data(wb, plot=False):
     wb.regs.acq_acq_start.write(1)
     time.sleep(0.1)
