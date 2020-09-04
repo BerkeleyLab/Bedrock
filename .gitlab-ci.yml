@@ -113,7 +113,7 @@ badger_test:
     - cd badger/tests && make clean
   stage: test
   script:
-    - make && tunctl -u w && ifconfig tap0 192.168.7.3 && bash tftp_test.sh
+    - make && ifconfig tap0 192.168.7.3 && bash tftp_test.sh
 
 peripheral_test:
   before_script:
