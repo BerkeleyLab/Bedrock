@@ -90,14 +90,14 @@ def config_romx(dsp_flavor=0, tool_rev=0, board_type=0):
     print(git_sha)
     version_number = 0
     try:
-        git_version = subprocess.check_output(['git', 'describe', '--tag'])
+        git_version = subprocess.check_output(['git', 'describe', '--tag', '--always'])
         m = re.match(r'\D*(\d*)\.[\s\S]*', git_version)
         if m:
             version_number = eval(m.group(1))
     except subprocess.CalledProcessError:
         print('config_crunch.py: Subprocess ERROR')
     except Exception:
-        print('config_crunch.py: Generic exception')
+        print('config_crunch.py: Generic exception, using version_number 0')
 
     try:
         code_is_dirty = 0 if ('nothing' in subprocess.check_output(
