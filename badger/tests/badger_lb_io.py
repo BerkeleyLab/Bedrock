@@ -358,7 +358,7 @@ if __name__ == "__main__":
         help="reset | tx | rx | show | rxb0 | rxb1 | emit | get_rx1 | get_rxn | stop_sim"
     )
     args = p.parse_args()
-    foo = lbus_access(args.ip, port=args.port)
+    foo = lbus_access(args.ip, port=args.port, timeout=10)
     if not foo:
         print("lbus_access setup failed")
         exit(1)
