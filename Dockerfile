@@ -95,7 +95,7 @@ RUN git clone https://github.com/cliffordwolf/yosys.git -b yosys-0.9 && \
 RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4
 
 RUN apt-get update && \
-	apt-get install -y libfl2 libfl-dev zlibc zlib1g zlib1g-dev autoconf && \
+	apt-get install -y libfl2 libfl-dev zlibc zlib1g zlib1g-dev autoconf uml-utilities && \
 	git clone https://github.com/verilator/verilator && cd verilator && \
 	git checkout v4.034 && autoconf && ./configure && make -j4 && make install && \
 	cd ../ && rm -rf verilator && verilator -V
