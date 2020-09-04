@@ -113,7 +113,7 @@ badger_test:
     - cd badger/tests && make clean
   stage: test
   script:
-    - make && ifconfig tap0 192.168.7.3 && bash tftp_test.sh
+    - make && ip tuntap add mode tap tap0 && ip command set ip address 192.168.7.3/24 dev tap0 && bash tftp_test.sh
 
 peripheral_test:
   before_script:
