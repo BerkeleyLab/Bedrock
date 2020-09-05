@@ -110,10 +110,10 @@ flake8:
 
 badger_test:
   before_script:
-    - cd badger/tests && make clean
+    - cd badger/tests && make clean && sh ./tap_setup.sh
   stage: test
   script:
-    - make
+    - make && bash tftp_test.sh && bash speed_check.sh
 
 peripheral_test:
   before_script:
