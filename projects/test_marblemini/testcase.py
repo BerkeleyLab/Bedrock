@@ -146,6 +146,7 @@ def print_ina219_config(title, a):
 
 
 def print_result(result, args, poll_only=False):
+    n_fmc = 2 if args.fmc else 0
     if args.debug:
         print(result)
     if args.ramtest:
@@ -197,12 +198,12 @@ def print_result(result, args, poll_only=False):
                 a1 = result[hx:hx+pitch]
                 print("SFP%d:  0x%X" % (ix+1, sfp_pp1[ix]))
                 print_sfp_z(a1)
-            for ix in range(2):
+            for ix in range(n_fmc):
                 pitch = 10
                 hx = 16+40 + pitch*ix
                 fmc_dig = result[hx:hx+pitch]
                 fmc_decode(ix, fmc_dig, squelch=args.squelch)
-            for ix in range(2):
+            for ix in range(n_fmc):
                 pitch = 6
                 hx = 16+40+20 + pitch*ix
                 fmc_ana = merge_16(result[hx:hx+pitch])
@@ -248,6 +249,7 @@ if __name__ == "__main__":
     parser.add_argument('--debug', action='store_true', help='print raw arrays')
     parser.add_argument('--poll', action='store_true', help='only poll for results')
     parser.add_argument('--vcd', type=str, help='VCD file to capture')
+    parser.add_argument('--fmc', action='store_true', help='connect to FMC tester')
     parser.add_argument('--rlen', type=int, default=359, help='result array length')
     parser.add_argument('--squelch', action='store_true', help='squelch non-LA FMC pins')
 
