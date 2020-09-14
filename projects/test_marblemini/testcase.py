@@ -176,7 +176,7 @@ def print_result(result, args, poll_only=False):
                 hx = ib + 7 + pitch*ix
                 print("SFP%d:  busmux readback %x" % (ix+1, result[hx]))
                 print_sfp(result[1+hx:pitch+hx])
-            for ix in range(2):
+            for ix in range(n_fmc):
                 pitch = 28
                 hx = ib + 207 + pitch*ix
                 a1 = result[hx:hx+pitch]
