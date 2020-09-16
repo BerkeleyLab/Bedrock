@@ -308,7 +308,8 @@ bool check_zest_regs(uint8_t dev, const t_init_data *p_data) {
     while ( len-- > 0 ){
         temp = read_zest_reg(dev, regmap->addr);
         pass &= regmap->data == temp;
-        debug_printf("SPI_Chceck: (%#04x, %#08x)\n", regmap->addr, temp);
+        debug_printf("SPI_Check: (%#06x, %#08x) %s\n",
+                regmap->addr, temp, pass? "PASS": "FAIL");
         regmap++;
     }
     return pass;
@@ -475,7 +476,7 @@ void dump_zest_adc_regs(void) {
         debug_printf("Dump ADC%d registers:\n", ix);
         for (size_t i=0; i<sizeof(addrs)/sizeof(addrs[0]); i++) {
             temp = read_zest_reg(g_zest_adcs[ix], addrs[i]);
-            debug_printf("  ADC Reg Dump: (%#04x, %#08x)\n", addrs[i], temp);
+            debug_printf("  ADC Reg Dump: (%#06x, %#08x)\n", addrs[i], temp);
         }
     }
 }
@@ -524,6 +525,7 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     write_zest_reg(ZEST_DEV_AD9653_BOTH, 0xff, 1); // init sample override
     write_zest_regs(ZEST_DEV_AD9653_BOTH, p_ad9653_data->regmap, p_ad9653_data->len);
     for (ix=0; ix<2; ix++) {
+        debug_printf("  --- Checking ADC: AD9653 %d\n", ix);
         pass &= check_zest_regs(g_zest_adcs[ix], p_ad9653_data);
     }
     printf("==== ZEST ADC(AD9653) ====  : %s.\n", pass?"PASS":"FAIL");
@@ -536,6 +538,7 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     reset_ad9781();
     write_zest_reg(ZEST_DEV_AD9781, 0x0, 0x20); // soft reset
     write_zest_regs(ZEST_DEV_AD9781, p_ad9781_data->regmap, p_ad9781_data->len);
+    debug_printf("  --- Checking DAC: AD9781...\n");
     pass &= check_zest_regs(ZEST_DEV_AD9781, p_ad9781_data);
     printf("==== ZEST DAC(AD9781) ====  : %s.\n", pass?"PASS":"FAIL");
 
@@ -546,6 +549,7 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     //------------------------------
     reset_ad7794();
     write_zest_regs(ZEST_DEV_AD7794, p_ad7794_data->regmap, p_ad7794_data->len);
+    debug_printf("  --- Checking Slow ADC: AD7794...\n");
     pass &= check_zest_regs(ZEST_DEV_AD7794, p_ad7794_data);
     printf("==== ZEST AD7794      ====  : %s.\n", pass?"PASS":"FAIL");
 
@@ -554,6 +558,7 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     //------------------------------
     write_zest_reg(ZEST_DEV_AMC7823, ((1<<6)|0xc), 0xbb30); // reset
     write_zest_regs(ZEST_DEV_AMC7823, p_amc7823_data->regmap, p_amc7823_data->len);
+    debug_printf("  --- Checking Slow ADC/DAC: AMC7823...\n");
     pass &= check_zest_regs(ZEST_DEV_AMC7823, p_amc7823_data);
     printf("==== ZEST AMC7823     ====  : %s.\n", pass?"PASS":"FAIL");
 
