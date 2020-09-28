@@ -1,0 +1,1 @@
+../test_marblemini/pin_map_fmc.py

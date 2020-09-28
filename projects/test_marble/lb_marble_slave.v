@@ -1,0 +1,1 @@
+../test_marblemini/lb_marble_slave.v
