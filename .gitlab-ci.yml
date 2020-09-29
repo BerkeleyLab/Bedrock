@@ -25,38 +25,11 @@ include:
   - local: .gitlab/ci/soc.gitlab-ci.yml
   - local: .gitlab/ci/oscope.gitlab-ci.yml
   - local: .gitlab/ci/comms_top.gitlab-ci.yml
+  - local: .gitlab/ci/dsp.gitlab-ci.yml
 
 leep_test:
   script:
     - cd projects/common && python3 -m unittest -v
-
-dsp_test:
-  before_script:
-    - cd dsp && export PYTHONPATH=../build-tools/
-  stage: test
-  script:
-    - make && make checks
-
-digaree_test:
-  before_script:
-    - cd dsp/digaree
-  stage: test
-  script:
-    - make
-
-feedforward_test:
-  before_script:
-    - cd dsp/feedforward
-  stage: test
-  script:
-    - make
-
-chirp_test:
-  before_script:
-    - cd dsp/chirp
-  stage: test
-  script:
-    - make && make checks
 
 cmoc_test:
   before_script:
