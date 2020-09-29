@@ -49,7 +49,7 @@ feedforward_test:
     - cd dsp/feedforward
   stage: test
   script:
-    - make    
+    - make
 
 chirp_test:
   before_script:

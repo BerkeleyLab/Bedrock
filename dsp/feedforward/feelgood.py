@@ -14,8 +14,8 @@ with open(argv[2]) as f:
     setup = json.load(f)
     dt = setup["dt"] / setup["tau"]
     sim_expand = setup["sim_expand"]
-    t_fill = setup["t_fill"]
-    t_flat = setup["t_flat"]
+    t_fill = setup["t_fill"] / setup["tau"]
+    t_flat = setup["t_flat"] / setup["tau"]
     d_amp = setup["d_amp"]
     ramp_x = setup["ramp_x"]
     couple = setup["couple"]

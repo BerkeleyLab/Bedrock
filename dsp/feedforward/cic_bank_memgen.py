@@ -19,7 +19,7 @@ def fill1(xx):
 # dt = 0.0200 maximally flat with cavity_decay -83030
 # XXX explain
 def pulse_setup(dt=0.02, d_amp=50000, t_fill=1.728, t_flat=1.0, ramp_x=0.94):
-    # dt is time step in units of cavity tau
+    # All time parameters are in units of cavity tau
     # d_amp is equilibrium drive amplitude (at flat top)
     # suggest keeping t_fill in range (1.50, 2.0)
     # ramp_x is normalized transition time
@@ -66,8 +66,8 @@ if __name__ == "__main__":
     with open(argv[1]) as f:
         setup = json.load(f)
         dt = setup["dt"] / setup["tau"]
-        t_fill = setup["t_fill"]
-        t_flat = setup["t_flat"]
+        t_fill = setup["t_fill"] / setup["tau"]
+        t_flat = setup["t_flat"] / setup["tau"]
         d_amp = setup["d_amp"]
         ramp_x = setup["ramp_x"]
         a = pulse_setup(dt=dt, d_amp=d_amp, t_fill=t_fill, t_flat=t_flat,
