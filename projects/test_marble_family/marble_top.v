@@ -1,5 +1,8 @@
 // Top level Marble-Mini and Marble v2 test build
 // Mostly cut-and-paste from rgmii_hw_test.v
+
+`include "marble_features_defs.vh"
+
 module marble_top(
 	input GTPREFCLK_P,
 	input GTPREFCLK_N,
@@ -70,7 +73,7 @@ module marble_top(
 	input [7:0] Pmod2
 );
 
-`include "marble_features.vh"
+`include "marble_features_params.vh"
 
 wire gtpclk0, gtpclk;
 // Gateway GTP refclk to fabric

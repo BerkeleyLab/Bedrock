@@ -53,12 +53,12 @@ marble_regmap.json: static_regmap.json scalar_marble_regmap.json
 config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOURCE))
 	$(PYTHON) $(BUILD_DIR)/build_rom.py -v $@ -j $< -d "Marble Testing"
 
-# gen_features.py rules
-marble1_features.vh: $(BUILD_DIR)/gen_features.py marble_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_mini
+# gen_features.py rules (note the use of PHONY targets)
+marble1_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_mini --split
 
-marble2_features.vh: $(BUILD_DIR)/gen_features.py marble_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_v2
+marble2_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_v2 --split
 
 # ====
 # tmds_test, requires access to unisims (or unisims_lrd)
@@ -119,13 +119,13 @@ MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA
 marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
 	echo $^ | tr ' ' '\n' > $@
 
-marble1.bit: marble.tcl marble1.d $(MARBLE_SYNTH_SOURCE) marble1_features.vh
+marble1.bit: marble.tcl marble1.d $(MARBLE_SYNTH_SOURCE) marble1_features
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1
 
 marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
 	echo $^ | tr ' ' '\n' > $@
 
-marble2.bit: marble.tcl marble2.d $(MARBLE_SYNTH_SOURCE2) marble2_features.vh
+marble2.bit: marble.tcl marble2.d $(MARBLE_SYNTH_SOURCE2) marble2_features
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2
 
 clean:
