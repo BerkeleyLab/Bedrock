@@ -28,7 +28,7 @@ marble_mini_run:
   dependencies:
     - marble_mini_synth
   before_script:
-    - ln -s marble1.*.bit marble1.bit
+    - cd projects/test_marble_family && ln -s marble1.*.bit marble1.bit
   script:
     - make marble1_hwload && sleep 3 && make marble1_hwtest
 
