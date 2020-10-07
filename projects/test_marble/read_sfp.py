@@ -1,1 +1,0 @@
-../test_marblemini/read_sfp.py

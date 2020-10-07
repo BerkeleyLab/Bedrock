@@ -130,6 +130,20 @@ marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
 marble2.bit: marble.tcl marble2.d marble2_features
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2
 
+# =====
+# bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'
+
+# IP address must match that configured in board_support/marblemini/marble_base.v
+RGMII_IP = 192.168.19.10
+BIT = marble1.bit
+
+marble1_hwload:
+	openocd -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT}; exit"
+
+# TODO: Add udprtx stress test
+marble1_hwtest:
+	ping -c 2 $RGMII_IP && $(PYTHON) testcase.py --ip=$RGMII_IP --sfp
+
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
 	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado* datasheet.txt
