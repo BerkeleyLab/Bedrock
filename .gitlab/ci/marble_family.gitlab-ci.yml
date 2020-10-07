@@ -30,7 +30,7 @@ marble_mini_run:
   before_script:
     - ln -s marble1.*.bit marble1.bit
   script:
-    - make BIT=marble1.*.bit marble1_hwload && make marble1_hwtest
+    - make marble1_hwload && sleep 3 && make marble1_hwtest
 
 marble_v2_synth:
   extends: .bitgen

@@ -142,7 +142,7 @@ marble1_hwload:
 
 # TODO: Add udprtx stress test
 marble1_hwtest:
-	ping -c 2 $RGMII_IP && $(PYTHON) testcase.py --ip=$RGMII_IP --sfp
+	ping -c 2 ${RGMII_IP} && $(PYTHON) testcase.py --ip=${RGMII_IP} --sfp
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc

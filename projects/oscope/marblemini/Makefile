@@ -16,7 +16,7 @@ include $(BUILD_DIR)/top_rules.mk
 include $(OSCOPE_COMMON_DIR)/rules.mk
 
 
-VFLAGS_DEP += -y$(DSP_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(BOARD_SUPPORT_DIR)/zest -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/iserdes -y$(ISERDES_DIR) -y$(XILINX_DIR) -y$(SERIAL_IO_DIR) -y. -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/idelay_scanner -y$(OSCOPE_COMMON_DIR) -y$(HOMELESS_DIR) -y$(BADGER_DIR) -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y../../test_marblemini/ -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y$(HOMELESS_DIR)/freq_demo -DSIMULATE -DUSE_I2CBRIDGE
+VFLAGS_DEP += -y$(DSP_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(BOARD_SUPPORT_DIR)/zest -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/iserdes -y$(ISERDES_DIR) -y$(XILINX_DIR) -y$(SERIAL_IO_DIR) -y. -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/idelay_scanner -y$(OSCOPE_COMMON_DIR) -y$(HOMELESS_DIR) -y$(BADGER_DIR) -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y../../test_marble_family/ -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y$(HOMELESS_DIR)/freq_demo -DSIMULATE -DUSE_I2CBRIDGE
 
 LB_AW = 23
 NEWAD_DIRS += $(OSCOPE_COMMON_DIR)
