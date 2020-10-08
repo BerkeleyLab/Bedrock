@@ -151,7 +151,18 @@ wire [3:0] ext_config;
 
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
-marble_base base(
+`ifdef USE_I2CBRIDGE
+localparam C_USE_I2CBRIDGE = 1;
+`else
+localparam C_USE_I2CBRIDGE = 0;
+`endif
+`ifdef MMC_CTRACE
+localparam C_MMC_CTRACE = 1;
+`else
+localparam C_MMC_CTRACE = 0;
+`endif
+
+marble_base #(.USE_I2CBRIDGE(C_USE_I2CBRIDGE), .MMC_CTRACE(C_MMC_CTRACE)) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
 	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),

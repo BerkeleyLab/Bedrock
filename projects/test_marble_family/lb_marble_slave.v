@@ -4,7 +4,10 @@
 // not be part of a final production build.
 // Only a few write addresses implemented for LEDs etc.,
 // see logic below for local_write.
-module lb_marble_slave(
+module lb_marble_slave #(
+	parameter USE_I2CBRIDGE = 0,
+	parameter MMC_CTRACE = 0
+)(
 	input clk,
 	input [23:0] addr,
 	input control_strobe,
@@ -29,7 +32,9 @@ module lb_marble_slave(
 	output mmc_int,
 	output allow_mmc_eth_config,
 	output zest_pwr_en,
-`ifdef USE_I2CBRIDGE
+	// -------
+	// Ignored when USE_I2CBRIDGE=0
+	// -------
 	//   0 is main I2C, routes to Marble I2C bus multiplexer
 	//   1 and 2 route to FMC User I/O
 	//   3 is unused so far
@@ -37,7 +42,7 @@ module lb_marble_slave(
 	inout [3:0] twi_sda,
 	input twi_int,
 	inout twi_rst,
-`endif
+	// -------
 	output wr_dac_sclk,
 	output wr_dac_sdo,
 	output [1:0] wr_dac_sync,
@@ -83,18 +88,19 @@ assign obadge_out=0;
 wire [15:0] ctrace_out;
 reg ctrace_start=0;
 wire [0:0] ctrace_running;
-`ifdef MMC_CTRACE
-localparam ctrace_aw=11;
-wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
-ctrace #(.dw(3), .tw(13), .aw(ctrace_aw)) mmc_ctrace(
-	.clk(clk), .data(mmc_pins), .start(ctrace_start),
-	.running(ctrace_running), .pc_mon(ctrace_pc_mon),
-	.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
-);
-`else
-assign ctrace_out=0;
-assign ctrace_running=0;
-`endif
+
+generate if (MMC_CTRACE) begin
+	localparam ctrace_aw=11;
+	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
+	ctrace #(.dw(3), .tw(13), .aw(ctrace_aw)) mmc_ctrace(
+		.clk(clk), .data(mmc_pins), .start(ctrace_start),
+		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
+		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
+	);
+end else begin
+	assign ctrace_out=0;
+	assign ctrace_running=0;
+end endgenerate
 
 // Simple cross-domain fault counter
 // Trigger originates deep inside construct.v
@@ -152,48 +158,49 @@ wire [2:0] twi_status;
 
 reg [1:0] twi_ctl;
 initial twi_ctl = (initial_twi_file != "") ? 2'b10 : 2'b00;
-`ifdef USE_I2CBRIDGE
-wire twi_run_stat, twi_updated, twi_err;
-wire twi_freeze = twi_ctl[0];
-wire twi_run_cmd = twi_ctl[1];
-// Contrast with local_write, below, and
-// align with read decoding for twi_dout.
-wire twi_write = control_strobe & ~control_rd & (addr[23:16]==8'h04);
-wire [3:0] hw_config;
-wire twi0_scl, twi_sda_drive, twi_sda_sense;
-i2c_chunk #(.tick_scale(twi_q0), .q1(twi_q1), .q2(twi_q2),
-	.initial_file(initial_twi_file)) i2c(
-	.clk(clk), .lb_addr(addr[11:0]), .lb_din(data_out[7:0]),
-	.lb_write(twi_write), .lb_dout(twi_dout),
-	.run_cmd(twi_run_cmd), .freeze(twi_freeze),
-	.run_stat(twi_run_stat), .updated(twi_updated), .err_flag(twi_err),
-	.hw_config(hw_config),
-	.scl(twi0_scl), .sda_drive(twi_sda_drive), .sda_sense(twi_sda_sense),
-	.intp(twi_int), .rst(twi_rst)
-);
-assign twi_status = {twi_run_stat, twi_err, twi_updated};
-//
-// Incomplete bus mux stuff
-wire [1:0] twi_bus_sel = hw_config[2:1];
-reg [3:0] twi_scl_r=0, twi_sda_r=0;
-always @(posedge clk) begin
-	twi_scl_r <= 4'b1111;
-	twi_scl_r[twi_bus_sel] <= twi0_scl;
-	twi_sda_r <= 4'b1111;
-	twi_sda_r[twi_bus_sel] <= twi_sda_drive;
-end
-assign twi_scl = twi_scl_r;
-assign twi_sda[0] = twi_sda_r[0] ? 1'bz : 1'b0;
-assign twi_sda[1] = twi_sda_r[1] ? 1'bz : 1'b0;
-assign twi_sda[2] = twi_sda_r[2] ? 1'bz : 1'b0;
-assign twi_sda[3] = twi_sda_r[3] ? 1'bz : 1'b0;
-assign twi_sda_sense = twi_sda[twi_bus_sel];
-assign twi_rst = hw_config[0] ? 1'b0 : 1'bz;  // three-state
-`else
-assign twi_dout=0;
-assign twi_status=0;
-assign twi_rst = 1'bz;
-`endif
+
+generate if (USE_I2CBRIDGE) begin
+	wire twi_run_stat, twi_updated, twi_err;
+	wire twi_freeze = twi_ctl[0];
+	wire twi_run_cmd = twi_ctl[1];
+	// Contrast with local_write, below, and
+	// align with read decoding for twi_dout.
+	wire twi_write = control_strobe & ~control_rd & (addr[23:16]==8'h04);
+	wire [3:0] hw_config;
+	wire twi0_scl, twi_sda_drive, twi_sda_sense;
+	i2c_chunk #(.tick_scale(twi_q0), .q1(twi_q1), .q2(twi_q2),
+		.initial_file(initial_twi_file)) i2c(
+		.clk(clk), .lb_addr(addr[11:0]), .lb_din(data_out[7:0]),
+		.lb_write(twi_write), .lb_dout(twi_dout),
+		.run_cmd(twi_run_cmd), .freeze(twi_freeze),
+		.run_stat(twi_run_stat), .updated(twi_updated), .err_flag(twi_err),
+		.hw_config(hw_config),
+		.scl(twi0_scl), .sda_drive(twi_sda_drive), .sda_sense(twi_sda_sense),
+		.intp(twi_int), .rst(twi_rst)
+	);
+	assign twi_status = {twi_run_stat, twi_err, twi_updated};
+	//
+	// Incomplete bus mux stuff
+	wire [1:0] twi_bus_sel = hw_config[2:1];
+	reg [3:0] twi_scl_r=0, twi_sda_r=0;
+	always @(posedge clk) begin
+		twi_scl_r <= 4'b1111;
+		twi_scl_r[twi_bus_sel] <= twi0_scl;
+		twi_sda_r <= 4'b1111;
+		twi_sda_r[twi_bus_sel] <= twi_sda_drive;
+	end
+	assign twi_scl = twi_scl_r;
+	assign twi_sda[0] = twi_sda_r[0] ? 1'bz : 1'b0;
+	assign twi_sda[1] = twi_sda_r[1] ? 1'bz : 1'b0;
+	assign twi_sda[2] = twi_sda_r[2] ? 1'bz : 1'b0;
+	assign twi_sda[3] = twi_sda_r[3] ? 1'bz : 1'b0;
+	assign twi_sda_sense = twi_sda[twi_bus_sel];
+	assign twi_rst = hw_config[0] ? 1'b0 : 1'bz;  // three-state
+end else begin
+	assign twi_dout=0;
+	assign twi_status=0;
+	assign twi_rst = 1'bz;
+end endgenerate
 
 // White Rabbit DAC - software-only for initial testing
 // Note that chip-selects are derived from data[17:16]
