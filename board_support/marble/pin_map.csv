@@ -1,0 +1,115 @@
+## Marble meta-xdc file, meant for processing with
+##   python meta-xdc.py Marble.xdc pin_map.csv
+## Depends on Marble.xdc generated from
+##   git@github.com:BerkeleyLab/Marble.git
+
+## First column is pin name listed in Marble.xdc
+## Second column is pin name as used by application (top-level) Verilog
+
+# RGMII Rx
+RGMII_RX_CLK  RGMII_RX_CLK
+RGMII_RX_DV   RGMII_RX_CTRL
+RGMII_RXD0    {RGMII_RXD[0]}
+RGMII_RXD1    {RGMII_RXD[1]}
+RGMII_RXD2    {RGMII_RXD[2]}
+RGMII_RXD3    {RGMII_RXD[3]}
+
+# RGMII Tx
+RGMII_TX_CLK  RGMII_TX_CLK
+RGMII_TX_EN   RGMII_TX_CTRL
+RGMII_TXD0    {RGMII_TXD[0]}
+RGMII_TXD1    {RGMII_TXD[1]}
+RGMII_TXD2    {RGMII_TXD[2]}
+RGMII_TXD3    {RGMII_TXD[3]}
+
+# QSPI Boot Flash
+# CCLK doesn't show up as a constrained pin; access via STARTUPE2 primitive instead.
+CFG_FCS    BOOT_CS_B
+CFG_MOSI   BOOT_MOSI
+CFG_DIN    BOOT_MISO
+# CFG_D02 (WP#) and CFG_D03 (HOLD#) not normally connected
+CFG_D02    CFG_D02
+
+# MMC microcontroller for configuration - for real!
+FPGA_SCK   SCLK
+FPGA_SSEL  CSB
+FPGA_MOSI  MOSI
+FPGA_MISO  MISO
+FPGA_INT   MMC_INT
+
+# I2C, shared access with microcontroller
+I2C_FPGA_SDA     TWI_SDA
+I2C_FPGA_SCL     TWI_SCL
+EXP_INT          TWI_INT
+I2C_FPGA_SW_RST  TWI_RST
+
+# White Rabbit DAC
+WR_DAC_SCLK      WR_DAC_SCLK
+WR_DAC_DIN       WR_DAC_DIN
+WR_DAC1_SYNC     WR_DAC1_SYNC
+WR_DAC2_SYNC     WR_DAC2_SYNC
+
+# 125 MHz from White Rabbit comes in via one of the MGTREFCLK pins;
+# In most cases the primary clock for a design will come from there via the GTX TXOUTCLK.
+# It can sometimes be simpler to use 20 MHz from Y3, which doesn't depend
+# on the clock mux or GTX setup.  Do note that this source needs to
+# be enabled by setting VCXO_EN high, before you can use it!
+CLK20_VCXO  SYSCLK_P
+VCXO_EN    VCXO_EN
+
+# UART to USB
+FPGA_TxD  FPGA_TxD
+FPGA_RxD  FPGA_RxD
+
+# Pmod1 J12
+Pmod1_0    {Pmod1[0]}
+Pmod1_1    {Pmod1[1]}
+Pmod1_2    {Pmod1[2]}
+Pmod1_3    {Pmod1[3]}
+Pmod1_4    {Pmod1[4]}
+Pmod1_5    {Pmod1[5]}
+Pmod1_6    {Pmod1[6]}
+Pmod1_7    {Pmod1[7]}
+
+# Pmod2 J13
+Pmod2_0    {Pmod2[0]}
+Pmod2_1    {Pmod2[1]}
+Pmod2_2    {Pmod2[2]}
+Pmod2_3    {Pmod2[3]}
+Pmod2_4    {Pmod2[4]}
+Pmod2_5    {Pmod2[5]}
+Pmod2_6    {Pmod2[6]}
+Pmod2_7    {Pmod2[7]}
+
+# Miscellaneous
+PHY_RSTn   PHY_RSTN
+
+# Literal output follows
+
+# Truly special:
+#   125 MHz from U20 CDCM61004 routed through GBX_MUX to any one of four MGT_CLK_* pairs
+#   This configuration is for MGT_CLK_0 (bank 116 MGTREFCLK0)
+set_property -dict {PACKAGE_PIN D6} [get_ports GTPREFCLK_P]
+set_property -dict {PACKAGE_PIN D5} [get_ports GTPREFCLK_N]
+
+# Special pin properties for RGMII
+# Invalid to flag RGMII_RX_CLK as IOB TRUE
+set_property IOB TRUE [get_ports {RGMII_RX_CTRL}]
+set_property IOB TRUE [get_ports {RGMII_RXD*}]
+set_property IOB TRUE [get_ports {RGMII_TX*}]
+set_property SLEW FAST [get_ports {RGMII_TX*}]
+
+# Bank 0 setup
+set_property CFGBVS VCCO [current_design]
+set_property CONFIG_VOLTAGE 2.5 [current_design]
+
+# Clocks
+create_clock -name sys_clk -period 50.00 [get_ports SYSCLK_P]
+create_clock -period 8.00 -name rx_clk [get_ports RGMII_RX_CLK]
+set_clock_groups -name async_clks -asynchronous \
+  -group [get_clocks -include_generated_clocks sys_clk] \
+  -group [get_clocks -include_generated_clocks rx_clk]
+
+# This is a frequency source, not a phase source,
+# so having it enter on a non-CC pin is OK.
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets SYSCLK_P]

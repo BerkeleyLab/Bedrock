@@ -1,4 +1,3 @@
-// Note: BMB7 vR1 is only supported
 module oscope_top(
 	input 	     GTPREFCLK_P,
 	input 	     GTPREFCLK_N,
@@ -158,7 +157,7 @@ wire [33:0] FMC2_LA_N;
 
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
-marble_base base(
+marble_base #(.USE_I2CBRIDGE(1)) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
 	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
@@ -170,19 +169,17 @@ marble_base base(
 	.aux_clk(SYSCLK_P), .GPS(4'b0),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
-`ifdef USE_I2CBRIDGE
 	.twi_scl({dum_scl, FMC2_LA_P[2] , FMC1_LA_P[2], TWI_SCL}),
 	.twi_sda({dum_sda, FMC2_LA_N[2], FMC1_LA_N[2], TWI_SDA}),
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
-`endif
-        .lb_clk(lb_clk),
-        .lb_addr(lb_addr),
-        .lb_strobe(lb_strobe),
-        .lb_rd(lb_rd),
-        .lb_write(lb_write),
-        .lb_rd_valid(lb_rd_valid),
-        .lb_data_out(lb_data_out),
-        .lb_data_in(lb_din),
+	.lb_clk(lb_clk),
+	.lb_addr(lb_addr),
+	.lb_strobe(lb_strobe),
+	.lb_rd(lb_rd),
+	.lb_write(lb_write),
+	.lb_rd_valid(lb_rd_valid),
+	.lb_data_out(lb_data_out),
+	.lb_data_in(lb_din),
 	.fmc_test({
 		FMC2_LA_P[33:3], FMC2_LA_P[1:0],
 		FMC2_LA_N[33:3], FMC2_LA_N[1:0],
