@@ -1,0 +1,22 @@
+# Defs are made available as Verilog defines
+# Params are made available as Verilog localparams and included in ROM metadata
+
+marble_mini:
+    defs:
+        MARBLE_MINI: 1
+        USE_I2CBRIDGE: 1
+        MMC_CTRACE: 1
+        USE_GTPCLK: 1
+    params:
+        carrier: "Marble Mini"
+        carrier_rev: "v1"
+
+marble_v2:
+    defs:
+        MARBLE_V2: 1
+        USE_I2CBRIDGE: 1
+        MMC_CTRACE: 1
+        USE_GTPCLK: 1
+    params:
+        carrier: "Marble"
+        carrier_rev: "v2"

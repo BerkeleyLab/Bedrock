@@ -98,4 +98,5 @@ RUN apt-get update && \
 	apt-get install -y libfl2 libfl-dev zlibc zlib1g zlib1g-dev autoconf && \
 	git clone https://github.com/verilator/verilator && cd verilator && \
 	git checkout v4.034 && autoconf && ./configure && make -j4 && make install && \
-	cd ../ && rm -rf verilator && verilator -V
+	cd ../ && rm -rf verilator && verilator -V && \
+	apt-get install -y openocd
