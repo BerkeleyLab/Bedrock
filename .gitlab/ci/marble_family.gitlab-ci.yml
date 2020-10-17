@@ -30,7 +30,7 @@ marble_mini_run:
   before_script:
     - cd projects/test_marble_family && ln -s marble1.*.bit marble1.bit
   script:
-    - make marble1_hwload && sleep 3 && make marble1_hwtest
+    - make marble1_hwload && sleep 8 && make marble1_hwtest
 
 marble_v2_synth:
   extends: .bitgen
