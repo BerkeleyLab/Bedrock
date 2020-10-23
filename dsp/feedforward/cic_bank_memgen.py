@@ -1,5 +1,8 @@
 from simple import quad_setup
 
+import json
+from sys import argv
+
 
 # spread integer val across npt nearly-evenly distributed bins
 def expand(val, npt):
@@ -13,6 +16,20 @@ def fill0(xx):
 
 def fill1(xx):
     return sum([[0, x, 0, 0] for x in xx], [])
+
+
+def pulse_setup_wrapper(json_file, amp=None):
+    dt = json_file["dt"] / json_file["tau"]
+    t_fill = json_file["t_fill"] / json_file["tau"]
+    t_flat = json_file["t_flat"] / json_file["tau"]
+    ramp_x = json_file["ramp_x"]
+
+    if not (amp):  # also used in lcls2_llrf by software/prc/ff_setup.py. maybe change?
+        d_amp = json_file["d_amp"]
+    else:
+        d_amp = amp
+
+    return pulse_setup(dt=dt, d_amp=d_amp, t_fill=t_fill, t_flat=t_flat, ramp_x=ramp_x)
 
 
 # dt = 0.0186 maximally flat with cavity_decay -77500
@@ -60,21 +77,27 @@ def pulse_setup(dt=0.02, d_amp=50000, t_fill=1.728, t_flat=1.0, ramp_x=0.94):
     return a
 
 
+def print_or_write(pulse_vals, file_name=None):
+    filln = 4*512 - len(pulse_vals)
+    pulse_vals += [0] * filln
+
+    if not (file_name):  # default, how it is being called here
+        for x in pulse_vals:
+            print(x)
+    else:  # but it can also write into a file
+        mem_file = open(file_name, "w")
+        for x in pulse_vals:  # same loop, but otherwise we open and close all the time
+            mem_file.write(str(x))
+            mem_file.write("\n")
+        mem_file.close()
+
+
 if __name__ == "__main__":
-    import json
-    from sys import argv
     with open(argv[1]) as f:
         setup = json.load(f)
-        dt = setup["dt"] / setup["tau"]
-        t_fill = setup["t_fill"] / setup["tau"]
-        t_flat = setup["t_flat"] / setup["tau"]
-        d_amp = setup["d_amp"]
-        ramp_x = setup["ramp_x"]
-        a = pulse_setup(dt=dt, d_amp=d_amp, t_fill=t_fill, t_flat=t_flat,
-                        ramp_x=ramp_x)
-    filln = 4*512 - len(a)
-    a += [0] * filln
-    for x in a:
-        print(x)
+
+    pulse_vals = pulse_setup_wrapper(setup)
+
+    print_or_write(pulse_vals)
     # output to cic_bankx_in.dat, which is read by
     # both cic_bank (compled from cic_bank.c) and cic_bankx_tb.
