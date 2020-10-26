@@ -18,18 +18,19 @@ def fill1(xx):
     return sum([[0, x, 0, 0] for x in xx], [])
 
 
-def pulse_setup_wrapper(json_file, amp=None):
-    dt = json_file["dt"] / json_file["tau"]
-    t_fill = json_file["t_fill"] / json_file["tau"]
-    t_flat = json_file["t_flat"] / json_file["tau"]
-    ramp_x = json_file["ramp_x"]
+def json_parse(json_cfg):
+    setup_params = {  # dictionary containing all parsed values
+        "d_amp": json_cfg["d_amp"],
+        "t_fill": json_cfg["t_fill"],
+        "t_flat": json_cfg["t_flat"],
+        "tau": json_cfg["tau"],
+        "dt": json_cfg["dt"],
+        "sim_expand": json_cfg["sim_expand"],
+        "ramp_x": json_cfg["ramp_x"],
+        "couple": json_cfg["couple"],
+    }
 
-    if not (amp):  # also used in lcls2_llrf by software/prc/ff_setup.py. maybe change?
-        d_amp = json_file["d_amp"]
-    else:
-        d_amp = amp
-
-    return pulse_setup(dt=dt, d_amp=d_amp, t_fill=t_fill, t_flat=t_flat, ramp_x=ramp_x)
+    return setup_params
 
 
 # dt = 0.0186 maximally flat with cavity_decay -77500
@@ -77,27 +78,24 @@ def pulse_setup(dt=0.02, d_amp=50000, t_fill=1.728, t_flat=1.0, ramp_x=0.94):
     return a
 
 
-def print_or_write(pulse_vals, file_name=None):
+def gen_array(pulse_vals, print_me=True):
     filln = 4*512 - len(pulse_vals)
     pulse_vals += [0] * filln
 
-    if not (file_name):  # default, how it is being called here
+    if (print_me):
         for x in pulse_vals:
             print(x)
-    else:  # but it can also write into a file
-        mem_file = open(file_name, "w")
-        for x in pulse_vals:  # same loop, but otherwise we open and close all the time
-            mem_file.write(str(x))
-            mem_file.write("\n")
-        mem_file.close()
+
+    return pulse_vals
 
 
 if __name__ == "__main__":
-    with open(argv[1]) as f:
-        setup = json.load(f)
+    with open(argv[1]) as json_input:
+        json_local = json_parse(json.load(json_input))
 
-    pulse_vals = pulse_setup_wrapper(setup)
+    pulse_vals = pulse_setup(json_local["dt"], json_local["d_amp"], json_local["t_fill"],
+                             json_local["t_flat"], json_local["ramp_x"])
 
-    print_or_write(pulse_vals)
+    gen_array(pulse_vals)  # print the values, do not store array
     # output to cic_bankx_in.dat, which is read by
     # both cic_bank (compled from cic_bank.c) and cic_bankx_tb.
