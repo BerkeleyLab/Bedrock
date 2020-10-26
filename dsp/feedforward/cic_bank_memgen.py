@@ -21,8 +21,11 @@ def fill1(xx):
 # dt = 0.0186 maximally flat with cavity_decay -77500
 # dt = 0.0200 maximally flat with cavity_decay -83030
 # XXX explain
-def pulse_setup(dt=0.02, d_amp=50000, t_fill=1.728, t_flat=1.0, ramp_x=0.94):
+def pulse_setup(dt_arg=0.02, d_amp=50000, t_fill_arg=1.728, t_flat_arg=1.0, ramp_x=0.94, tau=0.095):
     # All time parameters are in units of cavity tau
+    dt = dt_arg / tau
+    t_fill = t_fill_arg / tau
+    t_flat = t_flat_arg / tau
     # d_amp is equilibrium drive amplitude (at flat top)
     # suggest keeping t_fill in range (1.50, 2.0)
     # ramp_x is normalized transition time
@@ -79,7 +82,7 @@ if __name__ == "__main__":
         cfg = json.load(json_input)
 
     pulse_vals = pulse_setup(cfg["dt"], cfg["d_amp"], cfg["t_fill"],
-                             cfg["t_flat"], cfg["ramp_x"])
+                             cfg["t_flat"], cfg["ramp_x"], cfg["tau"])
 
     gen_array(pulse_vals)  # print the values, do not store array
     # output to cic_bankx_in.dat, which is read by
