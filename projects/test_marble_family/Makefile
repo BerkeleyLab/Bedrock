@@ -27,7 +27,6 @@ SYNTH_VIVADO = $(VIVADOEXEC) -mode batch -source
 # Attention!!!!
 vpath %.v $(BADGER_DIR)/tests $(HOMELESS_DIR) $(DSP_DIR) $(SERIAL_IO_DIR) $(I2CBRIDGE_DIR) $(PERIPH_DRIVERS_DIR) $(BOARD_SUPPORT_DIR)/marblemini $(HOMELESS_DIR)/freq_demo
 vpath %.c $(BADGER_DIR)/tests
-vpath %.xdc $(BOARD_SUPPORT_DIR)/marblemini
 
 # =====
 # gets us $(FREQ_DEMO_V)
@@ -54,6 +53,15 @@ marble_regmap.json: static_regmap.json scalar_marble_regmap.json
 config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOURCE))
 	$(PYTHON) $(BUILD_DIR)/build_rom.py -v $@ -j $< -d "Marble Testing"
 
+# gen_features.py rules (note the use of PHONY targets)
+# actual file outputs are marble_features_params.vh and marble_features_defs.vh
+marble1_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_mini --split
+
+marble2_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_v2 --split
+.PHONY: marble1_features marble2_features
+
 # ====
 # tmds_test, requires access to unisims (or unisims_lrd)
 tmds_test_tb: tmds_test.v
@@ -70,7 +78,7 @@ udp-vpi.vpi: udp_model.o
 # subset that is interesting to test live on network
 LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v config_romx.v $(I2CBRIDGE_V) ad5662.v gps_test.v simpleuart.v
 lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v
-VFLAGS_lb_marble_slave_tb = -DUSE_I2CBRIDGE -m ./udp-vpi
+VFLAGS_lb_marble_slave_tb = -m ./udp-vpi
 net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=8030 +vcd
 
@@ -85,7 +93,7 @@ net_slave_check: lb_marble_slave_tb udp-vpi.vpi
 # syntax-check only, no actual test bench code
 MARBLE_BASE_V = marble_base.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V)
 marble_base_tb: $(MARBLE_BASE_V)
-VFLAGS_marble_base_tb = -DUSE_I2CBRIDGE -DMMC_CTRACE
+VFLAGS_marble_base_tb =
 
 .PHONY: no_multiple_drivers_check
 no_multiple_drivers_check: marble_base_tb
@@ -96,7 +104,10 @@ no_multiple_drivers_check: marble_base_tb
 # constraint
 pin_map_fmc.csv: pin_map_fmc.py
 	$(PYTHON) $< > $@
-marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py Marble.xdc $(BOARD_SUPPORT_DIR)/marblemini/pin_map.csv pin_map_fmc.csv
+marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marblemini/%, Marble.xdc pin_map.csv) pin_map_fmc.csv
+	$(PYTHON) $^ > $@
+
+marble2.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marble/%, Marble.xdc pin_map.csv) pin_map_fmc.csv
 	$(PYTHON) $^ > $@
 
 # =====
@@ -106,16 +117,36 @@ read_sfp.dat: read_sfp.py
 
 # =====
 # bitfile
-MARBLE_SYNTH_SOURCE = marble1.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_sfp.dat marble1.xdc
-marble1.d: $(MARBLE_SYNTH_SOURCE)
+MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_sfp.dat
+marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
 	echo $^ | tr ' ' '\n' > $@
-marble1.bit: marble1.tcl marble1.d $(MARBLE_SYNTH_SOURCE)
-	$(SYNTH_VIVADO) $<
-	mv _xilinx/marble1.runs/impl_1/marble1.bit $@
+
+marble1.bit: marble.tcl marble1.d marble1_features
+	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1
+
+marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
+	echo $^ | tr ' ' '\n' > $@
+
+marble2.bit: marble.tcl marble2.d marble2_features
+	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2
+
+# =====
+# bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'
+
+# IP address must match that configured in board_support/marblemini/marble_base.v
+RGMII_IP = 192.168.19.10
+BIT = marble1.bit
+
+marble1_hwload:
+	openocd -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT}; exit"
+
+# TODO: Add udprtx stress test
+marble1_hwtest:
+	ping -c 2 ${RGMII_IP} && $(PYTHON) testcase.py --ip=${RGMII_IP} --sfp
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
-	rm -f pin_map_fmc.csv marble1.xdc marble1.bit vivado* datasheet.txt
+	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado* datasheet.txt
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
 	rm -f read_sfp.dat
 	rm -rf _xilinx .Xil

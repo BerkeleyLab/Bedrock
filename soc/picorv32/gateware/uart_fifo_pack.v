@@ -97,7 +97,7 @@ always @(posedge clk) begin
     mem_rdata <= 32'h00000000;
     utx_tvalid <= 0;
     urx_tready <= 0;
-    if (mem_valid && !ready_sum && mem_addr[31:24]==BASE_ADDR) begin
+    if (mem_valid && !ready_sum && mem_addr[31:16]=={BASE_ADDR, 8'h00}) begin
         (* parallel_case *)
         case (1)
             // -----------------------------

@@ -164,6 +164,8 @@ if __name__ == "__main__":
                    "wvform_dt": wvform_dt,
                    "freq_quantum": 0.0355256,
                    "digaree_dt": digaree_dt,
+                   "basist_block": 10,
+                   "basist_n": 24,
                    "out_shift": 4}
     run1(rf_wvf, detune_dict, axes=None, dest=dest, fname=args.datafile)
     plot_post(dest, args.datafile)

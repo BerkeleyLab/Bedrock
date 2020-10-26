@@ -1,14 +1,14 @@
 #!/bin/sh
 # Convenience utility for working with Marble hardware and bitfiles
 set -e
-IP=${IP:-192.168.19.8}
+IP=${IP:-192.168.19.10}
 PYTHON=${PYTHON:-python3}
 BITFILE=${BITFILE:-marble1.bit}
 case "$1" in
   usb)
     # start here; without a bitfile loaded, the rest of the commands won't work
     if test -r $BITFILE; then
-      openocd -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $BITFILE; exit"
+      openocd -s "../../board_support/marblemini/" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $BITFILE; exit"
     else
       echo "$BITFILE not found"
     fi

@@ -25,6 +25,7 @@ include:
   - local: .gitlab/ci/soc.gitlab-ci.yml
   - local: .gitlab/ci/oscope.gitlab-ci.yml
   - local: .gitlab/ci/comms_top.gitlab-ci.yml
+  - local: .gitlab/ci/marble_family.gitlab-ci.yml
 
 leep_test:
   script:
@@ -70,25 +71,6 @@ freq_demo:
   script:
     - cd homeless/freq_demo && make
 
-marble_sim:
-  stage: test
-  script:
-    - cd projects/test_marblemini && make all net_slave_check
-
-marble_synth:
-  before_script:
-    - cd projects/test_marblemini && ls /non-free
-  stage: synthesis
-  script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make marble1.bit
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
-    expire_in: 2 days
-    paths:
-      - projects/test_marblemini/marble1.bit
-      - projects/test_marblemini/vivado.log
-      - projects/test_marblemini/_xilinx/marble1.runs/impl_1/marble1_utilization_placed.rpt
-
 rtsim_test:
   before_script:
     - cd rtsim && make clean && make
@@ -110,10 +92,10 @@ flake8:
 
 badger_test:
   before_script:
-    - cd badger/tests && make clean
+    - cd badger/tests && make clean && sh ./tap-setup.sh
   stage: test
   script:
-    - make
+    - make && bash tftp_test.sh && bash speed_check.sh
 
 peripheral_test:
   before_script:

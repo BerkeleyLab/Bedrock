@@ -1,6 +1,9 @@
-// Top level Marble-Mini test build
+// Top level Marble-Mini and Marble v2 test build
 // Mostly cut-and-paste from rgmii_hw_test.v
-module marble1(
+
+`include "marble_features_defs.vh"
+
+module marble_top(
 	input GTPREFCLK_P,
 	input GTPREFCLK_N,
 	input SYSCLK_P,
@@ -59,14 +62,18 @@ module marble1(
 	inout [33:0] FMC2_LA_N,
 	// output ZEST_PWR_EN,
 
+`ifdef MARBLE_MINI
 	// J15 TMDS 0, 1, 2, CLK
 	output [3:0] TMDS_P,
 	output [3:0] TMDS_N,
+`endif
 
 	// Physical Pmod, may be used as LEDs
 	inout [7:0] Pmod1,
 	input [7:0] Pmod2
 );
+
+`include "marble_features_params.vh"
 
 wire gtpclk0, gtpclk;
 // Gateway GTP refclk to fabric
@@ -144,7 +151,18 @@ wire [3:0] ext_config;
 
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
-marble_base base(
+`ifdef USE_I2CBRIDGE
+localparam C_USE_I2CBRIDGE = 1;
+`else
+localparam C_USE_I2CBRIDGE = 0;
+`endif
+`ifdef MMC_CTRACE
+localparam C_MMC_CTRACE = 1;
+`else
+localparam C_MMC_CTRACE = 0;
+`endif
+
+marble_base #(.USE_I2CBRIDGE(C_USE_I2CBRIDGE), .MMC_CTRACE(C_MMC_CTRACE)) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
 	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
@@ -170,10 +188,12 @@ marble_base base(
 );
 defparam base.rtefi.p4_client.engine.seven = 1;
 
+`ifdef MARBLE_MINI
 // TMDS test pattern generation
 wire tmds_enable = ext_config[0];
 tmds_test tmds_test(.clk(test_clk), .enable(tmds_enable),
 	.tmds_p(TMDS_P), .tmds_n(TMDS_N));
+`endif
 
 // Give the network the option of turning off the 20 MHz VCXO
 assign VCXO_EN = ~ext_config[1];

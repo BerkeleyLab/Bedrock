@@ -1,11 +1,12 @@
 from fmc_test_l import fmc_decode, fmc_goal
 from time import sleep
-import i2c_live
 
 import sys
-bedrock_dir = "bedrock/"
+bedrock_dir = "../../"
+sys.path.append(bedrock_dir + "badger")
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 from assem import i2c_assem
+import i2c_live
 
 
 def build_i2c_reader(fmc_bus):
