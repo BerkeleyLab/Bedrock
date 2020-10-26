@@ -18,21 +18,6 @@ def fill1(xx):
     return sum([[0, x, 0, 0] for x in xx], [])
 
 
-def json_parse(json_cfg):
-    setup_params = {  # dictionary containing all parsed values
-        "d_amp": json_cfg["d_amp"],
-        "t_fill": json_cfg["t_fill"],
-        "t_flat": json_cfg["t_flat"],
-        "tau": json_cfg["tau"],
-        "dt": json_cfg["dt"],
-        "sim_expand": json_cfg["sim_expand"],
-        "ramp_x": json_cfg["ramp_x"],
-        "couple": json_cfg["couple"],
-    }
-
-    return setup_params
-
-
 # dt = 0.0186 maximally flat with cavity_decay -77500
 # dt = 0.0200 maximally flat with cavity_decay -83030
 # XXX explain
@@ -91,10 +76,10 @@ def gen_array(pulse_vals, print_me=True):
 
 if __name__ == "__main__":
     with open(argv[1]) as json_input:
-        json_local = json_parse(json.load(json_input))
+        cfg = json.load(json_input)
 
-    pulse_vals = pulse_setup(json_local["dt"], json_local["d_amp"], json_local["t_fill"],
-                             json_local["t_flat"], json_local["ramp_x"])
+    pulse_vals = pulse_setup(cfg["dt"], cfg["d_amp"], cfg["t_fill"],
+                             cfg["t_flat"], cfg["ramp_x"])
 
     gen_array(pulse_vals)  # print the values, do not store array
     # output to cic_bankx_in.dat, which is read by
