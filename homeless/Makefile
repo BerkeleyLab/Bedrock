@@ -1,0 +1,20 @@
+CFLAGS = --std=c99 -O2 -Wall
+# The following CFLAGS are not needed, of course.
+# They can be used to show that the code is squeaky-clean
+CFLAGS += -Wextra -Wundef -Wshadow -Wstrict-prototypes -Wmissing-prototypes -pedantic
+
+all: NMEAtest
+
+NMEAtest: NMEAtest.o NMEA.o
+	$(CC) $(CFLAGS) -o NMEAtest NMEAtest.o NMEA.o
+
+test: NMEAtest
+	./NMEAtest \
+        '$$GPRMC,064951.000,A,2307.1256,N,12016.4438,E,0.03,165.48,260406,3.05,W,A*2C' \
+        '$$GPRMC,064951.123,A,2307.1256,N,12016.4438,E,0.03,165.48,260406,3.05,W,A*2C' \
+        '$$GPRMC,220516,A,5133.82,N,00042.24,W,173.8,231.8,130604,004.2,W*79' \
+        '$$GPRMC,225446,A,4916.45,N,12311.12,W,000.5,054.7,191104,020.3,E*61' \
+        '$$GPRMC,010455.000,A,3754.7666,N,12201.4667,W,0.01,0.00,220420,,,D*7C'
+
+clean:
+	rm -f NMEAtest NMEAtest.o NMEA.o
