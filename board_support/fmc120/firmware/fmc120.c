@@ -429,7 +429,7 @@ bool FMC120_InitClock(uint8_t clockmode) {
             { 0x12C, 0x62 },    // DIG_DLY_SCLK11     DCLK halfstep=-0.5, SCLK sourced from DCLK,  2 vco clock cycle delay on sysref out
             { 0x12D, 0x00 },    // ANA_DLY_SCLK11    SCLK analog delay disabled
             { 0x12E, 0xB7 },    // PD_CLK11_10 !DIG_DLY, GLITCHLESS Half Step ON, !ANAGLITCH, !ANA_DLY, EN_DCLK, ACTIVE, SCLK Disabled at VCM
-            { 0x12F, 0x11 },    // Both Off, iff enbaled with pop option use  0X01: Sclock OFF Dclock = LVDS
+            { 0x12F, 0x11 },    // Both Off, iff enabled with pop option use  0X01: Sclock OFF Dclock = LVDS
 
             // External Clock Output, This will be programed 'on' but we will Clear it off in final configuration
             // CLK12/13 Settings  DCLK 12 EXTERNAL CLOCK OUTPUT
@@ -439,7 +439,7 @@ bool FMC120_InitClock(uint8_t clockmode) {
             { 0x134, 0x62 },    // DIG_DLY_SCLK13    SCLK analog = 2 VCO Clock Cycles (666pS << from FMC144 )
             { 0x135, 0x00 },    // ANA_DLY_SCLK13    SCLK analog delay disabled
             { 0x136, 0xB7 },    // PD_CLK13_12 !DIG_DLY, GLITCHLESS Half Step ON, !ANAGLITCH, !ANA_DLY, EN_DCLK, ACTIVE, SCLK Disabled at VCM
-            { 0x137, 0x00 },    // Sclk Off, Dclock On = LVPECL                << set to 0x00 to turn off Externl Clock option
+            { 0x137, 0x00 },    // Sclk Off, Dclock On = LVPECL                << set to 0x00 to turn off External Clock option
 
             // Select VCO1 PLL1 source
             { 0x138, 0x20 },    // VCO_OSC_OUT VCO01 (High Speed), PLL1_FB=OSCin,OSCOUT=input (Drivers powerd down)
@@ -480,8 +480,8 @@ bool FMC120_InitClock(uint8_t clockmode) {
             { 0x154, 0x78 },    // CLKIN0_DIV (LS)
 
             // External Reference Input
-            //PLL1 CLKIN1 Divider External Reference input, default 100MHz and a 100.000KHz Phase Detector Frequency
-            { 0x155, 0x00 },    // CLKIN1_DIV (MS)      100MHz / 1000 = 100KHz
+            //PLL1 CLKIN1 Divider External Reference input, default 100MHz and a 100.000kHz Phase Detector Frequency
+            { 0x155, 0x00 },    // CLKIN1_DIV (MS)      100MHz / 1000 = 100kHz
             { 0x156, 0X0A },    // CLKIN1_DIV (LS)
 
             // *********** PLL 1 REF Set      // 10MHz
@@ -490,21 +490,21 @@ bool FMC120_InitClock(uint8_t clockmode) {
             { 0x157, 0x00 },    // CLKIN2_DIV (MS)         R divide = A = 10 = 10MHz
             { 0x158, 0x0A },    // CLKIN2_DIV (LS)
 
-            // Onbaord 500MHz VCSO at LMK OSCIN pins
+            // Onboard 500MHz VCSO at LMK OSCIN pins
             // PLL1 N divider, Divide 500MHz VCSO down to PDF
             { 0x159, 0x00 },    // PLL1_NDIV (MS)  N divide =0x32 = 50 = 10 MHz
             { 0x15A, 0x32 },    // PLL1_NDIV (LS)
 
-            // PLL1 Coonfiguration
+            // PLL1 Configuration
             { 0x15B, 0xDF },    // PLL1_SETUP,  Dlig lock det window 43ns, PLL active, Pos Slope, max pump current
             { 0x15C, 0x20 },    // PLL1_LOCK_CNT (MS)    Lock detector window,  must be valid for 1024 cycles
             { 0x15D, 0x00 },    // PLL1_LOCK_CNT (LS)
             { 0x15E, 0x00 },    // PLL1_DLY   // not applicable keep at 0
             { 0x15F, 0x0B },    // STATUS_LD1_MUX == LD1 Push-Pull Output
 
-            // PLL2 onfigured to lock VCO1 at 3000MHz to 500MHz VCSO with a PFD of 125MHz, (4N * 6P = 24) * 125MHz = 3000MHz
+            // PLL2 configured to lock VCO1 at 3000MHz to 500MHz VCSO with a PFD of 125MHz, (4N * 6P = 24) * 125MHz = 3000MHz
             //a prescale value of 6 allows the PLL2 N and R to match
-            { 0x160, 0x00 },    // PLL2_RDIV (MS) PLL2 Reference Divider = 4 refference frequency = 125MHz
+            { 0x160, 0x00 },    // PLL2_RDIV (MS) PLL2 Reference Divider = 4 reference frequency = 125MHz
             { 0x161, 0x04 },    // PLL2_RDIV (LS)
             { 0x162, 0xD0 },    // PLL2_PRESCALE PRE=6,  >255 to 500MHz  range  amp off, doubler off
             { 0x163, 0x00 },    // PLL2_NCAL (HI) Only used during CAL
@@ -519,14 +519,14 @@ bool FMC120_InitClock(uint8_t clockmode) {
 
             { 0x166, 0x00 },      // PLL2_NDIV (HI) Allow CAL
             { 0x167, 0x00 },      // PLL2_NDIV (MID) PLL2 N-Divider
-            { 0x168, 0x04 },      // PLL2_NDIV (LOW) Cal. P = 3, N = 8 (24 * 125Mhz_ref = 3G)
+            { 0x168, 0x04 },      // PLL2_NDIV (LOW) Cal. P = 3, N = 8 (24 * 125MHz_ref = 3G)
             { 0x169, 0x49 },      // PLL2_SETUP Window 3.7nS, I(cp)=1.6mA, Pos Slope, CP ! Tristate, Bit 0 always 1. 1.6mA gives better close in phase  noise than 3.2mA.
             { 0x16A, 0x00 },      // PLL2_LOCK_CNT (MS)
             { 0x16B, 0x20 },      // PLL2_LOCK_CNT (LS)  PD must be in lock for 16 cycles
-            { 0x16C, 0x00 },      // PLL2_LOOP_FILTER_R Disable Internal, uses externla Loop Filter R3=R4=200 Ohms
-            { 0x16D, 0x00 },      // PLL2_LOOP_FILTER_C Disable Internal, uses externla Loop Filter C3=C4=10 pF
+            { 0x16C, 0x00 },      // PLL2_LOOP_FILTER_R Disable Internal, uses external Loop Filter R3=R4=200 Ohms
+            { 0x16D, 0x00 },      // PLL2_LOOP_FILTER_C Disable Internal, uses external Loop Filter C3=C4=10 pF
             { 0x16E, 0x12 },      // STATUS_LD2_MUX LD2=Locked   Push Pull Output
-            { 0x173, 0x00 }       // PLL2_MISC PLL2 Active, normal opperation
+            { 0x173, 0x00 }       // PLL2_MISC PLL2 Active, normal operation
         };
 
         ret &= FMC120_SPI_WriteRegs(LMK_SELECT, regmap, sizeof(regmap) / sizeof(regmap[0]));
@@ -537,7 +537,7 @@ bool FMC120_InitClock(uint8_t clockmode) {
             { 0x182, 0x01 },
             { 0x182, 0x00 },
 
-            // Clear PLL2 Erros regardless of if we use them
+            // Clear PLL2 Errors regardless of if we use them
             { 0x183, 0x01 },
             { 0x183, 0x00 }
         };
@@ -574,7 +574,7 @@ bool FMC120_InitClock(uint8_t clockmode) {
 
         // datasheet table 2.
         // SYNC_MODE:  0: Prevent SYNC pin. 1: From SYNC pin. 2: From Pulser via SYNC pin. 3: From Pulser via SPI
-        // SYSREF_MUX: 0: Normal SYNC. 1: Re-clocked. 2: SYSREF Pulser. 3: SYSREF Continous
+        // SYSREF_MUX: 0: Normal SYNC. 1: Re-clocked. 2: SYSREF Pulser. 3: SYSREF Continuous
         uint8_t sync_mode = 1;
         uint8_t sysref_mux = 0;
         uint8_t sysref_clkin0_mux = 0; // XXX 1 not working
@@ -632,7 +632,7 @@ bool FMC120_InitClock(uint8_t clockmode) {
             { 0x12C, 0x20 },    // SDCLKoutX_MUX=1
             { 0x12D, 0x00 },    // ANA_DLY_SCLK11    SCLK analog delay disabled
             { 0x12E, 0xF7 },    // PD_CLK11_10 !DIG_DLY, GLITCHLESS Half Step OFF, !ANAGLITCH, !ANA_DLY, EN_DCLK, ACTIVE, SCLK Disabled at VCM
-            { 0x12F, 0x00 },    // Both Off, iff enbaled with pop option use  0X01: Sclock OFF Dclock = LVDS
+            { 0x12F, 0x00 },    // Both Off, iff enabled with pop option use  0X01: Sclock OFF Dclock = LVDS
 
             // External Clock Output, This will be programed 'on' but we will Clear it off in final configuration
             // CLK12/13 Settings  DCLK 12 EXTERNAL CLOCK OUTPUT
@@ -641,7 +641,7 @@ bool FMC120_InitClock(uint8_t clockmode) {
             { 0x134, 0x20 },    // SDCLKoutX_MUX=1
             { 0x135, 0x00 },    // ANA_DLY_SCLK13    SCLK analog delay disabled
             { 0x136, 0xF7 },    // PD_CLK13_12 !DIG_DLY, GLITCHLESS Half Step ON, !ANAGLITCH, !ANA_DLY, EN_DCLK, ACTIVE, SCLK Disabled at VCM
-            { 0x137, 0x00 },    // Sclk Off, Dclock On = LVPECL                << set to 0x00 to turn off Externl Clock option
+            { 0x137, 0x00 },    // Sclk Off, Dclock On = LVPECL                << set to 0x00 to turn off External Clock option
 
             // VCO MUX
             { 0x138, 0x40 },    // VCO_MUX = CLKin1, powerdown CLKin2
@@ -700,7 +700,7 @@ bool FMC120_InitClock(uint8_t clockmode) {
         ret &= FMC120_SPI_WriteRegs(LMK_SELECT, regmap, sizeof(regmap) / sizeof(regmap[0]));
 
         //    2.(e) Perform SYNC by toggling SYNC_POL
-        //    Moved to upper level to apply to both boards simutanously.
+        //    Moved to upper level to apply to both boards simultaneously.
         // FMC120_LMK04828_SyncAll();
         // FMC120_LMK04828_SetSYSREF();
     }
@@ -711,7 +711,7 @@ bool FMC120_InitClock(uint8_t clockmode) {
 
 bool FMC120_LMK04828_SetSYSREF(void) {
     uint8_t sync_mode = 2;
-    uint8_t sysref_mux = 2; // 3 for continous sysref
+    uint8_t sysref_mux = 2; // 3 for continuous sysref
     uint8_t sysref_clr = 0;
     uint8_t sysref_clkin0_mux = 0;
 
@@ -748,7 +748,7 @@ bool FMC120_ShortPatternTest(void) {
 
     ret &= FMC120_SPI_Write(DAC_SELECT, 0x6C, 0x0000);
 	// 15-8 : alarm_from_shortest  bit8 = lane0 alarm, bit1 = lane1_alarm
-	// 7-0  : Loss of signal dectect outputs from SerDes lanes
+	// 7-0  : Loss of signal detect outputs from SerDes lanes
     ret &= FMC120_SPI_Read(DAC_SELECT, 0x6C, &spi_read_dat);
     print_str("0x6C = ");
     print_hex(spi_read_dat, 4);
@@ -862,7 +862,7 @@ bool FMC120_InitDAC(void) {
     // JESD settings
     uint8_t pL = 8;         // Number of lanes
     uint8_t pM = 4;         // Number of converters per link
-    uint8_t pF = 1;         // Number of octest per frame per lane
+    uint8_t pF = 1;         // Number of octets per frame per lane
     uint8_t pS = 1;         // Number of converter samples per frame
     uint8_t pK = 32;        // Number of frames per multiframe
     uint8_t pHD = 1;        // High Density
@@ -1114,7 +1114,7 @@ bool FMC120_InitADC(void) {
         { 0x6000, 0x01 },        // assert pulse Reset
         { 0x6000, 0x00 },        // clear pulse Reset
 
-        // select 6A00 JESD Anlaog Page
+        // select 6A00 JESD Analog Page
         { 0x4003, 0x00 },        // select JESD Digital Page
         { 0x4004, 0x6A },        // select JESD Digital Page
         { 0x6016, 0x02 },        // 40X pll
@@ -1163,7 +1163,7 @@ bool init_jesd204_core(void) {
     uint32_t sysref_required = 0;    // 0: No sysref required on re-sync.
     uint32_t sysref_delay = 3;       // 0-15
     uint32_t sysref_always = 1;      // 1: All sysref event will reset LMFC counter
-    uint32_t rx_buf_delay = 1;      // read buffer ajdust @ 0x830
+    uint32_t rx_buf_delay = 1;      // read buffer adjust @ 0x830
 
     const t_reg32 jesd_cfg_adc[] = {
         { 0x08, 0x01 },         // 0x08: Support ILA
@@ -1246,7 +1246,7 @@ bool check_jesd204_sync(uint32_t base_core) {
 
 void FMC120_LMK04828_SyncAll(void) {
     // Follow datasheet example:
-    // Toggle SYNC pin, which applies to both boards simutanously
+    // Toggle SYNC pin, which applies to both boards simultaneously
     // LMK04828 Table 2, Differential input SYNC (SYNC_MODE = 1, SYSREF_MUX = 0)
     SET_GPIO1( BASE_GPIO, GPIO_OUT_REG, PIN_LMK_SYNC, 1 );
     SET_GPIO1( BASE_GPIO, GPIO_OUT_REG, PIN_LMK_SYNC, 0 );

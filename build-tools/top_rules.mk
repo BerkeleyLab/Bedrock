@@ -43,8 +43,10 @@ VERILOG_RUN = $(VVP) $@
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@.$$$$ $<
 
-VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I. -Wno-TIMESCALEMOD
-VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY
+VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I.
+# keep -Wno-TIMESCALEMOD separate, since it's a new flag not supported by Verilator 4.010 in Debian Buster
+VLATOR_TIMESCALEMOD = -Wno-TIMESCALEMOD
+VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY $(VLATOR_TIMESCALEMOD)
 VERILATOR_LINT = $(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $(filter %.v %.sv, $^)
 VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN --MMD --Mdir $(DEPDIR)
 VERILATOR_SIM = $(VERILATOR) --trace-fst -O2 $(VLATOR_LINT_IGNORE) $(VG_ALL) +define+VERILATOR_SIM
@@ -55,7 +57,7 @@ ISE_SYNTH = bash $(BUILD_DIR)/xil_syn
 VIVADO_CMD = vivado -mode batch -nojou -nolog
 VIVADO_SYNTH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(BUILD_DIR)/vivado_tcl/vivado_project.tcl -tclargs
 VIVADO_REMOTE_SYNTH = $(VIVADO_SYNTH)
-SYNTH_OPT = -DMEM_SIZE=16384
+# SYNTH_OPT = -DMEM_SIZE=16384
 PLANAHEAD_SYNTH = planAhead -mode batch -nojou -nolog -source $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(BUILD_DIR)/vivado_tcl/planahead_project.tcl -tclargs
 VIVADO_FLASH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/vivado_flash.tcl -tclargs
 VIVADO_CREATE_IP = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/lbl_ip.tcl $(BUILD_DIR)/vivado_tcl/create_ip.tcl -tclargs

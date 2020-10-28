@@ -7,7 +7,6 @@
 # ---------------------------------------------------------------------------------------
 #  Init script to run C programs
 # ---------------------------------------------------------------------------------------
-# assuming 2048 words memory, with interrupt support
 # requires this function to be present in C program:
 # uint32_t *irq(uint32_t *regs, uint32_t irqs){ return regs; }
 #include "custom_ops.S"
@@ -114,15 +113,6 @@ irq_vec:
 
 	picorv32_retirq_insn()
 
-irq_regs:
-	# registers are saved to this memory region during interrupt handling
-	# the program counter is saved as register 0
-	.fill 32,4
-
-	# stack for the interrupt handler
-	.fill 128,4
-irq_stack:
-
 init_for_c:
 	lui   t0,     %hi(_bss_start)
 	addi  t0, t0, %lo(_bss_start)
@@ -181,13 +171,13 @@ initRegs:
 #-----------------------------------------------
 # C-wrappers for the custom instructions
 #-----------------------------------------------
-# extern uint32_t _asm_test( uint32_t inpa, uint32_t inpb );
-# for testing how to in- and output values to GCC
-# a0 = first argument & return value
-# a1 = second argument
-.globl _asm_test
-_asm_test:
-	addi a0, a1, 0  # return( inpb );
+# extern uint64_t _picorv32_rd_cycle_64(void);
+.globl _picorv32_rd_cycle_64
+_picorv32_rd_cycle_64:
+	rdcycleh     a1
+	rdcycle      a0
+	rdcycleh     t0
+	bne          a1, t0, _picorv32_rd_cycle_64
 	ret
 
 # extern uint32_t _picorv32_irq_mask( uint32_t iMask );
@@ -238,3 +228,14 @@ _picorv32_irq_reset:
 _picorv32_irq_timer:
 	picorv32_timer_insn(a0, a0)
 	ret
+
+# IRQ stack
+.section .bss
+irq_regs:
+	# registers are saved to this memory region during interrupt handling
+	# the program counter is saved as register 0
+	.fill 32,4
+
+	# stack for the interrupt handler
+	.fill 128,4
+irq_stack:

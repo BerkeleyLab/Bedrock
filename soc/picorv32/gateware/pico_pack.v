@@ -3,7 +3,10 @@
 // --------------------------------------------------------------
 // PicoRV32 CPU core wrapper. To get the packed interface
 
-module pico_pack (
+module pico_pack #(
+    parameter [31:0] PROGADDR_RESET = 32'h 0000_0000,
+    parameter [31:0] PROGADDR_IRQ = 32'h 0000_0010
+) (
     input   clk,
     input   reset,
     output  trap,
@@ -65,9 +68,9 @@ picorv32 #(
     .ENABLE_IRQ           ( 1              ),// Enable interrupt controller
     .ENABLE_IRQ_QREGS     ( 1              ),
     .ENABLE_IRQ_TIMER     ( 1              ),
-    .LATCHED_IRQ          ( 32'h FFFF_0000 ),// 1 = Interrupts are latched until served by ISR
-    .PROGADDR_RESET       ( 32'h 0000_0000 ),// Start into the bootloader at 0x00000000
-    .PROGADDR_IRQ         ( 32'h 0000_0010 ),// Interrupts jump into the main program at 0x0000010
+    .LATCHED_IRQ          ( 32'h FFFF_0007 ),// 1 = Interrupts are latched until served by ISR
+    .PROGADDR_RESET       ( PROGADDR_RESET ),// Start into the bootloader at 0x00000000
+    .PROGADDR_IRQ         ( PROGADDR_IRQ   ),// Interrupts jump into the main program at 0x0000010
     .CATCH_MISALIGN       ( 1              ),
     .BARREL_SHIFTER       ( 1              ),
     .ENABLE_MUL           ( 1              ),
@@ -75,6 +78,7 @@ picorv32 #(
     .ENABLE_DIV           ( 1              ),
     .TWO_CYCLE_COMPARE    ( 0              ),
     .TWO_CYCLE_ALU        ( 0              ),
+    .STACKADDR            (`BLOCK_RAM_SIZE ),
 `ifdef SIMULATE
     .ENABLE_TRACE    ( 1 )
 `else

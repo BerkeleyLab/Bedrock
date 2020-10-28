@@ -32,9 +32,11 @@ include $(BUILD_DIR)/top_rules.mk
 # Local overrides of default variables
 VERILOG += -Wno-timescale -DSIMULATE
 
+# We're 99% integrated into bedrock's verilator workflow
+VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
+
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
-VERILATOR = verilator
 YOSYS = yosys
 PERL = perl
 XCIRCUIT = xcircuit
@@ -58,7 +60,7 @@ vpath %.eps ..
 all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check
 all: scanner_check hack_icmp_cksum_check rtefi_pipe_check hw_test_tb
 all: hello_check speed_test_check mem_gateway_check spi_flash_check
-all: Vrtefi_blob Vhw_test Vmem_gateway_check
+all: Vrtefi_blob Vhw_test Vmem_gateway_check udprtx
 all: test_tx_check precog_check mac_subset_check
 all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb rtefi_live
 all: lb_timing_demo.vcd
@@ -279,7 +281,7 @@ tap_start: rtefi_live tap-vpi.vpi
 # My first ever attempt!  Probably full of bogosities, but it does work.
 Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -Wno-TIMESCALEMOD -cc --exe $^
+	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vrtefi_blob.mk
 	mv obj_dir/$@ $@
 
@@ -287,7 +289,7 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 # Verilator, slightly larger scope
 Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -Wno-TIMESCALEMOD -cc --exe $^
+	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
 	mv obj_dir/$@ $@
 # TFTP server demo:
@@ -301,7 +303,7 @@ Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) $(R
 # WIP
 Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) mem_gateway_sim.cpp udp_model.c
 	rm -f udp_model.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace -Wno-PINMISSING -Wno-WIDTH -Wno-TIMESCALEMOD -cc --exe $^
+	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmem_gateway_wrap.mk
 	mv obj_dir/$@ $@
 Vmem_gateway_check: Vmem_gateway_wrap
@@ -381,7 +383,7 @@ locc:
 CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck
 CLEAN += crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test
 CLEAN += stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen
-CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab
+CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab udprtx
 CLEAN += $(RTEFI_CLEAN)
 CLEAN += *.html *.pdf
 CLEAN_DIRS += obj_dir _xilinx

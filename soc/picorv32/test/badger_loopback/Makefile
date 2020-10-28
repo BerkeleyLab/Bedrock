@@ -15,7 +15,7 @@ all: $(TARGET).vcd
 #-------------------
 BLOCK_RAM_SIZE = 4096
 SRC_V  += memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v sfr_pack.v gpio_pack.v
-OBJS   += startup.o print.o badger.o common.o
+OBJS   += startup.o print.o badger.o
 
 #-------------------
 # The packet badger

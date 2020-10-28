@@ -29,10 +29,10 @@ module zest_wrap #(parameter u15_u18_spi_mode="passthrough") (
    `ifndef SIMULATE
    (* IODELAY_GROUP = "IODELAY_200" *)
    IDELAYCTRL idelayctrl (
-	.RST(zif_cfg.IDELAY_ctrl_rst),
-	.REFCLK(clk_200),
-	.RDY(zif_cfg.IDELAY_ctrl_rdy)
-	);
+        .RST(zif_cfg.IDELAY_ctrl_rst),
+        .REFCLK(clk_200),
+        .RDY(zif_cfg.IDELAY_ctrl_rdy)
+        );
    `endif
 
    // 2x AD9653 - U2, U3 - Fast ADC

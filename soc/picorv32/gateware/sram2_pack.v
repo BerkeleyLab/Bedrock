@@ -45,6 +45,7 @@ assign ram_data_z = ram_nwe ? 8'hzz : w_reg;
 reg  [23:0] mem_rdata;
 reg         mem_ready;
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd(69'h0),
     .mem_packed_ret(mem_packed_ret),
 

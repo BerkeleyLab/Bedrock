@@ -1,9 +1,11 @@
+[dumpfile] "lb_bridge.vcd"
 [timestart] 0
 [size] 1390 1145
 [pos] -1 -1
-*-9.205416 536 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-18.717293 1544000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] lb_bridge_tb.
 [treeopen] lb_bridge_tb.bridge.
+[treeopen] lb_bridge_tb.cpu.
 [treeopen] lb_bridge_tb.merge.
 [sst_width] 229
 [signals_width] 270
@@ -17,6 +19,10 @@ lb_bridge_tb.mem_clk
 lb_bridge_tb.lb_clk
 @800200
 -cpu_mem
+@22
+lb_bridge_tb.cpu.picorv32_core.dbg_insn_addr[31:0]
+@820
+lb_bridge_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
 @22
 lb_bridge_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
 @28
@@ -38,7 +44,6 @@ lb_bridge_tb.dbg_w_retry
 lb_bridge_tb.dbg_w_retry_rise
 @420
 lb_bridge_tb.r_retries
-@421
 lb_bridge_tb.w_retries
 @800200
 -lbo
@@ -61,18 +66,21 @@ lb_bridge_tb.bridge.lb_write_ready
 lb_bridge_tb.bridge.reading.shift[2:0]
 @1000200
 -lbo
+@29
+lb_bridge_tb.cpu.mem_la_read
 @800200
 -lb1
 @28
 lb_bridge_tb.lb1_write
 lb_bridge_tb.lb1_read
+lb_bridge_tb.lb1_rvalid
 @22
 lb_bridge_tb.lb1_addr[19:0]
 lb_bridge_tb.lb1_wdata[31:0]
 lb_bridge_tb.lb1_rdata[31:0]
 @1000200
 -lb1
-@800200
+@c00200
 -merge
 @28
 lb_bridge_tb.merge.lb_write_a
@@ -97,9 +105,9 @@ lb_bridge_tb.merge.lb_merge_wdata[31:0]
 lb_bridge_tb.merge.collision
 lb_bridge_tb.merge.lb_strobe_a
 lb_bridge_tb.merge.lb_strobe_b
-@1000200
+@1401200
 -merge
-@800200
+@c00200
 -lb_merg
 @28
 lb_bridge_tb.merge.collision
@@ -147,10 +155,11 @@ lb_bridge_tb.lb_merge_rdata[31:0]
 (31)lb_bridge_tb.lb_merge_rdata[31:0]
 @1401200
 -group_end
-@1000200
 -lb_merg
 @28
 lb_bridge_tb.cpu.mem_ready
-lb_bridge_tb.cpu_read_lb
+lb_bridge_tb.bridge.mem_write
+lb_bridge_tb.bridge.mem_read
+lb_bridge_tb.bridge.ready_sum
 [pattern_trace] 1
 [pattern_trace] 0

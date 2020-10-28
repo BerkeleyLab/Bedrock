@@ -9,7 +9,7 @@ SRC_V   = memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v
 SRC_V  += idelays_pack.v ads62.v freq_count.v
 SRC_V  += BUFG.v IBUFDS.v IDDR.v IDELAYE2.v
 SRC_V  += sfr_pack.v gpio_pack.v
-OBJS   = startup.o common.o timer.o
+OBJS   = startup.o timer.o
 
 CFLAGS += -DSIMULATION -I$(BOARD_SUPPORT_DIR)/fmc150/firmware
 VFLAGS += -DSIMULATE

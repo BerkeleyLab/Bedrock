@@ -11,7 +11,9 @@ regressions in the following Bedrock sub-systems and features:
 * Generation of QF2PRE-compatible bitfiles
 * Communication with QF2PRE over Ethernet/Local Bus
 
-**NOTE:** This project currently only supports QF2PRE hardware.
+**NOTE:** While this project mainly focuses on exercising QF2PRE hardware and its
+GTX transceivers, a minimal example of Ethernet-over-fiber functionality using GTP
+transceivers can be found under `gige_eth/`, which targets an AC701 development board.
 
 > Generate bitfile:
 

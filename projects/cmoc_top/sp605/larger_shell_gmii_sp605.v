@@ -84,7 +84,9 @@ cryomodule_badger #(
     .gmii_txd(GMII_TXD),
     .gmii_tx_en(GMII_TX_EN),
     .gmii_tx_er(GMII_TX_ER),
-    .eth_status(eth_status)
+    .eth_status(eth_status),
+    .eth_cfg_clk(1'b0),
+    .eth_cfg_set(10'b0)
 );
 
 reg [24:0] c1x_ecnt=0;

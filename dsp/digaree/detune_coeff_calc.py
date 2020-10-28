@@ -12,9 +12,10 @@ class rf_waveforms:
                "LOOPB_I", "LOOPB_Q", ]  # Drive
     MIN_PTS = 256
 
-    def __init__(self, data_file, data_format=DAT_FMT):
+    def __init__(self, data_file, skip_pt=0, data_format=DAT_FMT):
         self.waves = np.loadtxt(data_file).transpose()
 
+        self.skip_pt = skip_pt
         self.DAT_FMT = data_format
 
         if self.waves.shape[0] != len(self.DAT_FMT) or\
@@ -26,7 +27,7 @@ class rf_waveforms:
         if ch_key not in self.DAT_FMT:
             print("ERROR: No channel {} in waveform data".format(ch_key))
 
-        return self.waves[self.DAT_FMT.index(ch_key)]
+        return self.waves[self.DAT_FMT.index(ch_key)][self.skip_pt:]
 
 
 class digaree_coeff:
@@ -179,7 +180,7 @@ class detune_gdr(digaree_coeff):
             pyplot.show()
 
         if verbose:
-            print("SI beta %.3f%+.3fj Hz" % (beta.real, beta.imag))
+            print("SI beta %.3f%+.3fj Hz, magnitude %.3f Hz" % (beta.real, beta.imag, abs(beta)))
         return self.get_coeffs(beta)
 
 
@@ -209,7 +210,8 @@ class detune_pulse(digaree_coeff):
 
     # basist is n*m, where n=len(cav)-1, m is number of time-dependent bases
     def compute(self, wvf, plot=False, verbose=False):
-        basist = self.create_basist(block=10, n=24)
+        b_blk, b_n = self.c_dict["basist_block"], self.c_dict["basist_n"]
+        basist = self.create_basist(block=b_blk, n=b_n)
         cav = wvf.get_ch("CAV_I") + 1j*wvf.get_ch("CAV_Q")
         fwd = wvf.get_ch("FWD_I") + 1j*wvf.get_ch("FWD_Q")
 
@@ -231,19 +233,26 @@ class detune_pulse(digaree_coeff):
         basisn = hstack([-cave.imag, cave.real])  # a.imag repeated
         basis = vstack([basis1, basis2, basis3, basisn])
 
-        (fitc, resid, rank, sing) = linalg.lstsq(basis.T, goal, rcond=-1)
+        fitc, resid, rank, sing = linalg.lstsq(basis.T, goal, rcond=-1)
 
         beta = fitc[0]+1j*fitc[1]  # in rad/s
         beta_hz = beta / (2*pi)
-        if verbose:
-            print("SI beta %.3f%+.3fj Hz" % (beta.real, beta.imag))
-
         bw_hz = fitc[2]/(2*pi)  # Hz
         det_hz = fitc[3:]/(2*pi)  # Hz
         if verbose:
             print("Bandwidth %.3f Hz" % -bw_hz)
             print("Detune Hz", det_hz)
-            print("SI beta %.3f%+.3fj Hz" % (beta.real, beta.imag))
+            print("SI beta %.3f%+.3fj Hz, magnitude %.3f Hz" % (beta.real, beta.imag, abs(beta)))
+
+        if False:
+            fitv = fitc.dot(basis)
+            # print(goal.shape, basis.shape, fitv.shape)
+            pyplot.plot(goal, label='goal')
+            pyplot.plot(fitv, label='fit')
+            for jx in range(len(fitc)):
+                pyplot.plot(fitc[jx]*basis[jx, :], label="%d" % jx)
+            pyplot.legend(frameon=False)
+            pyplot.show()
 
         # Useful for plotting
         detune_hz = basist.dot(fitc[3:])/(2*pi)
@@ -283,7 +292,18 @@ if __name__ == "__main__":
                    "wvform_dt": wvform_dt,
                    "freq_quantum": 0.0355256,
                    "digaree_dt": digaree_dt,
+                   "basist_block": 10,
+                   "basist_n": 24,
                    "out_shift": 4}
+    # I should write a long essay about the meaning of basist_block and
+    # basist_n, which are only used in pulse-mode.  These describe the
+    # degrees of freedom available to fit variations in cavity frequency
+    # during a pulse due to Lorentz Force Detuning (LFD).  basist_block is
+    # the number of sample points per degree of freedom, and basist_n is
+    # the number of such degrees of freedom.  The number of waveform points
+    # used in the analysis is basist_block * (basist_n - 1) + 2.  That should
+    # be less than the number of points in the "on" time of the pulse.
+    # I hope that helps.  :-)
 
     if args.mode == "cw":
         print("Calculating detune coefficients from CW data")

@@ -1,0 +1,26 @@
+[timestart] 298
+[size] 956 571
+[pos] -1 -1
+*-5.658963 324 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] multiply_accumulate_tb.
+[sst_width] 213
+[signals_width] 230
+[sst_expanded] 1
+[sst_vpaned_height] 142
+@28
+multiply_accumulate_tb.dut.clk
+multiply_accumulate_tb.dut.enable
+multiply_accumulate_tb.dut.reset
+multiply_accumulate_tb.dut.post_mult_shift[2:0]
+@420
+multiply_accumulate_tb.dut.signal[17:0]
+multiply_accumulate_tb.dut.constant[17:0]
+multiply_accumulate_tb.dut.correction[15:0]
+multiply_accumulate_tb.dut.integrator_in[20:0]
+multiply_accumulate_tb.dut.integrator_in_large[35:0]
+multiply_accumulate_tb.dut.integrator_sum_pre[21:0]
+multiply_accumulate_tb.dut.integrator_sum[20:0]
+@421
+multiply_accumulate_tb.dut.accumulated[20:0]
+[pattern_trace] 1
+[pattern_trace] 0

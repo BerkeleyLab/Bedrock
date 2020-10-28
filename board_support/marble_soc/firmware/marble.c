@@ -72,7 +72,7 @@ bool init_i2c_app_devices(void) {
     //   MinimumLSB = MaxExpected_I/32767 = 7.63e-6     (7.6uA per bit)
     //   MaximumLSB = MaxExpected_I/4096  = 61.0e-5      ( 61uA per bit)
     // 4. Choose an LSB between the min and max values
-    //    (Preferrably a roundish number close to MinLSB)
+    //    (Preferably a roundish number close to MinLSB)
     //   CurrentLSB = 1e-5 A (10uA per bit)
     // 5. Compute the calibration register
     //   Cal = trunc (0.04096 / (CurrentLSB * RSHUNT)) = 49950 (0xc31e)

@@ -51,6 +51,7 @@ wire [31:0] mem_addr;
 wire [31:0] mem_rdata;
 wire        mem_ready;
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_xadc_ret ),
 

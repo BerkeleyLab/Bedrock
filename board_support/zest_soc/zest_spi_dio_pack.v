@@ -80,8 +80,7 @@ assign spi_ss = spi_cfg_reg[BIT_SS_MAN] ? spi_cfg_reg[BIT_SS_CTRL] : spi_ss_auto
 // ------------------------------------------------------------------------
 //  Instantiate the SPI engine
 // ------------------------------------------------------------------------
-spi_engine #(
-) spi_inst (
+spi_engine spi_inst (
     .clk                 (clk),
     .reset               (rst),
     // If lowest bit of `spi_tx_reg` is written, start SPI transmission
@@ -95,10 +94,10 @@ spi_engine #(
     .cfg_cpha            (spi_cfg_reg[BIT_CPHA]),
     .cfg_lsb             (spi_cfg_reg[BIT_LSB]),
     .cfg_scklen          ({2'h0,cfg_nbits}),
-    .SS                  (spi_ss_auto),
-    .SCK                 (spi_sck),
-    .MOSI                (spi_mosi),
-    .MISO                (spi_miso_combine)
+    .cs                  (spi_ss_auto),
+    .sck                 (spi_sck),
+    .copi                (spi_mosi),
+    .cipo                (spi_miso_combine)
 );
 
 ad9653_spi_dio_bridge spi_dio_bridge_i (
