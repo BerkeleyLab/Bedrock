@@ -33,9 +33,14 @@ wire [ 3:0] mem_wstrb;
 wire        mem_valid;
 wire [31:0] mem_addr;
 wire  [3:0] mem_short_addr = mem_addr[3:0];
-reg         mem_ready=0;
 reg  [31:0] mem_rdata;
+
+reg mem_ready = 0;
+reg mem_ready_ = 0;
+wire ready_sum = mem_ready || mem_ready_;
+
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
 
@@ -92,7 +97,7 @@ always @(posedge clk) begin
     mem_rdata <= 32'h00000000;
     utx_tvalid <= 0;
     urx_tready <= 0;
-    if ( mem_valid && !mem_ready && mem_addr[31:24]==BASE_ADDR ) begin
+    if (mem_valid && !ready_sum && mem_addr[31:16]=={BASE_ADDR, 8'h00}) begin
         (* parallel_case *)
         case (1)
             // -----------------------------
@@ -108,7 +113,7 @@ always @(posedge clk) begin
                 if (mem_wstrb[2]) utx_tdata[23:16] <= mem_wdata[23:16];
                 if (mem_wstrb[1]) utx_tdata[15: 8] <= mem_wdata[15: 8];
                 if (mem_wstrb[0]) utx_tdata[ 7: 0] <= mem_wdata[ 7: 0];
-                if ( utx_tready ) begin
+                if (utx_tready) begin
                     utx_tvalid <= 1;
                     mem_ready <= 1;
                 end else begin
@@ -147,5 +152,6 @@ always @(posedge clk) begin
             end
         endcase
     end
+    mem_ready_ <= mem_ready;
 end
 endmodule

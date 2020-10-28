@@ -41,6 +41,7 @@ wire  [3:0] short_addr = mem_addr[3:0];
 wire        mem_ready;
 reg  [31:0] mem_rdata=0;
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
 

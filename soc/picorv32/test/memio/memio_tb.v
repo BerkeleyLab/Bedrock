@@ -89,7 +89,7 @@ module sram_tb;
             #1
             $display("\n\nFlash Config: %08x", cfgreg_do);
         end
-        if (sys_inst.memio_inst.mem_ready && flash_addr < 24'hFFFFFC) begin
+        if (sys_inst.memio_inst.mem_ready_ && flash_addr < 24'hFFFFFC) begin
             memTestWord = memTestData[flash_addr / 4];
             $write("%8x ", sys_inst.cpu.mem_rdata);
             if (memTestWord !== sys_inst.cpu.mem_rdata) begin
