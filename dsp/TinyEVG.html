@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>TinyEventGenerator</title>
+  </head>
+  <body>
+    <h1>Tiny Event Generator</h1>
+    <p>This firmware provides a small subset of the capabilities of a
+      Micro Research Finland timing system event generator.&nbsp;
+      Resource utilization is on the order of a few hundred
+      flip-flops.&nbsp; No vendor-specific IP is used so the firmware is
+      portable to any platform providing the required high-speed serial
+      transceivers.<br>
+    </p>
+    <p>Capabilities include:<br>
+    </p>
+    <ul>
+      <li>Fixed rate heartbeat timing synchronization events.&nbsp;
+        Useful for generating circular machine orbit clocks at event
+        receivers.</li>
+      <li>Time-of-day synchronization events.&nbsp; Allows all event
+        receivers to synchronize to a common time reference such as that
+        provided by a low cost GPS receiver.</li>
+      <li>Arbitrary user-specified events.</li>
+      <li>Distributed 8 bit data bus.</li>
+    </ul>
+    <p>To keep the complexity as low as possible many features of a full
+      MRF event generator are not present.&nbsp; The most important of
+      these are:<br>
+    </p>
+    <ul>
+      <li>No distributed data buffer.</li>
+      <li>No predefined tables of event sequences.</li>
+    </ul>
+    <ul>
+    </ul>
+    <h2>Ports</h2>
+    <p>Unless otherwise noted, all signals are in the evgTxClk domain.<br>
+    </p>
+    <table style=" text-align: left; width: 80%;" border="1"
+      cellspacing="2" cellpadding="2">
+      <tbody>
+        <tr>
+          <td style="text-align: center;"><span style="font-weight:
+              bold;">Signal</span><br>
+          </td>
+          <td style="text-align: center;"><span style="font-weight:
+              bold;">Direc</span><span style="font-weight: bold;">tion</span><br>
+          </td>
+          <td style="text-align: center;"><span style="font-weight:
+              bold;">Width</span><span style="font-weight: bold;"></span><br>
+          </td>
+          <td style="text-align: center;"><span style="font-weight:
+              bold;">Description</span><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">evgTxClk<br>
+          </td>
+          <td style="text-align: center;">I<br>
+          </td>
+          <td style="text-align: center;">1<br>
+          </td>
+          <td style="text-align: left;">Transmitter clock from
+            transceiver block.&nbsp; 1/20th of serial bit rate.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">evgTxWord<br>
+          </td>
+          <td style="text-align: center;">O<br>
+          </td>
+          <td style="text-align: center;">16<br>
+          </td>
+          <td style="text-align: left;">Value to be transmitted.&nbsp;
+            Most significant 8 bits are distributed bus, least
+            significant 8 bits are event code or comma.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">evgTxIsK<br>
+          </td>
+          <td style="text-align: center;">O<br>
+          </td>
+          <td style="text-align: center;">2<br>
+          </td>
+          <td style="text-align: left;">Least significant bit indicates
+            whether least significant 8 bits of evgTxWord are event code
+            (0) or comma (1).&nbsp; Most significant bit is always 0.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">heartbeatInterval<br>
+          </td>
+          <td style="text-align: center;">I<br>
+          </td>
+          <td style="text-align: center;">32<br>
+          </td>
+          <td style="text-align: left;">Sets interval, in units of
+            evgTxClk, at which heartbeat events (event code 0x7A) are
+            transmitted.&nbsp; A value less than 20 inhibits heartbeat
+            event generation.&nbsp; Heartbeat events are never delayed,
+            but can be inhibited by an explicit event request.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">distributedBus<br>
+          </td>
+          <td style="text-align: center;">I<br>
+          </td>
+          <td style="text-align: center;">8<br>
+          </td>
+          <td style="text-align: left;">The value to be sent to the
+            distributed bus outputs of all event receivers.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">eventCode<br>
+          </td>
+          <td style="text-align: center;">I<br>
+          </td>
+          <td style="text-align: center;">8<br>
+          </td>
+          <td style="text-align: left;">The event code to be sent to all
+            event receivers.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">eventStrobe<br>
+          </td>
+          <td style="text-align: center;">I<br>
+          </td>
+          <td style="text-align: center;">1<br>
+          </td>
+          <td style="text-align: left;">Enable transmission of the value
+            at the eventCode inputs.&nbsp; Such events have highest
+            priority and are never delayed.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">ppsMarker_a<br>
+          </td>
+          <td style="text-align: center;">I<br>
+          </td>
+          <td style="text-align: center;">1<br>
+          </td>
+          <td style="text-align: left;">Asynchronous Pulse-per-second
+            timing synchronization.&nbsp; The value on this input is
+            debounced and transferred to the evgTxClk domain.&nbsp; The
+            rising edge of the debounced and synchronized signal latches
+            the value on the seconds_a inputs for later transmission and
+            transmits a time-of-day clock synchronization event
+            (0x7D).&nbsp; The actual transmission of the event may be
+            delayed since heartbeat and explicit events have higher
+            priority.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">seconds_a<br>
+          </td>
+          <td style="text-align: center;">I<br>
+          </td>
+          <td style="text-align: center;">32<br>
+          </td>
+          <td style="text-align: left;">Time of day (POSIX seconds) to
+            be sent to all event receivers.&nbsp; Does not have to be in
+            evgTxClk domain, but should be held stable for at least 4
+            evgTxClk cycles from the rising edge of ppsMarker_a.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">ppsToggle<br>
+          </td>
+          <td style="text-align: center;">O<br>
+          </td>
+          <td style="text-align: center;">1<br>
+          </td>
+          <td style="text-align: left;">Changes state when the value on
+            seconds_a has been latched.&nbsp; This indicates that a new
+            seconds_a value is expected.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>At each clock cycle an event code is transmitted in the following
+      priority order:<br>
+    </p>
+    <ol>
+      <li>User-specified (eventStrobe) events.</li>
+      <li>Heartbeat events (event code 0x7A).&nbsp; Never delayed, but
+        possibly superseded by a user-specified event.<br>
+      </li>
+      <li>Time-of-day synchronization events (event code 0x7D).</li>
+      <li>Time-of-day shift register events (event code 0x70 or 0x71).</li>
+      <li>A null event (event code 0x00) or occasionally an 8B/10B
+        synchronizing comma (K28.5).</li>
+    </ol>
+    <h3>Transmitter Configuration</h3>
+    <p>The details of the transceiver transmitter configuration vary
+      with chosen hardware.&nbsp; The critical configuration settings
+      are:<br>
+    </p>
+    <ol>
+      <li>8b/10b encoding</li>
+      <li>16 bit external data path</li>
+      <li>Internal FIFOs disabled<br>
+      </li>
+    </ol>
+  </body>
+</html>
