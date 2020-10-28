@@ -26,6 +26,7 @@ module memory2_pack #(
 reg  [31:0] mem_rdata=0;
 reg         mem_ready=0;
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( 69'd0 ),
     .mem_packed_ret( mem_packed_ret ),
     .mem_wdata (),

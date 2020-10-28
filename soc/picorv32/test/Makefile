@@ -6,7 +6,8 @@ all: clean
 	$(MAKE) -C ./gpio
 	$(MAKE) -C ./i2c
 #   $(MAKE) -C ./iserdes
-	$(MAKE) -C ./lb_bridge
+# TODO lb_bridge: fix & improve PASS / FAIL logic
+# 	$(MAKE) -C ./lb_bridge
 	$(MAKE) -C ./mpack
 	$(MAKE) -C ./onewire
 	$(MAKE) -C ./spi

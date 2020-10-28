@@ -21,6 +21,8 @@ start:
     nop
     LW  t0, 0x08(gp)
     LW  t0, 0x0c(gp)
+    nop
+    nop
     li  t0, 't'
     SW  t0, 0x10(gp)
     LW  t0, 0x10(gp)
