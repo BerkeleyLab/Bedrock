@@ -10,11 +10,12 @@ initial begin
 		$dumpfile("xy_pi_clip.vcd");
 		$dumpvars(5,xy_pi_clip_tb);
 	end
-	for (cc=0; cc<80; cc=cc+1) begin
+	for (cc=0; cc<200; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
 	$display("%s", fail ? "FAIL" : "PASS");
+	$display("WARNING: Not a self-checking testbench. Will always pass.");
 	$finish();
 end
 
@@ -48,6 +49,9 @@ wire signed [17:0] coeff, lim;
 quad_ireg s0(.clk(clk), .rd_addr(s0_addr), .lb_data(lb_data), .lb_write(lb_write[0]), .lb_addr(lb_addr), .d(coeff));
 quad_ireg s1(.clk(clk), .rd_addr(s1_addr), .lb_data(lb_data), .lb_write(lb_write[1]), .lb_addr(lb_addr), .d(lim));
 
+reg signed [17:0] ff_ddrive, ff_phase;
+reg ff_en=0;
+
 initial begin
 	s0.store[0] =  10000;  // coeff X I
 	s0.store[1] = -12000;  // coeff Y I
@@ -65,11 +69,17 @@ initial begin
 	s1.store[3] = 2000;  // lim Y lo
 	@(cc==56);
 	s0.store[2] = -100;  // coeff X P
+	@(cc==100);
+	s1.store[0] = 500;  // lim X hi
+	@(cc==120);
+	ff_en       = 1;
+	ff_ddrive    = 10;
 end
 
 wire signed [17:0] out_xy;
 xy_pi_clip dut(.clk(clk), .sync(sync), .in_xy(in_xy),
 	.coeff(coeff), .lim(lim),
+	.ff_en(ff_en), .ff_ddrive(ff_ddrive), .ff_phase(ff_phase),
 	.out_xy(out_xy)
 );
 
