@@ -58,8 +58,9 @@ ddrive_int = np.cumsum(ddrive, dtype=int)
 # documented in cic_bankx.v and ff_driver.v
 ddrive_int = ddrive_int/sim_expand
 
-rms = np.sqrt(np.mean((drive-ddrive)**2))
+rms = np.sqrt(np.mean((drive-ddrive_int)**2))
 print("int(delta_drive) to drive RMS:", rms)
+fail = fail or rms > 30  # peak of the waveform is around 70000
 
 pyplot.plot(t, drive, label='drive')
 pyplot.plot(t, ddrive_int, label='int(ddrive)')

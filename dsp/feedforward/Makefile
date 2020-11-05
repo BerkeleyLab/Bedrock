@@ -12,6 +12,8 @@ ff_driver_tb: ff_driver.v cic_bankx.v a_model.v
 ff_driver.out: ff_driver_tb ff_plusargs.py pulse_set.json
 	$(VVP) -N $< +trace `$(PYTHON) ff_plusargs.py pulse_set.json`
 
+VVP_FLAGS_ff_driver.vcd = +trace `$(PYTHON) ff_plusargs.py pulse_set.json`
+
 cic_bankx_in.dat: cic_bank_memgen.py pulse_set.json
 	$(PYTHON) $^ > $@
 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void cic_bank(unsigned int len, int shift, int mem_sz, int mem[])
+static void cic_bank(unsigned int len, int shift, int mem_sz, int mem[])
 {
 	int next, sr1=0, sr2=0, sr3=0, sr4=0;
 	unsigned int count_mod = mem_sz << shift;
