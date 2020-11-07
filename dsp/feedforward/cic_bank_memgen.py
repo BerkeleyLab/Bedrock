@@ -18,6 +18,14 @@ def fill1(xx):
     return sum([[0, x, 0, 0] for x in xx], [])
 
 
+def add_header(xx):
+    sz = len(xx) + 4
+    if sz > (2048):
+        print("Calculated table (%d) does not fit in available memory. Aborting" % sz)
+        exit(-1)
+    return [sz, 0, 0, 0] + xx
+
+
 # dt = 0.0186 maximally flat with cavity_decay -77500
 # dt = 0.0200 maximally flat with cavity_decay -83030
 # XXX explain
@@ -63,8 +71,23 @@ def pulse_setup(dt_arg=0.02, d_amp=50000, t_fill_arg=1.728, t_flat_arg=1.0, ramp
     a += fill1(expand(-int(qx), n2))
     a += [0, 0, 0, 0] * n3
     a += fill0(expand(-int(d_amp), n4))
-    return a
+    return add_header(a)
 
+def square_pulse_setup(dt_arg=0.02, d_amp=50000, t_fill_arg=0.5, t_flat_arg=1.0, ramp_x=0.94, tau=0.095):
+    # All time parameters are in SI units
+    dt = dt_arg
+    t_fill = t_fill_arg
+    t_flat = t_flat_arg
+
+    # d_amp is equilibrium drive amplitude (at flat top)
+
+    n_rise_fall = 1
+    n_flat = int(t_flat/dt)
+    a = fill0(expand(int(d_amp), n_rise_fall))
+    a += fill0(expand(0, n_flat))
+    a += fill0(expand(-int(d_amp), n_rise_fall))
+    a += fill0(expand(0, 260))  # Decay time
+    return add_header(a)
 
 def gen_array(pulse_vals, print_me=True):
     filln = 4*512 - len(pulse_vals)
