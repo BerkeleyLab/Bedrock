@@ -73,10 +73,10 @@ def pulse_setup(dt_arg=0.02, d_amp=50000, t_fill_arg=1.728, t_flat_arg=1.0, ramp
     a += fill0(expand(-int(d_amp), n4))
     return add_header(a)
 
+
 def square_pulse_setup(dt_arg=0.02, d_amp=50000, t_fill_arg=0.5, t_flat_arg=1.0, ramp_x=0.94, tau=0.095):
     # All time parameters are in SI units
     dt = dt_arg
-    t_fill = t_fill_arg
     t_flat = t_flat_arg
 
     # d_amp is equilibrium drive amplitude (at flat top)
@@ -88,6 +88,7 @@ def square_pulse_setup(dt_arg=0.02, d_amp=50000, t_fill_arg=0.5, t_flat_arg=1.0,
     a += fill0(expand(-int(d_amp), n_rise_fall))
     a += fill0(expand(0, 260))  # Decay time
     return add_header(a)
+
 
 def gen_array(pulse_vals, print_me=True):
     filln = 4*512 - len(pulse_vals)
