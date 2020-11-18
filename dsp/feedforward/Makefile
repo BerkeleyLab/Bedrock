@@ -14,7 +14,7 @@ ff_driver.out: ff_driver_tb ff_plusargs.py pulse_set.json
 
 VVP_FLAGS_ff_driver.vcd = +trace `$(PYTHON) ff_plusargs.py pulse_set.json`
 
-ff_pulser_tb: ff_pulser.v
+ff_pulser_tb: ff_pulser.v $(DSP_DIR)/reg_delay.v
 
 cic_bankx_in.dat: cic_bank_memgen.py pulse_set.json
 	$(PYTHON) $^ > $@
