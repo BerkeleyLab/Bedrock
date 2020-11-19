@@ -59,8 +59,13 @@ wire [ 3:0] mem_wstrb;
 wire        mem_valid;
 wire [31:0] mem_addr;
 reg  [31:0] mem_rdata;
-reg         mem_ready;
+
+reg mem_ready = 0;
+reg mem_ready_ = 0;
+wire ready_sum = mem_ready || mem_ready_;
+
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
 
@@ -89,9 +94,9 @@ always @(posedge clk) begin
     mem_rdata <= 0;
     // Make all Write strobes pulsed signals
     sfRegsWrStr <= {N_REGS{32'h0}};
-    if( rst ) begin         // Copy INITIAL_STATE to registers on reset
+    if (rst) begin         // Copy INITIAL_STATE to registers on reset
         sfRegsOut <= INITIAL_STATE;
-    end else if ( mem_valid && !mem_ready && addr_base=={BASE_ADDR,BASE2_ADDR,2'b00} ) begin
+    end else if (mem_valid && !ready_sum && addr_base=={BASE_ADDR,BASE2_ADDR,2'b00}) begin
         mem_ready <= 1;     // For now, never stall CPU when addressed
         case (addr_mode)
             2'd0: begin     // Word addressing mode
@@ -125,6 +130,7 @@ always @(posedge clk) begin
             end
         endcase
     end
+    mem_ready_ <= mem_ready;
 end
 
 endmodule

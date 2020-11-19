@@ -315,8 +315,17 @@ generate for (ch=0; ch<N_CH; ch=ch+1) begin: ch_map
         .mem_packed_fwd ( mem_packed_fwd ),
         .mem_packed_ret ( mem_packed_rets[ch] )
     );
-    assign adc_out_data[16*ch+:16] = adc_out[ch]; // inverted by 0x14=0x7
+    // assign adc_out_data[16*ch+:16] = adc_out[ch]; // inverted by 0x14=0x7
 end endgenerate
+    // Remap to SMA order
+    assign adc_out_data[16*7+:16] = adc_out[4]; // J11 to ADC1 A
+    assign adc_out_data[16*6+:16] = adc_out[5]; // J10 to ADC1 B
+    assign adc_out_data[16*5+:16] = adc_out[6]; //  J9 to ADC1 C
+    assign adc_out_data[16*4+:16] = adc_out[7]; //  J8 to ADC1 D
+    assign adc_out_data[16*3+:16] = adc_out[0]; //  J7 to ADC0 A
+    assign adc_out_data[16*2+:16] = adc_out[1]; //  J6 to ADC0 B
+    assign adc_out_data[16*1+:16] = adc_out[2]; //  J5 to ADC0 C
+    assign adc_out_data[16*0+:16] = adc_out[3]; //  J4 to ADC0 D
 
 assign adc_out_clk = clk_div_data;
 assign clk_div_out = clk_div;

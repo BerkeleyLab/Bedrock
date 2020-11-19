@@ -29,12 +29,17 @@ wire [31:0] mem_wdata;
 wire [ 3:0] mem_wstrb;
 wire        mem_valid;
 wire [31:0] mem_addr;
-wire        mem_ready;
 wire        mem_ready_mem;
-wire [31:0] mem_rdata;
+reg  [31:0] mem_rdata = 0;
 wire [31:0] mem_rdata_cfg;
 wire [31:0] mem_rdata_mem;
+
+reg mem_ready = 0;
+reg mem_ready_ = 0;
+wire ready_sum = mem_ready || mem_ready_;
+
 munpack mu (
+	.clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
     .mem_wdata ( mem_wdata    ),
@@ -48,7 +53,7 @@ munpack mu (
 wire  [7 :0] mem_base_addr  = mem_addr[31:24]; // Which peripheral   (BASE_ADDR)
 wire  [23:0] mem_flash_addr = mem_addr[23:0];  // Which address on the flash chip
 // Decode address bus and see when SPI memory or the config words get addressed
-wire         isFlashSelect   = mem_valid && mem_base_addr==BASE_ADDR;
+wire         isFlashSelect   = mem_valid && !ready_sum && mem_base_addr==BASE_ADDR;
 wire         isAddrCfg       = mem_flash_addr == SPIMEM_CFG_REG;
 wire  [ 3:0] flash_di;
 wire  [ 3:0] flash_do;
@@ -91,8 +96,23 @@ generate
 endgenerate
 assign flash_di = flash_dz;
 
-// Multiplexer for the 2 bus outputs
-assign mem_rdata = !isFlashSelect ? 32'h0 : isAddrCfg ? mem_rdata_cfg : mem_rdata_mem;
-assign mem_ready = !isFlashSelect ?  1'h0 : isAddrCfg ?          1'h1 : mem_ready_mem;
+always @(posedge clk) begin
+	mem_ready <= 0;
+	mem_rdata <= 0;
+
+	if (isFlashSelect) begin
+		if (isAddrCfg) begin
+			mem_rdata <= mem_rdata_cfg;
+			mem_ready <= 1;
+		end else begin
+			if (mem_ready_mem) begin
+				mem_rdata <= mem_rdata_mem;
+				mem_ready <= 1;
+			end
+		end
+	end
+
+	mem_ready_ <= mem_ready;
+end
 
 endmodule

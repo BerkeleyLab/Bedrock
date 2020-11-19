@@ -18,8 +18,13 @@ wire [31:0] mem_addr;
 wire [23:0] mem_addr_local  = mem_addr[23:0];      // [bytes] Clip off the uppermost byte, which is the base address
 wire [21:0] word_addr_local = mem_addr_local[23:2];// [words] Addressing 4 byte words
 reg  [31:0] mem_rdata=0;
-reg         mem_ready=0;
+
+reg mem_ready = 0;
+reg mem_ready_ = 0;
+wire ready_sum = mem_ready || mem_ready_;
+
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
 
@@ -35,7 +40,7 @@ wire mine = mem_addr[31:24]==BASE_ADDR;
 always @(posedge clk) begin
     mem_ready <= 0;
     mem_rdata <= 0;
-    if ( mem_valid && !mem_ready && mine ) begin
+    if (mem_valid && !ready_sum && mine) begin
         mem_ready <= 1;  // no stalling
         if (mem_wstrb[0]) begin
             // Sure was a lot of work to get to the one line that
@@ -43,5 +48,6 @@ always @(posedge clk) begin
             $write("%c", mem_wdata[7:0]);
         end
     end
+    mem_ready_ <= mem_ready;
 end
 endmodule

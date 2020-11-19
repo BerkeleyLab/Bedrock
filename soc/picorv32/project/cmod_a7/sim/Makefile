@@ -6,7 +6,8 @@ include ../common/common.mk
 
 # max. baudrate is F_CLK / 8
 BOOTLOADER_BAUDRATE = 8522727
-VFLAGS += -DMEMORY_PACK_FAST -DBOOTLOADER_BAUDRATE=$(BOOTLOADER_BAUDRATE)
+VFLAGS += -DBOOTLOADER_BAUDRATE=$(BOOTLOADER_BAUDRATE)
+# -DMEMORY_PACK_FAST
 # virtual SPI flash contents
 VCD_ARGS += +firmware=$(PICORV_DIR)/test/memio/flashdata8.hex
 CFLAGS += -DSIMULATION
