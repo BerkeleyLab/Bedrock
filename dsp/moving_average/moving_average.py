@@ -41,24 +41,27 @@ class MovingAverage(Elaboratable):
         return m
 
 
-def moving_average_tb(dut, log_downsample_ratio, signal_in, signal_out):
-    yield dut.log_downsample_ratio.eq(log_downsample_ratio)
-    for i in range(200):
-        yield dut.i.eq(i)
-        signal_in.append(i)
-        signal_out.append((yield dut.o))
-        yield
+if __name__ == "__main__":
+    dut = MovingAverage()
+    print(verilog.convert(dut, name='moving_average',
+                          ports=[dut.i, dut.o, dut.data_valid, dut.log_downsample_ratio]))
 
-
-ma = MovingAverage()
-print(verilog.convert(ma, name='moving_average', ports=[ma.i, ma.o, ma.data_valid, ma.log_downsample_ratio]))
-
-with pysim.Simulator(ma, vcd_file=open('foo.vcd', 'w')) as sim:
+    sim = pysim.Simulator(dut)
+    log_downsample_ratio = 0
     signal_in, signal_out = [], []
     sim.add_clock(1e-6)
-    tb = moving_average_tb(ma, 0, signal_in, signal_out)
-    sim.add_sync_process(tb)
-    sim.run()
+
+    def moving_average_tb():
+        yield dut.log_downsample_ratio.eq(log_downsample_ratio)
+        for i in range(200):
+            yield dut.i.eq(i)
+            signal_in.append(i)
+            signal_out.append((yield dut.o))
+            yield
+
+    sim.add_sync_process(moving_average_tb)
+    with sim.write_vcd('foo.vcd', 'foo.gtkw'):
+        sim.run()
     try:
         from matplotlib import pyplot as plt
         plt.plot(signal_in)

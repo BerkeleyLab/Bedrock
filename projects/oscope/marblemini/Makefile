@@ -1,4 +1,4 @@
-HARDWARE = marblemini
+HARDWARE = marble
 DSP_FLAVOR = 7
 COMMUNICATION = gtx
 DAUGHTER = base
@@ -33,7 +33,7 @@ zest_connector.csv: remap_gen.py
 	$(PYTHON) remap_gen.py -p $(BEDROCK_DIR) > $@
 
 # TODO: Remove the relative path digilent pmod dependency
-system_top.xdc: $(BOARD_SUPPORT_DIR)/marblemini/Marble.xdc $(BOARD_SUPPORT_DIR)/marblemini/pin_map.csv digilent_led_pmod.csv zest_connector.csv oscope_rules.csv
+system_top.xdc: $(BOARD_SUPPORT_DIR)/marble/Marble.xdc $(BOARD_SUPPORT_DIR)/marble/pin_map.csv digilent_led_pmod.csv zest_connector.csv oscope_rules.csv
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
 oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v
