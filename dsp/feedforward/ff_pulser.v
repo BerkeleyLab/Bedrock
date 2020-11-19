@@ -19,8 +19,10 @@ module ff_pulser #(
    output busy,
 
    // Common settings
-   input [LENGTH_WI-1:0] length, // total pulse length, inc. rise and fall; must have non-zero flat-top
-   input [DWI-2:0]       slew_limit, // Maximum output variation per clock cycle; always positive
+   input [LENGTH_WI-1:0] length, // Total pulse length, inc. rise and fall;
+                                 // must have non-zero flat-top
+   input [DWI-2:0]       slew_limit, // Maximum output variation per clock cycle;
+                                     // must be greater than zero
 
    // Per-setpoint settings
    input signed [DWI-1:0] setp_x,
@@ -34,12 +36,12 @@ module ff_pulser #(
 
    // Delayed start marker to match pipeline latency
    wire start_dly;
-   reg_delay #(.dw(1), .len(3-1)) i_pipe_lat (
+   reg_delay #(.dw(1), .len(3)) i_pipe_lat (
       .clk  (clk), .reset (1'b0), .gate  (1'b1),
       .din   (start_g), .dout  (start_dly));
 
    reg [LENGTH_WI-1:0] len_cnt, rise_cnt, fall_t;
-   reg pulse_on=0, fall=0, fall_r, pulse_on_dly=0;
+   reg pulse_on=0, fall=0, pulse_on_dly=0;
    always @(posedge clk) begin
       if (start_g) begin
          pulse_on <= 1;
@@ -48,7 +50,6 @@ module ff_pulser #(
          fall     <= 0;
          fall_t   <= 0;
       end
-      fall_r <= fall;
       if (start_dly) pulse_on_dly <= 1;
 
       if (pulse_on_dly) begin
@@ -57,17 +58,16 @@ module ff_pulser #(
          if (len_cnt == length) {pulse_on, pulse_on_dly} <= 0; // Strictly enforce pulse length
          if ((fall_t != 0) && (len_cnt == fall_t)) fall <= 1;
 
-         if (x_railed && y_railed) begin
-            fall_t <= length - rise_cnt - 1;
+         if (x_railed_r && y_railed_r) begin
+            fall_t <= length - rise_cnt - 5;
          end else begin
             rise_cnt <= rise_cnt + 1;
          end
       end
    end
 
-   wire x_pos, y_pos;
-   assign x_pos = ~setp_x[DWI-1];
-   assign y_pos = ~setp_y[DWI-1];
+   wire x_pos = ~setp_x[DWI-1];
+   wire y_pos = ~setp_y[DWI-1];
 
    reg [DWI-2:0] setp_x_us, setp_y_us;
    reg [DWI-2:0] x_us=0, y_us=0;
@@ -90,8 +90,10 @@ module ff_pulser #(
    end
 
    reg x_railed=0, y_railed=0;
+   reg x_railed_r=0, y_railed_r=0;
    always @(posedge clk) if (pulse_on) begin
-      if (!fall_r) begin
+      {x_railed_r, y_railed_r} <= {x_railed, y_railed}; // Match pipeline
+      if (!fall) begin
          {x_railed, x_us} <= x_next >= setp_x_us ? {1'b1, setp_x_us} : {1'b0, x_next};
          {y_railed, y_us} <= y_next >= setp_y_us ? {1'b1, setp_y_us} : {1'b0, y_next};
       end else begin
@@ -107,7 +109,7 @@ module ff_pulser #(
    reg signed [DWI-1:0] out_x_r, out_y_r;
    always @(posedge clk) begin
       out_x_r <= x_pos ? x_us : -x_us;
-      out_y_r <= y_pos ? x_us : -y_us;
+      out_y_r <= y_pos ? y_us : -y_us;
    end
    assign out_x = out_x_r;
    assign out_y = out_y_r;
