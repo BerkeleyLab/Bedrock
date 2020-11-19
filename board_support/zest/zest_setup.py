@@ -81,7 +81,7 @@ class c_prc(c_llrf_bmb7):
 
         self.leep = leep.open(leep_addr, instance=[])
         c_llrf_bmb7.__init__(self, ip, port, bitfilepath=bitfilepath, reset=reset,
-                             clk_freq=clk_freq, use_spartan=use_spartan)
+                             use_spartan=use_spartan)
 
         if self.spartan_interface:
             if not self.sn_init():

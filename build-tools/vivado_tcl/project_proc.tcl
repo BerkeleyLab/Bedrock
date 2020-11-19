@@ -38,6 +38,10 @@ proc project_create {platform_name project_name} {
         set platform "marblemini"
         set project_part "xc7a100t-fgg484-2"
     }
+    if [regexp "marble" $platform_name] {
+        set platform "marble"
+        set project_part "xc7k160tffg676-2"
+    }
     if [regexp "qf2pre_*" $platform_name] {
         set platform "bmb7"
         set project_part "xc7k160tffg676-2"
