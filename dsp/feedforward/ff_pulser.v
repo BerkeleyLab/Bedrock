@@ -14,55 +14,51 @@ module ff_pulser #(
    parameter LENGTH_WI = 20,
    parameter DWI = 18
 ) (
-   input clk,
-   input start,  // Reset state and start pulsing
+   input  clk,
+   input  start, // Reset state and start pulsing
    output busy,
 
    // Common settings
-   input [LENGTH_WI-1:0] length, // Total pulse length, inc. rise and fall;
+   input [LENGTH_WI-1:0] length, // external; Total pulse length, inc. rise and fall;
                                  // must have non-zero flat-top
-   input [DWI-2:0]       slew_limit, // Maximum output variation per clock cycle;
-                                     // must be greater than zero
+   input [DWI-2:0]       slew_limit, // external; Maximum output variation per clock cycle;
+                                    // must be greater than zero
 
    // Per-setpoint settings
-   input signed [DWI-1:0] setp_x,
-   input signed [DWI-1:0] setp_y,
+   input signed [DWI-1:0] setp_x, // external
+   input signed [DWI-1:0] setp_y, // external
 
    output signed [DWI-1:0] out_x,
    output signed [DWI-1:0] out_y
 );
-
-   wire start_g = start&~pulse_on; // Ignore if already pulsing
-
-   // Delayed start marker to match pipeline latency
-   wire start_dly;
+   // Delay to match pipeline latency
+   reg pulse_on=0;
+   wire pulse_on_dly;
    reg_delay #(.dw(1), .len(3)) i_pipe_lat (
       .clk  (clk), .reset (1'b0), .gate  (1'b1),
-      .din   (start_g), .dout  (start_dly));
+      .din   (pulse_on), .dout  (pulse_on_dly));
 
+   reg fall=0;
    reg [LENGTH_WI-1:0] len_cnt, rise_cnt, fall_t;
-   reg pulse_on=0, fall=0, pulse_on_dly=0;
    always @(posedge clk) begin
-      if (start_g) begin
+      if (start&~pulse_on) begin // Ignore if already pulsing
          pulse_on <= 1;
          len_cnt  <= 0;
          rise_cnt <= 0;
          fall     <= 0;
          fall_t   <= 0;
       end
-      if (start_dly) pulse_on_dly <= 1;
 
       if (pulse_on_dly) begin
          len_cnt <= len_cnt + 1;
 
-         if (len_cnt == length) {pulse_on, pulse_on_dly} <= 0; // Strictly enforce pulse length
+         if (len_cnt == length) pulse_on <= 0; // Strictly enforce pulse length
          if ((fall_t != 0) && (len_cnt == fall_t)) fall <= 1;
 
-         if (x_railed_r && y_railed_r) begin
+         if (x_railed_r && y_railed_r)
             fall_t <= length - rise_cnt - 5;
-         end else begin
+         else
             rise_cnt <= rise_cnt + 1;
-         end
       end
    end
 
@@ -77,12 +73,10 @@ module ff_pulser #(
       setp_y_us <= y_pos ? setp_y : -setp_y;
       if (pulse_on) begin
          x_next <= setp_x_us;
-         if (!x_railed)
-            x_next <= fall ? x_next - slew_limit : x_next + slew_limit;
+         if (!x_railed) x_next <= fall ? x_next - slew_limit : x_next + slew_limit;
 
          y_next <= setp_y_us;
-         if (!y_railed)
-            y_next <= fall ? y_next - slew_limit : y_next + slew_limit;
+         if (!y_railed) y_next <= fall ? y_next - slew_limit : y_next + slew_limit;
       end else begin
          x_next <= 0;
          y_next <= 0;
@@ -91,19 +85,23 @@ module ff_pulser #(
 
    reg x_railed=0, y_railed=0;
    reg x_railed_r=0, y_railed_r=0;
+   reg x_zero=0, y_zero=0;
    always @(posedge clk) if (pulse_on) begin
       {x_railed_r, y_railed_r} <= {x_railed, y_railed}; // Match pipeline
       if (!fall) begin
-         {x_railed, x_us} <= x_next >= setp_x_us ? {1'b1, setp_x_us} : {1'b0, x_next};
-         {y_railed, y_us} <= y_next >= setp_y_us ? {1'b1, setp_y_us} : {1'b0, y_next};
+         {x_railed, x_us} <= x_next >= setp_x_us ? {1'b1, setp_x_us} : {1'b0, x_next[DWI-2:0]};
+         {y_railed, y_us} <= y_next >= setp_y_us ? {1'b1, setp_y_us} : {1'b0, y_next[DWI-2:0]};
       end else begin
          {x_railed, y_railed} <= 2'b0;
-         x_us <= x_next < 0 ? 0 : x_next;
-         y_us <= y_next < 0 ? 0 : y_next;
+         if (x_zero) x_us <= 0;
+         else {x_zero, x_us} <= x_next <= 0 ? {1'b1, {DWI-1{1'b0}}} : {x_zero, x_next[DWI-2:0]};
+
+         if (y_zero) y_us <= 0;
+         else {y_zero, y_us} <= y_next <= 0 ? {1'b1, {DWI-1{1'b0}}} : {y_zero, y_next[DWI-2:0]};
       end
    end else begin
-      {x_railed, x_us} <= 0;
-      {y_railed, y_us} <= 0;
+      {x_zero, x_railed, x_us} <= 0;
+      {y_zero, y_railed, y_us} <= 0;
    end
 
    reg signed [DWI-1:0] out_x_r, out_y_r;

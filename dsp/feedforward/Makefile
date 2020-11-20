@@ -5,7 +5,7 @@ CIC_BANK_MEM_SZ = 2048
 CIC_BANK_LEN = 8192
 CIC_BANK_SHIFT = 1
 
-all: cic_bank.out feelgood.png
+all: cic_bank.out feelgood.png ff_pulser_check
 
 ff_driver_tb: ff_driver.v cic_bankx.v a_model.v
 
