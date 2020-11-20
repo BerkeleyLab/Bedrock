@@ -48,10 +48,10 @@ end
 // an extra pipeline stage has been added to help routing near multiplier
 reg signed [32:0] mul_i=0, mul_q=0, mul_i1=0, mul_q1=0, mul_i2=0, mul_q2=0;
 always @(posedge clk) begin
-	mul_i  <= a_data * cosd_r;
+	mul_i  <= a_data * sind_r;
 	mul_i1 <= mul_i;
 	mul_i2 <= mul_i1;
-	mul_q  <= a_data * sind_r;
+	mul_q  <= a_data * cosd_r;
 	mul_q1 <= mul_q;
 	mul_q2 <= mul_q1;
 end
