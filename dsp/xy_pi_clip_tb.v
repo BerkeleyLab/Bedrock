@@ -10,7 +10,7 @@ initial begin
 		$dumpfile("xy_pi_clip.vcd");
 		$dumpvars(5,xy_pi_clip_tb);
 	end
-	for (cc=0; cc<200; cc=cc+1) begin
+	for (cc=0; cc<300; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
@@ -49,7 +49,8 @@ wire signed [17:0] coeff, lim;
 quad_ireg s0(.clk(clk), .rd_addr(s0_addr), .lb_data(lb_data), .lb_write(lb_write[0]), .lb_addr(lb_addr), .d(coeff));
 quad_ireg s1(.clk(clk), .rd_addr(s1_addr), .lb_data(lb_data), .lb_write(lb_write[1]), .lb_addr(lb_addr), .d(lim));
 
-reg signed [17:0] ff_ddrive, ff_phase;
+reg signed [17:0] ff_ddrive, ff_dphase;
+reg signed [17:0] ff_drive, ff_phase;
 reg ff_en=0;
 
 initial begin
@@ -73,13 +74,20 @@ initial begin
 	s1.store[0] = 500;  // lim X hi
 	@(cc==120);
 	ff_en       = 1;
-	ff_ddrive    = 10;
+	ff_drive    = 30;
+	ff_phase    = 0;
+	ff_ddrive   = 0;
+	@(cc==140);
+	ff_drive    = 0;
+	ff_phase    = 0;
+	ff_ddrive   = 10;
 end
 
 wire signed [17:0] out_xy;
 xy_pi_clip dut(.clk(clk), .sync(sync), .in_xy(in_xy),
 	.coeff(coeff), .lim(lim),
-	.ff_en(ff_en), .ff_ddrive(ff_ddrive), .ff_phase(ff_phase),
+	.ff_en(ff_en), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
+	.ff_drive(ff_drive), .ff_phase(ff_phase),
 	.out_xy(out_xy)
 );
 

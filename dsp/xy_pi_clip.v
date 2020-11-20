@@ -46,10 +46,12 @@ module xy_pi_clip #(
 	// 8-way muxed configuration
 	input signed [17:0] coeff,
 	input signed [17:0] lim,
-	// feed-forward input drive derivative
+	// feed-forward inputs
 	input ff_en,
-	input signed [17:0] ff_ddrive, // FF drive (derivative) to be accumulated
-	input signed [17:0] ff_phase,  // Placeholder - currently unused
+	input signed [17:0] ff_ddrive, // FF drive (derivative) to be accumulated in I term
+	input signed [17:0] ff_dphase, // FF phase (derivative); currently unused
+	input signed [17:0] ff_drive, // FF drive added to P term
+	input signed [17:0] ff_phase, // FF phase
 	// Output clipped, four bits are vs. {x_hi, y_hi, x_lo, y_lo}
 	output [3:0] clipped
 );
@@ -65,12 +67,12 @@ wire signed [17:0] in_xy1;
 reg_delay #(.dw(18), .len(2))
 	pi_match(.clk(clk), .reset(1'b0), .gate(1'b1), .din(in_xy), .dout(in_xy1));
 
-// FF drive to be sampled during 'integral' cycles only. Phase tie-in still incomplete
+// FF ddrive to be sampled during 'integral' cycles only. Phase tie-in still incomplete
 // Pipelined to ease timing
 reg signed [41:0] mr_scale=0;
 reg signed [42:0] mr_ff=0;
 reg signed [18+12-1:0] ff_mp=0;
-wire signed [18+12-1:0] ff_ddrive_l; // Worst-case bit-sizing
+wire signed [18+12-1:0] ff_ddrive_l, ff_drive_l, ff_phase_l; // Worst-case bit-sizing
 
 // Perform deferred down-shifting of ff_ddrive here by combining with up-shifting by 12
 // required by the accumulator construction below.
@@ -79,10 +81,18 @@ generate if (ff_dshift > 12) begin: g_dshift
 end else begin: g_ushift
 	assign ff_ddrive_l = ff_ddrive <<< (12-ff_dshift);
 end endgenerate
+assign ff_drive_l = ff_drive <<< 12;
+assign ff_phase_l = ff_phase <<< 12;
 
 always @(posedge clk) begin
 	ff_mp <= 0;
-	if (ff_en) ff_mp <= stb[1] ? ff_ddrive_l : 18'b0;
+	if (ff_en) case(stb[4:1])
+		4'b0001: ff_mp <= ff_ddrive_l; // ddrive I
+		4'b0010: ff_mp <= 0;           // dphase I
+		4'b0100: ff_mp <= ff_drive_l;  // drive P
+		4'b1000: ff_mp <= ff_phase_l;  // phase P
+		default: ff_mp <= 0;
+	endcase
 	// Avoid 3-way add by pre-computing mr_scale + ff_mp
 	mr_ff <= mr_scale + ff_mp;  // outputs on stb 3, 4, 5, 6
 end

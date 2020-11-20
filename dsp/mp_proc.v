@@ -54,8 +54,11 @@ module mp_proc # (
 	input [0:0] ff_en, // external
 	input signed [17:0] ff_setm, // Magnitude setpoint
 	input signed [17:0] ff_setp, // Phase setpoint
-	input signed [17:0] ff_ddrive, // Drive (derivative)
-	input signed [17:0] ff_phase, // Phase - unused
+	// Drive control for feed-forward feedback
+	input signed [17:0] ff_ddrive, // Drive derivative; accumulated in I term
+	input signed [17:0] ff_dphase, // Phase derivative - unused
+	input signed [17:0] ff_drive,  // Drive; added to P term
+	input signed [17:0] ff_phase,  // Phase;
 	// Final output, back to cordic_mux
 	output out_sync,
 	output signed [17:0] out_xy,
@@ -143,7 +146,8 @@ wire signed [17:0] xy_drive;
 wire [3:0] clipped;
 xy_pi_clip #(.ff_dshift(ff_dshift)) pi (.clk(clk), .in_xy(mp_err2), .sync(stb[1]),
 	.out_xy(xy_drive), .o_sync(pi_sync), .coeff(coeff), .lim(lim), .clipped(clipped),
-	.ff_en(ff_en), .ff_ddrive(ff_ddrive), .ff_phase(ff_phase)
+	.ff_en(ff_en), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
+	.ff_drive(ff_drive), .ff_phase(ff_phase)
 );
 
 // terrible waste of a multiplier
