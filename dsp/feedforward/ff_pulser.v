@@ -10,27 +10,28 @@
    Pipelined uarch introduces 3-cycles of latency from start marker
 */
 
-module ff_pulser #(
-   parameter LENGTH_WI = 20,
-   parameter DWI = 18
-) (
+module ff_pulser (
    input  clk,
    input  start, // Reset state and start pulsing
    output busy,
 
    // Common settings
-   input [LENGTH_WI-1:0] length, // external; Total pulse length, inc. rise and fall;
-                                 // must have non-zero flat-top
-   input [DWI-2:0]       slew_limit, // external; Maximum output variation per clock cycle;
-                                    // must be greater than zero
+   input [31:0]        length, // external; Total pulse length, inc. rise and fall;
+                               // must have non-zero flat-top
+   input [16:0]        slew_lim, // external; Maximum output variation per clock cycle;
+                                 // must be greater than zero
 
    // Per-setpoint settings
-   input signed [DWI-1:0] setp_x, // external
-   input signed [DWI-1:0] setp_y, // external
+   input signed [17:0] setp_x, // external
+   input signed [17:0] setp_y, // external
 
-   output signed [DWI-1:0] out_x,
-   output signed [DWI-1:0] out_y
+   output signed [17:0] out_x,
+   output signed [17:0] out_y
 );
+   // Not using params to allow newad register extraction
+   localparam LENGTH_WI = 32;
+   localparam DWI = 18;
+
    // Delay to match pipeline latency
    reg pulse_on=0;
    wire pulse_on_dly;
@@ -73,10 +74,10 @@ module ff_pulser #(
       setp_y_us <= y_pos ? setp_y : -setp_y;
       if (pulse_on) begin
          x_next <= setp_x_us;
-         if (!x_railed) x_next <= fall ? x_next - slew_limit : x_next + slew_limit;
+         if (!x_railed) x_next <= fall ? x_next - slew_lim : x_next + slew_lim;
 
          y_next <= setp_y_us;
-         if (!y_railed) y_next <= fall ? y_next - slew_limit : y_next + slew_limit;
+         if (!y_railed) y_next <= fall ? y_next - slew_lim : y_next + slew_lim;
       end else begin
          x_next <= 0;
          y_next <= 0;

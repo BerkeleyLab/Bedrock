@@ -33,7 +33,7 @@ module ff_pulser_tb;
       end
    end
 
-   localparam LWI = 20, DWI=18;
+   localparam LWI = 32, DWI=18;
 
    // ----------------------
    // Generate stimulus
@@ -55,7 +55,7 @@ module ff_pulser_tb;
    reg start=0;
    wire busy;
    reg [LWI-1:0] ff_length=100;
-   reg [DWI-2:0] ff_slew_limit=400;
+   reg [DWI-2:0] ff_slew_lim=400;
    reg signed [DWI-1:0] ff_setp_x=200, ff_setp_y=-300;
 
    integer stim_mode;
@@ -79,8 +79,8 @@ module ff_pulser_tb;
       end
 
       max_setp = max_abs(ff_setp_x, ff_setp_y);
-      ff_slew_limit = max_setp/(1+$urandom(seed_int)%9);
-      ff_length = 10 + 2*max_setp/ff_slew_limit + $urandom(seed_int)%100;
+      ff_slew_lim = max_setp/(1+$urandom(seed_int)%9);
+      ff_length = 10 + 2*max_setp/ff_slew_lim + $urandom(seed_int)%100;
 
       #(10*CLK_PER); // Quasi-static settings
 
@@ -96,12 +96,12 @@ module ff_pulser_tb;
    // ----------------------
    // DUT
    // ----------------------
-   ff_pulser #(.LENGTH_WI(LWI), .DWI(DWI)) i_dut (
+   ff_pulser i_dut (
       .clk        (clk),
       .start      (start),
       .busy       (busy),
       .length     (ff_length),
-      .slew_limit (ff_slew_limit),
+      .slew_lim   (ff_slew_lim),
       .setp_x     (ff_setp_x),
       .setp_y     (ff_setp_y),
       .out_x      (ff_out_x),
