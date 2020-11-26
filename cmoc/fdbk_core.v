@@ -78,6 +78,8 @@ wire sync3 = stb[1];
 mp_proc mp_proc // auto
 	(.clk(clk), .sync(sync3),
 	.in_mp(out_mp), // .state(state),
+	.ffd_en(1'b0),
+	.ffp_en(1'b0),
 	.out_xy(proc_out_xy), .out_ph(proc_out_ph),
 	.cmp_event(cmp_event),
 	`AUTOMATIC_mp_proc
