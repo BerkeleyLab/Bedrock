@@ -52,6 +52,7 @@ reg [17:0] lb_addr=0;
 `AUTOMATIC_decode
 
 reg signed [17:0] out_x=0,out_y=0;
+reg ffp_en=0, ffd_en=0;
 reg signed [17:0] ff_setm=0, ff_setp=0;
 reg signed [17:0] ff_ddrive=0, ff_dphase=0;
 reg signed [17:0] ff_drive=0, ff_phase=0;
@@ -80,7 +81,8 @@ initial begin
 	@(cc==116); verify(500,0);
 
 	// Switch on feedforward setpoints (should be no-op since we're clipped)
-	dut_ff_en = 1;
+	ffd_en = 1;
+	ffp_en = 1;
 	ff_setm = 200;
 	ff_setp = 0;
 	dp_dut_lim.mem[0] = 2500;  // lim X hi
@@ -127,8 +129,9 @@ wire out_sync;
 mp_proc dut  // auto
 	(.clk(clk), .sync(sync), .in_mp(in_mp),
 	.out_xy(out_xy), .out_ph(out_ph), .out_sync(out_sync),
-	.ff_setm(ff_setm), .ff_setp(ff_setp), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
-	.ff_drive(ff_drive), .ff_phase(ff_phase),
+	.ffd_en(ffd_en), .ff_setm(ff_setm), .ff_setp(ff_setp),
+	.ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
+	.ffp_en(ffp_en), .ff_drive(ff_drive), .ff_phase(ff_phase),
 	`AUTOMATIC_dut
 );
 

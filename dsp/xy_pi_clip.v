@@ -47,9 +47,10 @@ module xy_pi_clip #(
 	input signed [17:0] coeff,
 	input signed [17:0] lim,
 	// feed-forward inputs
-	input ff_en,
+	input ffd_en,
 	input signed [17:0] ff_ddrive, // FF drive (derivative) to be accumulated in I term
 	input signed [17:0] ff_dphase, // FF phase (derivative); currently unused
+	input ffp_en,
 	input signed [17:0] ff_drive, // FF drive added to P term
 	input signed [17:0] ff_phase, // FF phase
 	// Output clipped, four bits are vs. {x_hi, y_hi, x_lo, y_lo}
@@ -86,11 +87,11 @@ assign ff_phase_l = ff_phase <<< 12;
 
 always @(posedge clk) begin
 	ff_mp <= 0;
-	if (ff_en) case(stb[4:1])
-		4'b0001: ff_mp <= ff_ddrive_l; // ddrive I
+	case(stb[4:1])
+		4'b0001: ff_mp <= ffd_en ? ff_ddrive_l : 0; // ddrive I
 		4'b0010: ff_mp <= 0;           // dphase I
-		4'b0100: ff_mp <= ff_drive_l;  // drive P
-		4'b1000: ff_mp <= ff_phase_l;  // phase P
+		4'b0100: ff_mp <= ffp_en ? ff_drive_l : 0;  // drive P
+		4'b1000: ff_mp <= ffp_en ? ff_phase_l : 0;  // phase P
 		default: ff_mp <= 0;
 	endcase
 	// Avoid 3-way add by pre-computing mr_scale + ff_mp

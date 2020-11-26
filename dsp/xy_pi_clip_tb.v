@@ -51,7 +51,7 @@ quad_ireg s1(.clk(clk), .rd_addr(s1_addr), .lb_data(lb_data), .lb_write(lb_write
 
 reg signed [17:0] ff_ddrive, ff_dphase;
 reg signed [17:0] ff_drive, ff_phase;
-reg ff_en=0;
+reg ffd_en=0, ffp_en=0;
 
 initial begin
 	s0.store[0] =  10000;  // coeff X I
@@ -73,11 +73,12 @@ initial begin
 	@(cc==100);
 	s1.store[0] = 500;  // lim X hi
 	@(cc==120);
-	ff_en       = 1;
+	ffp_en      = 1;
 	ff_drive    = 30;
 	ff_phase    = 0;
 	ff_ddrive   = 0;
 	@(cc==140);
+	ffd_en      = 1;
 	ff_drive    = 0;
 	ff_phase    = 0;
 	ff_ddrive   = 10;
@@ -86,8 +87,8 @@ end
 wire signed [17:0] out_xy;
 xy_pi_clip dut(.clk(clk), .sync(sync), .in_xy(in_xy),
 	.coeff(coeff), .lim(lim),
-	.ff_en(ff_en), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
-	.ff_drive(ff_drive), .ff_phase(ff_phase),
+	.ffd_en(ffd_en), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
+	.ffp_en(ffp_en), .ff_drive(ff_drive), .ff_phase(ff_phase),
 	.out_xy(out_xy)
 );
 

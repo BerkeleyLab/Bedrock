@@ -50,13 +50,14 @@ module mp_proc # (
 	output [1:0] setmp_addr,  // external address for setmp
 	output [1:0] coeff_addr,  // external address for coeff
 	output [1:0] lim_addr,  // external address for lim
-	// Setpoint control for feed-forward feedback
-	input [0:0] ff_en, // external
+	// Feedforward integral hooks and setpoints
+	input               ffd_en,
 	input signed [17:0] ff_setm, // Magnitude setpoint
 	input signed [17:0] ff_setp, // Phase setpoint
-	// Drive control for feed-forward feedback
 	input signed [17:0] ff_ddrive, // Drive derivative; accumulated in I term
 	input signed [17:0] ff_dphase, // Phase derivative - unused
+	// Feedforward proportional hooks
+	input               ffp_en,
 	input signed [17:0] ff_drive,  // Drive; added to P term
 	input signed [17:0] ff_phase,  // Phase;
 	// Final output, back to cordic_mux
@@ -119,7 +120,7 @@ always @(posedge clk) begin
 	ff_setmp <= state[0] ? ff_setm : ff_setp;
 end
 
-wire signed [17:0] setmp_mux = ff_en ? ff_setmp : setmp;
+wire signed [17:0] setmp_mux = ffd_en ? ff_setmp : setmp;
 
 // Subtract setpoint, add offset
 reg signed [17:0] mp_err=0, phout=0;
@@ -146,8 +147,8 @@ wire signed [17:0] xy_drive;
 wire [3:0] clipped;
 xy_pi_clip #(.ff_dshift(ff_dshift)) pi (.clk(clk), .in_xy(mp_err2), .sync(stb[1]),
 	.out_xy(xy_drive), .o_sync(pi_sync), .coeff(coeff), .lim(lim), .clipped(clipped),
-	.ff_en(ff_en), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
-	.ff_drive(ff_drive), .ff_phase(ff_phase)
+	.ffd_en(ffd_en), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
+	.ffp_en(ffp_en), .ff_drive(ff_drive), .ff_phase(ff_phase)
 );
 
 // terrible waste of a multiplier
