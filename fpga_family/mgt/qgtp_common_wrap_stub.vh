@@ -43,13 +43,21 @@
        .cpll_reset_out (pll0_init_reset),
        .cpll_pd_out    (pll0_pd),
        .refclk_out     (),
+`ifdef PLL0_REFCLK0
        .refclk_in      (gtrefclk0));
+`else
+       .refclk_in      (gtrefclk1));
+`endif
 
     `Q_GTP_COMM_RAIL i_gtp_common_rail1 (
        .cpll_reset_out (pll1_init_reset),
        .cpll_pd_out    (pll1_pd),
        .refclk_out     (),
-       .refclk_in      (gtrefclk0)); // Ideally configurable but in practice it's just generating a reset
+`ifdef PLL1_REFCLK0
+       .refclk_in      (gtrefclk0));
+`else
+       .refclk_in      (gtrefclk1));
+`endif
 
     assign pll0_reset_l = pll_soft_reset | pll0_init_reset | pll0_reset;
     assign pll1_reset_l = pll_soft_reset | pll1_init_reset | pll1_reset;
