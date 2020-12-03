@@ -187,7 +187,10 @@ def mem_read(dev, args):
         length = ast.literal_eval(length)
 
         retmem = dev.exchange(range(baseaddr, baseaddr+length))
-        print(retmem)
+        if args.string:
+            print("".join([chr(x) for x in retmem]))
+        else:
+            print(retmem)
 
 
 if __name__ == "__main__":
@@ -195,6 +198,7 @@ if __name__ == "__main__":
     p.add_argument('-a', '--address', help='IP address of device', default='localhost')
     p.add_argument('-p', '--port', help='UDP port for I/O', default=803)
     p.add_argument('-t', '--timeout', help='UDP timeout, in seconds', type=float, default=1.02)
+    p.add_argument('--string', help='Format output as string', action='store_true', dest='string')
 
     sp = p.add_subparsers()
     s = sp.add_parser('reg', help='read/write registers')
