@@ -366,7 +366,12 @@ assign clips = {6'b0, edrive_clip, res_clip};
 
 // Configuration and parameter ROM
 wire [7:0] rom_data0;
-config_romx rom(.address(lb_addr[4:0]), .data(rom_data0));
+parameter use_config_rom = 1; //
+
+generate if (use_config_rom == 1)
+     config_romx rom(.address(lb_addr[4:0]), .data(rom_data0));
+endgenerate
+
 reg [7:0] config_data0=0;
 always @(lb_addr[4:0]) case(lb_addr[4:0])
 	5'h00: config_data0 = 8'haa;
