@@ -33,7 +33,7 @@ zest_connector.csv: remap_gen.py
 	$(PYTHON) remap_gen.py -p $(BEDROCK_DIR) > $@
 
 # TODO: Remove the relative path digilent pmod dependency
-system_top.xdc: $(BOARD_SUPPORT_DIR)/marble/Marble.xdc $(BOARD_SUPPORT_DIR)/marble/pin_map.csv digilent_led_pmod.csv zest_connector.csv oscope_rules.csv
+system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)/$(HARDWARE)/pin_map.csv digilent_led_pmod.csv zest_connector.csv oscope_rules.csv
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
 oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v
@@ -57,6 +57,9 @@ $(AUTOGEN_DIR)/regmap_application_top.json: $(OSCOPE_COMMON_DIR)/application_top
 $(APP_NAME)_regmap.json: $(AUTOGEN_DIR)/regmap_application_top.json scalar_$(APP_NAME)_regmap.json $(OSCOPE_COMMON_DIR)/static_$(APP_NAME)_regmap.json $(OSCOPE_COMMON_DIR)/merge_json.py $(OSCOPE_COMMON_DIR)/shorten_names.py
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/merge_json.py -o $(APP_NAME)_regmap_long.json -i $(filter %.json, $^)
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/shorten_names.py -o $@ -i $(APP_NAME)_regmap_long.json
+
+download:
+	openocd -f ../../test_marble_family/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 oscope_top.bit; exit"
 
 include $(BUILD_DIR)/bottom_rules.mk
 CLEAN += *.bit $(APP_NAME)_regmap*.json scalar_$(APP_NAME)_regmap.json
