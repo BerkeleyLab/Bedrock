@@ -24,20 +24,19 @@ include $(APP_DIR)/rules.mk
 
 SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
 
-VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(DSP_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/pll -y. -y$(APP_DIR) -y$(HOMELESS_DIR) -y$(HOMELESS_DIR)/freq_demo -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y$(SERIAL_IO_DIR) -y../../test_marble_family/ -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y../bmb7_cu
+VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/pll -y. -y$(APP_DIR) -y$(HOMELESS_DIR) -y$(HOMELESS_DIR)/freq_demo -y$(BADGER_DIR) -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y$(SERIAL_IO_DIR) -y../../test_marble_family/ -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y../bmb7_cu
 
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
 
-include $(BADGER_DIR)/rules.mk
-
 system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)/$(HARDWARE)/pin_map.csv digilent_led_pmod.csv oscope_rules.csv
+	echo "Building for $(HARDWARE); Use make HARDWARE=marble otherwise"
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
 CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json
 CLEAN_DIRS += _xilinx
 
 cmoc_top.bit: $(AUTOGEN_DIR)/config_romx.v
-cmoc_top.v: $(AUTOGEN_DIR)/config_romx.v cryomodule_auto
+cmoc_top.v: $(AUTOGEN_DIR)/config_romx.v rtefi_blob.v construct_tx_table.v cryomodule_auto
 
 download: cmoc_top.bit
 	openocd -f $(BOARD_SUPPORT_DIR)/$(HARDWARE)/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $^; exit"
@@ -55,8 +54,8 @@ include $(BUILD_DIR)/bottom_rules.mk
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))
--include $(BITS_:%.bit=$(DEPDIR)/%.bit.d)
+include $(BITS_:%.bit=$(DEPDIR)/%.bit.d)
     else
--include $(MAKECMDGOALS:%.bit=$(DEPDIR)/%.bit.d)
+include $(MAKECMDGOALS:%.bit=$(DEPDIR)/%.bit.d)
     endif
 endif
