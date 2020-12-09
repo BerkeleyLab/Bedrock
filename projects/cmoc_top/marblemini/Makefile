@@ -32,7 +32,7 @@ system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)
 	echo "Building for $(HARDWARE); Use make HARDWARE=marble otherwise"
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
-CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json
+CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json $(RTEFI_CLEAN)
 CLEAN_DIRS += _xilinx
 
 cmoc_top.bit: $(AUTOGEN_DIR)/config_romx.v
