@@ -5,6 +5,7 @@ vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
 .PHONY: all
 all: targets
 include $(BUILD_DIR)/top_rules.mk
+RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include $(BADGER_DIR)/rules.mk
 
 TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb rf_controller_tb
@@ -52,9 +53,10 @@ $(AUTOGEN_DIR)/config_romx.v:
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/config_crunch.py --OUTPUT=$@
 
 VFLAGS_DEP += -y $(BADGER_DIR) -Wno-macro-redefinition
-VERILOG_AUTOGEN += " $(RTEFI_V) $(AUTOGEN_DIR)/config_romx.v"
 
 cryomodule_badger_tb.v: $(RTEFI_V) $(AUTOGEN_DIR)/config_romx.v cordicg_b22.v cryomodule_auto
+
+CLEAN += $(RTEFI_CLEAN)
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))
