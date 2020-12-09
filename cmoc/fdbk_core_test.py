@@ -1,10 +1,9 @@
-import os
-import sys
 from subprocess import call
 import numpy as np
 import matplotlib.pylab as plt
 
 from read_regmap import get_map, get_reg_info
+
 
 def write_reg_file(registers, regmap_fdbk_core, filename):
     """
