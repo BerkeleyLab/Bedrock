@@ -38,7 +38,7 @@ module marble_top(
 	// One I2C bus, everything gatewayed through a TCA9548
 	output TWI_SCL,
 	inout  TWI_SDA,
-	output TWI_RST,
+	inout  TWI_RST,
 	input  TWI_INT,
 
 	// White Rabbit DAC

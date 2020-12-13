@@ -40,7 +40,7 @@ module marble_base #(
 	// One I2C bus, everything gatewayed through a TCA9548
 	output [3:0] twi_scl,
 	inout  [3:0] twi_sda,
-	output TWI_RST,
+	inout  TWI_RST,
 	input  TWI_INT,
 
 	// White Rabbit DAC
