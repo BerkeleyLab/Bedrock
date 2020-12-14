@@ -1,9 +1,9 @@
 // formal verification rules for a picorv bus peripheral
 // instantiate this inside the peripheral and connect it to the bus
 //
-// we look at the bus from the point of view of the CPU
-// assume for peripheral inputs (mem_addr, mem_wstrb, mem_valid)
-// assert for peripheral outputs (mem_ready, mem_rdata)
+// we look at the bus from the point of view of the peripheral
+// assume to `drive` peripheral inputs (mem_addr, mem_wstrb, mem_valid)
+// assert to `check` peripheral outputs (mem_ready, mem_rdata)
 
 module f_pack_peripheral #(
     parameter [7:0] BASE_ADDR=8'h00,
