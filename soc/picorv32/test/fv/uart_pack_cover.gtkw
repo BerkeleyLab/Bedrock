@@ -1,0 +1,42 @@
+[dumpfile] "trace0.vcd"
+[timestart] 0
+[size] 1916 1036
+[pos] -1 -1
+*-7.383023 334 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] uart_pack.
+[sst_width] 252
+[signals_width] 366
+[sst_expanded] 1
+[sst_vpaned_height] 305
+@28
+uart_pack.mem_valid
+uart_pack.ready_sum
+@22
+uart_pack.mem_addr[31:0]
+uart_pack.mem_wdata[31:0]
+uart_pack.mem_wstrb[3:0]
+uart_pack.mem_rdata[31:0]
+@200
+-
+@28
+uart_pack.txd
+uart_pack.rxd
+@201
+-
+@c00022
+uart_pack.uart_rx_inst.data_reg[7:0]
+@28
+(0)uart_pack.uart_rx_inst.data_reg[7:0]
+(1)uart_pack.uart_rx_inst.data_reg[7:0]
+(2)uart_pack.uart_rx_inst.data_reg[7:0]
+(3)uart_pack.uart_rx_inst.data_reg[7:0]
+(4)uart_pack.uart_rx_inst.data_reg[7:0]
+(5)uart_pack.uart_rx_inst.data_reg[7:0]
+(6)uart_pack.uart_rx_inst.data_reg[7:0]
+(7)uart_pack.uart_rx_inst.data_reg[7:0]
+@1401200
+-group_end
+@22
+uart_pack.uart_rx_inst.output_axis_tdata_reg[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

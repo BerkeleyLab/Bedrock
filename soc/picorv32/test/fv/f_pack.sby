@@ -1,0 +1,32 @@
+[tasks]
+sfr_pack
+uart_pack
+
+[options]
+# mode bmc
+# mode cover
+mode prove
+
+# Need many steps for uart_pack due to /7 baudrate counter
+uart_pack: depth 100
+
+[engines]
+smtbmc yices
+#smtbmc boolector
+#smtbmc z3
+
+[script]
+sfr_pack: read -formal sfr_pack.v munpack.v f_pack_peripheral.v
+sfr_pack: prep -top sfr_pack
+
+uart_pack: read -formal uart_pack.v uart_rx.v uart_tx.v munpack.v f_pack_peripheral.v
+uart_pack: prep -top uart_pack
+
+[files]
+# Hack to include all .v files from gateware directory
+--pycode-begin--
+from glob import glob
+for g in glob("../../gateware/*.v"):
+	output(g)
+--pycode-end--
+f_pack_peripheral.v
