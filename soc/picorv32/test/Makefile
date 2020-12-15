@@ -1,5 +1,7 @@
 # iserdes, xadc disabled as they require the xilinx unisims library on CI
 all: clean
+# Formal verification of some components
+	(cd fv/ && sby f_pack.sby)
 	$(MAKE) -C ./badger_loopback
 	$(MAKE) -C ./bootLoad
 	$(MAKE) -C ./fmc150
@@ -35,4 +37,4 @@ clean:
 	$(MAKE) -C ./sram      clean
 	$(MAKE) -C ./memio     clean
 	$(MAKE) -C ../project/cmod_a7/sim clean
-
+	rm -rf fv/f_pack_sfr_pack fv/f_pack_uart_pack
