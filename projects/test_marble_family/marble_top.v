@@ -89,7 +89,6 @@ wire clk_locked;
 wire pll_reset = 0;  // or RESET?
 wire test_clk;
 
-`define USE_GTPCLK
 `ifdef USE_GTPCLK
 xilinx7_clocks #(
 	.DIFF_CLKIN("BYPASS"),
