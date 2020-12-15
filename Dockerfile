@@ -100,3 +100,22 @@ RUN apt-get update && \
 	git checkout v4.034 && autoconf && ./configure && make -j4 && make install && \
 	cd ../ && rm -rf verilator && verilator -V && \
 	apt-get install -y openocd
+
+# SymbiYosys formal verification tool + Yices 2 solver (`sby` command)
+RUN apt-get update && \
+	apt-get install -y build-essential clang bison flex libreadline-dev \
+					 gawk tcl-dev libffi-dev git mercurial graphviz   \
+					 xdot pkg-config python python3 libftdi-dev gperf \
+					 libboost-program-options-dev autoconf libgmp-dev \
+					 cmake && \
+	git clone https://github.com/YosysHQ/SymbiYosys.git SymbiYosys && \
+	cd SymbiYosys && \
+	make install && \
+	cd .. && \
+	git clone https://github.com/SRI-CSL/yices2.git yices2 && \
+	cd yices2 && \
+	autoconf && \
+	./configure && \
+	make -j$(nproc) && \
+	make install
+
