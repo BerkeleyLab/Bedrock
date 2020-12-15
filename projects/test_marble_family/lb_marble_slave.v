@@ -159,6 +159,7 @@ wire [2:0] twi_status;
 reg [1:0] twi_ctl;
 initial twi_ctl = (initial_twi_file != "") ? 2'b10 : 2'b00;
 
+parameter scl_act_high = 3;  // cycles of active pull-up following rising edge
 generate if (USE_I2CBRIDGE) begin
 	wire twi_run_stat, twi_updated, twi_err;
 	wire twi_freeze = twi_ctl[0];
@@ -181,15 +182,25 @@ generate if (USE_I2CBRIDGE) begin
 	assign twi_status = {twi_run_stat, twi_err, twi_updated};
 	//
 	// Incomplete bus mux stuff
+	// twi_scl_l == pull pin low (dominates)
+	// twi_scl_h == pull pin high
+	// neither == let pin float
 	wire [1:0] twi_bus_sel = hw_config[2:1];
-	reg [3:0] twi_scl_r=0, twi_sda_r=0;
+	reg [3:0] twi_scl_l=0, twi_scl_h=0, twi_sda_r=0;
+	reg [scl_act_high:0] twi0_scl_shf=0;
 	always @(posedge clk) begin
-		twi_scl_r <= 4'b1111;
-		twi_scl_r[twi_bus_sel] <= twi0_scl;
+		twi0_scl_shf <= {twi0_scl_shf[scl_act_high-1:0], twi0_scl};
+		twi_scl_l <= 4'b0000;
+		twi_scl_l[twi_bus_sel] <= ~twi0_scl;
+		twi_scl_h <= 4'b0000;
+		twi_scl_h[twi_bus_sel] <= ~twi0_scl_shf[scl_act_high];
 		twi_sda_r <= 4'b1111;
 		twi_sda_r[twi_bus_sel] <= twi_sda_drive;
 	end
-	assign twi_scl = twi_scl_r;
+	assign twi_scl[0] = twi_scl_l[0] ? 1'b0 : twi_scl_h[0] ? 1'b1 : 1'bz;
+	assign twi_scl[1] = twi_scl_l[1] ? 1'b0 : twi_scl_h[1] ? 1'b1 : 1'bz;
+	assign twi_scl[2] = twi_scl_l[2] ? 1'b0 : twi_scl_h[2] ? 1'b1 : 1'bz;
+	assign twi_scl[3] = twi_scl_l[3] ? 1'b0 : twi_scl_h[3] ? 1'b1 : 1'bz;
 	assign twi_sda[0] = twi_sda_r[0] ? 1'bz : 1'b0;
 	assign twi_sda[1] = twi_sda_r[1] ? 1'bz : 1'b0;
 	assign twi_sda[2] = twi_sda_r[2] ? 1'bz : 1'b0;

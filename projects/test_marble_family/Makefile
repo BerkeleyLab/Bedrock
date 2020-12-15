@@ -86,7 +86,7 @@ net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 # Actual regression test of the above; tricky!
 # Depends on UDP port 8030 not being tied up.
 # It would be nice to have a "quiet" option to udp-vpi.
-net_slave_check: lb_marble_slave_tb udp-vpi.vpi
+net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_sfp.dat
 	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py --sim --ramtest --stop --rlen=34
 
 # =====

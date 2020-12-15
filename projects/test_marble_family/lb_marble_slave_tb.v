@@ -33,7 +33,7 @@ mem_gateway #(.n_lat(n_lat), .enable_bursts(1)) dut(.clk(clk),
 );
 
 // TWI bus itself
-wire TWI_SCL;  tri1 TWI_SDA, TWI_INT, TWI_RST;
+tri1 TWI_SCL, TWI_SDA, TWI_INT, TWI_RST;
 wire [2:0] dum_scl;
 tri1 [2:0] dum_sda;
 
