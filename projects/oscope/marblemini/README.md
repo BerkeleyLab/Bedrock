@@ -72,5 +72,5 @@ export PYTHONPATH=../../../dsp/:../../common:../../../board_support/zest:/home/w
 Setup idelays etc on zest with zest_setup.py
 ```
 python ../../../board_support/zest/zest_setup.py -a 192.168.19.8 -p 803 -r -f 125
-python oscope.py -a 192.168.19.8 -p 803
+python main.py -a 192.168.19.8 -p 803
 ```

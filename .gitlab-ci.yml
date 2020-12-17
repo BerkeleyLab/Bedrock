@@ -24,6 +24,7 @@ include:
   - local: .gitlab/ci/serial_io.gitlab-ci.yml
   - local: .gitlab/ci/soc.gitlab-ci.yml
   - local: .gitlab/ci/oscope.gitlab-ci.yml
+  - local: .gitlab/ci/cmoc.gitlab-ci.yml
   - local: .gitlab/ci/comms_top.gitlab-ci.yml
   - local: .gitlab/ci/marble_family.gitlab-ci.yml
 
@@ -48,13 +49,6 @@ digaree_test:
 chirp_test:
   before_script:
     - cd dsp/chirp
-  stage: test
-  script:
-    - make && make checks
-
-cmoc_test:
-  before_script:
-    - cd cmoc && export PYTHONPATH=../build-tools/
   stage: test
   script:
     - make && make checks

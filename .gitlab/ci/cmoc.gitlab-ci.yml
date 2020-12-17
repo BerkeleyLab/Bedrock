@@ -1,0 +1,18 @@
+cmoc_test:
+  before_script:
+    - cd cmoc && export PYTHONPATH=../build-tools/
+  stage: test
+  script:
+    - make && make checks
+
+cmoc_top_marblemini:
+  before_script:
+    - cd projects/cmoc_top/marblemini && ls /non-free
+  stage: synthesis
+  script:
+    - XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH make HARDWARE=marblemini cmoc_top.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - projects/cmoc_top/marblemini/cmoc_top.bit
