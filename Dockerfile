@@ -75,7 +75,7 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 	rm -rf vhd2vl
 
 # Yosys
-# For now we need to build yosys-0.9 from source, since Debian Buster
+# For now we need to build yosys from source, since Debian Buster
 # is stuck at yosys-0.8 that doesn't have the features we need.
 # Revisit this choice when Debian catches up, maybe in Bullseye,
 # and hope to get back to "apt-get install yosys" then.
@@ -85,6 +85,7 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 
 RUN git clone https://github.com/cliffordwolf/yosys.git && \
 	cd yosys && \
+	git checkout 40e35993af6ecb6207f15cc176455ff8d66bcc69 && \
 	apt-get update && \
 	apt-get install -y clang libreadline-dev tcl-dev libffi-dev graphviz \
 	xdot libboost-system-dev libboost-python-dev libboost-filesystem-dev zlib1g-dev && \
@@ -110,6 +111,7 @@ RUN apt-get update && \
 					 cmake && \
 	git clone https://github.com/YosysHQ/SymbiYosys.git SymbiYosys && \
 	cd SymbiYosys && \
+	git checkout 091222b87febb10fad87fcbe98a57599a54c5fd3 && \
 	make install && \
 	cd .. && \
 	git clone https://github.com/SRI-CSL/yices2.git yices2 && \
