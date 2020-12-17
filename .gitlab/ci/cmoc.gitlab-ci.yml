@@ -1,3 +1,10 @@
+rtsim_test:
+  before_script:
+    - cd rtsim && make clean && make
+  stage: test
+  script:
+    - make clean && make checks && make rtsim.dat
+
 cmoc_test:
   before_script:
     - cd cmoc && export PYTHONPATH=../build-tools/

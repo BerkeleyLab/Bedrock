@@ -32,9 +32,6 @@ include:
 leep_test:
   script:
     - cd projects/common && python3 -m unittest -v
-  stage: test
-  script:
-    - make && make checks
 
 cordic_test:
   before_script:
@@ -47,13 +44,6 @@ freq_demo:
   stage: test
   script:
     - cd homeless/freq_demo && make
-
-rtsim_test:
-  before_script:
-    - cd rtsim && make clean && make
-  stage: test
-  script:
-    - make clean && make checks && make rtsim.dat
 
 make_docs:
   before_script:
