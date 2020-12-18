@@ -12,199 +12,56 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty
-'''
-top-level multichannel plotter.
-Revamp with kivy started
-TODO:
-1. Move away from Matplotlib to MeshLinePlot in hope that things get fast
-2. Verify the performance of gather data and plot (for now different threads)
-3.
-'''
+
 import copy
-import sys
-import time
+import dataclasses
+import json
 
 from threading import Thread
 
-import numpy as np
 from matplotlib import pyplot as plt
 
-from misc import ADC, DataBlock, Processing
+from carrier import ZestOnBMB7Carrier, LTCOnMarblemini
+from misc import Processing
 
-from banyan_ch_find import banyan_ch_find
-from get_raw_adcs import collect_adcs
-from zest_setup import c_prc
-
-
-def write_mask(carrier, mask_int):
-    carrier.leep.reg_write([('banyan_mask', mask_int)])
-    channels = banyan_ch_find(mask_int)
-    n_channels = len(channels)
-    print((channels, 8 / n_channels))
-    return n_channels, channels
+g_plot_type_limits = {}
 
 
-def get_npt(prc):
-    banyan_status = prc.leep.reg_read(['banyan_status'])[0]
-    npt = 1 << ((banyan_status >> 24) & 0x3F)
-    if npt == 1:
-        print("aborting since hardware module not present")
-        sys.exit(2)
-    return npt
-
-
-class Carrier():
-    def test_data(self, *args):
-        raise NotImplementedError
-
-    def acquire_data(self, *args):
-        raise NotImplementedError
-
-    def _process_subscriptions(self):
-        # TODO: Perhaps implement something to avoid race condition on results
-        for sub_id, (single_subscribe, fn, *fn_args) in list(self.subscriptions.items()):
-            self.results[sub_id] = fn(self._db, *fn_args)
-            if single_subscribe:
-                self.remove_subscription(sub_id)
-
-    def add_subscription(self, sub_id, fn, *fn_args, single_subscribe=False):
-        # TODO: Add args/kwargs to the function
-        self.subscriptions[sub_id] = (single_subscribe, fn, *fn_args)
-        Logger.info('Added subscription {}'.format(sub_id))
-
-    def remove_subscription(self, sub_id):
-        self.subscriptions.pop(sub_id)
-        Logger.info('Removed subscription {}'.format(sub_id))
-
-
-class LTCOnMarblemini(Carrier):
-    def __init__(self,
-                 ip_addr='192.168.1.121',
-                 port=50006,
-                 count=10,
-                 log_decimation_factor=0,
-                 verbose=False,
-                 test=False):
-        ADC.bits = 14
-        ADC.sample_rate = 120000000.
-        ADC.decimation_factor = 1 << log_decimation_factor
-        self.n_channels = 2
-        self._db = None
-        self.test = test
-        self.pts_per_ch = 8192
-        self.subscriptions, self.results = {}, {}
-        ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
-        self.wb = RemoteClient()
-        self.wb.open()
-        print(self.wb.regs.acq_buf_full.read())
-        initLTC(self.wb)
-
-    def acquire_data(self, *args):
-        while True:
-            self.wb.regs.acq_acq_start.write(1)
-            self._db = DataBlock(get_data(self.wb), int(time.time()))
-            # ADC count / FULL SCALE => [-1.0, 1.]
-            self._process_subscriptions()
-            time.sleep(0.1)
-        self.wb.close()
-
-
-class ZestOnBMB7Carrier(Carrier):
-    def __init__(self,
-                 ip_addr='192.168.1.121',
-                 port=50006,
-                 mask="0xff",
-                 npt_wish=0,
-                 count=10,
-                 log_decimation_factor=0,
-                 verbose=False,
-                 use_spartan=False,
-                 test=False):
-
-        ADC.decimation_factor = 1 << log_decimation_factor
-        self._db = None
-        self.test = test
-        if not test:
-            self.carrier = c_prc(
-                ip_addr,
-                port,
-                use_spartan=use_spartan)
-
-            self.npt = get_npt(self.carrier)
-            mask_int = int(mask, 0)
-            self.n_channels, channels = write_mask(self.carrier, mask_int)
-            self.carrier.leep.reg_write([('config_adc_downsample_ratio',
-                                          log_decimation_factor)])
-        else:
-            banyan_aw = 13
-            self.npt = 2**banyan_aw
-            self.n_channels = 2
-
-        self.pts_per_ch = self.npt * 8 // self.n_channels
-        self.subscriptions, self.results = {}, {}
-        ADC.fpga_output_rate = ADC.sample_rate / ADC.decimation_factor
-
-    def test_data(self, *args):
-        while True:
-            # https://docs.python.org/3/tutorial/classes.html#private-variables
-            self._db = DataBlock(
-                np.array([np.random.random_sample(self.pts_per_ch)
-                          for _ in range(self.n_channels)]),
-                time.time())
-            self._process_subscriptions()
-            time.sleep(0.2)
-
-    def acquire_data(self, *args):
-        if self.test:
-            return self.test_data(*args)
-
-        while True:
-            # collect_adcs is not normal:
-            # It always collects npt * 8 data points.
-            # Each channel gets [(npt * 8) // n_channels] datapoints
-            start = time.time()
-            data_raw, ts = collect_adcs(self.carrier.leep,
-                                        self.npt, self.n_channels)
-            print(self.npt, self.n_channels, time.time()-start)
-            self._db = DataBlock(ADC.counts_to_volts(np.array(data_raw)), ts)
-            # ADC count / FULL SCALE => [-1.0, 1.]
-            self._process_subscriptions()
-            # time.sleep(0.1)  # This is now unnecessary, as this routine is the bottleneck
-
-    def _process_subscriptions(self):
-        # TODO: Perhaps implement something to avoid race condition on results
-        for sub_id, (single_subscribe, fn, *fn_args) in list(self.subscriptions.items()):
-            self.results[sub_id] = fn(self._db, *fn_args)
-            if single_subscribe:
-                self.remove_subscription(sub_id)
-
-    def add_subscription(self, sub_id, fn, *fn_args, single_subscribe=False):
-        # TODO: Add args/kwargs to the function
-        self.subscriptions[sub_id] = (single_subscribe, fn, *fn_args)
-        Logger.info('Added subscription {}'.format(sub_id))
-
-    def remove_subscription(self, sub_id):
-        self.subscriptions.pop(sub_id)
-        Logger.info('Removed subscription {}'.format(sub_id))
-
-
-g_scope_channels, g_plot_type_limits = {}, {}
-
-
+@dataclasses.dataclass
 class GUIGraphLimits:
-    def __init__(self, plot_type, **kwargs):
-        self.plot_type = plot_type
-        self.xlim = kwargs.get('xlim')
-        self.ylim = kwargs.get('ylim')
-        self.xlabel = kwargs.get('xlabel')
-        self.ylabel = kwargs.get('ylabel')
-        self.ylog = kwargs.get('ylog')
-        self.xlog = kwargs.get('xlog')
-        self.autoscale = kwargs.pop('autoscale', False)
+    plot_type: str
+    xlim: (float, float)
+    ylim: (float, float)
+    xlabel: str
+    ylabel: str
+    ylog: bool
+    xlog: bool
+    autoscale: bool
 
 
-# TODO: Should convert this to a dataclass for python 3.7+
+# TODO: Could convert this to a dataclass for python 3.7+
 class GUIGraph:
+    graphs = {}
+    oscope_default_state = {
+        'T': {'plot_type': 'T',
+              'xlabel': 'Time [s]',
+              'ylabel': 'ADC count',
+              'xlim': [0, 0.01],
+              'ylim': [-1., 1.],
+              'autoscale': False,
+              'ylog': False,
+              'xlog': False},
+        'F': {'plot_type': 'F',
+              'xlabel': 'Frequency [Hz]',
+              'ylabel': '[V/sqrt(Hz)]',
+              'xlim': [0, 5e6],
+              'ylim': [1e-11, 60000],
+              'autoscale': True,
+              'ylog': False,
+              'xlog': False},
+        'active_graphs': []
+    }
+
     def __init__(self, ch_id, plot_info, show=False, label='Noname', **kwargs):
         self.ch_id = ch_id
         self.show = show
@@ -216,6 +73,7 @@ class GUIGraph:
         self.ax.set_xlabel(plot_info.xlabel)
         self.ax.set_ylabel(plot_info.ylabel)
         self.ax.legend()
+        self.ax.grid(True)
         self.carrier_ch_n = int(ch_id[1]) if int(ch_id[0]) < 2 else None
         self.plot_info = plot_info
         self._old_results = []
@@ -246,29 +104,51 @@ class GUIGraph:
         self.show = b
 
     @staticmethod
+    def load_settings(settings_file='oscope_state.json'):
+        try:
+            with open(settings_file, 'r') as jf:
+                oscope_state = json.load(jf)
+        except IOError as e:
+            Logger.warning(f'{e} occured while reading settings_file, loading default settings')
+            oscope_state = GUIGraph.oscope_default_state
+        except json.JSONDecodeError as e:
+            Logger.warning(f'{e} occured while reading settings_file, loading default settings')
+            oscope_state = GUIGraph.oscope_default_state
+        return oscope_state
+
+    @staticmethod
+    def save_settings(settings_file='oscope_state.json'):
+        GUIGraph.oscope_state['T'] = dataclasses.asdict(g_plot_type_limits['T'])
+        GUIGraph.oscope_state['F'] = dataclasses.asdict(g_plot_type_limits['F'])
+        GUIGraph.oscope_state['active_graphs'] = [g.ch_id for g in GUIGraph.graphs.values() if g.show]
+        try:
+            with open(settings_file, 'w') as jf:
+                json.dump(GUIGraph.oscope_state, jf)
+        except IOError:
+            Logger.warning('State of oscope couldn\'t be saved')
+
+    @staticmethod
     def setup_gui_graphs(carrier):
+        GUIGraph.oscope_state = GUIGraph.load_settings()
         # Load possible types of limits: For now T for time domain,
         #                                and F for frequency
-        g_plot_type_limits['T'] = GUIGraphLimits('T', xlabel='Time [s]',
-                                                 ylabel='ADC count',
-                                                 xlim=[0, 0.01], ylim=[-1., 1.])
-        g_plot_type_limits['F'] = GUIGraphLimits('F', xlabel='Frequency [Hz]',
-                                                 ylabel='[V/sqrt(Hz)]',
-                                                 xlim=[0, 5e6],
-                                                 ylim=[1e-11, 60000],
-                                                 autoscale=True)
+        g_plot_type_limits['T'] = GUIGraphLimits(**GUIGraph.oscope_state['T'])
+        g_plot_type_limits['F'] = GUIGraphLimits(**GUIGraph.oscope_state['F'])
         # Create 2 GUI graphs for each channel of data coming from the carrier
         # 2 graphs, 1 for T and 1 for F
         for i in range(carrier.n_channels):
             ch_id = "0" + str(i)
-            g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['T'],
-                                               label='CH{}-TimeDomain'.format(i))
+            GUIGraph.graphs[ch_id] = GUIGraph(ch_id, g_plot_type_limits['T'],
+                                              show=ch_id in GUIGraph.oscope_state['active_graphs'],
+                                              label='CH{}-TimeDomain'.format(i))
             ch_id = "1" + str(i)
-            g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
-                                               label='CH{}-Frequency'.format(i))
+            GUIGraph.graphs[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
+                                              show=ch_id in GUIGraph.oscope_state['active_graphs'],
+                                              label='CH{}-Frequency'.format(i))
         ch_id = "3"
-        g_scope_channels[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
-                                           label='CSD')
+        GUIGraph.graphs[ch_id] = GUIGraph(ch_id, g_plot_type_limits['F'],
+                                          show=ch_id in GUIGraph.oscope_state['active_graphs'],
+                                          label='CSD')
 
 
 class Logic(BoxLayout):
@@ -281,11 +161,22 @@ class Logic(BoxLayout):
         self.plot_id = '00'
         self.plot_Q = []
 
+    def update_ldf(self, *args):
+        ldf = args[-1]
+        ldf = ldf.text
+        ldf = int(str(ldf))
+        assert(ldf < 32)
+        carrier.set_log_decimation_factor(ldf)
+
     def update_lim(self, axis, *args):
-        CH = g_scope_channels[self.plot_id]
+        '''
+        Called from .kv
+        '''
+        CH = GUIGraph.graphs[self.plot_id]
         plot_limits = g_plot_type_limits[CH.plot_info.plot_type]
         if axis == 'autoscale':
             plot_limits.autoscale = args[1]
+            GUIGraph.save_settings()
             return
         text = args[1]
         try:
@@ -295,6 +186,7 @@ class Logic(BoxLayout):
                 plot_limits.ylim = eval(text)
         except Exception:
             Logger.warning('Invalid limits: ' + text)
+        GUIGraph.save_settings()
 
     def plot_settings_update(self, plot_id, plot_selected):
         if plot_selected:
@@ -309,7 +201,7 @@ class Logic(BoxLayout):
             self.ids.settings_box.size_hint = [1, .1]
 
         self.plot_id = self.plot_Q[-1]
-        CH = g_scope_channels[self.plot_id]
+        CH = GUIGraph.graphs[self.plot_id]
         plot_limits = g_plot_type_limits[CH.plot_info.plot_type]
         try:
             self.ids.ch_name.text = str('CH' + str(int(self.plot_id[1]) + 1) + ' ' +
@@ -322,6 +214,7 @@ class Logic(BoxLayout):
 
     def plot_select(self, plot_id, *args):
         '''
+        Called from .kv
         plot_id == plot_type + channel_number
         plot_type is '0' for Timeseries, '1' for FFT, '3' for Cross Spectral Density
         TODO: We don't need to handle plot types in this messy way if they are formalized
@@ -329,7 +222,7 @@ class Logic(BoxLayout):
         '''
         plot_selected = args[-1]  # Adds the plot when True, else removes it
 
-        CH = g_scope_channels[plot_id]
+        CH = GUIGraph.graphs[plot_id]
 
         self.plot_settings_update(plot_id, plot_selected)
 
@@ -352,6 +245,7 @@ class Logic(BoxLayout):
             CH.set_plot_active(False)
             self.remove_widget(CH.wid)
             carrier.remove_subscription(plot_id)
+        GUIGraph.save_settings()
 
     def csd_validate(self, *args):
         try:
@@ -374,7 +268,7 @@ class Logic(BoxLayout):
         Processing.reset_ch_stack_count(1)
 
     def update_graph(self, dt):
-        for _, ch in g_scope_channels.items():
+        for _, ch in GUIGraph.graphs.items():
             if ch.show:
                 ch.update_data()
 
@@ -397,7 +291,9 @@ if __name__ == "__main__":
     parser.add_argument(
         '-p', '--port', help='port', dest='port', type=int, default=803)
     parser.add_argument(
-        '-m', '--mask', help='mask', dest='mask', type=str, default='0x33')
+        '-m', '--mask', help='mask', dest='mask', type=str, default='0x0f')
+    parser.add_argument(
+        '-b', '--board', help='ltc or zest', type=str, default='zest')
     parser.add_argument(
         '-n',
         '--npt_wish',
@@ -416,18 +312,18 @@ if __name__ == "__main__":
         action="store_true",
         help="use spartan")
     args = parser.parse_args()
-    carrier = ZestOnBMB7Carrier(
-        ip_addr=args.ip,
-        port=args.port,
-        mask=args.mask,
-        npt_wish=args.npt_wish,
-        count=args.count,
-        use_spartan=args.use_spartan,
-        log_decimation_factor=args.log_decimation_factor,
-        test=False)
-    from litex import RemoteClient
-    from ltc_setup_litex_client import initLTC, get_data
-    # carrier = LTCOnMarblemini()
+    if args.board == 'ltc':
+        carrier = LTCOnMarblemini()
+    else:
+        carrier = ZestOnBMB7Carrier(
+            ip_addr=args.ip,
+            port=args.port,
+            mask=args.mask,
+            npt_wish=args.npt_wish,
+            count=args.count,
+            use_spartan=args.use_spartan,
+            log_decimation_factor=args.log_decimation_factor,
+            test=False)
     GUIGraph.setup_gui_graphs(carrier)
     acq_thread = Thread(target=carrier.acquire_data)
     acq_thread.daemon = True

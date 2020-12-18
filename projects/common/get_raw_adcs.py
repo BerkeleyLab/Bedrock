@@ -163,7 +163,7 @@ def collect_adcs(dev, npt, nchans, print_minmax=True):
     mult = 8//nchans
     block = []
     for ix in range(nchans):
-        ch_data = value[ix*mult:ix*mult+mult].reshape(mult*npt)
+        ch_data = value[ix*mult:(ix+1)*mult].reshape(mult*npt)
         block.append(ch_data)
     return block, timestamp
 
