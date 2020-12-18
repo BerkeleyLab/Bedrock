@@ -29,7 +29,7 @@ VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(FPGA_FA
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
 
 system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)/$(HARDWARE)/pin_map.csv digilent_led_pmod.csv oscope_rules.csv
-	echo "Building for $(HARDWARE); Use make HARDWARE=marble otherwise"
+	echo "Building for $(HARDWARE); Use make HARDWARE=marble(mini) otherwise"
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
 CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json $(RTEFI_CLEAN)

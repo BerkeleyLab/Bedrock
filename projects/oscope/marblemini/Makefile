@@ -62,7 +62,7 @@ download:
 	openocd -f ../../test_marble_family/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 oscope_top.bit; exit"
 
 include $(BUILD_DIR)/bottom_rules.mk
-CLEAN += *.bit $(APP_NAME)_regmap*.json scalar_$(APP_NAME)_regmap.json
+CLEAN += *.bit *.bin *.prm $(APP_NAME)_regmap*.json scalar_$(APP_NAME)_regmap.json
 CLEAN += top.xdc zest_connector.csv $(RTEFI_CLEAN)
 CLEAN_DIRS +=  _xilinx .Xil
 
