@@ -22,6 +22,7 @@ SECTIONS {
 
     /* uninitialized globals, set to zero by startup.S */
     .bss : {
+        . = ALIGN(4);
         _bss_start = .;
         *(.sbss);
         *(.bss);
@@ -36,5 +37,9 @@ SECTIONS {
         *(.comment);
     }
 
-    .theRest : { *(*); . = ALIGN(4); }
+    .theRest : {
+        . = ALIGN(4);
+        *(*);
+        . = ALIGN(4);
+    }
 }
