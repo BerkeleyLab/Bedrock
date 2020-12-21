@@ -1,3 +1,8 @@
+// Note:
+// this model is for 1 device per wire only
+// it does not respond to the `normal search` (0xF0) or
+// `conditional search` (0xEC) commands
+
 // ds1822.v
 // Behavioral model of a Dallas 1-Wire[TM] device, e.g., a DS1822 or DS2401
 // Larry Doolittle, LBNL
