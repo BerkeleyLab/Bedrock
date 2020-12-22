@@ -78,8 +78,16 @@ wire sync3 = stb[1];
 mp_proc mp_proc // auto
 	(.clk(clk), .sync(sync3),
 	.in_mp(out_mp), // .state(state),
+	// Feedforward not exercised in this test
 	.ffd_en(1'b0),
 	.ffp_en(1'b0),
+	.ff_setm(18'b0),
+	.ff_setp(18'b0),
+	.ff_ddrive(18'b0),
+	.ff_dphase(18'b0),
+	.ff_drive(18'b0),
+	.ff_phase(18'b0),
+	//
 	.out_xy(proc_out_xy), .out_ph(proc_out_ph),
 	.cmp_event(cmp_event),
 	`AUTOMATIC_mp_proc
