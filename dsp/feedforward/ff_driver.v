@@ -48,29 +48,47 @@ module ff_driver # (
    // FeedForward memory addressing
    // -----------
    reg [MEM_AW+MEM_REP-1:0] cycle=0;
-   reg running=0;
+   reg running=0, running_r;
+   reg [MEM_AW-1:0] mem_addr_end=0;
+   wire [1:0] subcycle;
+   reg  [1:0] subcycle_r=0;
+   wire [MEM_AW-2-1:0] cycle_u;
+   wire cic_init;
+   reg  cic_init_r=0;
 
    always @(posedge clk) begin
       if (start) running <= 1;
-      if (&cycle) running <= 0;
+      if (mem_addr==mem_addr_end) running <= 0;
 
-      if (running) cycle <= cycle+1;
+      running_r <= running;
+      cycle <= cycle+1; // Free-running so that cavity model is not stopped at end of table
+      if (running) begin
+         if (!running_r)
+            cycle <= 0;
+         else if (cycle_u==0 && subcycle==3)
+            // First 4 entries containing FF table size plus reserved entries are not repeated
+            cycle <= 1<<(2+MEM_REP);
+      end
+
+      // Delay subcycle and cic_init to align with incoming memory
+      subcycle_r <= subcycle;
+      cic_init_r <= cic_init;
+
+      if (cycle_u==0 && subcycle_r==0) mem_addr_end <= mem[MEM_AW-1:0];
    end
 
-   wire [1:0] subcycle = cycle[1:0]; // Read in increments of 4
-   wire [MEM_AW-2-1:0] cycle_u = cycle[MEM_AW+MEM_REP-1:MEM_REP+2];
-   assign mem_addr = {cycle_u, subcycle};
-
-   wire cic_init = (cycle_u == 0); // Init cic_bankx during first read cycle
+   assign subcycle = cycle[1:0]; // Read in increments of 4
+   assign cycle_u = cycle[MEM_AW+MEM_REP-1:MEM_REP+2];
+   assign mem_addr = running ? {cycle_u, subcycle} : 0;
+   assign cic_init = (cycle_u == 1) & running; // Init cic_bankx during first read cycles
 
    // -----------
    // CIC bank
    // -----------
+   wire [1:0] error_l;
    wire signed [17:0] drive_delta, drive;
 
-   // Delay subcycle used by cic_bankx and a_model to align with incoming memory
-   reg [1:0] subcycle_r=0;
-   always @(posedge clk) subcycle_r <= subcycle;
+   wire [17:0] mem_l = (running_r && cycle_u!=0) ? mem : 0;
 
    cic_bankx #(
       .squelch(squelch),
@@ -78,11 +96,11 @@ module ff_driver # (
    i_cic_bankx (
       .clk         (clk),
       .subcycle    (subcycle_r),
-      .init        (cic_init),
-      .mem_v       (mem),
+      .init        (cic_init_r),
+      .mem_v       (mem_l),
       .drive_delta (drive_delta),
       .drive       (drive),
-      .error       (error[1]));
+      .error       (error_l[1]));
 
    // -----------
    // Cavity model
@@ -101,14 +119,14 @@ module ff_driver # (
       .coeff    (coeff_r),
       .drive    (drive),
       .cavity   (cav_mag_l),
-      .error    (error[0]));
+      .error    (error_l[0]));
 
    // Time-align all outputs by latching onto valid cycles; this simplifies
    // downstream connections
    reg signed [17:0] drive_delta_r=0, drive_r=0;
    reg signed [17:0] cav_mag_r=0, cav_ddrive_r=0, cav_drive_r=0;
 
-   always @(posedge clk) if (running) begin // Only update when FF is running
+   always @(posedge clk) begin // Only update when FF is running
       if (subcycle_r == 1) drive_delta_r <= drive_delta;
       if (subcycle_r == 2) drive_r <= drive;
       if (subcycle_r == 0) begin
@@ -121,6 +139,7 @@ module ff_driver # (
    assign cav_drive  = cav_drive_r;
    assign cav_ddrive = cav_ddrive_r;
    assign cav_mag    = cav_mag_r;
+   assign error      = error_l & running;
 
    // No phase model yet
    assign cav_ph = 0;
