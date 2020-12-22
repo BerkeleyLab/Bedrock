@@ -1,15 +1,13 @@
 # iserdes, xadc disabled as they require the xilinx unisims library on CI
 all: clean
-# Formal verification of some components
-	(cd fv/ && sby f_pack.sby)
+	(cd fv/ && sby f_pack.sby)  # Formal verification of some components
 	$(MAKE) -C ./badger_loopback
 	$(MAKE) -C ./bootLoad
 	$(MAKE) -C ./fmc150
 	$(MAKE) -C ./gpio
 	$(MAKE) -C ./i2c
 #   $(MAKE) -C ./iserdes
-# TODO lb_bridge: fix & improve PASS / FAIL logic
-# 	$(MAKE) -C ./lb_bridge
+# 	$(MAKE) -C ./lb_bridge  # TODO lb_bridge: fix & improve PASS / FAIL logic
 	$(MAKE) -C ./mpack
 	$(MAKE) -C ./onewire
 	$(MAKE) -C ./spi
