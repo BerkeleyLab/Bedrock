@@ -102,6 +102,7 @@ module i2c_tb;
     wire       data_valid;
     wire [7:0] data_from_tb;
     reg  [7:0] data_to_tb = 8'h00;
+    wire stop;
     I2C_model #(
         .ADDR      ( 7'h42             )
     ) i2c_model (
@@ -114,7 +115,8 @@ module i2c_tb;
         .read_req        ( read_req ),
         .data_to_tb  ( data_to_tb ),
         .data_valid      ( data_valid ),
-        .data_from_tb( data_from_tb )
+        .data_from_tb( data_from_tb ),
+        .stop        (stop)
     );
 
     // --------------------------------------------------------------
@@ -161,7 +163,7 @@ module i2c_tb;
 
     task i2c_wait_for_stop;
         begin
-            wait (i2c_model.stop_reg);
+            wait (stop);
             $write("<stop>\n");
         end
     endtask
@@ -171,21 +173,21 @@ module i2c_tb;
         begin
             @ (posedge mem_clk);
             data_to_tb <= sendVal;
-            @ (posedge mem_clk);
-            wait (i2c_model.read_req);
+            wait (read_req);
             $write("R%x ", data_to_tb);
+            @ (posedge mem_clk);
         end
     endtask
 
     task i2c_write_task;
         input [7:0] expectVal;
         begin
-            wait( i2c_model.data_valid );
+            wait( data_valid );
             @ (posedge mem_clk);
-            if( i2c_model.data_from_tb === expectVal ) begin
-                $write("W%x ", i2c_model.data_from_tb);
+            if( data_from_tb === expectVal ) begin
+                $write("W%x ", data_from_tb);
             end else begin
-                $write("W<%2x!=%2x> ", i2c_model.data_from_tb, expectVal);
+                $write("W<%2x!=%2x> ", data_from_tb, expectVal);
                 pass = 0;
             end
             @ (posedge mem_clk);

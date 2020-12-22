@@ -38,7 +38,8 @@ input wire rst,
 output wire read_req,
 input wire [7:0] data_to_tb,
 output wire data_valid,
-output wire [7:0] data_from_tb
+output wire [7:0] data_from_tb,
+output wire stop
 );
 
 parameter [6:0] ADDR = 0;
@@ -68,6 +69,7 @@ reg scl_reg = 1'b 1;
 reg sda_reg = 1'b 1;  // Helpers to figure out next state
 reg start_reg = 1'b 0;
 reg stop_reg = 1'b 0;
+assign stop = stop_reg;
 reg scl_rising_reg = 1'b 0;
 reg scl_falling_reg = 1'b 0;  // Address and data received from master
 reg [6:0] addr_reg = 0;
@@ -149,7 +151,7 @@ reg [7:0] data_to_master_reg = 0;
           if(cmd_reg == 1'b 1) begin
             // issue read request
             read_req_reg <= 1'b 1;
-            data_to_master_reg <= data_to_tb;
+            // data_to_master_reg <= data_to_tb;
           end
         end
         else begin
@@ -226,7 +228,7 @@ reg [7:0] data_to_master_reg = 0;
           continue_reg <= 1'b 1;
           read_req_reg <= 1'b 1;
           // request reg byte
-          data_to_master_reg <= data_to_tb;
+          // data_to_master_reg <= data_to_tb;
         end
       end
     end
@@ -285,5 +287,13 @@ reg [7:0] data_to_master_reg = 0;
   assign data_from_tb = data_from_master_reg;
   // Master reads
   assign read_req = read_req_reg;
+
+  // need to capture testbench data 1 cycle after pulsing read_req
+  reg read_req_reg_;
+  always @(posedge clk) begin
+    read_req_reg_ <= read_req_reg;
+    if (read_req_reg_)
+      data_to_master_reg <= data_to_tb;
+  end
 
 endmodule
