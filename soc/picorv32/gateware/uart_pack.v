@@ -49,7 +49,7 @@ wire [ 3:0] mem_wstrb;
 wire        mem_valid;
 wire [31:0] mem_addr;
 wire  [3:0] mem_short_addr = mem_addr[3:0];
-reg  [31:0] mem_rdata;
+reg  [31:0] mem_rdata = 32'h0;
 
 reg mem_ready = 0;
 reg mem_ready_ = 0;
@@ -121,6 +121,8 @@ always @(posedge clk) begin
     utx_tvalid <= 0;
     urx_tready <= 0;
     if (mem_valid && !ready_sum && mem_addr[31:16]=={BASE_ADDR, 8'h00}) begin
+        mem_ready <= 1; // acknowledge by default if base_addr matches
+
         (* parallel_case *)
         case (1)
             // -----------------------------
@@ -136,35 +138,16 @@ always @(posedge clk) begin
                 if (mem_wstrb[3] && DATA_WIDTH>24) utx_tdata[31:24] <= mem_wdata[31:24];
                 if (mem_wstrb[2] && DATA_WIDTH>16) utx_tdata[23:16] <= mem_wdata[23:16];
                 if (mem_wstrb[1] && DATA_WIDTH>8 ) utx_tdata[15: 8] <= mem_wdata[15: 8];
+
                 // Writing to the lowest byte starts the transmission
                 if (mem_wstrb[0]) begin
                     if (utx_tready) begin
                         utx_tdata[7:0] <= mem_wdata[7:0];
                         utx_tvalid <= 1;
-                        mem_ready <= 1;
                     end else begin
-                        mem_ready <= 0;         // !!! STALL !!! (until UART is ready)
+                        mem_ready <= 0;  // !!! STALL !!! (until UART is ready)
                     end
                 end
-            end
-            // ---------------------------------------
-            // --- Read from UART0 status register ---
-            // ---------------------------------------
-            !mem_wstrb && (mem_short_addr==UART_STATUS): begin
-                mem_rdata <= uart_status;
-                mem_ready <= 1;
-            end
-            // ----------------------------------------
-            // --- Read from RX UART0 data register ---
-            // ----------------------------------------
-            !mem_wstrb && (mem_short_addr==UART_RX_REG): begin
-                if ( urx_tvalid ) begin
-                    mem_rdata <= urx_tdata;       // Write UART data to mem. bus
-                    urx_tready <= 1;              // Acknowledge to UART that data has been read
-                end else begin
-                    mem_rdata <= 32'hFFFF_FF00;   // Write error flag to mem. bus
-                end
-                mem_ready <= 1;
             end
             // -------------------------------
             // --- Write to UART0 baudrate ---
@@ -173,11 +156,53 @@ always @(posedge clk) begin
                 if (mem_wstrb[0]) uprescale[ 7:0] <= mem_wdata[ 7:0];
                 if (mem_wstrb[1]) uprescale[15:8] <= mem_wdata[15:8];
                 $display("new UART prescale value = 0x%04x", mem_wdata );
-                mem_ready <= 1;
+            end
+            // -------------
+            // --- Reads ---
+            // -------------
+            !mem_wstrb: begin
+                if (mem_short_addr == UART_STATUS) begin
+                    // Read from UART0 status register
+                    mem_rdata <= uart_status;
+                end else if (mem_short_addr == UART_RX_REG) begin
+                    // Read from RX UART0 data register
+                    if ( urx_tvalid ) begin
+                        mem_rdata <= urx_tdata;       // Write UART data to mem. bus
+                        urx_tready <= 1;              // Acknowledge to UART that data has been read
+                    end else begin
+                        mem_rdata <= 32'hFFFF_FF00;   // Write error flag to mem. bus
+                    end
+                end
             end
         endcase
     end
     mem_ready_ <= mem_ready;
 end
+
+`ifdef FORMAL
+    // formal rules for the picorv32 bus
+    f_pack_peripheral #(
+        .BASE_ADDR (BASE_ADDR),
+        .BASE2_ADDR(8'h0),
+        .F_MAX_STALL_CYCLES(32'd85)
+    ) fpp (
+        .clk(clk),
+        .rst(rst),
+        .mem_packed_fwd(mem_packed_fwd),
+        .mem_packed_ret(mem_packed_ret),
+        .f_past_valid(f_past_valid)
+    );
+
+    always @(posedge clk) begin
+        // without this line, sby will figure out how to write a large value
+        // to the prescale reg and then timeout on the UART stall :p
+        assume(uprescale == 1);
+
+        // Run it in cover mode and see how sby will figure out how to clock
+        // 0x12 into the UART by driving the RX line and then read it over
+        // the picorv bus. Very impressive.
+        cover(mem_rdata == 32'h00000012);
+    end
+`endif
 
 endmodule

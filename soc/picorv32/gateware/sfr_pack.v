@@ -58,7 +58,7 @@ wire [31:0] mem_wdata;
 wire [ 3:0] mem_wstrb;
 wire        mem_valid;
 wire [31:0] mem_addr;
-reg  [31:0] mem_rdata;
+reg  [31:0] mem_rdata = 0;
 
 reg mem_ready = 0;
 reg mem_ready_ = 0;
@@ -132,5 +132,30 @@ always @(posedge clk) begin
     end
     mem_ready_ <= mem_ready;
 end
+
+`ifdef FORMAL
+    wire f_past_valid;
+
+    // formal rules for the picorv32 bus
+    f_pack_peripheral #(
+        .BASE_ADDR (BASE_ADDR),
+        .BASE2_ADDR(BASE2_ADDR)
+    ) fpp (
+        .clk(clk),
+        .rst(rst),
+        .mem_packed_fwd(mem_packed_fwd),
+        .mem_packed_ret(mem_packed_ret),
+        .f_past_valid(f_past_valid)
+    );
+
+    // One clock after reset, internal storage must be reset to initial value
+    always @(posedge clk) begin
+        if (f_past_valid && $past(rst))
+            assert(sfRegsOut == INITIAL_STATE);
+
+        // This is sooo cool! sby auto-generates a test-case in cover mode!
+        cover(sfRegsWrStr == 32'h80000000);
+    end
+`endif
 
 endmodule
