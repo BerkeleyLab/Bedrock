@@ -52,7 +52,7 @@ end
 
 reg start=0;
 // Second pulse is intentionally delayed to demonstrate 'start' functionality
-always @(posedge clk) start <= (cc == 10) || (cc == (2500 << shift));
+always @(posedge clk) start <= (cc == 10) || (cc == (1500 << shift));
 
 
 // Scaling note:

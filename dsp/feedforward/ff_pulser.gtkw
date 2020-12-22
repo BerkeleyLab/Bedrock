@@ -1,0 +1,68 @@
+[timestart] 24
+[size] 1462 363
+[pos] 0 248
+*-8.302251 105 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] ff_pulser_tb.
+[treeopen] ff_pulser_tb.i_dut.
+[sst_width] 228
+[signals_width] 294
+[sst_expanded] 1
+[sst_vpaned_height] 60
+@28
+ff_pulser_tb.i_dut.clk
+ff_pulser_tb.start
+@8420
+ff_pulser_tb.ff_out_x[17:0]
+ff_pulser_tb.ff_out_y[17:0]
+@24
+ff_pulser_tb.ff_length[31:0]
+@c00420
+ff_pulser_tb.i_dut.setp_x[17:0]
+@28
+(0)ff_pulser_tb.i_dut.setp_x[17:0]
+(1)ff_pulser_tb.i_dut.setp_x[17:0]
+(2)ff_pulser_tb.i_dut.setp_x[17:0]
+(3)ff_pulser_tb.i_dut.setp_x[17:0]
+(4)ff_pulser_tb.i_dut.setp_x[17:0]
+(5)ff_pulser_tb.i_dut.setp_x[17:0]
+(6)ff_pulser_tb.i_dut.setp_x[17:0]
+(7)ff_pulser_tb.i_dut.setp_x[17:0]
+(8)ff_pulser_tb.i_dut.setp_x[17:0]
+(9)ff_pulser_tb.i_dut.setp_x[17:0]
+(10)ff_pulser_tb.i_dut.setp_x[17:0]
+(11)ff_pulser_tb.i_dut.setp_x[17:0]
+(12)ff_pulser_tb.i_dut.setp_x[17:0]
+(13)ff_pulser_tb.i_dut.setp_x[17:0]
+(14)ff_pulser_tb.i_dut.setp_x[17:0]
+(15)ff_pulser_tb.i_dut.setp_x[17:0]
+(16)ff_pulser_tb.i_dut.setp_x[17:0]
+(17)ff_pulser_tb.i_dut.setp_x[17:0]
+@1401200
+-group_end
+@c00420
+ff_pulser_tb.i_dut.setp_y[17:0]
+@28
+(0)ff_pulser_tb.i_dut.setp_y[17:0]
+(1)ff_pulser_tb.i_dut.setp_y[17:0]
+(2)ff_pulser_tb.i_dut.setp_y[17:0]
+(3)ff_pulser_tb.i_dut.setp_y[17:0]
+(4)ff_pulser_tb.i_dut.setp_y[17:0]
+(5)ff_pulser_tb.i_dut.setp_y[17:0]
+(6)ff_pulser_tb.i_dut.setp_y[17:0]
+(7)ff_pulser_tb.i_dut.setp_y[17:0]
+(8)ff_pulser_tb.i_dut.setp_y[17:0]
+(9)ff_pulser_tb.i_dut.setp_y[17:0]
+(10)ff_pulser_tb.i_dut.setp_y[17:0]
+(11)ff_pulser_tb.i_dut.setp_y[17:0]
+(12)ff_pulser_tb.i_dut.setp_y[17:0]
+(13)ff_pulser_tb.i_dut.setp_y[17:0]
+(14)ff_pulser_tb.i_dut.setp_y[17:0]
+(15)ff_pulser_tb.i_dut.setp_y[17:0]
+(16)ff_pulser_tb.i_dut.setp_y[17:0]
+(17)ff_pulser_tb.i_dut.setp_y[17:0]
+@1401200
+-group_end
+@28
+ff_pulser_tb.i_dut.busy
+[pattern_trace] 1
+[pattern_trace] 0

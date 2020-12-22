@@ -445,7 +445,7 @@ def generate_addresses(fd,
     for k in register_names:
         bitwidth = gch[k][0]
         register_array_size = 1 << gch[k][0]
-        if (gen_mirror and mirror_base == -1 and register_array_size <= MIN_MIRROR_ARRAY_SIZE and fd):
+        if (gen_mirror and mirror_base == -1 and register_array_size <= MIN_MIRROR_ARRAY_SIZE):
             mirror_base = base
             mirror_bit_len = mirror_size.bit_length()
             mirror_size_nearest_pow2 = 1 << mirror_bit_len
@@ -459,10 +459,11 @@ def generate_addresses(fd,
                 print('Aligning mirror base. New mirror base: {}'.format(
                     format(base, '#x')))
             mirror_clk_prefix = 'lb'  # TODO: This is a hack
-            s = '`define MIRROR_WIDTH %d\n'\
-                '`define ADDR_HIT_MIRROR (%s_addr[`LB_HI:`MIRROR_WIDTH]==%d)\n' %\
-                (mirror_bit_len, mirror_clk_prefix, mirror_base >> mirror_bit_len)
-            fd.write(s)
+            if fd:
+                s = '`define MIRROR_WIDTH %d\n'\
+                    '`define ADDR_HIT_MIRROR (%s_addr[`LB_HI:`MIRROR_WIDTH]==%d)\n' %\
+                    (mirror_bit_len, mirror_clk_prefix, mirror_base >> mirror_bit_len)
+                fd.write(s)
         sign = gch[k][2]
         datawidth = gch[k][3]
         description = gch[k][-1]
@@ -588,13 +589,14 @@ def write_address_header(fi, fo, low_res, lb_width, gen_mirror, base_addr,
     addr_bufs.close()
 
 
-def write_regmap_file(fi, fo, low_res, base_addr, plot_map):
+def write_regmap_file(fi, fo, low_res, gen_mirror, base_addr, plot_map):
     address_allocation(
         0,
         0,
         sorted(gch.keys()),
         base_addr,
         low_res=low_res,
+        gen_mirror=gen_mirror,
         plot_map=plot_map)
     addr_map = {x: g_flat_addr_map[x] for x in g_flat_addr_map}
     with open(fo, 'w') as fd:
@@ -690,7 +692,7 @@ def main(argv):
                              args.plot_map)
     if regmap_fname:
         write_regmap_file(input_fname, regmap_fname, args.low_res,
-                          args.base_addr, args.plot_map)
+                          args.gen_mirror, args.base_addr, args.plot_map)
 
 
 if __name__ == '__main__':
