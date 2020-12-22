@@ -86,13 +86,6 @@ badger_ac701:
     paths:
       - badger/tests/ac701_rgmii_vtest.bit
 
-cmoc_litex:
-  before_script:
-    - cd projects/cmoc_top/litex
-  stage: synthesis
-  script:
-    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.1 PATH=$XILINX_VIVADO/bin:$PATH make bit
-
 badger_ac701_run:
   stage: program
   tags:

@@ -6,11 +6,11 @@ gawk [looks like mawk is the default install and isn't enough]
 python-numpy
 python-flake8
 
-gtkwave
 Note that python2 is very close to end-of-life; we support and
 recommend using python3.
 
 [optional]
+gtkwave
 Verilator
 Yosys
 
