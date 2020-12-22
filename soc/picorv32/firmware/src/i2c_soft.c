@@ -93,7 +93,7 @@ int i2c_write_regs(uint8_t i2cAddr, uint8_t regAddr, uint8_t *buffer, uint16_t l
 {
     int ret=1;
     i2c_start();
-    ret &= i2c_tx((i2cAddr<<1) | I2C_W);
+    ret &= i2c_tx((i2cAddr << 1) | I2C_W);
     ret &= i2c_tx(regAddr);
     while (len-- > 0)
         ret &= i2c_tx(*buffer++);
@@ -105,13 +105,13 @@ int i2c_read_regs(uint8_t i2cAddr, uint8_t regAddr, uint8_t *buffer, uint16_t le
 {
     int ret=1;
     i2c_start();
-    ret &= i2c_tx((i2cAddr<<1) | I2C_W);
+    ret &= i2c_tx((i2cAddr << 1) | I2C_W);
     ret &= i2c_tx(regAddr);
     // Repeated start to switch to read mode
     i2c_start();
-    ret &= i2c_tx((i2cAddr<<1) | I2C_R);
+    ret &= i2c_tx((i2cAddr << 1) | I2C_R);
     while (len-- > 0)
-        *buffer++ = i2c_rx(len!=0);   // Send NACK for the last byte
+        *buffer++ = i2c_rx(len != 0);   // Send NACK for the last byte
     i2c_stop();
     return ret;
 }
@@ -138,11 +138,11 @@ int i2c_dump(uint8_t i2cAddr, uint8_t regAddr, int nBytes)
 {
     int ret=1;
     i2c_start();
-    ret &= i2c_tx((i2cAddr<<1) | I2C_W);
+    ret &= i2c_tx((i2cAddr << 1) | I2C_W);
     ret &= i2c_tx(regAddr);
     // Repeated start to switch to read mode
     i2c_start();
-    ret &= i2c_tx((i2cAddr<<1) | I2C_R);
+    ret &= i2c_tx((i2cAddr << 1) | I2C_R);
     if(!ret) {
         print_str("I2C Error\n");
         return ret;
@@ -165,11 +165,11 @@ int i2c_read_ascii(uint8_t i2cAddr, uint8_t regAddr, int nBytes)
 {
     int ret=1;
     i2c_start();
-    ret &= i2c_tx((i2cAddr<<1) | I2C_W);
+    ret &= i2c_tx((i2cAddr << 1) | I2C_W);
     ret &= i2c_tx(regAddr);
     // Repeated start to switch to read mode
     i2c_start();
-    ret &= i2c_tx((i2cAddr<<1) | I2C_R);
+    ret &= i2c_tx((i2cAddr << 1) | I2C_R);
     while (nBytes-- > 0)
         _putchar(i2c_rx(nBytes!=0));   // Send NACK for the last byte
     i2c_stop();
