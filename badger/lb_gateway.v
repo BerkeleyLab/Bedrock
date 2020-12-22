@@ -9,7 +9,7 @@ module lb_gateway #(
     parameter read_pipe_len=3
 ) (
     input         clk,   // timespec 6.8 ns
-    // client interface with RTEFI, see clients.eps
+    // client interface with RTEFI, see doc/clients.eps
     input  [10:0] len_c,
     input  [ 7:0] idata,
     input         raw_l,
@@ -50,7 +50,7 @@ mem_gateway #(
 
 assign lb_clk    = clk;
 assign lb_write  = control_strobe & ~control_rd;
-assign lb_read   = control_rd;
+assign lb_read   = |control_pipe_rd;
 assign lb_pre_rvalid = control_pipe_rd[read_pipe_len-1];
 
 endmodule

@@ -97,14 +97,14 @@ scanner_tb.a.pass_ipdst
 @c00200
 -arp pattern
 @24
-scanner_tb.a.arp_p.cnt[10:0]
+scanner_tb.a.find_arp.arp_p.cnt[10:0]
 @22
-scanner_tb.a.arp_p.data[7:0]
-scanner_tb.a.arp_p.template[7:0]
+scanner_tb.a.find_arp.arp_p.data[7:0]
+scanner_tb.a.find_arp.arp_p.template[7:0]
 @28
-scanner_tb.a.arp_p.want
-scanner_tb.a.arp_p.match
-scanner_tb.a.arp_p.pass
+scanner_tb.a.find_arp.arp_p.want
+scanner_tb.a.find_arp.arp_p.match
+scanner_tb.a.find_arp.arp_p.pass
 @1401200
 -arp pattern
 @c00200

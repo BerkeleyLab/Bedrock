@@ -35,7 +35,9 @@
 //  .     .      .       y_lo
 //  .     .      .       .      o_sync  out_x
 //  .     .      .       .      .       out_y
-module xy_pi_clip(
+module xy_pi_clip #(
+	parameter ff_dshift = 0 // Deferred ff_ddrive downshift
+)(
 	input clk,  // timespec 6.8 ns
 	input sync,  // high for the first of the xy pair
 	input signed [17:0] in_xy,
@@ -44,6 +46,13 @@ module xy_pi_clip(
 	// 8-way muxed configuration
 	input signed [17:0] coeff,
 	input signed [17:0] lim,
+	// feed-forward inputs
+	input ffd_en,
+	input signed [17:0] ff_ddrive, // FF drive (derivative) to be accumulated in I term
+	input signed [17:0] ff_dphase, // FF phase (derivative); currently unused
+	input ffp_en,
+	input signed [17:0] ff_drive, // FF drive added to P term
+	input signed [17:0] ff_phase, // FF phase
 	// Output clipped, four bits are vs. {x_hi, y_hi, x_lo, y_lo}
 	output [3:0] clipped
 );
@@ -59,9 +68,39 @@ wire signed [17:0] in_xy1;
 reg_delay #(.dw(18), .len(2))
 	pi_match(.clk(clk), .reset(1'b0), .gate(1'b1), .din(in_xy), .dout(in_xy1));
 
-reg signed [35:0] mr=0;
+// FF ddrive to be sampled during 'integral' cycles only. Phase tie-in still incomplete
+// Pipelined to ease timing
 reg signed [41:0] mr_scale=0;
-reg signed [29:0] mr_sat=0;
+reg signed [42:0] mr_ff=0;
+reg signed [18+12-1:0] ff_mp=0;
+wire signed [18+12-1:0] ff_ddrive_l, ff_drive_l, ff_phase_l; // Worst-case bit-sizing
+
+// Perform deferred down-shifting of ff_ddrive here by combining with up-shifting by 12
+// required by the accumulator construction below.
+generate if (ff_dshift > 12) begin: g_dshift
+	assign ff_ddrive_l = ff_ddrive >>> (ff_dshift-12);
+end else begin: g_ushift
+	assign ff_ddrive_l = ff_ddrive <<< (12-ff_dshift);
+end endgenerate
+assign ff_drive_l = ff_drive <<< 12;
+assign ff_phase_l = ff_phase <<< 12;
+
+always @(posedge clk) begin
+	ff_mp <= 0;
+	case(stb[4:1])
+		4'b0001: ff_mp <= ffd_en ? ff_ddrive_l : 0; // ddrive I
+		4'b0010: ff_mp <= 0;           // dphase I
+		4'b0100: ff_mp <= ffp_en ? ff_drive_l : 0;  // drive P
+		4'b1000: ff_mp <= ffp_en ? ff_phase_l : 0;  // phase P
+		default: ff_mp <= 0;
+	endcase
+	// Avoid 3-way add by pre-computing mr_scale + ff_mp
+	mr_ff <= mr_scale + ff_mp;  // outputs on stb 3, 4, 5, 6
+end
+
+wire signed [29:0] mr_sat = `SAT(mr_ff,42,29);
+
+reg signed [35:0] mr=0;
 reg signed [30:0] lim1=0;
 reg signed [30:0] accum1=0, accum2=0, accum3=0, accum4=0, accum5=0, accum6=0;
 reg signed [17:0] val=0;
@@ -77,7 +116,6 @@ always @(posedge clk) begin
 	val <= (sync|stb[0]) ? in_xy : in_xy1;  // outputs on stb 0, 1, 2, 3
 	mr <= coeff * val;  // outputs on stb 1, 2, 3, 4
 	mr_scale <= p_term ? (mr <<< 6) : mr;  // this step determines K_P vs. K_I scaling
-	mr_sat <= `SAT(mr_scale,41,29);  // outputs on stb 3, 4, 5, 6
 	accum1 <= clip_recirc ? accum4 : (mr_sat + (p_term2 ? accum6 : accum4));
 	accum2 <= accum1;
 	cmp <= accum1_upper < lim;

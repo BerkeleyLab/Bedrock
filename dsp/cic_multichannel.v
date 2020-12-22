@@ -5,25 +5,26 @@
     - Double Integrator (DI) per channel
     - Multichannel Serializer sampling the output of all DIs into a shift-chain
       at a rate defined by cic_base_per
+    - (Optional configurable delay chain)
     - Cascaded Differentiator and post-filter (CC Filter) with barrel shifter
       sampled at a rate defined by cc_samp_per
     - CIC timing generator
     - Shift-chain tap of the DI serialized stream
 
-       +-----------------------------+
-       | +-----+   +---+             |
- in[0]--->D INT+--->   | +-------------> di_sr_out
-       | +-----+   | S | |           |
-       |           | E | |  +------+ |
-       | +-----+   | R | |  |      | |
- in[1]--->D INT+---> I +-+-->CCFILT+---> cc_sr_out
-       | +-----+   | A |    |      | |
-       |           | L |    +---^--+ |
-       | +-----+   |   |        |    |
- in[N]--->D INT+--->   |        |    |
-       | +-----+   +-^-+        |    |
-       |             |          |    |
-       +-----------------------------+
+       +-------------------------------------+
+       | +-----+   +---+                     |
+ in[0]--->D INT+--->   |         +-------------> di_sr_out
+       | +-----+   | S |         |           |
+       |           | E |         |  +------+ |
+       | +-----+   | R |         |  |      | |
+ in[1]--->D INT+---> I +-[][][]--+-->CCFILT+---> cc_sr_out
+       | +-----+   | A |  SHIFT     |      | |
+       |           | L |            +---^--+ |
+       | +-----+   |   |                |    |
+ in[N]--->D INT+--->   |                |    |
+       | +-----+   +-^-+                |    |
+       |             |                  |    |
+       +-------------------------------------+
                      |          |
           cic_sample +          + cc_sample
 */
@@ -39,10 +40,13 @@ module cic_multichannel #(
    parameter di_noise_bits=4, // Number of noise bits to discard at the output of Double Integrator.
                               // This depends on the SNR of the inputs and the CIC sample rate
 
+   parameter shift_delay=0,   // Optional shifter between Integrator and Comb. A value of 0 disables shifter
+
    parameter cc_outw=20,      // CCFilt output width; Must be 20 if using half-band filter
    parameter cc_halfband=1,
    parameter cc_use_delay=0,  // Match pipeline length of filt_halfband=1
-   parameter cc_shift_base=0) // Bits to discard from previous acc step
+   parameter cc_shift_base=0, // Bits to discard from previous acc step
+   parameter cc_shift_wi=4)
 (
    // Incoming stream
    input                       clk,
@@ -53,7 +57,7 @@ module cic_multichannel #(
 
    // CC Filter controls
    input                       cc_sample,  // CCFilt sampling signal
-   input [3:0]                 cc_shift,   // controls scaling of filter result
+   input [cc_shift_wi-1:0]     cc_shift,   // controls scaling of filter result
 
    // Post-integrator conveyor belt tap
    output                      di_stb_out,
@@ -96,8 +100,8 @@ module cic_multichannel #(
    // Multichannel serializer/conveyor belt generator
    // ------
 
-   wire [di_rwi-1:0] sr_out;
-   wire stb_out;
+   wire [di_rwi-1:0] sr_out_l;
+   wire stb_out_l;
 
    serializer_multichannel #(
       .n_chan (n_chan),
@@ -106,12 +110,32 @@ module cic_multichannel #(
       .clk        (clk),
       .sample_in  (cic_sample),
       .data_in    (di_out),
-      .gate_out   (stb_out),
-      .stream_out (sr_out)
+      .gate_out   (stb_out_l),
+      .stream_out (sr_out_l)
    );
 
-   assign di_stb_out = stb_out;
-   assign di_sr_out  = sr_out;
+   // ------
+   // Optional shift-based delay
+   // ------
+   wire [di_rwi-1:0] sr_out_shift;
+   wire stb_out_shift, stb_out_shift_l;
+
+   reg_delay #(
+      .dw  (di_rwi+1),
+      .len (shift_delay*n_chan))
+   i_shift_delay (
+      .clk   (clk),
+      .reset (reset),
+      .gate  (stb_out_l), // Shift at line-rate
+      .din   ({sr_out_l, stb_out_l}),
+      .dout  ({sr_out_shift, stb_out_shift_l})
+   );
+
+   assign stb_out_shift = stb_out_shift_l & stb_out_l;
+
+   // Pre-comb conveyor-belt tap
+   assign di_stb_out = stb_out_shift;
+   assign di_sr_out  = sr_out_shift;
 
    // ------
    // Cascaded diferentiator and post-filter
@@ -129,6 +153,7 @@ module cic_multichannel #(
    ccfilt #(
       .dw         (di_rwi-di_noise_bits),
       .outw       (cc_outw),
+      .shift_wi   (cc_shift_wi),
       .shift_base (cc_shift_base),
       .dsr_len    (n_chan),
       .use_hb     (cc_halfband),
@@ -137,8 +162,8 @@ module cic_multichannel #(
    (
       .clk      (clk),
       .reset    (reset),
-      .sr_in    (sr_out[di_rwi-1:(di_noise_bits)]), // Discard noisy LSBs
-      .sr_valid (stb_out&cc_sample),
+      .sr_in    (sr_out_shift[di_rwi-1:(di_noise_bits)]), // Discard noisy LSBs
+      .sr_valid (stb_out_shift&cc_sample),
       .shift    (cc_shift),
       .result   (cc_sr_out), // signed filtered and scaled result
       .strobe   (cc_stb_out)

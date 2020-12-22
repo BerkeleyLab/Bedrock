@@ -13,7 +13,7 @@
 
 // This is a relatively long file, but it helps that it is broken down
 // into smaller modules:
-//   scanner   top level, see rtefi.eps
+//   scanner   top level, see doc/rtefi.eps
 //    - arp_patt
 //    - ip_patt
 //    - icmp_patt
@@ -50,7 +50,7 @@ module scanner (
 	// line de-asserted as soon as the dropping condition is detected.
 	// When an incoming packet is categorized as causing a response,
 	// the keep line is asserted one cycle before busy falls.
-	// Also see precog_upg.eps
+	// Also see doc/precog_upg.eps
 	output busy,
 	output keep,
 	//
@@ -63,6 +63,9 @@ module scanner (
 	output [7:0] status_vec,
 	output [10:0] pack_len
 );
+// Configuration
+parameter handle_arp = 1;
+parameter handle_icmp = 1;
 
 // State machine mostly cribbed from head_rx.v
 wire [7:0] eth_octet = eth_in;
@@ -160,15 +163,26 @@ reg pass_ipdst=0;   always @(posedge clk) begin if (want_c_ip  & ~ip_m) pass_ipd
 
 // Specific protocols; IP is a component of both ICMP and UDP
 wire [15:0] ip_length, udp_length;
-wire pass_arp0;  arp_patt  arp_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_arp0));
+
+wire pass_arp0;
+generate if (handle_arp) begin: find_arp
+	arp_patt arp_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_arp0));
+end else assign pass_arp0 = 0;
+endgenerate
+
+wire pass_icmp0;
+generate if (handle_icmp) begin: find_icmp
+	icmp_patt icmp_p(.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_icmp0));
+end else assign pass_icmp0 = 0;
+endgenerate
+
 wire pass_ip0;   ip_patt   ip_p  (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_ip0), .length(ip_length));
-wire pass_icmp0; icmp_patt icmp_p(.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_icmp0));
 wire pass_udp0;  udp_patt  udp_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_udp0), .length(udp_length));
 wire pass_sum;   cksum_chk chk_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_sum), .length(ip_length));
 
 // CRC32
 wire crc_zero;
-crc8e_guts crc(.clk(clk), .gate(h_data_d1), .first(data_first),
+crc8e_guts crc8e(.clk(clk), .gate(h_data_d1), .first(data_first),
 	.d_in(data_d1), .zero(crc_zero));
 wire final_octet = h_data_d1 & ~h_data;
 

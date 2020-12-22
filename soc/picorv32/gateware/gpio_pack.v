@@ -5,7 +5,8 @@
 // uses the addressing scheme described in sfr_pack.v
 
 module gpio_pack #(
-    parameter BASE_ADDR=8'h00
+    parameter BASE_ADDR=8'h00,
+    parameter BASE2_ADDR=8'h00
 ) (
     input  wire        clk,
     input  wire        reset,
@@ -26,6 +27,7 @@ wire [3*32-1:0] sfRegsOut;
 wire [3*32-1:0] sfRegsIn;
 sfr_pack #(
     .BASE_ADDR      ( BASE_ADDR ),
+    .BASE2_ADDR     ( BASE2_ADDR ),
     .N_REGS         ( 3 )
 ) sfrInst (
     .clk            ( clk ),

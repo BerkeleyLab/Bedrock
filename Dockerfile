@@ -1,91 +1,123 @@
 # Install riscv cross compiler
 
-FROM python:3-slim-stretch as riscv-builder
+FROM debian:buster-slim as riscv-builder
 
-RUN apt-get update && apt-get install -y autoconf automake autotools-dev curl\
-	libmpc-dev libmpfr-dev libgmp-dev libusb-1.0-0-dev\
-	gawk build-essential bison flex texinfo gperf\
-	libtool patchutils bc zlib1g-dev device-tree-compiler git\
-	pkg-config libexpat-dev
+# prerequisites for building gcc
+# wget is used by riscv_prep.sh
+RUN apt-get update && apt-get install -y \
+	libmpc-dev libmpfr-dev libgmp-dev \
+	build-essential wget
 
-RUN mkdir software && \
-	cd software && \
-	git clone --recursive https://github.com/riscv/riscv-gnu-toolchain && \
-	cd riscv-gnu-toolchain && mkdir build && cd build && \
-	../configure --with-arch=rv32i --prefix=/riscv32i --enable-multilib && \
-	make -j$(nproc) && make install && \
+# Documentation and rationale for this process in build-tools/riscv_meta.sh
+# Note that "sh riscv_prep.sh" requires network access to pull in tarballs.
+RUN cd && pwd && ls && mkdir software
+COPY build-tools/riscv_prep.sh software/riscv_prep.sh
+COPY build-tools/riscv_meta.sh software/riscv_meta.sh
+RUN cd software && \
+	sh riscv_prep.sh && \
+	sh riscv_meta.sh $PWD/src /riscv32i && \
 	ls /riscv32i/bin/riscv32-unknown-elf-gcc && \
-	cd && rm -rf software/riscv-gnu-toolchain && \
+	cd && rm -rf software && \
 	rm -rf /var/lib/apt/lists/*
 
-# Basing of Lucas Russo's iverilog container
-# "https://github.com/lerwys/docker-iverilog.git"
+FROM debian:buster-slim as basic-iverilog
 
-FROM python:3-slim-stretch as basic-iverilog
-
-ENV IVERILOG_VERSION=v10_2
-
-# This is a debian flag: Picks default answers for apt questions
-# Largely unnecessary if -y is being given
-# ARG DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get -y update && \
-    apt-get install -y \
-	gawk \
-	automake \
-        autoconf \
-        gperf \
-        build-essential \
-        flex \
-        bison \
+# Vivado needs libtinfo5, at least for Artix?
+# libz-dev required for Verilator FST support
+RUN apt-get update && \
+	apt-get install -y \
 	git \
-	subversion && \
-    rm -rf /var/lib/apt/lists/*
+	iverilog \
+	libz-dev \
+	libbsd-dev \
+	xc3sprog \
+	build-essential \
+	libtinfo5 \
+	wget \
+	iputils-ping \
+	iproute2 \
+	bsdmainutils \
+	curl \
+	gawk \
+	flake8 \
+	python3-pip \
+	python3-numpy \
+	python3-scipy \
+	python3-matplotlib && \
+	rm -rf /var/lib/apt/lists/* && \
+	python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
+	pip3 --version
 
-RUN pip install --trusted-host pypi.python.org flake8 numpy scipy matplotlib
-
-RUN git clone --branch=${IVERILOG_VERSION} https://github.com/steveicarus/iverilog && \
-    cd iverilog && \
-    bash autoconf.sh && \
-    ./configure && \
-    make -j$(nproc) && \
-    make install && \
-    cd && \
-    rm -rf iverilog
-
-FROM basic-iverilog as litex
-
-ENV LITEX_VERSION=master
-ENV LITEX_ROOT_URL="http://github.com/yetifrisstlama/"
-RUN apt-get update && apt-get install -y wget && \
-	mkdir litex_setup_dir && \
-	cd litex_setup_dir && \
-	wget https://raw.githubusercontent.com/yetifrisstlama/litex/${LITEX_VERSION}/litex_setup.py && \
-	python litex_setup.py init install && \
-	ln -s /non-free/Xilinx /opt/Xilinx
+FROM basic-iverilog as testing_base
 
 COPY --from=riscv-builder /riscv32i /riscv32i
 
 ENV PATH="/riscv32i/bin:${PATH}"
 
-RUN apt-get install -y verilator libbsd-dev && \
-	pip install git+https://github.com/m-labs/nmigen.git
-
-FROM litex as testing_base
-
-RUN apt-get -y update && \
+# flex and bison required for building vhd2vl
+RUN apt-get update && \
 	apt-get install -y \
 	cmake \
+	flex \
+	bison \
 	libftdi1-dev \
 	libusb-dev \
 	pkg-config && \
 	rm -rf /var/lib/apt/lists/*
 
-RUN svn co https://svn.code.sf.net/p/xc3sprog/code/trunk xc3sprog &&\
-	cd xc3sprog &&\
-	mkdir build && \
-	cd build &&\
-	cmake .. &&\
-	make &&\
-	make install &&\
-	rm -rf xc3sprog
+# Must follow iverilog installation
+RUN git clone https://github.com/ldoolitt/vhd2vl && \
+	cd vhd2vl && \
+	git checkout 37e3143395ce4e7d2f2e301e12a538caf52b983c && \
+	make && \
+	install src/vhd2vl /usr/local/bin && \
+	cd .. && \
+	rm -rf vhd2vl
+
+# Yosys
+# For now we need to build yosys from source, since Debian Buster
+# is stuck at yosys-0.8 that doesn't have the features we need.
+# Revisit this choice when Debian catches up, maybe in Bullseye,
+# and hope to get back to "apt-get install yosys" then.
+
+# Note that the standard yosys build process used here requires
+# network access to download abc from https://github.com/berkeley-abc/abc.
+
+RUN git clone https://github.com/cliffordwolf/yosys.git && \
+	cd yosys && \
+	git checkout 40e35993af6ecb6207f15cc176455ff8d66bcc69 && \
+	apt-get update && \
+	apt-get install -y clang libreadline-dev tcl-dev libffi-dev graphviz \
+	xdot libboost-system-dev libboost-python-dev libboost-filesystem-dev zlib1g-dev && \
+	make config-clang && make -j4 && make install && \
+	cd .. && rm -rf yosys && \
+	rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4
+
+RUN apt-get update && \
+	apt-get install -y libfl2 libfl-dev zlibc zlib1g zlib1g-dev autoconf && \
+	git clone https://github.com/verilator/verilator && cd verilator && \
+	git checkout v4.034 && autoconf && ./configure && make -j4 && make install && \
+	cd ../ && rm -rf verilator && verilator -V && \
+	apt-get install -y openocd
+
+# SymbiYosys formal verification tool + Yices 2 solver (`sby` command)
+RUN apt-get update && \
+	apt-get install -y build-essential clang bison flex libreadline-dev \
+					 gawk tcl-dev libffi-dev git mercurial graphviz   \
+					 xdot pkg-config python python3 libftdi-dev gperf \
+					 libboost-program-options-dev autoconf libgmp-dev \
+					 cmake && \
+	git clone https://github.com/YosysHQ/SymbiYosys.git SymbiYosys && \
+	cd SymbiYosys && \
+	git checkout 091222b87febb10fad87fcbe98a57599a54c5fd3 && \
+	make install && \
+	cd .. && \
+	git clone https://github.com/SRI-CSL/yices2.git yices2 && \
+	cd yices2 && \
+	autoconf && \
+	./configure && \
+	make -j$(nproc) && \
+	make install
+

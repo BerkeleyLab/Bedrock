@@ -18,6 +18,7 @@ initial begin
 		#250; clk=0;
 	end
 	$display("%s",errors==0?"PASS":"FAIL");
+	if (errors != 0) $stop();
 	$finish();
 end
 

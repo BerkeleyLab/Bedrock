@@ -2,7 +2,9 @@ include ../../../../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
 
-MEM_SIZE = 2048
+vpath %.v $(PERIPH_DRIVERS_DIR)/ds1822
+
+BLOCK_RAM_SIZE = 2048
 
 SRC_V  = memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v
 SRC_V += sfr_pack.v gpio_pack.v gpioz_pack.v debug_console.v

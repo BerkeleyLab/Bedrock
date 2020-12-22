@@ -1,0 +1,78 @@
+Marble demo project
+
+Microprocessor "MMC" feature wish-list:
+  keep MAC&IP values in Flash, reset on long push-button
+  change MAC&IP on command, within 30 seconds of short push-button (flicker LEDs)
+  push MAC&IP to FPGA after FPGA boot
+  poll server (simple counter at first), reset FPGA after 30 seconds of failure
+  accumulate entropy from ADC
+  do something with UART so hardware can be tested
+  eventually speak DHCP to get IP based on MAC (configurable option)
+  eventually participate in Siphash key management
+
+Gateware feature wish-list:
+  no soft core needed, right?
+  should be usable as a golden image, as well as hardware verification
+  step 1: [DONE] add i2cbridge and SPI micro hookup to a copy of badger/tests/rgmii_hw_test.v
+  step 2: [DONE] add UDP for boot flash programming
+  step 2a: add UDP for self-JTAG
+  step 3: [DONE] do something with UART so hardware can be tested
+  step 4: [DONE] add FMC tester support code
+  step 5a: [DONE] add SPI control of WR DACs (2 x AD5662, separate SYNC#)
+  step 5b: start on some kind of White Rabbit support or at least phase-locking VCXO
+  step 6: test framework for DDR3, use LiteDRAM?
+  The above steps are mostly orthogonal and could be pursued in parallel if we had a larger team
+
+Other work:
+  learn how to program FT4232H config EEPROM
+    add device_desc and serial number, leave vid and pid alone?
+    learn how to program/debug LPC1776 - [DONE] see bringup.txt
+  test LPC1776 UART over USB
+  use MMC to test features on I2C_PM bus: 2 x LM75 (thermometers),
+    MAX6639 (thermometers, thermal shutdown, fans), XRP7724 (power supply)
+  add MAC hookup to spi_gate, maybe try to use ENC28J60 paradigms?
+  check that 88E1512 still works with VDDO_SEL tied low
+
+Wishlist for next rev of Marble Mini hardware(relative to v1.0rc3)
+  fix errata according to Michal:
+  - USB FTDI - reset pin connect to VUSB
+  - remove R225
+  - remove F1 and F2
+  - rotate LEDs
+  - FPGA JTAG connector pin connect to P2V5
+  - wrong transistors, BSS139 -> BSS138
+  - change S25FL128S to S25FL128SAGMFIR01
+  add rubber feet (with designated location) for desk use
+  add mounting holes (standoffs)? (overlap with rubber feet)
+  add physical power switch (includes barrel and PoE but not AMC?)
+  add direct-attach LED or two to FPGA, maybe on interrupt line to MMC?
+  add on-board SiLabs oscillator as option for MGT_CLK_0
+    prototype first with Pmod from Michael?
+  add 330 Ohm series resistor to all four FMC GA pins
+  add power meter (another IN219) on 12V bulk input
+    barrel-\         /---fans
+    PoE--------vvv-------XR
+    AMC----/         \---FMC
+      (but 3V3MP is not supplied from that path, so not included)
+  move parts between sides to reduce number of reels used in loading
+    see stray_parts.py; moving 13 components could save 13 reels
+    C2 C374 C42 D1 D2 Q19 Q2 R103 R104 R108 R160 R58 R66
+  move U29 (I2C thermometer) to other end of board, near VCXOs
+  use 10 Ohm instead of F1 and F2
+  remove stray via at (272.35, 172.53)?
+  reduce BOM line count in general, push-buttons in particular
+  U4 (88E1512 Ethernet PHY): VDDO_SEL (10) should be tied low for VDDO = 2.5V
+  more (labeled) test points, esp. power supplies
+  if keeping J14 "Cortex Debug Connector" make a big pin-1 marking
+    can we use a keyed/shrouded option for J14? Amphenol 20021221-00010C4LF
+  update branding/naming on silkscreen
+  more labels in general, e.g., DONE by associated LED
+  much bigger silkscreen labels for user-facing parts:
+    J9, J10, J11, J12, J13, J14, J15, J16, S1, SW1, SW2, SW3, M1, M2
+  NAD builds can mark S1 as DNF
+  AMC builds should mark Pmod J12, J13, J16 as DNF
+  improve testablity in general
+  improve documentation of build options
+  schematic: clarify/unify net names +3.3VP (power), 3V3PM (AMC), +3V3MP (many)
+  mark SFP TX_DIS pulldown resistors as 0 Ohm DNF: R84 R105 R185 R187
+  increase voltage rating of capacitors attached to +12V to 25V (some are 16V)

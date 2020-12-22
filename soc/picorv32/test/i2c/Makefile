@@ -2,10 +2,10 @@ include ../../../../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 include $(PICORV_DIR)/rules.mk
 
-MEM_SIZE = 4096
+BLOCK_RAM_SIZE = 4096
 
 SRC_V  = memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v
-SRC_V += sfr_pack.v gpio_pack.v gpioz_pack.v I2C_slave.v
+SRC_V += sfr_pack.v gpio_pack.v gpioz_pack.v I2C_model.v
 OBJS   = startup.o timer.o i2c_soft.o print.o
 
 # CFLAGS   += -ffunction-sections

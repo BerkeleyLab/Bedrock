@@ -1,7 +1,7 @@
 // Mechanism to reprogram boot flash
 module spi_flash(
 	input clk,
-	// client interface with RTEFI, see clients.eps
+	// client interface with RTEFI, see doc/clients.eps
 	input [10:0] len_c,
 	input [7:0] idata,
 	input raw_l,
@@ -11,7 +11,8 @@ module spi_flash(
 	output spi_clk,
 	output spi_cs,
 	output spi_mosi,
-	input spi_miso
+	input spi_miso,
+	output busy   // only intended for simulation
 );
 
 parameter n_lat = 8;  // latency of client pipeline
@@ -29,8 +30,8 @@ parameter n_lat = 8;  // latency of client pipeline
 // mechanism, whenever that becomes available.
 
 parameter aw=9;  // nominal/minimal 512 x 8
-reg [7:0] rx_mem[0:1<<aw-1];
-reg [7:0] tx_mem[0:1<<aw-1];
+reg [7:0] rx_mem[0:(1<<aw)-1];
+reg [7:0] tx_mem[0:(1<<aw)-1];
 
 reg pack_read_ready=0;
 reg [8:0] rx_packet_len;
@@ -76,10 +77,13 @@ end
 //  0x52   write buffer
 // The write command will fail if the buffer is not empty, and that
 // failure  gets reported in the status message, below, right?
-reg write_pack_flag=0;
+reg rx_for_us=0, write_pack_flag=0;
+wire rx_mem_write = raw_s & raw_sr[1] & write_pack_flag;
+wire pre_write_pack_flag = rx_for_us & idata[0];
 always @(posedge clk) begin
-	if (raw_s & ~raw_sr[0]) write_pack_flag <= idata == 8'h52;
-	if (raw_s & raw_sr[1] & write_pack_flag) rx_mem[eth_point] <= idata;
+	if (raw_s & ~raw_sr[0]) rx_for_us <= (idata == 8'h52) && ~pack_read_ready;
+	if (raw_sr[0] & ~raw_sr[1]) write_pack_flag <= pre_write_pack_flag;
+	if (rx_mem_write) rx_mem[eth_point] <= idata;
 	if (raw_sr[0] & ~raw_s & write_pack_flag) pack_read_ready <= 1;
 	if (raw_sr[0] & ~raw_s & write_pack_flag) rx_packet_len <= eth_point;
 	if (pack_read_done) pack_read_ready <= 0;
@@ -105,12 +109,18 @@ end
 
 // Logic for reading Tx memory
 // len_c counts down to 9, but we need something that counts up from 0
-wire [7:0] tx_status = {write_pack_flag, pack_read_done};  // ???
+wire [7:0] tx_status = {pre_write_pack_flag, ~pack_read_ready};
 reg [7:0] tx_rdata=0, odata1=0;
 always @(posedge clk) begin
 	tx_rdata <= tx_mem[eth_point];
 	odata1 <= raw_sr[1] ? tx_rdata : raw_sr[0] ? tx_status : 8'h51;
 end
+
+// Internal-only for viewing in simulation
+reg [7:0] status_report;
+wire status_capture_tick = ~raw_sr[1] & raw_sr[0];
+always @(posedge clk) if (status_capture_tick) status_report <= tx_status;
+
 // output packet:
 //   message type
 //   status byte
@@ -120,5 +130,7 @@ end
 // choose to pipeline output
 reg_delay #(.len(n_lat-1), .dw(8)) align(.clk(clk), .gate(1'b1), .reset(1'b0),
 	.din(odata1), .dout(odata));
+
+assign busy = pack_read_ready;
 
 endmodule

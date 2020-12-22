@@ -27,9 +27,4 @@
 #define SWAP16(x) (                                                   (((x)<<8)&0x0000ff00) | (((x)>> 8)&0x000000ff) )
 #define SWAP32(x) ( (((x)<<24)&0xff000000) | (((x)<<8)&0x00ff0000)  | (((x)>>8)&0x0000ff00) | (((x)>>24)&0x000000ff) ) //Clearly needs more brackets :p
 
-// string.h replacements
-void *memcpy(void *dest, const void *src, size_t n);
-void *memset(void *s, int c, size_t n);
-int   memcmp(const void *s1, const void *s2, size_t n);
-
 #endif

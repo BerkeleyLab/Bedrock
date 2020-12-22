@@ -3,15 +3,17 @@ include $(CORDIC_DIR)/rules.mk
 VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -y$(CORDIC_DIR)
 VFLAGS += -I. -y. -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
-TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb complex_mul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb banyan_tb banyan_mem_tb biquad_tb iirFilter_tb tinyEVR_tb circle_buf_tb cic_multichannel_tb cic_wave_recorder_tb circle_buf_serial_tb iq_deinterleaver_tb serializer_multichannel_tb complex_freq_tb iq_trace_tb second_if_out_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb complex_mul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb banyan_tb banyan_mem_tb biquad_tb iirFilter_tb circle_buf_tb cic_multichannel_tb cic_wave_recorder_tb circle_buf_serial_tb iq_deinterleaver_tb serializer_multichannel_tb complex_freq_tb iq_trace_tb second_if_out_tb cpxmul_fullspeed_tb dpram_tb host_averager_tb cic_simple_us_tb phasex_tb complex_mul_flat_tb
 
 TGT_ := $(TEST_BENCH)
 
 NO_CHECK = piloop2_check cavity_check lp_check banyan_mem_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
+CHK_ += multiply_accumulate_pycheck non_iq_interleaved_piloop_pycheck
+NO_LINT = $(NO_CHECK) mon_12_lint biquad_lint
+LNT_ = $(filter-out $(NO_LINT), $(TEST_BENCH:%_tb=%_lint))
 
 BITS_ := bandpass3.bit
-PYTHON = python3
 
 VERILOG_AUTOGEN += " "
 
@@ -19,7 +21,12 @@ VERILOG_AUTOGEN += " "
 targets: $(TGT_)
 checks: $(CHK_)
 check_all: $(CHK_)
+lint: $(LNT_)
 bits: $(BITS_)
+
+%_pycheck: %_tb tb_pycheck.py
+	$(VVP) $< +trace
+	$(PYTHON) $(word 2, $^) -f $*
 
 rot_dds_auto: cordicg_b22.v
 
@@ -72,14 +79,23 @@ banyan_check: banyan_tb banyan_ch_find.py $(BUILD_DIR)/testcode.awk
 	$(VERILOG_CHECK)
 	$(VVP) banyan_tb +trace +squelch | $(PYTHON) $(filter %banyan_ch_find.py, $^)
 
-second_if_out_tb: cordicg_b22.v
+include $(DSP_DIR)/lo_lut/rules.mk
 
-second_if_out_check: second_if_out_tb second_if_test.py $(BUILD_DIR)/testcode.awk
-	$(VERILOG_CHECK)
-	$(VVP) second_if_out_tb +trace; $(PYTHON) second_if_test.py second_if_out.dat
+# SSB Drivers
+SSB_TEST_PY = ssb_drive_test.py
+
+second_if_out_tb: cordicg_b22.v lo_lut_f40.v lo_lut_f40_05.v
+
+second_if_out_check: second_if_out_tb $(SSB_TEST_PY)
+	$(VVP) $< +trace +if_lo=0 && $(PYTHON) $(word 2, $^) second_if_out.dat 145
+	$(VVP) $< +trace +if_lo=1 && $(PYTHON) $(word 2, $^) second_if_out.dat 60
+
+ssb_out_check: ssb_out_tb $(SSB_TEST_PY)
+	$(VVP) $< +trace && $(PYTHON) $(word 2, $^) ssb_out.dat SSB_OUT
+	$(VVP) $< +trace +single && $(PYTHON) $(word 2, $^) ssb_out.dat SSB_OUT SINGLE
 
 CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat *.lxt *~
-CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cordicg_b22.v second_if_out.dat
+CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cordicg_b22.v second_if_out.dat ssb_*.dat multiply_accumulate.out non_iq_interleaved_piloop.out
 
 CLEAN_DIRS += tt800_ref.dSYM
 CLEAN_DIRS += _xilinx __pycache__

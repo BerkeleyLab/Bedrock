@@ -34,6 +34,15 @@ proc project_create {platform_name project_name} {
         set platform "bmb7"
         set project_part "xc7k160tffg676-2"
     }
+    if [regexp "marble" $platform_name] {
+	if [regexp "marblemini" $platform_name] {
+	    set platform "marblemini"
+	    set project_part "xc7a100t-fgg484-2"
+	} else {
+	    set platform "marble"
+	    set project_part "xc7k160tffg676-2"
+	}
+    }
     if [regexp "qf2pre_*" $platform_name] {
         set platform "bmb7"
         set project_part "xc7k160tffg676-2"
@@ -59,6 +68,7 @@ proc project_create {platform_name project_name} {
     if {$project_board ne "none"} {
         set_property board_part $project_board [current_project]
     }
+    set_property top $project_name [current_fileset]
 }
 
 proc project_bd_design {library_dir project_name} {
@@ -131,7 +141,14 @@ proc project_run {verilog_defines} {
     # for picorv32soc
     set baz [string map {"-D" ""} $verilog_defines]
     set args [regexp -all -inline {\S+} $baz]
+
+    # Append to existing defines, if any
+    set cur_list [get_property verilog_define [current_fileset]]
+    set args [list {*}$args {*}$cur_list]
+
     set_property verilog_define $args [current_fileset]
+    puts "DEFINES:"
+    puts [get_property verilog_define [current_fileset]]
 
     launch_runs synth_1
     wait_on_run synth_1
@@ -158,5 +175,7 @@ proc project_write_bitstream {platform} {
         set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [get_designs impl_1]
     }
     set_property BITSTREAM.CONFIG.CONFIGRATE 33 [get_designs impl_1]
+
     write_bitstream -force [current_project].bit
+    write_cfgmem -force -format bin -interface spix4 -size 16 -loadbit "up 0x0 [current_project].bit" -file [current_project].bin
 }

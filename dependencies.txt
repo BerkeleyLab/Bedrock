@@ -7,6 +7,8 @@ python-numpy
 python-flake8
 
 gtkwave
+Note that python2 is very close to end-of-life; we support and
+recommend using python3.
 
 [optional]
 Verilator
@@ -14,3 +16,36 @@ Yosys
 
 python-scipy
 python-matplotlib
+
+=====
+Summary, well tested on Debian Stretch and Buster:
+
+apt-get install -y build-essential git iverilog gtkwave gawk verilator
+apt-get install -y python3-numpy python3-flake8 python3-scipy python3-matplotlib
+
+=====
+The setup instructions for bedrock on Fedora should be:
+
+yum install iverilog gtkwave make g++ python3-numpy python3-scipy
+
+but then we hit a iverilog-vpi configuration bug seemingly caused by RedHat.
+The evasive action I suggest is to build iverilog from source:
+
+sudo yum remove iverilog
+sudo yum install bison flex
+cd
+wget ftp://icarus.com/pub/eda/verilog/v10/verilog-10.2.tar.gz
+echo "96dedbddb12d375edb45a144a926a3ba1e3e138d6598b18e7d79f2ae6de9e500  verilog-10.2.tar.gz" | sha256sum -c
+tar -xvzf verilog-10.2.tar.gz
+cd verilog-10.2
+./configure --prefix=$HOME
+make
+make install
+
+=====
+Windows Subsystem for Linux (WSL)
+??? works?
+
+=====
+macOS
+??? works?

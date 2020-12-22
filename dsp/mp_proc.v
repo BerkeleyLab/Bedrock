@@ -31,7 +31,10 @@
 // drv_p = (sel_en ? in_mp : 0) + ph_offset
 // set_p and gain_p
 
-module mp_proc(
+module mp_proc # (
+	parameter thresh_shift = 9, // Threshold shift; typically 9 for SRF use
+	parameter ff_dshift = 0     // Deferred ff_ddrive downshift
+)(
 	input clk,
 	input sync,
 	// Input from cordic_mux
@@ -47,6 +50,16 @@ module mp_proc(
 	output [1:0] setmp_addr,  // external address for setmp
 	output [1:0] coeff_addr,  // external address for coeff
 	output [1:0] lim_addr,  // external address for lim
+	// Feedforward integral hooks and setpoints
+	input               ffd_en,
+	input signed [17:0] ff_setm, // Magnitude setpoint
+	input signed [17:0] ff_setp, // Phase setpoint
+	input signed [17:0] ff_ddrive, // Drive derivative; accumulated in I term
+	input signed [17:0] ff_dphase, // Phase derivative - unused
+	// Feedforward proportional hooks
+	input               ffp_en,
+	input signed [17:0] ff_drive,  // Drive; added to P term
+	input signed [17:0] ff_phase,  // Phase;
 	// Final output, back to cordic_mux
 	output out_sync,
 	output signed [17:0] out_xy,
@@ -101,13 +114,21 @@ always @(posedge clk) begin
 	end
 end
 
+// Setpoint muxing - pipelined to ease timing
+reg signed [17:0] ff_setmp=0;
+always @(posedge clk) begin
+	ff_setmp <= state[0] ? ff_setm : ff_setp;
+end
+
+wire signed [17:0] setmp_mux = ffd_en ? ff_setmp : setmp;
+
 // Subtract setpoint, add offset
 reg signed [17:0] mp_err=0, phout=0;
 // drv_p only valid during sync cycles
 wire signed [17:0] drv_p = (sel_en&sel_amp_ok) ? in_mp + ph_offset : 0; // XXX can't change phase unless SEL?
 always @(posedge clk) begin
-	mp_err <= in_mp - setmp;  // XXX saturate magnitude only?
-	phout <= stb[0] ? drv_p : setmp;
+	mp_err <= in_mp - setmp_mux;  // XXX saturate magnitude only?
+	phout <= stb[0] ? drv_p : setmp_mux;
 end
 wire signed [17:0] mp_err2;
 pdetect #(.w(18)) pdetect(.clk(clk), .ang_in(mp_err), .strobe_in(stb[1]),
@@ -124,14 +145,16 @@ assign out_ph = {out_ph_w,1'b0};  // Hmmmm....
 wire pi_sync;  // not used
 wire signed [17:0] xy_drive;
 wire [3:0] clipped;
-xy_pi_clip pi(.clk(clk), .in_xy(mp_err2), .sync(stb[1]),
-	.out_xy(xy_drive), .o_sync(pi_sync), .coeff(coeff), .lim(lim), .clipped(clipped)
+xy_pi_clip #(.ff_dshift(ff_dshift)) pi (.clk(clk), .in_xy(mp_err2), .sync(stb[1]),
+	.out_xy(xy_drive), .o_sync(pi_sync), .coeff(coeff), .lim(lim), .clipped(clipped),
+	.ffd_en(ffd_en), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
+	.ffp_en(ffp_en), .ff_drive(ff_drive), .ff_phase(ff_phase)
 );
 
 // terrible waste of a multiplier
 reg signed [35:0] set1=0;
 always @(posedge clk) begin
-	set1 <= setmp * 96667;  // 2^17*2/(1.646760258)^2
+	set1 <= setmp_mux * 96667;  // 2^17*2/(1.646760258)^2
 end
 wire signed [17:0] set1s = set1[34:17];
 
@@ -155,18 +178,17 @@ end
 // Set up the thresholds for comparison
 reg [16:0] thresh1=0, thresh2=0;
 reg over_thresh=0;
-localparam thresh_shift1 = 9;
 always @(posedge clk) begin
-	// When thresh_shift1 = 9, thresholds at 0.2%, 0.1%, 0.05%, and 0.024%
+	// When thresh_shift = 9, thresholds at 0.2%, 0.1%, 0.05%, and 0.024%
 	// in amplitude, and 0.002 radian, .. 0.00024 radian in phase,
 	// equivalent to 0.11 degree, .. 0.014 degree.  Note that 20861 is
 	// one radian, expressed as 17-bit fraction of a revolution.
-	thresh1 <= stb[1] ? (setmp >>> thresh_shift1): stb[2] ? (20861 >>> thresh_shift1) : thresh2 >> 1;
+	thresh1 <= stb[1] ? (setmp_mux >>> thresh_shift): stb[2] ? (20861 >>> thresh_shift) : thresh2 >> 1;
 	thresh2 <= thresh1;
 	over_thresh <= mp_err3 > thresh1;
 end
 
-// Spit out oever-threshold events;
+// Spit out over-threshold events;
 // someone else will have to latch these, and reset on slow capture.
 wire [7:0] over_event = {8{over_thresh}} & {stb[2:0], stb[7:3]};
 assign cmp_event = {clipped, over_event};

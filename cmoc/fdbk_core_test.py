@@ -1,12 +1,8 @@
-import os
-import sys
 from subprocess import call
 import numpy as np
 import matplotlib.pylab as plt
 
-sys.path.append(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))) +
-    "/submodules/build")
+from read_regmap import get_map, get_reg_info
 
 
 def write_reg_file(registers, regmap_fdbk_core, filename):
@@ -48,7 +44,6 @@ def run_test_bench(setmp_val,
     """
 
     # Get register map from JSON
-    from read_regmap import get_map, get_reg_info
     regmap_fdbk_core = get_map("./_autogen/regmap_fdbk_core_tb.json")
 
     # Extract the registers of interest

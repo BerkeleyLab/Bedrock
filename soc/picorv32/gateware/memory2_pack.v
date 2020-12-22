@@ -1,9 +1,9 @@
 // --------------------------------------------------------------
-//  memory_pack.v
+//  memory2_pack.v
 // --------------------------------------------------------------
 // This memory can look into the future with the picorv look-ahead interface
 // hence ready goes high at the same time as valid
-// MEM_SIZE must be specified as macro on cmdline
+// BLOCK_RAM_SIZE must be specified as macro on cmdline
 
 module memory2_pack #(
     parameter MEM_INIT = "",
@@ -26,6 +26,7 @@ module memory2_pack #(
 reg  [31:0] mem_rdata=0;
 reg         mem_ready=0;
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( 69'd0 ),
     .mem_packed_ret( mem_packed_ret ),
     .mem_wdata (),
@@ -43,19 +44,15 @@ wire [21:0] mem_addr_reg  = mem_la_addr[23:2];  // Which word
 // --------------------------------------------------------------
 //  Init the memory and its interface wires
 // --------------------------------------------------------------
-// Makefile passes -DMEM_SIZE=$(MEM_SIZE) [bytes]
-// _MEM_SIZE [32 bit words]
-localparam _MEM_SIZE = `MEM_SIZE/4;
+// Makefile passes -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) [bytes]
+// _BLOCK_RAM_SIZE [32 bit words]
+localparam _BLOCK_RAM_SIZE = `BLOCK_RAM_SIZE/4;
 integer i;
-reg [31:0] memory[0:_MEM_SIZE-1];
+reg [31:0] memory[0:_BLOCK_RAM_SIZE-1];
 initial begin
-    for (i=0; i<_MEM_SIZE; i=i+1) memory[i] = 32'h00000000;
-    $readmemh( MEM_INIT, memory );
-    $write("--------------------------\n");
-    $write(" memory2_pack\n");
-    $write("--------------------------\n");
-    $write("Size:      0x%x words\n", _MEM_SIZE);
-    $write("Init file: %s\n",         MEM_INIT);
+    for (i=0; i<_BLOCK_RAM_SIZE; i=i+1) memory[i] = 32'h00000000;
+    $readmemh(MEM_INIT, memory);
+    $write("memory2_pack: 0x%x words, %s\n", _BLOCK_RAM_SIZE, MEM_INIT);
     $fflush();
 end
 

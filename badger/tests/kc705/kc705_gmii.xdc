@@ -46,6 +46,16 @@ set_property -dict {PACKAGE_PIN AA8 IOSTANDARD LVCMOS15} [get_ports {LED[1]}]
 set_property -dict {PACKAGE_PIN AC9 IOSTANDARD LVCMOS15} [get_ports {LED[2]}]
 set_property -dict {PACKAGE_PIN AB9 IOSTANDARD LVCMOS15} [get_ports {LED[3]}]
 
+# QSPI Flash
+set_property -dict {PACKAGE_PIN U19 IOSTANDARD LVCMOS25} [get_ports BOOT_CS_B]
+set_property -dict {PACKAGE_PIN P24 IOSTANDARD LVCMOS25} [get_ports BOOT_MOSI]
+set_property -dict {PACKAGE_PIN R25 IOSTANDARD LVCMOS25} [get_ports BOOT_MISO]
+# U19  QSPI_IC_CS_B
+# P24  FLASH_D0
+# R25  FLASH_D1
+# and the FPGA_CCLK is special, doesn't show up here,
+# access is by instantiating the STARTUPE2 primitive
+
 # More-or-less fake attachment to FMC; I have no plans to hook this up
 set_property -dict {PACKAGE_PIN AJ21 IOSTANDARD LVCMOS25} [get_ports SCLK]
 set_property -dict {PACKAGE_PIN AH21 IOSTANDARD LVCMOS25} [get_ports CSB]

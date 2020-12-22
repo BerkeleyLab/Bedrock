@@ -74,8 +74,8 @@ def given(ov, sl):
     print("// given(%s, %s) pc=%d" % (ov, sl, new_op.pc))
 
 
-def unmatched(l):
-    print("// unmatched: "+l)
+def unmatched(line):
+    print("// unmatched: " + line)
 
 
 ifile = open(argv[1], 'r')
@@ -179,8 +179,8 @@ def assign_vars():
             n = choose_reg(v)
             if verbose:
                 print("// assigned %d for %s from %d to %d" % (n, v, becomes_valid[v], last_used[v]))
-            else:
-                print("// %s from %d never used" % (v, becomes_valid[v]))
+        else:
+            print("// %s from %d never used" % (v, becomes_valid[v]))
 
 
 def dump_regmap():

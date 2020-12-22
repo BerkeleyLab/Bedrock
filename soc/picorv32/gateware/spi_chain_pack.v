@@ -1,14 +1,14 @@
 module spi_chain_pack #(
     parameter BASE_ADDR=8'h00,
-    parameter [3:0] N_SLAVES=1
+    parameter [3:0] N_DEVICES=1
 ) (
     input  clk,
     input  rst,
     // Hardware interface
-    output reg [N_SLAVES-1:0] spi_ss,
+    output reg [N_DEVICES-1:0] spi_ss,
     output reg spi_sck,
     output reg spi_mosi,
-    input      [N_SLAVES-1:0] spi_miso,
+    input      [N_DEVICES-1:0] spi_miso,
     // PicoRV32 packed MEM Bus interface
     input  [68:0]     mem_packed_fwd,  //DEC > URT
     output [32:0]     mem_packed_ret   //DEC < URT
@@ -24,7 +24,7 @@ localparam BIT_CPOL       = 16;
 localparam BIT_CPHA       = 17;
 
 initial begin
-    spi_ss = {N_SLAVES{1'b1}};
+    spi_ss = {N_DEVICES{1'b1}};
     spi_sck = 0;
     spi_mosi = 0;
 end
@@ -36,11 +36,12 @@ wire [31:0] mem_wdata;
 wire [ 3:0] mem_wstrb;
 wire        mem_valid;
 wire [31:0] mem_addr;
-wire  [3:0] slave_addr = mem_addr[7:4];
+wire  [3:0] addr = mem_addr[7:4];
 wire  [3:0] short_addr = mem_addr[3:0];
 wire        mem_ready;
 reg  [31:0] mem_rdata=0;
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
 
@@ -99,10 +100,10 @@ reg [31:0] spi_rdata_latch=0;
 reg mem_read_done=0;
 reg mem_write_done=0;
 
-reg [15:0] sckhalfperiods [0:N_SLAVES-1];
-reg [7:0] scklens [0:N_SLAVES-1];
-reg [0:N_SLAVES-1] cfg_cpols;
-reg [0:N_SLAVES-1] cfg_cphas;
+reg [15:0] sckhalfperiods [0:N_DEVICES-1];
+reg [7:0] scklens [0:N_DEVICES-1];
+reg [0:N_DEVICES-1] cfg_cpols;
+reg [0:N_DEVICES-1] cfg_cphas;
 
 always @(posedge clk) begin
     // latch spi read for cpu read
@@ -123,10 +124,10 @@ always @(posedge clk) begin
                     spi_start <= 0;
                 end else begin
                     // apply configuration
-                    sckhalfperiod <= sckhalfperiods[slave_addr];
-                    scklen <= scklens[slave_addr];
-                    cfg_cpol <= cfg_cpols[slave_addr];
-                    cfg_cpha <= cfg_cphas[slave_addr];
+                    sckhalfperiod <= sckhalfperiods[addr];
+                    scklen <= scklens[addr];
+                    cfg_cpol <= cfg_cpols[addr];
+                    cfg_cpha <= cfg_cphas[addr];
                     spi_wdata <= mem_wdata[31:0];
                     spi_start <= 1;
                 end
@@ -146,10 +147,10 @@ always @(posedge clk) begin
             end
 
             mem_write && (short_addr==SPI_CONFIG) : begin
-                sckhalfperiods[slave_addr] <= mem_wdata[7:0];
-                scklens[slave_addr] <= mem_wdata[15:8];
-                cfg_cpols[slave_addr] <= mem_wdata[BIT_CPOL];
-                cfg_cphas[slave_addr] <= mem_wdata[BIT_CPHA];
+                sckhalfperiods[addr] <= mem_wdata[7:0];
+                scklens[addr] <= mem_wdata[15:8];
+                cfg_cpols[addr] <= mem_wdata[BIT_CPOL];
+                cfg_cphas[addr] <= mem_wdata[BIT_CPHA];
                 mem_write_done <= 1;
             end
 
@@ -165,7 +166,7 @@ end
 
 integer ix;
 initial
-for (ix=0; ix<N_SLAVES; ix=ix+1) begin
+for (ix=0; ix<N_DEVICES; ix=ix+1) begin
     sckhalfperiods[ix] = 3;
     scklens[ix] = 32;
     cfg_cpols[ix] = 0;
@@ -173,12 +174,12 @@ for (ix=0; ix<N_SLAVES; ix=ix+1) begin
 end
 
 always @* begin
-    for (ix=0; ix<N_SLAVES; ix=ix+1) begin
-        spi_ss[ix]   = (slave_addr==ix) ? spi_ss_mux : 1;
+    for (ix=0; ix<N_DEVICES; ix=ix+1) begin
+        spi_ss[ix]   = (addr==ix) ? spi_ss_mux : 1;
     end
     spi_sck  = spi_sck_mux;
     spi_mosi = spi_mosi_mux;
-    spi_miso_mux = spi_miso[slave_addr];
+    spi_miso_mux = spi_miso[addr];
 end
 
 assign mem_ready = spi_rvalid | mem_read_done | mem_write_done;

@@ -35,6 +35,7 @@ module cic_wave_recorder #(
    parameter cc_halfband=1,
    parameter cc_use_delay=0,  // Match pipeline length of filt_halfband=1
    parameter cc_shift_base=0, // Bits to discard from previous acc step
+   parameter cc_shift_wi=4,
 
 
    // Circular Buffer parameters
@@ -50,7 +51,7 @@ module cic_wave_recorder #(
 (
    input                      iclk,
    input                      reset,
-   input                      stb_in,     // Strobe signal for input samples
+   input                      stb_in,          // Strobe signal for input samples
    input [n_chan*di_dwi-1:0]  d_in,            // Flattened array of unprocessed data streams. CH0 in LSBs
    input                      cic_sample,      // CIC base sampling signal
 
@@ -60,7 +61,7 @@ module cic_wave_recorder #(
 
    // CC Filter controls
    input                      cc_sample,       // CCFilt sampling signal
-   input [3:0]                cc_shift,        // controls scaling of filter result
+   input [cc_shift_wi-1:0]    cc_shift,        // controls scaling of filter result
 
    // Channel selector controls
    input [n_chan-1:0]         chan_mask,       // Bitmask of channels to record
@@ -99,7 +100,8 @@ module cic_wave_recorder #(
       .cc_outw       (cc_outw),
       .cc_halfband   (cc_halfband),
       .cc_use_delay  (cc_use_delay),
-      .cc_shift_base (cc_shift_base))
+      .cc_shift_base (cc_shift_base),
+      .cc_shift_wi   (cc_shift_wi))
    i_cic_multichannel
    (
       .clk           (iclk),
@@ -135,6 +137,27 @@ module cic_wave_recorder #(
       end
    endgenerate
 
+   // Avoid partial strobes/bursts when using buf_write
+   // Assume strobes are well formed (asserted in fchan_subset)
+   // Count beats in case there's no separation between bursts
+   reg [4:0] chan_stb_cnt=0;
+   reg wr_gated_r=0;
+
+   wire wr_gated = (chan_stb_cnt==0 && !buf_write);
+
+   always @(posedge iclk) begin
+      if (cic_stb_out) begin
+         chan_stb_cnt <= chan_stb_cnt + 1;
+
+         if (wr_gated) wr_gated_r <= 1;
+      end
+
+      if (chan_stb_cnt == n_chan-1) begin
+         chan_stb_cnt <= 0;
+         wr_gated_r <= 0;
+      end
+   end
+
    circle_buf_serial #(
       .n_chan        (n_chan),
       .lsb_mask      (lsb_mask),
@@ -145,7 +168,7 @@ module cic_wave_recorder #(
    i_circle_buf_serial (
       .iclk            (iclk),
       .sr_in           (wave_data),
-      .sr_stb          (cic_stb_out & buf_write),
+      .sr_stb          (cic_stb_out & (~wr_gated & ~wr_gated_r)),
       .chan_mask       (chan_mask),
       .oclk            (oclk),
       .buf_sync        (buf_sync),

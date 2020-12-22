@@ -11,7 +11,7 @@
 import argparse
 import json
 import re
-from os.path import dirname, basename, isfile
+from os.path import dirname, basename, isfile, splitext
 from copy import deepcopy
 try:
     from StringIO import StringIO
@@ -200,10 +200,14 @@ def print_instance_ports(inst, mod, gvar, gcnt, fd):
     so the variables mapped to the ports can get adequately defined.
     '''
     instance_ports = port_lists[mod]
-    # 'list comprehension' for the port list itself
     if fd:
-        fd.write('`define AUTOMATIC_' + inst + ' ' + ',\\\n\t'.join(
-            one_port(inst, p.name, gvar) for p in instance_ports))
+        # 'list comprehension' for the port list itself
+        this_list = [one_port(inst, p.name, gvar) for p in instance_ports]
+        if this_list:
+            tail = ' ' + ',\\\n\t'.join(this_list)
+        else:
+            tail = ''
+        fd.write('`define AUTOMATIC_' + inst + tail)
         fd.write('\n')
     #  now construct the self_ports and decoders (if any)
     for p in instance_ports:
@@ -249,7 +253,7 @@ TOP_LEVEL_REG = r'^\s*//\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*top-l
 DESCRIPTION_ATTRIBUTE = r'^\s*\(\*\s*BIDS_description\s*=\s*\"(.+?)\"\s*\*\)\s*$'
 
 
-def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
+def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
     '''
     Given a filename, parse Verilog:
     (a) looking for module instantiations marked automatic,
@@ -258,21 +262,32 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
     (b) looking for input/output ports labeled 'external'.
     Record them in the port_lists dictionary for this module.
     '''
-    fd.write('// parse_vfile %s %s\n' % (stack, fin))
+    fin_sv = splitext(fin)[0] + '.sv'
     searchpath = dirname(fin)
     fname = basename(fin)
-    if not isfile(fin):
+    fname_sv = basename(fin_sv)
+    fsearch = [fname, fname_sv] if try_sv else [fname]
+    found = False
+    for fn in fsearch:
+        if isfile(fn):
+            fin = fn
+            break
         for d in dlist:
-            x = d + '/' + fname
+            x = d + '/' + fn
             if isfile(x):
                 fin = x
+                found = True
                 break
+        if found:
+            break
+
     if not isfile(fin):
         print("File not found:", fin)
         print("(from hierarchy %s)" % stack)
         global file_not_found
         file_not_found += 1
         return
+    fd.write('// parse_vfile %s %s\n' % (stack, fin))
     if searchpath == '':
         searchpath = '.'
     this_mod = fin.split('/')[-1].split('.')[0]
@@ -283,14 +298,14 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
         verilog_file_lines = f.readlines()
     this_port_list = []
     attributes = {}
-    for l in verilog_file_lines:
+    for line in verilog_file_lines:
         # Search for attributes
-        m = re.search(DESCRIPTION_ATTRIBUTE, l)
+        m = re.search(DESCRIPTION_ATTRIBUTE, line)
         if m:
             value = m.group(1)
             attributes['description'] = value
         # (a) instantiations
-        m = re.search(INSTANTIATION_SITE, l)
+        m = re.search(INSTANTIATION_SITE, line)
         if m:
             mod = m.group(1)
             inst = m.group(3)
@@ -333,7 +348,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
                     construct_map(inst, p, gcnt, this_mod)
         # (b) ports
         # Search for port with register width defined 'input (signed)? [%d:%d] name // <...>'
-        m = re.search(PORT_WIDTH_MULTI, l)
+        m = re.search(PORT_WIDTH_MULTI, line)
         if m:
             info = [m.group(i) for i in range(7)]
             p = Port(info[5], (info[3], info[4]), info[1], info[2], this_mod,
@@ -348,7 +363,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
                 consider_port(p, fd)
             attributes = {}
         else:
-            m = re.search(PORT_WIDTH_SINGLE, l)
+            m = re.search(PORT_WIDTH_SINGLE, line)
             if m:
                 info = [m.group(i) for i in range(5)]
                 p = Port(info[3], (0, 0), info[1], info[2], this_mod, info[4],
@@ -359,7 +374,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed):
 
         # (c) registers in the top-level file
         if not stack:
-            m = re.search(TOP_LEVEL_REG, l)
+            m = re.search(TOP_LEVEL_REG, line)
             if m:
                 info = [m.group(i) for i in range(6)]
                 p = Port(info[4], (info[2], info[3]), 'top_level', info[1],
@@ -430,7 +445,7 @@ def generate_addresses(fd,
     for k in register_names:
         bitwidth = gch[k][0]
         register_array_size = 1 << gch[k][0]
-        if (gen_mirror and mirror_base == -1 and register_array_size <= MIN_MIRROR_ARRAY_SIZE and fd):
+        if (gen_mirror and mirror_base == -1 and register_array_size <= MIN_MIRROR_ARRAY_SIZE):
             mirror_base = base
             mirror_bit_len = mirror_size.bit_length()
             mirror_size_nearest_pow2 = 1 << mirror_bit_len
@@ -444,10 +459,11 @@ def generate_addresses(fd,
                 print('Aligning mirror base. New mirror base: {}'.format(
                     format(base, '#x')))
             mirror_clk_prefix = 'lb'  # TODO: This is a hack
-            s = '`define MIRROR_WIDTH %d\n'\
-                '`define ADDR_HIT_MIRROR (%s_addr[`LB_HI:`MIRROR_WIDTH]==%d)\n' %\
-                (mirror_bit_len, mirror_clk_prefix, mirror_base >> mirror_bit_len)
-            fd.write(s)
+            if fd:
+                s = '`define MIRROR_WIDTH %d\n'\
+                    '`define ADDR_HIT_MIRROR (%s_addr[`LB_HI:`MIRROR_WIDTH]==%d)\n' %\
+                    (mirror_bit_len, mirror_clk_prefix, mirror_base >> mirror_bit_len)
+                fd.write(s)
         sign = gch[k][2]
         datawidth = gch[k][3]
         description = gch[k][-1]
@@ -573,13 +589,14 @@ def write_address_header(fi, fo, low_res, lb_width, gen_mirror, base_addr,
     addr_bufs.close()
 
 
-def write_regmap_file(fi, fo, low_res, base_addr, plot_map):
+def write_regmap_file(fi, fo, low_res, gen_mirror, base_addr, plot_map):
     address_allocation(
         0,
         0,
         sorted(gch.keys()),
         base_addr,
         low_res=low_res,
+        gen_mirror=gen_mirror,
         plot_map=plot_map)
     addr_map = {x: g_flat_addr_map[x] for x in g_flat_addr_map}
     with open(fo, 'w') as fd:
@@ -675,7 +692,7 @@ def main(argv):
                              args.plot_map)
     if regmap_fname:
         write_regmap_file(input_fname, regmap_fname, args.low_res,
-                          args.base_addr, args.plot_map)
+                          args.gen_mirror, args.base_addr, args.plot_map)
 
 
 if __name__ == '__main__':

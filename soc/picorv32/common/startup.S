@@ -52,7 +52,7 @@ initRegs:
     addi x29, zero, 0
     addi x30, zero, 0
     addi x31, zero, 0
-    li  sp, MEM_SIZE          # Set stack pointer to last byte in memory + 1 of user app
+    li  sp, BLOCK_RAM_SIZE    # Set stack pointer to last byte in memory + 1 of user app
     addi sp,sp,-16
     sw zero,0(sp)
     sw zero,4(sp)
@@ -60,3 +60,12 @@ initRegs:
     sw zero,12(sp)
     jal ra, main              # call main()
     ebreak                    # returned from main, put on the ebreak
+
+# extern uint64_t _picorv32_rd_cycle_64(void);
+.globl _picorv32_rd_cycle_64
+_picorv32_rd_cycle_64:
+    rdcycleh     a1
+    rdcycle      a0
+    rdcycleh     t0
+    bne          a1, t0, _picorv32_rd_cycle_64
+    ret

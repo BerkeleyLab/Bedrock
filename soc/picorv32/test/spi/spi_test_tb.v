@@ -6,7 +6,7 @@
 module spi_test_tb;
     localparam CLK_PERIOD = 8;    // Simulated clock period in [ns]
     localparam MAX_SIM    = 84000;   // ns
-    localparam N_SLAVES   = 2;
+    localparam N_MODELS   = 2;
     reg mem_clk=1;
     always #(CLK_PERIOD/2)   mem_clk = ~mem_clk;
 
@@ -96,19 +96,19 @@ module spi_test_tb;
     // --------------------------------------------------------------
     //  SPI master
     // --------------------------------------------------------------
-    wire [N_SLAVES-1:0] spi_ss;
-    wire [N_SLAVES-1:0] spi_sck;
-    wire [N_SLAVES-1:0] spi_mosi;
-    wire [N_SLAVES-1:0] spi_miso;
+    wire [N_MODELS-1:0] spi_cs;
+    wire [N_MODELS-1:0] spi_sck;
+    wire [N_MODELS-1:0] spi_copi;
+    wire [N_MODELS-1:0] spi_cipo;
     spi_pack #(
         .BASE_ADDR  (8'h04)
     ) dut (
         .clk            (mem_clk        ),
         .rst            (reset          ),
-        .spi_ss         (spi_ss[0]      ),
+        .spi_cs         (spi_cs[0]      ),
         .spi_sck        (spi_sck[0]     ),
-        .spi_mosi       (spi_mosi[0]    ),
-        .spi_miso       (spi_miso[0]    ),
+        .spi_copi       (spi_copi[0]    ),
+        .spi_cipo       (spi_cipo[0]    ),
         // PicoRV32 packed MEM Bus interface
         .mem_packed_fwd (packed_cpu_fwd ), //DEC > URT
         .mem_packed_ret (packed_spi0_ret )  //DEC < URT
@@ -119,34 +119,34 @@ module spi_test_tb;
     ) dut1 (
         .clk            (mem_clk        ),
         .rst            (reset          ),
-        .spi_ss         (spi_ss[1]      ),
+        .spi_cs         (spi_cs[1]      ),
         .spi_sck        (spi_sck[1]     ),
-        .spi_mosi       (spi_mosi[1]    ),
-        .spi_miso       (spi_miso[1]    ),
+        .spi_copi       (spi_copi[1]    ),
+        .spi_cipo       (spi_cipo[1]    ),
         // PicoRV32 packed MEM Bus interface
         .mem_packed_fwd (packed_cpu_fwd ), //DEC > URT
         .mem_packed_ret (packed_spi1_ret )  //DEC < URT
     );
 
     // --------------------------------------------------------------
-    //  SPI slave (hardware)
+    //  SPI model (hardware)
     // --------------------------------------------------------------
     localparam ROM0 = 32'hdeadbeaf;
     localparam ROM1 = 24'h123456;
-    spi_slave #(.ID(0), .CPOL(0), .DW(32)) spi_slave0_inst (
+    spi_model #(.ID(0), .CPOL(0), .DW(32)) spi_model0_inst (
         .ROM  (ROM0),
-        .ss   (spi_ss[0]  ),
+        .cs   (spi_cs[0]  ),
         .sck  (spi_sck[0] ),
-        .mosi (spi_mosi[0]),
-        .miso (spi_miso[0])
+        .copi (spi_copi[0]),
+        .cipo (spi_cipo[0])
     );
 
-    spi_slave #(.ID(1), .CPOL(1), .DW(24)) spi_slave1_inst (
+    spi_model #(.ID(1), .CPOL(1), .DW(24)) spi_model1_inst (
         .ROM  (ROM1),
-        .ss   (spi_ss[1]  ),
+        .cs   (spi_cs[1]  ),
         .sck  (spi_sck[1] ),
-        .mosi (spi_mosi[1]),
-        .miso (spi_miso[1])
+        .copi (spi_copi[1]),
+        .cipo (spi_cipo[1])
     );
 
     reg spi_start01=0;
@@ -187,9 +187,9 @@ module spi_test_tb;
                 pass &= cpu.mem_rdata == ROM1;
         end
         if (spi_start0)
-            $display("spi_start slave 0, halfperiod: %d", dut.spi_inst.cfg_sckhalfperiod[7:0]);
+            $display("spi_start model 0, halfperiod: %d", dut.spi_inst.cfg_sckhalfperiod[7:0]);
         if (spi_start1)
-            $display("spi_start slave 1, halfperiod: %d", dut1.spi_inst.cfg_sckhalfperiod[7:0]);
-        //$monitor("time: %8g ns, spi_ss: %2b, spi_miso: %2b", $time, spi_ss, spi_miso);
+            $display("spi_start model 1, halfperiod: %d", dut1.spi_inst.cfg_sckhalfperiod[7:0]);
+        //$monitor("time: %8g ns, spi_cs: %2b, spi_cipo: %2b", $time, spi_cs, spi_cipo);
     end
 endmodule

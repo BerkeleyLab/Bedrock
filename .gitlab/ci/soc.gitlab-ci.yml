@@ -8,23 +8,32 @@ soc_picorv32_test:
 soc_picorv32_kc705:
   stage: synthesis
   before_script:
-    - cd soc/picorv32/project/kc705 && echo $XILINXD_LICENSE_FILE
+    - cd soc/picorv32/project/kc705/synth
   script:
-    - XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.3 PATH=$XILINX_VIVADO/bin:$PATH make system_synth.bit
+    - XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.3 PATH=$XILINX_VIVADO/bin:$PATH make system_top.bit
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week
     paths:
-      - soc/picorv32/project/kc705/system_synth.bit
+      - soc/picorv32/project/kc705/synth/system_top.bit
 
 soc_picorv32_cmod_a7:
   stage: synthesis
   before_script:
-    - cd soc/picorv32/project/cmod_a7
+    - cd soc/picorv32/project/cmod_a7/synth
   script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make system_synth.bit
+    - PATH=$XILINX_VIVADO/bin:$PATH make system_top.bit
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week
     paths:
-      - soc/picorv32/project/cmod_a7/system_synth.bit
+      - soc/picorv32/project/cmod_a7/synth/system_top.bit
+
+soc_picorv32_cmod_a7_run:
+  stage: program
+  dependencies:
+    - soc_picorv32_cmod_a7
+  before_script:
+    - cd soc/picorv32/project/cmod_a7
+  script:
+    - xc3sprog -c jtaghs1_fast -s 210328A6DA47 synth/system_top.bit && python3 hw_test.py 210328A6DA47

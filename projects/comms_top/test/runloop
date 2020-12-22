@@ -1,0 +1,13 @@
+#!/bin/bash
+
+NREP=$1; shift
+count=0
+while [ "$count" -lt "$NREP" ] && $@ ; do
+   (( count++ ))
+done
+if [ $count -ne $NREP ]
+then
+   exit 1
+fi
+
+

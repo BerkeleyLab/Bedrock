@@ -1,0 +1,23 @@
+[dumpfile] "complex_mul_flat.vcd"
+[timestart] 0
+[size] 956 275
+[pos] -1 -98
+*-3.773491 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] complex_mul_tb.
+[sst_width] 213
+[signals_width] 134
+[sst_expanded] 1
+[sst_vpaned_height] 60
+@420
+complex_mul_tb.dut.x_I[17:0]
+complex_mul_tb.dut.x_Q[17:0]
+complex_mul_tb.dut.y_I[17:0]
+complex_mul_tb.dut.y_Q[17:0]
+@28
+complex_mul_tb.dut.gate_in
+complex_mul_tb.dut.gate_out
+@421
+complex_mul_tb.dut.z_I_all[35:0]
+complex_mul_tb.dut.z_Q_all[35:0]
+[pattern_trace] 1
+[pattern_trace] 0

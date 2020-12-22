@@ -1,0 +1,111 @@
+[timestart] 1064610
+[size] 1020 1105
+[pos] -1 -1
+*-14.000000 976458 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.badger_lwip_tb.
+[treeopen] TOP.badger_lwip_tb.badger_pack_inst.
+[sst_width] 213
+[signals_width] 280
+[sst_expanded] 1
+[sst_vpaned_height] 329
+@800200
+-CPU
+@820
+TOP.badger_lwip_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+@c00022
+[color] 5
+TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+@28
+[color] 5
+(0)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(1)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(2)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(3)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(4)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(5)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(6)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(7)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(8)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(9)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(10)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(11)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(12)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(13)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(14)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(15)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(16)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(17)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(18)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(19)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(20)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(21)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(22)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(23)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(24)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(25)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(26)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(27)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(28)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(29)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(30)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+[color] 5
+(31)TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+@1401200
+-group_end
+@28
+TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_instr
+@22
+TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_rdata[31:0]
+@28
+TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_ready
+TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_valid
+@22
+TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_wdata[31:0]
+TOP.badger_lwip_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+@1000200
+-CPU
+@800201
+-mac_buffer
+@29
+TOP.badger_lwip_tb.badger_pack_inst.is_addressed_rx
+TOP.badger_lwip_tb.badger_pack_inst.is_addressed_tx
+TOP.badger_lwip_tb.badger_pack_inst.mem_valid
+@23
+TOP.badger_lwip_tb.badger_pack_inst.mem_rdata[31:0]
+@29
+TOP.badger_lwip_tb.badger_pack_inst.mem_ready
+@1000201
+-mac_buffer
+[pattern_trace] 1
+[pattern_trace] 0

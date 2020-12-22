@@ -14,7 +14,7 @@ print('''    parameter def_op=0
     input [1:0] opin,
     //  opin = 1 forces y to zero (rect to polar),
     //  opin = 0 forces theta to zero (polar to rect),
-    //  opin = 3 for slave mode
+    //  opin = 3 for follow mode
     input [width-1:0] xin,
     input [width-1:0] yin,
     input [width:0] phasein,

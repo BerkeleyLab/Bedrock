@@ -17,7 +17,7 @@ module cstageg(clk, opin, xin, yin, zin, ain, opout, xout, yout, zout);
 		opout=def_op;  xout=0;  yout=0;  zout=0;
 	end
 
-	reg control_h=0;  // local saved state to implement slave mode
+	reg control_h=0;  // local saved state to implement follow mode
 	wire control_l = opin[0] ? ~yin[width-1] : zin[zwidth-1];
 	wire control = opin[1] ? ~control_h : control_l;
 	wire [width-1:0] xv, yv;

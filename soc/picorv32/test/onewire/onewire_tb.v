@@ -1,5 +1,5 @@
 // This testbench does test all of the following
-//  * onewire_soft library against a simulated slave
+//  * onewire_soft library against a simulated model
 //  * gpioz_pack tristate IO module
 //  * gpio_pack IO module
 //  * sfr_pack bit addressable memory module
@@ -111,7 +111,7 @@ module onewire_tb;
     );
 
     // --------------------------------------------------------------
-    //  Simulated onewire slave
+    //  Simulated onewire model
     // --------------------------------------------------------------
     localparam PIN_ONEWIRE = 3;  // has to match settings.h
     pullup ( gpio_z[PIN_ONEWIRE] );

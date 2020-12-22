@@ -1,0 +1,166 @@
+#:import MeshLinePlot kivy.garden.graph.MeshLinePlot
+Logic:
+    orientation: "vertical"
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            size_hint: [1, 0.05]
+            id: settings_box
+            orientation: "horizontal"
+            BoxLayout:
+                size_hint: [0.2, 1]
+                orientation: "vertical"
+                Label:
+                    text: "CH1"
+                    bold: True
+                    id: ch_name
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: [0.6, 1]
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "xlim"
+                        size_hint: [0.3, 1]
+                    TextInput:
+                        id: xlim
+                        on_text: root.update_lim("X", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "ylim"
+                        size_hint: [0.3, 1]
+                    TextInput:
+                        id: ylim
+                        on_text: root.update_lim("Y", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "log_dec_fac"
+                        size_hint: [0.3, 1]
+                    TextInput:
+                        id: ldf
+                        on_text_validate: root.update_ldf(*args)
+                        multiline: False
+            BoxLayout:
+                orientation: "vertical"
+                size_hint: [0.2, 1]
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "Autoscale"
+                    CheckBox:
+                        on_active: root.update_lim("autoscale", *args)
+                        active: root.autoscale
+                Button:
+                    size_hint: [0.5, 0.2]
+                    text: "SAVE"
+                    bold: True
+                    center: self.parent.center
+                    on_press: root.save_data()
+            # BoxLayout:
+            #     orientation: "vertical"
+            #     Label:
+            #         text: "window"
+            #     TextInput:
+            #         id: window
+        BoxLayout:
+            size_hint: [1, 0.05]
+            orientation: "horizontal"
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    text: "CH1"
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "T"
+                    CheckBox:
+                        on_active: root.plot_select("00", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "F"
+                    CheckBox:
+                        on_active: root.plot_select("10", *args)
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    text: "CH2"
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "T"
+                    CheckBox:
+                        on_active: root.plot_select("01", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "F"
+                    CheckBox:
+                        on_active: root.plot_select("11", *args)
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    text: "CH3"
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "T"
+                    CheckBox:
+                        on_active: root.plot_select("02", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "F"
+                    CheckBox:
+                        on_active: root.plot_select("12", *args)
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    text: "CH4"
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "T"
+                    CheckBox:
+                        on_active: root.plot_select("03", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "F"
+                    CheckBox:
+                        on_active: root.plot_select("13", *args)
+            BoxLayout:
+                orientation: "vertical"
+                Label:
+                    text: "F"
+                CheckBox:
+                    on_active: root.plot_select("13", *args)
+        BoxLayout:
+            size_hint: [1, .05]
+            orientation: "horizontal"
+            Label:
+                text: "Cross Spectral Density"
+            CheckBox:
+                on_active: root.plot_select("3", *args)
+            TextInput:
+                id: ti
+                hint_text: "1-2"
+                on_text: root.csd_validate(*args)
+        BoxLayout:
+            size_hint: [1,.1]
+            BoxLayout:
+                size_hint: [.5, 1]
+                orientation: "vertical"
+                Button:
+                    text: "SAVE"
+                    bold: True
+                    on_press: root.save_data()
+            BoxLayout:
+                size_hint: [.5, 1]
+                orientation: "vertical"
+                Button:
+                    text: "RESET"
+                    bold: True
+                    on_press: root.restack_data()

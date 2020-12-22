@@ -59,7 +59,7 @@ set_property PACKAGE_PIN P19 [get_ports {bus_digitizer_U1[4]}]
 set_property PACKAGE_PIN P20 [get_ports {bus_digitizer_U1[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {bus_digitizer_U1[5]}]
 set_property PACKAGE_PIN AC14 [get_ports {bus_digitizer_U1[5]}]
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets digitizer_U1/clk_ibufgds]
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets i_zest_wrap/U1_lmk01801/clk_ibufgds]
 
 # U2: AD9653 ADC
 set_property IOSTANDARD LVDS_25 [get_ports {bus_digitizer_U2[4]}]
@@ -241,14 +241,6 @@ set_property PACKAGE_PIN AA14 [get_ports {bus_digitizer_U33U1[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {bus_digitizer_U33U1[1]}]
 set_property PACKAGE_PIN AA15 [get_ports {bus_digitizer_U33U1[1]}]
 
-# U5: SI571
-set_property IOSTANDARD LVCMOS33 [get_ports {bus_bmb7_U5[*]}]
-set_property PACKAGE_PIN F6 [get_ports {bus_bmb7_U5[0]}]
-set_property PACKAGE_PIN F5 [get_ports {bus_bmb7_U5[1]}]
-
-# U19: CDCE62005
-set_property PACKAGE_PIN K6 [get_ports {bus_bmb7_U19[1]}]
-set_property PACKAGE_PIN K5 [get_ports {bus_bmb7_U19[0]}]
 
 ########
 # Clocks
@@ -257,10 +249,6 @@ create_clock -period 2.500  -name U2_DCO         -waveform {1.000 2.250}  [get_p
 create_clock -period 2.500  -name U3_DCO         -waveform {1.000 2.250}  [get_ports {bus_digitizer_U3[24]}]
 create_clock -period 5.000  -name U4_DCO         -waveform {1.000 3.500}  [get_ports {bus_digitizer_U4[13]}]
 create_generated_clock -name U4_DCI    -source [get_pins {digitizer_U4/oddr_dci/C}] -divide_by 1 -invert [get_ports {bus_digitizer_U4[29]}]
-
-create_clock -period 8.000  -name GTXREFCLK3     -waveform {0.000 4.000}  [get_ports {bus_bmb7_U19[1]}]
-create_clock -period 16.000 -name TXOUTCLK       -waveform {0.000 8.000}  [get_nets {U50_txoutclk[0]}]
-create_clock -period 16.000 -name RXOUTCLK       -waveform {0.000 8.000}  [get_nets {U50_rxoutclk[0]}]
 
 set_clock_groups -name prc -asynchronous \
 -group [get_clocks -include_generated_clocks S6_TO_K7_CLK_1] \

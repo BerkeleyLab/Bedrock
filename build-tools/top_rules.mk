@@ -13,6 +13,7 @@ V_TB = -Wno-timescale
 VFLAGS = ${VFLAGS_$@} -y$(AUTOGEN_DIR) -I$(AUTOGEN_DIR)
 VVP_FLAGS = ${VVP_FLAGS_$@}
 VVP = vvp$(ICARUS_SUFFIX) -N
+VERILATOR = verilator -Wall -Wno-fatal
 GTKWAVE = gtkwave
 VPIEXT = vpi
 PYTHON = python3
@@ -42,13 +43,22 @@ VERILOG_RUN = $(VVP) $@
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@.$$$$ $<
 VERILOG_E = $(VERILOG) -E ${VFLAGS} $(VFLAGS_DEP) -o $@ `cat $(DEPDIR)/$*_tb.dd`
+
+VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I.
+# keep -Wno-TIMESCALEMOD separate, since it's a new flag not supported by Verilator 4.010 in Debian Buster
+VLATOR_TIMESCALEMOD = -Wno-TIMESCALEMOD
+VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY $(VLATOR_TIMESCALEMOD)
+VERILATOR_LINT = $(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $(filter %.v %.sv, $^)
+VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN --MMD --Mdir $(DEPDIR)
+VERILATOR_SIM = $(VERILATOR) --trace-fst -O2 $(VLATOR_LINT_IGNORE) $(VG_ALL) +define+VERILATOR_SIM
+
 FMC_MAP = awk -F\" 'NR==FNR{a[$$2]=$$4;next}$$4 in a{printf "NET %-15s LOC = %-4s | IOSTANDARD = %10s; \# %s\n",$$2,a[$$4],$$6,$$4}'
 XDC_MAP = awk -F"[ \"\t]+" 'NR==FNR{gsub(/]/,"",$$8);a[$$8]=$$4;next}($$3 in a){printf "set_property -dict \"PACKAGE_PIN %-4s IOSTANDARD %s\" [get_ports %s]\n",a[$$3], $$4, $$2}'
 ISE_SYNTH = bash $(BUILD_DIR)/xil_syn
 VIVADO_CMD = vivado -mode batch -nojou -nolog
 VIVADO_SYNTH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(BUILD_DIR)/vivado_tcl/vivado_project.tcl -tclargs
 VIVADO_REMOTE_SYNTH = $(VIVADO_SYNTH)
-SYNTH_OPT = -DMEM_SIZE=16384
+# SYNTH_OPT = -DMEM_SIZE=16384
 PLANAHEAD_SYNTH = planAhead -mode batch -nojou -nolog -source $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(BUILD_DIR)/vivado_tcl/planahead_project.tcl -tclargs
 VIVADO_FLASH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/vivado_flash.tcl -tclargs
 VIVADO_CREATE_IP = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/lbl_ip.tcl $(BUILD_DIR)/vivado_tcl/create_ip.tcl -tclargs
@@ -105,6 +115,14 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 %_check: %_tb $(BUILD_DIR)/testcode.awk
 	$(VERILOG_CHECK)
 
+%_lint: %.v %_auto
+	$(VERILATOR_LINT)
+
+V%_tb: $(wildcard *.sv) $(wildcard *.v)
+	$(VERILATOR_SIM) -I$(V$*_CLIB) -cc --exe $(filter %.v %.sv %.cpp %.c, $^) --top-module $* -y $(AUTOGEN_DIR)
+	MAKEFLAGS="" make -C obj_dir -f V$*.mk USER_CPPFLAGS="-I$(V$*_CLIB)"
+	mv obj_dir/V$* $@
+
 %: %.m
 	$(OCTAVE_SILENT)
 
@@ -129,8 +147,9 @@ ifeq ($(XILINX_TOOL), VIVADO)
 
 %_$(DAUGHTER1).xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/%.xdc  $(BOARD_SUPPORT_DIR)/$(DAUGHTER1)/fmc.map
 	$(XDC_MAP) $^ > $@
+
 # vivado synth
-%.bit: system_top.xdc %.v
+%.bit: system_top.xdc $(wildcard %.sv) $(wildcard %.v)
 	$(VIVADO_SYNTH) $(HARDWARE) $* "$(SYNTH_OPT)" $^
 
 # Uncomment below for remote synth
@@ -159,17 +178,24 @@ else
 	promgen -w -spi -p mcs -o $@ -s 16384 -u 0 $<
 endif
 
-UNISIM_CRAP = 'BUFGCE|IOBUF|BUFG'
+UNISIM_CRAP = 'BUFGCE|IOBUF|BUFG|IBUF|IBUFDS_GTE2|ICAPE2|IOBUF|STARTUPE2|MMCME2_BASE'
 
 # Auto-generated verilog entities shall be set by globally appending to this variable
 $(DEPDIR)/%.bit.d: %.v $(VERILOG_AUTOGEN)
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*.bit $@: "; sort -u $@.$$$$ | grep -Ee $(UNISIM_CRAP) -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
+
 $(DEPDIR)/%_tb.dd: %_tb.v $(VERILOG_AUTOGEN)
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( sort -u $@.$$$$ | grep -Ee _tb -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
+$(DEPDIR)/%.bit.d: %.sv $(VERILOG_AUTOGEN)
+	set -e; mkdir -p $(DEPDIR); $(VERILATOR_MAKEDEP) && ( cp $(DEPDIR)/V"$*"__verFiles.dat $@.$$$$; printf "$*.bit $@: "; tail -n+3 $@.$$$$ | rev | cut -d' ' -f1|rev|tr -d '\"' | sort -u | grep -Ee $(UNISIM_CRAP) -v | grep -Ee "dev/null|verilator_bin|__verFiles.dat|__ver.d" -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
+
 $(DEPDIR)/%_tb.d: %_tb.v $(VERILOG_AUTOGEN)
 	set -e; mkdir -p $(DEPDIR); $(MAKEDEP) && ( printf "$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
+
+$(DEPDIR)/V%_tb.d: %.sv $(VERILOG_AUTOGEN)
+	set -e; mkdir -p $(DEPDIR); $(VERILATOR_MAKEDEP) && ( cp $(DEPDIR)/V"$*"__verFiles.dat $@.$$$$; printf "V$*_tb $@: "; tail -n+3 $@.$$$$ | rev | cut -d' ' -f1|rev|tr -d '\"' | sort -u | grep -Ee "dev/null|verilator_bin|__verFiles.dat|__ver.d" -v | tr '\n' ' '; printf "\n" ) > $@ && rm -f $@.$$$$
 
 LB_AW = 10
 EMPTY :=
@@ -177,14 +203,39 @@ SPACE := $(EMPTY) $(EMPTY)
 COMMA := ,
 NEWAD_DIRS = .
 NEWAD_ARGS = -d $(subst $(SPACE),$(COMMA),$(NEWAD_DIRS)) -i $< -w $(LB_AW)
+
+define NEWAD_O
+mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -o $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
+endef
+define NEWAD_A
+mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -a $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
+endef
+define NEWAD_L
+mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
+endef
+define REV_JSON
+$(PYTHON) $(BUILD_DIR)/reverse_json.py $< > $@
+endef
+
+$(AUTOGEN_DIR)/%_auto.vh: %.sv
+	$(NEWAD_O)
 $(AUTOGEN_DIR)/%_auto.vh: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -o $@ $(NEWAD_ARGS)
+	$(NEWAD_O)
 
+$(AUTOGEN_DIR)/addr_map_%.vh: %.sv
+	$(NEWAD_A)
 $(AUTOGEN_DIR)/addr_map_%.vh: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -a $@ $(NEWAD_ARGS)
+	$(NEWAD_A)
 
+$(AUTOGEN_DIR)/regmap_%.json: %.sv
+	$(NEWAD_L)
 $(AUTOGEN_DIR)/regmap_%.json: %.v
-	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS)
+	$(NEWAD_L)
+
+$(AUTOGEN_DIR)/scalar_%_regmap.json: %.sv
+	$(REV_JSON)
+$(AUTOGEN_DIR)/scalar_%_regmap.json: %.v
+	$(REV_JSON)
 
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz

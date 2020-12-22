@@ -1,4 +1,6 @@
-module xadc_mon(
+module xadc_mon #(
+    parameter INIT_49=16'h1010 // v_aux channel enables
+)(
    input lb_clk,                // Clock input for the dynamic reconfiguration port
    input reset,                 // Reset signal for the System Monitor control logic
    input [4:0] lb_addr,         // read out channel address
@@ -6,7 +8,9 @@ module xadc_mon(
 
    output [8:0] alarm_out,      // {Over-Temp, 5'hx, VCCAUX, VCCINT, Temp}
    input vp_in,                 // Dedicated Analog Input Pair
-   input vn_in
+   input vn_in,
+   input [15:0] vaux_p,
+   input [15:0] vaux_n
 );
 
 reg [6:0] daddr_in=0;    // Address bus for the dynamic reconfiguration port
@@ -77,7 +81,7 @@ wire [7:0]  alm_int;
 wire ot_out;
 assign alarm_out = {ot_out, alm_int};
 
-`ifndef SIMULATION
+`ifndef SIMULATE
 /***********
 create_ip -name xadc_wiz -vendor xilinx.com -library ip -module_name "xadc_wiz_0"
 set_property -dict {
@@ -108,8 +112,8 @@ XADC #(
     .INIT_40(16'h0000), // config reg 0
     .INIT_41(16'h21A0), // config reg 1
     .INIT_42(16'h0500), // config reg 2
-    .INIT_48(16'h0F00), // Sequencer channel selection
-    .INIT_49(16'h0000), // Sequencer channel selection
+    .INIT_48(16'h4F00), // Sequencer channel selection: vcc_bram, V_P, vcc_aux, vcc_int, die-temp
+    .INIT_49(INIT_49), // Sequencer channel selection: vaux_12, vaux_4
     .INIT_4A(16'h0000), // Sequencer Average selection
     .INIT_4B(16'h0000), // Sequencer Average selection
     .INIT_4C(16'h0000), // Sequencer Bipolar selection
@@ -136,8 +140,8 @@ XADC #(
         .DI             (di_in),
         .DWE            (dwe_in),
         .RESET          (reset_in),
-        .VAUXN          (16'h0),
-        .VAUXP          (16'h0),
+        .VAUXN          (vaux_n),
+        .VAUXP          (vaux_p),
         .ALM            (alm_int),
         .BUSY           (busy_out),
         .CHANNEL        (channel_out),

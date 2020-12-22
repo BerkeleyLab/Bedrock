@@ -81,14 +81,14 @@ rtefi_pipe_tb.a.center.a_scan.pass_ipdst
 @c00200
 -arp pattern
 @24
-rtefi_pipe_tb.a.center.a_scan.arp_p.cnt[10:0]
+rtefi_pipe_tb.a.center.a_scan.find_arp.arp_p.cnt[10:0]
 @22
-rtefi_pipe_tb.a.center.a_scan.arp_p.data[7:0]
-rtefi_pipe_tb.a.center.a_scan.arp_p.template[7:0]
+rtefi_pipe_tb.a.center.a_scan.find_arp.arp_p.data[7:0]
+rtefi_pipe_tb.a.center.a_scan.find_arp.arp_p.template[7:0]
 @28
-rtefi_pipe_tb.a.center.a_scan.arp_p.want
-rtefi_pipe_tb.a.center.a_scan.arp_p.match
-rtefi_pipe_tb.a.center.a_scan.arp_p.pass
+rtefi_pipe_tb.a.center.a_scan.find_arp.arp_p.want
+rtefi_pipe_tb.a.center.a_scan.find_arp.arp_p.match
+rtefi_pipe_tb.a.center.a_scan.find_arp.arp_p.pass
 @1401200
 -arp pattern
 @c00200
@@ -171,6 +171,19 @@ rtefi_pipe_tb.a.center.b_write.pxd[8:0]
 @1401200
 -mem addressing
 @c00200
+-rx_mac
+@28
+rtefi_pipe_tb.a.center.b_write.mac_bank
+@24
+rtefi_pipe_tb.a.center.b_write.mac_a0[10:0]
+@22
+rtefi_pipe_tb.a.center.b_write.rx_mac_d[7:0]
+@28
+rtefi_pipe_tb.a.center.b_write.mac_save
+rtefi_pipe_tb.a.center.b_write.mac_queue
+@1401200
+-rx_mac
+@c00200
 -mtu_mem
 @22
 rtefi_pipe_tb.a.center.pbuf_din[8:0]
@@ -200,11 +213,11 @@ rtefi_pipe_tb.a.center.c_construct.status_vec[7:0]
 @800200
 -txmac
 @28
-rtefi_pipe_tb.a.center.txmac.host_start
-rtefi_pipe_tb.a.center.txmac.strobe_l
-rtefi_pipe_tb.a.center.txmac.strobe_s
+rtefi_pipe_tb.a.center.mac_b.txmac.host_start_
+rtefi_pipe_tb.a.center.mac_b.txmac.strobe_l
+rtefi_pipe_tb.a.center.mac_b.txmac.strobe_s
 @22
-rtefi_pipe_tb.a.center.txmac.mac_data[7:0]
+rtefi_pipe_tb.a.center.mac_b.txmac.mac_data[7:0]
 @1000200
 -txmac
 @c00200

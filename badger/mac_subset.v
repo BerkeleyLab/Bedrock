@@ -1,17 +1,18 @@
 module mac_subset #(
-	parameter aw=10,  // 16-bit words
+	parameter mac_aw=10,  // 16-bit words
 	parameter big_endian=0,
 	parameter latency=256,
 	parameter stretch=4,  // minimum value 2, should be 4 for GMII
 	parameter ifg=24   // must have more padding than just Ethernet IFG
 ) (
-	input host_clk,
-	// note that the high-order bit of host_waddr is used to
-	// select control registers
-	input [aw:0] host_waddr,
-	input host_write,
-	input [15:0] host_wdata,
-	output done,
+	// connect the 2 below to an external 16 bit dual port ram
+	output [mac_aw - 1: 0] host_raddr,
+	input [15:0] host_rdata,
+	// address where we should start transmitting from
+	input [mac_aw - 1: 0] buf_start_addr,
+	// set start to trigger transmit, wait for done, reset start
+	input tx_mac_start,
+	output tx_mac_done,
 	// crucial information from input scanner
 	input scanner_busy,
 	// Connection to output multiplexer, right after xformer.v,
@@ -24,34 +25,28 @@ module mac_subset #(
 	output [7:0] mac_data
 );
 
-// Dual-port RAM
-reg [15:0] host_mem[0:(1<<aw)-1];
-wire host_dpram_write = host_write & ~host_waddr[aw];
-always @(posedge host_clk) if (host_dpram_write)
-	host_mem[host_waddr[aw-1:0]] <= host_wdata;
-wire [aw-1:0] host_raddr;
-reg [15:0] host_rdata=0;
-always @(posedge tx_clk) host_rdata <= host_mem[host_raddr];
-
-// Writing the start address triggers sending
-reg [aw-1:0] buf_start_addr;
-wire host_start_write = host_write & host_waddr[aw];
-reg host_pre_start=0, host_start=0;
-always @(posedge host_clk) begin
-	if (host_start_write & ~host_waddr[0]) buf_start_addr <= host_wdata;
-	if (host_start_write) host_pre_start <= ~host_waddr[0];
-	host_start <= host_pre_start;
+reg host_start_=0;
+always @(posedge tx_clk) begin
+	host_start_ <= tx_mac_start;
 end
 
 // Instantiate MAC
 wire req;
 wire [10:0] len_req;
 wire mac_strobe;
-test_tx_mac #(.aw(aw)) mac(.clk(tx_clk),
-	.host_addr(host_raddr), .host_d(host_rdata),
-	.start(host_start), .buf_start_addr(buf_start_addr), .done(done),
-	.req(req), .len_req(len_req),
-	.strobe(mac_strobe), .mac_data(mac_data)
+test_tx_mac #(
+	.mac_aw(mac_aw)
+) mac(
+	.clk(tx_clk),
+	.host_addr(host_raddr),
+	.host_d(host_rdata),
+	.start(host_start_),
+	.buf_start_addr(buf_start_addr),
+	.done(tx_mac_done),
+	.req(req),
+	.len_req(len_req),
+	.strobe(mac_strobe),
+	.mac_data(mac_data)
 );
 
 // Instantiate precog
@@ -71,6 +66,7 @@ precog #(
 // Manipulate simple strobe from precog
 // final system wants 4 cycles lead (for GMII preamble) and
 // 4 cycle trailer (for CRC) on strobe_l compared to strobe_s.
+// TODO this should be moved to precog
 reg [stretch-1:0] strobe_sr1=0;
 always @(posedge tx_clk) strobe_sr1 <= {strobe_sr1[stretch-2:0], clear_to_send};
 reg [stretch-1:0] strobe_sr2=0;

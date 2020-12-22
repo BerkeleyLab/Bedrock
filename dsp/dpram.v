@@ -9,27 +9,28 @@ module dpram(
 parameter aw=8;
 parameter dw=8;
 parameter sz=(32'b1<<aw)-1;
-	input clka, clkb, wena;
-	input [aw-1:0] addra, addrb;
-	input [dw-1:0] dina;
-	output [dw-1:0] douta, doutb;
+parameter initial_file = "";
+
+input clka, clkb, wena;
+input [aw-1:0] addra, addrb;
+input [dw-1:0] dina;
+output [dw-1:0] douta, doutb;
 
 reg [dw-1:0] mem[sz:0];
 reg [aw-1:0] ala=0, alb=0;
 
-// In principle this should work OK for synthesis, but
+// In principle the zeroing loop should work OK for synthesis, but
 // there seems to be a bug in the Xilinx synthesizer
 // triggered when k briefly becomes sz+1.
-`ifdef SIMULATE
 integer k=0;
-initial
-begin
-	for (k=0;k<sz+1;k=k+1)
-	begin
-		mem[k]=0;
+initial begin
+	if (initial_file != "") $readmemh(initial_file, mem);
+`ifdef SIMULATE
+	else begin
+		for (k=0;k<sz+1;k=k+1) mem[k]=0;
 	end
-end
 `endif
+end
 
 assign douta = mem[ala];
 assign doutb = mem[alb];

@@ -9,7 +9,12 @@ module complex_freq #(
 	output [16:0] amp_max,
 	output [16:0] amp_min,
 	output updated, // Asserted when amp_{max,min} are updated
-	output timing_err // New data received while calculation is ongoing
+	output timing_err, // New data received while calculation is ongoing
+	//
+	// Additional output giving magnitude-squared, meant to
+	// support average power calculations; can be ignored.
+	output [23:0] square_sum_out,
+	output square_sum_valid
 );
 
 // One multiplier to square the inputs
@@ -29,6 +34,9 @@ always @(posedge clk) begin
 	sgate2 <= sgate1;
 	sum_valid <= sgate1 & sgate2;
 end
+
+assign square_sum_out = square_sum_cut[33:10];
+assign square_sum_valid = sum_valid;
 
 // Sqrt for convenience and to keep the word width down
 wire [16:0] sqrt_val;

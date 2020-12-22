@@ -10,17 +10,19 @@ module sf_user #(
 	input ce,  // clock enable
 	input signed [pw-1:0] meas,  // measurements from radio
 	input trigger,   // high for one cycle, just before meas stream starts
-	// Host port to set parameters
-	input h_write,
-	input [const_aw-1:0] h_addr,
-	input signed [pw-1:0] h_data,
+	// Interface to external parameter storage
+	output [const_aw-1:0] h_addr, // external address for param memory
+	input signed [pw-1:0] h_data, // external
 	// Results
+	output                 ab_update,
 	output signed [pw-1:0] a_o,
 	output signed [pw-1:0] b_o,
+	output                 cd_update,
 	output signed [pw-1:0] c_o,
 	output signed [pw-1:0] d_o,
 	// Debug output
 	output signed [pw+extra-1:0] trace,
+	output [6:0] trace_addr,
 	output trace_strobe,
 	output [6:0] sat_count
 );
@@ -37,19 +39,13 @@ always @(posedge clk) if (ce) begin
 end
 assign trace_strobe = run1;
 
-// DPRAM written by the host, read by the state machine
-wire signed [pw-1:0] const_val;
-wire [const_aw-1:0] addrb = pc + 1 - data_len;
-sf_dpram #(.aw(const_aw), .dw(pw)) consts(
-	.clka(clk), .clkb(clk),
-	.addra(h_addr), .dina(h_data), .wena(ce & h_write),
-	.addrb(addrb), .doutb(const_val));
+assign h_addr = pc + 1 - data_len;
 
 // Measurements stream in during first data_len cycles,
 // host-settable parameters during next consts_len cycles.
 wire choose_const = pc>=data_len && pc<(data_len+consts_len);
 reg signed [pw-1:0] meas_mux=0;
-always @(posedge clk) if (ce) meas_mux <= choose_const ? const_val : meas;
+always @(posedge clk) if (ce) meas_mux <= choose_const ? h_data : meas;
 
 // Create the instruction ROM, using generated code.
 // It would be easy to make this memory writable, but I don't
@@ -66,7 +62,9 @@ endcase
 wire sat_happened;
 sf_main #(.pw(pw), .extra(extra), .mw(mw)) cpu(.clk(clk), .ce(ce),
 	.inst(inst), .meas(meas_mux),
+	.ab_update(ab_update),
 	.a_o(a_o), .b_o(b_o),
+	.cd_update(cd_update),
 	.c_o(c_o), .d_o(d_o),
 	.trace(trace), .sat_happened(sat_happened));
 
@@ -77,5 +75,6 @@ always @(posedge clk) if (ce) begin
 	if (trigger) sat_report <= sat_cnt;
 end
 assign sat_count = sat_report;
+assign trace_addr = pc;
 
 endmodule

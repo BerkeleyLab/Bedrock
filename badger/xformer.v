@@ -9,7 +9,7 @@ module xformer(
 	input [7:0] idata,
 	input eth_strobe_short,
 	input eth_strobe_long,
-	// As documented in clients.eps
+	// As documented in doc/clients.eps
 	output [10:0] len_c,
 	// don't bother with data output port, it's the same as idata above
 	// 7 of these strobes for the 7 possible clients
@@ -23,8 +23,11 @@ module xformer(
 	output ostrobe_l
 );
 
+// Configuration
 parameter n_lat=2;
-wire icmp = category == 2;
+parameter handle_icmp = 1;
+
+wire icmp = (category == 2) & handle_icmp;
 wire udp = category == 3;
 
 // ICMP Echo Checksum (see RFC 792 p. 13)
@@ -36,6 +39,8 @@ wire [7:0] d_out2;
 // but we've accumulated two cycles of pipeline delay.
 reg icmp_kick=0; always @(posedge clk) icmp_kick <= icmp & (pc==42);
 wire [7:0] odata0;
+// Always instantiate this; it turns into a simple pass-through
+// (two cycles delayed) when not kicked.
 hack_icmp_cksum hack_icmp_cksum(.clk(clk),
 	.kick(icmp_kick), .idat(idata), .odat(odata0));
 
@@ -78,7 +83,7 @@ always @(posedge clk) begin
 	if (pdata_count == 9) pdata_down <= 0;
 end
 
-// Signals documented in clients.eps
+// Signals documented in doc/clients.eps
 // Fan out the strobes based on udp_sel
 wire [7:0] mask = 1 << udp_sel;
 assign len_c = pdata_count;

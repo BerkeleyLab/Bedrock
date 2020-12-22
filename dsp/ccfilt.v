@@ -1,3 +1,4 @@
+`timescale 1ns / 1ns
 // Cascaded Differentiator and post-filter
 //  also includes a barrel shifter to adjust scale to compensate
 //  for changing decimation intervals
@@ -8,6 +9,7 @@ module ccfilt #(
 	parameter outw=20,  // output data width
 		// comments below assume outw == 20
 		// outw must be 20 if using half-band filter
+	parameter shift_wi=4,
 	parameter shift_base=0,
 	parameter dsr_len = 12,  // expected length of strobe pattern
 	parameter use_hb = 1,  // compile-time conditional half-band code
@@ -19,7 +21,7 @@ module ccfilt #(
 	input sr_valid,
 
 	// semi-static configuration
-	input [3:0] shift,  // controls scaling of result
+	input [shift_wi-1:0] shift,  // controls scaling of result
 
 	// filtered and scaled result, ready for storage
 	output signed [outw-1:0] result,
@@ -47,7 +49,7 @@ reg ovf=0;
 // This construction should not result in any actual extra hardware.
 localparam dwmax = outw+16+shift_base;
 wire signed [dwmax:0] d2e = {{dwmax+1-dw{d2[dw-1]}},d2};
-wire [4:0] full_shift = shift + shift_base;
+wire [shift_wi:0] full_shift = shift + shift_base;
 wire [dwmax:0] d2es = d2e >>> full_shift;
 always @(posedge clk) begin
 	d3 <= d2es;

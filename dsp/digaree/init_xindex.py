@@ -9,21 +9,21 @@
 persist = {}
 
 
-def do_init_line(l):
-    a = l.split(" ")
+def do_init_line(line):
+    a = line.split(" ")
     if len(a) != 3:
         return
     t = a[0]
     if t == "s" or t == "h":
-        print(l)
+        print(line)
     elif t == "p":
         v = a[1]
         # print "looking up", v, persist[v]
         print("p %s %s" % (persist[v], a[2]))
 
 
-def do_ops_line(l):
-    a = l.split()
+def do_ops_line(line):
+    a = line.split()
     if len(a) != 3:
         return
     n = a[1]

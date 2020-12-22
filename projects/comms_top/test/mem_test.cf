@@ -1,0 +1,2 @@
+PRINT "Reading consecutive memory locations and ignoring output"
+RDMEM :0x0 0x1000 mem.dat

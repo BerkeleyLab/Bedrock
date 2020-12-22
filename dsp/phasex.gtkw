@@ -1,0 +1,59 @@
+[timestart] 0
+[size] 1150 707
+[pos] 258 82
+*-23.233957 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] phasex_tb.
+[treeopen] phasex_tb.track.
+[sst_width] 210
+[signals_width] 219
+[sst_expanded] 1
+[sst_vpaned_height] 191
+@28
+phasex_tb.trig
+phasex_tb.ready
+phasex_tb.done
+phasex_tb.f
+@24
+phasex_tb.raddr[5:0]
+@22
+phasex_tb.dout[15:0]
+@8024
+phasex_tb.phase_diff[12:0]
+@20000
+-
+@420
+phasex_tb.vfreq_out[13:0]
+@200
+-dut
+@28
+phasex_tb.dut.invalid
+phasex_tb.dut.run
+phasex_tb.dut.ready_r
+@22
+phasex_tb.dut.count[8:0]
+@28
+phasex_tb.dut.div2
+phasex_tb.dut.div1
+@22
+phasex_tb.dut.shiftr[15:0]
+@28
+phasex_tb.dut.wen
+@22
+phasex_tb.dut.waddr[5:0]
+@200
+-trackers
+@8024
+phasex_tb.track.phaset_out1[13:0]
+@20000
+-
+@28
+phasex_tb.track.fault1
+@8024
+phasex_tb.track.phaset_out2[13:0]
+@20000
+-
+@28
+phasex_tb.track.fault2
+phasex_tb.track.tick
+[pattern_trace] 1
+[pattern_trace] 0
