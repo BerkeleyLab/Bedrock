@@ -11,6 +11,8 @@
 #define BASE_GPIO              0x01000000
 #define BASE_UART0             0x02000000    // Debug UART
 
+#define BASE_I2C               BASE_GPIO
+
 #define F_CLK                   125000000     // [Hz] for KC705
 
 #define BOOTLOADER_DELAY    (F_CLK/1000)  // How long to wait in the bootloader for a connection
