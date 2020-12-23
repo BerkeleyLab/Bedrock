@@ -110,4 +110,11 @@ always @(posedge clk) begin
     end
 end
 
+`ifdef FORMAL
+always @(*) begin
+    assert(prescale_reg <= prescale << 3);
+    assert(bit_cnt <= DATA_WIDTH + 1);
+end
+`endif
+
 endmodule

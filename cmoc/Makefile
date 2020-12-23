@@ -5,6 +5,8 @@ vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
 .PHONY: all
 all: targets
 include $(BUILD_DIR)/top_rules.mk
+RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
+include $(BADGER_DIR)/rules.mk
 
 NEWAD_ARGS += -y
 
@@ -28,6 +30,10 @@ check_all: $(CHK_)
 lint: $(LNT_)
 bits: $(BITS_)
 
+_dep/fdbk_core_tb.d: fdbk_core_tb_auto
+_dep/rf_controller_tb.d: rf_controller_tb_auto
+
+
 fdbk_core.vcd: $(AUTOGEN_DIR)/regmap_fdbk_core_tb.json
 fdbk_core.vcd: fdbk_core_tb fdbk_core_test.py
 	$(PYTHON) fdbk_core_test.py
@@ -49,25 +55,32 @@ cryomodule_check: cryomodule.dat
 $(AUTOGEN_DIR)/config_romx.v:
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/config_crunch.py --OUTPUT=$@
 
+VFLAGS_DEP += -y $(BADGER_DIR) -Wno-macro-redefinition
+
+cryomodule_badger_tb.v: $(RTEFI_V) $(AUTOGEN_DIR)/config_romx.v cordicg_b22.v cryomodule_auto
+
+CLEAN += $(RTEFI_CLEAN)
+
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))
-	-include $(BITS_:%.bit=$(DEPDIR)/%.bit.d)
+	include $(BITS_:%.bit=$(DEPDIR)/%.bit.d)
     else
-	-include $(MAKECMDGOALS:%.bit=$(DEPDIR)/%.bit.d)
+	include $(MAKECMDGOALS:%.bit=$(DEPDIR)/%.bit.d)
     endif
 endif
-ifneq (,$(findstring _tb,$(MAKECMDGOALS)))
-    -include $(MAKECMDGOALS:%_tb=$(DEPDIR)/%_tb.d)
-endif
-ifneq (,$(findstring _view,$(MAKECMDGOALS)))
-    -include $(MAKECMDGOALS:%_tb=$(DEPDIR)/%_tb.d)
-endif
-ifneq (,$(findstring _check,$(MAKECMDGOALS)))
-    -include $(MAKECMDGOALS:%_tb=$(DEPDIR)/%_tb.d)
-endif
-ifeq (,$(MAKECMDGOALS))
-    -include $(TEST_BENCH:%_tb=$(DEPDIR)/%_tb.d)
-endif
+
+# ifneq (,$(findstring _tb,$(MAKECMDGOALS)))
+#     include $(MAKECMDGOALS:%_tb=$(DEPDIR)/%_tb.d)
+# endif
+# ifneq (,$(findstring _view,$(MAKECMDGOALS)))
+#     include $(MAKECMDGOALS:%_tb=$(DEPDIR)/%_tb.d)
+# endif
+# ifneq (,$(findstring _check,$(MAKECMDGOALS)))
+#     include $(MAKECMDGOALS:%_tb=$(DEPDIR)/%_tb.d)
+# endif
+# ifeq (,$(MAKECMDGOALS))
+#     include $(TEST_BENCH:%_tb=$(DEPDIR)/%_tb.d)
+# endif
 
 CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cryomodule_in.dat cryomodule_p.dat cryomodule.dat $(RTEFI_CLEAN)

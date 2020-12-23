@@ -1,5 +1,5 @@
 // --------------------------------------------------------------
-//  memory_pack.v
+//  memory2_pack.v
 // --------------------------------------------------------------
 // This memory can look into the future with the picorv look-ahead interface
 // hence ready goes high at the same time as valid
@@ -26,6 +26,7 @@ module memory2_pack #(
 reg  [31:0] mem_rdata=0;
 reg         mem_ready=0;
 munpack mu (
+    .clk           (clk),
     .mem_packed_fwd( 69'd0 ),
     .mem_packed_ret( mem_packed_ret ),
     .mem_wdata (),

@@ -11,10 +11,10 @@ parameter dw=8;
 parameter sz=(32'b1<<aw)-1;
 parameter initial_file = "";
 
-	input clka, clkb, wena;
-	input [aw-1:0] addra, addrb;
-	input [dw-1:0] dina;
-	output [dw-1:0] douta, doutb;
+input clka, clkb, wena;
+input [aw-1:0] addra, addrb;
+input [dw-1:0] dina;
+output [dw-1:0] douta, doutb;
 
 reg [dw-1:0] mem[sz:0];
 reg [aw-1:0] ala=0, alb=0;

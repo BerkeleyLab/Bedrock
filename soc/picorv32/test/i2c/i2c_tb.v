@@ -1,10 +1,9 @@
 // This testbench does test all of the following
-//  * soft_i2c library against a simulated slave
+//  * soft_i2c library against a simulated model device
 //  * gpioz_pack tristate IO module
 //  * gpio_pack IO module
 //  * sfr_pack bit addressable memory module
 //
-// TODO why is the i2c slave producing xxxx?
 
 `timescale 1 ns / 1 ns
 
@@ -93,7 +92,7 @@ module i2c_tb;
     );
 
     // --------------------------------------------------------------
-    //  Simulated I2C slave
+    //  Simulated I2C model
     // --------------------------------------------------------------
     localparam PIN_I2C_SDA = 1;  // has to match settings.h
     localparam PIN_I2C_SCL = 0;  // has to match settings.h
@@ -101,11 +100,12 @@ module i2c_tb;
     pullup ( gpio_z[PIN_I2C_SCL] );
     wire       read_req;
     wire       data_valid;
-    wire [7:0] data_from_master;
-    reg  [7:0] data_to_master = 8'h00;
-    I2C_slave #(
-        .SLAVE_ADDR      ( 7'h42             )
-    ) i2c_slave (
+    wire [7:0] data_from_tb;
+    reg  [7:0] data_to_tb = 8'h00;
+    wire stop;
+    I2C_model #(
+        .ADDR      ( 7'h42             )
+    ) i2c_model (
         .clk             ( mem_clk           ),
         .rst             ( reset             ),
         .sda             ( gpio_z[PIN_I2C_SDA]),
@@ -113,9 +113,10 @@ module i2c_tb;
 
         // Data interface
         .read_req        ( read_req ),
-        .data_to_master  ( data_to_master ),
+        .data_to_tb  ( data_to_tb ),
         .data_valid      ( data_valid ),
-        .data_from_master( data_from_master )
+        .data_from_tb( data_from_tb ),
+        .stop        (stop)
     );
 
     // --------------------------------------------------------------
@@ -155,14 +156,14 @@ module i2c_tb;
     // --------------------------------------------------------------
     task i2c_wait_for_start;
         begin
-            wait (i2c_slave.start_reg);
+            wait (i2c_model.start_reg);
             $write("<start> ");
         end
     endtask
 
     task i2c_wait_for_stop;
         begin
-            wait (i2c_slave.stop_reg);
+            wait (stop);
             $write("<stop>\n");
         end
     endtask
@@ -171,22 +172,22 @@ module i2c_tb;
         input [7:0] sendVal;
         begin
             @ (posedge mem_clk);
-            data_to_master <= sendVal;
+            data_to_tb <= sendVal;
+            wait (read_req);
+            $write("R%x ", data_to_tb);
             @ (posedge mem_clk);
-            wait (i2c_slave.read_req);
-            $write("R%x ", data_to_master);
         end
     endtask
 
     task i2c_write_task;
         input [7:0] expectVal;
         begin
-            wait( i2c_slave.data_valid );
+            wait( data_valid );
             @ (posedge mem_clk);
-            if( i2c_slave.data_from_master === expectVal ) begin
-                $write("W%x ", i2c_slave.data_from_master);
+            if( data_from_tb === expectVal ) begin
+                $write("W%x ", data_from_tb);
             end else begin
-                $write("W<%2x!=%2x> ", i2c_slave.data_from_master, expectVal);
+                $write("W<%2x!=%2x> ", data_from_tb, expectVal);
                 pass = 0;
             end
             @ (posedge mem_clk);

@@ -8,11 +8,11 @@ SRC_V  = uart_tx.v uart_rx.v stream_fifo.v shortfifo.v
 SRC_V += memory2_pack.v mpack.v munpack.v picorv32.v pico_pack.v
 SRC_V += uart_pack.v uart_fifo_pack.v uart_stream.v
 
-TARGET = uart
+TARGET = uart_fifo
 
 all: $(TARGET)_check
 
-OBJS = startup.o common.o
+OBJS = startup.o
 
 $(TARGET).elf: 0x000.lds $(OBJS)
 $(TARGET)_tb: $(SRC_V)

@@ -16,6 +16,7 @@ SECTIONS {
     }
 
     .text : {
+        . = ALIGN(4);
         _startup_adr = .;
         KEEP(*startup.o(.text));
         KEEP(*startup_irq.o(.text));
@@ -24,18 +25,24 @@ SECTIONS {
 
     /* uninitialized globals, set to zero by startup.S */
     .bss : {
+        . = ALIGN(4);
         _bss_start = .;
         *(.sbss);
         *(.bss);
         _bss_end = .;
     }
 
-    /* get rid of .riscv.attributes sections,
-       which have been appearing since GNU Binutils 2.32
-       ... absolutely no idea what they are used for. */
+    /*
+    get rid of some unneeded sections to save space
+    */
     ./DISCARD/ : {
-        *(.riscv.attributes)
+        *(.riscv.attributes);
+        *(.comment);
     }
 
-    .theRest : { *(*); . = ALIGN(4); }
+    .theRest : {
+        . = ALIGN(4);
+        *(*);
+        . = ALIGN(4);
+    }
 }

@@ -5,13 +5,10 @@
 //  Interrupt mapping
 // --------------------------------------------------------------
 // Irq 0-15 = level triggered. Irq 16-31 rising edge triggered
+// IRQ 0 - 2 are hard-wired within the picorv core:
 #define IRQ_TIMER0       0x00
 #define IRQ_EBREAK       0x01
 #define IRQ_BUSERR       0x02
-#define IRQ_UART0_RX     0x03      //IRQ when byte received. Cleared when byte read from UART_RX_REG
-//#define IRQ_UART0_TX     0x04    //IRQ on IDLE?
-#define IRQ_UART1_RX     0x05      //IRQ when byte received. Cleared when byte read from UART_RX_REG
-//#define IRQ_UART1_TX     0x06
 
 // --------------------------------------------------------------
 //  IRQ assembler functions (see start.S)

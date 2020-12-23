@@ -38,8 +38,12 @@ wire [ 3:0] mem_wstrb;
 wire        mem_valid;
 wire [31:0] mem_addr;
 wire  [3:0] mem_short_addr = mem_addr[3:0];
-reg         mem_ready=0;
 reg  [31:0] mem_rdata;
+
+reg mem_ready = 0;
+reg mem_ready_ = 0;
+wire ready_sum = mem_ready || mem_ready_;
+
 munpack mu (
     .mem_packed_fwd( mem_packed_fwd ),
     .mem_packed_ret( mem_packed_ret ),
@@ -79,7 +83,8 @@ always @(posedge clk) begin
     mem_rdata <= 0;
     utx_tvalid <= 0;
     urx_tready <= 0;
-    if ( mem_valid && !mem_ready && mem_addr[31:24]==BASE_ADDR ) begin
+    if (mem_valid && !ready_sum && mem_addr[31:24]==BASE_ADDR) begin
+
         (* parallel_case *)
         case (1)
             |mem_wstrb && (mem_short_addr==UART_TX_REG): begin
@@ -110,6 +115,7 @@ always @(posedge clk) begin
             end
         endcase
     end
+    mem_ready_ <= mem_ready;
 end
 
 endmodule

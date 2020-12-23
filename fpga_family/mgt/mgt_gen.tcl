@@ -101,6 +101,7 @@ proc add_gtcommon {config_file quad_num pll0_refclk pll1_refclk} {
    set module_name "q${quad_num}_gtcommon"
 
    puts "\[MGT_GEN\] Configuring ${module_name} with configuration found in ${config_file}"
+   puts "\[MGT_GEN\] WARNING: PLL0 and PLL1 must always be supplied with running clocks to achieve lock."
 
    # Read in configuration list
    set config_dict [source $config_file]

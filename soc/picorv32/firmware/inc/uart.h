@@ -25,7 +25,7 @@
 // UART access macros
 //-------------------------
 // Setup the baudrate register
-#define UART_INIT(uartBaseAddr,baudRate)    SET_REG( uartBaseAddr+REG_UART_BAUDRATE, (F_CLK/(baudRate*8)))
+#define UART_INIT(uartBaseAddr,baudRate)    SET_REG(uartBaseAddr + REG_UART_BAUDRATE, (F_CLK / (baudRate * 8)))
 
 // Poll RX UART. Returns 16 bit value: high byte = status (UART_DATA_OK, UART_NO_NEW_DATA),  low byte = received data value
 #define UART_GETC(uartBaseAddr)             ( (uint16_t)(GET_REG(uartBaseAddr+REG_UART_RX)) )

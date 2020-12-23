@@ -34,7 +34,7 @@ t_fmc150Error dac3283_check_tp( void )
 {
     unsigned result, timeOut=0;
     print_str("dac3283_check_tp()        ");
-    DAC3283_TESTP(1);   // PHY: start sending patten
+    DAC3283_TESTP(1);   // PHY: start sending pattern
     DAC3283_OSD_RST();  // Reset MMCM and OSERDES
     while( !DAC3283_IS_MMCM_LOCKED() ){
         DELAY_US(10);   // Wait for MMCM to stabilize (~13 us)

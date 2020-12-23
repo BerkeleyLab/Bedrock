@@ -59,7 +59,7 @@ set_property PACKAGE_PIN P19 [get_ports {bus_digitizer_U1[4]}]
 set_property PACKAGE_PIN P20 [get_ports {bus_digitizer_U1[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports {bus_digitizer_U1[5]}]
 set_property PACKAGE_PIN AC14 [get_ports {bus_digitizer_U1[5]}]
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets digitizer_U1/clk_ibufgds]
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets i_zest_wrap/U1_lmk01801/clk_ibufgds]
 
 # U2: AD9653 ADC
 set_property IOSTANDARD LVDS_25 [get_ports {bus_digitizer_U2[4]}]

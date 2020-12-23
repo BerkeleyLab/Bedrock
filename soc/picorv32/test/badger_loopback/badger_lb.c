@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 // #include "common.h"  // using this and CFLAGS += -nostdlib cuts the program size by half
 #include "sfr.h"
 #include "gpio.h"

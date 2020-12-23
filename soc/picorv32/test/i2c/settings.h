@@ -14,6 +14,7 @@
 #define F_CLK                100000000     // [Hz] for CMODA7
 
 // I2C specific settings
+#define BASE_I2C             BASE_GPIO
 #define PIN_I2C_SDA          1              // GPIO pin numbers
 #define PIN_I2C_SCL          0
 #define I2C_DELAY_US         1              //~half a clock period [us]

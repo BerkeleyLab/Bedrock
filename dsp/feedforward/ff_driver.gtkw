@@ -1,0 +1,38 @@
+[timestart] 0
+[size] 1307 528
+[pos] -1 -1
+*-6.229939 105 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] ff_driver_tb.
+[sst_width] 228
+[signals_width] 213
+[sst_expanded] 1
+[sst_vpaned_height] 116
+@24
+[color] 3
+ff_driver_tb.coeff_a[1:0]
+@420
+[color] 3
+ff_driver_tb.coeff_v[17:0]
+@24
+[color] 2
+ff_driver_tb.mem_a[10:0]
+@420
+[color] 2
+ff_driver_tb.mem_v[17:0]
+ff_driver_tb.drive[17:0]
+ff_driver_tb.drive_delta[17:0]
+ff_driver_tb.cavity[17:0]
+@28
+ff_driver_tb.error[1:0]
+ff_driver_tb.start
+@200
+-DUT
+@24
+ff_driver_tb.dut.cycle[15:0]
+ff_driver_tb.dut.subcycle[1:0]
+ff_driver_tb.dut.subcycle_r[1:0]
+ff_driver_tb.dut.cycle_u[8:0]
+@28
+ff_driver_tb.dut.cic_init
+[pattern_trace] 1
+[pattern_trace] 0

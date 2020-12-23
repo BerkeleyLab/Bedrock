@@ -16,10 +16,10 @@ module spi_engine (
     input               cfg_cpha,
     input               cfg_lsb,
 
-    (* mark_debug = "true" *) output SS,
-    (* mark_debug = "true" *) output SCK,
-    (* mark_debug = "true" *) output MOSI,
-    (* mark_debug = "true" *) input MISO
+    (* mark_debug = "true" *) output reg cs,
+    (* mark_debug = "true" *) output sck,
+    (* mark_debug = "true" *) output copi,
+    (* mark_debug = "true" *) input cipo
 );
 
 initial begin
@@ -53,20 +53,20 @@ reg cfg_cpha_reg = 1;
 reg cfg_lsb_reg  = 0;
 reg [7:0] cfg_scklen_reg = 8'd32;
 
-wire sck = clk_cnt > cfg_sckfullperiod_reg[8:1];
+wire sck_wtf = clk_cnt > cfg_sckfullperiod_reg[8:1];
 reg sck1 = 0;
-wire sck_rise = sck & ~sck1;
-wire sck_fall = ~sck & sck1;
+wire sck_rise = sck_wtf & ~sck1;
+wire sck_fall = ~sck_wtf & sck1;
 // data change at the opposite edge of sampling edge
-wire sck_edge_mosi = cfg_cpha_reg ? sck_rise : sck_fall; // Driving edge
-wire sck_edge_miso = cfg_cpha_reg ? sck_fall : sck_rise; // Sampling edge
+wire sck_edge_copi = cfg_cpha_reg ? sck_rise : sck_fall; // Driving edge
+wire sck_edge_cipo = cfg_cpha_reg ? sck_fall : sck_rise; // Sampling edge
 
-reg ss = 1'b1;
-reg [32:0] mosi_sr = 0;
+initial cs = 1'b1;
+reg [32:0] copi_sr = 0;
 reg [31:0] rdata_sr = 0;
 
 always @(posedge clk) begin
-    sck1 <= sck;
+    sck1 <= sck_wtf;
     if (trigger) begin
         wdata_r <= wdata;
         cfg_sckfullperiod_reg <= cfg_sckhalfperiod << 1;
@@ -80,51 +80,51 @@ always @(posedge clk) begin
     case (1'b1)
         cstate[IDLE] : begin
             sck_en <= 1'b0;
-            ss   <= 1'b1;
+            cs   <= 1'b1;
             done <= 1'b0;
             if (trigger) cstate[LOAD] <= 1;
             else cstate[IDLE] <= 1;
             sck_cnt <= 0;
-            mosi_sr <= 0;
+            copi_sr <= 0;
             rdata_sr <= 0;
         end
 
         cstate[LOAD] : begin
             sck_en <= 1'b1;
-            ss <= 1'b0;
+            cs <= 1'b0;
             done <= 1'b0;
             cstate[SHIFT] <= 1;
             sck_cnt <= 0;
-            // mosi_sr <= cfg_cpha_reg ? {1'b0, wdata_r} : {wdata_r, 1'b0};
-            // mosi_sr <= wdata_r;
+            // copi_sr <= cfg_cpha_reg ? {1'b0, wdata_r} : {wdata_r, 1'b0};
+            // copi_sr <= wdata_r;
             // dirty trick ...
-            mosi_sr <= (cfg_lsb_reg && cfg_cpha_reg) ? {wdata_r, 1'b0} : {1'b0, wdata_r};
+            copi_sr <= (cfg_lsb_reg && cfg_cpha_reg) ? {wdata_r, 1'b0} : {1'b0, wdata_r};
         end
 
         cstate[SHIFT] : begin
-            ss <= 1'b0;
+            cs <= 1'b0;
             done <= 1'b0;
-            if (sck_edge_mosi) begin
+            if (sck_edge_copi) begin
                 sck_en <= (sck_cnt == cfg_scklen_reg) ? 0 : 1'b1;
                 sck_cnt <= sck_cnt + 1'b1;
                 if (cfg_lsb_reg)
-                    mosi_sr <= {1'b0, mosi_sr[32:1]};
+                    copi_sr <= {1'b0, copi_sr[32:1]};
                 else
-                    mosi_sr <= {mosi_sr[31:0], 1'b0};
+                    copi_sr <= {copi_sr[31:0], 1'b0};
             end
-            if (sck_edge_miso) begin
+            if (sck_edge_cipo) begin
                 if (cfg_lsb_reg)
-                    rdata_sr <= {MISO, rdata_sr[31:1]};
+                    rdata_sr <= {cipo, rdata_sr[31:1]};
                 else
-                    rdata_sr <= {rdata_sr[30:0], MISO};
+                    rdata_sr <= {rdata_sr[30:0], cipo};
             end
-            if (sck_edge_mosi && sck_cnt == cfg_scklen_reg) cstate[DONE] <= 1;
+            if (sck_edge_copi && sck_cnt == cfg_scklen_reg) cstate[DONE] <= 1;
             else cstate[SHIFT] <= 1;
         end
 
         cstate[DONE] : begin
             sck_en <= 1'b0;
-            ss <= 1'b1;
+            cs <= 1'b1;
             done <= 1'b1;
             cstate[IDLE] <= 1;
             sck_cnt <= 0;
@@ -132,20 +132,19 @@ always @(posedge clk) begin
         end
 
         default : begin
-            {sck_en,done,ss} <= 3'b001;
+            {sck_en,done,cs} <= 3'b001;
             cstate[IDLE] <= 1;
             sck_cnt <= 0;
-            mosi_sr <= 0;
+            copi_sr <= 0;
         end
     endcase
     clk_cnt <= cstate[IDLE] ? 1 : (clk_cnt == cfg_sckfullperiod_reg) ? 1 : clk_cnt + 1;
 end
 
-assign SS = ss;
 wire sck_out = sck_en & sck1;
-// assign SCK = cfg_cpol_reg ? ~sck_out: sck_out;
-assign SCK = cfg_cpol ? ~sck_out: sck_out;
-assign MOSI = cfg_lsb_reg ? mosi_sr[0] : mosi_sr[cfg_scklen_reg];
+// assign sck = cfg_cpol_reg ? ~sck_out: sck_out;
+assign sck = cfg_cpol ? ~sck_out: sck_out;
+assign copi = cfg_lsb_reg ? copi_sr[0] : copi_sr[cfg_scklen_reg];
 assign busy = ~cstate[IDLE] | done;
 assign rdata_val = done;
 

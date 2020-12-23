@@ -153,6 +153,10 @@ rtefi_blob #(
     .rx_mac_status_s  (rx_mac_status_s),
     .rx_mac_status_d  (rx_mac_status_d),
 
+    // Application ports
+    .p2_nomangle(1'b0),
+    .p3_data_in(32'b0),
+
     // Dumb stuff to get LEDs blinking
     .rx_mon         (),
     .tx_mon         (),
@@ -170,8 +174,13 @@ wire        mem_valid;
 wire [31:0] mem_addr;
 wire [13:0] word_addr = mem_addr[15:2];  // For addressing memory as [32 bit words]
 reg  [31:0] mem_rdata;
+
 reg         mem_ready;
+reg         mem_ready_ = 0;
+wire ready_sum = mem_ready || mem_ready_;
+
 munpack mu (
+    .clk           (sys_clk),
     .mem_packed_fwd(mem_packed_fwd),
     .mem_packed_ret(mem_packed_ret_dpram),
     .mem_wdata (mem_wdata),
@@ -213,7 +222,7 @@ always @(posedge eth_clocks_gtx) begin
 end
 
 // Let picorv read and write `buf_tx` in 8, 16, 24 or 32 bit words
-wire is_addressed_tx = mem_valid && !mem_ready && (mem_addr[31:16] == {BASE_ADDR, BASE_TX});
+wire is_addressed_tx = mem_valid && !ready_sum && (mem_addr[31:16] == {BASE_ADDR, BASE_TX});
 
 // ---------------------
 //  Host side of RX MAC
@@ -244,7 +253,7 @@ end
 //   * lowest 2 bits of `mem_addr` we don't care as we only do 32 bit aligned access
 //   * result is 10 bits = 1024 words = 4096 bytes, enough to hold 2 * MTU of 1500 bytes
 wire [9:0] word_addr_rx = (rx_mac_hbank_r << 9) | mem_addr[10:2];
-wire is_addressed_rx = mem_valid && !mem_ready && (mem_addr[31:16] == {BASE_ADDR, BASE_RX});
+wire is_addressed_rx = mem_valid && !ready_sum && (mem_addr[31:16] == {BASE_ADDR, BASE_RX});
 always @(posedge sys_clk) begin
     mem_ready <=  1'b0;
     mem_rdata <= 32'h0;
@@ -262,6 +271,8 @@ always @(posedge sys_clk) begin
         if (mem_wstrb[3]) buf_tx[word_addr][31:24] <= mem_wdata[31:24];
         mem_ready <= 1;
     end
+
+    mem_ready_ <= mem_ready;
 end
 
 endmodule

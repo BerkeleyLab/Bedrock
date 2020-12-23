@@ -7,6 +7,7 @@ An open-source system on a chip based on the [PicoRV32](https://github.com/cliff
 * Digilent Cmod A7
 * Xilinx KC705 + FMC150
 * Xilinx VC707 + FMC120
+* Marblemini + Zest
 
 # Projects at LBNL
 
@@ -19,8 +20,8 @@ An open-source system on a chip based on the [PicoRV32](https://github.com/cliff
 * `iverilog`, `gtkwave`
 * [RISC-V](https://github.com/cliffordwolf/picorv32#building-a-pure-rv32i-toolchain) cross complier tool-chain.
 
-## Synthesize tool
-* Xilinx Vivado (tested between 2015.3 to 2017.4) suite
+## Synthesis tool
+* Xilinx Vivado (tested between 2015.3 to 2017.4, 2018.1, 2018.3) suite
 
 # Features
 
@@ -69,7 +70,7 @@ Digilent Adept2, which is available from
 Once the core is running, it launches into a serial bootloader program. From there, a new firmware can be quickly loaded and verified with `make system_load`.
 
 * For KC705/VC707, UART CTS pin is used to remote hardware reset;
-* For all cases, write 0x14 (Ctrl+T) to UART will trigger software cpu reset and start from
+* For all cases, writing 0x14 (Ctrl+T) to UART will trigger software cpu reset and start from
   bootloader.
 
 ## Memory size
@@ -80,7 +81,7 @@ This gets passed to the linker (to print memory utilization), assembler (to set 
 
 # Getting started
 
-run all the testbenches
+running all the testbenches
 
 ```bash
 cd test
@@ -128,4 +129,3 @@ The serial bootloader can be used to change the program (stored in ram) quickly 
 ```bash
 make clean system_load
 ```
-

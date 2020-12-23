@@ -93,7 +93,7 @@ module mdio_tb;
     );
 
     // --------------------------------------------------------------
-    //  Simulated slave
+    //  Simulated model
     // --------------------------------------------------------------
     localparam PIN_PHY_RESET_B = 2; // has to match settings.h
     localparam PIN_PHY_MDIO = 1;    // has to match settings.h
@@ -101,7 +101,7 @@ module mdio_tb;
 
     pullup ( gpio_z[PIN_PHY_MDIO] );
 
-    mdio_slave #(
+    mdio_model #(
         .ADDR            ( 5'h10             )
     ) phy (
         .reset_b         ( gpio_z[PIN_PHY_RESET_B]),

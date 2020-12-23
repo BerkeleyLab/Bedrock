@@ -47,7 +47,7 @@ cordic_bias_check: cordic_check.py cordic_bias.dat
 
 cordic_slve_check: cordic_check.py cordic_slve.dat
 	@echo
-	@echo "Check of slave mode"
+	@echo "Check of follow mode"
 	$(PYTHON) $< $(word 2, $^)
 
 

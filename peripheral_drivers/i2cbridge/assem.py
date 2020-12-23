@@ -74,8 +74,8 @@ class i2c_assem:
 
     # l is length of program so far
     # jump_n is jump address after padding
-    def pad(self, jump_n, l):
-        pad_n = 32*jump_n - l
+    def pad(self, jump_n, length):
+        pad_n = 32*jump_n - length
         if pad_n < 0:
             print("Oops!  negative pad %d" % pad_n)
         return pad_n*[0]

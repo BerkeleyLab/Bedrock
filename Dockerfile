@@ -28,7 +28,6 @@ RUN apt-get update && \
 	apt-get install -y \
 	git \
 	iverilog \
-	verilator \
 	libz-dev \
 	libbsd-dev \
 	xc3sprog \
@@ -76,7 +75,7 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 	rm -rf vhd2vl
 
 # Yosys
-# For now we need to build yosys-0.9 from source, since Debian Buster
+# For now we need to build yosys from source, since Debian Buster
 # is stuck at yosys-0.8 that doesn't have the features we need.
 # Revisit this choice when Debian catches up, maybe in Bullseye,
 # and hope to get back to "apt-get install yosys" then.
@@ -84,8 +83,9 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 # Note that the standard yosys build process used here requires
 # network access to download abc from https://github.com/berkeley-abc/abc.
 
-RUN git clone https://github.com/jersey99/yosys.git && \
-	cd yosys && git checkout signed-in-rtlil-wire && \
+RUN git clone https://github.com/cliffordwolf/yosys.git && \
+	cd yosys && \
+	git checkout 40e35993af6ecb6207f15cc176455ff8d66bcc69 && \
 	apt-get update && \
 	apt-get install -y clang libreadline-dev tcl-dev libffi-dev graphviz \
 	xdot libboost-system-dev libboost-python-dev libboost-filesystem-dev zlib1g-dev && \
@@ -94,3 +94,29 @@ RUN git clone https://github.com/jersey99/yosys.git && \
 	rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4
+
+RUN apt-get update && \
+	apt-get install -y libfl2 libfl-dev zlibc zlib1g zlib1g-dev autoconf && \
+	git clone https://github.com/verilator/verilator && cd verilator && \
+	git checkout v4.034 && autoconf && ./configure && make -j4 && make install && \
+	cd ../ && rm -rf verilator && verilator -V && \
+	apt-get install -y openocd
+
+# SymbiYosys formal verification tool + Yices 2 solver (`sby` command)
+RUN apt-get update && \
+	apt-get install -y build-essential clang bison flex libreadline-dev \
+					 gawk tcl-dev libffi-dev git mercurial graphviz   \
+					 xdot pkg-config python python3 libftdi-dev gperf \
+					 libboost-program-options-dev autoconf libgmp-dev \
+					 cmake && \
+	git clone https://github.com/YosysHQ/SymbiYosys.git SymbiYosys && \
+	cd SymbiYosys && \
+	git checkout 091222b87febb10fad87fcbe98a57599a54c5fd3 && \
+	make install && \
+	cd .. && \
+	git clone https://github.com/SRI-CSL/yices2.git yices2 && \
+	cd yices2 && \
+	autoconf && \
+	./configure && \
+	make -j$(nproc) && \
+	make install

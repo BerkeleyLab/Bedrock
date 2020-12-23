@@ -1,0 +1,27 @@
+dsp_test:
+  before_script:
+    - cd dsp && export PYTHONPATH=../build-tools/
+  stage: test
+  script:
+    - make && make checks
+
+digaree_test:
+  before_script:
+    - cd dsp/digaree
+  stage: test
+  script:
+    - make
+
+feedforward_test:
+  before_script:
+    - cd dsp/feedforward
+  stage: test
+  script:
+    - make
+
+chirp_test:
+  before_script:
+    - cd dsp/chirp
+  stage: test
+  script:
+    - make && make checks

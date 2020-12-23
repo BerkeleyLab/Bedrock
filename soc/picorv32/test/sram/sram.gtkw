@@ -1,0 +1,39 @@
+[dumpfile] "sram.vcd"
+[timestart] 2339000
+[size] 1916 507
+[pos] -1 -1
+*-18.396069 4382000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] sram_tb.
+[treeopen] sram_tb.sys_inst.
+[treeopen] sram_tb.sys_inst.sram.
+[sst_width] 214
+[signals_width] 348
+[sst_expanded] 1
+[sst_vpaned_height] 167
+@29
+sram_tb.mem_clk
+@28
+sram_tb.sys_inst.cpu.mem_valid
+sram_tb.sys_inst.cpu.mem_ready
+@22
+sram_tb.sys_inst.sram.mem_addr[31:0]
+sram_tb.sys_inst.sram.mem_wdata[31:0]
+sram_tb.sys_inst.sram.mem_rdata[31:0]
+@200
+-
+-
+@28
+sram_tb.sys_inst.sram.isSelected
+@22
+sram_tb.sys_inst.sram.mem_rdata[31:0]
+@200
+-
+@22
+sram_tb.sys_inst.sram.cycle[2:0]
+@28
+sram_tb.sram_model_inst.we_n
+@22
+sram_tb.sram_model_inst.addr[18:0]
+sram_tb.sram_model_inst.data[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

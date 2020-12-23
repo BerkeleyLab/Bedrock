@@ -6,7 +6,7 @@ BLOCK_RAM_SIZE = 4096
 
 SRC_V  = memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v
 SRC_V += sfr_pack.v gpio_pack.v gpioz_pack.v
-SRC_V += mdio_slave.v
+SRC_V += mdio_model.v
 #OBJS   = $(COMMON_DIR)/startup.o $(LIB_DIR)/src/timer.o $(LIB_DIR)/src/mdio.o $(LIB_DIR)/src/print.o
 OBJS   = startup.o timer.o mdio.o print.o mdio_soft.o
 

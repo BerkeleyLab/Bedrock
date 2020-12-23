@@ -33,6 +33,15 @@ Logic:
                     TextInput:
                         id: ylim
                         on_text: root.update_lim("Y", *args)
+                BoxLayout:
+                    orientation: "horizontal"
+                    Label:
+                        text: "log_dec_fac"
+                        size_hint: [0.3, 1]
+                    TextInput:
+                        id: ldf
+                        on_text_validate: root.update_ldf(*args)
+                        multiline: False
             BoxLayout:
                 orientation: "vertical"
                 size_hint: [0.2, 1]

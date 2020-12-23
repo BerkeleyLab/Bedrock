@@ -5,10 +5,10 @@ module spi_pack #(
     input           clk,
     input           rst,
     // Hardware interface
-    output          spi_ss,
-    output          spi_sck,
-    output          spi_mosi,
-    input           spi_miso,
+    output          spi_cs,     // active low chip select
+    output          spi_sck,  // serial clock
+    output          spi_copi,  // controller out / peripheral in
+    input           spi_cipo,  // controller in / peripheral out
 	output [31:0]   spi_cfg_reg,
     // PicoRV32 packed MEM Bus interface
     input  [68:0]   mem_packed_fwd,  //CPU > SPI
@@ -38,7 +38,7 @@ wire [2*32-1:0] sfRegsWrStr;
 wire [2*32-1:0] sfRegsIn;
 wire [31:0] spi_rdata;
 wire        spi_busy;
-wire        spi_ss_auto;
+wire        spi_cs_auto;
 sfr_pack #(
     .BASE_ADDR      ( BASE_ADDR ),
     .BASE2_ADDR     ( BASE2_ADDR ),
@@ -63,12 +63,12 @@ assign sfRegsIn[0*32+:32] = spi_rdata;
 assign spi_cfg_reg = sfRegsOut[1*32+:32];
 
 // Connect config word to "read on BASE_ADDR+4"
-assign sfRegsIn[1*32+:32] = { spi_miso, spi_busy, spi_cfg_reg[29:0] };
+assign sfRegsIn[1*32+:32] = { spi_cipo, spi_busy, spi_cfg_reg[29:0] };
 wire [ 7:0] cfg_clk_div = spi_cfg_reg[BIT_CLK_DIV+:8]; // Clock divider word
 wire [ 5:0] cfg_nbits   = spi_cfg_reg[BIT_NBITS  +:6]; // N bits per transf. (1-32)
 
 // Auto / manual control of SS pin
-assign spi_ss = spi_cfg_reg[BIT_SS_MAN] ? spi_cfg_reg[BIT_SS_CTRL] : spi_ss_auto;
+assign spi_cs = spi_cfg_reg[BIT_SS_MAN] ? spi_cfg_reg[BIT_SS_CTRL] : spi_cs_auto;
 
 // ------------------------------------------------------------------------
 //  Instantiate the SPI engine
@@ -86,11 +86,11 @@ spi_engine spi_inst (
     .cfg_cpol            (spi_cfg_reg[BIT_CPOL]),
     .cfg_cpha            (spi_cfg_reg[BIT_CPHA]),
     .cfg_lsb             (spi_cfg_reg[BIT_LSB]),
-    .cfg_scklen          ({2'h0,cfg_nbits}),
-    .SS                  (spi_ss_auto),
-    .SCK                 (spi_sck),
-    .MOSI                (spi_mosi),
-    .MISO                (spi_miso)
+    .cfg_scklen          ({2'h0, cfg_nbits}),
+    .cs                  (spi_cs_auto),
+    .sck                 (spi_sck),
+    .copi                (spi_copi),
+    .cipo                (spi_cipo)
 );
 
 endmodule

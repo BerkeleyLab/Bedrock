@@ -11,6 +11,7 @@ COMMUNICATION = gmii
 #COMMUNICATION = mgt
 DAUGHTER = base
 FPGA_FAMILY = spartan6
+RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 
 APP_DIR = $(TOP_DIR)/cmoc
 BS_HARDWARE_DIR = $(BOARD_SUPPORT_DIR)/$(HARDWARE)
@@ -31,6 +32,7 @@ include $(FPGA_FAMILY_DIR)/$(FPGA_FAMILY)/rules.mk
 include $(BS_HARDWARE_DIR)/rules.mk
 include $(BOARD_SUPPORT_DIR)/rules.mk
 include $(APP_DIR)/rules.mk
+include _dep/larger_shell_gmii_sp605.bit.d
 
 system_top.ucf: larger_extra.ucf
 

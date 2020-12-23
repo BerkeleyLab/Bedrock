@@ -11,11 +11,12 @@ initial begin
 		$dumpfile("xy_pi_clip.vcd");
 		$dumpvars(5,xy_pi_clip_tb);
 	end
-	for (cc=0; cc<80; cc=cc+1) begin
+	for (cc=0; cc<300; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
 	$display("%s", fail ? "FAIL" : "PASS");
+	$display("WARNING: Not a self-checking testbench. Will always pass.");
 	$finish();
 end
 `endif //  `ifdef SIMULATE
@@ -51,6 +52,10 @@ quad_ireg s0(.clk(clk), .rd_addr(s0_addr), .lb_data(lb_data), .lb_write(lb_write
 quad_ireg s1(.clk(clk), .rd_addr(s1_addr), .lb_data(lb_data), .lb_write(lb_write[1]), .lb_addr(lb_addr), .d(lim));
 
 `ifdef SIMULATE
+reg signed [17:0] ff_ddrive, ff_dphase;
+reg signed [17:0] ff_drive, ff_phase;
+reg ffd_en=0, ffp_en=0;
+
 initial begin
 	s0.store[0] =  10000;  // coeff X I
 	s0.store[1] = -12000;  // coeff Y I
@@ -68,12 +73,26 @@ initial begin
 	s1.store[3] = 2000;  // lim Y lo
 	@(cc==56);
 	s0.store[2] = -100;  // coeff X P
+	@(cc==100);
+	s1.store[0] = 500;  // lim X hi
+	@(cc==120);
+	ffp_en      = 1;
+	ff_drive    = 30;
+	ff_phase    = 0;
+	ff_ddrive   = 0;
+	@(cc==140);
+	ffd_en      = 1;
+	ff_drive    = 0;
+	ff_phase    = 0;
+	ff_ddrive   = 10;
 end
 `endif //  `ifdef SIMULATE
 
 wire signed [17:0] out_xy;
 xy_pi_clip dut(.clk(clk), .sync(sync), .in_xy(in_xy),
 	.coeff(coeff), .lim(lim),
+	.ffd_en(ffd_en), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
+	.ffp_en(ffp_en), .ff_drive(ff_drive), .ff_phase(ff_phase),
 	.out_xy(out_xy)
 );
 

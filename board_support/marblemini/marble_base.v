@@ -1,8 +1,11 @@
 // Marble base, mostly copied from hw_test.v
 // Instantiates rtefi_blob and support code
 // Needs to be kept 100% portable/synthesizable
-module marble_base(
 
+module marble_base #(
+	parameter USE_I2CBRIDGE = 1,
+	parameter MMC_CTRACE = 1
+)(
 	// GMII Tx port
 	input vgmii_tx_clk,
 	output [7:0] vgmii_txd,
@@ -37,7 +40,7 @@ module marble_base(
 	// One I2C bus, everything gatewayed through a TCA9548
 	output [3:0] twi_scl,
 	inout  [3:0] twi_sda,
-	output TWI_RST,
+	inout  TWI_RST,
 	input  TWI_INT,
 
 	// White Rabbit DAC
@@ -87,8 +90,8 @@ parameter [47:0] mac = 48'h12555500012d;
 parameter [31:0] ip = {8'd192, 8'd168, 8'd19, 8'd9};  // 192.168.19.9
 parameter [47:0] mac = 48'h12555500022d;
 `else
-parameter [31:0] ip = {8'd192, 8'd168, 8'd19, 8'd8};  // 192.168.19.8
-parameter [47:0] mac = 48'h12555500012d;
+parameter [31:0] ip = {8'd192, 8'd168, 8'd19, 8'd10};  // 192.168.19.10
+parameter [47:0] mac = 48'h12555500032d;
 `endif
 `endif
 
@@ -131,7 +134,7 @@ wire allow_mmc_eth_config;
 wire [31:0] lb_slave_data_read;
 
 //
-lb_marble_slave slave(
+lb_marble_slave #(.USE_I2CBRIDGE(USE_I2CBRIDGE), .MMC_CTRACE(MMC_CTRACE)) slave(
 	.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
 	.data_out(lb_data_out), .data_in(lb_slave_data_read),
@@ -142,10 +145,8 @@ lb_marble_slave slave(
 	.mmc_pins({MOSI, SCLK, CSB}),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
-`ifdef USE_I2CBRIDGE
 	.twi_scl(twi_scl), .twi_sda(twi_sda),
 	.twi_int(TWI_INT), .twi_rst(TWI_RST),
-`endif
 	.wr_dac_sclk(WR_DAC_SCLK), .wr_dac_sdo(WR_DAC_DIN),
 	.wr_dac_sync({WR_DAC2_SYNC, WR_DAC1_SYNC}),
 	.cfg_d02(cfg_d02),

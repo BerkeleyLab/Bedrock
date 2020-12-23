@@ -10,6 +10,7 @@ module iserdes_pack #(
     input [DW-1:0]      in_p,
     input [DW-1:0]      in_n,
     output [8*DW-1:0]   dout,
+    output [8*DW-1:0]   bitwise_out,
 
     // PicoRV32 packed MEM Bus interface
     input  clk,
@@ -62,7 +63,7 @@ sfr_pack #(
 // --------------------------------------------------------------
 // Hardware
 // --------------------------------------------------------------
-genvar ix;
+genvar ix, jx;
 generate for (ix=0; ix < DW; ix=ix+1) begin: in_cell
     wire out_del;
     wire iserdese2_o;  // not used
@@ -139,7 +140,12 @@ generate for (ix=0; ix < DW; ix=ix+1) begin: in_cell
         .OCLK               (1'b0),
         .OCLKB              (1'b0)
     );
-    assign dout[8*ix+7 : 8*ix] = dq;
+    assign dout[8*ix+:8] = dq;
+
+    // Remap to bitwise_out
+    // Supports Ad9653 Table 23 and Figure 2, in ZEST.
+    // Supports LTC2175 in FMC11x.
+    for (jx=0;jx<8;jx=jx+1) assign bitwise_out[DW*jx+ix] = dq[jx];
 
     // XXX cross domains, data has to be a static training pattern
     always @(posedge clk) begin

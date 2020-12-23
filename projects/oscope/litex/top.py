@@ -1,10 +1,10 @@
 import argparse
 
-from migen import Signal, Memory, If, Cat, Module
+from migen import Signal, Memory, If, Cat, Module, ClockSignal
 from migen.genlib.cdc import PulseSynchronizer
 # from migen.genlib.fifo import AsyncFIFO
 
-# from litex.soc.cores.freqmeter import FreqMeter
+from litex.soc.cores.freqmeter import FreqMeter
 from litex.soc.cores import spi
 from litex.soc.interconnect import wishbone
 from litex.soc.integration.soc_sdram import soc_sdram_args, soc_sdram_argdict
@@ -61,8 +61,8 @@ class LTCSocDev(EthernetSoC, AutoCSR):
             self.lvds.pads_dco
         )
         # Frequency counter for received sample clock
-        # self.submodules.f_sample = FreqMeter(self.sys_clk_freq)
-        # self.comb += self.f_sample.clk.eq(ClockSignal("sample"))
+        self.submodules.f_sample = FreqMeter(self.sys_clk_freq)
+        self.comb += self.f_sample.clk.eq(ClockSignal("sample"))
 
         spi_pads = self.platform.request("LTC_SPI")
         self.submodules.spi = spi.SPIMaster(spi_pads, 16, self.sys_clk_freq, self.sys_clk_freq/32)
@@ -97,6 +97,8 @@ def main():
                         help="enable Ethernet support")
     parser.add_argument("--ethernet-phy", default="rgmii",
                         help="select Ethernet PHY (rgmii or 1000basex)")
+    parser.add_argument("-p", "--program-only", action="store_true",
+                        help="select Ethernet PHY (rgmii or 1000basex)")
     args = parser.parse_args()
 
     if args.with_ethernet:
@@ -105,14 +107,17 @@ def main():
         # soc = EthernetSoC(phy=args.ethernet_phy, **soc_core_argdict(args))
     else:
         soc = BaseSoC(**soc_sdram_argdict(args))
+
     builder = Builder(soc, **builder_argdict(args))
-    vns = builder.build()
+    if not args.program_only:
+        vns = builder.build()
 
-    if False:
-        soc.analyzer.do_exit(vns)
+        if False:
+            soc.analyzer.do_exit(vns)
 
-    # prog = soc.platform.create_programmer()
-    # prog.load_bitstream('soc_basesoc_marblemini/gateware/top.bit')
+    prog = soc.platform.create_programmer()
+    import os
+    prog.load_bitstream(os.path.join(builder.gateware_dir, "marblemini.bit"))
 
 
 if __name__ == "__main__":

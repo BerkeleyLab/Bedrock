@@ -1,3 +1,4 @@
+`timescale 1ns / 1ns
 // Cascaded Differentiator and post-filter
 //  also includes a barrel shifter to adjust scale to compensate
 //  for changing decimation intervals
