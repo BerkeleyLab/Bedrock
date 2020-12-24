@@ -10,10 +10,13 @@ all: cic_bank.out feelgood.png ff_pulser_check ff_driver_check
 ff_driver_tb: ff_driver.v cic_bankx.v a_model.v
 
 ff_driver.out: ff_driver_tb ff_plusargs.py pulse_set.json
-	$(VVP) -N $< +trace `$(PYTHON) ff_plusargs.py pulse_set.json`
+	$(VVP) -N $< +trace `$(PYTHON) $(filter %ff_plusargs.py, $^) $(filter %pulse_set.json, $^)`
 
 VVP_FLAGS_ff_driver.vcd = +trace `$(PYTHON) ff_plusargs.py pulse_set.json`
-VVP_FLAGS_ff_driver_check = `$(PYTHON) ff_plusargs.py pulse_set.json`
+
+ff_driver_check: ff_plusargs.py pulse_set.json
+VVP_FLAGS_ff_driver_check = `$(PYTHON) $(filter %ff_plusargs.py, $^) $(filter %pulse_set.json, $^)`
+
 ff_driver.vcd: cic_bankx_in.dat
 ff_driver_check: cic_bankx_in.dat
 

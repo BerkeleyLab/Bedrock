@@ -11,7 +11,8 @@ test -x Vmem_gateway_wrap
 ./Vmem_gateway_wrap +udp_port=3000 &
 sleep 1
 A=""
-if python3 badger_lb_io.py --ip localhost --port 3000 hello; then
+SRCDIR=`dirname $0`
+if python3 ${SRCDIR}/badger_lb_io.py --ip localhost --port 3000 hello; then
   A=OK
 fi
 kill %1  # important to do this even if the test fails

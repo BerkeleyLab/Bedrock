@@ -18,8 +18,6 @@ SERIAL_IO_DIR = local
 %_check: %.out %.gold
 	cmp $^
 	@echo PASS
-%_check: %_tb
-	$(VVP) $< $(VCD_ARGS_$@)
 %_tb: %_tb.v
 	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
 %-vpi.vpi: %-vpi.o
@@ -187,7 +185,7 @@ stests.dat: packetgen.py
 scanner.vcd: stests.dat
 scanner_check: stests.dat
 VCD_ARGS_scanner.vcd = +packet_file=stests.dat
-VCD_ARGS_scanner_check = +packet_file=stests.dat
+VVP_FLAGS_scanner_check = +packet_file=stests.dat
 
 # =====
 # assembled pipeline
@@ -287,7 +285,7 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 
 # =====
 # Verilator, slightly larger scope
-Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c
+Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v spi_gate.v $(LB_DEMO_V) $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
@@ -306,8 +304,8 @@ Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) mem
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmem_gateway_wrap.mk
 	mv obj_dir/$@ $@
-Vmem_gateway_check: Vmem_gateway_wrap
-	bash mem_gateway_check.sh
+Vmem_gateway_check: mem_gateway_check.sh Vmem_gateway_wrap
+	bash $<
 
 # =====
 # Simple syntax check

@@ -12,7 +12,7 @@ VG_ALL = -DSIMULATE
 V_TB = -Wno-timescale
 VFLAGS = ${VFLAGS_$@} -y$(AUTOGEN_DIR) -I$(AUTOGEN_DIR)
 VVP_FLAGS = ${VVP_FLAGS_$@}
-VVP = vvp$(ICARUS_SUFFIX) -N
+VVP = vvp$(ICARUS_SUFFIX)
 VERILATOR = verilator -Wall -Wno-fatal
 GTKWAVE = gtkwave
 VPIEXT = vpi
@@ -37,8 +37,8 @@ VERILOG_TB = $(VERILOG) $(VG_ALL) $(V_TB) ${VFLAGS} $(VFLAGS_DEP) -o $@ $(filter
 VERILOG_TB_VPI = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} $(VFLAGS_DEP) -o $@ $(filter %.v, $^)
 VERILOG_SIM = cd `dirname $@` && $(VVP) `basename $<` $(VVP_FLAGS)
 VERILOG_VIEW = $(GTKWAVE) $(GTKW_OPT) $^
-VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS) | $(AWK) -f $(filter %.awk, $^)
-VERILOG_RUN = $(VVP) $@
+VERILOG_CHECK = $(VVP) -N $< $(VVP_FLAGS)
+VERILOG_RUN = $(VVP) -n $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@.$$$$ $<
@@ -63,7 +63,6 @@ VIVADO_FLASH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/vivado_flash.tcl -t
 VIVADO_CREATE_IP = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/lbl_ip.tcl $(BUILD_DIR)/vivado_tcl/create_ip.tcl -tclargs
 OCTAVE_SILENT = $(OCTAVE) -q $<
 PS2PDF = ps2pdf -dEPSCrop $< $@
-CHECK = $(VVP) $< | awk -f $(filter %.awk, $^)
 BIT2RBF = bit2rbf $@ < $<
 GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 
@@ -108,7 +107,7 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 %_view: %.vcd %.gtkw
 	$(VERILOG_VIEW)
 
-%_check: %_tb $(BUILD_DIR)/testcode.awk
+%_check: %_tb
 	$(VERILOG_CHECK)
 
 %_lint: %.v %_auto
