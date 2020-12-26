@@ -30,7 +30,7 @@ shortfifo #(
 	.full(fifo_full),
     .empty(fifo_empty)
 );
-assign d_out_valid = fifo_re;
+assign d_out_valid = ~fifo_empty;
 assign d_out_last = d_out_last_i & d_out_valid;
 assign d_in_ready = !fifo_full;
 
