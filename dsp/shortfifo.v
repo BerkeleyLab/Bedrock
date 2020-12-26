@@ -24,20 +24,19 @@ module shortfifo #(
 	output last,
 	output [aw:0] count  // -1: empty, 0: single element, 2**aw - 1: full
 );
+localparam len = 1 << aw;
 
 // Need 1 extra bit to distinguish between full and empty
 reg [aw:0] raddr = ~0;
+
+wire re_ = re && !empty;
+wire we_ = we && (!full || re_);
 
 genvar ix;
 generate for (ix=0; ix<dw; ix=ix+1) begin: bit_slice
 	abstract_dsr #(.aw(aw)) srl(.clk(clk), .ce(we_), .addr(raddr),
 		.din(din[ix]), .dout(dout[ix]) );
 end endgenerate
-
-localparam len = 1 << aw;
-
-wire re_ = re && !empty;
-wire we_ = we && (!full || re_);
 
 always @(posedge clk) raddr <= raddr + we_ - re_;
 assign full = raddr == (len - 1);
