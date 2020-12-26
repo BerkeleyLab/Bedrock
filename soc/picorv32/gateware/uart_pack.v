@@ -4,8 +4,6 @@
 // Here we wrap the uart.v interface to the picorv32 address bus
 // Makes is sinmpler to instantiate UARTS
 
-`default_nettype none
-
 module uart_pack #(
     parameter [31:0] DATA_WIDTH = 8,
     parameter BASE_ADDR=8'h00

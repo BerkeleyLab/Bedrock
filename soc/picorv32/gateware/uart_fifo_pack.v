@@ -1,5 +1,3 @@
-`default_nettype none
-
 module uart_fifo_pack #(
     parameter [31:0] DATA_WIDTH = 8,
     parameter BASE_ADDR=8'h00,

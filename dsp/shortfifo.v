@@ -5,7 +5,6 @@
 // max. elements: 2**aw
 
 `timescale 1ns / 1ns
-`default_nettype none
 
 module shortfifo #(
 	parameter dw=2,
