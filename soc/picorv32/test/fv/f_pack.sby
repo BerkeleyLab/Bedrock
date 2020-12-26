@@ -27,6 +27,7 @@ uart_pack: prep -top uart_pack
 # uart_fifo_pack: read -formal uart_fifo_pack.v uart_stream.v stream_fifo.v shortfifo.v uart_rx.v uart_tx.v munpack.v f_pack_peripheral.v
 # uart_fifo_pack: prep -top uart_fifo_pack
 
+
 [files]
 # Hack to include all .v files from gateware directory
 --pycode-begin--
@@ -36,3 +37,4 @@ for g in glob("../../gateware/*.v"):
 --pycode-end--
 f_pack_peripheral.v
 ../../../../dsp/shortfifo.v
+../../../../dsp/fifo.v

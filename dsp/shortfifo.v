@@ -30,11 +30,11 @@ localparam len = 1 << aw;
 reg [aw:0] raddr = ~0;
 
 wire re_ = re && !empty;
-wire we_ = we && (!full || re_);
+wire we_ = we && (!full || re);
 
 genvar ix;
 generate for (ix=0; ix<dw; ix=ix+1) begin: bit_slice
-	abstract_dsr #(.aw(aw)) srl(.clk(clk), .ce(we_), .addr(raddr),
+	abstract_dsr #(.aw(aw)) srl(.clk(clk), .ce(we_), .addr(raddr[aw-1:0]),
 		.din(din[ix]), .dout(dout[ix]) );
 end endgenerate
 
@@ -132,16 +132,23 @@ always @(posedge clk) begin
 	if (f_past_valid && $past(empty))
 		assert(!full);
 
+	// Make sure the right things happen when read and write at the same time
+	if (f_past_valid && $past(we) && $past(re) && $past(f_fill > 0))
+		assert($stable(f_fill));
+
 	// Show 2 values entering and exiting the FIFO:
 	// cover(f_past_valid && $past(f_state) == 3 && f_state == 0);
 end
 
 // Fill up the fIFO and empty it again
 reg f_was_full = 0;
+reg f_both = 0; // show what happens when both are high
 always @(posedge clk) begin
 	if (full)
-		f_was_full = 1;
-	cover(f_was_full && empty);
+		f_was_full <= 1;
+	if (we && re && !empty)
+		f_both <= 1;
+	cover(f_was_full && empty && f_both);
 end
 
 always @(*) begin
