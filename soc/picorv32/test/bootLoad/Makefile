@@ -5,7 +5,7 @@ include $(PICORV_DIR)/rules.mk
 BLOCK_RAM_SIZE = 256
 SRC_V    = memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v
 SRC_V   += uart_pack.v uart_rx.v uart_tx.v
-SRC_V   += stream_fifo.v shortfifo.v uart_fifo_pack.v uart_stream.v
+SRC_V   += stream_fifo.v shortfifo.v fifo.v uart_fifo_pack.v uart_stream.v
 OBJS     = bootloader.o
 
 TARGET = bootLoad
