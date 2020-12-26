@@ -1,7 +1,8 @@
 
 module uart_stream #(
     parameter [31:0] DW=8,
-    parameter [31:0] AW=8
+    parameter [31:0] AW_TX=8,
+    parameter [31:0] AW_RX=8
 ) (
     // control interface
     input           clk,
@@ -31,7 +32,7 @@ module uart_stream #(
 
     wire tx_fifo_empty;
     stream_fifo #(
-        .DW(DW), .AW(AW)
+        .DW(DW), .AW(AW_TX)
     ) tx_fifo (
         .clk        (clk        ),
         .d_in       (utx_tdata  ),
@@ -86,7 +87,7 @@ module uart_stream #(
     assign uart_status = {frame_error, overrun_error, rx_busy || !rx_fifo_empty, tx_busy || !tx_fifo_empty};
 
     stream_fifo #(
-        .DW(DW), .AW(AW)
+        .DW(DW), .AW(AW_RX)
     ) rx_fifo (
         .clk        (clk        ),
         .d_in       (s_rx_tdata ),
