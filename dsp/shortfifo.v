@@ -7,8 +7,8 @@
 `timescale 1ns / 1ns
 
 module shortfifo #(
-	parameter dw=2,
-	parameter aw=2
+	parameter dw=8,
+	parameter aw=3
 ) (
 	// require single clock domain
 	input clk,
@@ -107,6 +107,8 @@ always @(posedge clk) begin
 		2: begin  // 2 values are in, read out first value
 			if (re_ && (f_r_addr == f_first_addr))
 				f_state <= 3;
+			else
+				f_state <= 0;
 
 			assert(f_first_valid);
 			assert(f_second_valid);
@@ -118,8 +120,7 @@ always @(posedge clk) begin
 		end
 
 		3: begin  // read out second value
-			if (re_)
-				f_state <= 0;
+			f_state <= 0;
 
 			assert(f_second_valid);
 			assert(dout == f_second_data);
@@ -140,10 +141,11 @@ always @(posedge clk) begin
 	// cover(f_past_valid && $past(f_state) == 3 && f_state == 0);
 end
 
-// Fill up the fIFO and empty it again
+// Fill up the FIFO and empty it again
 reg f_was_full = 0;
 reg f_both = 0; // show what happens when both are high
 always @(posedge clk) begin
+	// assume(din == $past(din) + 8'h1);
 	if (full)
 		f_was_full <= 1;
 	if (we && re && !empty)
@@ -152,6 +154,9 @@ always @(posedge clk) begin
 end
 
 always @(*) begin
+	assert(f_fill >= 0);
+	assert(raddr == f_fill - (aw'd1));
+
 	assert(empty == (f_fill == 0));
 	assert(last == (f_fill == 1));
 	assert(full == (f_fill == len));

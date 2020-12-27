@@ -22,17 +22,24 @@ module fifo #(
 	output [aw:0] count
 );
 
-localparam MEM_LEN = 1 << aw;
+localparam len = 1 << aw;
 
-(* rw_addr_collision = "yes" *)
-reg [dw - 1: 0] mem[MEM_LEN - 1: 0];
+reg [dw - 1: 0] mem[len - 1: 0];
 
-// read / write pointers (need an extra bit too!)
+reg [dw - 1: 0] read = 0;
+reg [dw - 1: 0] last_write = 0;
+
+// read / write pointers (need an extra bit)
 reg [aw: 0] wr_addr = 0;
 reg [aw: 0] rd_addr = 0;
 
-// Number of items in memory (up to MEM_LEN items)
-// Need 1 extra bit, else wouldn't be able to count MEM_LEN items
+// Else Vivado would not infer block ram, arrrgh
+wire [aw - 1: 0] wr_addr_ = wr_addr;
+wire [aw - 1: 0] rd_addr_ = rd_addr;
+wire [aw - 1: 0] rd_addr_next_ = rd_addr + 1;
+
+// Number of items in memory (up to len items)
+// Need 1 extra bit, else wouldn't be able to count len items
 wire [aw: 0] fill = wr_addr - rd_addr;
 assign count = fill - 1;
 
@@ -42,19 +49,30 @@ wire re_ = re && !empty;
 // can only write when not full (except when also reading)
 wire we_ = we && (!full || re);
 
-assign dout = mem[rd_addr];
 assign empty = fill == 0;
 assign last = fill == 1;
-assign full = fill >= MEM_LEN;
+assign full = fill >= len;
+
+// Cannot use block-ram when there is only one element in the FIFO
+// as it has a 2 cycle latency (write and read). We need 1 cycle, so use the
+// bypass register `last_write` in this case instead.
+assign dout = last ? last_write : read;
 
 always @(posedge clk) begin
+	read <= mem[rd_addr_];
+
 	if (we_) begin
-		mem[wr_addr] <= din;
+		last_write <= din;
+		mem[wr_addr_] <= din;
 		wr_addr <= wr_addr + 1;
 	end
 
 	if (re_) begin
 		rd_addr <= rd_addr + 1;
+
+		// we need to look one cycle into the future to compensate the 2 cycle
+		// latency of the xilinx block-ram
+		read <= mem[rd_addr_next_];
 	end
 end
 
@@ -91,7 +109,7 @@ always @(posedge clk) begin
 	case (f_state)
 		0: begin  // IDLE state
 			// write first magic value into FIFO
-			if (we_ && !re_ && (wr_addr == f_first_addr) && (din == f_first_data))
+			if (we_ && (wr_addr == f_first_addr) && (din == f_first_data))
 				f_state <= 1;
 		end
 
@@ -113,6 +131,8 @@ always @(posedge clk) begin
 		2: begin  // 2 values are in, read out first value
 			if (re_ && (rd_addr == f_first_addr))
 				f_state <= 3;
+			else
+				f_state <= 0;
 
 			assert(f_first_valid);
 			assert(f_second_valid);
@@ -124,8 +144,7 @@ always @(posedge clk) begin
 		end
 
 		3: begin  // read out second value
-			if (re_)
-				f_state <= 0;
+			f_state <= 0;
 
 			assert(f_second_valid);
 			assert(mem[f_second_addr] == f_second_data);
@@ -141,7 +160,7 @@ always @(posedge clk) begin
 		assert(!full);
 
 	// Read and write can happen at the same time!
-	if (f_past_valid && $past(we) && $past(re) && !$past(empty))
+	if (f_past_valid && $past(we) && $past(re) && $past(fill > 0))
 		assert($stable(fill));
 
 	// cover mode: show 2 values entering and exiting the FIFO:
@@ -152,6 +171,7 @@ end
 reg f_was_full = 0;
 reg f_both = 0; // show what happens when both are high
 always @(posedge clk) begin
+	// assume(din == $past(din) + 8'h1);
 	if (full)
 		f_was_full <= 1;
 	if (we && re && !empty)
@@ -164,10 +184,10 @@ always @(*) begin
 	assert(fill == wr_addr - rd_addr);
 	assert(empty == (fill == 0));
 	assert(last == (fill == 1));
-	assert(full == (fill == MEM_LEN));
+	assert(full == (fill == len));
 
 	// Can't have more items than the memory holds
-	assert(fill <= MEM_LEN);
+	assert(fill <= len);
 
 	// Cant be full and empty at the same time
 	assert(!(full && empty));

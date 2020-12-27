@@ -73,7 +73,8 @@ reg urx_tready = 0;
 uart_stream #(
     .DW(DATA_WIDTH),
     .AW_TX(AW_TX),
-    .AW_RX(AW_RX)
+    .AW_RX(AW_RX),
+    .USE_SHORTFIFO(0)
 ) stream (
     .clk        (clk),
     .rst        (rst),
