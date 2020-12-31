@@ -10,11 +10,12 @@ module uart_fifo_pack #(
     input  rxd,
     output txd,
     // Interrupt signals
-    output        irq_rx_valid,    //Set when a byte is received. Cleared when the byte is read from UART_RX_REG
-    output [15:0] prescale_out,     // output uprescale value
+    output        irq_rx_valid,    // Set when a byte is received. Cleared when the byte is read from UART_RX_REG
+    output        tx_busy,         // High when transmission in progress
+    output [15:0] prescale_out,    // output uprescale value
     // PicoRV32 packed MEM Bus interface
-    input  [68:0] mem_packed_fwd,  //DEC > URT
-    output [32:0] mem_packed_ret   //DEC < URT
+    input  [68:0] mem_packed_fwd,
+    output [32:0] mem_packed_ret
 );
 
 // --------------------------------------------------------------
@@ -58,6 +59,7 @@ munpack mu (
 //  Instantiate the two UART modules for RX and TX
 // ------------------------------------------------------------------------
 wire [3:0]  uart_status;
+
 reg  [15:0] uprescale = 1;
 assign prescale_out = uprescale;
 
@@ -92,6 +94,7 @@ uart_stream #(
 );
 
 assign irq_rx_valid = urx_tvalid;
+assign tx_busy = uart_status[0];
 
 // ------------------------------------------------------------------------
 //  Glue logic
