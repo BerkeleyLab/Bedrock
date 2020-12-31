@@ -28,6 +28,7 @@ SECTIONS {
         . = ALIGN(4);
         _bss_start = .;
         *(.sbss);
+        . = ALIGN(4);
         *(.bss);
         _bss_end = .;
     }
