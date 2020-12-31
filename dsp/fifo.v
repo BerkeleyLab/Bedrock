@@ -1,6 +1,5 @@
 // blockram based FIFO
 // exchangeable with shortfifo.v
-// TODO make reads registered and get rid of the `rw_addr_collision` attribute
 
 module fifo #(
 	parameter aw = 3,
