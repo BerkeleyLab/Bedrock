@@ -161,12 +161,12 @@ wire [1:0] pad_wx = stream_end ? 2'b01 : 2'b11;
 wire [1:0] pad_rd = stream_end ? 2'b00 : 2'b10;
 reg [1:0] bc;
 always @(posedge clk) case(state)
-	s_idle:  bc = 2'b11;  // H
-	s_start: bc = op_xf ? 2'b10 : 2'b11;  // L or H
-	s_data:  bc = {1'b0, data_bit};
-	s_ack:   bc = {1'b0, ack_bit};
-	s_pad:   bc = o_rd ? pad_rd : o_wx ? pad_wx : pad_wr;
-	s_stop:  bc = 2'b11;  // H
+	s_idle:  bc <= 2'b11;  // H
+	s_start: bc <= op_xf ? 2'b10 : 2'b11;  // L or H
+	s_data:  bc <= {1'b0, data_bit};
+	s_ack:   bc <= {1'b0, ack_bit};
+	s_pad:   bc <= o_rd ? pad_rd : o_wx ? pad_wx : pad_wr;
+	s_stop:  bc <= 2'b11;  // H
 endcase
 
 assign p_addr = next_pc;
