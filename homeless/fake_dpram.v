@@ -72,7 +72,7 @@ wire [aw-1:0] addrb = ren1 ? addr1 : ren2 ? addr2 : addr2_d;
 
 // dpram has no explicit read-able port, it just reads every cycle
 wire [dw-1:0] doutb;
-dpram #(.aw(aw), .dw(dw)) mem(
+dpram #(.aw(aw), .dw(dw)) xmem(
 	.clka(clk), .clkb(clk),
 	.addra(addra), .dina(dina), .wena(wena),
 	.addrb(addrb), .doutb(doutb)

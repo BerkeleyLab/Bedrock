@@ -145,11 +145,17 @@ assign lb_write = lb_control_strobe & ~lb_control_rd;
 // Mailbox
 wire error;
 wire lb_mbox_sel = lb_addr[23:20] == 2;
-wire lb_mbox_wen = lb_mbox_sel & lb_control_rd;
-wire lb_mbox_ren = lb_mbox_sel & lb_write;
+wire lb_mbox_wen = lb_mbox_sel & lb_write;
+// Local bus read-enable is a bit fragile, since we need to
+// match the latency configured deep inside Packet Badger's mem_gateway.
+reg lb_mbox_ren0=0, lb_mbox_ren=0;
+always @(posedge lb_clk) begin
+	lb_mbox_ren0 <= lb_mbox_sel & lb_control_strobe & lb_control_rd;
+	lb_mbox_ren <= lb_mbox_ren0;
+end
 wire [7:0] mbox_out1, mbox_out2;
 // mbox_out2 will eventually get hooked to spi_gate
-fake_dpram #(.aw(11), .dw(8)) dut (
+fake_dpram #(.aw(11), .dw(8)) xmem (
 	.clk(lb_clk),  // must be the same as config_clk
 	.addr1(lb_addr[10:0]), .din1(lb_data_out[7:0]), .dout1(mbox_out1), .wen1(lb_mbox_wen), .ren1(lb_mbox_ren),
 	.addr2(mbox_a), .din2(config_d), .dout2(mbox_out2), .wen2(config_mw), .ren2(config_mr),

@@ -29,7 +29,7 @@ always @(posedge config_clk) begin
 	// need history to look for edges
 	csb_d2 <= csb_d1;
 	sclk_d2 <= sclk_d1;
-	// update the shift register on rising edge of SCLK
+	// update the shift register on active edge of SCLK
 	if (active_edge) sr <= {sr[14:0], din};
 	// cycle the output on rising edge of CSB
 	config_w_r <= csb_d1 & ~csb_d2;

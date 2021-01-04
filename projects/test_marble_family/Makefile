@@ -115,6 +115,20 @@ marble2.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/m
 read_sfp.dat: read_sfp.py
 	$(PYTHON) $< > $@
 
+# Build a testbench with Verilator that can be put on the (simulated) network as 192.168.7.4
+# marble_base.v is over in board_support/marblemini, but most of the infrastructure,
+# including lb_marble_slave.v, is here.
+VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
+Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
+	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
+	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -cc --exe $^
+	MAKEFLAGS="" make -C obj_dir -f Vmarble_base.mk USER_CPPFLAGS="-I $(BADGER_DIR)/tests"
+	mv obj_dir/$@ $@
+# Recipe:
+#  make VLATOR_TIMESCALEMOD= Vmarble_base read_sfp.dat && ./Vmarble_base +trace
+#  ping -c 2 192.168.7.4; python3 lbus_access.py -a 192.168.7.4 -t 3 mem 2097200:8; python3 lbus_access.py -a 192.168.7.4 -t 3 reg 327686=1
+#  gtkwave marble_base_sim.vcd marble_base_sim.gtkw
+
 # =====
 # bitfile
 MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_sfp.dat
@@ -148,5 +162,5 @@ clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
 	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado* datasheet.txt
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
-	rm -f read_sfp.dat
-	rm -rf _xilinx .Xil
+	rm -f read_sfp.dat Vmarble_base
+	rm -rf _xilinx .Xil obj_dir
