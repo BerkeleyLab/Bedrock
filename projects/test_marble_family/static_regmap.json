@@ -89,5 +89,12 @@
         "sign": "unsigned",
         "base_addr": 458752,
         "data_width": 8
+    },
+    "spi_mbox": {
+        "access": "r",
+        "addr_width": 11,
+        "sign": "unsigned",
+        "base_addr": 2097152,
+        "data_width": 8
     }
 }

@@ -112,14 +112,25 @@ spi_gate spi(
 // Map generic configuration bus to application
 // 16-bit SPI word semantics:
 //   0 0 0 1 a a a a d d d d d d d d  ->  set MAC/IP config[a] = D
-//   0 0 1 0 x x x x x x x x x x x V  ->  set enable_rx to V
+//   0 0 1 0 0 0 0 0 x x x x x x x V  ->  set enable_rx to V
+//   0 0 1 0 0 0 1 0 x d d d d d d d  ->  set 7-bit mailbox page selector
 //   0 0 1 1 a a a a d d d d d d d d  ->  set UDP port config[a] = D
+//   0 1 0 0 a a a a d d d d d d d d  ->  mailbox read (not yet implemented)
+//   0 1 0 1 a a a a d d d d d d d d  ->  mailbox write
 parameter default_enable_rx = 1;
 reg enable_rx=default_enable_rx;  // special case initialization
-always @(posedge config_clk) if (config_w && (config_a[7:4] == 2)) enable_rx <= config_d[0];
+reg [6:0] mbox_page=0;
+always @(posedge config_clk) begin
+	if (config_w && (config_a == 8'h20)) enable_rx <= config_d[0];
+	if (config_w && (config_a == 8'h22)) mbox_page <= config_d[6:0];
+end
 wire config_s = config_w && (config_a[7:4] == 1);
 wire config_p = config_w && (config_a[7:4] == 3);
+wire config_mr = 0        && (config_a[7:4] == 4);
+wire config_mw = config_w && (config_a[7:4] == 5);
+wire [10:0] mbox_a = {mbox_page, config_a[3:0]};
 
+// Forward declarations
 wire led_user_mode, l1, l2;
 // Local bus
 assign lb_clk = tx_clk;
@@ -130,6 +141,20 @@ assign lb_strobe = lb_control_strobe;
 assign lb_rd = lb_control_rd;
 assign lb_rd_valid = lb_control_rd_valid;
 assign lb_write = lb_control_strobe & ~lb_control_rd;
+
+// Mailbox
+wire error;
+wire lb_mbox_sel = lb_addr[23:20] == 2;
+wire lb_mbox_wen = lb_mbox_sel & lb_control_rd;
+wire lb_mbox_ren = lb_mbox_sel & lb_write;
+wire [7:0] mbox_out1, mbox_out2;
+// mbox_out2 will eventually get hooked to spi_gate
+fake_dpram #(.aw(11), .dw(8)) dut (
+	.clk(lb_clk),  // must be the same as config_clk
+	.addr1(lb_addr[10:0]), .din1(lb_data_out[7:0]), .dout1(mbox_out1), .wen1(lb_mbox_wen), .ren1(lb_mbox_ren),
+	.addr2(mbox_a), .din2(config_d), .dout2(mbox_out2), .wen2(config_mw), .ren2(config_mr),
+	.error(error)
+);
 
 // Debugging hooks
 wire ibadge_stb, obadge_stb;
@@ -169,12 +194,13 @@ lb_marble_slave #(.USE_I2CBRIDGE(USE_I2CBRIDGE), .MMC_CTRACE(MMC_CTRACE)) slave(
 
 // Delegate part of the address space to application code outside this module
 reg [23:0] p3_lb_addr_d;
-reg p3_use_app_rd;
+reg p3_use_app_rd=0, p3_use_mbox_rd=0;
 always @(posedge lb_clk) begin
 	p3_lb_addr_d <= lb_addr;
 	p3_use_app_rd <= p3_lb_addr_d[23:20] == 1;
+	p3_use_mbox_rd <= p3_lb_addr_d[23:20] == 2;
 end
-wire [31:0] p3_lb_data_in = p3_use_app_rd ? lb_data_in : lb_slave_data_read;
+wire [31:0] p3_lb_data_in = p3_use_mbox_rd ? mbox_out1 : p3_use_app_rd ? lb_data_in : lb_slave_data_read;
 
 // MAC master
 // Clearly not useful in the long run to drive this only from
