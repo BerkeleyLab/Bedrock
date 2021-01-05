@@ -100,13 +100,14 @@ wire rx_clk = vgmii_rx_clk;
 
 // Configuration port
 wire config_clk = tx_clk;
-wire config_w;
+wire config_w, config_r;
 wire [7:0] config_a;
 wire [7:0] config_d;
+wire [7:0] spi_return;
 spi_gate spi(
 	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB), .MISO(MISO),
-	.config_clk(config_clk), .config_w(config_w),
-	.config_a(config_a), .config_d(config_d)
+	.config_clk(config_clk), .config_w(config_w), .config_r(config_r),
+	.config_a(config_a), .config_d(config_d), .tx_data(spi_return)
 );
 
 // Map generic configuration bus to application
@@ -126,7 +127,7 @@ always @(posedge config_clk) begin
 end
 wire config_s = config_w && (config_a[7:4] == 1);
 wire config_p = config_w && (config_a[7:4] == 3);
-wire config_mr = 0        && (config_a[7:4] == 4);
+wire config_mr = config_r && (config_a[7:4] == 4);
 wire config_mw = config_w && (config_a[7:4] == 5);
 wire [10:0] mbox_a = {mbox_page, config_a[3:0]};
 
@@ -148,19 +149,18 @@ wire lb_mbox_sel = lb_addr[23:20] == 2;
 wire lb_mbox_wen = lb_mbox_sel & lb_write;
 // Local bus read-enable is a bit fragile, since we need to
 // match the latency configured deep inside Packet Badger's mem_gateway.
-reg lb_mbox_ren0=0, lb_mbox_ren=0;
+reg lb_mbox_ren=0;
 always @(posedge lb_clk) begin
-	lb_mbox_ren0 <= lb_mbox_sel & lb_control_strobe & lb_control_rd;
-	lb_mbox_ren <= lb_mbox_ren0;
+	lb_mbox_ren <= lb_mbox_sel & lb_control_strobe & lb_control_rd;
 end
 wire [7:0] mbox_out1, mbox_out2;
-// mbox_out2 will eventually get hooked to spi_gate
 fake_dpram #(.aw(11), .dw(8)) xmem (
 	.clk(lb_clk),  // must be the same as config_clk
-	.addr1(lb_addr[10:0]), .din1(lb_data_out[7:0]), .dout1(mbox_out1), .wen1(lb_mbox_wen), .ren1(lb_mbox_ren),
-	.addr2(mbox_a), .din2(config_d), .dout2(mbox_out2), .wen2(config_mw), .ren2(config_mr),
+	.addr1(mbox_a), .din1(config_d), .dout1(mbox_out1), .wen1(config_mw), .ren1(config_mr),
+	.addr2(lb_addr[10:0]), .din2(lb_data_out[7:0]), .dout2(mbox_out2), .wen2(lb_mbox_wen), .ren2(lb_mbox_ren),
 	.error(error)
 );
+assign spi_return = mbox_out1;  // data sent back to MMC vis SPI
 
 // Debugging hooks
 wire ibadge_stb, obadge_stb;
@@ -206,7 +206,7 @@ always @(posedge lb_clk) begin
 	p3_use_app_rd <= p3_lb_addr_d[23:20] == 1;
 	p3_use_mbox_rd <= p3_lb_addr_d[23:20] == 2;
 end
-wire [31:0] p3_lb_data_in = p3_use_mbox_rd ? mbox_out1 : p3_use_app_rd ? lb_data_in : lb_slave_data_read;
+wire [31:0] p3_lb_data_in = p3_use_mbox_rd ? mbox_out2 : p3_use_app_rd ? lb_data_in : lb_slave_data_read;
 
 // MAC master
 // Clearly not useful in the long run to drive this only from

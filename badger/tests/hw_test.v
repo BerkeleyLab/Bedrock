@@ -58,10 +58,11 @@ wire config_clk = tx_clk;
 wire config_w;
 wire [7:0] config_a;
 wire [7:0] config_d;
+wire [7:0] spi_return=0;
 spi_gate spi(
 	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB),
 	.config_clk(config_clk), .config_w(config_w),
-	.config_a(config_a), .config_d(config_d)
+	.config_a(config_a), .config_d(config_d), .tx_data(spi_return)
 );
 
 // Map generic configuration bus to application

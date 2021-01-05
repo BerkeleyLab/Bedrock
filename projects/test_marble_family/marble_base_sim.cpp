@@ -103,7 +103,8 @@ void spi_model(unsigned char *SCLK, unsigned char *CSB, unsigned char *MOSI, uns
 	static int cc=0;
 	// Write "1234ABCD" to first half of page 3
 	// this should show up at (Ethernet) local bus 2097200 - 2097207
-	const uint16_t pattern[] = {0x2203, 0x5031, 0x5132, 0x5233, 0x5334, 0x5441, 0x5542, 0x5643, 0x5744};
+	// End with two read instructions.  Should check correctness here.
+	const uint16_t pattern[] = {0x2203, 0x50b1, 0x51b2, 0x52b3, 0x53b4, 0x5441, 0x5542, 0x5643, 0x5744, 0x4411, 0x4111};
 	const unsigned pattern_len = sizeof(pattern) / sizeof(pattern[0]);
 	static unsigned pattern_ix = 0;
 	if (!SCLK || !CSB || !MOSI) {
