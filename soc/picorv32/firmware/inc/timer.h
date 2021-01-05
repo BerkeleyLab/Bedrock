@@ -37,4 +37,8 @@ uint32_t getTimer(void);
 // Block for `nCycles`, ~45 cycles overhead
 void delayCycles(const uint32_t nCycles);
 
+// when called in a loop, makes sure each iteration takes
+// the same amount of time (at least `cycles` between calls)
+void periodic_delay(unsigned cycles);
+
 #endif
