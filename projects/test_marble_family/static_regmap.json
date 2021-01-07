@@ -34,6 +34,13 @@
         "base_addr": 327689,
         "data_width": 18
     },
+    "ctrace_start": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327690,
+        "data_width": 1
+    },
     "gps_buf_reset": {
         "access": "rw",
         "addr_width": 0,
@@ -82,6 +89,13 @@
         "sign": "unsigned",
         "base_addr": 327701,
         "data_width": 22
+    },
+    "ctrace_out": {
+        "access": "r",
+        "addr_width": 11,
+        "sign": "unsigned",
+        "base_addr": 393216,
+        "data_width": 16
     },
     "gps_buff": {
         "access": "r",

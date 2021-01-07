@@ -182,7 +182,7 @@ lb_marble_slave #(.USE_I2CBRIDGE(USE_I2CBRIDGE), .MMC_CTRACE(MMC_CTRACE)) slave(
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
-	.mmc_pins({MOSI, SCLK, CSB}),
+	.mmc_pins({MISO, MOSI, SCLK, CSB}),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
 	.twi_scl(twi_scl), .twi_sda(twi_sda),
