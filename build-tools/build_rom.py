@@ -152,7 +152,7 @@ if __name__ == "__main__":
         dest='json',
         help='Register map filename',
         type=str)
-    # TO-DO: Add argument for ROM size that also affects the address width
+    # TO-DO: Add argument for ROM size that also affects the address width.
     # TO-DO: Also check the Verilog files where the ROM is instantiated in,
     # TO-DO: and change the signals that are tied to the addr
     # NB: This is a placeholder for the argument parser
