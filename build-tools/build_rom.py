@@ -9,6 +9,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../badger"))
 from lbus_access import lbus_access
 
+MAX_ROM_SIZE = 2048
 
 def chunk(li, flag=1):
     '''
@@ -83,8 +84,9 @@ def decode_array(a):
 
 
 def verilog_rom(a):
-    print("%d/%d ROM entries used" % (len(a), 2048))
-    if len(a) > 2048:
+    print("%d/%d ROM entries used" % (len(a), MAX_ROM_SIZE))
+    if len(a) > MAX_ROM_SIZE:
+        print("ROM_size input exceeds MAX_ROM_SIZE")
         return ""
     config_case = '\n'.join([
         '''\t11'h%3.3x: dxx <= 16'h%4.4x;''' % (ix, a[ix])
@@ -149,6 +151,9 @@ if __name__ == "__main__":
         dest='json',
         help='Register map filename',
         type=str)
+    # TO-DO: Add argument for ROM size that also affects the address width
+    # TO-DO: Also check the Verilog files where the ROM is instantiated and change the signals that are tied to the address
+    # NB: This is a placeholder for the argument parser
     parser.add_argument(
         '-d',
         '--dev_descript',
