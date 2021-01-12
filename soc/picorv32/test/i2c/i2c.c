@@ -7,7 +7,7 @@
 int main(void) {
     uint8_t testData[8];
 
-    i2c_init();
+    i2c_init(PIN_I2C_SDA, PIN_I2C_SCL);
 
     // Read N bytes
     i2c_read_regs(0x42, 0x24, testData, sizeof(testData));

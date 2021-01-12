@@ -9,22 +9,46 @@
 //-------------------------------------------------
 // Private macros /functions
 //-------------------------------------------------
+// pre-calculated memory addresses for
 // setting / clearing / reading the I2C pins
-#define SDA1() {SET_GPIO1(BASE_I2C, GPIO_OE_REG, PIN_I2C_SDA, 0); I2C_DELAY();}
-#define SDA0() {SET_GPIO1(BASE_I2C, GPIO_OE_REG, PIN_I2C_SDA, 1); I2C_DELAY();}
-#define SDAR()  GET_GPIO1(BASE_I2C, GPIO_IN_REG, PIN_I2C_SDA)
-#define SCL1() {SET_GPIO1(BASE_I2C, GPIO_OE_REG, PIN_I2C_SCL, 0); I2C_DELAY();}
-#define SCL0() {SET_GPIO1(BASE_I2C, GPIO_OE_REG, PIN_I2C_SCL, 1); I2C_DELAY();}
+static unsigned p_sda1;
+static unsigned p_sda0;
+static unsigned p_sdar;
+static unsigned p_scl1;
+static unsigned p_scl0;
+
+#define SDA1() {SET_REG(p_sda1, 0); I2C_DELAY();}
+#define SDA0() {SET_REG(p_sda0, 0); I2C_DELAY();}
+#define SDAR()  GET_REG(p_sdar)
+#define SCL1() {SET_REG(p_scl1, 0); I2C_DELAY();}
+#define SCL0() {SET_REG(p_scl0, 0); I2C_DELAY();}
 #define I2C_DELAY() DELAY_US(I2C_DELAY_US)
+
+#define BIT_CLEAR 0x100
+#define BIT_SET 0x80
 
 //-------------------------------------------------
 // Low level functions
 //-------------------------------------------------
-void i2c_init(void)
+void i2c_init(uint8_t pin_sda, uint8_t pin_scl)
 {
+    // pre-calculate memory addresses for setting / clearing / reading the pins
+    // cannot rely on macros here as they are only efficient for constants
+    // to make sense of this, see sfr_pack.v
+    pin_sda = (pin_sda & 0x1F) << 2;
+    pin_scl = (pin_scl & 0x1F) << 2;
+
+    p_sda1 = BASE_I2C | (GPIO_OE_REG << 9) | BIT_CLEAR | pin_sda;
+    p_sda0 = BASE_I2C | (GPIO_OE_REG << 9) | BIT_SET | pin_sda;
+    p_sdar = BASE_I2C | (GPIO_IN_REG << 9) | BIT_SET | pin_sda;
+
+    p_scl1 = BASE_I2C | (GPIO_OE_REG << 9) | BIT_CLEAR | pin_scl;
+    p_scl0 = BASE_I2C | (GPIO_OE_REG << 9) | BIT_SET | pin_scl;
+
     // I2C pin signals alternate between 0 and Z, so clear the gpioOut bits
-    SET_GPIO1(BASE_I2C, GPIO_OUT_REG, PIN_I2C_SCL, 0);
-    SET_GPIO1(BASE_I2C, GPIO_OUT_REG, PIN_I2C_SDA, 0);
+    SET_REG(BASE_I2C | (GPIO_OUT_REG << 9) | BIT_CLEAR | pin_scl, 0);
+    SET_REG(BASE_I2C | (GPIO_OUT_REG << 9) | BIT_CLEAR | pin_sda, 0);
+
     SDA1();
     SCL1();
 }
