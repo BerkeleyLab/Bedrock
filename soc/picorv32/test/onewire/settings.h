@@ -13,7 +13,9 @@
 #define BASE_DEBUG_UART      BASE_UART0
 #define F_CLK                5000000     // [Hz] absurdly slow to make simulations faster
 
-// I2C specific settings
-#define PIN_ONEWIRE          3              // GPIO pin numbers
+// One-wire specific settings
+#define BASE_ONEWIRE         BASE_GPIO
+#define PIN_ONEWIRE_A        3              // GPIO pin numbers
+#define PIN_ONEWIRE_B        4
 
 #endif

@@ -8,9 +8,10 @@ BLOCK_RAM_SIZE = 2048
 
 SRC_V  = memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v
 SRC_V += sfr_pack.v gpio_pack.v gpioz_pack.v debug_console.v
-OBJS   = startup.o onewire_soft.o print.o
+OBJS   = startup.o timer.o onewire_soft.o print.o
 
-# CFLAGS   += -ffunction-sections
+# Need -O3 when only running at FCLK = 5 MHz
+CFLAGS += -ffunction-sections -O3
 
 TARGET = onewire
 
