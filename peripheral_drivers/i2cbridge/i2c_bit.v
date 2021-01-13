@@ -29,7 +29,7 @@ module i2c_bit(
 reg [3:0] cnt=0;  // count to 14
 reg last_tick=0;
 always @(posedge clk) begin
-	last_tick = cnt==13;
+	last_tick <= cnt==13;
 	if (tick) cnt <= last_tick ? 0 : cnt+1;
 end
 
