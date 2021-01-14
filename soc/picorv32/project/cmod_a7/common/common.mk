@@ -17,7 +17,7 @@ SRC_V += stream_fifo.v shortfifo.v fifo.v uart_fifo_pack.v uart_stream.v
 SRC_V += sfr_pack.v gpio_pack.v gpioz_pack.v spimemio.v spimemio_pack.v
 SRC_V += pb_debouncer.v sram_pack.v sram2_pack.v
 
-OBJS += system.o print.o timer.o test.o startup_irq.o
+OBJS += system.o print.o timer.o test.o startup_irq.o donut.o
 
 #size of the blockRam [bytes]
 BLOCK_RAM_SIZE = 16384
@@ -25,4 +25,4 @@ SYNTH_OPT += -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
 
 CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\" -I../common
 CFLAGS += -DBOOTLOADER_BAUDRATE=$(BOOTLOADER_BAUDRATE)
-CFLAGS += -ffunction-sections
+CFLAGS += -ffunction-sections -O3
