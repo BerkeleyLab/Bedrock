@@ -1,0 +1,36 @@
+[timestart] 0
+[size] 1197 363
+[pos] -367 -21
+*-14.173025 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] lpass1_tb.
+[sst_width] 228
+[signals_width] 286
+[sst_expanded] 1
+[sst_vpaned_height] 58
+@29
+lpass1_tb.dut.clk
+@10420
+lpass1_tb.adc_in[15:0]
+@c10420
+lpass1_tb.adc_out[15:0]
+@28
+(0)lpass1_tb.adc_out[15:0]
+(1)lpass1_tb.adc_out[15:0]
+(2)lpass1_tb.adc_out[15:0]
+(3)lpass1_tb.adc_out[15:0]
+(4)lpass1_tb.adc_out[15:0]
+(5)lpass1_tb.adc_out[15:0]
+(6)lpass1_tb.adc_out[15:0]
+(7)lpass1_tb.adc_out[15:0]
+(8)lpass1_tb.adc_out[15:0]
+(9)lpass1_tb.adc_out[15:0]
+(10)lpass1_tb.adc_out[15:0]
+(11)lpass1_tb.adc_out[15:0]
+(12)lpass1_tb.adc_out[15:0]
+(13)lpass1_tb.adc_out[15:0]
+(14)lpass1_tb.adc_out[15:0]
+(15)lpass1_tb.adc_out[15:0]
+@1401200
+-group_end
+[pattern_trace] 1
+[pattern_trace] 0

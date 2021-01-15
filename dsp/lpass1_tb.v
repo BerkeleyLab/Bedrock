@@ -1,7 +1,7 @@
 `timescale 1ns / 1ns
 `include "constants.vams"
 
-module fwashout_tb;
+module lpass1_tb;
 
    localparam CLK_PER = 10; // ns
 
@@ -11,15 +11,15 @@ module fwashout_tb;
    real phstep;
    initial begin
       if ($test$plusargs("vcd")) begin
-         $dumpfile("fwashout.vcd");
-         $dumpvars(5,fwashout_tb);
+         $dumpfile("lpass1.vcd");
+         $dumpvars(5,lpass1_tb);
       end
 
       if (!$value$plusargs("phstep=%f", phstep)) phstep=0.01; // Default 1 MHz
-      if (!$value$plusargs("simtime=%f", simtime)) simtime=1000; // Default 1000*10 ns
+      if (!$value$plusargs("simtime=%f", simtime)) simtime=20000; // Default 20000*10 ns
       if ($test$plusargs("trace")) begin
          trace = 1;
-         out_file = $fopen("fwashout.dat", "w");
+         out_file = $fopen("lpass1.dat", "w");
       end
       for (cc=0; cc<simtime; cc=cc+1) begin
          clk=0; #(CLK_PER/2);
@@ -43,20 +43,13 @@ module fwashout_tb;
    end
 
    // Instantiate DUT
-   fwashout #(
-      .a_dw (16),
-      .o_dw (16),
-      .cut  (4)) // ~ 1e6 Hz
+   lpass1 #(
+      .dwi (16),
+      .klog2 (7)) // ~1e5 Hz
    dut (
-      .clk      (clk),
-      .rst      (1'b0),
-      .track    (1'b1),
-      .a_data   (adc_in),
-      .a_gate   (1'b1), .a_trig (1'b0),
-      .o_data   (adc_out),
-      .o_gate   (), .o_trig (), // Ignore
-      .time_err ()
-   );
+      .clk  (clk),
+      .din  (adc_in),
+      .dout (adc_out));
 
    always @(posedge clk) if (trace) begin
       $fwrite(out_file, "%d %d\n", adc_in, adc_out);

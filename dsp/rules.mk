@@ -3,7 +3,7 @@ include $(CORDIC_DIR)/rules.mk
 VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -y$(CORDIC_DIR)
 VFLAGS += -I. -y. -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
-TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb complex_mul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb banyan_tb banyan_mem_tb biquad_tb iirFilter_tb circle_buf_tb cic_multichannel_tb cic_wave_recorder_tb circle_buf_serial_tb iq_deinterleaver_tb serializer_multichannel_tb complex_freq_tb iq_trace_tb second_if_out_tb cpxmul_fullspeed_tb dpram_tb host_averager_tb cic_simple_us_tb phasex_tb complex_mul_flat_tb
+TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb complex_mul_tb tt800_tb rot_dds_tb mon_12_tb lp_tb lp_notch_tb xy_pi_clip_tb mp_proc_tb iq_chain4_tb cordic_mux_tb timestamp_tb afterburner_tb ssb_out_tb banyan_tb banyan_mem_tb biquad_tb iirFilter_tb circle_buf_tb cic_multichannel_tb cic_wave_recorder_tb circle_buf_serial_tb iq_deinterleaver_tb serializer_multichannel_tb complex_freq_tb iq_trace_tb second_if_out_tb cpxmul_fullspeed_tb dpram_tb host_averager_tb cic_simple_us_tb phasex_tb complex_mul_flat_tb fwashout_tb lpass1_tb
 
 TGT_ := $(TEST_BENCH)
 
@@ -93,6 +93,13 @@ second_if_out_check: second_if_out_tb $(SSB_TEST_PY)
 ssb_out_check: ssb_out_tb $(SSB_TEST_PY)
 	$(VVP) $< +trace && $(PYTHON) $(word 2, $^) ssb_out.dat SSB_OUT
 	$(VVP) $< +trace +single && $(PYTHON) $(word 2, $^) ssb_out.dat SSB_OUT SINGLE
+
+# 1st order low/high pass filters
+FTEST_PY = filter_test.py
+fwashout_check: $(FTEST_PY) fwashout_tb
+	$(PYTHON) $^
+lpass1_check: $(FTEST_PY) lpass1_tb
+	$(PYTHON) $^
 
 CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat *.lxt *~
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cordicg_b22.v second_if_out.dat ssb_*.dat multiply_accumulate.out non_iq_interleaved_piloop.out
