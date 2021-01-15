@@ -95,10 +95,12 @@ RUN git clone https://github.com/cliffordwolf/yosys.git && \
 
 RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4
 
+# note sed-based workaround for verilator issue #1574
 RUN apt-get update && \
 	apt-get install -y libfl2 libfl-dev zlibc zlib1g zlib1g-dev autoconf && \
 	git clone https://github.com/verilator/verilator && cd verilator && \
-	git checkout v4.034 && autoconf && ./configure && make -j4 && make install && \
+	git checkout v4.034 && sed -i -e '/LINE_TOKEN_MAX/s/20000/30000/' src/V3PreProc.h && \
+	autoconf && ./configure && make -j4 && make install && \
 	cd ../ && rm -rf verilator && verilator -V && \
 	apt-get install -y openocd
 
