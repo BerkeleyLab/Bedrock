@@ -4,7 +4,8 @@
 
 module marble_base #(
 	parameter USE_I2CBRIDGE = 1,
-	parameter MMC_CTRACE = 1
+	parameter MMC_CTRACE = 1,
+	parameter misc_config_default = 0
 )(
 	// GMII Tx port
 	input vgmii_tx_clk,
@@ -116,7 +117,7 @@ spi_gate spi(
 //   0 0 1 0 0 0 0 0 x x x x x x x V  ->  set enable_rx to V
 //   0 0 1 0 0 0 1 0 x d d d d d d d  ->  set 7-bit mailbox page selector
 //   0 0 1 1 a a a a d d d d d d d d  ->  set UDP port config[a] = D
-//   0 1 0 0 a a a a d d d d d d d d  ->  mailbox read (not yet implemented)
+//   0 1 0 0 a a a a d d d d d d d d  ->  mailbox read
 //   0 1 0 1 a a a a d d d d d d d d  ->  mailbox write
 parameter default_enable_rx = 1;
 reg enable_rx=default_enable_rx;  // special case initialization
@@ -174,7 +175,11 @@ wire allow_mmc_eth_config;
 wire [31:0] lb_slave_data_read;
 
 //
-lb_marble_slave #(.USE_I2CBRIDGE(USE_I2CBRIDGE), .MMC_CTRACE(MMC_CTRACE)) slave(
+lb_marble_slave #(
+	.USE_I2CBRIDGE(USE_I2CBRIDGE),
+	.MMC_CTRACE(MMC_CTRACE),
+	.misc_config_default(misc_config_default)
+) slave(
 	.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
 	.data_out(lb_data_out), .data_in(lb_slave_data_read),

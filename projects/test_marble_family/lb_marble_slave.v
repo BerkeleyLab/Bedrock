@@ -6,7 +6,8 @@
 // see logic below for local_write.
 module lb_marble_slave #(
 	parameter USE_I2CBRIDGE = 0,
-	parameter MMC_CTRACE = 0
+	parameter MMC_CTRACE = 0,
+	parameter misc_config_default = 0
 )(
 	input clk,
 	input [23:0] addr,
@@ -297,7 +298,7 @@ end
 
 // Direct writes
 reg led_user_r=0;
-reg [7:0] misc_config = 8'd0;
+reg [7:0] misc_config = misc_config_default;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
 // decoding corresponds to mirror readback, see notes above
