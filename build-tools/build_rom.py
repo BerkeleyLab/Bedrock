@@ -108,8 +108,8 @@ endmodule
 '''
 
 
-def read_live_array(dev):
-    foo = dev.exchange(range(0x800, 0xfff))
+def read_live_array(dev, len):
+    foo = dev.exchange(range(0x800, 0x800+len))
     return foo
 
 
@@ -169,7 +169,7 @@ if __name__ == "__main__":
         ip_addr = args.ip
         port = args.port
         dev = lbus_access(ip_addr, port=port)
-        a = read_live_array(dev)
+        a = read_live_array(dev, args.rom_size)
         # print(" ".join(["%4.4x"%x for x in a]))
         r = decode_array(a)
         for rr in r:
