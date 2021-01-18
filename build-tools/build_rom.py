@@ -9,9 +9,6 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "../badger"))
 from lbus_access import lbus_access
 
-MAX_ROM_SIZE = 4096
-ROM_MSB = ceil(log2(MAX_ROM_SIZE))
-
 
 def chunk(li, flag=1):
     '''
@@ -85,7 +82,8 @@ def decode_array(a):
     return result
 
 
-def verilog_rom(a):
+def verilog_rom(a, MAX_ROM_SIZE):
+    ROM_MSB = ceil(log2(MAX_ROM_SIZE))
     print("%d/%d ROM entries used" % (len(a), MAX_ROM_SIZE))
     if len(a) > MAX_ROM_SIZE:
         print("ROM_size input exceeds MAX_ROM_SIZE")
@@ -118,6 +116,8 @@ def read_live_array(dev):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Read/Write from FPGA memory')
+    parser.add_argument(
+        '-r', help='Maximum ROM size', dest='rom_size', type=int, default=2048)  # Variable ROM size
     parser.add_argument(
         '--loopback',
         dest='loopback',
@@ -190,4 +190,4 @@ if __name__ == "__main__":
             print(a)
         else:
             with open(args.verilog_file, 'w') as f:
-                f.write(verilog_rom(a))
+                f.write(verilog_rom(a, args.rom_size))
