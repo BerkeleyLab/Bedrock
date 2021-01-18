@@ -116,8 +116,11 @@ def read_live_array(dev, len):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Read/Write from FPGA memory')
+    # Variable ROM size
+    # If you change this default, you presumably also need to modify
+    # the Verilog code that instantiates the ROM.
     parser.add_argument(
-        '-r', help='Maximum ROM size', dest='rom_size', type=int, default=2048)  # Variable ROM size
+        '-r', help='Maximum ROM size', dest='rom_size', type=int, default=2048)
     parser.add_argument(
         '--loopback',
         dest='loopback',
@@ -153,10 +156,6 @@ if __name__ == "__main__":
         dest='json',
         help='Register map filename',
         type=str)
-    # TO-DO: Add argument for ROM size that also affects the address width.
-    # TO-DO: Also check the Verilog files where the ROM is instantiated in,
-    # TO-DO: and change the signals that are tied to the addr
-    # NB: This is a placeholder for the argument parser
     parser.add_argument(
         '-d',
         '--dev_descript',
