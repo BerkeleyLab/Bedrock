@@ -10,6 +10,8 @@ marble_mini:
     params:
         carrier: "Marble Mini"
         carrier_rev: "v1"
+        default_enable_rx: 1
+        misc_config_default: 4
 
 marble_v2:
     defs:
@@ -20,3 +22,5 @@ marble_v2:
     params:
         carrier: "Marble"
         carrier_rev: "v2"
+        default_enable_rx: 1
+        misc_config_default: 4

@@ -6,7 +6,8 @@
 // see logic below for local_write.
 module lb_marble_slave #(
 	parameter USE_I2CBRIDGE = 0,
-	parameter MMC_CTRACE = 0
+	parameter MMC_CTRACE = 0,
+	parameter misc_config_default = 0
 )(
 	input clk,
 	input [23:0] addr,
@@ -22,7 +23,7 @@ module lb_marble_slave #(
 	input [7:0] obadge_data,
 	input xdomain_fault,
 	// More debugging hooks
-	input [2:0] mmc_pins,
+	input [3:0] mmc_pins,
 	// Features
 	input tx_mac_done,
 	input [15:0] rx_mac_data,
@@ -89,11 +90,20 @@ wire [15:0] ctrace_out;
 reg ctrace_start=0;
 wire [0:0] ctrace_running;
 
+reg csb_r=0, csb_toggle;
+reg arm=1;
+always @(posedge clk) begin
+   csb_r <= mmc_pins[0];
+   csb_toggle <= (~mmc_pins[0] & csb_r);
+   if (csb_toggle) arm <= 0;
+   if (ctrace_start) arm <= 1;
+end
+
 generate if (MMC_CTRACE) begin
 	localparam ctrace_aw=11;
 	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
-	ctrace #(.dw(3), .tw(13), .aw(ctrace_aw)) mmc_ctrace(
-		.clk(clk), .data(mmc_pins), .start(ctrace_start),
+	ctrace #(.dw(4), .tw(12), .aw(ctrace_aw)) mmc_ctrace(
+		.clk(clk), .data(mmc_pins), .start(csb_toggle & arm),
 		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
 		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
 	);
@@ -288,7 +298,7 @@ end
 
 // Direct writes
 reg led_user_r=0;
-reg [7:0] misc_config = 8'd0;
+reg [7:0] misc_config = misc_config_default;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
 // decoding corresponds to mirror readback, see notes above
