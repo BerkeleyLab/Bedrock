@@ -30,14 +30,14 @@ lpass1_tb = {"tb": "lpass1_tb",
              "ofile": "lpass1.dat",
              "dt": 10e-9,
              "fstart": 1e4,
-             "fstop": 1e6,
+             "fstop": 1e7,
              "fcorner": 1e5,
              "slope": -20}
 
 TB_LIST = {"fwashout_tb": fwashout_tb, "lpass1_tb": lpass1_tb}
 
 
-def run_and_parse(tb_cfg):
+def run_and_parse(tb_cfg, verbose=False):
     tb = tb_cfg["tb"]
     of = tb_cfg["ofile"]
     dt = tb_cfg["dt"]
@@ -52,17 +52,31 @@ def run_and_parse(tb_cfg):
     for p in psweep:
         # Set simulation time so it includes 3 periods
         stime = np.ceil(3/p)
-        a = vvp_run(tb, "+phstep=%f +simtime=%d +trace" % (p, stime), of)
+        a = vvp_run(tb, "+phstep=%f +simtime=%d +trace" % (p, stime), of, verbose)
         npts = a.shape[0]
         trans = int(npts - npts/3)
         a_in = a[trans:, 0]  # Ignore transient
         a_out = a[trans:, 1]
-        gain_arr.append(max(a_out)/max(a_in))
+        gain_est1 = max(a_out)/max(a_in)
 
         # Estimate phase shift based on dot-product
         dp = np.dot(a_in, a_out)
         norm = np.linalg.norm(a_in)*np.linalg.norm(a_out)
-        ph_arr.append(np.arccos(dp/norm)*180.0/np.pi)
+        phas_est1 = np.arccos(dp/norm)*180.0/np.pi
+
+        # assume sine waves
+        n_out = len(a_in)
+        ref = np.exp(p*2*np.pi*1j*np.arange(n_out))
+        cpx_in = np.mean(np.dot(a_in, ref.conj()))
+        cpx_out = np.mean(np.dot(a_out, ref.conj()))
+        cpx_gain = cpx_out / cpx_in
+        gain_est2 = abs(cpx_gain)
+        phas_est2 = np.angle(cpx_gain)*180.0/np.pi
+
+        if verbose:
+            print("%8.5f %8.5f  %8.3f %8.3f" % (gain_est1, gain_est2, phas_est1, phas_est2))
+        gain_arr.append(gain_est2)
+        ph_arr.append(phas_est2)
 
     return fsweep, gain_arr, ph_arr
 
@@ -76,16 +90,17 @@ def check_tf(freq, gain, phase, tb_cfg, plot=False):
     # 3 dB corner
     c = np.argmax(g < -3.0) if lowpass else np.argmax(g > -3.0)
     c_est = (freq[c] + freq[c-1])/2
-    print("3dB corner estimate: %f Hz" % c_est)
+    print("3dB corner estimate: %.1f Hz" % c_est)
     # Approximate slope before/after corner
+    delta = 2
     if lowpass:
-        gs = g[c+1:]
-        fs = f[c+1:]
+        gs = g[c+delta:]
+        fs = f[c+delta:]
     else:
-        gs = g[0:c-1]
-        fs = f[0:c-1]
+        gs = g[0:c-delta]
+        fs = f[0:c-delta]
     slope = (gs[-1] - gs[0])/(np.log10(fs[-1]) - np.log10(fs[0]))
-    print("Estimated slope before/after 3dB corner: %f dB/dec" % slope)
+    print("Estimated slope before/after 3dB corner: %.3f dB/dec" % slope)
 
     if plot:
         plt.subplot(211)
@@ -104,12 +119,12 @@ def check_tf(freq, gain, phase, tb_cfg, plot=False):
     fspec = tb_cfg["fcorner"]
     diff = (np.log10(fmeas) - np.log10(fspec))/np.log10(fspec)
     if (abs(diff) > 0.1):
-        print("FAIL: Measured 3dB corner (%f) too far from spec (%f)!" % (fmeas, fspec))
+        print("FAIL: Measured 3dB corner (%.1f) too far from spec (%.1f)!" % (fmeas, fspec))
         fail = True
     sspec = tb_cfg["slope"]
     diff = (slope - sspec)/sspec
     if (abs(diff) > 0.1):
-        print("FAIL: Measured slope (%f) too far from spec (%f)!" % (slope, sspec))
+        print("FAIL: Measured slope (%.3f) too far from spec (%.3f)!" % (slope, sspec))
         fail = True
 
     if fail:
@@ -135,6 +150,6 @@ if tb_name not in TB_LIST.keys():
 
 tb = TB_LIST[tb_name]
 
-f, g, p = run_and_parse(tb)
+f, g, p = run_and_parse(tb, verbose=False)
 rc = check_tf(f, g, p, tb, plot)
 exit(rc)

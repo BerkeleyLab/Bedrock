@@ -103,6 +103,7 @@ lpass1_check: $(FTEST_PY) lpass1_tb
 
 CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d lp_out.dat notch_test.dat *.lxt *~
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cordicg_b22.v second_if_out.dat ssb_*.dat multiply_accumulate.out non_iq_interleaved_piloop.out
+CLEAN += fwashout.dat lpass1.dat
 
 CLEAN_DIRS += tt800_ref.dSYM
 CLEAN_DIRS += _xilinx __pycache__

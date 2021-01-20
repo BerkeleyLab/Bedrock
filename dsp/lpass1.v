@@ -4,6 +4,8 @@
 
    Corner frequency (fc) set by:
    fc = k / [(1-k)*2*PI*dt]
+
+   No need for saturated arithmetic, since gain is strictly less than unity.
 */
 
 module lpass1 #(
@@ -15,14 +17,13 @@ module lpass1 #(
    output signed [dwi-1:0] dout
 );
 
-   reg signed [dwi+klog2-1:0] dout_r=0, dout_r2=0;
-   wire signed [dwi+klog2:0] sub = (din<<<klog2) - dout_r2; // Shift din to buy precision
+   reg signed [dwi+klog2-1:0] dout_r=0;
+   wire signed [dwi+klog2:0] sub = (din<<<klog2) - dout_r; // Shift din to buy precision
 
    always @(posedge clk) begin
-       dout_r2 <= dout_r;
-       dout_r <= dout_r2 + (sub>>>klog2);
+       dout_r <= dout_r + (sub>>>klog2);
    end
 
-   assign dout = dout_r2[dwi+klog2-1:klog2];
+   assign dout = dout_r[dwi+klog2-1:klog2];
 
 endmodule
