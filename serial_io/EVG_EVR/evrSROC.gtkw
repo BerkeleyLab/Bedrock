@@ -1,0 +1,27 @@
+[timestart] 3680000
+[size] 1469 392
+[pos] 31 219
+*-22.708155 20022200 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] evrSROC_tb.
+[treeopen] evrSROC_tb.dut.
+[sst_width] 282
+[signals_width] 239
+[sst_expanded] 1
+[sst_vpaned_height] 69
+@28
+evrSROC_tb.evrClk
+evrSROC_tb.sysClk
+evrSROC_tb.dut.evrHeartbeatMarker
+evrSROC_tb.dut.evrPulsePerSecondMarker
+evrSROC_tb.dut.heartBeatValid
+@29
+evrSROC_tb.dut.pulsePerSecondValid
+@28
+evrSROC_tb.dut.evrSROC
+@420
+evrSROC_tb.evr_SROC_max
+@28
+evrSROC_tb.dut.evrSROCsynced
+evrSROC_tb.fail
+[pattern_trace] 1
+[pattern_trace] 0
