@@ -45,11 +45,12 @@ module lpass1_tb;
    // Instantiate DUT
    lpass1 #(
       .dwi (16),
-      .klog2 (7)) // ~1e5 Hz
+      .klog2 (8))
    dut (
-      .clk  (clk),
-      .din  (adc_in),
-      .dout (adc_out));
+      .clk     (clk),
+      .trim_sh (2'd1), // (8-1) = 7: fc ~= 1e5 Hz
+      .din     (adc_in),
+      .dout    (adc_out));
 
    always @(posedge clk) if (trace) begin
       $fwrite(out_file, "%d %d\n", adc_in, adc_out);
