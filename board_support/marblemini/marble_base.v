@@ -4,7 +4,8 @@
 
 module marble_base #(
 	parameter USE_I2CBRIDGE = 1,
-	parameter MMC_CTRACE = 1
+	parameter MMC_CTRACE = 1,
+	parameter misc_config_default = 0
 )(
 	// GMII Tx port
 	input vgmii_tx_clk,
@@ -100,17 +101,38 @@ wire rx_clk = vgmii_rx_clk;
 
 // Configuration port
 wire config_clk = tx_clk;
-wire enable_rx, config_s, config_p;
-wire [3:0] config_a;
+wire config_w, config_r;
+wire [7:0] config_a;
 wire [7:0] config_d;
+wire [7:0] spi_return;
 spi_gate spi(
-	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB),
-	.enable_rx(enable_rx),
-	.config_clk(config_clk), .config_s(config_s), .config_p(config_p),
-	.config_a(config_a), .config_d(config_d)
+	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB), .MISO(MISO),
+	.config_clk(config_clk), .config_w(config_w), .config_r(config_r),
+	.config_a(config_a), .config_d(config_d), .tx_data(spi_return)
 );
-assign MISO = 0;  // XXX fixme
 
+// Map generic configuration bus to application
+// 16-bit SPI word semantics:
+//   0 0 0 1 a a a a d d d d d d d d  ->  set MAC/IP config[a] = D
+//   0 0 1 0 0 0 0 0 x x x x x x x V  ->  set enable_rx to V
+//   0 0 1 0 0 0 1 0 x d d d d d d d  ->  set 7-bit mailbox page selector
+//   0 0 1 1 a a a a d d d d d d d d  ->  set UDP port config[a] = D
+//   0 1 0 0 a a a a d d d d d d d d  ->  mailbox read
+//   0 1 0 1 a a a a d d d d d d d d  ->  mailbox write
+parameter default_enable_rx = 1;
+reg enable_rx=default_enable_rx;  // special case initialization
+reg [6:0] mbox_page=0;
+always @(posedge config_clk) begin
+	if (config_w && (config_a == 8'h20)) enable_rx <= config_d[0];
+	if (config_w && (config_a == 8'h22)) mbox_page <= config_d[6:0];
+end
+wire config_s = config_w && (config_a[7:4] == 1);
+wire config_p = config_w && (config_a[7:4] == 3);
+wire config_mr = config_r && (config_a[7:4] == 4);
+wire config_mw = config_w && (config_a[7:4] == 5);
+wire [10:0] mbox_a = {mbox_page, config_a[3:0]};
+
+// Forward declarations
 wire led_user_mode, l1, l2;
 // Local bus
 assign lb_clk = tx_clk;
@@ -121,6 +143,25 @@ assign lb_strobe = lb_control_strobe;
 assign lb_rd = lb_control_rd;
 assign lb_rd_valid = lb_control_rd_valid;
 assign lb_write = lb_control_strobe & ~lb_control_rd;
+
+// Mailbox
+wire error;
+wire lb_mbox_sel = lb_addr[23:20] == 2;
+wire lb_mbox_wen = lb_mbox_sel & lb_write;
+// Local bus read-enable is a bit fragile, since we need to
+// match the latency configured deep inside Packet Badger's mem_gateway.
+reg lb_mbox_ren=0;
+always @(posedge lb_clk) begin
+	lb_mbox_ren <= lb_mbox_sel & lb_control_strobe & lb_control_rd;
+end
+wire [7:0] mbox_out1, mbox_out2;
+fake_dpram #(.aw(11), .dw(8)) xmem (
+	.clk(lb_clk),  // must be the same as config_clk
+	.addr1(mbox_a), .din1(config_d), .dout1(mbox_out1), .wen1(config_mw), .ren1(config_mr),
+	.addr2(lb_addr[10:0]), .din2(lb_data_out[7:0]), .dout2(mbox_out2), .wen2(lb_mbox_wen), .ren2(lb_mbox_ren),
+	.error(error)
+);
+assign spi_return = mbox_out1;  // data sent back to MMC vis SPI
 
 // Debugging hooks
 wire ibadge_stb, obadge_stb;
@@ -134,7 +175,11 @@ wire allow_mmc_eth_config;
 wire [31:0] lb_slave_data_read;
 
 //
-lb_marble_slave #(.USE_I2CBRIDGE(USE_I2CBRIDGE), .MMC_CTRACE(MMC_CTRACE)) slave(
+lb_marble_slave #(
+	.USE_I2CBRIDGE(USE_I2CBRIDGE),
+	.MMC_CTRACE(MMC_CTRACE),
+	.misc_config_default(misc_config_default)
+) slave(
 	.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
 	.data_out(lb_data_out), .data_in(lb_slave_data_read),
@@ -142,7 +187,7 @@ lb_marble_slave #(.USE_I2CBRIDGE(USE_I2CBRIDGE), .MMC_CTRACE(MMC_CTRACE)) slave(
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
-	.mmc_pins({MOSI, SCLK, CSB}),
+	.mmc_pins({MISO, MOSI, SCLK, CSB}),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
 	.twi_scl(twi_scl), .twi_sda(twi_sda),
@@ -160,12 +205,13 @@ lb_marble_slave #(.USE_I2CBRIDGE(USE_I2CBRIDGE), .MMC_CTRACE(MMC_CTRACE)) slave(
 
 // Delegate part of the address space to application code outside this module
 reg [23:0] p3_lb_addr_d;
-reg p3_use_app_rd;
+reg p3_use_app_rd=0, p3_use_mbox_rd=0;
 always @(posedge lb_clk) begin
 	p3_lb_addr_d <= lb_addr;
 	p3_use_app_rd <= p3_lb_addr_d[23:20] == 1;
+	p3_use_mbox_rd <= p3_lb_addr_d[23:20] == 2;
 end
-wire [31:0] p3_lb_data_in = p3_use_app_rd ? lb_data_in : lb_slave_data_read;
+wire [31:0] p3_lb_data_in = p3_use_mbox_rd ? mbox_out2 : p3_use_app_rd ? lb_data_in : lb_slave_data_read;
 
 // MAC master
 // Clearly not useful in the long run to drive this only from
@@ -239,7 +285,7 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 	.config_clk(config_clk),
 	.config_s(config_s & allow_mmc_eth_config),
 	.config_p(config_p & allow_mmc_eth_config),
-	.config_a(config_a), .config_d(config_d),
+	.config_a(config_a[3:0]), .config_d(config_d),
 
 	// .host_clk(host_clk), .host_write(host_write),
 	// .host_waddr(host_waddr), .host_wdata(host_wdata),

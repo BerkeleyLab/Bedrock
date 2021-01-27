@@ -7,9 +7,11 @@ include ../../dir_list.mk
 
 include $(BUILD_DIR)/top_rules.mk
 
-all: NMEAtest_check tinyEVR_check
+all: NMEAtest_check tinyEVR_check evrSROC_check
 
 tinyEVR_tb: tinyEVR.v
+
+evrSROC_tb: evrSROC.v
 
 NMEAtest: NMEAtest.o NMEA.o
 
