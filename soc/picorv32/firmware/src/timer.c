@@ -35,11 +35,12 @@ uint32_t millis(void)
     return cs / (F_CLK / 1000);
 }
 
-void periodic_delay(unsigned cycles)
+int periodic_delay(unsigned cycles)
 {
     static unsigned ts_a = 0;
     unsigned dt = getCycles() - ts_a;
     if (dt < cycles)
         delayCycles(cycles - dt);
     ts_a = getCycles();
+    return cycles - dt;
 }

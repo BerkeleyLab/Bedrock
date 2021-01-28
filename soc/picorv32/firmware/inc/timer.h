@@ -39,6 +39,7 @@ void delayCycles(const uint32_t nCycles);
 
 // when called in a loop, makes sure each iteration takes
 // the same amount of time (at least `cycles` between calls)
-void periodic_delay(unsigned cycles);
+// returns the number of blocked cycles (IDLE time)
+int periodic_delay(unsigned cycles);
 
 #endif
