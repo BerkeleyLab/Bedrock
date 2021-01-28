@@ -325,14 +325,14 @@ freq_demo freq_demo(
 reg [26:0] rx_heartbeat=0, tx_heartbeat=0;
 always @(posedge rx_clk) rx_heartbeat <= rx_heartbeat+1;
 always @(posedge tx_clk) tx_heartbeat <= tx_heartbeat+1;
-// wire led0 = led_user_mode ? l1 : rx_heartbeat[26];
-// wire led1 = led_user_mode ? l2 : tx_heartbeat[26];
+wire led0 = led_user_mode ? l1 : rx_heartbeat[26];
+wire led1 = led_user_mode ? l2 : tx_heartbeat[26];
 wire rx_led, tx_led;
 activity rx_act(.clk(rx_clk), .trigger(rx_mon), .led(rx_led));
 activity tx_act(.clk(tx_clk), .trigger(tx_mon), .led(tx_led));
 wire rx_h = rx_heartbeat[26];
 wire tx_h = tx_heartbeat[26];
-assign LED = {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, l2, l1};
+assign LED = {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, led1, led0};
 
 // Keep the PHY's reset pin low for the first 33 ms
 reg phy_rb=0;
