@@ -39,8 +39,7 @@ void periodic_delay(unsigned cycles)
 {
     static unsigned ts_a = 0;
     unsigned dt = getCycles() - ts_a;
-    if (dt >= cycles)
-        return;
-    delayCycles(cycles - dt);
+    if (dt < cycles)
+        delayCycles(cycles - dt);
     ts_a = getCycles();
 }
