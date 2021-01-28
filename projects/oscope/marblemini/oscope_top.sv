@@ -1,52 +1,52 @@
 module oscope_top(
-	input 	     GTPREFCLK_P,
-	input 	     GTPREFCLK_N,
-	input 	     SYSCLK_P,
+	input        GTPREFCLK_P,
+	input        GTPREFCLK_N,
+	input        SYSCLK_P,
 
 	// RGMII
 	output [3:0] RGMII_TXD,
-	output 	     RGMII_TX_CTRL,
-	output 	     RGMII_TX_CLK,
+	output       RGMII_TX_CTRL,
+	output       RGMII_TX_CLK,
 	input [3:0]  RGMII_RXD,
-	input 	     RGMII_RX_CTRL,
-	input 	     RGMII_RX_CLK,
+	input        RGMII_RX_CTRL,
+	input        RGMII_RX_CLK,
 
 	// SPI boot flash programming port
 	// BOOT_CCLK treated specially in 7-series
-	output 	     BOOT_CS_B,
-	input 	     BOOT_MISO,
-	output 	     BOOT_MOSI,
-	output 	     CFG_D02, // hope R209 is DNF
+	output       BOOT_CS_B,
+	input        BOOT_MISO,
+	output       BOOT_MOSI,
+	output       CFG_D02, // hope R209 is DNF
 
 	// One I2C bus, everything gatewayed through a TCA9548
-	output 	     TWI_SCL,
-	inout 	     TWI_SDA,
-	output 	     TWI_RST,
-	input 	     TWI_INT,
+	output       TWI_SCL,
+	inout        TWI_SDA,
+	output       TWI_RST,
+	input        TWI_INT,
 
 	// SPI pins connected to microcontroller
-	input 	     SCLK,
-	input 	     CSB,
-	input 	     MOSI,
-	output 	     MISO,
-	output 	     MMC_INT,
+	input        SCLK,
+	input        CSB,
+	input        MOSI,
+	output       MISO,
+	output       MMC_INT,
 
 	// White Rabbit DAC
-	output 	     WR_DAC_SCLK,
-	output 	     WR_DAC_DIN,
-	output 	     WR_DAC1_SYNC,
-	output 	     WR_DAC2_SYNC,
+	output       WR_DAC_SCLK,
+	output       WR_DAC_DIN,
+	output       WR_DAC1_SYNC,
+	output       WR_DAC2_SYNC,
 
 	// UART to USB
 	// The RxD and TxD directions are with respect
 	// to the USB/UART chip, not the FPGA!
-	output 	     FPGA_RxD,
-	input 	     FPGA_TxD,
+	output       FPGA_RxD,
+	input        FPGA_TxD,
 
 	// Reset command to PHY
-	output 	     PHY_RSTN,
+	output       PHY_RSTN,
 
-	output 	     VCXO_EN,
+	output       VCXO_EN,
 
 	output [7:0] LED,
 
