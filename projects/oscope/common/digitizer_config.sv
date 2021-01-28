@@ -7,22 +7,22 @@
 module digitizer_config(
 
 	// local bus -- minimize or eliminate uses
-	input 	      lb_clk,
-	input 	      lb_strobe,
-	input 	      lb_rd,
+	input         lb_clk,
+	input         lb_strobe,
+	input         lb_rd,
 	input [23:0]  lb_addr,
 	input [31:0]  lb_dout,
 		      zest_cfg_if.master zif_cfg,
 
 	// clocks for frequency and phase measurement
-	input 	      clk200,
+	input         clk200,
 
 	// llspi physical I/O
 	// slightly less physical
-	output 	      rawadc_trig_x,
+	output        rawadc_trig_x,
 
 	// 8 channels high-speed 16-bit parallel ADC data
-	input 	      adc_clk,
+	input         adc_clk,
 	input [127:0] adc_data,
 
 	// outputs to host read register map
@@ -47,33 +47,33 @@ module digitizer_config(
 	input [31:0]  periph_config, // external
 	input [15:0]  bitslip, // external
 	input [1:0]   U15_spi_read_and_start_r, // external
-	//input        U15_spi_read_r,   // external
+	//input       U15_spi_read_r,   // external
 	input [31:0]  U15_spi_data_addr_r, // external
 	//input [15:0] U15_spi_addr_r,   // external
 	input [1:0]   U18_spi_read_and_start_r, // external
-	//input        U18_spi_read_r,   // external
+	//input       U18_spi_read_r,   // external
 	input [31:0]  U18_spi_data_addr_r, // external
 	//input  [7:0] U18_spi_addr_r,   // external
-	input 	      U2_clk_reset_r, // external
-	input 	      U3_clk_reset_r, // external
+	input         U2_clk_reset_r, // external
+	input         U3_clk_reset_r, // external
 	input [1:0]   adc_mmcm, // external single-cycle
-	input 	      U2_iserdes_reset_r, // external
-	input 	      U3_iserdes_reset_r, // external
-	input 	      U4_reset_r, // external
-	input 	      mmcm_reset_r, // external
-	input 	      idelayctrl_reset_r, // external
+	input         U2_iserdes_reset_r, // external
+	input         U3_iserdes_reset_r, // external
+	input         U4_reset_r, // external
+	input         mmcm_reset_r, // external
+	input         idelayctrl_reset_r, // external
 	// lb_clk domain
 	input [7:0]   banyan_mask, // external
-	input 	      phasex_trig, // external single-cycle
-	input 	      llspi_we, // external we-strobe
-	input 	      llspi_re, // -- external strobe
-	input 	      clk_status_we, // external we-strobe
+	input         phasex_trig, // external single-cycle
+	input         llspi_we, // external we-strobe
+	input         llspi_re, // -- external strobe
+	input         clk_status_we, // external we-strobe
 	input [4:0]   scanner_debug, // external
-	input 	      autoset_enable, // -- external
-	input 	      scan_trigger, // -- external single-cycle
-	input 	      scan_trigger_we, // external we-strobe
+	input         autoset_enable, // -- external
+	input         scan_trigger, // -- external single-cycle
+	input         scan_trigger_we, // external we-strobe
 	// lb_clk domain, but only because I flag_xdomain to adc_clk
-	input 	      rawadc_trig, // external single-cycle
+	input         rawadc_trig, // external single-cycle
 	input [9:0]   adc_downsample_ratio, // external
 	// adc_clk domain
 	input [9:0]   sync_ad7794_cset, // external

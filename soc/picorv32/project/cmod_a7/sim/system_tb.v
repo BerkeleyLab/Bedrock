@@ -33,7 +33,7 @@ module system_tb;
     initial begin
         if ($test$plusargs("vcd")) begin
             $dumpfile("system.vcd");
-            $dumpvars(5, system_tb);
+            $dumpvars(7, system_tb);
         end
         $display(
             "UART0 baud_rate: %8d (clk_div: %4d)",

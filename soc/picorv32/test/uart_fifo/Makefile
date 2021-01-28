@@ -4,7 +4,7 @@ include $(PICORV_DIR)/rules.mk
 
 BLOCK_RAM_SIZE = 1024
 
-SRC_V  = uart_tx.v uart_rx.v stream_fifo.v shortfifo.v
+SRC_V  = uart_tx.v uart_rx.v stream_fifo.v shortfifo.v fifo.v
 SRC_V += memory2_pack.v mpack.v munpack.v picorv32.v pico_pack.v
 SRC_V += uart_pack.v uart_fifo_pack.v uart_stream.v
 

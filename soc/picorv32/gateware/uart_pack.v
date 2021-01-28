@@ -123,58 +123,55 @@ always @(posedge clk) begin
     if (mem_valid && !ready_sum && mem_addr[31:16]=={BASE_ADDR, 8'h00}) begin
         mem_ready <= 1; // acknowledge by default if base_addr matches
 
-        (* parallel_case *)
-        case (1)
-            // -----------------------------
-            // --- Write to UART output  ---
-            // -----------------------------
-            |mem_wstrb && (mem_short_addr==UART_TX_REG): begin
-                // Writing to address UART_TX_REG will make the UART transmit a byte.
-                // If the uart is already transmitting something, we wait for it to finish.
-                // This is done by not asserting mem_ready_i, which stalls the CPU for a while.
-                // The user should check the tx_busy bit in the UART status register before
-                // transmitting to avoid the stall.
-                // Writing to the upper 3 bytes of the 4 byte word just latches the value
-                if (mem_wstrb[3] && DATA_WIDTH>24) utx_tdata[31:24] <= mem_wdata[31:24];
-                if (mem_wstrb[2] && DATA_WIDTH>16) utx_tdata[23:16] <= mem_wdata[23:16];
-                if (mem_wstrb[1] && DATA_WIDTH>8 ) utx_tdata[15: 8] <= mem_wdata[15: 8];
+        // -----------------------------
+        // --- Write to UART output  ---
+        // -----------------------------
+        if (|mem_wstrb && (mem_short_addr==UART_TX_REG)) begin
+            // Writing to address UART_TX_REG will make the UART transmit a byte.
+            // If the uart is already transmitting something, we wait for it to finish.
+            // This is done by not asserting mem_ready_i, which stalls the CPU for a while.
+            // The user should check the tx_busy bit in the UART status register before
+            // transmitting to avoid the stall.
+            // Writing to the upper 3 bytes of the 4 byte word just latches the value
+            if (mem_wstrb[3] && DATA_WIDTH>24) utx_tdata[31:24] <= mem_wdata[31:24];
+            if (mem_wstrb[2] && DATA_WIDTH>16) utx_tdata[23:16] <= mem_wdata[23:16];
+            if (mem_wstrb[1] && DATA_WIDTH>8 ) utx_tdata[15: 8] <= mem_wdata[15: 8];
 
-                // Writing to the lowest byte starts the transmission
-                if (mem_wstrb[0]) begin
-                    if (utx_tready) begin
-                        utx_tdata[7:0] <= mem_wdata[7:0];
-                        utx_tvalid <= 1;
-                    end else begin
-                        mem_ready <= 0;  // !!! STALL !!! (until UART is ready)
-                    end
+            // Writing to the lowest byte starts the transmission
+            if (mem_wstrb[0]) begin
+                if (utx_tready) begin
+                    utx_tdata[7:0] <= mem_wdata[7:0];
+                    utx_tvalid <= 1;
+                end else begin
+                    mem_ready <= 0;  // !!! STALL !!! (until UART is ready)
                 end
             end
-            // -------------------------------
-            // --- Write to UART0 baudrate ---
-            // -------------------------------
-            |mem_wstrb && (mem_short_addr==UART_BAUDRATE): begin
-                if (mem_wstrb[0]) uprescale[ 7:0] <= mem_wdata[ 7:0];
-                if (mem_wstrb[1]) uprescale[15:8] <= mem_wdata[15:8];
-                $display("new UART prescale value = 0x%04x", mem_wdata );
-            end
-            // -------------
-            // --- Reads ---
-            // -------------
-            !mem_wstrb: begin
-                if (mem_short_addr == UART_STATUS) begin
-                    // Read from UART0 status register
-                    mem_rdata <= uart_status;
-                end else if (mem_short_addr == UART_RX_REG) begin
-                    // Read from RX UART0 data register
-                    if ( urx_tvalid ) begin
-                        mem_rdata <= urx_tdata;       // Write UART data to mem. bus
-                        urx_tready <= 1;              // Acknowledge to UART that data has been read
-                    end else begin
-                        mem_rdata <= 32'hFFFF_FF00;   // Write error flag to mem. bus
-                    end
+        end
+        // -------------------------------
+        // --- Write to UART0 baudrate ---
+        // -------------------------------
+        if (|mem_wstrb && (mem_short_addr==UART_BAUDRATE)) begin
+            if (mem_wstrb[0]) uprescale[ 7:0] <= mem_wdata[ 7:0];
+            if (mem_wstrb[1]) uprescale[15:8] <= mem_wdata[15:8];
+            $display("new UART prescale value = 0x%04x", mem_wdata );
+        end
+        // -------------
+        // --- Reads ---
+        // -------------
+        if (!mem_wstrb) begin
+            if (mem_short_addr == UART_STATUS) begin
+                // Read from UART0 status register
+                mem_rdata <= uart_status;
+            end else if (mem_short_addr == UART_RX_REG) begin
+                // Read from RX UART0 data register
+                if ( urx_tvalid ) begin
+                    mem_rdata <= urx_tdata;       // Write UART data to mem. bus
+                    urx_tready <= 1;              // Acknowledge to UART that data has been read
+                end else begin
+                    mem_rdata <= 32'hFFFF_FF00;   // Write error flag to mem. bus
                 end
             end
-        endcase
+        end
     end
     mem_ready_ <= mem_ready;
 end
@@ -190,7 +187,7 @@ end
         .rst(rst),
         .mem_packed_fwd(mem_packed_fwd),
         .mem_packed_ret(mem_packed_ret),
-        .f_past_valid(f_past_valid)
+        .f_past_valid()
     );
 
     always @(posedge clk) begin

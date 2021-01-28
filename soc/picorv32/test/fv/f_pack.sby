@@ -1,6 +1,7 @@
 [tasks]
 sfr_pack
 uart_pack
+# uart_fifo_pack  # needs (a lot) more work!!
 
 [options]
 # mode bmc
@@ -9,6 +10,7 @@ mode prove
 
 # Need many steps for uart_pack due to /7 baudrate counter
 uart_pack: depth 100
+# uart_fifo_pack: depth 50
 
 [engines]
 smtbmc yices
@@ -22,6 +24,10 @@ sfr_pack: prep -top sfr_pack
 uart_pack: read -formal uart_pack.v uart_rx.v uart_tx.v munpack.v f_pack_peripheral.v
 uart_pack: prep -top uart_pack
 
+# uart_fifo_pack: read -formal uart_fifo_pack.v uart_stream.v stream_fifo.v shortfifo.v uart_rx.v uart_tx.v munpack.v f_pack_peripheral.v
+# uart_fifo_pack: prep -top uart_fifo_pack
+
+
 [files]
 # Hack to include all .v files from gateware directory
 --pycode-begin--
@@ -30,3 +36,5 @@ for g in glob("../../gateware/*.v"):
 	output(g)
 --pycode-end--
 f_pack_peripheral.v
+../../../../dsp/shortfifo.v
+../../../../dsp/fifo.v

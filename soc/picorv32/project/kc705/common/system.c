@@ -37,7 +37,7 @@ void init(void)
     SET_GPIO1(BASE_GPIO, GPIO_OE_REG, PIN_PCA9584_RST, 1);// Drive PCA9584 RESET pin
     SET_GPIO8(BASE_GPIO, GPIO_OE_REG, 3, 0xFF);       // Drive LEDs
     lcd_init();
-    i2c_init();
+    i2c_init(PIN_I2C_SDA, PIN_I2C_SCL);
 }
 
 int main(void)

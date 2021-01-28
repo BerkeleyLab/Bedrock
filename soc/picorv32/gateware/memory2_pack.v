@@ -27,19 +27,17 @@ reg  [31:0] mem_rdata=0;
 reg         mem_ready=0;
 munpack mu (
     .clk           (clk),
-    .mem_packed_fwd( 69'd0 ),
-    .mem_packed_ret( mem_packed_ret ),
+    .mem_packed_fwd(69'd0),
+    .mem_packed_ret(mem_packed_ret),
     .mem_wdata (),
     .mem_wstrb (),
     .mem_valid (),
     .mem_addr  (),
-    .mem_ready ( mem_ready  ),
-    .mem_rdata ( mem_rdata  )
+    .mem_ready (mem_ready),
+    .mem_rdata (mem_rdata)
 );
 wire [ 7:0] mem_addr_base = mem_la_addr[31:24]; // Which peripheral   (BASE_ADDR)
 wire [21:0] mem_addr_reg  = mem_la_addr[23:2];  // Which word
-
-
 
 // --------------------------------------------------------------
 //  Init the memory and its interface wires
@@ -59,27 +57,21 @@ end
 // --------------------------------------------------------------
 //  Logic for MEM (read and write) access
 // --------------------------------------------------------------
-reg lastReset;
-always @( posedge clk ) begin
+always @(posedge clk) begin
     // Initialize status lines operating with single clock wide pulses
     mem_ready <=  1'b0;
     mem_rdata <= 32'h00000000;
-    lastReset <= reset;
-    if ( !reset && lastReset ) begin
-        // TODO, can the synthesizer re-init memory at run-time ?
-    end else begin
-        if ( mem_addr_base==BASE_ADDR ) begin
-            if ( mem_la_write ) begin
-                mem_ready <= 1;
-                if (mem_la_wstrb[0]) memory[mem_addr_reg][ 7: 0] <= mem_la_wdata[ 7: 0];
-                if (mem_la_wstrb[1]) memory[mem_addr_reg][15: 8] <= mem_la_wdata[15: 8];
-                if (mem_la_wstrb[2]) memory[mem_addr_reg][23:16] <= mem_la_wdata[23:16];
-                if (mem_la_wstrb[3]) memory[mem_addr_reg][31:24] <= mem_la_wdata[31:24];
-            end
-            if ( mem_la_read ) begin
-                mem_ready <= 1;
-                mem_rdata <= memory[mem_addr_reg];
-            end
+    if (mem_addr_base == BASE_ADDR) begin
+        if (mem_la_write) begin
+            mem_ready <= 1;
+            if (mem_la_wstrb[0]) memory[mem_addr_reg][ 7: 0] <= mem_la_wdata[ 7: 0];
+            if (mem_la_wstrb[1]) memory[mem_addr_reg][15: 8] <= mem_la_wdata[15: 8];
+            if (mem_la_wstrb[2]) memory[mem_addr_reg][23:16] <= mem_la_wdata[23:16];
+            if (mem_la_wstrb[3]) memory[mem_addr_reg][31:24] <= mem_la_wdata[31:24];
+        end
+        if (mem_la_read) begin
+            mem_ready <= 1;
+            mem_rdata <= memory[mem_addr_reg];
         end
     end
 end

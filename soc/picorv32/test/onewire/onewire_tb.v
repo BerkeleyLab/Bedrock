@@ -24,7 +24,7 @@ module onewire_tb;
         end
         repeat (10) @(posedge mem_clk);
         reset <= 0;
-        #11800000
+        #25000000
         $display("\nTIMEOUT\nFAIL");
         $stop();
     end
@@ -113,8 +113,25 @@ module onewire_tb;
     // --------------------------------------------------------------
     //  Simulated onewire model
     // --------------------------------------------------------------
-    localparam PIN_ONEWIRE = 3;  // has to match settings.h
-    pullup ( gpio_z[PIN_ONEWIRE] );
-    ds1822 #(.debug(0)) ds1822 ( gpio_z[PIN_ONEWIRE] );
+    localparam PIN_ONEWIRE_A = 3;  // has to match settings.h
+    localparam PIN_ONEWIRE_B = 4;
+
+    pullup(gpio_z[PIN_ONEWIRE_A]);
+    pullup(gpio_z[PIN_ONEWIRE_B]);
+
+    // Simplified mockup of a onewire device
+    ds1822 #(
+        .debug(0),
+        .rom  (64'hbe000008e52f8e01)
+    ) ds1822_A_inst (
+        .pin(gpio_z[PIN_ONEWIRE_A])
+    );
+
+    ds1822 #(
+        .debug(0),
+        .rom  (64'h1234567890123456)
+    ) ds1822_B_inst (
+        .pin(gpio_z[PIN_ONEWIRE_B])
+    );
 
 endmodule

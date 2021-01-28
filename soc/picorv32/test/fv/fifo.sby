@@ -1,0 +1,14 @@
+[options]
+# mode bmc
+# mode cover
+mode prove
+
+[engines]
+smtbmc yices
+
+[script]
+read -formal fifo.v
+prep -top fifo
+
+[files]
+../../../../dsp/fifo.v

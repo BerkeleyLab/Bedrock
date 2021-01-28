@@ -2,8 +2,6 @@
 // I2C bit-bang library
 //-------------------------------------------------
 // Expects the following macros in settings.h:
-// #define PIN_I2C_SDA              0  // GPIO pin number of the data pin
-// #define PIN_I2C_SCL              1  // GPIO pin number of the clock pin
 // #define I2C_DELAY_US             1  //~half a clock period [us]
 // #define BASE_GPIO       0x01000000  //base address of the gpio module used for soft_i2c
 
@@ -20,7 +18,7 @@
 //-------------------------------------------------
 // Low level functions (doing I2C things)
 //-------------------------------------------------
-void i2c_init(void);                // initialize GPIO pins
+void i2c_init(uint8_t pin_sda, uint8_t pin_scl);  // initialize GPIO pins
 void i2c_stop(void);                // Send I2C start-condition
 void i2c_start(void);               // Send I2C stop-condition
 int i2c_tx( uint8_t dat );  // sends out 8 bits (dat), returns ack (9th bit, 1 = ack ok)

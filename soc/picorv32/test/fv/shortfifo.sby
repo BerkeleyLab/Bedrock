@@ -1,0 +1,14 @@
+[options]
+mode bmc
+# mode cover
+# mode prove  # needs more work for shortfifo
+
+[engines]
+smtbmc yices
+
+[script]
+read -formal shortfifo.v
+prep -top shortfifo
+
+[files]
+../../../../dsp/shortfifo.v
