@@ -108,7 +108,7 @@ void spi_model(unsigned char *SCLK, unsigned char *CSB, unsigned char *MOSI, uns
 	const unsigned pattern_len = sizeof(pattern) / sizeof(pattern[0]);
 	static unsigned pattern_ix = 0;
 	if (!SCLK || !CSB || !MOSI) {
-		if (cc == 0) VL_PRINTF("spi_model() caller misconfigured\n");	
+		if (cc == 0) VL_PRINTF("spi_model() caller misconfigured\n");
 		cc++;
 		return;
 	}

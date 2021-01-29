@@ -6,7 +6,7 @@ FEED acquisition device logic substitution generator
     {
         # required
         "reset":{"name":"reg_reset","bit": 0}
-        ,"status":{"name":"reg_status","bit": 1	}
+        ,"status":{"name":"reg_status","bit": 1}
         ,"trg:prefix:"
         # optional
         ,"readback":[
