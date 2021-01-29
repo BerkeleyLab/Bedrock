@@ -49,7 +49,7 @@ WR_DAC_DIN       WR_DAC_DIN
 WR_DAC1_SYNC     WR_DAC1_SYNC
 WR_DAC2_SYNC     WR_DAC2_SYNC
 
-# 125 MHz from White Rabbit comes in via one of the MGTREFCLK pins;
+# Precision 125 MHz comes in via one of the MGTREFCLK pins;
 # In most cases the primary clock for a design will come from there via the GTX TXOUTCLK.
 # It can sometimes be simpler to use 20 MHz from Y3, which doesn't depend
 # on the clock mux or GTX setup.  Do note that this source needs to
@@ -83,6 +83,8 @@ Pmod2_7    {Pmod2[7]}
 
 # Miscellaneous
 PHY_RSTn   PHY_RSTN
+LD16       LD16
+LD17       LD17
 
 # Literal output follows
 

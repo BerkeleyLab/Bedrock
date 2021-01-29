@@ -48,7 +48,7 @@ lb_marble_slave #(.USE_I2CBRIDGE(1), .twi_q0(4), .twi_q1(0), .twi_q2(2), .led_cw
 	.tx_mac_done(1'b0), .rx_mac_data(16'b0),
 	.rx_mac_buf_status(2'b0),
 	.xdomain_fault(1'b0),
-	.mmc_pins(3'b0),
+	.mmc_pins(4'b0),
 	.twi_scl({dum_scl, TWI_SCL}), .twi_sda({dum_sda, TWI_SDA}),
 	.gps(4'b00z0),
 	.twi_int(TWI_INT), .twi_rst(TWI_RST)

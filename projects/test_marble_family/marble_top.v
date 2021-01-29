@@ -68,6 +68,10 @@ module marble_top(
 	output [3:0] TMDS_N,
 `endif
 
+	// Directly attached LEDs
+	output LD16,
+	output LD17,
+
 	// Physical Pmod, may be used as LEDs
 	inout [7:0] Pmod1,
 	input [7:0] Pmod2
@@ -159,6 +163,7 @@ localparam C_MMC_CTRACE = 1;
 localparam C_MMC_CTRACE = 0;
 `endif
 
+wire [7:0] leds;
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
 marble_base #(
@@ -188,9 +193,12 @@ marble_base #(
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
-	.GPS(Pmod2[3:0]), .ext_config(ext_config), .LED(Pmod1)
+	.GPS(Pmod2[3:0]), .ext_config(ext_config), .LED(leds)
 );
 defparam base.rtefi.p4_client.engine.seven = 1;
+assign Pmod1 = leds;
+assign LD16 = leds[0];
+assign LD17 = leds[1];
 
 `ifdef MARBLE_MINI
 // TMDS test pattern generation

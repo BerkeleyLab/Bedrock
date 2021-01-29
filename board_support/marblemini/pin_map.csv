@@ -1,10 +1,10 @@
-## Marble Mini meta-xdc file process with
-##   python ../meta-xdc.py pin_map.csv > marblem_rgmii.xdc
-## Implicit dependence on Marble.xdc generated from
-##   git@github.com:BerkeleyLab/Marble.git
+## Marble-Mini meta-xdc file process with
+##   python meta-xdc.py Marble.xdc pin_map.csv
+## Depends on Marble.xdc generated from
+##   git@github.com:BerkeleyLab/MarbleMini.git
 
 ## First column is pin name listed in Marble.xdc
-## Second column is pin name as needed by rgmii_hw_test.v
+## Second column is pin name as used by application (top-level) Verilog
 
 # RGMII Rx
 RGMII_RX_CLK  RGMII_RX_CLK
@@ -23,9 +23,11 @@ RGMII_TXD2    {RGMII_TXD[2]}
 RGMII_TXD3    {RGMII_TXD[3]}
 
 # QSPI Boot Flash
+# CCLK doesn't show up as a constrained pin; access via STARTUPE2 primitive instead.
 CFG_FCS    BOOT_CS_B
 CFG_MOSI   BOOT_MOSI
 CFG_DIN    BOOT_MISO
+# CFG_D02 (WP#) and CFG_D03 (HOLD#) not normally connected
 CFG_D02    CFG_D02
 
 # MMC microcontroller for configuration - for real!
@@ -47,10 +49,13 @@ WR_DAC_DIN       WR_DAC_DIN
 WR_DAC1_SYNC     WR_DAC1_SYNC
 WR_DAC2_SYNC     WR_DAC2_SYNC
 
-# 125 MHz from White Rabbit comes in via MGTREFCLK;
-# we should really turn on the GTP and use its TXOUTCLK.
-# 20 MHz from Y3 is a poor substitute
+# Precision 125 MHz comes in via one of the MGTREFCLK pins;
+# In most cases the primary clock for a design will come from there via the GTX TXOUTCLK.
+# It can sometimes be simpler to use 20 MHz from Y3, which doesn't depend
+# on the GTX setup.  Do note that this source needs to
+# be enabled by setting VCXO_EN high, before you can use it!
 CLK20_VCXO  SYSCLK_P
+VCXO_EN    VCXO_EN
 
 # UART to USB
 FPGA_TxD  FPGA_TxD
@@ -88,7 +93,8 @@ TMDS_CLK_N  {TMDS_N[3]}
 
 # Miscellaneous
 PHY_RSTn   PHY_RSTN
-VCXO_EN    VCXO_EN
+LD16       LD16
+LD17       LD17
 
 # Literal output follows
 
