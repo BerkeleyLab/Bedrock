@@ -30,6 +30,7 @@ def set_lock(chip, v, dac=1, verbose=False):
 
 def poll_lock(chip, verbose=False):
     global old_pps_cnt
+    rct = 0
     while True:
         dsp_status, gps_status, cfg = chip.exchange([14, 12, 327692])
         dac = dsp_status >> 16
@@ -39,8 +40,10 @@ def poll_lock(chip, verbose=False):
         pha = dsp_status & 0xfff
         if verbose or pps_cnt != old_pps_cnt:
             break
+        time.sleep(0.20)
+        rct += 1
     old_pps_cnt = pps_cnt
-    ss = "%d %d %d %d %d %d" % (dac, dsp_on, dsp_arm, pha, pps_cnt, cfg)
+    ss = "%d %d %d %d %d %d %d" % (dac, dsp_on, dsp_arm, pha, pps_cnt, cfg, rct)
     return ss
 
 
@@ -67,4 +70,4 @@ if __name__ == "__main__":
         ss = poll_lock(chip, verbose=args.verbose)
         print(ss)
         sys.stdout.flush()
-        time.sleep(0.35)
+        time.sleep(0.85)
