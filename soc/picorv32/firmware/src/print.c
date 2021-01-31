@@ -147,9 +147,9 @@ void print_hex(uint32_t val, uint8_t digits)
 void hexDump(uint8_t *buffer, uint16_t nBytes)
 {
     for(uint16_t i=0; i<nBytes; i++) {
-        if((nBytes>16) && ((i%16)==0)) {
+        if((nBytes > 16) && ((i % 16) == 0)) {
             print_str("\n    ");
-            print_hex(i, 4);
+            print_hex(i, 2);
             print_str(": ");
         }
         print_hex(*buffer++, 2);
@@ -158,12 +158,26 @@ void hexDump(uint8_t *buffer, uint16_t nBytes)
     print_str("\n");
 }
 
+void hexDump16(uint16_t *buffer, uint16_t nWords)
+{
+    for(uint16_t i=0; i<nWords; i++) {
+        if((nWords > 8) && ((i % 8) == 0)) {
+            print_str("\n    ");
+            print_hex(i * 2, 4);
+            print_str(": ");
+        }
+        print_hex(*buffer++, 4);
+        print_str(" ");
+    }
+    print_str("\n");
+}
+
 void hexDump32(uint32_t *buffer, uint16_t nWords)
 {
     for(uint16_t i=0; i<nWords; i++) {
-        if((nWords>4) && ((i%4)==0)) {
+        if((nWords > 4) && ((i % 4) == 0)) {
             print_str("\n    ");
-            print_hex(i*4, 4);
+            print_hex(i * 4, 4);
             print_str(": ");
         }
         print_hex(*buffer++, 8);

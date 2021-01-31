@@ -45,7 +45,8 @@ void print_str(const char *p);
 // Print a memory region as 8-bit ordered hexdump
 void hexDump(uint8_t *buffer, uint16_t nBytes);
 
-// Print a memory region as 32-bit ordered hexdump
+// Print a memory region as N-bit ordered hexdump
+void hexDump16(uint16_t *buffer, uint16_t nWords);
 void hexDump32(uint32_t *buffer, uint16_t nWords);
 
 #endif
