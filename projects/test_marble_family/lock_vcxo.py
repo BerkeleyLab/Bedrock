@@ -61,11 +61,14 @@ if __name__ == "__main__":
                    help="Produce extra chatter")
     p.add_argument('--npt', default=60,
                    help="Number of time steps to collect")
+    p.add_argument('--cont', action='store_true',
+                   help="Monitor only, don't initialize")
 
     args = p.parse_args()
 
     chip = lbus_access(args.ip, port=args.port)
-    set_lock(chip, int(args.val), dac=int(args.dac), verbose=args.verbose)
+    if not args.cont:
+        set_lock(chip, int(args.val), dac=int(args.dac), verbose=args.verbose)
     for ix in range(int(args.npt)):
         ss = poll_lock(chip, verbose=args.verbose)
         print(ss)
