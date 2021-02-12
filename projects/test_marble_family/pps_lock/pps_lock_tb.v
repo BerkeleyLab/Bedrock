@@ -4,6 +4,8 @@ module pps_lock_tb;
 
 reg clk;
 integer cc;
+integer seed=123;
+
 reg fail=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
@@ -15,19 +17,27 @@ initial begin
 		clk=1; #4;
 	end
 	$display("%s", fail ? "FAIL" : "PASS");
+	$display("WARNING: Not a self-checking testbench. Will always pass.");
+	$finish();
+
 end
 
-// Create a fake pps, actually aligns perfectly for now
+// Create a fake pps with some random jitter
 integer local_count=0;
 reg pps_in=0;
+integer pps_start=100;
 always @(posedge clk) begin
-	local_count <= (local_count==12499) ? 0 : local_count+1;
+	local_count <= local_count + 1;
+	if (local_count == 12499) begin
+		local_count <= 0;
+		pps_start <= 95 + $urandom(seed)%10;
+	end
 	pps_in <= 0;
-	if (local_count == 100) pps_in <= 1;
-	if (local_count == 101) pps_in <= 1;
-	if (local_count == 102) pps_in <= 1;
-	if ((local_count >= 112) && (local_count < 200)) pps_in <= 1;
-	if (local_count == 203) pps_in <= 1;
+	if (local_count == pps_start) pps_in <= 1;
+	if (local_count == pps_start+1) pps_in <= 1;
+	if (local_count == pps_start+2) pps_in <= 1;
+	if ((local_count >= pps_start+2) && (local_count < pps_start+100)) pps_in <= 1;
+	if (local_count == pps_start+103) pps_in <= 1;
 end
 
 // Just do one run
