@@ -223,17 +223,21 @@ end else begin
 	assign twi_rst = 1'bz;
 end endgenerate
 
-// White Rabbit DAC - software-only for initial testing
-// Note that chip-selects are derived from data[17:16]
+// White Rabbit DAC - with EXPERIMENTAL internal GPS pps lock
 // wr_dac_tick is 31.2 MHz, wr_dac_sclk is 15.6 MHz when operating
 reg wr_dac_tick;  always @(posedge clk) wr_dac_tick <= &led_cc[1:0];
 reg wr_dac_send=0;
-wire [1:0] wr_dac_ctl=0;
+reg pps_config_write=0;
 wire [0:0] wr_dac_busy;
-ad5662 #(.nch(2)) wr_dac(.clk(clk), .tick(wr_dac_tick),
-	.data(data_out[15:0]), .sel(data_out[17:16]),
-	.ctl(wr_dac_ctl), .send(wr_dac_send),
-	.busy(wr_dac_busy),
+wire [31:0] pps_dsp_status;
+wire pps_in = gps_pins[3];
+ad5662_lock wr_dac(.clk(clk), .tick(wr_dac_tick),
+	.pps_in(pps_in),
+	.host_data(data_out[17:0]),
+	.host_write_dac(wr_dac_send),
+	.host_write_cr(pps_config_write),
+	.spi_busy(wr_dac_busy),
+	.dsp_status(pps_dsp_status),
 	.sclk(wr_dac_sclk), .sync_(wr_dac_sync), .sdo(wr_dac_sdo)
 );
 
@@ -269,6 +273,7 @@ always @(posedge clk) if (do_rd) begin
 		4'hb: reg_bank_0 <= ctrace_running;
 		4'hc: reg_bank_0 <= gps_stat;
 		4'hd: reg_bank_0 <= gps_pps_data;
+		4'he: reg_bank_0 <= pps_dsp_status;
 		default: reg_bank_0 <= "zzzz";
 	endcase
 end
@@ -317,6 +322,7 @@ always @(posedge clk) if (local_write) case (addr[4:0])
 	// 9: wr_dac
 	// 10: ctrace_start
 	// 11: gps_buf_reset
+	// 12: pps_config_write
 	16: fmc_test_r[21:0] <= data_out;
 	17: fmc_test_r[43:22] <= data_out;
 	18: fmc_test_r[65:44] <= data_out;
@@ -329,6 +335,7 @@ always @(posedge clk) begin
 	wr_dac_send <= local_write & (addr[4:0] == 9);
 	ctrace_start <= local_write & (addr[4:0] == 10);
 	gps_buf_reset <= local_write & (addr[4:0] == 11);
+	pps_config_write <= local_write & (addr[4:0] == 12);
 end
 
 // Mirror memory

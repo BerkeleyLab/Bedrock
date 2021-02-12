@@ -48,6 +48,13 @@
         "base_addr": 327691,
         "data_width": 1
     },
+    "pps_config": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327692,
+        "data_width": 4
+    },
     "fmc_test_0": {
         "access": "rw",
         "addr_width": 0,
