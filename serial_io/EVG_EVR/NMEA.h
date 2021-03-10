@@ -30,6 +30,11 @@
 #define _NMEA_H_
 
 /**
+ * Number of satellites in view
+ */
+int NMEAsatellitesInView(void);
+
+/**
  * Call this routine with each character from GPS receiver.
  * You must provide three callback routines, described below.
  */
