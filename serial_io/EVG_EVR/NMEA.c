@@ -30,6 +30,8 @@
 #include <ctype.h>
 #include "NMEA.h"
 
+static int satellitesInView = -1;
+
 /*
  * Returns number of days since civil 1970-01-01
  * Ref: http://howardhinnant.github.io/date_algorithms.html#days_from_civil
@@ -66,7 +68,7 @@ static void
 parse(const char *sentence)
 {
     const char *cp = sentence;
-    const char *fmt = {"$GPRMC,dddf,a,,,,,,,ddd"};
+    const char *fmt = "$GPx";
     int v;
     int value;
     int width;
@@ -79,6 +81,14 @@ parse(const char *sentence)
             return;
         }
         switch (*fmt) {
+        case 'x':
+            switch(*cp) {
+            case 'R': fmt = "RMC,dddf,a,,,,,,,ddd";  break;
+            case 'G': fmt = "GSV,,,d";               break;
+            default: return;
+            }
+            break;
+
         case 'd':
         case 'f':
             value = 0;
@@ -131,11 +141,19 @@ parse(const char *sentence)
             break;
         }
     }
-    if (vIdx == 7) {
+    switch (vIdx) {
+    case 1:
+        satellitesInView = vBuf[0];
+        break;
+
+    case 7:
+        {
         int y = vBuf[6] + (vBuf[6] < 20 ? 2100 : 2000);
         NMEAtime(days_from_civil(y, vBuf[5], vBuf[4])*86400U +
                                             vBuf[0]*3600 + vBuf[1]*60 + vBuf[2],
                                                               vBuf[3]*4294967U);
+        }
+        break;
     }
 }
 
@@ -205,3 +223,10 @@ NMEAconsume(int c)
         break;
     }
 }
+
+int
+NMEAsatellitesInView(void)
+{
+    return satellitesInView;
+}
+
