@@ -45,6 +45,7 @@ module rtefi_blob(
 	output rx_mac_status_s,
 	input rx_mac_accept,
 	// Debugging
+	output [3:0] scanner_debug,
 	output ibadge_stb,
 	output [7:0] ibadge_data,
 	output obadge_stb,
@@ -111,6 +112,7 @@ rtefi_center #(
 	.rx_mac_hbank(rx_mac_hbank), .rx_mac_buf_status(rx_mac_buf_status),
 	.rx_mac_accept(rx_mac_accept),
 	.rx_mac_status_d(rx_mac_status_d), .rx_mac_status_s(rx_mac_status_s),
+	.scanner_debug(scanner_debug),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),

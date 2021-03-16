@@ -15,7 +15,9 @@ module spi_gate(
 	output config_r,
 	output [7:0] config_a,
 	output [7:0] config_d,
-	input [7:0] tx_data
+	input [7:0] tx_data,
+	//
+	output [3:0] spi_pins_debug  // latched in config_clk domain
 );
 
 
@@ -60,5 +62,7 @@ assign config_d = sr[7:0];
 assign MISO = sr_tx[7];
 // MISO transitions three cycles (24 ns) after falling edge of SCLK
 // (as latched in the IOB as sclk_d1)
+assign spi_pins_debug = {MISO, din, sclk_d1, csb_d1};
+// watch MISO like a hawk, make sure it lands in an IOB
 
 endmodule

@@ -105,10 +105,12 @@ wire config_w, config_r;
 wire [7:0] config_a;
 wire [7:0] config_d;
 wire [7:0] spi_return;
+wire [3:0] spi_pins_debug;
 spi_gate spi(
 	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB), .MISO(MISO),
 	.config_clk(config_clk), .config_w(config_w), .config_r(config_r),
-	.config_a(config_a), .config_d(config_d), .tx_data(spi_return)
+	.config_a(config_a), .config_d(config_d), .tx_data(spi_return),
+	.spi_pins_debug(spi_pins_debug)
 );
 
 // Map generic configuration bus to application
@@ -187,7 +189,7 @@ lb_marble_slave #(
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
-	.mmc_pins({MISO, MOSI, SCLK, CSB}),
+	.mmc_pins(spi_pins_debug),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
 	.twi_scl(twi_scl), .twi_sda(twi_sda),
@@ -266,6 +268,7 @@ mac_compat_dpram #(
 // Instantiate the Real Work
 parameter enable_bursts=1;
 
+wire [3:0] scanner_debug;
 wire rx_mon, tx_mon;
 wire boot_busy, blob_in_use;
 rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bursts)) rtefi(
@@ -299,6 +302,7 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 	.rx_mac_hbank(rx_mac_hbank), .rx_mac_buf_status(rx_mac_buf_status),
 	.rx_mac_accept(rx_mac_accept),
 	.rx_mac_status_d(rx_mac_status_d), .rx_mac_status_s(rx_mac_status_s),
+	.scanner_debug(scanner_debug),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
@@ -333,6 +337,7 @@ activity tx_act(.clk(tx_clk), .trigger(tx_mon), .led(tx_led));
 wire rx_h = rx_heartbeat[26];
 wire tx_h = tx_heartbeat[26];
 assign LED = {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, led1, led0};
+// assign LED = {scanner_debug, tx_led, rx_led, led1, led0};
 
 // Keep the PHY's reset pin low for the first 33 ms
 reg phy_rb=0;

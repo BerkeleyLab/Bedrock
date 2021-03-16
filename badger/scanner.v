@@ -53,6 +53,7 @@ module scanner (
 	// Also see doc/precog_upg.eps
 	output busy,
 	output keep,
+	output [3:0] debug,
 	//
 	// Simple flow of data to the next processing stage (pbuf_writer).
 	// somewhat conforms to AXI-stream-lite, if I adjust the names?
@@ -106,6 +107,15 @@ always @(posedge clk) begin
 	if (h_drop & ~eth_strobe) begin
 		h_drop <= 0; h_idle <= 1;
 	end
+end
+
+// Debug helper
+reg [1:0] debug1_r=0;
+always @(posedge clk) begin
+	if (h_idle) debug1_r <= 0;
+	if (h_preamble) debug1_r <= 1;
+	if (h_data) debug1_r <= 3;
+	if (h_drop) debug1_r <= 2;
 end
 
 // Synchronization and pipelining step
@@ -238,6 +248,13 @@ always @(posedge clk) begin
 end
 assign busy = busy_r;
 assign keep = keep_r;
+
+// Debug helper
+reg [1:0] debug2_r=0;
+always @(posedge clk) begin
+	if (status_valid) debug2_r <= category;
+end
+assign debug = {debug2_r, debug1_r};
 
 // Output ports
 assign odata = data_d2;
