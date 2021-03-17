@@ -36,7 +36,6 @@ set new_defs [list "GIT_32BIT_ID=$gitid_v" "REVC_1W"]
 launch_runs synth_1
 wait_on_run synth_1
 open_run synth_1
-report_datasheet -v -file datasheet.txt
 
 # See UG908 Appendix A
 set_property BITSTREAM.CONFIG.SPI_BUSWIDTH  2  [current_design]
@@ -45,5 +44,21 @@ set_property BITSTREAM.CONFIG.CONFIGRATE   33  [current_design]
 launch_runs impl_1 -to_step route_design
 wait_on_run impl_1
 puts "Implementation done!"
+
+proc project_rpt {project_name} {
+    # Generate implementation timing & power report
+    report_power -file ./_xilinx/$project_name/imp_power.rpt
+    report_datasheet -v -file ./_xilinx/$project_name/imp_datasheet.txt
+    report_cdc -v -details -file ./_xilinx/$project_name/cdc_report.txt
+    report_timing_summary -delay_type min_max -report_unconstrained -check_timing_verbose -max_paths 10 -input_pins -file ./_xilinx/$project_name/imp_timing.rpt
+    # http://xillybus.com/tutorials/vivado-timing-constraints-error
+    if {! [string match -nocase {*timing constraints are met*} [report_timing_summary -no_header -no_detailed_paths -return_string]]} {
+        puts "Timing constraints weren't met. Please check your design."
+        exit 2
+    }
+}
+
 open_run impl_1
+set my_proj_name "${build_id}.runs"
+project_rpt $my_proj_name
 write_bitstream -force $build_id.$gitid.bit

@@ -161,7 +161,7 @@ marble1_hwtest:
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
-	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado* datasheet.txt
+	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
 	rm -f read_sfp.dat Vmarble_base
 	rm -rf _xilinx .Xil obj_dir
