@@ -73,7 +73,7 @@ module marble_top(
 	output LD17,
 
 	// Physical Pmod, may be used as LEDs
-	inout [7:0] Pmod1,
+	output [7:0] Pmod1,  // feel free to change to inout, if you attach to something other than LEDs
 	input [7:0] Pmod2
 );
 
