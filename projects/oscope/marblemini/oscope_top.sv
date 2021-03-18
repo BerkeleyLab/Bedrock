@@ -254,7 +254,7 @@ application_top application_top(
 	.lb_addr(lb_addr),
 	.lb_data(lb_data_out),
 	.lb_din(lb_din),
-	.clk200(clk200),
+	.clk200(SYSCLK_P),  // looks weird, but not wrong; must be incoherent with ADC clock(s)
 	.zif_cfg(zif_cfg.master)
 );
 
