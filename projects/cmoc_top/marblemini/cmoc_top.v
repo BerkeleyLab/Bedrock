@@ -65,9 +65,6 @@ wire tx_clk, tx_clk90;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
 
-(* dont_touch = "true" *)
-wire clk200; // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz
-
 `define USE_GTPCLK
 `ifdef USE_GTPCLK
 xilinx7_clocks #(
@@ -81,7 +78,6 @@ xilinx7_clocks #(
         .sysclk_n (1'b0),
         .reset    (pll_reset),
         .clk_out0 (tx_clk),
-        .clk_out1 (clk200),
         .clk_out2 (tx_clk90),
         .locked   (clk_locked)
 );
@@ -185,10 +181,10 @@ wire [2:0] D5rgb;
 
 wire clk_1x_90, clk_2x_0, clk_eth, clk_eth_90;
 
-parameter clk2x_div = 7;  // relative to 1200 MHz (on-board oscillator * 6)
+parameter clk2x_div = 5;  // relative to 750 MHz (tx_clk * 6)
 clocks #(.mmcm_div0(clk2x_div*2), .mmcm_div1(clk2x_div)) clocks(
     .rst(1'b0),
-    .sysclk_buf(clk200),
+    .sysclk_buf(tx_clk),
     .clk_eth(clk_eth),
     .clk_eth_90(clk_eth_90),
     .clk_1x_90(clk_1x_90),

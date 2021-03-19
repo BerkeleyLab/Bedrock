@@ -48,7 +48,13 @@ module oscope_top(
 
 	output       VCXO_EN,
 
-	output [7:0] LED,
+	// Directly attached LEDs
+	output LD16,
+	output LD17,
+
+	// Physical Pmod
+	output [7:0] Pmod1,
+	inout [7:0] Pmod2,
 
 	inout [0:0]  bus_bmb7_J28,
 	inout [0:0]  bus_bmb7_J4,
@@ -155,6 +161,11 @@ wire [33:0] FMC1_LA_N;
 wire [33:0] FMC2_LA_P;
 wire [33:0] FMC2_LA_N;
 
+wire [7:0] LED;
+assign Pmod1 = LED;
+assign LD16 = 1;
+assign LD17 = 1;
+
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
 marble_base #(.USE_I2CBRIDGE(1)) base(
@@ -243,7 +254,7 @@ application_top application_top(
 	.lb_addr(lb_addr),
 	.lb_data(lb_data_out),
 	.lb_din(lb_din),
-	.clk200(clk200),
+	.clk200(SYSCLK_P),  // looks weird, but not wrong; must be incoherent with ADC clock(s)
 	.zif_cfg(zif_cfg.master)
 );
 

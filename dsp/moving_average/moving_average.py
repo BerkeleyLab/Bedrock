@@ -1,8 +1,9 @@
 '''
 nMigen based
 '''
-from nmigen import Signal, Elaboratable, Module, Array
+from nmigen import Signal, Elaboratable, Module, Array, signed
 from nmigen.back import verilog, pysim
+from sys import stderr
 
 
 class MovingAverage(Elaboratable):
@@ -10,8 +11,8 @@ class MovingAverage(Elaboratable):
         self._dw = dw
         self.MAX_DELAY_BITS = MAX_DELAY_BITS
         self._SREG_LEN = 2**MAX_DELAY_BITS
-        self.i, self.o = (Signal((self._dw, True), name='i'),
-                          Signal((self._dw, True), name='o'))
+        self.i, self.o = (Signal(signed(self._dw), name='i'),
+                          Signal(signed(self._dw), name='o'))
         self.data_valid = Signal(name='data_valid')
         # log_downsample_ratio must be a power of 2.
         self.log_downsample_ratio = Signal(MAX_DELAY_BITS, name='log_downsample_ratio')
@@ -21,21 +22,21 @@ class MovingAverage(Elaboratable):
         delay_tap = Signal(self._SREG_LEN)
         m.d.comb += delay_tap.eq(1 << self.log_downsample_ratio)
         # Dynamic delay shift register
-        out_val = Signal((self._dw, True))
-        delay_reg = Array(Signal((self._dw, True), reset=0) for _ in range(self._SREG_LEN))
+        out_val = Signal(signed(self._dw))
+        delay_reg = Array(Signal(signed(self._dw), reset=0) for _ in range(self._SREG_LEN))
         src = self.i
         for x in range(self._SREG_LEN):
             m.d.sync += delay_reg[x].eq(src)
             src = delay_reg[x]
         m.d.comb += out_val.eq(delay_reg[delay_tap - 1])
-        counter = Signal((self._dw, True))
+        counter = Signal(signed(self._dw))
         with m.If(counter == delay_tap - 1):
             m.d.sync += counter.eq(0)
             m.d.comb += self.data_valid.eq(1)
         with m.Else():
             m.d.sync += counter.eq(counter + 1)
 
-        moving_average_full = Signal((self._dw + self.MAX_DELAY_BITS, True))
+        moving_average_full = Signal(signed(self._dw + self.MAX_DELAY_BITS))
         m.d.sync += moving_average_full.eq(moving_average_full + self.i - out_val)
         m.d.comb += [self.o.eq(moving_average_full >> self.log_downsample_ratio)]
         return m
@@ -62,10 +63,11 @@ if __name__ == "__main__":
     sim.add_sync_process(moving_average_tb)
     with sim.write_vcd('foo.vcd', 'foo.gtkw'):
         sim.run()
+    print("Attempting plot; ignore warnings if running batch", file=stderr)
     try:
         from matplotlib import pyplot as plt
         plt.plot(signal_in)
         plt.plot(signal_out)
         plt.show()
     except Exception:
-        print("// Skipped plot")
+        print("Skipped plot", file=stderr)

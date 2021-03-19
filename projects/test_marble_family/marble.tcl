@@ -48,8 +48,8 @@ puts "Implementation done!"
 proc project_rpt {project_name} {
     # Generate implementation timing & power report
     report_power -file ./_xilinx/$project_name/imp_power.rpt
-    report_datasheet -v -file ./_xilinx/$project_name/imp_datasheet.txt
-    report_cdc -v -details -file ./_xilinx/$project_name/cdc_report.txt
+    report_datasheet -v -file ./_xilinx/$project_name/imp_datasheet.rpt
+    report_cdc -v -details -file ./_xilinx/$project_name/cdc_report.rpt
     report_timing_summary -delay_type min_max -report_unconstrained -check_timing_verbose -max_paths 10 -input_pins -file ./_xilinx/$project_name/imp_timing.rpt
     # http://xillybus.com/tutorials/vivado-timing-constraints-error
     if {! [string match -nocase {*timing constraints are met*} [report_timing_summary -no_header -no_detailed_paths -return_string]]} {
