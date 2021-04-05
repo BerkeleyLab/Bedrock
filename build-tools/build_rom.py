@@ -2,7 +2,6 @@ import subprocess
 import zlib
 import struct
 import hashlib
-from math import ceil, log2
 import sys
 import os
 
@@ -83,7 +82,7 @@ def decode_array(a):
 
 
 def verilog_rom(a, MAX_ROM_SIZE):
-    ROM_MSB = ceil(log2(MAX_ROM_SIZE))
+    ROM_MSB = (MAX_ROM_SIZE-1).bit_length()
     print("%d/%d ROM entries used" % (len(a), MAX_ROM_SIZE))
     if len(a) > MAX_ROM_SIZE:
         print("ROM_size input exceeds MAX_ROM_SIZE")
