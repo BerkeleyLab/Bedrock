@@ -24,7 +24,7 @@ def get_map(f='regmap_gen_vmod1.json'):
     return regmap
 
 
-H = [["llrf", "tgen", "cavity", "station", "station_cav4_elec"],
+H = [["llrf", "tgen", "cavity", "station", "station_cav4_elec", "shell"],
      ["mode", "freq", "outer_prod", "dot"]]
 
 
