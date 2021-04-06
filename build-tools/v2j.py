@@ -7,7 +7,7 @@ import os
 def v2j(vfile):
     basename = os.path.basename(vfile)
     base = os.path.splitext(basename)[0]
-    assert(basename.endswith('.v'))
+    assert(basename.endswith('.v') or basename.endswith('.sv'))
     autofile = '/tmp/{}_auto.vh'.format(base)
     with open(autofile, 'w') as f:
         f.write('')
