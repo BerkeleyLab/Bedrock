@@ -1,0 +1,80 @@
+[timestart] 7600
+[size] 1270 773
+[pos] 2021 184
+*-9.542541 10028 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.marble_base.
+[sst_width] 213
+[signals_width] 194
+[sst_expanded] 1
+[sst_vpaned_height] 212
+@800200
+-SPI
+@28
+TOP.marble_base.spi.config_clk
+TOP.marble_base.SCLK
+TOP.marble_base.CSB
+TOP.marble_base.MOSI
+TOP.marble_base.MISO
+TOP.marble_base.spi.active_edge
+@22
+TOP.marble_base.config_a[7:0]
+TOP.marble_base.config_d[7:0]
+@28
+TOP.marble_base.config_w
+TOP.marble_base.config_r
+TOP.marble_base.spi.halfway
+@22
+TOP.marble_base.spi.tx_data[7:0]
+@1000200
+-SPI
+@c00200
+-ETH
+@28
+TOP.marble_base.vgmii_rx_dv
+TOP.marble_base.vgmii_tx_en
+@1401200
+-ETH
+@800200
+-Mailbox
+@28
+TOP.marble_base.lb_mbox_wen
+TOP.marble_base.lb_mbox_ren
+TOP.marble_base.config_mw
+TOP.marble_base.config_mr
+TOP.marble_base.error
+@1000200
+-Mailbox
+@c00200
+-Fake DPRAM
+@28
+TOP.marble_base.xmem.ren1
+@22
+TOP.marble_base.xmem.addr1[10:0]
+TOP.marble_base.xmem.dout1[7:0]
+@28
+TOP.marble_base.xmem.wen2
+@22
+TOP.marble_base.xmem.addr2[10:0]
+TOP.marble_base.xmem.din2[7:0]
+@28
+TOP.marble_base.xmem.ren2
+@22
+TOP.marble_base.xmem.dout2[7:0]
+@1401200
+-Fake DPRAM
+@c00200
+-Local Bus
+@28
+TOP.marble_base.lb_control_strobe
+TOP.marble_base.lb_control_rd
+@22
+TOP.marble_base.lb_addr[23:0]
+TOP.marble_base.lb_data_out[31:0]
+TOP.marble_base.lb_data_in[31:0]
+@28
+TOP.marble_base.error
+@1401200
+-Local Bus
+[pattern_trace] 1
+[pattern_trace] 0

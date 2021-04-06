@@ -15,14 +15,14 @@ reg [5:0] cnt=0;
 reg [DW-1:0] rom=0;
 wire sck_edge = CPOL ? ~sck : sck; // convert to CPOL=0
 
-// send data at rising edge
+// CIPO changes on SCK rising edge
 always @(posedge sck_edge) if (~cs) begin
     cnt <= (cnt==DW) ? 1 : cnt + 1'b1;
     if (cnt==0) rom <= ROM;
     else rom <= {rom[DW-2:0], rom[DW-1]};
 end
 
-// sample data at falling edge
+// Sample COPI on SCK falling edge
 reg read=0;
 always @(negedge sck_edge) if (~cs) begin
     if (cnt == 1) read = copi;  // only response to 'read' cmd

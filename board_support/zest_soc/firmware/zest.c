@@ -360,8 +360,8 @@ bool check_div_clk_phase(uint8_t ch, uint8_t center) {
     printf("    Phase %8s clk: %#4x", zest_phdiff_names[ch], ph_cnt);
     print_dec_fix(ph_cnt, 7, 3);
     print_str(" UI\n");
-    // return (ph_cnt > 128*0.35 && ph_cnt < 128*0.75);
-    return (ph_cnt > center*0.7 && ph_cnt < center*1.5);
+    // return (ph_cnt > 128*0.3 && ph_cnt < 128*0.7);
+    return (ph_cnt > center*0.6 && ph_cnt < center*1.4);
 }
 
 bool align_adc_clk_phase(uint8_t ch, uint8_t center) {

@@ -176,7 +176,7 @@ def read_write(dev, args):
             val = ast.literal_eval(val)
 
         retval = dev.exchange([reg], [val])
-        if not val:
+        if val is None:
             print("%s: \t%08x" % (reg, retval[0]))
 
 

@@ -1,0 +1,23 @@
+[timestart] 681
+[size] 1433 363
+[pos] -1 -1
+*-10.217481 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] fwashout_tb.
+[sst_width] 228
+[signals_width] 159
+[sst_expanded] 1
+[sst_vpaned_height] 58
+@28
+fwashout_tb.clk
+@22
+fwashout_tb.phstep
+@10420
+fwashout_tb.adc_in[15:0]
+@20000
+-
+@10420
+fwashout_tb.adc_out[15:0]
+@20000
+-
+[pattern_trace] 1
+[pattern_trace] 0

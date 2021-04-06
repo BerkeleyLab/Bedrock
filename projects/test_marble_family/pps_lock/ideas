@@ -1,0 +1,39 @@
+gps_test
+  pps and UART input
+  gps_freq output
+wr_dac_{sclk,sdo}
+ad5662 #(.nch(2))  for wr_dac_*
+  "send" port goes high for one cycle to trigger a write cycle
+  tied to write address 9,
+  Note that chip-selects are derived from data[17:16]
+  wr_dac_tick <= &led_cc[1:0];
+
+Most obvious and least error-prone to provide a mode bit,
+  select between existing software control of DAC / readout of freq
+  and the new digital PLL.
+ad5662 inputs data, sel, send get muxed
+  wr_dac_ctl is still static 0
+
+count to 125000000 and wrap
+  on startup, arm, and then on rising pps edge, set count to 2048.
+  now we're in run mode.  capture 11 lsb of counter value on rising pps edge
+  if other 14 bits are not zero, that's an error, stop.  Now we have an
+  offset-binary 12-bit phase.  Pass to a DSP module; after some
+  processing time, a DAC write command comes out.
+
+Check and double-check the sign of the feedback
+  increasing DAC value means increasing VCXO frequency, right?
+  Sure sounds like I need a chicken bit.
+
+Control register bits:
+  run_request
+  sign of feedback
+  ad5662 sel bits (use this always, instead of data[17:16])
+    no, keep compatibility, mux sel bits too
+use run_request as mux control for ad5662 data and send
+status bits come out
+wish for a 'scope trace of phase and dac values, interleaved I guess
+  add mask bits and buffer reset command to control register
+  share memory with UART buffer?  Maybe not at first, this is so slow
+  a simple polling loop on a scalar status register is enough
+  32-bit can include mode status, DAC value, and phase measure

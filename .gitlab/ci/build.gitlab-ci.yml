@@ -16,7 +16,9 @@ build:
     - docker push $CONTAINER_IM_IMAGE:latest
     - docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
     - docker push $CONTAINER_IMAGE:latest
-  only:
-    changes:
-      - Dockerfile*
-      - .gitlab/ci/build.gitlab-ci.yml
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        - Dockerfile*
+        - .gitlab/ci/build.gitlab-ci.yml

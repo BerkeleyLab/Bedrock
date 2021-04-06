@@ -68,8 +68,12 @@ module marble_top(
 	output [3:0] TMDS_N,
 `endif
 
+	// Directly attached LEDs
+	output LD16,
+	output LD17,
+
 	// Physical Pmod, may be used as LEDs
-	inout [7:0] Pmod1,
+	output [7:0] Pmod1,  // feel free to change to inout, if you attach to something other than LEDs
 	input [7:0] Pmod2
 );
 
@@ -148,8 +152,6 @@ wire ZEST_PWR_EN;
 wire dum_scl, dum_sda;
 wire [3:0] ext_config;
 
-// Real, portable implementation
-// Consider pulling 3-state drivers out of this
 `ifdef USE_I2CBRIDGE
 localparam C_USE_I2CBRIDGE = 1;
 `else
@@ -161,7 +163,15 @@ localparam C_MMC_CTRACE = 1;
 localparam C_MMC_CTRACE = 0;
 `endif
 
-marble_base #(.USE_I2CBRIDGE(C_USE_I2CBRIDGE), .MMC_CTRACE(C_MMC_CTRACE)) base(
+wire [7:0] leds;
+// Real, portable implementation
+// Consider pulling 3-state drivers out of this
+marble_base #(
+	.USE_I2CBRIDGE(C_USE_I2CBRIDGE),
+	.MMC_CTRACE(C_MMC_CTRACE),
+	.default_enable_rx(C_DEFAULT_ENABLE_RX),
+	.misc_config_default(C_MISC_CONFIG_DEFAULT)
+) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
 	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
@@ -183,9 +193,12 @@ marble_base #(.USE_I2CBRIDGE(C_USE_I2CBRIDGE), .MMC_CTRACE(C_MMC_CTRACE)) base(
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
-	.GPS(Pmod2[3:0]), .ext_config(ext_config), .LED(Pmod1)
+	.GPS(Pmod2[3:0]), .ext_config(ext_config), .LED(leds)
 );
 defparam base.rtefi.p4_client.engine.seven = 1;
+assign Pmod1 = leds;
+assign LD16 = leds[0];
+assign LD17 = leds[1];
 
 `ifdef MARBLE_MINI
 // TMDS test pattern generation

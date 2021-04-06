@@ -1,0 +1,42 @@
+[timestart] 0
+[size] 1000 600
+[pos] 2077 284
+*-6.374730 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] fake_dpram_tb.
+[sst_width] 213
+[signals_width] 118
+[sst_expanded] 1
+[sst_vpaned_height] 151
+@420
+fake_dpram_tb.cc
+@28
+fake_dpram_tb.error
+@200
+-Port 1
+@24
+fake_dpram_tb.din1[4:0]
+fake_dpram_tb.addr1[3:0]
+@28
+fake_dpram_tb.wen1
+fake_dpram_tb.ren1
+@24
+fake_dpram_tb.dout1[4:0]
+@200
+-Port 2
+@24
+fake_dpram_tb.din2[4:0]
+fake_dpram_tb.addr2[3:0]
+@28
+fake_dpram_tb.wen2
+fake_dpram_tb.ren2
+@24
+fake_dpram_tb.dout2[4:0]
+@200
+-Debug
+@24
+fake_dpram_tb.dut.dina[4:0]
+fake_dpram_tb.dut.addra[3:0]
+@28
+fake_dpram_tb.dut.wena
+[pattern_trace] 1
+[pattern_trace] 0

@@ -7,32 +7,32 @@
 `include "application_top_auto.vh"
 
 module application_top(
-        input 		  lb_clk,
-        input 		  lb_write,
-        input 		  lb_strobe,
-        input 		  lb_rd,
-        input [23:0] 	  lb_addr,
-        input [31:0] 	  lb_data,
+        input             lb_clk,
+        input             lb_write,
+        input             lb_strobe,
+        input             lb_rd,
+        input [23:0]      lb_addr,
+        input [31:0]      lb_data,
         output reg [31:0] lb_din,
 
-	input 		  clk200,
+	input             clk200,
 
 	// Zest related
 	zest_cfg_if.master zif_cfg,
 
-	output [2:0] 	  D4rgb,
-	output [2:0] 	  D5rgb,
-	inout [3:0] 	  J17_pmod_4321, // top row of pins,       J17_pmod_4321[3] next to ground pin
-	inout [3:0] 	  J17_pmod_a987, // row adjacent to board, J17_pmod_a987[3] next to ground pin
-	inout [3:0] 	  J18_pmod_4321, // top row of pins,       J18_pmod_4321[3] next to ground pin
-	inout [3:0] 	  J18_pmod_a987, // row adjacent to board, J18_pmod_a987[3] next to ground pin
-	inout [5:0] 	  J19_hdmi_data,
-	inout [5:0] 	  J19_hdmi_ctrl
+	output [2:0]      D4rgb,
+	output [2:0]      D5rgb,
+	inout [3:0]       J17_pmod_4321, // top row of pins,       J17_pmod_4321[3] next to ground pin
+	inout [3:0]       J17_pmod_a987, // row adjacent to board, J17_pmod_a987[3] next to ground pin
+	inout [3:0]       J18_pmod_4321, // top row of pins,       J18_pmod_4321[3] next to ground pin
+	inout [3:0]       J18_pmod_a987, // row adjacent to board, J18_pmod_a987[3] next to ground pin
+	inout [5:0]       J19_hdmi_data,
+	inout [5:0]       J19_hdmi_ctrl
 
 
-	// inout 		  U1_datauwire_inout,  TODO: current status is skeptical
+	// inout          U1_datauwire_inout,  TODO: current status is skeptical
 
-	// input 		  U3_sdi,
+	// input          U3_sdi,
 );
 
 

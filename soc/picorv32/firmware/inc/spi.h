@@ -9,6 +9,7 @@
 #define SPI_CFG_REG   1
 
 #define BIT_CLK_DIV   0   // 8 bit spi clock prescaler (halfperiod cycle count)
+                          // F_SCK = F_CLK / CLK_DIV / 2
 #define BIT_NBITS     8   // Send / Receive N bits per transfer
 #define BIT_CPOL     16   // Clock polarity: 0 = idle low, 1 = idle high
 #define BIT_CPHA     17   // Clock phase: 0 = sample on first edge, 1 = second edge

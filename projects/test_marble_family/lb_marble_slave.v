@@ -6,7 +6,8 @@
 // see logic below for local_write.
 module lb_marble_slave #(
 	parameter USE_I2CBRIDGE = 0,
-	parameter MMC_CTRACE = 0
+	parameter MMC_CTRACE = 0,
+	parameter misc_config_default = 0
 )(
 	input clk,
 	input [23:0] addr,
@@ -22,7 +23,7 @@ module lb_marble_slave #(
 	input [7:0] obadge_data,
 	input xdomain_fault,
 	// More debugging hooks
-	input [2:0] mmc_pins,
+	input [3:0] mmc_pins,
 	// Features
 	input tx_mac_done,
 	input [15:0] rx_mac_data,
@@ -89,11 +90,20 @@ wire [15:0] ctrace_out;
 reg ctrace_start=0;
 wire [0:0] ctrace_running;
 
+reg csb_r=0, csb_toggle;
+reg arm=1;
+always @(posedge clk) begin
+   csb_r <= mmc_pins[0];
+   csb_toggle <= (~mmc_pins[0] & csb_r);
+   if (csb_toggle) arm <= 0;
+   if (ctrace_start) arm <= 1;
+end
+
 generate if (MMC_CTRACE) begin
 	localparam ctrace_aw=11;
 	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
-	ctrace #(.dw(3), .tw(13), .aw(ctrace_aw)) mmc_ctrace(
-		.clk(clk), .data(mmc_pins), .start(ctrace_start),
+	ctrace #(.dw(4), .tw(12), .aw(ctrace_aw)) mmc_ctrace(
+		.clk(clk), .data(mmc_pins), .start(csb_toggle & arm),
 		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
 		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
 	);
@@ -213,17 +223,21 @@ end else begin
 	assign twi_rst = 1'bz;
 end endgenerate
 
-// White Rabbit DAC - software-only for initial testing
-// Note that chip-selects are derived from data[17:16]
+// White Rabbit DAC - with EXPERIMENTAL internal GPS pps lock
 // wr_dac_tick is 31.2 MHz, wr_dac_sclk is 15.6 MHz when operating
 reg wr_dac_tick;  always @(posedge clk) wr_dac_tick <= &led_cc[1:0];
 reg wr_dac_send=0;
-wire [1:0] wr_dac_ctl=0;
+reg pps_config_write=0;
 wire [0:0] wr_dac_busy;
-ad5662 #(.nch(2)) wr_dac(.clk(clk), .tick(wr_dac_tick),
-	.data(data_out[15:0]), .sel(data_out[17:16]),
-	.ctl(wr_dac_ctl), .send(wr_dac_send),
-	.busy(wr_dac_busy),
+wire [31:0] pps_dsp_status;
+wire pps_in = gps_pins[3];
+ad5662_lock wr_dac(.clk(clk), .tick(wr_dac_tick),
+	.pps_in(pps_in),
+	.host_data(data_out[17:0]),
+	.host_write_dac(wr_dac_send),
+	.host_write_cr(pps_config_write),
+	.spi_busy(wr_dac_busy),
+	.dsp_status(pps_dsp_status),
 	.sclk(wr_dac_sclk), .sync_(wr_dac_sync), .sdo(wr_dac_sdo)
 );
 
@@ -259,6 +273,7 @@ always @(posedge clk) if (do_rd) begin
 		4'hb: reg_bank_0 <= ctrace_running;
 		4'hc: reg_bank_0 <= gps_stat;
 		4'hd: reg_bank_0 <= gps_pps_data;
+		4'he: reg_bank_0 <= pps_dsp_status;
 		default: reg_bank_0 <= "zzzz";
 	endcase
 end
@@ -288,7 +303,7 @@ end
 
 // Direct writes
 reg led_user_r=0;
-reg [7:0] misc_config = 8'd0;
+reg [7:0] misc_config = misc_config_default;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
 // decoding corresponds to mirror readback, see notes above
@@ -307,6 +322,7 @@ always @(posedge clk) if (local_write) case (addr[4:0])
 	// 9: wr_dac
 	// 10: ctrace_start
 	// 11: gps_buf_reset
+	// 12: pps_config_write
 	16: fmc_test_r[21:0] <= data_out;
 	17: fmc_test_r[43:22] <= data_out;
 	18: fmc_test_r[65:44] <= data_out;
@@ -319,6 +335,7 @@ always @(posedge clk) begin
 	wr_dac_send <= local_write & (addr[4:0] == 9);
 	ctrace_start <= local_write & (addr[4:0] == 10);
 	gps_buf_reset <= local_write & (addr[4:0] == 11);
+	pps_config_write <= local_write & (addr[4:0] == 12);
 end
 
 // Mirror memory

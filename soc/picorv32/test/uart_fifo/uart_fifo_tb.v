@@ -17,7 +17,7 @@ module uart_fifo_tb;
         end
         repeat (10) @(posedge mem_clk);
         reset <= 0;
-        #100000
+        #500000
         $display("TIMEOUT\nFAIL");
         $stop();
     end

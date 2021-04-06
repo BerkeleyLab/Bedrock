@@ -27,6 +27,7 @@ int main(void) {
     int pass=0;
     UART_INIT(BASE_UART, 9216000);
     uart_send(buf_tx);
+    for (volatile unsigned i=0; i<0xFF; i++);
     uart_recv(buf_rx, N_CHARS);
     pass = memcmp(buf_tx, buf_rx, N_CHARS) == 0;
     return pass;

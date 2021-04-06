@@ -231,9 +231,12 @@ gpioz_pack #(
 // --------------------------------------------------------------
 //  UART0, prints debugging info to onboard USB serial
 // --------------------------------------------------------------
-uart_pack #(
+uart_fifo_pack #(
     .DATA_WIDTH  ( 8 ),
-    .BASE_ADDR   ( BASE_UART0 )
+    .BASE_ADDR   ( BASE_UART0 ),
+    // Anything below 7 bits gets implemented as distributed ram
+    .AW_TX       ( 7 ),
+    .AW_RX       ( 7 )
 ) uart_inst0 (
     // Hardware interface
     .clk         ( clk        ),

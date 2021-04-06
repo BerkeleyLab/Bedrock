@@ -1,46 +1,73 @@
+#ifndef ONEWIRE_SOFT_H
+#define ONEWIRE_SOFT_H
+#include <stdint.h>
+#include <stdbool.h>
+
 //-------------------------------------------------
 // Onewire bit-bang library
 //-------------------------------------------------
+// * set BASE_ONEWIRE at compile time
+// * bus multiplexer: select gpio pin at runtime with onewire_init()
+//
 // Expects the following macros in settings.h:
-// #define PIN_I2C_SDA              0  // GPIO pin number of the data pin
-// #define PIN_I2C_SCL              1  // GPIO pin number of the clock pin
-// #define I2C_DELAY_US             1  //~half a clock period [us]
-// #define BASE_GPIO       0x01000000  //base address of the gpio module used for soft_i2c
-
-#ifndef ONEWIRE_SOFT_H
-#define ONEWIRE_SOFT_H
-
-#include <stdint.h>
+// #define BASE_ONEWIRE       0x01000000  //base address of the gpio module
 
 //-------------------------------------------------
 // Low level functions
 //-------------------------------------------------
-void onewire_init(void);            // initialize GPIO pins
-int onewire_reset(void);            // reset bus with long low-going pulse, return "presence"
-int onewire_tx( uint8_t dat );      // sends out 8 bits (dat), returns ack (9th bit, 1 = ack ok)
+// initialize or change GPIO pin
+void onewire_init(uint8_t pin);
+
+// reset bus with long low-going pulse
+// returns true if a one-wire device is present
+bool onewire_reset(void);
+
+// write a byte, use onewire_tx(0xff) for reading a byte
+uint8_t onewire_tx(uint8_t dat);
+
+// write several bytes
+void onewire_write_bytes(const uint8_t *buf, unsigned count);
+
+// read several bytes
+void onewire_read_bytes(uint8_t *buf, unsigned count);
+
+// used for ds2438 to signal end of conversion
+// read a bit until it changes to `val`, then return true
+// times out after `max_cycles` and returns false
+bool onewire_poll_bit(bool val, unsigned max_cycles);
+
+// Get device unique ID
+// for a single device on bus only. Use onewire_search() for multiple ones
+// on success writes 8 bytes into addr and returns true
+bool onewire_readrom(uint8_t *addr);
 
 //-------------------------------------------------
-// High level functions (dealing with registers)
+// High level functions from:
+// https://github.com/PaulStoffregen/OneWire/blob/master/OneWire.h
 //-------------------------------------------------
-// Typical register based writing (write regAddr, then write data)
-// i2cAddr = 7 bit I2C address. MSB = 0.
-// returns 1 on success, 0 if one or more ACK bits were missing
-int onewire_write_regs( uint8_t i2cAddr, uint8_t regAddr, uint8_t *buffer, uint16_t len );
+// Issue a 1-Wire rom select command, you do the reset first.
+void onewire_select(const uint8_t rom[8]);
 
-// Typical register based reading (write regAddr, then read data)
-// i2cAddr = 7 bit I2C address. MSB = 0.
-// returns 1 on success, 0 if one or more ACK bits were missing
-int onewire_read_regs( uint8_t i2cAddr, uint8_t regAddr, uint8_t *buffer, uint16_t len );
+// Issue a 1-Wire rom skip command, to address all on bus.
+void onewire_skip(void);
 
-//-------------------------------------------------
-// Debugging functions (printing stuff)
-//-------------------------------------------------
-// Scan through all addresses, try to write and
-// reports the ones which respond with an ack
-void onewire_scan(void);
+// Clear the search state so that if will start from the beginning again.
+void onewire_reset_search(void);
 
-int onewire_dump( uint8_t i2cAddr, uint8_t regAddr, int nBytes );
+// Setup the search to find the device type 'family_code' on the next call
+// to search(*newAddr) if it is present.
+void onewire_target_search(uint8_t family_code);
 
-int onewire_read_ascii( uint8_t i2cAddr, uint8_t regAddr, int nBytes );
+// Look for the next device. Returns 1 if a new address has been
+// returned. A zero might mean that the bus is shorted, there are
+// no devices, or you have already retrieved all of them.  It
+// might be a good idea to check the CRC to make sure you didn't
+// get garbage.  The order is deterministic. You will always get
+// the same devices in the same order.
+bool onewire_search(uint8_t *newAddr);
+
+// Compute a Dallas Semiconductor 8 bit CRC, these are used in the
+// ROM and scratchpad registers.
+uint8_t onewire_crc8(const uint8_t *addr, uint8_t len);
 
 #endif

@@ -65,7 +65,7 @@ end
 wire [dw+tw-1:0] saveme = {count, data2};
 
 // Trace memory
-dpram #(.dw(dw+tw), .aw(aw)) mem(
+dpram #(.dw(dw+tw), .aw(aw)) xmem(
 	.clka(clk), .clkb(lb_clk),
 	.addra(pc), .dina(saveme), .wena(wen),
 	.addrb(lb_addr), .doutb(lb_out)

@@ -8,6 +8,8 @@
 #include "test.h"
 #include "spi_memio.h"
 
+void donut(void);
+
 #define LED(val) SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, ((~val) & 0x7))
 
 #ifdef SIMULATION
@@ -27,7 +29,7 @@ void _putchar(char c)
     UART_PUTC(BASE_UART0, c);
 }
 
-volatile unsigned chars_received = 0;
+volatile unsigned chars_received = 0, last_char=0x100;
 uint32_t *irq(uint32_t *regs, uint32_t irqs)
 {
     // called for all 32 interrupts
@@ -35,7 +37,8 @@ uint32_t *irq(uint32_t *regs, uint32_t irqs)
     // irqs = q1 = bitmask of all IRQs to be handled
     if (irqs & (1 << IRQ_UART0_RX)) {
         // Ctrl + T = reset
-        if (UART_GETC(BASE_UART0) == 0x14) {
+        last_char = UART_GETC(BASE_UART0);
+        if (last_char == 0x14) {
             // reboot from interrupt
             _picorv32_irq_reset();
         }
@@ -50,6 +53,24 @@ int main(void)
     _picorv32_irq_enable(1 << IRQ_UART0_RX);
     SET_GPIO8(BASE_GPIO, GPIO_OUT_REG, 0, 0);
     SET_GPIO8(BASE_GPIO, GPIO_OE_REG, 0, 0xFF);  // Drive LEDs
+
+    print_str("\n---------------------------------------\n");
+    print_str(" LBL pico_soc @");
+    print_udec_fix(((F_CLK / 1000) << 8) / 1000, 8, 3);
+    print_str(" MHz, " GIT_VERSION);
+    print_str("\n---------------------------------------\n");
+    print_str("running UART0 at ");
+    print_dec(BOOTLOADER_BAUDRATE);
+    print_str(" baud/s\n\n");
+    print_str("`CTRL+T` to reset, `s` to sift for prime numbers, `d` for a 3D donut ...\n");
+    LED(0b011);  // Ready for test, LED = yellow
+    while (1) {
+        if (last_char == 's')
+            break;
+
+        else if (last_char == 'd')
+            donut();
+    }
 
     // test of SPI flash memory mapping
     // only works reliably in 1x mode and only up to 68 MHz
@@ -74,18 +95,6 @@ int main(void)
     //     if (hash != 0x90C7112A)
     //         print_str(" !!! ERROR !!!");
     // }
-
-    print_str("\n---------------------------------------\n");
-    print_str(" LBL pico_soc @");
-    print_udec_fix(((F_CLK / 1000) << 8) / 1000, 8, 3);
-    print_str(" MHz, " GIT_VERSION);
-    print_str("\n---------------------------------------\n");
-    print_str("running UART0 at ");
-    print_dec(BOOTLOADER_BAUDRATE);
-    print_str(" baud/s\n\n");
-    print_str("CTRL+T for reset, `any key` to start sieving for prime numbers ...\n");
-    LED(0b011);  // Ready for test, LED = yellow
-    while(chars_received == 0);
 
     LED(0b111);  // Test running, LED = white
     unsigned calc_hash = sieve(N_PRIMES);

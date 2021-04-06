@@ -34,3 +34,13 @@ uint32_t millis(void)
     uint64_t cs = _picorv32_rd_cycle_64();
     return cs / (F_CLK / 1000);
 }
+
+int periodic_delay(unsigned cycles)
+{
+    static unsigned ts_a = 0;
+    unsigned dt = getCycles() - ts_a;
+    if (dt < cycles)
+        delayCycles(cycles - dt);
+    ts_a = getCycles();
+    return cycles - dt;
+}

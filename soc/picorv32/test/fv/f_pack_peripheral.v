@@ -16,7 +16,8 @@ module f_pack_peripheral #(
     input [68:0] mem_packed_fwd,  // CPU > SFR
     input [32:0] mem_packed_ret,  // DEC < SFR
 
-    output f_past_valid
+    output f_past_valid,
+    output reg [31:0] f_stall_count
 );
 
 // --------------------------------------------------------------
@@ -38,7 +39,7 @@ initial assume(!mem_valid);
 initial assert(!mem_ready);
 initial assert(mem_rdata == 0);
 
-reg [31:0] f_stall_count = 0;
+initial f_stall_count = 0;
 wire f_is_addr = mem_addr[31:14] == {BASE_ADDR, BASE2_ADDR, 2'b00};
 
 always @(*)

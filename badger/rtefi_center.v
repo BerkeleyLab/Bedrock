@@ -62,6 +62,7 @@ module rtefi_center(
 	output [7:0] obadge_data,
 	output xdomain_fault,
 	// Dumb stuff to get LEDs blinking
+	output [3:0] scanner_debug,
 	output rx_mon,
 	output tx_mon,
 	// Simulation-only
@@ -116,7 +117,7 @@ scanner #(.handle_arp(handle_arp), .handle_icmp(handle_icmp)) a_scan(
 	.enable_rx(enable_rx),
 	.ip_a(ip_a), .ip_d(ip_d),
 	.pno_a(pno_a), .pno_d(pno_d),
-	.busy(scanner_busy),
+	.busy(scanner_busy), .debug(scanner_debug),
 	.odata(sdata), .odata_s(sdata_s), .odata_f(sdata_l),
 	.pack_len(pack_len), .status_vec(status_vec), .status_valid(status_valid)
 );

@@ -55,15 +55,26 @@ wire rx_clk = vgmii_rx_clk;
 
 // Configuration port
 wire config_clk = tx_clk;
-wire enable_rx, config_s, config_p;
-wire [3:0] config_a;
+wire config_w;
+wire [7:0] config_a;
 wire [7:0] config_d;
+wire [7:0] spi_return=0;
 spi_gate spi(
 	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB),
-	.enable_rx(enable_rx),
-	.config_clk(config_clk), .config_s(config_s), .config_p(config_p),
-	.config_a(config_a), .config_d(config_d)
+	.config_clk(config_clk), .config_w(config_w),
+	.config_a(config_a), .config_d(config_d), .tx_data(spi_return)
 );
+
+// Map generic configuration bus to application
+// 16-bit SPI word semantics:
+//   0 0 0 1 a a a a d d d d d d d d  ->  set MAC/IP config[a] = D
+//   0 0 1 0 x x x x x x x x x x x V  ->  set enable_rx to V
+//   0 0 1 1 a a a a d d d d d d d d  ->  set UDP port config[a] = D
+parameter default_enable_rx = 1;
+reg enable_rx=default_enable_rx;  // special case initialization
+always @(posedge config_clk) if (config_w && (config_a[7:4] == 2)) enable_rx <= config_d[0];
+wire config_s = config_w && (config_a[7:4] == 1);
+wire config_p = config_w && (config_a[7:4] == 3);
 
 wire led_user_mode, l1, l2;
 // Local bus
@@ -154,7 +165,7 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 	.tx_en(vgmii_tx_en),  // no vgmii_tx_er
 	.enable_rx(enable_rx),
 	.config_clk(config_clk), .config_s(config_s), .config_p(config_p),
-	.config_a(config_a), .config_d(config_d),
+	.config_a(config_a[3:0]), .config_d(config_d),
 
 	// .host_clk(host_clk), .host_write(host_write),
 	// .host_waddr(host_waddr), .host_wdata(host_wdata),

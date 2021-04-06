@@ -7,23 +7,23 @@
 module digitizer_config(
 
 	// local bus -- minimize or eliminate uses
-	input 	      lb_clk,
-	input 	      lb_strobe,
-	input 	      lb_rd,
+	input         lb_clk,
+	input         lb_strobe,
+	input         lb_rd,
 	input [23:0]  lb_addr,
 	input [31:0]  lb_dout,
 
 	zest_cfg_if.master zif_cfg,
 
 	// clocks for frequency and phase measurement
-	input 	      clk200,
+	input         clk200,
 
 	// llspi physical I/O
 	// slightly less physical
-	output 	      rawadc_trig_x,
+	output        rawadc_trig_x,
 
 	// 8 channels high-speed 16-bit parallel ADC data
-	input 	      adc_clk,
+	input         adc_clk,
 	input [127:0] adc_data,
 
 	// outputs to host read register map
@@ -65,6 +65,8 @@ module digitizer_config(
 	input        U2_clk_reset_r,   // external
 	(* external *)
 	input        U3_clk_reset_r,   // external
+	(* external, signal_type="single-cycle" *)
+	input [1:0]   adc_mmcm, // external single-cycle
 	(* external *)
 	input        U2_iserdes_reset_r, // external
 	(* external *)
@@ -96,6 +98,7 @@ module digitizer_config(
 	input rawadc_trig,  // external single-cycle
 	(* external *)
 	input [9:0] adc_downsample_ratio,  // external
+
 	// adc_clk domain
 	(* external *)
 	input [9:0] sync_ad7794_cset,  // external
