@@ -146,7 +146,7 @@ sudo cp certs/domain.crt /etc/docker/certs.d/mohs.dhcp.lbl.gov/ca.crt
 sudo cp certs/domain.crt /usr/local/share/ca-certificates/mohs.dhcp.lbl.gov.crt
 sudo update-ca-certificates
 # restart docker and its registry
-sudo sh scripts/restart_registry.sh
+sh scripts/restart_registry.sh
 
 #+END_SRC
 
