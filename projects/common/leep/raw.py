@@ -55,7 +55,11 @@ def yscale(wave_samp_per=1):
 
 class LEEPDevice(DeviceBase):
     backend = 'leep'
-    rom_addr = 0x800
+    rom_addr = 0x1000
+    # TO-DO: The rom_addr starting addr (and end addr) has changed
+    # this needs to be configurable.
+    # When a 4096-long rom is being inferred, 0x1000 is good
+    # When a 2048-long rom (legacy) is being inferred, 0x800 is good
 
     def __init__(self, addr, timeout=0.1, **kws):
         DeviceBase.__init__(self, **kws)
@@ -372,7 +376,7 @@ class LEEPDevice(DeviceBase):
         self.jsonhash = None
         self.regmap = None
 
-        values = self.exchange(range(self.rom_addr, self.rom_addr+0x800))
+        values = self.exchange(range(self.rom_addr, self.rom_addr+0x1000))
 
         values = numpy.frombuffer(values, be16)
         _log.debug("ROM[0] %08x", values[0])
