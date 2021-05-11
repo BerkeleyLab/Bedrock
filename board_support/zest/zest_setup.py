@@ -59,30 +59,30 @@ class c_prc:
         }
         self.chan_list = [self.channels[ix] for ix in range(8)]
         self.ad9653_regname = {  # XXX please move this to a class!
-            0x00: 'SPI port configuration',
-            0x01: 'Chip ID',
-            0x02: 'Chip Grade',
-            0x05: 'Device Index',
-            0x08: 'Power Modes (global)',
-            0x09: 'Clock (global)',
-            0x0b: 'Clock divide (global)',
-            0x0c: 'Enhancement control',
-            0x0d: 'Test mode',
-            0x10: 'Offset adjust (local)',
-            0x14: 'Output mode',
-            0x15: 'Output adjust',
-            0x16: 'Output phase',
-            0x18: 'V_REF',
-            0x19: 'USER_PATT1_LSB (global)',
-            0x1a: 'USER_PATT1_MSB (global)',
-            0x1b: 'USER_PATT2_LSB (global)',
-            0x1c: 'USER_PATT2_MSB (global)',
-            0x21: 'Serial output data control (global)',
-            0x22: 'Serial channel status (local)',
-            0x100: 'Sample rate override',
-            0x101: 'User I/O Control 2',
-            0x102: 'User I/O Control 3',
-            0x109: 'Sync'
+            0x00: '18  SPI port configuration',
+            0x01: 'b5  Chip ID',
+            0x02: '61  Chip Grade',
+            0x05: '3f  Device Index',
+            0x08: '00  Power Modes (global)',
+            0x09: '01  Clock (global)',
+            0x0b: '00  Clock divide (global)',
+            0x0c: '00  Enhancement control',
+            0x0d: '00  Test mode',
+            0x10: '00  Offset adjust (local)',
+            0x14: '02  Output mode',
+            0x15: '00  Output adjust',
+            0x16: '03  Output phase',
+            0x18: '04  V_REF',
+            0x19: '00  USER_PATT1_LSB (global)',
+            0x1a: '00  USER_PATT1_MSB (global)',
+            0x1b: '00  USER_PATT2_LSB (global)',
+            0x1c: '00  USER_PATT2_MSB (global)',
+            0x21: '30  Serial output data control (global)',
+            0x22: '00  Serial channel status (local)',
+            0x100: '46  Sample rate override',
+            0x101: '00  User I/O Control 2',
+            0x102: '00  User I/O Control 3',
+            0x109: '00  Sync'
         }
 
         # This must come after peripheral classes above are initialized
@@ -125,6 +125,20 @@ class c_prc:
         if not self.adc_bufr_reset():
             return False
         self.adc_bitslip()
+
+        # DAC timing parameter search
+        vwin_tup = self.dac_timing()
+        # If window available, set to middle value
+        if vwin_tup:
+            # Pick middle of the valid window and apply empirically determined bias
+            # to allow for more falling-edge margin
+            val = int(len(vwin_tup)/2 + 0.5) - 2
+            val = max(val, 2)
+            SMP, SEEK, SET, HLD = vwin_tup[val]
+            self.dac_timing(SET=SET, HLD=HLD, SMP=SMP)
+        else:
+            self.dac_timing(SET=13, HLD=15, SMP=19)
+
         if False:
             if self.pntest2() == []:
                 self.pntest()
@@ -180,8 +194,13 @@ class c_prc:
         aok = True
         for addr in sorted(self.ad9653_regname.keys()):
             foo = self.spi_readn(adc_list, addr)
+            rn = self.ad9653_regname[addr]
+            goal = rn.split()[0]
             x = ['{:02x}'.format(v[2]) for v in foo]
-            print("%3.3x  " % addr + "  ".join(x) + "  " + self.ad9653_regname[addr])
+            ok = all([v == goal for v in x])
+            aok &= ok
+            ss = "  OK  " if ok else "  BAD "
+            print("%3.3x   " % addr + "  ".join(x) + ss + rn)
         return aok
 
     def amc_write(self, pg, saddr, val):
@@ -479,8 +498,8 @@ class c_prc:
             0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
             0x0f, 0x10, 0x11, 0x12, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f]
         for addr in alist:
-            bb = ['{:08x}'.format(d[2]) for d in self.spi_readn([self.dac_spi], addr)]
-            print('dac spi addr 0x%x ' % addr + repr(bb))
+            bb = self.spi_readn([self.dac_spi], addr)[0]
+            print('dac spi addr 0x%02x  0x%02x' % (addr, bb[2]))
         print("done")
         sys.stdout.flush()
 
@@ -684,55 +703,110 @@ class c_prc:
         return SEEK
 
     def dac_timing(self, SET=None, HLD=None, SMP=None):
+        def log_step(_s, _smp, _seek, _set, _hld):
+            print('Step %d: SMP %02d  SEEK %d  SET %02d  HLD %02d' % (_s, SMP, SEEK, SET, HLD))
+
         if SET and HLD and SMP:
+            print("DAC Timing: Skipping timing search and pushing default values")
             self.seeksethldsmp(SET=SET, HLD=HLD, SMP=SMP, display=1)
-        else:
-            # step 1
-            SMP = 0
-            SET = 0
-            HLD = 0
+            return
+
+        # step 1 - Record SEEK for SMP=SET=HLD=0
+        SMP = 0
+        SET = 0
+        HLD = 0
+        SEEK = self.seeksethldsmp(SET, HLD, SMP)
+        log_step(1, SMP, SEEK, SET, HLD)
+        SEEK_000 = SEEK
+
+        # step 2 - Sweep HLD until SEEK toggles; Hold time
+        SEEK = SEEK_000
+        HLD_TIME = 15  # Default if not found
+        HLD += 1
+        while HLD < 16:
             SEEK = self.seeksethldsmp(SET, HLD, SMP)
-            print('step 1 %d %d %d %d' % (SMP, SEEK, SET, HLD))
-            SEEK_000 = SEEK
-            # step 2
-            SMP = 0
-            SET = 0
-            HLD = 0
-            SEEK = SEEK_000
-            while HLD < 16 and SEEK == SEEK_000:
-                HLD = HLD + 1
+            if (SEEK != SEEK_000):
+                HLD_TIME = HLD
+                break
+            HLD += 1
+        log_step(2, SMP, SEEK, SET, HLD)
+        print("AD9781 Hold time: %d" % HLD_TIME)
+
+        # step 3 - Sweep SET until SEEK toggles; Setup time
+        SMP = 0
+        SET = 0
+        HLD = 0
+        SEEK = SEEK_000
+        SET_TIME = 15
+        SET += 1
+        while SET < 16:
+            SEEK = self.seeksethldsmp(SET, HLD, SMP)
+            if (SEEK != SEEK_000):
+                SET_TIME = SET
+                break
+            SET += 1
+        log_step(3, SMP, SEEK, SET, HLD)
+        print("AD9781 Setup time: %d" % SET_TIME)
+
+        # step 4 - Find HLD and SET for each SMP
+        SET = 0
+        HLD = 0
+        SMP = 0
+        SEEK_ARR = [0]*32
+        SET_ARR = [0]*32
+        HLD_ARR = [0]*32
+        while SMP < 32:
+            SEEK_SMP = self.seeksethldsmp(SET, HLD, SMP)
+            SEEK_ARR[SMP] = SEEK_SMP
+
+            # Find ideal Hold for this SMP
+            HLD_OK = 15  # Default if not found
+            HLD += 1
+            while HLD < 16:
                 SEEK = self.seeksethldsmp(SET, HLD, SMP)
-            print('step 2 %d %d %d %d' % (SMP, SEEK, SET, HLD))
-            # step 3
-            SMP = 0
-            SET = 0
+                if (SEEK != SEEK_SMP):
+                    HLD_OK = HLD
+                    break
+                HLD += 1
+            HLD_ARR[SMP] = HLD_OK
+
+            # Find ideal Setup for this SMP
             HLD = 0
-            SEEK = SEEK_000
-            while SET < 16 and SEEK == SEEK_000:
-                SET = SET + 1
+            SET_OK = 15  # Default if not found
+            SET += 1
+            while SET < 16:
                 SEEK = self.seeksethldsmp(SET, HLD, SMP)
-            # print 'set', SET, 'seek', SEEK
-            print('step 3 %d %d %d %d' % (SMP, SEEK, SET, HLD))
-            # step 4
-            SET = 0
-            HLD = 0
-            SMP = 0
-            SEEK = SEEK_000
-            while SMP < 32:
-                SMP = SMP + 1
-                SEEK = self.seeksethldsmp(SET, HLD, SMP)
-                SEEK_SMP = SEEK
-                while HLD < 16 and SEEK == SEEK_SMP:
-                    HLD = HLD + 1
-                    SEEK = self.seeksethldsmp(SET, HLD, SMP)
-                HLD_SMP = HLD
-                HLD = 0
-                while SET < 16 and SEEK == SEEK_SMP:
-                    SET = SET + 1
-                    SEEK = self.seeksethldsmp(SET, HLD, SMP)
-                SET_SMP = SET
-                SET = 0
-                print('step 3 %d %d %d %d' % (SMP, SEEK_SMP, SET_SMP, HLD_SMP))
+                if (SEEK != SEEK_SMP):
+                    SET_OK = SET
+                    break
+                SET += 1
+            SET_ARR[SMP] = SET_OK  # Save ideal Setup for this SMP
+
+            # Print timing table
+            print("SMP %02d  SEEK %d  SET %02d  HLD %02d" % (SMP, SEEK_ARR[SMP], SET_ARR[SMP], HLD_ARR[SMP]))
+            SMP += 1
+
+        # Identify first valid window
+        p_seek = SEEK_ARR[0]
+        vstart = vstop = None
+        for _smp, _seek in enumerate(SEEK_ARR):
+            if not vstart and (_seek == 1 and p_seek == 0):
+                vstart = _smp
+            if vstart and (_seek == 0 and p_seek == 1) or _smp == 31:
+                vstop = _smp
+                break
+        p_seek = _seek
+
+        if not vstart or not vstop:
+            print("DAC Timing: No valid window found")
+            return
+
+        # Build valid window tuple: SMP, SEEK, SET, HLD
+        print("Valid window: %d : %d" % (vstart, vstop))
+        vwin_tup = list(zip(list(range(vstart, vstop)), SEEK_ARR[vstart:vstop],
+                        SET_ARR[vstart:vstop], HLD_ARR[vstart:vstop]))
+        # print("DAC Timing: First valid window ", vwin_tup)
+        return vwin_tup
 
     # def raw_buf(self, adc_ch):  unused, bit-rotten, deleted; see all_adcs.py instead.
 
@@ -935,10 +1009,6 @@ class c_prc:
     #     describe_phase_diff(foo[7], "U3")
     #     for ix in range(len(onames)):
     #         print("%s %d" % (onames[ix], foo[8+ix]))
-
-
-def usage():
-    print("python zest_setup.py -a $IP [-r [-b bitfile] ]")
 
 
 if __name__ == "__main__":
