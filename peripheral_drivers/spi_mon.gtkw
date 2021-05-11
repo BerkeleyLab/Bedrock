@@ -1,0 +1,41 @@
+[timestart] 0
+[size] 1308 568
+[pos] -1 -1
+*-11.309580 5981 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] spi_mon_tb.
+[sst_width] 276
+[signals_width] 193
+[sst_expanded] 1
+[sst_vpaned_height] 132
+@28
+spi_mon_tb.clk
+spi_mon_tb.en
+spi_mon_tb.grant
+spi_mon_tb.req
+spi_mon_tb.spi_start
+spi_mon_tb.spi_busy
+spi_mon_tb.spi_start
+@22
+spi_mon_tb.spi_addr[23:0]
+spi_mon_tb.spi_data[7:0]
+@28
+spi_mon_tb.spi_rnw
+@22
+spi_mon_tb.spi_rdata[7:0]
+@29
+spi_mon_tb.spi_rvalid
+@200
+-MEM READOUT
+@28
+spi_mon_tb.rd_addr[1:0]
+@22
+spi_mon_tb.rd_data[7:0]
+@200
+-SPI_MASTER
+@28
+spi_mon_tb.i_spi_master.sck
+spi_mon_tb.i_spi_master.cs
+spi_mon_tb.i_spi_master.sdi
+spi_mon_tb.i_spi_master.sdo
+[pattern_trace] 1
+[pattern_trace] 0
