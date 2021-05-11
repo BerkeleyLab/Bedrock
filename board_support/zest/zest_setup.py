@@ -12,18 +12,33 @@ from prnd import prnd
 
 class c_prc:
 
-    def __init__(self, ip, port=50006, leep_addr=None, reset=False,
+    def __init__(self, ip, port=50006, leep_addr=None,
+                 reset=False,
+                 dac_nm_mode=False,
+                 timeout=0.1, strict=False,
                  clk_freq=1320e6/14.0, ref_freq=50.):
+        # Note that port is not actually used any more.
+        # To set a UDP port, use e.g., localhost:3010 for the ip, which gets passed to leep.
 
         import leep
 
         self.pn9 = prnd(0x92, 16)  # static class variable
 
+        self.test_mode_now = None
+
         self.ip = ip
         self.ref_freq = ref_freq
         self.clk_freq = clk_freq
+        self.dac_nm_mode = dac_nm_mode
+        self.strict = strict
+
         if leep_addr is None:
-            leep_addr = "leep://" + str(self.ip) + ':' + str(port)
+            leep_addr = "leep://" + str(self.ip)
+
+        # Open communication with the carrier board
+        print('Carrier board address %s' % leep_addr)
+
+        self.leep = leep.open(leep_addr, timeout=timeout, instance=[])
 
         self.lmk_spi = c_llspi_lmk01801(1)
         self.U2_adc_spi = c_llspi_ad9653(2)
@@ -31,7 +46,6 @@ class c_prc:
         self.dac_spi = c_llspi_ad9781(4)
         self.ad7794 = c_ad7794()
         self.amc7823 = c_amc7823()
-        self.test_mode_now = None
 
         # Used in top2idelay; makes things (more?) specific to
         # AD9653 test mode 00001100, but it seems needed for reliability.
@@ -71,21 +85,14 @@ class c_prc:
             0x109: 'Sync'
         }
 
-        # Open communication with the carrier board
-        print('Carrier board address %s' % leep_addr)
-
-        self.leep = leep.open(leep_addr, instance=[])
-
+        # This must come after peripheral classes above are initialized
         if reset:
-            self.reset()
-
-    def reset(self):
-        print('Starting reset')
-
-        if not self.hardware_reset():
-            print("Initialization Error!")
-            exit(2)
-        sys.stdout.flush()
+            # Perform hardware reset
+            if not self.hardware_reset():
+                print("Initialization Error!")
+                exit(2)
+            print("Reset sequence complete in %s: board address %s" % (sys.argv[0], leep_addr))
+            sys.stdout.flush()
 
     def _freq_get_convert(self, reg_name):
         freq_count = self.leep.reg_read([(reg_name)])[0]
@@ -98,7 +105,9 @@ class c_prc:
 
     def hardware_reset(self):
         print("Entering hardware_reset")
-        self.digitizer_spi_init()
+        aok = self.digitizer_spi_init(dac_nm_mode=self.dac_nm_mode)
+        if not aok:
+            return False
 
         self.clock_check()
 
@@ -116,8 +125,6 @@ class c_prc:
         if not self.adc_bufr_reset():
             return False
         self.adc_bitslip()
-        # self.dac_smp(SET=None, HLD=None, SMP=None)
-        # self.dac_smp(SET=15, HLD=4, SMP=4)
         if False:
             if self.pntest2() == []:
                 self.pntest()
@@ -169,12 +176,13 @@ class c_prc:
         self.leep.reg_write(vlist)
 
     def ad9653_spi_dump(self, adc_list):
-        print(hex(self.leep.reg_read([('hello_3')])[0]))
         print("addr  U2  U3")
+        aok = True
         for addr in sorted(self.ad9653_regname.keys()):
             foo = self.spi_readn(adc_list, addr)
             x = ['{:02x}'.format(v[2]) for v in foo]
             print("%3.3x  " % addr + "  ".join(x) + "  " + self.ad9653_regname[addr])
+        return aok
 
     def amc_write(self, pg, saddr, val):
         # print 'amc write pg', pg, 'saddr', hex(saddr), 'val', hex(val)
@@ -312,8 +320,8 @@ class c_prc:
         if tp != self.test_mode_now:
             for adc in self.U2_adc_spi, self.U3_adc_spi:
                 self.spi_write(adc, 0xd, tp)
-            self.test_mode_now = tp
-        return tp  # self.spi_read(adc, 0xd)[0][2].encode('hex')
+        self.test_mode_now = tp
+        return tp
 
     def bitslip_calc(self, value=0xa19c):
         value_hi = value >> 8
@@ -364,17 +372,17 @@ class c_prc:
             ('adc_test_reset', 0)
         ])
 
-    def digitizer_spi_init(self):
+    def digitizer_spi_init(self, dac_nm_mode=False):
         self.leep.reg_write([('periph_config', 0xfffffffd)])
         self.spi_flush()
         sys.stdout.write("start lmk setup -")
         self.spi_write(self.lmk_spi, 15, self.lmk_spi.R15(uWireLock="0"))
         self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(RESET='1'))
-        if True:
+        if False:
             # Check this if running on sliderule.dhcp with 377MHz input clock
             self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
                 RESET='0',
-                CLKin0_DIV="111",
+                CLKin0_DIV="010",
                 CLKin1_DIV="000",
                 CLKin1_MUX="01",
                 CLKin0_MUX="01"))
@@ -440,8 +448,13 @@ class c_prc:
         sys.stdout.flush()
 
         print("AD9653 initialization")
-        self.ad9653_spi_dump([self.U2_adc_spi, self.U3_adc_spi])
-        print("done")
+        aok = self.ad9653_spi_dump([self.U2_adc_spi, self.U3_adc_spi])
+        if not aok:
+            print("FAIL")
+            if self.strict:
+                return False
+        else:
+            print("done")
         sys.stdout.flush()
 
         print("AD9781 initialization")
@@ -450,10 +463,14 @@ class c_prc:
         self.spi_write(self.dac_spi, 2, '00000000')
         self.spi_write(self.dac_spi, 3, '00000000')
         self.spi_write(self.dac_spi, 4, '11011111')
-        if True:
-            self.spi_write(self.dac_spi, 10, '00001111')  # mix mode for SCLLRF
+        if not dac_nm_mode:
+            # Pick mix mode when driving on second Nyquist band.
+            # E.g. LCLS2 145 MHz IF output at 188.57 MSPS
+            print("AD9781: Selecting Mix mode")
+            self.spi_write(self.dac_spi, 10, '00001111')
         else:
-            self.spi_write(self.dac_spi, 10, '00000000')  # normal mode for gun
+            print("AD9781: Selecting Normal mode")
+            self.spi_write(self.dac_spi, 10, '00000000')
         # self.spi_write(self.dac_spi, 0xb, '11111111')
         # self.spi_write(self.dac_spi, 0xc, '11111111')
         # self.spi_write(self.dac_spi, 0xf, '11111111')
@@ -485,6 +502,7 @@ class c_prc:
         self.amc_write(1, 0xd, 0xffff)
         print("done")
         sys.stdout.flush()
+        return True
 
     def adc_reset_clk(self):
         '''
@@ -650,22 +668,22 @@ class c_prc:
             self.spi_write(adc, 0x14, value)
             # print 'reg0x14', value
 
-    def reg4(self, SET, HLD):
+    def dac_sethld_reg(self, SET, HLD):
         return format(((SET & 0xf) << 4) + (HLD & 0xf), '08b')
 
-    def reg5(self, SMP):
+    def dac_smp_reg(self, SMP):
         return format(SMP, '08b')
 
     def seeksethldsmp(self, SET, HLD, SMP, display=0):
-        self.spi_write(self.dac_spi, 4, self.reg4(SET, HLD))
-        self.spi_write(self.dac_spi, 5, self.reg5(SMP))
-        reg6 = self.spi_readn([self.dac_spi], 6)
-        SEEK = struct.unpack('!I', reg6[0][2])[0] & 0x1
+        self.spi_write(self.dac_spi, 0x4, self.dac_sethld_reg(SET, HLD))
+        self.spi_write(self.dac_spi, 0x5, self.dac_smp_reg(SMP))
+        seek_reg = self.spi_readn([self.dac_spi], 0x6)
+        SEEK = seek_reg[0][2] & 0x1
         if display:
-            print('working SMP %d SET %d HLD %d SEEK %d' % (SMP, SET, HLD, SEEK))
+            print('working SMP %02d SET %02d HLD %02d SEEK %d' % (SMP, SET, HLD, SEEK))
         return SEEK
 
-    def dac_smp(self, SET=None, HLD=None, SMP=None):
+    def dac_timing(self, SET=None, HLD=None, SMP=None):
         if SET and HLD and SMP:
             self.seeksethldsmp(SET=SET, HLD=HLD, SMP=SMP, display=1)
         else:
@@ -803,7 +821,7 @@ class c_prc:
         self.leep.reg_write(abs(count) * pstep_one)
 
     def pntest3(self, pstep):
-        for kx in range(56 * 10 / pstep):
+        for kx in range(int(56 * 10 / pstep)):
             r = self.pntest2(quiet=True)
             print("%3d " % (kx*pstep) + "  ".join(["%5d" % x for x in r]))
             self.mmcm_step(pstep)
@@ -881,7 +899,7 @@ class c_prc:
         }
         v = self.amc7823_adcread_volt_all()
         amc_minmax = [(0, 3.3), (1.0, 1.2), (1.66, 2.04), (0.85, 2.24),
-                      (0.5, 2.7), (0.7, 1.4), (0.3, 0.9), (1.5, 1.8),
+                      (0.5, 2.7), (0.7, 1.4), (0.28, 0.9), (1.5, 1.8),
                       (0.1, 0.2)]
         rv = True
         for addr in range(9):
@@ -898,7 +916,7 @@ class c_prc:
     def amc7823_print(self, check_channels=[]):
         (ss, rv) = self.amc7823_string(check_channels)
         sys.stdout.write(ss)
-        return True
+        return rv
 
     # def read_health_status(leep):
     #     fnames = ["adc", "4xout", "clkout3", "dco", "gtx_tx", "gtx_rx"]
@@ -931,12 +949,16 @@ if __name__ == "__main__":
 
     parser.add_argument('-a', '--address', dest="dev_addr", default=None,
                         help='FPGA carrier URL (leep://<IP> or ca://<PREFIX>)')
-    parser.add_argument('-p', '--port', default=803, type=int,
-                        help='Application port number in badger')
     parser.add_argument('-r', '--reset', action='store_true', dest='reset', default=False,
                         help='Run HW reset routines')
+    parser.add_argument('-dn', '--dac_normal_mode', action='store_true', dest='dac_normal_mode', default=False,
+                        help='Select DAC Normal output mode. Default is Mix mode.')
     parser.add_argument('-s', '--scan', dest='scan', default=None, type=int,
                         help='Run MMCM scan')
+    parser.add_argument('--strict', action='store_true', dest='strict', default=False,
+                        help='Strict checks on test results')
+    parser.add_argument('-t', '--timeout', type=float, default=0.1,
+                        help='LEEP network timeout')
     parser.add_argument('-f', '--ref_freq', dest='ref_freq', default=50., type=float,
                         help='Reference oscillator (in MHz)')
     parser.add_argument('-c', '--clk_freq', dest='clk_freq', default=100., type=float,
@@ -944,7 +966,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    prc = c_prc(args.dev_addr, port=args.port, reset=args.reset,
+    prc = c_prc(args.dev_addr, reset=args.reset,
+                dac_nm_mode=args.dac_normal_mode,
+                timeout=args.timeout, strict=args.strict,
                 ref_freq=args.ref_freq, clk_freq=args.clk_freq*1e6)
 
     if args.scan:
