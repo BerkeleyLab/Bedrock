@@ -1,4 +1,3 @@
-import re
 import struct
 import sys
 import time
@@ -21,7 +20,6 @@ class c_prc:
         self.pn9 = prnd(0x92, 16)  # static class variable
 
         self.ip = ip
-        self.bitfilepath = bitfilepath
         self.ref_freq = ref_freq
         self.clk_freq = clk_freq
         if leep_addr is None:
@@ -33,6 +31,7 @@ class c_prc:
         self.dac_spi = c_llspi_ad9781(4)
         self.ad7794 = c_ad7794()
         self.amc7823 = c_amc7823()
+        self.test_mode_now = None
 
         # Used in top2idelay; makes things (more?) specific to
         # AD9653 test mode 00001100, but it seems needed for reliability.
@@ -77,8 +76,8 @@ class c_prc:
 
         self.leep = leep.open(leep_addr, instance=[])
 
-        print("Digitizer serial number read disabled")
-        self.sn = "Unknown"
+        if reset:
+            self.reset()
 
     def reset(self):
         print('Starting reset')
@@ -511,6 +510,7 @@ class c_prc:
             return False
         if abs(adc_freq - (self.clk_freq/1e6)) > 0.01:
             print("#### WARNING #### Unexpected ADC frequency")
+            print("#### (not close to %.3f MHz)" % (self.clk_freq/1e6))
         adc_values = self.adc_reg()
         # print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
         print('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339, adc_values[0] != 0xa19c))
@@ -939,11 +939,13 @@ if __name__ == "__main__":
                         help='Run MMCM scan')
     parser.add_argument('-f', '--ref_freq', dest='ref_freq', default=50., type=float,
                         help='Reference oscillator (in MHz)')
+    parser.add_argument('-c', '--clk_freq', dest='clk_freq', default=100., type=float,
+                        help='Intended ADC clock frequency (in MHz)')
 
     args = parser.parse_args()
 
     prc = c_prc(args.dev_addr, port=args.port, reset=args.reset,
-                ref_freq=args.ref_freq, clk_freq=100e6)
+                ref_freq=args.ref_freq, clk_freq=args.clk_freq*1e6)
 
     if args.scan:
         prc.pntest3(args.scan)
