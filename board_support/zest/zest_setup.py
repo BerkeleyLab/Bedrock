@@ -3,8 +3,6 @@ import struct
 import sys
 import time
 
-from llrf_bmb7 import c_llrf_bmb7
-
 from llspi_lmk01801 import c_llspi_lmk01801
 from llspi_ad9653 import c_llspi_ad9653
 from llspi_ad9781 import c_llspi_ad9781
@@ -13,12 +11,10 @@ from amc7823 import c_amc7823
 from prnd import prnd
 
 
-class c_prc(c_llrf_bmb7):
+class c_prc:
 
-    def __init__(self, ip, port=50006, leep_addr=None,
-                 bitfilepath=None, reset=False,
-                 clk_freq=1320e6/14.0, use_spartan=False,
-                 ref_freq=50.):
+    def __init__(self, ip, port=50006, leep_addr=None, reset=False,
+                 clk_freq=1320e6/14.0, ref_freq=50.):
 
         import leep
 
@@ -80,27 +76,12 @@ class c_prc(c_llrf_bmb7):
         print('Carrier board address %s' % leep_addr)
 
         self.leep = leep.open(leep_addr, instance=[])
-        c_llrf_bmb7.__init__(self, ip, port, bitfilepath=bitfilepath, reset=reset,
-                             use_spartan=use_spartan)
 
-        if self.spartan_interface:
-            if not self.sn_init():
-                print("ERROR: Couldn't find serial number")
-                exit(2)
-            pass
-        else:
-            print("Digitizer serial number read disabled")
-            self.sn = "Unknown"
+        print("Digitizer serial number read disabled")
+        self.sn = "Unknown"
 
     def reset(self):
         print('Starting reset')
-
-        if self.bitfilepath:
-            if (self.carrier_rev == 2) != ('sesqui' in self.bitfilepath):
-                print("Bitfile name interlock failed")
-                exit(2)
-            print('Trying to program')
-            self.carrier.program_kintex_7(bitfilepath=self.bitfilepath)
 
         if not self.hardware_reset():
             print("Initialization Error!")
@@ -150,33 +131,6 @@ class c_prc(c_llrf_bmb7):
             return False
         return True
 
-    def sn_init(self):
-        if self.use_spartan:
-            snread = self.sn_read()
-            if snread is False:
-                print("sn_read() failed")
-                return False
-            print('Read SN: "%s"' % snread)
-            self.sn = snread
-            m = re.match(r'LBNL DIGITIZER V1.\d SN +(\d+)', snread)
-            if not m:
-                try:
-                    if True:
-                        import qrtools
-                        a = qrtools.QR()
-                        a.decode_webcam()
-                        adata = a.data
-                    else:
-                        # Emergency use only
-                        adata = 'LBNL DIGITIZER V1.0 SN 006'
-                    print('Writing new SN: "%s"' % adata)
-                    self.sn_write(adata)
-                except Exception:
-                    pass
-                    print("Error: Failed to get QR code or write to EEPROM")
-                    return False
-        return True
-
     def read_buffer_to_end(self, chan):
         waveforms_available_location = {
             'U3DA_buf': 0x10,
@@ -214,26 +168,6 @@ class c_prc(c_llrf_bmb7):
             print("Frequency error %.3f Hz" % (ferror*1e6))
             print(vlist)
         self.leep.reg_write(vlist)
-
-    def sn_write(self, write_string):
-        for ix in range(len(write_string)):
-            if self.spartan_interface:
-                self.spartan_interface.write_at24c32d_prom(
-                    self.fmc_prom_address, ix, ord(write_string[ix]))
-        pass
-
-    def sn_read(self, count=27, start_ix=0):
-        r_ascii = ""
-        for i in range(count):
-            if self.spartan_interface:
-                try:
-                    v = self.spartan_interface.read_at24c32d_prom(start_ix+i, False)
-                    if v >= 32 and v < 127:
-                        r_ascii += chr(v)
-                except Exception:
-                    print("Error: Failure reading FMC EEPROM")
-                    return False
-        return r_ascii
 
     def ad9653_spi_dump(self, adc_list):
         print(hex(self.leep.reg_read([('hello_3')])[0]))
@@ -798,6 +732,18 @@ class c_prc(c_llrf_bmb7):
             # print('chan', chan, 'error:', cnt)
         return cnt
 
+    def buf_read_raw(self, addr, count=None, debug=None):
+        if not count:
+            count = 2**self.cirbuf_aw
+        waveaddr = {1: 0x16, 2: 0x17}
+        if addr in waveaddr:
+            addr = waveaddr[addr]
+        if addr in self.read_regmap:
+            addr = self.read_regmap[addr]
+        alist = count*[addr]
+        result = self.reg_read(alist)
+        return [r[2] for r in result]
+
     def pntest(self):
         print("pntest using circular buffer wave0")
         self.set_test_mode('00000110')
@@ -989,19 +935,15 @@ if __name__ == "__main__":
                         help='Application port number in badger')
     parser.add_argument('-r', '--reset', action='store_true', dest='reset', default=False,
                         help='Run HW reset routines')
-    parser.add_argument('-b', '--bitfile', dest="bitfilepath", default=None,
-                        help='FPGA carrier bitstream file')
     parser.add_argument('-s', '--scan', dest='scan', default=None, type=int,
                         help='Run MMCM scan')
     parser.add_argument('-f', '--ref_freq', dest='ref_freq', default=50., type=float,
                         help='Reference oscillator (in MHz)')
-    parser.add_argument('-u', '--usespartan', action='store_true', dest='use_spartan', default=False,
-                        help='Use Spartan interface')
 
     args = parser.parse_args()
 
-    prc = c_prc(args.dev_addr, port=args.port, bitfilepath=args.bitfilepath, reset=args.reset,
-                use_spartan=args.use_spartan, ref_freq=args.ref_freq, clk_freq=100e6)
+    prc = c_prc(args.dev_addr, port=args.port, reset=args.reset,
+                ref_freq=args.ref_freq, clk_freq=100e6)
 
     if args.scan:
         prc.pntest3(args.scan)
