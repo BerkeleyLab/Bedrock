@@ -44,7 +44,7 @@ class c_prc:
         self.U2_adc_spi = c_llspi_ad9653(2)
         self.U3_adc_spi = c_llspi_ad9653(3)
         self.dac_spi = c_llspi_ad9781(4)
-        self.ad7794 = c_ad7794()
+        self.ad7794 = c_ad7794(REFSEL=0)
         self.amc7823 = c_amc7823()
 
         # Used in top2idelay; makes things (more?) specific to
@@ -111,6 +111,10 @@ class c_prc:
 
         self.clock_check()
 
+        self.ad7794_calibrate()
+        if not self.ad7794_print():
+            print("ad7794_print failed")
+            return False
         if not self.amc7823_print(check_channels=[3, 5, 7]):
             print("amc7823_print failed")
             return False
@@ -204,7 +208,6 @@ class c_prc:
         return aok
 
     def amc_write(self, pg, saddr, val):
-        # print 'amc write pg', pg, 'saddr', hex(saddr), 'val', hex(val)
         print('amc write pg %d saddr 0x%x val 0x%x' % (pg, saddr, val))
         da = self.amc7823.dataaddr(val, self.amc7823.cmd(rw=0, pg=pg, saddr=saddr, eaddr=0x00))
         self.leep.reg_write([
@@ -212,8 +215,6 @@ class c_prc:
             ("U15_spi_read_and_start_r", 2),
             ("U15_spi_read_and_start_r", 3)
         ])
-        # print 'after write',
-        # , "U15_spi_ready, U15_sdio_as_sdo", "U15_spi_start, U15_spi_read_r", "U15_spi_data_r, U15_spi_addr_r"])
         time.sleep(0.2)
 
     def amc_read(self, pg, saddr):
@@ -231,7 +232,6 @@ class c_prc:
         return [rw, pg, saddr, eaddr, data]
 
     def ad7794_write(self, addr, val):
-        # print 'ad7794 write ', 'addr', hex(addr), 'val', hex(val)
         da = self.ad7794.dataaddr(val, self.ad7794.cmd(read=0, addr=addr))
         self.leep.reg_write([
             ("U18_spi_data_addr_r", da),
@@ -255,7 +255,7 @@ class c_prc:
             ("U18_spi_read_and_start_r", 3)
         ])
         time.sleep(0.2)
-        result = self.reg_read_value(["U18_spi_rdbk"])
+        result = self.leep.reg_read(["U18_spi_rdbk"])
         result = result[0]
         [read, addr, cread] = self.ad7794.cmddecode(result >> 24)
         data = result & 0xffffff
@@ -929,20 +929,37 @@ class c_prc:
         print("Error: Finished full mmcm phase scan without finding eye")
         return False
 
-    def ad7794_read_channel(self, chan, G=0):
-        config = self.ad7794.configuration_register(chan=chan, G=G, REFSEL=2)  # should this in the init?
-        # print 'chan', chan, 'config', format(config, '06x'), 'reading'
+    def ad7794_read_channel(self, chan):
+        config = self.ad7794.configuration_register(chan)
+        # print('chan', chan, 'config', format(config, '06x'), 'reading')
         self.ad7794_write(0x2, config)
         self.ad7794_write(0x1, 0x200aff)
         time.sleep(0.3)
-        # read0 = self.ad7794_read(0x0)
-        # print [format(i, '06x') for i in read0]
-        read3 = self.ad7794_read(0x3)
-        # print [format(i, '06x') for i in read3],
-        return read3[3]
+        return self.ad7794_read(0x3)[3]
+
+    def ad7794_calibrate(self):
+        # Internal temp sensor; assume datasheet sensitivity for now
+        # TODO: Properly calibrate temp sensor
+        self.ad7794.calibrate(chan=6, v1=0, v2=0, t1=0, t2=0, override=(1/(0.81e-3), -273.15))
+
+        # TODO: Calibrate thermistor bridges
+        for c in [0, 1, 2, 5]:
+            self.ad7794.calibrate(chan=c, v1=0, v2=0, t1=0, t2=0, override=(1/(0.81e-3), -273.15))
 
     def ad7794_value(self):
         return [self.ad7794_read_channel(i) for i in [0, 1, 2, 5, 6, 7]]
+
+    def ad7794_print(self):
+        sys.stdout.write("AD7794 Zest temperatures\n")
+        for c in [0, 1, 2, 5, 6]:
+            counts = self.ad7794_read_channel(c)
+            if c == 6:
+                v = self.ad7794.conv_deg(counts, c)
+                sys.stdout.write("IntT: %5.3f C\n" % (v))
+            else:
+                v = self.ad7794.conv_volt(counts, c)
+                sys.stdout.write("CH %d: %5.3f V\n" % (c+1, v))
+        return True
 
     def amc7823_read(self, addr):
         return self.amc_read(pg=0, saddr=addr)[4] & 0xfff
