@@ -11,7 +11,8 @@ import json
 
 import logging
 _log = logging.getLogger(__name__)
-
+logging.basicConfig(level=logging.DEBUG)
+_log.debug("DEBUGGING")
 
 def readwrite(args, dev):
     for pair in args.reg:

@@ -55,11 +55,9 @@ def yscale(wave_samp_per=1):
 
 class LEEPDevice(DeviceBase):
     backend = 'leep'
-    rom_addr = 0x1000
-    # TO-DO: The rom_addr starting addr (and end addr) has changed
-    # this needs to be configurable.
-    # When a 4096-long rom is being inferred, 0x1000 is good
-    # When a 2048-long rom (legacy) is being inferred, 0x800 is good
+    init_rom_addr = 0x800
+    max_rom_addr = 0x4000
+    preamble_max_size = 30
 
     def __init__(self, addr, timeout=0.1, **kws):
         DeviceBase.__init__(self, **kws)
@@ -376,8 +374,23 @@ class LEEPDevice(DeviceBase):
         self.jsonhash = None
         self.regmap = None
 
-        values = self.exchange(range(self.rom_addr, self.rom_addr+0x1000))
+        try:
+            _log.debug("Trying with init_addr %d", self.init_rom_addr)
+            self._trysize(self.init_rom_addr)
+        except Exception:
+            _log.debug("Trying with max_addr %d", self.max_rom_addr)
+            try:
+                self._trysize(self.max_rom_addr)
+            except Exception:
+                raise ValueError("Could not read ROM either start addresses")
 
+    def _trysize(self, start_addr):
+        values = self.exchange(range(start_addr, start_addr+self.preamble_max_size))
+        rom_size = self._checkrom(values, True)
+        values = self.exchange(range(start_addr, start_addr+self.preamble_max_size+rom_size))
+        self._checkrom(values, False)
+
+    def _checkrom(self, values, initial_check=False):
         values = numpy.frombuffer(values, be16)
         _log.debug("ROM[0] %08x", values[0])
         values = values[1::2]  # discard upper bytes
@@ -391,7 +404,7 @@ class LEEPDevice(DeviceBase):
                 break
 
             blob, values = values[1:size+1], values[size+1:]
-            if len(blob) != size:
+            if (len(blob) != size and initial_check is False):
                 raise ValueError("Truncated ROM Descriptor")
 
             if type == 1:
@@ -409,12 +422,15 @@ class LEEPDevice(DeviceBase):
                 else:
                     _log.info("Extra ROM Hash %s", blob)
 
-            elif type == 3:
+            elif (type == 3 and initial_check is False):
                 if self.regmap is not None:
                     _log.error("Ignoring additional JSON blob in ROM")
                 else:
                     self.regmap = json.loads(zlib.decompress(
                         blob.tostring()).decode('ascii'))
 
-        if self.regmap is None:
+            elif (type == 3 and initial_check is True):
+                return size
+
+        if (self.regmap is None and initial_check is False):
             raise RuntimeError('ROM contains no JSON')

@@ -2,7 +2,8 @@
 import re
 import logging
 _log = logging.getLogger(__name__)
-
+logging.basicConfig(level=logging.DEBUG)
+_log.debug("DEBUGGING")
 
 # flags for _wait_acq
 IGNORE = "IGNORE"
