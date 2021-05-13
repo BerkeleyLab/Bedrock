@@ -57,7 +57,8 @@ class LEEPDevice(DeviceBase):
     backend = 'leep'
     init_rom_addr = 0x800
     max_rom_addr = 0x4000
-    preamble_max_size = 30
+    # TO-DO: preamble is not really bounded. See build_rom.py dev_descript arg
+    preamble_max_size = 50
 
     def __init__(self, addr, timeout=0.1, **kws):
         DeviceBase.__init__(self, **kws)
@@ -375,14 +376,15 @@ class LEEPDevice(DeviceBase):
         self.regmap = None
 
         try:
-            _log.debug("Trying with init_addr %d", self.init_rom_addr)
+            _log.info("Trying with init_addr %d", self.init_rom_addr)
             self._trysize(self.init_rom_addr)
         except Exception:
-            _log.debug("Trying with max_addr %d", self.max_rom_addr)
+            _log.info("Trying with max_addr %d", self.max_rom_addr)
             try:
                 self._trysize(self.max_rom_addr)
             except Exception:
                 raise ValueError("Could not read ROM either start addresses")
+        _log.info("ROM was successfully read")
 
     def _trysize(self, start_addr):
         values = self.exchange(range(start_addr, start_addr+self.preamble_max_size))
