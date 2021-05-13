@@ -1,5 +1,5 @@
 module  amc7823
-#(parameter DEBUG="true", parameter ADDR_WIDTH=16, parameter DATA_WIDTH=16, parameter SPIMODE="passthrough") (
+#(parameter ADDR_WIDTH=16, parameter DATA_WIDTH=16, parameter SPIMODE="passthrough") (
 	output                  ss,
 	input                   miso,
 	output                  mosi,
@@ -49,7 +49,7 @@ end
 endgenerate
 wire start_7823 = spi_start;
 assign spi_ssb_out= spi_ssb_in & ss;
-spi_master #(.TSCKHALF(16), .ADDR_WIDTH(16), .DATA_WIDTH(16), .SCK_RISING_SHIFT(1), .DEBUG(DEBUG))
+spi_master #(.TSCKHALF(16), .ADDR_WIDTH(16), .DATA_WIDTH(16), .SCK_RISING_SHIFT(1))
 amc7823_spi (
 	.cs(ss_7823), .sck(sclk_7823), .sdi(mosi_7823), .sdo(miso_7823),
 	.clk(clk), .spi_start(start_7823), .spi_read(spi_read),

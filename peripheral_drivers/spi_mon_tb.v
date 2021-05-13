@@ -5,11 +5,22 @@ module spi_mon_tb;
    localparam SIM_TIME = 50000; // ns
 
    reg clk=0;
+   integer fd, ix, rc;
+   reg [7:0] mem[0:255];
 
    initial begin
       if($test$plusargs("vcd")) begin
          $dumpfile("spi_mon.vcd");
          $dumpvars(5, spi_mon_tb);
+      end
+
+      fd = $fopen("spi_mon.dat", "r");
+      for (ix=0; ix<32; ix=ix+1) begin
+         rc = $fscanf(fd, "%x\n", mem[ix]);
+         if (rc != 1) begin
+            $display("parse error, aborting");
+            $stop();
+         end
       end
 
       while ($time<SIM_TIME) @(posedge clk);
@@ -18,20 +29,11 @@ module spi_mon_tb;
 
    always #5 clk=~clk;
 
-   localparam AW = 24;
-   localparam DW = 8;
-   localparam CMD_LEN = 5;
-   localparam RD_LEN = 3;
-   localparam RD_WI = $clog2(RD_LEN);
-   localparam SEQ_INIT = {24'hA, 8'hF, 1'b1,
-                          24'hB, 8'h0, 1'b0,
-                          24'hFF, 8'h0, 1'b1,
-                          24'h2, 8'h0, 1'b0,
-                          24'hAA, 8'h0, 1'b1};
+   localparam AW=8;
+   localparam DW=24;
 
    wire             en=1;
-   wire             req;
-   wire             grant;
+   wire [3:0]       spi_hw_sel;
    wire             spi_start;
    wire             spi_busy;
    wire [AW-1:0]    spi_addr;
@@ -39,14 +41,15 @@ module spi_mon_tb;
    wire             spi_rnw;
    wire             spi_rvalid;
    wire [DW-1:0]    spi_rdata;
-   reg [RD_WI-1:0]  rd_addr=0;
-   wire [DW-1:0]    rd_data;
-
+   reg  [6:0]       rd_addr=0;
+   wire [31:0]      rd_data;
    wire cs, sck;
    reg sdo=0;
    wire sdi;
 
-   wire [1:0] req_bus;
+   reg [7:0] mem_r;
+   wire [7:0] addr;
+   always @(posedge clk) mem_r <= mem[addr];
 
    // Silly toggling to get non-zero stimulus
    always @(posedge cs) sdo <= ~sdo;
@@ -54,38 +57,16 @@ module spi_mon_tb;
    // Continuously read-out spi_mon dpram
    always @(posedge clk) rd_addr <= rd_addr + 1;
 
-   // Simulate another requester
-   wire req2 = (req_cnt != 0);
-   wire grant2;
-   integer req_cnt=0;
-   always @(posedge clk) begin
-      if (req2 && grant2)
-         req_cnt <= req_cnt - 1;
-      else
-         req_cnt <= 300;
-   end
-
-   spi_mon_arb #(.NREQ(2)) i_spi_mon_arb (
-      .clk       (clk),
-      .req_bus   ({req2, req}),
-      .grant_bus ({grant2, grant})
-   );
-
-   spi_mon #(
-      .AW       (AW),
-      .DW       (DW),
-      .CMD_LEN  (CMD_LEN),
-      .RD_LEN   (RD_LEN),
-      .SEQ_INIT (SEQ_INIT))
-   i_dut (
+   spi_mon #(.SLEEP_SHIFT(4)) i_dut (
       .clk        (clk),
       .en         (en),
-      .req        (req),
-      .grant      (grant),
+      .sleep      (8'd20),
+      .imem_addr  (addr),
+      .imem       (mem_r),
+      .spi_hw_sel (spi_hw_sel),
       .spi_start  (spi_start),
       .spi_busy   (spi_busy),
-      .spi_addr   (spi_addr),
-      .spi_data   (spi_data),
+      .spi_data_addr ({spi_data, spi_addr}),
       .spi_rnw    (spi_rnw),
       .spi_rvalid (spi_rvalid),
       .spi_rdata  (spi_rdata),

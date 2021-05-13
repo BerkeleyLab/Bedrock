@@ -16,7 +16,7 @@ ad5662_tb: ad5662.v
 
 spi_master_tb: spi_master.v
 
-spi_mon_tb: spi_mon.v spi_master.v $(DSP_DIR)/dpram.v spi_mon_arb.v
+spi_mon_tb: spi_mon.v spi_master.v $(DSP_DIR)/dpram.v
 
 CLEAN += ad5662_tb spi_master_tb
 

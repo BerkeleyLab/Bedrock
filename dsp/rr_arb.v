@@ -1,4 +1,10 @@
-module spi_mon_arb #(
+/* rr_arb
+   Generic round-robin arbiter based on request-grant handshake.
+   Can be used as is or can be taken as an example of how the rr_next() function
+   can be incorporated into other designs.
+*/
+
+module rr_arb #(
    parameter NREQ = 2
 ) (
    input             clk,
@@ -18,13 +24,11 @@ module spi_mon_arb #(
       rr_next = double_grant[NREQ*2-1:NREQ] | double_grant[NREQ-1:0];
    end endfunction
 
-   reg [NREQ-1:0] base=1;
+   reg [NREQ-1:0] base=1; // one-hot encoded
    always @(posedge clk) begin
-      // Allow current requester as long as it needs (at the risk of livelocking)
-      if ((grant_bus & req_bus) == 0)
-         base <= rr_next(req_bus, base);
+      if (|(grant_bus & req_bus)) base <= base << 1 | base[NREQ-1];
    end
 
-   assign grant_bus = base;
+   assign grant_bus = rr_next(req_bus, base);
 
 endmodule
