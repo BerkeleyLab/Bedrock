@@ -423,7 +423,6 @@ class LEEPDevice(DeviceBase):
         if self.regmap is None and preamble_check is False:
             raise RuntimeError('ROM contains no JSON')
 
-
     def _readrom(self):
         self.descript = None
         self.codehash = None
@@ -433,10 +432,10 @@ class LEEPDevice(DeviceBase):
         try:
             _log.info("Trying with init_addr %d", self.init_rom_addr)
             self._trysize(self.init_rom_addr)
-        except ValueError:
+        except Exception:
             _log.info("Trying with max_addr %d", self.max_rom_addr)
             try:
                 self._trysize(self.max_rom_addr)
-            except ValueError:
+            except Exception:
                 raise ValueError("Could not read ROM using either start addresses")
         _log.info("ROM was successfully read")
