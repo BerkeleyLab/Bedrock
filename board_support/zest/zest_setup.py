@@ -118,9 +118,11 @@ class c_prc:
         if not self.amc7823_print(check_channels=[3, 5, 7]):
             print("amc7823_print failed")
             return False
+        sys.stdout.flush()
         if not self.adc_reset_clk():
             print("adc_reset_clk failed")
             return False
+        sys.stdout.flush()
         if not self.adc_idelay1(0):
             print("adc_idelay1 failed")
             return False
@@ -129,6 +131,7 @@ class c_prc:
         if not self.adc_bufr_reset():
             return False
         self.adc_bitslip()
+        sys.stdout.flush()
 
         # DAC timing parameter search
         vwin_tup = self.dac_timing()
@@ -142,6 +145,7 @@ class c_prc:
             self.dac_timing(SET=SET, HLD=HLD, SMP=SMP)
         else:
             self.dac_timing(SET=13, HLD=15, SMP=19)
+        sys.stdout.flush()
 
         if False:
             if self.pntest2() == []:
@@ -959,6 +963,7 @@ class c_prc:
             else:
                 v = self.ad7794.conv_volt(counts, c)
                 sys.stdout.write("CH %d: %5.3f V\n" % (c+1, v))
+            sys.stdout.flush()
         return True
 
     def amc7823_read(self, addr):
