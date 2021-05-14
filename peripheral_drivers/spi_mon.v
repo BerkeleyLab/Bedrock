@@ -30,14 +30,17 @@
 */
 
 module spi_mon #(
-   parameter SLEEP_SHIFT = 20
+   parameter SLEEP_SHIFT = 20,
+   parameter IMEM_WI = 9,
+   parameter DMEM_WI = 7
 ) (
    input         clk,
-   input         en, // external; enable monitoring
-   input  [7:0]  sleep, // external; in units of 1<<SLEEP_SHIFT clock cycles
+   input         en,    // Enable monitoring
+   input  [7:0]  sleep, // In units of 1<<SLEEP_SHIFT clock cycles
 
-   output [8:0]  imem_addr, // external
-   input  [7:0]  imem, // external
+   input                imem_we,
+   input  [IMEM_WI-1:0] imem_waddr,
+   input  [7:0]         imem_wdat,
 
    // To spi_master
    output [3:0]  spi_hw_sel,
@@ -49,11 +52,24 @@ module spi_mon #(
    input  [31:0] spi_rdata,
 
    // Data readout
-   input  [6:0]  rd_addr, // Stores up to 128 values
-   output [31:0] rd_data
+   input  [DMEM_WI-1:0] rd_addr, // Stores up to 128 values
+   output [31:0]        rd_data
 );
-   localparam IMEM_WI = 9;
-   localparam DMEM_WI = 7;
+   // --------
+   // Dual-port instruction memory
+   // --------
+   reg [IMEM_WI-1:0] iaddr=0;
+   wire [7:0] idat;
+   dpram #(.aw(IMEM_WI), .dw(8)) i_imem (
+      .clka  (clk),
+      .clkb  (clk),
+      .wena  (imem_we),
+      .addra (imem_waddr),
+      .dina  (imem_wdat),
+      .douta (),
+      .addrb (iaddr),
+      .doutb (idat)
+   );
 
    reg end_stream=0;
    reg sleep_on=0, sleep_on_r=0;
@@ -72,7 +88,6 @@ module spi_mon #(
    end
 
    // Instruction decoding
-   reg [IMEM_WI-1:0] iaddr=0;
    reg [2:0] word=0, word_r=0;
    reg [1:0] rsvd;
    reg rnw;
@@ -91,9 +106,9 @@ module spi_mon #(
             iaddr <= end_stream ? 0 : iaddr + 1;
             word <= (end_stream || word==4) ? 0 : word + 1;
             if (word_r == 0 && iaddr != 0)
-               {rsvd, end_stream, hw_sel, rnw} <= imem;
+               {rsvd, end_stream, hw_sel, rnw} <= idat;
             else begin
-               spi_cmd <= {spi_cmd[23:0], imem};
+               spi_cmd <= {spi_cmd[23:0], idat};
                if (word_r == 4) begin
                   spi_cmd_v <= 1;
                   iaddr <= iaddr; // Hold
@@ -107,7 +122,6 @@ module spi_mon #(
       word_r <= word;
    end
 
-   assign imem_addr = iaddr;
    assign spi_start = spi_cmd_v & ~spi_busy;
    assign spi_data_addr = spi_cmd;
    assign spi_rnw = rnw;

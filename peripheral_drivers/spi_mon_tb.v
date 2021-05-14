@@ -6,7 +6,11 @@ module spi_mon_tb;
 
    reg clk=0;
    integer fd, ix, rc;
-   reg [7:0] mem[0:255];
+
+   reg en=0;
+   reg [8:0] maddr=0;
+   reg [7:0] mdat;
+   reg mwe=0;
 
    initial begin
       if($test$plusargs("vcd")) begin
@@ -15,13 +19,19 @@ module spi_mon_tb;
       end
 
       fd = $fopen("spi_mon.dat", "r");
-      for (ix=0; ix<256; ix=ix+1) begin
-         rc = $fscanf(fd, "%x\n", mem[ix]);
+      for (ix=0; ix<512; ix=ix+1) begin
+         @(posedge clk);
+         #1;
+         mwe = 1;
+         maddr = ix;
+         rc = $fscanf(fd, "%x\n", mdat);
          if (rc != 1) begin
             $display("parse error, aborting");
             $stop();
          end
       end
+      mwe = 0;
+      en = 1;
 
       while ($time<SIM_TIME) @(posedge clk);
       $finish;
@@ -32,7 +42,6 @@ module spi_mon_tb;
    localparam AW=8;
    localparam DW=24;
 
-   reg              en=1;
    wire [3:0]       spi_hw_sel;
    wire             spi_start;
    wire             spi_busy;
@@ -61,22 +70,23 @@ module spi_mon_tb;
       en = 1;
    end
 
-   reg [7:0] mem_r;
-   wire [8:0] addr;
-   always @(posedge clk) mem_r <= en ? mem[addr] : 8'hXX;
-
    // Silly toggling to get non-zero stimulus
    always @(posedge cs) sdo <= ~sdo;
 
    // Continuously read-out spi_mon dpram
    always @(posedge clk) rd_addr <= rd_addr + 1;
 
-   spi_mon #(.SLEEP_SHIFT(4)) i_dut (
+   spi_mon #(
+      .SLEEP_SHIFT(4),
+      .IMEM_WI (9),
+      .DMEM_WI (7))
+   i_dut (
       .clk        (clk),
       .en         (en),
       .sleep      (8'd20),
-      .imem_addr  (addr),
-      .imem       (mem_r),
+      .imem_we    (mwe),
+      .imem_waddr (maddr),
+      .imem_wdat  (mdat),
       .spi_hw_sel (spi_hw_sel),
       .spi_start  (spi_start),
       .spi_busy   (spi_busy),
