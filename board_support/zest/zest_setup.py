@@ -123,10 +123,10 @@ class c_zest:
             print("adc_reset_clk failed")
             return False
         sys.stdout.flush()
-        if not self.adc_idelay1(0):
-            print("adc_idelay1 failed")
+        # if not self.adc_idelay0():
+        if not self.adc_idelay1():
+            print("idelay scan failed")
             return False
-        # self.adc_idelay0()
         sys.stdout.flush()
         if not self.adc_bufr_reset():
             return False
@@ -317,7 +317,7 @@ class c_zest:
             result1 = self.leep.reg_read([('llspi_result')]*please_read)
             return [(None, None, x) for x in result1]
 
-    def adc_reg(self):
+    def adc_reg(self, verbose=False):
         adc = self.leep.reg_read([('U3dout_msb'), ('U3dout_lsb'), ('U2dout_msb'), ('U2dout_lsb')])
         # print 'adc_reg U3DAU3DB U3DCU3DD U2DAU2DB U2DCU2DD', [(d[2].encode('hex')) for d in adc]
         U3DA = adc[0] >> 16 & 0xffff
@@ -328,11 +328,13 @@ class c_zest:
         U2DB = adc[2] & 0xffff
         U2DC = adc[3] >> 16 & 0xffff
         U2DD = adc[3] & 0xffff
+        adc_values = [U3DA, U3DB, U3DC, U3DD, U2DA, U2DB, U2DC, U2DD]
+        if verbose:
+            print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
+        return adc_values
 
-        return [U3DA, U3DB, U3DC, U3DD, U2DA, U2DB, U2DC, U2DD]
-
-    def adc_reg_hilo(self):
-        adcvalue = self.adc_reg()
+    def adc_reg_hilo(self, verbose=False):
+        adcvalue = self.adc_reg(verbose=verbose)
         hilo = []
         for value in adcvalue:
             hilo.append(value >> 8)
@@ -534,14 +536,13 @@ class c_zest:
         print('adc_reset_clk')
         regs = []
         regs.extend(1*[('U2_clk_reset_r', 0)])
-        regs.extend(1*[('U2_clk_reset_r', 1)])
-        regs.extend(1*[('U2_clk_reset_r', 0)])
         regs.extend(1*[('U3_clk_reset_r', 0)])
-        regs.extend(1*[('U3_clk_reset_r', 1)])
+        regs.extend(1*[('U2_clk_reset_r', 1)])
+        regs.extend(2*[('U3_clk_reset_r', 1)])
+        regs.extend(1*[('U2_clk_reset_r', 0)])
         regs.extend(1*[('U3_clk_reset_r', 0)])
         self.leep.reg_write(regs)
 
-        print('test pattern %s' % self.set_test_mode('00001100'))
         time.sleep(0.34)  # Frequency counter reference 24 bits at 50 MHz
         adc_freq = self.leep.reg_read([("frequency_adc")])[0]
         adc_freq = adc_freq * self.ref_freq * 0.5**24
@@ -552,9 +553,6 @@ class c_zest:
         if abs(adc_freq - (self.clk_freq/1e6)) > 0.01:
             print("#### WARNING #### Unexpected ADC frequency")
             print("#### (not close to %.3f MHz)" % (self.clk_freq/1e6))
-        adc_values = self.adc_reg()
-        # print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
-        print('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339, adc_values[0] != 0xa19c))
         return True
 
     def top2idelay(self, listin, LH):
@@ -572,20 +570,19 @@ class c_zest:
         top2 = sorted(out)[-2]
         return ((out.index(top1)) - int(top1/2)) & 0x1f, ((out.index(top2)) - int(top2/2)) & 0x1f
 
+    # set every lane's idelay according to 16-long list v
     def set_idelays(self, v):
-        idelay_base = self.get_write_address('idelay_base')
-        return [(idelay_base + ix, v[ix]) for ix in range(len(v))]
+        self.leep.reg_write([('idelay_base', v)])
 
     def find_best_idelay(self, ix, idelay_dict):
         lane = [idelay_dict[jx][ix] for jx in range(32)]  # loop over delays
-        return ix if 0 else self.top2idelay(lane, ix % 2)[0]
+        return ix if False else self.top2idelay(lane, ix % 2)[0]
 
-    def adc_idelay1(self, dbg1):
+    def adc_idelay1(self, dbg1=0):
         print('test pattern %s' % self.set_test_mode('00001100'))
+        print('Type 1 (firmware) idelay scan')
         if True:  # not needed after powerup, but will clear old values if re-scanning
-            # Note hard-coded 0x70 here and for lb_idelay_write in digitizer_config.v
-            self.leep.reg_write([('idelay_base', 16*[0])])
-            self.leep.reg_write([('idelay_base', 16*[0])])
+            self.set_idelays(16*[0])
 
         self.leep.reg_write([('scanner_debug', dbg1), ('scan_trigger_we', 3)])
         banyan_status = self.leep.reg_read([('banyan_status')])
@@ -598,42 +595,39 @@ class c_zest:
         scanner_result = self.leep.reg_read([("scanner_result")])[0]
         print("idelay  scan   " + "  ".join(self.chan_list))
         for jx in range(32):
-            bb = " ".join(["%2.2x" % scanner_result[lx*128 + jx*4 + 3] for lx in range(16)])
-            print("idelay %2.2d  Rx %s" % (jx, bb))
+            for kx in [3]:  # or range(4) for debug
+                bb = " ".join(["%2.2x" % scanner_result[lx*128 + jx*4 + kx] for lx in range(16)])
+                print("idelay %2.2d  Rx %s" % (jx, bb))
         print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in idelay_mirror]))
         print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in idelay_mirror]))
+        for i in range(4):
+            self.adc_reg(verbose=True)
+            time.sleep(0.002)
         return all([2 == (x >> 5) for x in idelay_mirror])  # all channels scan success!
 
     def adc_idelay0(self):
         print('test pattern %s' % self.set_test_mode('00001100'))
+        print('Type 0 (software) idelay scan')
         print("idelay  scan   " + "  ".join(self.chan_list))
         idelay_dict = {}
         for idelay in range(33):
-            test = ['U3dout_msb', 'U3dout_lsb', 'U2dout_msb', 'U2dout_lsb']
-            test += self.set_idelays([idelay % 32] * 16)
-            list_resp = self.query_resp_list(test)
-            if 0:
-                list_resp = [0x12345678, 0x24681357, 0xdeadbeef, 0xfeedface]
+            rx_pats = self.adc_reg_hilo()
+            self.set_idelays(16*[idelay % 32])
             if idelay == 0:
                 continue
-            # subdivide four 32-bit values to 16 x 8-bit values
-            rx_pats = sum([[x >> 24, (x >> 16) & 0xff, (x >> 8) & 0xff, x & 0xff]
-                           for x in list_resp], [])
             bb = " ".join(["%2.2x" % x for x in rx_pats])
             print("idelay %2.2d  Rx %s" % ((idelay - 1), bb))
             idelay_dict[idelay - 1] = rx_pats
         idelay_bests = [self.find_best_idelay(ix, idelay_dict) for ix in range(16)]
         print("idelay  best  " + " ".join(['%2d' % v for v in idelay_bests]))
-        self.query_resp_list(self.set_idelays(idelay_bests))
-        if 1:
-            idelay_base = self.get_read_address('idelay_base')
-            glist1 = ["banyan_status"] + list(range(idelay_base, idelay_base + 16))
-            rlist1 = self.query_resp_list(glist1)
-            print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in rlist1[1:17]]))
-            print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in rlist1[1:17]]))
-        for i in range(0):
-            adc = self.adc_reg()
-            print(" ".join([hex(i) for i in adc]))
+        self.set_idelays(idelay_bests)
+        if True:
+            bstat, rlist1 = self.leep.reg_read([('banyan_status'), ('idelay_base')])
+            print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in rlist1]))
+            print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in rlist1]))
+            print("banyan_status 0 0x%x" % bstat)
+        for i in range(4):
+            self.adc_reg(verbose=True)
             time.sleep(0.002)
         return True  # ???
 
@@ -645,8 +639,7 @@ class c_zest:
                 break
             self.leep.reg_write([(ic_reset, 0), (ic_reset, 1), (ic_reset, 0)])
             iserdes_reset()
-            adc_values = self.adc_reg()
-            print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
+            adc_values = self.adc_reg(verbose=True)
             if adc_values[adc] == 0x4339 or adc_values[adc] == 0xa19c:
                 success = True
                 break
@@ -657,8 +650,7 @@ class c_zest:
 
     def adc_bufr_reset(self):
         print('test pattern %s' % self.set_test_mode('00001100'))
-        adc_values = self.adc_reg()
-        print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
+        adc_values = self.adc_reg(verbose=True)
         print('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339, adc_values[0] != 0xa19c))
         s1, adc_values = self.adc_bufr_reset1(
             adc_values, 'BUFR 1', 0, 'U3_clk_reset_r', self.U3_adc_iserdes_reset)
@@ -681,8 +673,7 @@ class c_zest:
             index = index+1
         print("bitslip %s after %d iteration(s)" % ("success" if bitslip == 0 else "failure", index))
         for i in range(10):
-            adc = self.adc_reg()
-            print(" ".join([hex(i) for i in adc]))
+            self.adc_reg(verbose=True)
             time.sleep(0.002)
 
     def adc_twos_comp(self, twoscomp):
