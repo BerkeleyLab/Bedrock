@@ -4,9 +4,11 @@
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets i_zest_wrap/U1_lmk01801/clk_ibufgds]
 
 create_clock -name U2_DCO -period 2.50 [get_ports {bus_digitizer_U2[15]}]
+create_clock -name U3_DCO -period 2.50 [get_ports {bus_digitizer_U3[24]}]
 
 set_clock_groups -name async_clks -asynchronous \
   -group [get_clocks -include_generated_clocks sys_clk] \
   -group [get_clocks -include_generated_clocks U2_DCO] \
+  -group [get_clocks -include_generated_clocks U3_DCO] \
   -group [get_clocks -include_generated_clocks tx_clk] \
   -group [get_clocks -include_generated_clocks rx_clk]

@@ -62,7 +62,7 @@ download:
 
 include $(BUILD_DIR)/bottom_rules.mk
 CLEAN += *.bit *.bin *.prm $(APP_NAME)_regmap*.json scalar_$(APP_NAME)_regmap.json
-CLEAN += top.xdc zest_connector.csv $(RTEFI_CLEAN)
+CLEAN += system_top.xdc zest_connector.csv $(RTEFI_CLEAN)
 CLEAN_DIRS +=  _xilinx .Xil
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
