@@ -18,6 +18,13 @@ spi_master_tb: spi_master.v
 
 spi_mon_tb: spi_mon.v spi_master.v $(DSP_DIR)/dpram.v
 
-CLEAN += ad5662_tb spi_master_tb
+spi_mon.dat: spi_mon_prog.py
+	$(PYTHON) $< > $@
+
+spi_mon.vcd: spi_mon.dat
+
+spi_mon_check: spi_mon.dat
+
+CLEAN += ad5662_tb spi_master_tb spi_mon_tb spi_mon.dat
 
 include $(BUILD_DIR)/bottom_rules.mk

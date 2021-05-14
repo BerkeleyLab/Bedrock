@@ -15,7 +15,7 @@ module spi_mon_tb;
       end
 
       fd = $fopen("spi_mon.dat", "r");
-      for (ix=0; ix<32; ix=ix+1) begin
+      for (ix=0; ix<256; ix=ix+1) begin
          rc = $fscanf(fd, "%x\n", mem[ix]);
          if (rc != 1) begin
             $display("parse error, aborting");
@@ -32,7 +32,7 @@ module spi_mon_tb;
    localparam AW=8;
    localparam DW=24;
 
-   wire             en=1;
+   reg              en=1;
    wire [3:0]       spi_hw_sel;
    wire             spi_start;
    wire             spi_busy;
@@ -47,9 +47,23 @@ module spi_mon_tb;
    reg sdo=0;
    wire sdi;
 
+   // Exercise enable functionality
+   initial begin
+      #(SIM_TIME/4);
+      en = 0;
+      #(1000)
+      @(posedge clk);
+      en = 1;
+      #(SIM_TIME/4);
+      en = 0;
+      #(1000)
+      @(posedge clk);
+      en = 1;
+   end
+
    reg [7:0] mem_r;
-   wire [7:0] addr;
-   always @(posedge clk) mem_r <= mem[addr];
+   wire [8:0] addr;
+   always @(posedge clk) mem_r <= en ? mem[addr] : 8'hXX;
 
    // Silly toggling to get non-zero stimulus
    always @(posedge cs) sdo <= ~sdo;
@@ -69,7 +83,7 @@ module spi_mon_tb;
       .spi_data_addr ({spi_data, spi_addr}),
       .spi_rnw    (spi_rnw),
       .spi_rvalid (spi_rvalid),
-      .spi_rdata  (spi_rdata),
+      .spi_rdata  (en ? spi_rdata : 8'hxx),
       .rd_addr    (rd_addr),
       .rd_data    (rd_data));
 

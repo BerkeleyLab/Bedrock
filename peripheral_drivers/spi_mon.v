@@ -36,7 +36,7 @@ module spi_mon #(
    input         en, // external; enable monitoring
    input  [7:0]  sleep, // external; in units of 1<<SLEEP_SHIFT clock cycles
 
-   output [7:0]  imem_addr, // external
+   output [8:0]  imem_addr, // external
    input  [7:0]  imem, // external
 
    // To spi_master
@@ -52,7 +52,7 @@ module spi_mon #(
    input  [6:0]  rd_addr, // Stores up to 128 values
    output [31:0] rd_data
 );
-   localparam IMEM_WI = 8;
+   localparam IMEM_WI = 9;
    localparam DMEM_WI = 7;
 
    reg end_stream=0;
@@ -115,7 +115,7 @@ module spi_mon #(
 
    reg [DMEM_WI-1:0] save_addr=0;
    always @(posedge clk) begin
-      if (!en || end_stream)
+      if (!en || (!sleep_on && sleep_on_r))
          save_addr <= 0;
       else if (spi_rvalid)
          save_addr <= save_addr + 1;
@@ -127,7 +127,7 @@ module spi_mon #(
       .addra (save_addr),
       .douta (), // Unused
       .dina  (spi_rdata),
-      .wena  (spi_rvalid),
+      .wena  (spi_rvalid & en), // Don't save is disabled
       .addrb (rd_addr),
       .doutb (rd_data));
 
