@@ -10,7 +10,7 @@ from amc7823 import c_amc7823
 from prnd import prnd
 
 
-class c_prc:
+class c_zest:
 
     def __init__(self, ip, port=50006, leep_addr=None,
                  reset=False,
@@ -1058,10 +1058,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    prc = c_prc(args.dev_addr, reset=args.reset,
-                dac_nm_mode=args.dac_normal_mode,
-                timeout=args.timeout, strict=args.strict,
-                ref_freq=args.ref_freq, clk_freq=args.clk_freq*1e6)
+    prc = c_zest(
+        args.dev_addr, reset=args.reset,
+        dac_nm_mode=args.dac_normal_mode,
+        timeout=args.timeout, strict=args.strict,
+        ref_freq=args.ref_freq, clk_freq=args.clk_freq*1e6)
 
     if args.scan:
         prc.pntest3(args.scan)

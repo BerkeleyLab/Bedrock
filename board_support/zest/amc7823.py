@@ -14,7 +14,6 @@ class c_amc7823:
 
     def dataaddr(self, data, addr):
         res = (data << 16) + addr
-        # print hex(res),
         return res
 
     def cmddecode(self, cmdval):
@@ -25,41 +24,46 @@ class c_amc7823:
         return [rw, pg, saddr, eaddr]
 
 
+def amc_dprint(cc, suffix=None):
+    oo = " ".join([format(i, '04x') for i in cc])
+    if suffix is not None:
+        oo += suffix
+    print(oo)
+
+
 def usage():
     print('python %s -a [IP ADDR]' % sys.argv[0])
 
 
 if __name__ == "__main__":
     import getopt
-    from prc import c_prc
+    from zest_setup import c_zest
 
     opts, args = getopt.getopt(sys.argv[1:], 'ha:p:',
-                               ['help', 'addr=', 'port='])
+                               ['help', 'addr='])
     ip_addr = '192.168.21.11'
-    port = 50006
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
             sys.exit()
         elif opt in ('-a', '--address'):
             ip_addr = arg
-        elif opt in ('-p', '--port'):
-            port = int(arg)
 
-    prc = c_prc(ip_addr, port)
+    prc = c_zest(ip_addr)
 
     addrs = list(range(0x16))
     addrs.append(0x1e)
-    if 1:
+    if True:
         print("Read page 0:")
         for addr in range(11):
             adcs = prc.amc_read(0, addr)
-            print(([format(i, '04x') for i in adcs], '%6.3f' % (
-                (adcs[4] & 0xfff) * 2.5 / 2**12)))
+            vv = (adcs[4] & 0xfff) * 2.5 / 2**12
+            amc_dprint(adcs, '  %6.3f' % vv)
 
         print("Read page 1:")
         for addr in addrs:
-            print([format(i, '04x') for i in prc.amc_read(1, addr)])
+            rb = prc.amc_read(1, addr)
+            amc_dprint(rb)
 
         print("Write DACs 1-8:")
         for addr in range(8):
@@ -68,15 +72,15 @@ if __name__ == "__main__":
         # Load DAC
         prc.amc_write(1, 0x09, 0xbb00)
 
-    if 1:
+    if True:
         print("Write and readback GPIO register")
         prc.amc_write(0, 0x0a, 0xffff)
         rb = prc.amc_read(0, 0x0a)
-        print((rb, hex(rb[4])))
+        amc_dprint(rb)
         time.sleep(1)
         prc.amc_write(0, 0x0a, 0xffc0)
         rb = prc.amc_read(0, 0x0a)
-        print((rb, hex(rb[4])))
+        amc_dprint(rb)
         time.sleep(1)
 
     print("Power-down")

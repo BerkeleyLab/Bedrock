@@ -115,23 +115,20 @@ def usage():
 
 if __name__ == "__main__":
     import getopt
-    from prc import c_prc
+    from zest_setup import c_zest
 
     opts, args = getopt.getopt(sys.argv[1:], 'ha:p:',
-                               ['help', 'addr=', 'port='])
+                               ['help', 'addr='])
     ip_addr = '192.168.21.11'
-    port = 50006
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             usage()
             sys.exit()
         elif opt in ('-a', '--address'):
             ip_addr = arg
-        elif opt in ('-p', '--port'):
-            port = int(arg)
 
     print("Hardcoded sensitivity")
-    prc = c_prc(ip_addr, port)
+    prc = c_zest(ip_addr)
     prc.ad7794_calibrate()
     prc.ad7794_print()
     print("\n")
