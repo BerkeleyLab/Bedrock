@@ -11,7 +11,7 @@ from litex import RemoteClient
 from misc import ADC, DataBlock
 from banyan_ch_find import banyan_ch_find
 from get_raw_adcs import collect_adcs
-from zest_setup import c_prc
+from zest_setup import c_zest
 from ltc_setup_litex_client import initLTC, get_data
 
 
@@ -97,12 +97,10 @@ class ZestOnBMB7Carrier(Carrier):
     '''
     def __init__(self,
                  ip_addr='192.168.1.121',
-                 port=50006,
                  mask="0xff",
                  npt_wish=0,
                  count=10,
                  log_decimation_factor=0,
-                 use_spartan=False,
                  test=False):
 
         self._db = None
@@ -113,10 +111,7 @@ class ZestOnBMB7Carrier(Carrier):
             self.npt = 2**banyan_aw
             self.n_channels = 2
         else:
-            self.carrier = c_prc(
-                ip_addr,
-                port,
-                use_spartan=use_spartan)
+            self.carrier = c_zest(ip_addr)
             self.npt = ZestOnBMB7Carrier.get_npt(self.carrier)
             mask_int = int(mask, 0)
             self.n_channels, self.channel_order = ZestOnBMB7Carrier.write_mask(self.carrier, mask_int)
