@@ -28,6 +28,7 @@ initial begin
 	while ($time<40000) begin
 		#10;
 	end
+	$display("WARNING: Not a self-checking testbench. Will always pass.");
 	$finish;
 end
 

@@ -10,7 +10,7 @@ include ../dir_list.mk
 
 include $(BUILD_DIR)/top_rules.mk
 
-all: ad5662_check ad9653_tb
+all: ad5662_check ad9653_tb spi_mon_check spi_master_check
 
 ad5662_tb: ad5662.v
 
