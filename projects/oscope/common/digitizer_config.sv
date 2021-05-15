@@ -107,10 +107,8 @@ assign zif_cfg.U3_clk_reset = U3_clk_reset_r;
 
 assign zif_cfg.U2_bitslip = bitslip[7:0];
 assign zif_cfg.U2_pdwn = periph_config[1];
-assign zif_cfg.U2_iserdes_reset = U2_iserdes_reset_r;
 assign zif_cfg.U3_bitslip = bitslip[15:8];
 assign zif_cfg.U3_pdwn = periph_config[1];
-assign zif_cfg.U3_iserdes_reset = U3_iserdes_reset_r;
 
 assign zif_cfg.U4_reset = U4_reset_r;
 assign zif_cfg.U33U1_pwr_en = periph_config[0];
@@ -196,7 +194,7 @@ flag_xdomain rawadc_trig_xdomain (.clk1(lb_clk), .flagin_clk1(rawadc_trig),
 	.clk2(adc_clk), .flagout_clk2(rawadc_trig_x));
 
 // 16 idelay registers mapped to lb_addr 112-127
-// See idelay_base in static_prc_regmap.json
+// See idelay_base in static_oscope_regmap.json
 wire scan_running;
 wire [3:0] hw_addr;
 wire [4:0] hw_data;
@@ -265,10 +263,6 @@ freq_count freq_count_clk4xout (.f_in(clk200),                  .sysclk(lb_clk),
 freq_count freq_count_clkout3  (.f_in(zif_cfg.U1_clkout),       .sysclk(lb_clk), .frequency(frequency_clkout3));
 freq_count freq_count_dac_dco  (.f_in(zif_cfg.U4_dco_clk_out),  .sysclk(lb_clk), .frequency(frequency_dac_dco));
 
-assign zif_cfg.U3_dco_clk_in[0] = zif_cfg.U3_dco_clk_out;
-assign zif_cfg.U3_dco_clk_in[1] = zif_cfg.U2_dco_clk_out;
-assign zif_cfg.U2_dco_clk_in = zif_cfg.U2_dco_clk_out;
-
 `define CONFIG_PHASEX
 `ifdef CONFIG_PHASEX
 assign phasex_present = 1;
@@ -281,9 +275,17 @@ assign phasex_ready = 0;
 assign phasex_dout = 0;
 `endif
 
+// iserdes_reset, clk_div_in, and dco_clk_out are "special snowflakes"
+// U3 needs two of them, since its ad9653 instantiation is configured with BANK_CNT = 2
+assign zif_cfg.U3_iserdes_reset[0] = U3_iserdes_reset_r;
+assign zif_cfg.U3_iserdes_reset[1] = U2_iserdes_reset_r;
+assign zif_cfg.U2_iserdes_reset = U2_iserdes_reset_r;
 assign zif_cfg.U3_clk_div_in[0] = zif_cfg.U3_clk_div_bufr;
 assign zif_cfg.U3_clk_div_in[1] = zif_cfg.U2_clk_div_bufr;
 assign zif_cfg.U2_clk_div_in = zif_cfg.U2_clk_div_bufr;
+assign zif_cfg.U3_dco_clk_in[0] = zif_cfg.U3_dco_clk_out;
+assign zif_cfg.U3_dco_clk_in[1] = zif_cfg.U2_dco_clk_out;
+assign zif_cfg.U2_dco_clk_in = zif_cfg.U2_dco_clk_out;
 
 `define CONFIG_PHASE_DIFF
 `ifdef CONFIG_PHASE_DIFF
