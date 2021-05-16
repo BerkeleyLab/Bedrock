@@ -26,14 +26,13 @@ class c_zest:
 
         self.test_mode_now = None
 
-        self.ip = ip
         self.ref_freq = ref_freq
         self.clk_freq = clk_freq
         self.dac_nm_mode = dac_nm_mode
         self.strict = strict
 
         if leep_addr is None:
-            leep_addr = "leep://" + str(self.ip)
+            leep_addr = "leep://" + str(ip)
 
         # Open communication with the carrier board
         print('Carrier board address %s' % leep_addr)
@@ -87,6 +86,8 @@ class c_zest:
 
         # This must come after peripheral classes above are initialized
         if reset:
+            if type(self.leep.codehash) is str:
+                print("FPGA source git ID: " + self.leep.codehash)
             # Perform hardware reset
             if not self.hardware_reset():
                 print("Initialization Error!")
@@ -130,7 +131,8 @@ class c_zest:
         sys.stdout.flush()
         if not self.adc_bufr_reset():
             return False
-        self.adc_bitslip()
+        if not self.adc_bitslip() and self.strict:
+            return False
         sys.stdout.flush()
 
         # DAC timing parameter search
@@ -358,44 +360,26 @@ class c_zest:
         bitslip = (eval('0b' + ''.join([str(int(i)) for i in bitsliplist])))
         return bitslip
 
+    # at least 64 ns assertion of a reset line
+    def reset_pulse(self, reset_r):
+        self.leep.reg_write([(reset_r, 0), (reset_r, 1), (reset_r, 1), (reset_r, 0)])
+
+    # Reset for the single IDELAYCTRL primitive on the chip;
+    # it's clocked by clk_200, nothing to do with ADC clocks.
     def idelayctrl_reset(self):
-        self.leep.reg_write([
-            ('idelayctrl_reset_r', 0),
-            ('idelayctrl_reset_r', 1),
-            ('idelayctrl_reset_r', 0)
-        ])
+        self.reset_pulse('idelayctrl_reset_r')
 
     def U2_adc_iserdes_reset(self):
-        self.leep.reg_write([
-            ('U2_iserdes_reset_r', 0),
-            ('U2_iserdes_reset_r', 1),
-            ('U2_iserdes_reset_r', 1),
-            ('U2_iserdes_reset_r', 0)
-        ])
+        self.reset_pulse('U2_iserdes_reset_r')
 
     def U3_adc_iserdes_reset(self):
-        self.leep.reg_write([
-            ('U3_iserdes_reset_r', 0),
-            ('U3_iserdes_reset_r', 1),
-            ('U3_iserdes_reset_r', 1),
-            ('U3_iserdes_reset_r', 0)
-        ])
+        self.reset_pulse('U3_iserdes_reset_r')
 
-    def hw_reset(self):
-        self.leep.reg_write([
-            ('U4_reset_r', 0),
-            ('U4_reset_r', 1),
-            ('U4_reset_r', 0),
-            ('U4_reset_r', 0)
-        ])
+    def dac_reset(self):
+        self.reset_pulse('U4_reset_r')
 
     def adc_test_reset(self):
-        self.leep.reg_write([
-            ('adc_test_reset', 0),
-            ('adc_test_reset', 1),
-            ('adc_test_reset', 1),
-            ('adc_test_reset', 0)
-        ])
+        self.reset_pulse('adc_test_reset')
 
     def digitizer_spi_init(self, dac_nm_mode=False):
         self.leep.reg_write([('periph_config', 0xfffffffd)])
@@ -455,9 +439,7 @@ class c_zest:
 
         sys.stdout.write("various resets -")
         self.idelayctrl_reset()
-        self.U2_adc_iserdes_reset()
-        self.U3_adc_iserdes_reset()
-        self.hw_reset()
+        self.dac_reset()
         for adc in [self.U2_adc_spi, self.U3_adc_spi]:
             self.spi_write(adc, 0x00, '00111100')
             self.spi_write(adc, 0x08, '00000011')
@@ -534,15 +516,8 @@ class c_zest:
         Ref Freq in MHz
         '''
         print('adc_reset_clk')
-        regs = []
-        regs.extend(1*[('U2_clk_reset_r', 0)])
-        regs.extend(1*[('U3_clk_reset_r', 0)])
-        regs.extend(1*[('U2_clk_reset_r', 1)])
-        regs.extend(2*[('U3_clk_reset_r', 1)])
-        regs.extend(1*[('U2_clk_reset_r', 0)])
-        regs.extend(1*[('U3_clk_reset_r', 0)])
-        self.leep.reg_write(regs)
-
+        self.reset_pulse('U2_clk_reset_r')
+        self.reset_pulse('U3_clk_reset_r')
         time.sleep(0.34)  # Frequency counter reference 24 bits at 50 MHz
         adc_freq = self.leep.reg_read([("frequency_adc")])[0]
         adc_freq = adc_freq * self.ref_freq * 0.5**24
@@ -553,6 +528,8 @@ class c_zest:
         if abs(adc_freq - (self.clk_freq/1e6)) > 0.01:
             print("#### WARNING #### Unexpected ADC frequency")
             print("#### (not close to %.3f MHz)" % (self.clk_freq/1e6))
+        self.U2_adc_iserdes_reset()
+        self.U3_adc_iserdes_reset()
         return True
 
     def top2idelay(self, listin, LH):
@@ -633,11 +610,11 @@ class c_zest:
 
     def adc_bufr_reset1(self, adc_values, name, adc, ic_reset, iserdes_reset):
         success = False
-        for ix in range(24):
+        for ix in range(40):  # 0.75 ** 40 = 1e-5 expected failure rate
             if adc_values[adc] == 0x4339 or adc_values[adc] == 0xa19c:
                 success = True
                 break
-            self.leep.reg_write([(ic_reset, 0), (ic_reset, 1), (ic_reset, 0)])
+            self.reset_pulse(ic_reset)
             iserdes_reset()
             adc_values = self.adc_reg(verbose=True)
             if adc_values[adc] == 0x4339 or adc_values[adc] == 0xa19c:
@@ -675,6 +652,7 @@ class c_zest:
         for i in range(10):
             self.adc_reg(verbose=True)
             time.sleep(0.002)
+        return bitslip == 0 and index == 1
 
     def adc_twos_comp(self, twoscomp):
         for adc in [self.U2_adc_spi, self.U3_adc_spi]:
