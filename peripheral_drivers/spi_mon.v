@@ -88,10 +88,11 @@ module spi_mon #(
    end
 
    // Instruction decoding
+   reg start=0;
    reg [2:0] word=0, word_r=0;
    reg [1:0] rsvd;
    reg rnw;
-   reg [3:0] hw_sel;
+   reg [3:0] hw_sel, hw_sel_r=0;
    reg [31:0] spi_cmd;
    reg spi_cmd_v=0;
    always @(posedge clk) begin
@@ -118,14 +119,19 @@ module spi_mon #(
          end
       end
 
-      if (spi_start) spi_cmd_v <= 0; // Send command
+      start <= 0;
+      if (spi_cmd_v && !spi_busy) begin
+         start <= 1;
+         hw_sel_r <= hw_sel; // hw_sel cannot change until we send out new cmd
+         spi_cmd_v <= 0; // Send command
+      end
       word_r <= word;
    end
 
-   assign spi_start = spi_cmd_v & ~spi_busy;
+   assign spi_start = start;
    assign spi_data_addr = spi_cmd;
    assign spi_rnw = rnw;
-   assign spi_hw_sel = hw_sel;
+   assign spi_hw_sel = hw_sel_r;
 
    reg [DMEM_WI-1:0] save_addr=0;
    always @(posedge clk) begin

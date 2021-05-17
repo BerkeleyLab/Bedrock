@@ -56,7 +56,7 @@ endgenerate
 
 wire start_7794 = spi_start;
 assign spi_ssb_out = spi_ssb_in & CS;
-spi_master #(.TSCKHALF(1), .ADDR_WIDTH(8), .DATA_WIDTH(24), .SCK_RISING_SHIFT(0))
+spi_master #(.TSCKHALF(16), .ADDR_WIDTH(8), .DATA_WIDTH(24), .SCK_RISING_SHIFT(0))
 ad7794_spi (
 	.cs(ss_7794), .sck(sclk_7794), .sdi(mosi_7794), .sdo(miso_7794),
 	.clk(clkin), .spi_start(start_7794), .spi_busy(spi_busy), .spi_read(spi_read),
