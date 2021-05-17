@@ -111,6 +111,17 @@ def read_live_array(dev):
     return foo
 
 
+def desc_limit_check(dev_desc):
+    '''
+    Limits the ROM description length/size to comply with leep's preamble checking
+    Limit is controlled by dev_desc_lim, local to this function (limit in bytes)
+    '''
+    dev_desc_lim = 80
+    if len(dev_desc) > dev_desc_lim:
+        raise RuntimeError("Please provide a description up to " +
+                           str(dev_desc_lim) + " characters.")
+
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Read/Write from FPGA memory')
@@ -172,6 +183,7 @@ if __name__ == "__main__":
             sys.exit(2)
 
         dev_desc = args.dev_descript.encode('utf-8')
+        desc_limit_check(dev_desc)
         a = create_array(dev_desc, args.json)
         if args.loopback:
             r = decode_array(a)

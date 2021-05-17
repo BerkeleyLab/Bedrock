@@ -57,8 +57,9 @@ class LEEPDevice(DeviceBase):
     backend = 'leep'
     init_rom_addr = 0x800
     max_rom_addr = 0x4000
-    # TO-DO: preamble is not really bounded. See build_rom.py dev_descript arg
-    preamble_max_size = 50
+    # preamble is bound in build_rom.py by limiting description to 40 words (80 bytes)
+    # each hash is 10 words. 40 + 10 + 10 = 60. Plus 4 for each of the types.
+    preamble_max_size = 64
 
     def __init__(self, addr, timeout=0.1, **kws):
         DeviceBase.__init__(self, **kws)
