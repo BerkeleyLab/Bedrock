@@ -1,3 +1,5 @@
+// `include "oscope_features_defs.vh"
+
 module oscope_top(
 	input        GTPREFCLK_P,
 	input        GTPREFCLK_N,
@@ -70,6 +72,15 @@ module oscope_top(
 	inout [11:0] bus_digitizer_J19,
 	inout [1:0]  bus_digitizer_U33U1
 );
+
+// `include "oscope_features_params.vh"
+localparam C_CARRIER = "Marble";
+
+localparam C_CARRIER_REV = "v2";
+
+localparam C_DEFAULT_ENABLE_RX = 0;
+
+localparam C_MISC_CONFIG_DEFAULT = 4;
 
 
 assign VCXO_EN = 1;
@@ -168,7 +179,11 @@ assign LD17 = 1;
 
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
-marble_base #(.USE_I2CBRIDGE(1)) base(
+marble_base #(
+	.USE_I2CBRIDGE(1),
+	.default_enable_rx(C_DEFAULT_ENABLE_RX),
+	.misc_config_default(C_MISC_CONFIG_DEFAULT)
+) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
 	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
