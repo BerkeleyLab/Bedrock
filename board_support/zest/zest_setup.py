@@ -360,7 +360,7 @@ class c_zest:
         bitslip = (eval('0b' + ''.join([str(int(i)) for i in bitsliplist])))
         return bitslip
 
-    # at least 64 ns assertion of a reset line
+    # at least 128 ns assertion of a reset line
     def reset_pulse(self, reset_r):
         self.leep.reg_write([(reset_r, 0), (reset_r, 1), (reset_r, 1), (reset_r, 0)])
 
@@ -511,13 +511,24 @@ class c_zest:
         sys.stdout.flush()
         return True
 
+    def mmcm_status(self, verbose=False):
+        c_status = self.leep.reg_read(["clk_status_out"])[0]
+        if verbose:
+            print("Clock status %d" % c_status)
+        return c_status
+
     def adc_reset_clk(self):
         '''
         Ref Freq in MHz
         '''
         print('adc_reset_clk')
-        self.reset_pulse('U2_clk_reset_r')
-        self.reset_pulse('U3_clk_reset_r')
+        # Need to reset the BUFR before the MMCM, and reset the MMCM before
+        # asking idelay_scanner to use the Banyan fabric.
+        self.reset_pulse('U2_clk_reset_r')  # BUFR
+        self.reset_pulse('U3_clk_reset_r')  # BUFR
+        self.reset_pulse('mmcm_reset_r')  # both U2 and U3; U3's MMCM not used?
+        time.sleep(0.01)  # how long does this take?
+        self.leep.reg_write([("clk_status_we", 1)])  # arm clock fault detector
         time.sleep(0.34)  # Frequency counter reference 24 bits at 50 MHz
         adc_freq = self.leep.reg_read([("frequency_adc")])[0]
         adc_freq = adc_freq * self.ref_freq * 0.5**24
@@ -528,6 +539,8 @@ class c_zest:
         if abs(adc_freq - (self.clk_freq/1e6)) > 0.01:
             print("#### WARNING #### Unexpected ADC frequency")
             print("#### (not close to %.3f MHz)" % (self.clk_freq/1e6))
+        if self.mmcm_status(verbose=True) != 1:
+            return False
         self.U2_adc_iserdes_reset()
         self.U3_adc_iserdes_reset()
         return True
@@ -577,6 +590,9 @@ class c_zest:
                 print("idelay %2.2d  Rx %s" % (jx, bb))
         print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in idelay_mirror]))
         print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in idelay_mirror]))
+        # Check this one last time before we start resetting BUFRs
+        if self.mmcm_status(verbose=True) != 1:
+            return False
         for i in range(4):
             self.adc_reg(verbose=True)
             time.sleep(0.002)
@@ -603,6 +619,9 @@ class c_zest:
             print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in rlist1]))
             print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in rlist1]))
             print("banyan_status 0 0x%x" % bstat)
+        # Check this one last time before we start resetting BUFRs
+        if self.mmcm_status(verbose=True) != 1:
+            return False
         for i in range(4):
             self.adc_reg(verbose=True)
             time.sleep(0.002)
@@ -877,12 +896,7 @@ class c_zest:
         pstep = 5
         ok = 0
         print("Scanning adc_clk mmcm phase")
-        try:
-            self.leep.reg_write([("clk_status_we", 1)])
-            clk_status_present = 1
-        except KeyError:
-            print("Please upgrade to post-commit-5a098b92 bitfile")
-            clk_status_present = 0
+        self.leep.reg_write([("clk_status_we", 1)])  # arm clock fault detector
         for kx in range(15):  # range(56*10/pstep):
             r = self.pntest2(quiet=True)
             print("%2d " % (kx*pstep) + "  ".join(["%5d" % x for x in r]))
@@ -893,11 +907,9 @@ class c_zest:
             if ok == 5:
                 self.mmcm_step(-2 * pstep)
                 print("Found safe mmcm phase %d" % ((kx - 2) * pstep))
-                if clk_status_present:
-                    self.leep.reg_write([("clk_status_we", 2)])
-                    c_status = self.leep.reg_read(["clk_status_out"])[0]
-                    print("Clock status %d" % c_status)
-                return True
+                self.leep.reg_write([("clk_status_we", 2)])  # mark clock as good
+                c_status = self.mmcm_status(verbose=True)
+                return c_status == 2
             self.mmcm_step(pstep)
         print("Error: Finished full mmcm phase scan without finding eye")
         return False

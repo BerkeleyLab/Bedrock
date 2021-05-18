@@ -342,7 +342,6 @@ generate for (ix=0; ix<8; ix=ix+1) begin: mavg_set
 	);
 end endgenerate
 
-// Gloss over the fact that actual_banyan_mask crosses clock domains
 //wire [127:0] banyan_adc = {U2DD, U2DC, U2DB, U2DA, U3DD, U3DC, U3DB, U3DA};
 banyan_mem #(.aw(banyan_aw), .dw(16)) banyan_mem(.clk(adc_clk),
 	.adc_data(adc_data_decimated), .banyan_mask(banyan_mask_x),
