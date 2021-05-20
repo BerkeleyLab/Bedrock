@@ -1,4 +1,4 @@
-// `include "oscope_features_defs.vh"
+`include "oscope_features_defs.vh"
 
 module oscope_top(
 	input        GTPREFCLK_P,
@@ -73,15 +73,7 @@ module oscope_top(
 	inout [1:0]  bus_digitizer_U33U1
 );
 
-// `include "oscope_features_params.vh"
-localparam C_CARRIER = "Marble";
-
-localparam C_CARRIER_REV = "v2";
-
-localparam C_DEFAULT_ENABLE_RX = 0;
-
-localparam C_MISC_CONFIG_DEFAULT = 4;
-
+`include "oscope_features_params.vh"
 
 assign VCXO_EN = 1;
 wire gtpclk0, gtpclk;

@@ -32,13 +32,23 @@ $(AUTOGEN_DIR)/moving_average.v: $(DSP_DIR)/moving_average/moving_average.py
 oscope_features: $(BUILD_DIR)/gen_features.py oscope_features.yaml
 	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_v2 --split
 
+# gen_features.py rules; note the use of dummy targets, actual file outputs are:
+# oscope_features_params.vh and oscope_features_defs.vh
+oscope_marble1_features: $(BUILD_DIR)/gen_features.py oscope_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_mini --split
+	touch $@
+
+oscope_marble2_features: $(BUILD_DIR)/gen_features.py oscope_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_v2 --split
+	touch $@
+
 zest_connector.csv: remap_gen.py
 	$(PYTHON) remap_gen.py -p $(BEDROCK_DIR) > $@
 
 system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)/$(HARDWARE)/pin_map.csv zest_connector.csv oscope_rules.csv
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
-oscope_top.sv: $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) application_top_auto $(AUTOGEN_DIR)/moving_average.v
+oscope_top.sv: $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) application_top_auto $(AUTOGEN_DIR)/moving_average.v oscope_marble2_features
 
 oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v
 
@@ -66,7 +76,7 @@ download:
 
 
 include $(BUILD_DIR)/bottom_rules.mk
-CLEAN += *.bit *.bin *.prm $(APP_NAME)_regmap*.json scalar_$(APP_NAME)_regmap.json *_features*.json *_features*.vh
+CLEAN += *.bit *.bin *.prm $(APP_NAME)_regmap*.json scalar_$(APP_NAME)_regmap.json *_features*.json *_features*.vh oscope_marble*_features
 CLEAN += system_top.xdc zest_connector.csv $(RTEFI_CLEAN)
 CLEAN_DIRS +=  _xilinx .Xil
 
