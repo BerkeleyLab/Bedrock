@@ -21,13 +21,13 @@
    Since this module always outputs a 32-bit SPI command, it is up the instantiation to correctly
    split the command into address and data, as required by the target spi_master.v instance.
 
-   A Returned data is sequentially stored into a DPRAM that can be read by the host. No effort is
-   made to guarantee that the host reads frozen/coherent values from the DPRAM. It is expected that
-   the SPI readout rate is much faster than the host.
+   A Returned data is sequentially stored into a DPRAM that can be read by the host. The contents of
+   the DPRAM are double-buffered so that the host reads a coherent set of values.
 
    This module iterates over the instruction memory in a loop. A runtime-controllable sleep control
    register sets the rate at which the SPI polling happens.
 */
+`timescale 1ns / 1ns
 
 module spi_mon #(
    parameter SLEEP_SHIFT = 20,
@@ -37,6 +37,7 @@ module spi_mon #(
    input         clk,
    input         en,    // Enable monitoring
    input  [7:0]  sleep, // In units of 1<<SLEEP_SHIFT clock cycles
+   input  [7:0]  wr_dwell, // Dwell after a write, in units of 1<<SLEEP_SHIFT clock cycles
 
    input                imem_we,
    input  [IMEM_WI-1:0] imem_waddr,
@@ -73,7 +74,7 @@ module spi_mon #(
 
    reg end_stream=0;
    reg sleep_on=0, sleep_on_r=0;
-   reg [20+8-1:0] sleep_cnt=0;
+   reg [SLEEP_SHIFT+8-1:0] sleep_cnt=0;
    always @(posedge clk) if (en) begin
       sleep_on_r <= sleep_on;
       if (end_stream)
@@ -83,6 +84,26 @@ module spi_mon #(
          if (sleep_cnt[SLEEP_SHIFT+7:SLEEP_SHIFT] == sleep) begin
             sleep_on <= 0;
             sleep_cnt <= 0;
+         end
+      end
+   end
+
+   // Gate spi_busy by DWELL cycles
+   reg rnw_r=0; // Assigned later
+   reg spi_busy_r=0, spi_busy_gate=0;
+   reg [SLEEP_SHIFT+8-1:0] dwell_cnt=0;
+   always @(posedge clk) begin
+      spi_busy_r <= spi_busy;
+      if (!spi_busy && spi_busy_r)
+         dwell_cnt <= 1;
+      if (spi_busy && !spi_busy_r)
+         spi_busy_gate <= 1'b1;
+      if (dwell_cnt > 0) begin
+         dwell_cnt <= dwell_cnt + 1;
+         // Don't dwell on reads
+         if (dwell_cnt[SLEEP_SHIFT+7:SLEEP_SHIFT] == (wr_dwell+1) || rnw_r) begin
+            spi_busy_gate <= 1'b0;
+            dwell_cnt <= 0;
          end
       end
    end
@@ -120,9 +141,10 @@ module spi_mon #(
       end
 
       start <= 0;
-      if (spi_cmd_v && !spi_busy) begin
+      if (spi_cmd_v && !spi_busy_gate) begin
          start <= 1;
          hw_sel_r <= hw_sel; // hw_sel cannot change until we send out new cmd
+         rnw_r <= rnw;
          spi_cmd_v <= 0; // Send command
       end
       word_r <= word;
@@ -133,22 +155,26 @@ module spi_mon #(
    assign spi_rnw = rnw;
    assign spi_hw_sel = hw_sel_r;
 
+   // Return data storage and readout
+   reg bank=0;
    reg [DMEM_WI-1:0] save_addr=0;
+   wire sleep_off = ~sleep_on & sleep_on_r;
    always @(posedge clk) begin
-      if (!en || (!sleep_on && sleep_on_r))
+      if (!en || sleep_off) begin
          save_addr <= 0;
-      else if (spi_rvalid)
+         if (sleep_off) bank <= ~bank; // Flip bank
+      end else if (spi_rvalid)
          save_addr <= save_addr + 1;
    end
 
-   dpram #(.aw(DMEM_WI), .dw(32)) i_dpram (
+   dpram #(.aw(DMEM_WI+1), .dw(32)) i_dpram (
       .clka  (clk),
       .clkb  (clk),
-      .addra (save_addr),
+      .addra ({bank, save_addr}),
       .douta (), // Unused
       .dina  (spi_rdata),
-      .wena  (spi_rvalid & en), // Don't save is disabled
-      .addrb (rd_addr),
+      .wena  (spi_rvalid & en), // Don't save if disabled
+      .addrb ({~bank, rd_addr}),
       .doutb (rd_data));
 
 endmodule

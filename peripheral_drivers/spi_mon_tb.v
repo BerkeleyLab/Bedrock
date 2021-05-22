@@ -2,7 +2,7 @@
 
 module spi_mon_tb;
 
-   localparam SIM_TIME = 50000; // ns
+   localparam SIM_TIME = 500000; // ns
 
    reg clk=0;
    integer fd, ix, rc;
@@ -77,6 +77,10 @@ module spi_mon_tb;
    // Continuously read-out spi_mon dpram
    always @(posedge clk) rd_addr <= rd_addr + 1;
 
+   // Hack to make simulations more understandable;
+   // also note the width change from DW to 32.
+   wire [31:0] spi_rdata_x = en ? spi_rdata : {DW{1'bx}};
+
    spi_mon #(
       .SLEEP_SHIFT(4),
       .IMEM_WI (9),
@@ -85,6 +89,7 @@ module spi_mon_tb;
       .clk        (clk),
       .en         (en),
       .sleep      (8'd20),
+      .wr_dwell   (8'd10),
       .imem_we    (mwe),
       .imem_waddr (maddr),
       .imem_wdat  (mdat),
@@ -94,14 +99,15 @@ module spi_mon_tb;
       .spi_data_addr ({spi_data, spi_addr}),
       .spi_rnw    (spi_rnw),
       .spi_rvalid (spi_rvalid),
-      .spi_rdata  (en ? spi_rdata : 8'hxx),
+      .spi_rdata  (spi_rdata_x),
       .rd_addr    (rd_addr),
       .rd_data    (rd_data));
 
    spi_master #(
-      .TSCKHALF(1),
+      .TSCKHALF(4),
       .ADDR_WIDTH(AW),
-      .DATA_WIDTH(DW))
+      .DATA_WIDTH(DW),
+      .SCK_RISING_SHIFT(0))
    i_spi_master (
       .clk       (clk),
       .spi_start (spi_start),

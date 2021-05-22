@@ -1,3 +1,4 @@
+`timescale 1ns / 1ns
 module spi_master #(
 	parameter TSCKHALF=10,
 	parameter ADDR_WIDTH=16,
@@ -111,6 +112,6 @@ always @(posedge clk) begin
 end
 assign sdi = sdi_value[ADDR_WIDTH+DATA_WIDTH-1];
 assign spi_ready = spi_ready_r;
-assign spi_busy = cs_r | ~cs;
+assign spi_busy = cs_r | ~cs | sck_r;
 
 endmodule
