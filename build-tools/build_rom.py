@@ -6,8 +6,8 @@ import hashlib
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../badger"))
-from lbus_access import lbus_access
+sys.path.append(os.path.join(os.path.dirname(__file__), "../projects/common/", "leep"))
+from raw import LEEPDevice
 
 
 def chunk(li, flag=1):
@@ -130,7 +130,8 @@ def opt_bus_width(entries, min_rom_size, max_rom_size):
 
 
 def read_live_array(dev):
-    foo = dev.exchange(range(0x800, 0x47FF))  # 2048 to 16383
+    leep_dev = LEEPDevice(addr=dev, timeout=20)
+    foo = leep_dev.the_rom
     return foo
 
 
@@ -193,9 +194,7 @@ if __name__ == "__main__":
         default='LBNL BEDROCK ROM')
     args = parser.parse_args()
     if args.live:
-        ip_addr = args.ip
-        port = args.port
-        dev = lbus_access(ip_addr, port=port)
+        dev = str(args.ip) + ':' + str(args.port)
         a = read_live_array(dev)
         # print(" ".join(["%4.4x"%x for x in a]))
         r = decode_array(a)

@@ -1,13 +1,13 @@
 
 from __future__ import print_function
 import numpy
-from .base import DeviceBase
 from datetime import datetime
 import json
 import zlib
 import random
 import socket
 import sys
+import os
 from functools import reduce
 
 import logging
@@ -15,6 +15,9 @@ _log = logging.getLogger(__name__)
 # special logger for use in exchange()
 _spam = logging.getLogger(__name__+'.packets')
 _spam.propagate = False
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+from base import DeviceBase
 
 if sys.version_info >= (3, 0):
     unicode = str
@@ -63,6 +66,7 @@ class LEEPDevice(DeviceBase):
     hash_descriptor_size = 24
     size_desc = 0
     size_rom = 0
+    the_rom = []
 
     def __init__(self, addr, timeout=0.1, **kws):
         DeviceBase.__init__(self, **kws)
@@ -385,6 +389,7 @@ class LEEPDevice(DeviceBase):
             values_json = self.exchange(range(end_addr, stop_addr))
             values_full = numpy.array(numpy.concatenate((values_preamble, values_json)), be32)
             self._checkrom(values_full)
+            return values_full
         else:
             raise RuntimeError("ROM not found")
 
@@ -446,11 +451,11 @@ class LEEPDevice(DeviceBase):
 
         try:
             _log.info("Trying with init_addr %d", self.init_rom_addr)
-            self._trysize(self.init_rom_addr)
+            self.the_rom = self._trysize(self.init_rom_addr)
         except (RuntimeError, ValueError):
             _log.info("Trying with max_addr %d", self.max_rom_addr)
             try:
-                self._trysize(self.max_rom_addr)
+                self.the_rom = self._trysize(self.max_rom_addr)
             except (RuntimeError, ValueError):
                 raise ValueError("Could not read ROM using either start addresses")
         _log.info("ROM was successfully read")
