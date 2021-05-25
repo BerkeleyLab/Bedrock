@@ -1,6 +1,3 @@
-###############################################################################
-### BMB7 R1.5 a.k.a. QF2-pre, with "modern" Fall 2018 Spartan firmware
-
 set_property CONFIG_VOLTAGE  3.3 [current_design]
 
 # Differential 50MHz system clock
@@ -25,6 +22,10 @@ set_property DIFF_TERM TRUE     [get_ports {kintex_data_in_p}]
 set_property IOSTANDARD LVDS_25 [get_ports {kintex_data_in_n}]
 set_property PACKAGE_PIN H13    [get_ports {kintex_data_in_n}]
 set_property DIFF_TERM TRUE     [get_ports {kintex_data_in_n}]
+
+set_property DRIVE 4 [get_ports kintex_rx_locked]
+set_property IOSTANDARD LVCMOS25 [get_ports kintex_rx_locked]
+set_property PACKAGE_PIN F14 [get_ports kintex_rx_locked]
 
 #create_clock -name clk_master -period 20.0 [get_ports EXT_CLK]
 set_property CFGBVS VCCO [current_design]
