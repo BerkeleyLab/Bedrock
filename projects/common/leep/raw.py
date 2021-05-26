@@ -401,7 +401,7 @@ class LEEPDevice(DeviceBase):
         while len(values):
             type = values[0] >> 14
             size = values[0] & 0x3fff
-            _log.info("ROM Descriptor type=%d size=%d", type, size)
+            _log.debug("ROM Descriptor type=%d size=%d", type, size)
 
             if type == 0:
                 break
@@ -411,14 +411,13 @@ class LEEPDevice(DeviceBase):
                 _log.error("Truncated: %d", len(blob))
                 raise ValueError("Truncated ROM Descriptor")
 
-            _log.info("Checking for JSON")
             if type == 1:
                 blob = blob.tostring()
                 self.size_desc = size
                 if self.descript is None:
                     self.descript = blob
                 else:
-                    _log.info("Extra ROM Text '%s'", blob)
+                    _log.debug("Extra ROM Text '%s'", blob)
 
             elif type == 2:
                 blob = ''.join(["%04x" % b for b in blob])
@@ -427,13 +426,13 @@ class LEEPDevice(DeviceBase):
                 elif self.codehash is None:
                     self.codehash = blob
                 else:
-                    _log.info("Extra ROM Hash %s", blob)
+                    _log.debug("Extra ROM Hash %s", blob)
 
             elif type == 3 and preamble_check is False:
                 if self.regmap is not None:
                     _log.error("Ignoring additional JSON blob in ROM")
                 else:
-                    _log.info("Found JSON blob in ROM")
+                    _log.debug("Found JSON blob in ROM")
                     self.regmap = json.loads(zlib.decompress(
                         blob.tostring()).decode('ascii'))
 
@@ -450,10 +449,10 @@ class LEEPDevice(DeviceBase):
         self.regmap = None
 
         try:
-            _log.info("Trying with init_addr %d", self.init_rom_addr)
+            _log.debug("Trying with init_addr %d", self.init_rom_addr)
             self.the_rom = self._trysize(self.init_rom_addr)
         except (RuntimeError, ValueError):
-            _log.info("Trying with max_addr %d", self.max_rom_addr)
+            _log.debug("Trying with max_addr %d", self.max_rom_addr)
             try:
                 self.the_rom = self._trysize(self.max_rom_addr)
             except (RuntimeError, ValueError):
