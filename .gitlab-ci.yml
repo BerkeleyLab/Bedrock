@@ -17,7 +17,7 @@ image: $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
 services:
   - name: mohs.dhcp.lbl.gov/docker:18.09.7-dind
     entrypoint: ["dockerd-entrypoint.sh"]
-    command: ["--insecure-registry=$CI_REGISTRY"]
+    command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
 
 include:
   - local: .gitlab/ci/build.gitlab-ci.yml
