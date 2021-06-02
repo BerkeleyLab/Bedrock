@@ -403,8 +403,7 @@ class LEEPDevice(DeviceBase):
         while len(values):
             type = values[0] >> 14
             size = values[0] & 0x3fff
-            pp = desc_ix, desc_addr, type, size
-            _log.debug("ROM Descriptor #%d addr=%d type=%d size=%d", pp)
+            _log.debug("ROM Descriptor #%d addr=%d type=%d size=%d", desc_ix, desc_addr, type, size)
             desc_ix += 1
             desc_addr += (size+1)
 
