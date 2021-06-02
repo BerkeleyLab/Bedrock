@@ -58,6 +58,11 @@ Voscope_top_leep: Voscope_top_tb $(APP_NAME)_regmap.json
 	PYTHONPATH=$(PROJECTS_DIR)/common/ $(PYTHON) -m leep.cli leep://localhost:3010 list > leep_list.txt
 	awk -F'"' '/ {/{print $$2}' $(APP_NAME)_regmap.json | cmp leep_list.txt -
 
+Voscope_top_live: Voscope_top_tb $(APP_NAME)_regmap.json
+	@echo "----- Oscope build rom live test -----"
+	timeout 20 ./$< &
+	PYTHONPATH=$(PROJECTS_DIR)/common/ $(PYTHON) $(BUILD_DIR)/build_rom.py --live -a localhost -p 3010
+
 system_top.xdc: $(APP_NAME)_orig_special.xdc $(APP_NAME)_common.xdc
 
 $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
