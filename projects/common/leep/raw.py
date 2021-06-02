@@ -397,11 +397,14 @@ class LEEPDevice(DeviceBase):
         values = numpy.frombuffer(values, be16)
         _log.debug("ROM[0] %08d", values[0])
         values = values[1::2]  # discard upper bytes
+        desc_addr = 0
 
         while len(values):
             type = values[0] >> 14
             size = values[0] & 0x3fff
+            _log.debug("ROM Descriptor Address Position Index=%d", desc_addr)
             _log.debug("ROM Descriptor type=%d size=%d", type, size)
+            desc_addr += (size+1)
 
             if type == 0:
                 break
