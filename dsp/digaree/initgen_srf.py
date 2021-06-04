@@ -16,7 +16,7 @@ K = sqrt(1600)*exp(-i*0.2)
 # At the moment this only works for V in the range 0.5*cv to 1.0*cv;
 # maybe I should fuss with the dynamic range of 1/x
 # V = sqrt(Q1*RoverQ)*2*K  # equilibrium, not counting Q0 or omegad
-V = 15.8e6*exp(i*0.1)
+V = 18.7e6*exp(i*0.1)
 dVdt = a*V + b*K
 R = V/sqrt(Q1*RoverQ) - K
 dUdt = 2*real(V*conj(dVdt))/omega0/RoverQ
@@ -52,8 +52,8 @@ ai = a/ffs*fs*16  # 22 bit internal vs. 18 bit external; see parameter extra in 
 wave_samp_per = 32  # or equivalent
 use_hb = 0
 T = wave_samp_per*(use_hb+1)*33*14/1320.0e6  # s time interval between loop iterations
-fir_gain = 80  # prescale on dV/dt, see FIR filter comments in cgen_srf.py
-v_series = [(V-tx*T*dVdt)/cv*fs for tx in range(5)]
+fir_gain = 16  # prescale on dV/dt, see FIR filter comments in cgen_srf.py
+v_series = [(V-tx*T*dVdt)/cv*fs for tx in range(3)]
 
 # x5 = conj(cv/V)/8
 # print("# conj(1/v) (x5) %f+%f" % (x5.real, x5.imag))
@@ -90,7 +90,7 @@ print("#")
 
 # At one point we planned to send delta-V to the computer, rather than
 # let it compute differences.  Instead we are now set up to figure the
-# differences in the computer with a [-2 -1 0 1 2] FIR, with zero extra
+# differences in the computer with a [-1 0 1] FIR, with zero extra
 # hardware footrpint.
 
 sclv = 2*cv*cv/(T*fir_gain)/omega0/RoverQ
@@ -101,7 +101,7 @@ print("# %8.1f W  sclv" % sclv)
 print("# %8.1f W  sclf" % sclf)
 print("# %8.1f W  sclr" % sclr)
 # Any output unit is a good output unit, if all the terms use it
-maxscale = max(sclf, sclr) * 1.0001
+maxscale = max(sclv/32, sclf, sclr) * 1.0001
 print("# Full scale power values in internal units of %.1f W" % maxscale)
 sclv = sclv / maxscale
 sclf = sclf / maxscale
@@ -143,6 +143,10 @@ for vx in range(1, len(v_series)):
     vp = v_series[vx]/fs  # 22-bit internal, vs. 18-bit I/O
     xprint("p", "v%d_r" % vx, vp.real)
     xprint("p", "v%d_i" % vx, vp.imag)
+xprint("p", "k1_r", real(m_k))
+xprint("p", "k1_i", imag(m_k))
+xprint("p", "r1_r", real(m_r))
+xprint("p", "r1_i", imag(m_r))
 
 print("#")
 print("# Test stream (conveyor belt) values")

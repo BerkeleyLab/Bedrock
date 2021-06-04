@@ -21,8 +21,8 @@ cgen_init("cgen_srf.py")
 # Cut-and-paste for now, until we at least get the right answer.
 cpx_persist("v1")
 cpx_persist("v2")
-cpx_persist("v3")
-cpx_persist("v4")
+cpx_persist("k1")
+cpx_persist("r1")
 
 # These lines declare the input variables,
 # first six streamed from the radio
@@ -43,30 +43,32 @@ given("sclv")
 given("powt")
 
 # Get (still unscaled) derivative
-# Implements [-2 -1 0 1 2] FIR
-cpx_sub("dv1", "v", "v4", 3)  # note multiply-by-4
-cpx_sub("dv2", "v1", "v3", 2)  # note multiply-by-2
-cpx_add("dvx", "dv1", "dv2", 3)  # note multiply-by-4
-# Result is the amount that V will change in 80*T.
+# Implements [-1 0 1] FIR
+cpx_sub("dvxh", "v", "v2", 3)  # note multiply-by-4
+cpx_add("dvx", "dvxh", "dvxh", 1)  # stupid scale-up by another factor of 2
+# Result is the amount that V will change in 16*T.
 # Including the second-order CIC used to generate input samples,
-# this computation has a 3*T group delay.
+# this computation has a 2*T group delay.
+# Forward and reverse signals are internally delayed to match.
 
 # State-variable computation of the complex number a,
 # yielding detune frequency and decay rate
-cpx_inv_conj("x5", "v", 0, 3)
+cpx_inv_conj("x5", "v", 0, 3)  # XXX fails if we change v to v1
+# (because final multiply by v1 happens after the cpx_copy("v1", "v")
+# step listed below)
 cpx_scale("dvdt", "dvx", "invT", 1)
-cpx_mul("x3", "k", "beta", 1, 1)
+cpx_mul("x3", "k1", "beta", 1, 1)
 cpx_sub("x4", "dvdt", "x3", 2)   # some evidence this shift should be 1
 cpx_mul_conj("a", "x4", "x5", 2, 2)
 set_result("ab", "a_r", "a_i")
 
 # Power balance measure of cavity dissipation; uses magnitudes only
-cpx_mag("magr", "r", 0)  # reverse
+cpx_mag("magr", "r1", 0)  # reverse
 mul("powr", "sclr", "magr", 0)
-cpx_mag("magf", "k", 0)  # forward
+cpx_mag("magf", "k1", 0)  # forward
 mul("powf", "sclf", "magf", 0)
 sub("wgnet", "powf", "powr", 1)  # net power transferred by waveguide
-cpx_dot("dv2", "v", "dvx", 2)    # 2 * V * dV/dt = d/dt(V^2)
+cpx_dot("dv2", "v1", "dvx", 2)    # 2 * V * dV/dt = d/dt(V^2)
 mul("dudt", "dv2", "sclv", 3)  # dU/dt = power to stored energy
 sub("diss", "wgnet", "dudt", 1)  # est. of dissipation in cold cavity
 sub("perr", "diss", "powt", 1)  # allow for measurement error
@@ -74,7 +76,7 @@ set_result("cd", "diss", "perr")  # trigger quench fault if perr > 0
 
 # Watch these like a hawk:  order of execution matters,
 # unlike everything else here
-cpx_copy("v4", "v3")
-cpx_copy("v3", "v2")
 cpx_copy("v2", "v1")
 cpx_copy("v1", "v")
+cpx_copy("k1", "k")
+cpx_copy("r1", "r")

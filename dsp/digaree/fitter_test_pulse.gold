@@ -7,7 +7,7 @@ Detune Hz [ 95.70152167  90.84577125  83.67602682  74.27337732  60.79316504
 SI beta -99.706+22.738j Hz, magnitude 102.265 Hz
 sf_consts[0] = -1787
 sf_consts[1] = 407
-sf_consts[2] = 10000
+sf_consts[2] = 50000
 sf_consts[3] = 32768
 fq = 0.035526
 89 - 1.72*Gradient^2

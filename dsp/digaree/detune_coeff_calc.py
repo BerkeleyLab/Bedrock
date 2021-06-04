@@ -35,7 +35,7 @@ class digaree_coeff:
                      "freq_quantum", "digaree_dt",
                      "out_shift"]
 
-    def __init__(self, c_dict, fir_gain=80, dig_data_w=20, dig_extra_w=4):
+    def __init__(self, c_dict, fir_gain=16, dig_data_w=20, dig_extra_w=4):
         for p in self.CONFIG_PARAMS:
             if p not in c_dict:
                 print("ERROR: Parameter {} missing from config dict".format(p))
