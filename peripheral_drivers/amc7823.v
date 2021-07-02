@@ -1,11 +1,12 @@
 module  amc7823
-#(parameter DEBUG="true", parameter ADDR_WIDTH=16, parameter DATA_WIDTH=16, parameter SPIMODE="passthrough") (
+#(parameter ADDR_WIDTH=16, parameter DATA_WIDTH=16, parameter SPIMODE="passthrough") (
 	output                  ss,
 	input                   miso,
 	output                  mosi,
 	output                  sclk,
 	input                   clk,
 	input                   spi_start,
+	output                  spi_busy,  // For handshaking; can be ignored
 	input  [ADDR_WIDTH-1:0] spi_addr,
 	input                   spi_read,
 	input  [DATA_WIDTH-1:0] spi_data,
@@ -49,10 +50,10 @@ end
 endgenerate
 wire start_7823 = spi_start;
 assign spi_ssb_out= spi_ssb_in & ss;
-spi_master #(.TSCKHALF(16), .ADDR_WIDTH(16), .DATA_WIDTH(16), .SCK_RISING_SHIFT(1), .DEBUG(DEBUG))
+spi_master #(.TSCKHALF(16), .ADDR_WIDTH(16), .DATA_WIDTH(16), .SCK_RISING_SHIFT(1))
 amc7823_spi (
 	.cs(ss_7823), .sck(sclk_7823), .sdi(mosi_7823), .sdo(miso_7823),
-	.clk(clk), .spi_start(start_7823), .spi_read(spi_read),
+	.clk(clk), .spi_start(start_7823), .spi_busy(spi_busy), .spi_read(spi_read),
 	.spi_addr(spi_addr), .spi_data(spi_data), .sdo_addr(sdo_addr),
 	.spi_rdbk(spi_rdbk), .spi_ready(spi_ready), .sdio_as_sdo(sdio_as_sdo)
 );
