@@ -4,12 +4,12 @@ module spi_master #(
 	parameter ADDR_WIDTH=16,
 	parameter DATA_WIDTH=8,
 	parameter SCKCNT_WIDTH = clog2(ADDR_WIDTH+DATA_WIDTH+1),
-	parameter TSCKW= clog2(TSCKHALF)+1, //tsck is 2^5 time ts
+	parameter TSCKW= clog2(TSCKHALF)+1,  // tsck is 2^5 time ts
 	parameter SCK_RISING_SHIFT=1
 ) (
 	input                  clk,
 	input                  spi_start,
-	output                 spi_busy, // High while SPI transaction in flight
+	output                 spi_busy,  // High while SPI transaction in flight
 	input                  spi_read,
 	input [ADDR_WIDTH-1:0] spi_addr,
 	input [DATA_WIDTH-1:0] spi_data,

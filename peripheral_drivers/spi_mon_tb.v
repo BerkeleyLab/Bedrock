@@ -2,7 +2,7 @@
 
 module spi_mon_tb;
 
-   localparam SIM_TIME = 500000; // ns
+   localparam SIM_TIME = 500000;  // ns
 
    reg clk=0;
    integer fd, ix, rc;

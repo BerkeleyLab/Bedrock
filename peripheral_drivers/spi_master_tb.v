@@ -1,7 +1,7 @@
 `timescale 1ns / 1ns
 module spi_master_tb;
 
-parameter TSCKHALF=3; //tsck is 2^5 time ts
+parameter TSCKHALF=3;  // tsck is 2^5 time ts
 parameter ADDR_WIDTH=16;
 parameter DATA_WIDTH=8;
 
@@ -32,7 +32,7 @@ initial begin
 	$finish;
 end
 
-always #5 clk=~clk; // 100 MHz clk
+always #5 clk=~clk;  // 100 MHz clk
 
 reg start=0;
 //============================================================
