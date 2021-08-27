@@ -1,4 +1,5 @@
 import sys
+import time
 
 
 # AD7794 used to monitor temperatures on the Digitizer Board
@@ -127,8 +128,27 @@ if __name__ == "__main__":
         elif opt in ('-a', '--address'):
             ip_addr = arg
 
-    print("Hardcoded sensitivity")
     prc = c_zest(ip_addr)
+
+    try:
+        spi_mon_en = prc.leep.reg_read(['spi_mon_en'])[0]
+    except RuntimeError:
+        print("SPI Monitor support not present")
+        spi_mon_en = False
+
+    if spi_mon_en:
+        print("Reading AD7794 data from spi_monitor")
+        (CH_S, CH_E) = 9, 9+5
+        print("CH " + "      ".join(["%02d" % x for x in range(CH_E-CH_S)]))
+        while True:
+            rmem = prc.leep.reg_read(['spi_mon_dat'])[0]
+            sys.stdout.write(" ".join(["%7.5f" % prc.ad7794.conv_volt(x, i) for i, x in enumerate(rmem[CH_S:CH_E])]))
+            sys.stdout.write(" V\r")
+            sys.stdout.flush()
+            time.sleep(2)
+
+    print("Hardcoded sensitivity")
+    prc.ad7794_reset()
     prc.ad7794_calibrate()
     prc.ad7794_print()
     print("\n")
