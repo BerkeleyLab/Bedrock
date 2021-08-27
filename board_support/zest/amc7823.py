@@ -51,9 +51,26 @@ if __name__ == "__main__":
 
     prc = c_zest(ip_addr)
 
+    try:
+        spi_mon_en = prc.leep.reg_read(['spi_mon_en'])[0]
+    except RuntimeError:
+        print("SPI Monitor support not present")
+        spi_mon_en = False
+
+    if spi_mon_en:
+        print("Reading AMC7823 data from spi_monitor")
+        CH = 9
+        print("CH " + "      ".join(["%02d" % x for x in range(CH)]))
+        while True:
+            rmem = prc.leep.reg_read(['spi_mon_dat'])[0]
+            sys.stdout.write(" ".join(["%7.5f" % ((x & 0xfff) * 2.5 / 2**12) for x in rmem[0:CH]]))
+            sys.stdout.write(" V\r")
+            sys.stdout.flush()
+            time.sleep(2)
+
     addrs = list(range(0x16))
     addrs.append(0x1e)
-    if True:
+    if 1:
         print("Read page 0:")
         for addr in range(11):
             adcs = prc.amc_read(0, addr)
@@ -72,7 +89,7 @@ if __name__ == "__main__":
         # Load DAC
         prc.amc_write(1, 0x09, 0xbb00)
 
-    if True:
+    if 1:
         print("Write and readback GPIO register")
         prc.amc_write(0, 0x0a, 0xffff)
         rb = prc.amc_read(0, 0x0a)
@@ -82,6 +99,11 @@ if __name__ == "__main__":
         rb = prc.amc_read(0, 0x0a)
         amc_dprint(rb)
         time.sleep(1)
+
+    if 1:
+        print("Voltage readout")
+        v = prc.amc7823_adcread_volt_all()
+        print(v)
 
     print("Power-down")
     prc.amc_write(1, 0xd, 0xffdf)

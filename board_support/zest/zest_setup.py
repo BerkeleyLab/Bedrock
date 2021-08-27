@@ -12,13 +12,11 @@ from prnd import prnd
 
 class c_zest:
 
-    def __init__(self, ip, port=50006, leep_addr=None,
+    def __init__(self, ip, leep_addr=None,
                  reset=False,
                  dac_nm_mode=False,
                  timeout=0.1, strict=False,
                  clk_freq=1320e6/14.0, ref_freq=50.):
-        # Note that port is not actually used any more.
-        # To set a UDP port, use e.g., localhost:3010 for the ip, which gets passed to leep.
 
         import leep
 
