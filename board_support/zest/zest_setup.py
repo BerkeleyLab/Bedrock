@@ -19,6 +19,7 @@ class c_zest:
                  clk_freq=1320e6/14.0, ref_freq=50.):
 
         import leep
+        from leep import RomError
 
         self.pn9 = prnd(0x92, 16)  # static class variable
 
@@ -35,7 +36,11 @@ class c_zest:
         # Open communication with the carrier board
         print('Carrier board address %s' % leep_addr)
 
-        self.leep = leep.open(leep_addr, timeout=timeout, instance=[])
+        try:
+            self.leep = leep.open(leep_addr, timeout=timeout, instance=[])
+        except RomError as e:
+            print('zest_setup.py: %s, %s. Quitting.' % (leep_addr, str(e)))
+            raise
 
         self.lmk_spi = c_llspi_lmk01801(1)
         self.U2_adc_spi = c_llspi_ad9653(2)
