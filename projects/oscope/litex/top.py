@@ -44,6 +44,18 @@ class DumpToRAM(Module, AutoCSR):
         ]
 
 
+def add_ltc(soc):
+    self.submodules.lvds = LTCPhy(self.platform, self.sys_clk_freq, 120e6)
+    self.platform.add_false_path_constraints(
+        self.crg.cd_sys.clk,
+        self.lvds.pads_dco
+    )
+
+    spi_pads = self.platform.request("LTC_SPI")
+    self.submodules.spi = spi.SPIMaster(spi_pads, 16, self.sys_clk_freq, self.sys_clk_freq/32)
+    adc_data = Cat(Signal(2), self.lvds.sample_outs[0],
+                   Signal(2), self.lvds.sample_outs[1])
+
 class LTCSocDev(EthernetSoC, AutoCSR):
     csr_peripherals = [
         "lvds",
