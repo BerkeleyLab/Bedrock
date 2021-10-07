@@ -10,7 +10,6 @@ import sys
 import os
 from functools import reduce
 
-from . import RomError
 import logging
 _log = logging.getLogger(__name__)
 # special logger for use in exchange()
@@ -18,6 +17,7 @@ _spam = logging.getLogger(__name__+'.packets')
 _spam.propagate = False
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+from base import RomError
 from base import DeviceBase
 
 if sys.version_info >= (3, 0):
