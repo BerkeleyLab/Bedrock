@@ -110,6 +110,7 @@ class UDPFragmenter(Module):
         fsm.act("FRAGMENTED_PACKET_SEND",
                 sink.connect(packetizer.sink, omit={"length"}),
                 packetizer.sink.length.eq(bytes_in_fragment),
+                source.length.eq(bytes_in_fragment + 8),
                 If(sink.valid & packetizer.sink.ready,
                    counter_ce.eq(1)
                 ),
@@ -132,6 +133,7 @@ class UDPFragmenter(Module):
                 sink.ready.eq(0),
                 packetizer.sink.valid.eq(0),
                 packetizer.sink.length.eq(bytes_in_fragment),
+                source.length.eq(bytes_in_fragment + 8),
                 If((sink.length - (fragment_offset << 3)) > UDP_FRAG_MTU,
                     NextValue(bytes_in_fragment, UDP_FRAG_MTU),
                     counter_reset.eq(1)
@@ -172,25 +174,30 @@ class DataPipe(Module, AutoCSR):
         self.fifo_load = CSRStorage(reset=0)  # Load the coefficients in memory to the ROI Summer
         self.fifo_read = CSRStorage(reset=0)
         self.fifo_size = CSRStorage(32, reset=SIZE)
+        self.dst_ip = CSRStorage(32, reset=convert_ip("192.168.1.114"))
+        self.dst_port = CSRStorage(16, reset=7778)
 
         dw = 64
+        print(f"Write port: A ({ddr_wr_port.address_width})/ D ({ddr_wr_port.data_width})")
+        print(f"Read port: A ({ddr_rd_port.address_width})/ D ({ddr_rd_port.data_width})")
         self.submodules.dram_fifo = dram_fifo = LiteDRAMFIFO(
-            data_width  = 64,
+            data_width  = dw,
             base        = 0,
             depth       = SIZE,
-            write_port = ddr_wr_port,
-            read_port  = ddr_rd_port
+            write_port  = ddr_wr_port,
+            read_port   = ddr_rd_port,
+            with_bypass = True,
         )
         # self.mf = mf = Signal(reset=0)  # mf == More Fragments
         # self.fragment_offset = fragment_offset = Signal(13, reset=0)
         # self.identification = identification = Signal(16, reset=0)
 
-        self.submodules.adcs = adcs = ADCStream(1, 64)
+        self.submodules.adcs = adcs = ADCStream(1, dw)
         self.fifo_counter = fifo_counter = Signal(24)
         self.load_fifo = load_fifo = Signal()
 
         # adc --> buffer_fifo
-        self.submodules.buffer_fifo = buffer_fifo = stream.SyncFIFO(stream.EndpointDescription([("data", 64)]),
+        self.submodules.buffer_fifo = buffer_fifo = stream.SyncFIFO(stream.EndpointDescription([("data", dw)]),
                                                                     256,
                                                                     buffered=True)
         # buffer_fifo --> dram_fifo
@@ -203,7 +210,7 @@ class DataPipe(Module, AutoCSR):
             ),
             If(load_fifo & adcs.source.valid,
                self.fifo_full.status.eq(0),
-               self.fifo_error.status.eq(~dram_fifo.ctrl.writable),
+               self.fifo_error.status.eq(~dram_fifo.dram_fifo.ctrl.writable),
                fifo_counter.eq(fifo_counter + 1)
             ),
             If((fifo_counter == fifo_size - 1) & adcs.source.valid,
@@ -219,10 +226,7 @@ class DataPipe(Module, AutoCSR):
         ]
 
         # fifo --> stride converter
-        # TODO: instantiate this only when the strides are different to save flops
-        self.submodules.stride_converter = sc = stream.StrideConverter(dram_fifo.source.description,
-                                                                       stream.EndpointDescription([("data",
-                                                                                                    udp_port.dw)]))
+        self.submodules.stride_converter = sc = stream.Converter(dw, udp_port.dw)
 
         self.read_from_dram_fifo = read_from_dram_fifo = Signal()
         self.comb += [
@@ -241,16 +245,19 @@ class DataPipe(Module, AutoCSR):
 
         self.sync += read_from_dram_fifo.eq(self.fifo_read.storage)
         self.comb += If(read_from_dram_fifo,
-                        sc.source.connect(udp_fragmenter.sink, omit={'total_size'}))
+                        # TODO: There is a bug somewhere in the converter,
+                        # its source.last somehow gets set, no idea why. That signal is of no real use
+                        # for the fragmenter anyways, so we live without it
+                        sc.source.connect(udp_fragmenter.sink, omit={'total_size', 'last'}))
 
         # TODO: 8 should be adcstream data width // 8
-        self.comb += udp_fragmenter.sink.length.eq(fifo_size << 3)
+        self.comb += udp_fragmenter.sink.length.eq(fifo_size << log2_int(dw//8))
         self.comb += udp_fragmenter.source.connect(udp_port.sink)
         self.comb += [
             # param
             udp_port.sink.src_port.eq(4321),
-            udp_port.sink.dst_port.eq(7778),
-            udp_port.sink.ip_address.eq(convert_ip("192.168.1.114")),
+            udp_port.sink.dst_port.eq(self.dst_port.storage),
+            udp_port.sink.ip_address.eq(self.dst_ip.storage),
             # udp_port.sink.ip_address.eq(convert_ip("192.168.88.101")),
             # payload
             udp_port.sink.error.eq(0)
