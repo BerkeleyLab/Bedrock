@@ -168,7 +168,7 @@ class DataPipe(Module, AutoCSR):
 
     def __init__(self, ddr_wr_port, ddr_rd_port, udp_port):
         SIZE = 1024 * 1024
-        SIZE = 256
+        SIZE = 1024
         self.fifo_full = CSRStatus(reset=0)
         self.fifo_error = CSRStatus(reset=0)
         self.fifo_load = CSRStorage(reset=0)  # Load the coefficients in memory to the ROI Summer
