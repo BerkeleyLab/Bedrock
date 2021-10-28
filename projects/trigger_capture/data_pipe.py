@@ -17,8 +17,6 @@ from litex.soc.interconnect.stream import EndpointDescription
 from liteeth.common import eth_udp_user_description, convert_ip
 from liteeth.frontend.stream import LiteEthStream2UDPTX
 
-from litex_boards.platforms import ltc
-
 
 fragmenter_header_length = 8
 fragmenter_header_fields = {
@@ -58,7 +56,7 @@ class UDPFragmenter(Module):
     # TODO: compute this from eth_mtu
 
     def __init__(self, dw=8):
-        self.UDP_FRAG_MTU = UDP_FRAG_MTU = 1472 - 8  # The -8 is because of FRAGMENTER
+        self.UDP_FRAG_MTU = UDP_FRAG_MTU = 1472 - 8  # The -8 is because of FRAGMENTER header (which is unused)
         self.sink   = sink = stream.Endpoint([("data", dw), ("length", 32)])
         self.source = source = stream.Endpoint(eth_udp_user_description(dw))
         self.packetizer = packetizer = UDPFragmenterPacketizer()
@@ -134,14 +132,13 @@ class UDPFragmenter(Module):
                 packetizer.sink.valid.eq(0),
                 packetizer.sink.length.eq(bytes_in_fragment),
                 source.length.eq(bytes_in_fragment + 8),
+                counter_reset.eq(1),
                 If((sink.length - (fragment_offset << 3)) > UDP_FRAG_MTU,
                     NextValue(bytes_in_fragment, UDP_FRAG_MTU),
-                    counter_reset.eq(1)
                 ).Else(
                     NextValue(bytes_in_fragment,
                               sink.length - (fragment_offset << 3)),
                     NextValue(mf, 0),
-                    counter_reset.eq(1)
                 ),
                 NextState("FRAGMENTED_PACKET_SEND")
         )
@@ -163,6 +160,111 @@ class ADCStream(Module):
         self.sync += valid.eq(~valid)
         self.comb += [source.data.eq(Cat(*[ramp.count + ch for ch in range(nch)])),
                       source.valid.eq(valid)]
+
+class DataPipeWithoutBypass(Module, AutoCSR):
+    def __init__(self, ddr_wr_port, ddr_rd_port, udp_port, sim=False):
+        SIZE = 1024 * 1024
+        self.fifo_full  = CSRStatus(reset=0)
+        self.fifo_error = CSRStatus(reset=0)
+        self.fifo_load  = CSRStorage(reset=0)  # Load the coefficients in memory to the ROI Summer
+        self.fifo_read  = CSRStorage(reset=0)
+        self.fifo_size  = CSRStorage(32, reset=SIZE)
+        self.dst_ip     = CSRStorage(32, reset=convert_ip("192.168.1.114"))
+        self.dst_port   = CSRStorage(16, reset=7778)
+
+        self.fifo_counter = fifo_counter = Signal(24)
+        self.load_fifo    = load_fifo    = Signal()
+
+        if sim:
+            dw = 32
+            adc_dw = 16
+        else:
+            dw = 512
+            adc_dw = 64
+
+        print(f"Write port: A ({ddr_wr_port.address_width})/ D ({ddr_wr_port.data_width})")
+        print(f"Read port: A ({ddr_rd_port.address_width})/ D ({ddr_rd_port.data_width})")
+        self.submodules.dram_fifo = dram_fifo = LiteDRAMFIFO(
+            data_width  = dw,
+            base        = 0,
+            depth       = SIZE,
+            write_port  = ddr_wr_port,
+            read_port   = ddr_rd_port,
+        )
+        self.submodules.adcs = adcs = ADCStream(1, adc_dw)
+        adc_data = Signal(dw)
+        DW_RATIO = dw // adc_dw
+        log_dw_ratio = log2_int(DW_RATIO)
+        word_count = Signal(log_dw_ratio)
+        word_count_d = Signal(log_dw_ratio)
+        self.sync += [
+            If(adcs.source.valid,
+               adc_data.eq(Cat(adc_data[adcs.dw:], adcs.source.data)),
+               word_count.eq(word_count + 1)
+            ),
+            word_count_d.eq(word_count),
+        ]
+        self.comb += [
+            dram_fifo.sink.valid.eq((word_count == 0) & (word_count_d != 0) & load_fifo),
+            dram_fifo.sink.data.eq(adc_data)
+        ]
+
+        fifo_size = Signal(32)
+        self.sync += [
+            fifo_size.eq(self.fifo_size.storage),
+            If(self.fifo_load.re & self.fifo_load.storage,
+               fifo_counter.eq(0),
+               load_fifo.eq(1)
+            ),
+            If(load_fifo & adcs.source.valid,
+               self.fifo_full.status.eq(0),
+               self.fifo_error.status.eq(~dram_fifo.dram_fifo.ctrl.writable),
+               fifo_counter.eq(fifo_counter + 1)
+            ),
+            If((fifo_counter == fifo_size - 1) & adcs.source.valid,
+               load_fifo.eq(0),
+               self.fifo_full.status.eq(1)
+            ),
+        ]
+
+        # fifo --> stride converter
+        self.submodules.stride_converter = sc = stream.Converter(dw, udp_port.dw)
+
+        self.read_from_dram_fifo = read_from_dram_fifo = Signal()
+        self.comb += [
+            dram_fifo.source.connect(sc.sink)
+        ]
+        self.receive_count = receive_count = Signal(24)
+        self.sync += [
+            If(dram_fifo.source.valid & dram_fifo.source.ready,
+               receive_count.eq(receive_count + 1)
+            ).Elif(read_from_dram_fifo == 0,
+                   receive_count.eq(0)
+            )
+        ]
+        # --> udp fragmenter -->
+        self.submodules.udp_fragmenter = udp_fragmenter = UDPFragmenter(udp_port.dw)
+
+        self.sync += read_from_dram_fifo.eq(self.fifo_read.storage)
+        self.comb += If(read_from_dram_fifo,
+                        # TODO: There is a bug somewhere in the converter,
+                        # its source.last somehow gets set, no idea why. That signal is of no real use
+                        # for the fragmenter anyways, so we live without it
+                        sc.source.connect(udp_fragmenter.sink, omit={'total_size', 'last'}))
+
+        # TODO: 8 should be adcstream data width // 8
+        self.comb += udp_fragmenter.sink.length.eq(fifo_size << log_dw_ratio)
+        self.comb += udp_fragmenter.source.connect(udp_port.sink)
+        self.comb += [
+            # param
+            udp_port.sink.src_port.eq(4321),
+            udp_port.sink.dst_port.eq(self.dst_port.storage),
+            udp_port.sink.ip_address.eq(self.dst_ip.storage),
+            # udp_port.sink.ip_address.eq(convert_ip("192.168.88.101")),
+            # payload
+            udp_port.sink.error.eq(0)
+        ]
+
 
 class DataPipe(Module, AutoCSR):
 
@@ -276,7 +378,7 @@ class SDRAMSimSoC(SimSoC):
         self.udp_port = udp_port = self.udp.crossbar.get_port(4321, 8)
 
         ddr_wr_port, ddr_rd_port = self.sdram.crossbar.get_port("write"), self.sdram.crossbar.get_port("read")
-        self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port)
+        self.submodules.data_pipe = DataPipeWithoutBypass(ddr_wr_port, ddr_rd_port, udp_port, sim=True)
         self.add_csr("data_pipe")
 
 def main():

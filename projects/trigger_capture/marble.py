@@ -6,9 +6,11 @@ from litex.tools.litex_sim import SimSoC, SimConfig
 from litex_boards.targets.marble import EthernetSoC
 from litex.soc.integration.builder import *
 from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
+from litex.soc.cores.bitbang import I2CMaster
 
-from data_pipe import DataPipe
+from data_pipe import DataPipeWithoutBypass as DataPipe
 from litex_boards.platforms import marble
+from zest import Zest
 
 class SDRAMLoopbackSoC(EthernetSoC):
     '''
@@ -21,6 +23,9 @@ class SDRAMLoopbackSoC(EthernetSoC):
         ddr_wr_port, ddr_rd_port = self.sdram.crossbar.get_port("write"), self.sdram.crossbar.get_port("read")
         self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port)
         self.add_csr("data_pipe")
+
+        self.submodules.i2c = I2CMaster(self.platform.request("i2c_fpga"))
+        self.add_csr("i2c")
 
 
 class SDRAMDevSoC(SDRAMLoopbackSoC):
@@ -50,7 +55,7 @@ class SDRAMDevSoC(SDRAMLoopbackSoC):
             self.data_pipe.dram_fifo.pre_converter.sink,
             # self.data_pipe.dram_fifo.pre_converter.converter.strobe_all,
             self.data_pipe.dram_fifo.pre_converter.source,
-            self.data_pipe.buffer_fifo.source,
+            # self.data_pipe.buffer_fifo.source,
             self.data_pipe.dram_fifo.sink,
             # self.data_pipe.dram_fifo.dram_bypass,
             # self.data_pipe.stride_converter.sink,
@@ -136,7 +141,7 @@ def main():
             sim_config=sim_config)
 
     if args.build:
-        soc = SDRAMDevSoC(phy=args.ethernet_phy, **soc_core_argdict(args))
+        soc = SDRAMLoopbackSoC(phy=args.ethernet_phy, **soc_core_argdict(args))
         builder = Builder(soc, **builder_argdict(args))
         vns = builder.build(run=not args.program_only)
 

@@ -1,6 +1,7 @@
 from litex import RemoteClient
 wb = RemoteClient()
 wb.open()
+print(wb.regs.data_pipe_fifo_size.read())
 print(wb.regs.data_pipe_fifo_read.write(0))
 print(wb.regs.data_pipe_fifo_load.write(1))
 print(wb.regs.data_pipe_fifo_load.read())
