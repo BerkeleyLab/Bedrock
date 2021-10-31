@@ -3,29 +3,34 @@ import argparse
 from migen import *
 
 from litex.tools.litex_sim import SimSoC, SimConfig
-from litex_boards.targets.marble import EthernetSoC
+
 from litex.soc.integration.builder import *
 from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
 from litex.soc.cores.bitbang import I2CMaster
+from liteeth.core import LiteEthUDPIPCore
+from liteeth.common import convert_ip
 
 from data_pipe import DataPipeWithoutBypass as DataPipe
 from litex_boards.platforms import marble
 from zest import Zest
 
-class SDRAMLoopbackSoC(EthernetSoC):
+from targets.marble import BaseSoC
+
+class SDRAMLoopbackSoC(BaseSoC):
     '''
     SDRAM loopback tester over ethernet
     '''
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, ip="192.168.19.70", **kwargs):
+        super().__init__(with_ethernet=True, **kwargs)
+        self.submodules.udp_core = LiteEthUDPIPCore(self.ethphy, 0x12345678abcd,
+                                                    convert_ip(ip),
+                                                    clk_freq=self.sys_clk_freq)
+        self.add_csr("udp_core")
         self.udp_port = udp_port = self.udp_core.udp.crossbar.get_port(4321, 8)
 
         ddr_wr_port, ddr_rd_port = self.sdram.crossbar.get_port("write"), self.sdram.crossbar.get_port("read")
         self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port)
         self.add_csr("data_pipe")
-
-        self.submodules.i2c = I2CMaster(self.platform.request("i2c_fpga"))
-        self.add_csr("i2c")
 
 
 class SDRAMDevSoC(SDRAMLoopbackSoC):
@@ -95,9 +100,8 @@ def main():
     parser = argparse.ArgumentParser(description="SDRAM Loopback SoC on Marble*")
     builder_args(parser)
     soc_core_args(parser)
-    # soc_core_args(parser)
-    parser.add_argument("--with-ethernet", action="store_true",
-                        help="enable Ethernet support")
+    parser.add_argument("--ip", default="192.168.19.70",
+                        help="Assign an ip address")
     parser.add_argument("--ethernet-phy", default="rgmii",
                         help="select Ethernet PHY (rgmii or 1000basex)")
     parser.add_argument("-p", "--program-only", action="store_true",
@@ -141,7 +145,8 @@ def main():
             sim_config=sim_config)
 
     if args.build:
-        soc = SDRAMLoopbackSoC(phy=args.ethernet_phy, **soc_core_argdict(args))
+        kwargs = soc_core_argdict(args)
+        soc = SDRAMLoopbackSoC(ip=args.ip, phy=args.ethernet_phy, **kwargs)
         builder = Builder(soc, **builder_argdict(args))
         vns = builder.build(run=not args.program_only)
 
