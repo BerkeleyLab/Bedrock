@@ -7,8 +7,6 @@ from litex.soc.integration.builder import *
 from litex.tools.litex_sim import SimSoC, SimConfig
 from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
 
-from litex_boards.platforms import marble
-
 from litex.soc.interconnect import stream
 from litex.soc.interconnect.csr import CSRStatus, AutoCSR, CSRStorage
 from litex.soc.interconnect.packet import Header, HeaderField, Packetizer
