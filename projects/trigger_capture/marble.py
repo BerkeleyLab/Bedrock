@@ -11,7 +11,7 @@ from liteeth.core import LiteEthUDPIPCore
 from liteeth.common import convert_ip
 
 from data_pipe import DataPipeWithoutBypass as DataPipe
-from litex_boards.platforms import marble
+from platforms import marble
 from zest import Zest
 
 from targets.marble import BaseSoC

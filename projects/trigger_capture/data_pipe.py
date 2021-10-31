@@ -2,7 +2,6 @@ import argparse
 
 from migen import *
 
-from litex_boards.targets.marble import EthernetSoC
 from litedram.frontend.fifo import LiteDRAMFIFO
 from litex.soc.integration.builder import *
 from litex.tools.litex_sim import SimSoC, SimConfig
