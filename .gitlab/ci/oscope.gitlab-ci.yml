@@ -35,7 +35,7 @@ synthesis:
     - mkdir /litex_setup_dir && cd /litex_setup_dir
     - wget https://raw.githubusercontent.com/enjoy-digital/litex/master/litex_setup.py && python3 litex_setup.py init
     - cd litex && git checkout 70c5be6fb8
-    - python3 litex_setup.py install
+    - pip3 install meson && python3 litex_setup.py install
     - cd /builds/hdl-libraries/bedrock/projects/trigger_capture
   script:
     XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && make marble.bit
