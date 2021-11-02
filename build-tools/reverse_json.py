@@ -153,8 +153,10 @@ for line in f.read().split('\n'):
             # stderr.write('INFO: found localparam "%s" with value %d\n' % (p, v))
     if "endcase" in line:
         bank_state = None
-    if "case" in line and "lb_addr" in line:
-        bank_state = "=armed="
+    if "case" in line and "addr" in line:
+        m4 = re.search(r"case\s*\(\w*addr", line)
+        if m4:
+            bank_state = "=armed="
 print(",\n".join(sl))
 print("}")
 exit(fail)
