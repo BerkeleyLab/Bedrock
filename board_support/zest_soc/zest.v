@@ -1,4 +1,5 @@
 module zest #(
+    parameter PH_DIFF_ADV = 4693,  // ADV: 500*11/48 / 200/2*(1<<14) = 4693
     parameter N_ADC = 2,
     parameter N_CH = N_ADC*4,
     parameter FCNT_WIDTH = 16,
@@ -268,8 +269,7 @@ generate for (ix=0; ix<N_ADC; ix=ix+1) begin: ic_map
         .clk_div_buf  (clk_div_buf[ix])
     );
 
-    // ADV: 500*11/48/200/2*(1<<14) = 4693
-    phase_diff #(.adv(4693)) phase_diff_i (
+    phase_diff #(.adv(PH_DIFF_ADV)) phase_diff_i (
         .uclk1      (dsp_clk_out),
         .ext_div1   (1'b0),
         .uclk2      (clk_div[ix]),
@@ -363,8 +363,7 @@ BUFG dco_bufg (
     .O      (dac_dco_clk)
 );
 
-// ADV: 500*11/48/200/2*(1<<14) = 4693
-phase_diff #(.adv(4693)) phase_diff_dac (
+phase_diff #(.adv(PH_DIFF_ADV)) phase_diff_dac (
     .uclk1      (dsp_clk_out),
     .ext_div1   (1'b0),
     .uclk2      (dac_dco_clk),
