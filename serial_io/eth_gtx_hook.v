@@ -16,7 +16,9 @@ module eth_gtx_hook #(
 
         // Auto-Negotiation
         input               an_disable,
-        output [6:0]        an_status_l, // still in gmii_tx_clk domain
+        input               rx_err_los,
+        output [8:0]        an_status_l, // still in gmii_tx_clk domain
+        output [15:0]       lacr_rx,
 
         input               gmii_tx_en,
         input  [7:0]        gmii_txd,
@@ -70,7 +72,6 @@ module eth_gtx_hook #(
         // PCS/PMA and GMII Bridge
         // ---------------------------------
 
-        wire [15:0] lacr_rx;
 
         gmii_link i_gmii_link(
             //GMII to MAC
@@ -85,7 +86,7 @@ module eth_gtx_hook #(
              // To Transceiver
             .txdata       (gtx_txd_10),
             .rxdata       (gtx_rxd_10),
-            .rx_err_los   (1'b0),
+            .rx_err_los   (rx_err_los),
             .an_bypass    (an_disable), // Disable auto-negotiation
             .lacr_rx      (lacr_rx),
             .an_status    (an_status_l)
