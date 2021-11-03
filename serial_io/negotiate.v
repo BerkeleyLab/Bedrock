@@ -229,16 +229,16 @@ module negotiate(
 
    assign wdog_timeout = (wdog_cnt==WATCHDOG_TIME);
 
-   wire [6:0] an_status_l = {an_state==AN_ABORT, an_state==AN_ABILITY,
+   wire [8:0] an_status_l = {an_state==AN_ABORT, an_state==AN_ABILITY,
                              wdog_an_disable, remote_fault, abl_mismatch,
-                             an_state==AN_ACK, an_state==AN_IDLE, an_state==AN_LINK_OK};
+                             an_state==AN_ACK, an_state==AN_IDLE, an_state==AN_LINK_OK, 1'b0};
 
    // Register comb signals in rx_clk before transferring to tx_clk
    reg lacr_send_r=0; // lacr_send in the rx clock domain
    reg send_ack_r;
    reg send_breaklink_r;
    reg operate_r=0;
-   reg [6:0] an_status_r=0;
+   reg [8:0] an_status_r=0;
    always @(posedge rx_clk) begin
        operate_r        <= n_operate;
        lacr_send_r      <= n_lacr_send;
