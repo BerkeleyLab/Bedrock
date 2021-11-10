@@ -3,14 +3,15 @@ import socket
 import sys
 import struct
 
-from collections import namedtuple
-from datetime import datetime
+# from collections import namedtuple
+# from datetime import datetime
 from matplotlib import pyplot as plt
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 ip = sys.argv[1]
 port = int(sys.argv[2])
 sock.bind((ip, port))
+
 
 def recvall(sock):
     BUFF_SIZE = 1024 * 1024 * 8
@@ -24,6 +25,7 @@ def recvall(sock):
             # either 0 or end of data
             break
     return data
+
 
 data = recvall(sock)
 E = []

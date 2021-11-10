@@ -1,9 +1,9 @@
 import argparse
 
-from migen import *
+from migen import log2_int, If, Signal, Module, Cat, FSM, NextValue, NextState
 
 from litedram.frontend.fifo import LiteDRAMFIFO
-from litex.soc.integration.builder import *
+from litex.soc.integration.builder import builder_args, Builder, builder_argdict
 from litex.tools.litex_sim import SimSoC, SimConfig
 from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
 
@@ -12,7 +12,7 @@ from litex.soc.interconnect.csr import CSRStatus, AutoCSR, CSRStorage
 from litex.soc.interconnect.packet import Header, HeaderField, Packetizer
 from litex.soc.interconnect.stream import EndpointDescription
 from liteeth.common import eth_udp_user_description, convert_ip
-from liteeth.frontend.stream import LiteEthStream2UDPTX
+# from liteeth.frontend.stream import LiteEthStream2UDPTX
 
 
 fragmenter_header_length = 8
@@ -24,6 +24,7 @@ fragmenter_header = Header(fragmenter_header_fields,
                            fragmenter_header_length,
                            swap_field_bytes=True)
 
+
 def udp_fragmenter_description(dw):
     param_layout = [
         ("length",     32),
@@ -33,12 +34,14 @@ def udp_fragmenter_description(dw):
     ]
     return EndpointDescription(payload_layout, param_layout)
 
+
 class UDPFragmenterPacketizer(Packetizer):
     def __init__(self, dw=8):
         Packetizer.__init__(self,
             udp_fragmenter_description(dw),
             eth_udp_user_description(dw),
             fragmenter_header)
+
 
 class UDPFragmenter(Module):
     '''
@@ -140,12 +143,14 @@ class UDPFragmenter(Module):
                 NextState("FRAGMENTED_PACKET_SEND")
         )
 
+
 class Counter(Module):
     def __init__(self, nbits, enable_on_reset=1):
         self.count = Signal(nbits)
         self.en = Signal(reset=enable_on_reset)
         self.sync += If(self.en,
                         self.count.eq(self.count + 1))
+
 
 class ADCStream(Module):
     def __init__(self, nch=4, bits=16, cycles_per_sample=1, ramp=True):
@@ -157,6 +162,7 @@ class ADCStream(Module):
         self.sync += valid.eq(~valid)
         self.comb += [source.data.eq(Cat(*[ramp.count + ch for ch in range(nch)])),
                       source.valid.eq(valid)]
+
 
 class DataPipeWithoutBypass(Module, AutoCSR):
     def __init__(self, ddr_wr_port, ddr_rd_port, udp_port, sim=False):
@@ -369,6 +375,7 @@ class DataPipe(Module, AutoCSR):
             If(fifo_counter == SIZE - 2, self.last_sample.eq(adcs.source.data[:16])),
         ]
 
+
 class SDRAMSimSoC(SimSoC):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -377,6 +384,7 @@ class SDRAMSimSoC(SimSoC):
         ddr_wr_port, ddr_rd_port = self.sdram.crossbar.get_port("write"), self.sdram.crossbar.get_port("read")
         self.submodules.data_pipe = DataPipeWithoutBypass(ddr_wr_port, ddr_rd_port, udp_port, sim=True)
         self.add_csr("data_pipe")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Datapipe simulation SoC*")
@@ -404,7 +412,7 @@ def main():
     soc_kwargs["integrated_main_ram_size"] = 0x10000
     soc_kwargs = soc_core_argdict(args)
     soc_kwargs["uart_name"] = "sim"
-    #sim_config.add_module("serial2console", "serial")
+    # sim_config.add_module("serial2console", "serial")
     sim_config.add_module(
         'ethernet',
         "eth",
@@ -419,7 +427,8 @@ def main():
                       etherbone_mac_address=0x12345678abcd,
                       **soc_kwargs)
     builder = Builder(soc, **builder_argdict(args))
-    vns = builder.build(
+    # discard result, or save in vns?
+    builder.build(
         threads=args.threads,
         trace=args.trace,
         sim_config=sim_config)

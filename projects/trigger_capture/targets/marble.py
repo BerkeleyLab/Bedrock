@@ -27,25 +27,29 @@ then test and benchmark the etherbone link:
 import os
 import argparse
 
-from migen import *
+from migen import Signal, Module, ClockDomain
 
 import sys
 sys.path.append("..")
 from trigger_capture.platforms import marble
 
-from litex.soc.cores.clock import *
-from litex.soc.integration.soc_core import *
-from litex.soc.integration.builder import *
+# from litex.soc.cores.clock import *
+from functools import reduce
+from operator import or_
+from litex.soc.cores.clock.xilinx_s7 import S7IDELAYCTRL, S7MMCM
+from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict, SoCCore
+from litex.soc.integration.builder import builder_args, Builder, builder_argdict
 from litex.soc.cores.led import LedChaser
 from litex.soc.cores.bitbang import I2CMaster
 
-from litedram.modules import MT8JTF12864, parse_spd_hexdump, SDRAMModule, MT41J256M8
+# MT8JTF12864?
+from litedram.modules import parse_spd_hexdump, SDRAMModule, MT41J256M8
 from litedram.phy import s7ddrphy
 
 from liteeth.phy.s7rgmii import LiteEthPHYRGMII
 
-# CRG ----------------------------------------------------------------------------------------------
 
+# CRG ----------------------------------------------------------------------------------------------
 class _CRG(Module):
     def __init__(self, platform, sys_clk_freq, resets=[]):
         self.rst = Signal()
@@ -65,12 +69,13 @@ class _CRG(Module):
         pll.create_clkout(self.cd_sys4x, 4*sys_clk_freq)
         pll.create_clkout(self.cd_sys4x_dqs, 4*sys_clk_freq, phase=90)
         pll.create_clkout(self.cd_idelay, 200e6)
-        platform.add_false_path_constraints(self.cd_sys.clk, pll.clkin) # Ignore sys_clk to pll.clkin path created by SoC's rst.
+        # Ignore sys_clk to pll.clkin path created by SoC's rst.
+        platform.add_false_path_constraints(self.cd_sys.clk, pll.clkin)
 
         self.submodules.idelayctrl = S7IDELAYCTRL(self.cd_idelay)
 
-# BaseSoC ------------------------------------------------------------------------------------------
 
+# BaseSoC ------------------------------------------------------------------------------------------
 class BaseSoC(SoCCore):
     def __init__(
         self,
@@ -158,8 +163,8 @@ class BaseSoC(SoCCore):
                 pads         = platform.request_all("user_led"),
                 sys_clk_freq = sys_clk_freq)
 
-# Build --------------------------------------------------------------------------------------------
 
+# Build --------------------------------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -172,7 +177,8 @@ def main():
     parser.add_argument("--with-etherbone", action="store_true", help="Enable Etherbone support")
     parser.add_argument("--with-rts-reset", action="store_true", help="Connect UART RTS line to sys_clk reset")
     parser.add_argument("--with-bist",     action="store_true", help="Add DDR3 BIST Generator/Checker")
-    parser.add_argument("--spd-dump", type=str, help="DDR3 configuration file, dumped using the `spdread` command in LiteX BIOS")
+    parser.add_argument("--spd-dump", type=str,
+                        help="DDR3 configuration file, dumped using the `spdread` command in LiteX BIOS")
     builder_args(parser)
     soc_core_args(parser)
     args = parser.parse_args()
@@ -191,6 +197,7 @@ def main():
     if args.load:
         prog = soc.platform.create_programmer()
         prog.load_bitstream(os.path.join(builder.gateware_dir, soc.build_name + ".bit"))
+
 
 if __name__ == "__main__":
     main()

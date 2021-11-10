@@ -1,20 +1,24 @@
+import os
 import argparse
 
-from migen import *
+# from migen import *
 
-from litex.tools.litex_sim import SimSoC, SimConfig
+# from litex.tools.litex_sim import SimSoC
+from litex.tools.litex_sim import SimConfig
 
-from litex.soc.integration.builder import *
+from litex.soc.integration.builder import Builder, builder_argdict, builder_args
 from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
-from litex.soc.cores.bitbang import I2CMaster
+# from litex.soc.cores.bitbang import I2CMaster
 from liteeth.core import LiteEthUDPIPCore
 from liteeth.common import convert_ip
 
 from data_pipe import DataPipeWithoutBypass as DataPipe
+from data_pipe import SDRAMSimSoC
 from platforms import marble
-from zest import Zest
+# from zest import Zest
 
 from targets.marble import BaseSoC
+
 
 class SDRAMLoopbackSoC(BaseSoC):
     '''
@@ -95,6 +99,7 @@ class SDRAMDevSoC(SDRAMLoopbackSoC):
                                                      csr_csv="analyzer.csv")
         self.add_csr("analyzer")
 
+
 # Build --------------------------------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser(description="SDRAM Loopback SoC on Marble*")
@@ -124,7 +129,7 @@ def main():
         soc_kwargs["integrated_main_ram_size"] = 0x10000
         soc_kwargs = soc_core_argdict(args)
         soc_kwargs["uart_name"] = "sim"
-        #sim_config.add_module("serial2console", "serial")
+        # sim_config.add_module("serial2console", "serial")
         sim_config.add_module(
             'ethernet',
             "eth",
@@ -139,7 +144,8 @@ def main():
                           etherbone_mac_address=0x12345678abcd,
                           **soc_kwargs)
         builder = Builder(soc, **builder_argdict(args))
-        vns = builder.build(
+        # discard result, or save in vns?
+        builder.build(
             threads=args.threads,
             trace=args.trace,
             sim_config=sim_config)
@@ -148,7 +154,8 @@ def main():
         kwargs = soc_core_argdict(args)
         soc = SDRAMLoopbackSoC(ip=args.ip, phy=args.ethernet_phy, **kwargs)
         builder = Builder(soc, **builder_argdict(args))
-        vns = builder.build(run=not args.program_only)
+        # discard result, or save in vns?
+        builder.build(run=not args.program_only)
 
     if args.load:
         prog = marble.Platform().create_programmer()

@@ -1,16 +1,18 @@
 import argparse
+import os
 
-from migen import *
+# from migen import *
 
-from litex.tools.litex_sim import SimSoC, SimConfig
+# from litex.tools.litex_sim import SimSoC, SimConfig
 from litex_boards.targets.kc705 import BaseSoC
-from litex.soc.integration.builder import *
+from litex.soc.integration.builder import Builder, builder_argdict, builder_args
 from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
 from liteeth.core import LiteEthUDPIPCore
 from liteeth.common import convert_ip
 
 from data_pipe import DataPipe
 from litex_boards.platforms import kc705
+
 
 class SDRAMLoopbackSoC(BaseSoC):
     '''
@@ -31,6 +33,7 @@ class SDRAMLoopbackSoC(BaseSoC):
         self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port)
         self.add_csr("data_pipe")
 
+
 def main():
     parser = argparse.ArgumentParser(description="SDRAM Loopback SoC on Marble*")
     builder_args(parser)
@@ -47,13 +50,13 @@ def main():
                         help="program FPGA")
     args = parser.parse_args()
 
-
     if args.build:
         soc = SDRAMLoopbackSoC(
-            with_ethernet = args.with_ethernet,
+            with_ethernet=args.with_ethernet,
             **soc_core_argdict(args))
         builder = Builder(soc, **builder_argdict(args))
-        vns = builder.build(run=not args.program_only)
+        # discard result, or save in vns?
+        builder.build(run=not args.program_only)
 
     if args.load:
         prog = kc705.Platform().create_programmer()

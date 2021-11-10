@@ -17,7 +17,7 @@
 # Pin numbers extracted from a .xdc file, which was auto-generated from
 # the Kicad Schematic.
 
-from litex.build.generic_platform import *
+from litex.build.generic_platform import Pins, Subsignal, IOStandard
 from litex.build.xilinx import XilinxPlatform
 from litex.build.openocd import OpenOCD
 
