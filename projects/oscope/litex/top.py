@@ -7,7 +7,7 @@ from migen.genlib.cdc import PulseSynchronizer
 from litex.soc.cores.freqmeter import FreqMeter
 from litex.soc.cores import spi
 from litex.soc.interconnect import wishbone
-from litex.soc.integration.soc_sdram import soc_sdram_args, soc_sdram_argdict
+from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
 from litex.soc.integration.builder import builder_args, builder_argdict, Builder
 from litex.soc.interconnect.csr import CSRStatus, CSRField, AutoCSR, CSRStorage
 
@@ -43,18 +43,6 @@ class DumpToRAM(Module, AutoCSR):
                w_addr.eq(0)).Elif(w_addr != depth, w_addr.eq(w_addr + 1))
         ]
 
-
-def add_ltc(soc):
-    self.submodules.lvds = LTCPhy(self.platform, self.sys_clk_freq, 120e6)
-    self.platform.add_false_path_constraints(
-        self.crg.cd_sys.clk,
-        self.lvds.pads_dco
-    )
-
-    spi_pads = self.platform.request("LTC_SPI")
-    self.submodules.spi = spi.SPIMaster(spi_pads, 16, self.sys_clk_freq, self.sys_clk_freq/32)
-    adc_data = Cat(Signal(2), self.lvds.sample_outs[0],
-                   Signal(2), self.lvds.sample_outs[1])
 
 class LTCSocDev(EthernetSoC, AutoCSR):
     csr_peripherals = [
@@ -103,8 +91,8 @@ class LTCSocDev(EthernetSoC, AutoCSR):
 def main():
     parser = argparse.ArgumentParser(description="LiteX SoC on MarbleMini")
     builder_args(parser)
-    soc_sdram_args(parser)
-    # soc_core_args(parser)
+    # soc_sdram_args(parser)
+    soc_core_args(parser)
     parser.add_argument("--with-ethernet", action="store_true",
                         help="enable Ethernet support")
     parser.add_argument("--ethernet-phy", default="rgmii",
@@ -114,11 +102,11 @@ def main():
     args = parser.parse_args()
 
     if args.with_ethernet:
-        soc = LTCSocDev(phy=args.ethernet_phy, **soc_sdram_argdict(args))
+        soc = LTCSocDev(phy=args.ethernet_phy, **soc_core_argdict(args))
         # soc = EthernetSoC(phy=args.ethernet_phy, **soc_sdram_argdict(args))
         # soc = EthernetSoC(phy=args.ethernet_phy, **soc_core_argdict(args))
     else:
-        soc = BaseSoC(**soc_sdram_argdict(args))
+        soc = BaseSoC(**soc_core_argdict(args))
 
     builder = Builder(soc, **builder_argdict(args))
     if not args.program_only:
