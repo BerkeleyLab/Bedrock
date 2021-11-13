@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim as basic-iverilog
+FROM debian:bullseye-slim as testing_base_bullseye
 
 # Vivado needs libtinfo5, at least for Artix?
 # libz-dev required for Verilator FST support
@@ -26,10 +26,8 @@ RUN apt-get update && \
 	python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
 	pip3 --version
 
-FROM basic-iverilog as testing_base
-
 # Replaces previous build-riscv-gcc-from-source step
-RUN apt-get update && apt-get -y gcc-riscv64-unknown-elf
+RUN apt-get install -y gcc-riscv64-unknown-elf
 
 # flex and bison required for building vhd2vl
 RUN apt-get install -y \
@@ -56,8 +54,7 @@ RUN apt-get install -y yosys verilator openocd
 RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4
 
 # SymbiYosys formal verification tool + Yices 2 solver (`sby` command)
-RUN apt-get update && \
-	apt-get install -y build-essential clang bison flex libreadline-dev \
+RUN apt-get install -y build-essential clang bison flex libreadline-dev \
 					 gawk tcl-dev libffi-dev git mercurial graphviz   \
 					 xdot pkg-config python python3 libftdi-dev gperf \
 					 libboost-program-options-dev autoconf libgmp-dev \
