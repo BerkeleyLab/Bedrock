@@ -27,7 +27,8 @@ RUN apt-get update && \
 	pip3 --version
 
 # Replaces previous build-riscv-gcc-from-source step
-RUN apt-get install -y gcc-riscv64-unknown-elf
+RUN apt-get update && \
+	apt-get install -y gcc-riscv64-unknown-elf
 
 # flex and bison required for building vhd2vl
 RUN apt-get install -y \
@@ -70,4 +71,3 @@ RUN apt-get install -y build-essential clang bison flex libreadline-dev \
 	./configure && \
 	make -j$(nproc) && \
 	make install
-
