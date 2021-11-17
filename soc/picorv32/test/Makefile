@@ -16,7 +16,6 @@ all: clean
 	$(MAKE) -C ./sram
 	$(MAKE) -C ./memio
 	$(MAKE) -C ../project/cmod_a7/sim
-	$(MAKE) -C ./zest
 
 	# Formal verification of some components
 	(cd fv/ && sby f_pack.sby)
