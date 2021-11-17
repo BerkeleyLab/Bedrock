@@ -88,7 +88,7 @@ module zest_test_tb;
 
     // Naive way of generating a DDR test signal
     reg [13:0] testValue=14'b10101010101010;
-    reg [ 6:0] testSample =7'h0;
+    reg [ 7:0] testSample =8'h0;
     integer i;
     always @(posedge clk_ab) begin
         for (i=0; i<=6; i=i+1)
@@ -99,16 +99,17 @@ module zest_test_tb;
             testSample[i] = testValue[2*i+1];
         testValue = ~testValue;
     end
-
+    wire adc_pdwn = 0;
     zest #(
         .BASE_ADDR       (8'h01)
     ) zest_inst (
+        .ADC_PDWN           (adc_pdwn),
         .CLK_TO_FPGA_P      ( clk_ab),
         .CLK_TO_FPGA_N      (~clk_ab),
         .ADC_D0_P         ( testSample),
-        .ADC_D0_N         (~testSample),
-	.ADC_DCO_P (1'b0),
-	.ADC_DCO_N (1'b0),
+        .ADC_D0_N         ( ~testSample),
+        .ADC_DCO_P (2'b00),
+        .ADC_DCO_N (2'b00),
         .clk           (mem_clk),
         .rst           (rst),
         .mem_packed_fwd(packed_cpu_fwd),
