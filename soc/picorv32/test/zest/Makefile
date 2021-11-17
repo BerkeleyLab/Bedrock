@@ -16,14 +16,16 @@ SRC_V  += ODDR.v
 SRC_V  += $(VIVADO_BASE)/data/verilog/src/unisims/ISERDESE2.v $(VIVADO_BASE)/data/verilog/src/glbl.v
 SRC_V  += sfr_pack.v gpio_pack.v
 
-SRCS   = $(BOARD_SUPPORT_DIR)/zest_soc/firmware/zest.c $(BOARD_SUPPORT_DIR)/zest_soc/firmware/zest.h
+SRCS    = print.c timer.c settings.h
+SRCS   += printf.c iserdes.c
+SRCS   += $(BOARD_SUPPORT_DIR)/zest_soc/firmware/zest.c $(BOARD_SUPPORT_DIR)/zest_soc/firmware/zest.h zest_test.c
 
-OBJS   = zest.o startup.o timer.o
+OBJS   = $(subst .c,.o,$(filter %.c, $(SRCS))) startup.o
 
 CFLAGS += -DSIMULATION -I$(BOARD_SUPPORT_DIR)/zest_soc/firmware
 VFLAGS += -DSIMULATE -DSIMULATION
 
-TARGET  = zest
+TARGET  = zest_test
 
 all: $(TARGET).vcd
 

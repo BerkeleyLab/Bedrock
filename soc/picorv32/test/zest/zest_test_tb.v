@@ -1,6 +1,6 @@
 `timescale 1 ns / 1 ps
 
-module zest_tb;
+module zest_test_tb;
     localparam CLK_PERIOD =    1.0/0.200; // System clock period in [ns]
     localparam CLK_AB_PERIOD = 1.0/0.224; // DSP clock period in [ns]
     reg mem_clk=1, clk_ab=1;
@@ -25,8 +25,8 @@ module zest_tb;
     integer pass=1;
     initial begin
         if ($test$plusargs("vcd")) begin
-            $dumpfile("zest.vcd");
-            $dumpvars(5,zest_tb);
+            $dumpfile("zest_test.vcd");
+            $dumpvars(5,zest_test_tb);
         end
         repeat (10) @(posedge mem_clk);
         rst <= 0;
@@ -76,7 +76,7 @@ module zest_tb;
     //  Instantiate the memory (holds data and program!)
     // --------------------------------------------------------------
     memory_pack #(
-        .MEM_INIT      ("./zest32.hex"),
+        .MEM_INIT      ("./zest_test32.hex"),
         .BASE_ADDR     (8'h00)
     ) mem_inst (
         // Hardware interface
