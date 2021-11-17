@@ -11,7 +11,7 @@ vpath %.S $(COMMON_DIR)
 vpath %.lds $(COMMON_DIR)
 vpath %.c $(LIB_DIR)/src
 
-RISCV_TOOLS_PREFIX = riscv32-unknown-elf-
+RISCV_TOOLS_PREFIX = riscv64-unknown-elf-
 CC      = $(RISCV_TOOLS_PREFIX)gcc
 AR      = $(RISCV_TOOLS_PREFIX)ar
 VFLAGS  = -Wall -Wno-timescale -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
