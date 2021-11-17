@@ -8,6 +8,11 @@ WARN = "WARN"
 ERROR = "ERROR"
 
 
+class RomError(Exception):
+    """Exception raised for errors during ROM read."""
+    pass
+
+
 def open(addr, **kws):
     """Access to a single LEEP Device.
 

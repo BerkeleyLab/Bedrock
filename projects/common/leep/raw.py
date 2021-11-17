@@ -17,6 +17,7 @@ _spam = logging.getLogger(__name__+'.packets')
 _spam.propagate = False
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+from base import RomError
 from base import DeviceBase
 
 if sys.version_info >= (3, 0):
@@ -391,9 +392,12 @@ class LEEPDevice(DeviceBase):
             self._checkrom(values_full)
             return values_full
         else:
-            raise RuntimeError("ROM not found")
+            raise RomError("ROM not found, size is zero")
 
     def _checkrom(self, values, preamble_check=False):
+        rom_bad_value = 0xdeadf00d
+        if values[0] == rom_bad_value:
+            raise RomError("ROM not found, bad value")
         values = numpy.frombuffer(values, be16)
         _log.debug("ROM[0] %08d", values[0])
         values = values[1::2]  # discard upper bytes
@@ -414,7 +418,7 @@ class LEEPDevice(DeviceBase):
             blob, values = values[1:size+1], values[size+1:]
             if len(blob) != size and preamble_check is False:
                 _log.error("Truncated: %d", len(blob))
-                raise ValueError("Truncated ROM Descriptor")
+                raise RomError("Truncated ROM Descriptor")
 
             if type == 1:
                 blob = blob.tostring()
@@ -453,13 +457,17 @@ class LEEPDevice(DeviceBase):
         self.jsonhash = None
         self.regmap = None
 
+        # Try to read ROM at both addresses before raising error
         try:
             _log.debug("Trying with init_addr %d", self.init_rom_addr)
             self.the_rom = self._trysize(self.init_rom_addr)
-        except (RuntimeError, ValueError):
+        except (RuntimeError, ValueError, RomError):
             _log.debug("Trying with max_addr %d", self.max_rom_addr)
             try:
                 self.the_rom = self._trysize(self.max_rom_addr)
+            except RomError as e:
+                _log.error("raw.py: %s. Quitting." % str(e))
+                raise
             except (RuntimeError, ValueError):
                 raise ValueError("Could not read ROM using either start addresses")
         _log.info("ROM was successfully read")

@@ -600,11 +600,11 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
 bool check_adc_prbs9(void) {
     bool pass=true;
     uint16_t wfm_buf[16];
-    uint16_t pn_buf[32];
+    uint16_t pn_buf[64];
     size_t ix;
 
-    gen_prbs9(pn_buf, 32);
-    for (ix=0; ix<32; ix++) {
+    gen_prbs9(pn_buf, 64);
+    for (ix=0; ix<64; ix++) {
         debug_printf("PN9: %#06x\n", pn_buf[ix]);
     }
     write_zest_reg(ZEST_DEV_AD9653_BOTH, 0x14, 0x06); // offset binary
@@ -618,17 +618,17 @@ bool check_adc_prbs9(void) {
         for (ix=0; ix<8; ix++) {
             debug_printf("  ix %2d, dout: %#06x\n", ix, wfm_buf[ix]);
         }
-        for (ix=0; ix<32-8; ix++) {
+        for (ix=0; ix<64-8; ix++) {
             if (pn_buf[ix] == wfm_buf[0]) {
                 // See gen_prbs9() for starting point of 1504
                 // 1e3/(500 * 11 / 48) / 8 = 1.096 ns per bit
-                printf("  ADC %d: delay %d ns\n", ch,
-                        (int)(1.1*(ix + 1504)));
+                printf("  ADC %d: Found PN9 offset=%d\n", ch, ix+1504);
+                        // (int)(1.1*(ix + 1504)));
                 for (size_t iy=1; iy<8; iy++) {
                     pass &= pn_buf[ix+iy] == wfm_buf[iy];
                 }
                 break;
-            } else if (ix == 23) {
+            } else if (ix == 55) { // 64 - 8 - 1
                 printf("  ADC %d: Failed to find PN9.\n", ch);
             }
         }
