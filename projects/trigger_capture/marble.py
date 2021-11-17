@@ -1,7 +1,7 @@
 import os
 import argparse
 
-# from migen import *
+from migen import Module
 
 # from litex.tools.litex_sim import SimSoC
 from litex.tools.litex_sim import SimConfig
@@ -13,9 +13,10 @@ from liteeth.core import LiteEthUDPIPCore
 from liteeth.common import convert_ip
 
 from data_pipe import DataPipeWithoutBypass as DataPipe
-from data_pipe import SDRAMSimSoC
+from data_pipe import SDRAMSimSoC, ADCStream
+
 from platforms import marble
-# from zest import Zest
+from zest import zest_pads, Zest
 
 from targets.marble import BaseSoC
 
@@ -24,6 +25,29 @@ class SDRAMLoopbackSoC(BaseSoC):
     '''
     SDRAM loopback tester over ethernet
     '''
+    def add_zest(self):
+        self.platform.add_extension(zest_pads)
+        self.submodules.zest = Zest(self.platform)
+
+        self.clock_domains.cd_adc    = ClockDomain()
+
+        self.comb += ClockSignal("adc").eq(self.zest.adc_out_clk)
+
+        self.platform.add_false_path_constraints(self.crg.cd_adc.clk, self.crg.cd_sys.clk)
+
+        # self.dsp_clk_out      = Signal()
+        # self.clk_div_out      = Signal(2)
+        # self.adc_out_clk      = Signal(8)
+        # self.adc_out_data     = Signal(128)
+        # self.dac_in_data_i    = Signal(14)
+        # self.dac_in_data_q    = Signal(14)
+        # self.clk_200          = Signal()
+        # self.clk              = Signal()
+        # self.rst              = Signal()
+        # self.mem_packed_fwd   = Signal(69)
+        # self.mem_packed_ret   = Signal(33)
+
+
     def __init__(self, ip="192.168.19.70", **kwargs):
         super().__init__(with_ethernet=True, **kwargs)
         self.submodules.udp_core = LiteEthUDPIPCore(self.ethphy, 0x12345678abcd,
@@ -33,7 +57,17 @@ class SDRAMLoopbackSoC(BaseSoC):
         self.udp_port = udp_port = self.udp_core.udp.crossbar.get_port(4321, 8)
 
         ddr_wr_port, ddr_rd_port = self.sdram.crossbar.get_port("write"), self.sdram.crossbar.get_port("read")
-        self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port)
+
+        REAL_ADC = False
+        if REAL_ADC:
+            self.add_zest()
+            adc_source = self.zest.source
+            adc_dw = self.zest.dw
+        else:
+            adc_dw = 64
+            self.submodules.adcs = adcs = ADCStream(1, adc_dw)
+
+        self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port, adcs.source, adc_dw)
         self.add_csr("data_pipe")
 
 

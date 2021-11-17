@@ -1,5 +1,6 @@
 from migen import *
 
+from litex.build.generic_platform import Subsignal, Pins, IOStandard, Misc
 from litex.soc.interconnect.csr import AutoCSR
 
 zest_pads = [
@@ -81,59 +82,86 @@ zest_pads = [
     ),
 ]
 
-class zest(Module, AutoCSR):
-    def __init__(self):
-        self.ADC_PDWN = Signal()
-        self.ADC_CSB_0 = Signal()
-        self.ADC_SYNC = Signal()
-        self.SCLK = Signal()
-        self.SDI = Signal()
-        self.ADC_CSB_1 = Signal()
-        self.LMK_LEUWIRE = Signal()
-        self.PWR_SYNC = Signal()
-        self.PWR_EN = Signal()
-        self.AD7794_FCLK = Signal()
-        self.DAC_CSB = Signal()
-        self.AMC7823_SPI_SS = Signal()
-        self.AD7794_CSB = Signal()
-        self.DAC_RESET = Signal()
-        self.POLL_SCLK = Signal()
-        self.POLL_MOSI = Signal()
-        self.ADC_SDIO_DIR = Signal()
-        self.ADC_SDIO = Signal()
-        self.AMC7823_SPI_MISO = Signal()
-        self.LMK_DATAUWIRE = Signal()
-        self.AD7794_DOUT = Signal()
-        self.DAC_SDO = Signal()
-        self.CLK_TO_FPGA_P = Signal()
-        self.CLK_TO_FPGA_N = Signal()
-        self.ADC_D0_P = Signal(8)
-        self.ADC_D0_N = Signal(8)
-        self.ADC_D1_P = Signal(8)
-        self.ADC_D1_N = Signal(8)
-        self.ADC_DCO_P = Signal(2)
-        self.ADC_DCO_N = Signal(2)
-        self.ADC_FCO_P = Signal(2)
-        self.ADC_FCO_N = Signal(2)
-        self.DAC_D_P = Signal(14)
-        self.DAC_D_N = Signal(14)
-        self.DAC_DCI_P = Signal()
-        self.DAC_DCI_N = Signal()
-        self.DAC_DCO_P = Signal()
-        self.DAC_DCO_N = Signal()
-        self.dsp_clk_out = Signal()
-        self.clk_div_out = Signal(2)
-        self.adc_out_clk = Signal(8)
-        self.adc_out_data = Signal(128)
-        self.dac_in_data_i = Signal(14)
-        self.dac_in_data_q = Signal(14)
-        self.clk_200 = Signal()
-        self.clk = Signal()
-        self.rst = Signal()
-        self.mem_packed_fwd = Signal(69)
-        self.mem_packed_ret = Signal(33)
+class Zest(Module, AutoCSR):
+
+    def add_sources(self, platform):
+        sources = [
+            "../../board_support/zest_soc/zest.v",
+            "../../board_support/zest_soc/zest_clk_map.v",
+            "../../board_support/zest_soc/zest_spi_dio_pack.v",
+            "../../dsp/freq_count.v",
+            "../../dsp/phase_diff.v",
+            "../../dsp/flag_xdomain.v",
+            "../../dsp/data_xdomain.v",
+            "../../dsp/dpram.v",
+            "../../soc/picorv32/gateware/sfr_pack.v",
+            "../../soc/picorv32/gateware/munpack.v",
+            "../../soc/picorv32/gateware/picorv32.v",
+            "../../soc/picorv32/gateware/spi_engine.v",
+            "../../board_support/fmc11x/dco_buf.v",
+            "../../board_support/fmc11x/iserdes_pack.v",
+            "../../board_support/fmc11x/idelays_pack.v",
+            "../../board_support/fmc11x/wfm_pack.v",
+        ]
+        platform.add_sources("../", *sources)
+
+    def __init__(self, platform):
+        self.ADC_PDWN         = platform.request("ZEST_ADC_PDWN")
+        self.ADC_CSB_0        = platform.request("ZEST_ADC_PDWN")
+        self.ADC_SYNC         = platform.request("ZEST_ADC_PDWN")
+        self.SCLK             = platform.request("ZEST_SCLK")
+        self.SDI              = platform.request("ZEST_SDI")
+        self.ADC_CSB_1        = platform.request("ZEST_ADC_CSB_1")
+        self.LMK_LEUWIRE      = platform.request("ZEST_LMK_LEUWIRE")
+        self.PWR_SYNC         = platform.request("ZEST_PWR_SYNC")
+        self.PWR_EN           = platform.request("ZEST_PWR_EN")
+        self.AD7794_FCLK      = platform.request("ZEST_AD7794_FCLK")
+        self.DAC_CSB          = platform.request("ZEST_DAC_CSB")
+        self.AMC7823_SPI_SS   = platform.request("ZEST_AMC7823_SPI_SS")
+        self.AD7794_CSB       = platform.request("ZEST_AD7794_CSB")
+        self.DAC_RESET        = platform.request("ZEST_DAC_RESET")
+        self.POLL_SCLK        = platform.request("ZEST_POLL_SCLK")
+        self.POLL_MOSI        = platform.request("ZEST_POLL_MOSI")
+        self.ADC_SDIO_DIR     = platform.request("ZEST_ADC_SDIO_DIR")
+        self.ADC_SDIO         = platform.request("ZEST_ADC_SDIO")
+        self.AMC7823_SPI_MISO = platform.request("ZEST_AMC7823_SPI_MISO")
+        self.LMK_DATAUWIRE    = platform.request("ZEST_LMK_DATAUWIRE")
+        self.AD7794_DOUT      = platform.request("ZEST_AD7794_DOUT")
+        self.DAC_SDO          = platform.request("ZEST_DAC_SDO")
+        self.CLK_TO_FPGA_P    = platform.request("ZEST_CLK_TO_FPGA_P")
+        self.CLK_TO_FPGA_N    = platform.request("ZEST_CLK_TO_FPGA_N")
+        self.ADC_D0_P         = platform.request("ZEST_ADC_D0_P")
+        self.ADC_D0_N         = platform.request("ZEST_ADC_D0_N")
+        self.ADC_D1_P         = platform.request("ZEST_ADC_D1_P")
+        self.ADC_D1_N         = platform.request("ZEST_ADC_D1_N")
+        self.ADC_DCO_P        = platform.request("ZEST_ADC_DCO_P")
+        self.ADC_DCO_N        = platform.request("ZEST_ADC_DCO_N")
+        self.ADC_FCO_P        = platform.request("ZEST_ADC_FCO_P")
+        self.ADC_FCO_N        = platform.request("ZEST_ADC_FCO_N")
+        self.DAC_D_P          = platform.request("ZEST_DAC_D_P")
+        self.DAC_D_N          = platform.request("ZEST_DAC_D_N")
+        self.DAC_DCI_P        = platform.request("ZEST_DAC_DCI_P")
+        self.DAC_DCI_N        = platform.request("ZEST_DAC_DCI_N")
+        self.DAC_DCO_P        = platform.request("ZEST_DAC_DCO_P")
+        self.DAC_DCO_N        = platform.request("ZEST_DAC_DCO_N")
+        self.dsp_clk_out      = Signal()
+        self.clk_div_out      = Signal(2)
+        self.adc_out_clk      = Signal(8)
+        self.adc_out_data     = Signal(128)
+        self.dac_in_data_i    = Signal(14)
+        self.dac_in_data_q    = Signal(14)
+        self.clk_200          = Signal()
+        self.clk              = Signal()
+        self.rst              = Signal()
+        self.mem_packed_fwd   = Signal(69)
+        self.mem_packed_ret   = Signal(33)
 
         # # #
+        self.dw = dw = 128
+        self.source = source = stream.Endpoint([("data", dw)])
+        self.comb += [source.data.eq(self.adc_out_data),
+                      # TODO: Maybe have reset have an affect here?
+                      source.valid.eq(1)]
 
         self.specials += Instance("zest",
                                   o_ADC_PDWN=self.ADC_PDWN,
@@ -187,10 +215,4 @@ class zest(Module, AutoCSR):
                                   o_mem_packed_ret=self.mem_packed_ret,
         )
 
-        self.specials += Instance("pico_pack",
-                                  p_SYSTEM_HEX_PATH="system32.dat",
-                                  i_clk(clk),
-                                  i_cpu_reset(rst),
-
-                                  i_mem_packed_fwd(self.mem_packed_fwd),
-                                  o_mem_packed_ret(self.mem_packed_ret),
+        self.add_sources(platform)

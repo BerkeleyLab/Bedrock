@@ -165,7 +165,7 @@ class ADCStream(Module):
 
 
 class DataPipeWithoutBypass(Module, AutoCSR):
-    def __init__(self, ddr_wr_port, ddr_rd_port, udp_port, sim=False):
+    def __init__(self, ddr_wr_port, ddr_rd_port, udp_port, adc_source, adc_dw):
         SIZE = 1024 * 1024
         self.fifo_full  = CSRStatus(reset=0)
         self.fifo_error = CSRStatus(reset=0)
@@ -178,15 +178,11 @@ class DataPipeWithoutBypass(Module, AutoCSR):
         self.fifo_counter = fifo_counter = Signal(24)
         self.load_fifo    = load_fifo    = Signal()
 
-        if sim:
-            dw = 32
-            adc_dw = 16
-        else:
-            dw = 512
-            adc_dw = 64
+        dw = ddr_wr_port.data_width
 
         print(f"Write port: A ({ddr_wr_port.address_width})/ D ({ddr_wr_port.data_width})")
         print(f"Read port: A ({ddr_rd_port.address_width})/ D ({ddr_rd_port.data_width})")
+        print(f"dw: {dw}; adc_dw: {adc_dw}")
         self.submodules.dram_fifo = dram_fifo = LiteDRAMFIFO(
             data_width  = dw,
             base        = 0,
@@ -194,19 +190,21 @@ class DataPipeWithoutBypass(Module, AutoCSR):
             write_port  = ddr_wr_port,
             read_port   = ddr_rd_port,
         )
-        self.submodules.adcs = adcs = ADCStream(1, adc_dw)
-        adc_data = Signal(dw)
+
+        self.adc_data = adc_data = Signal(dw)
         DW_RATIO = dw // adc_dw
         log_dw_ratio = log2_int(DW_RATIO)
         word_count = Signal(log_dw_ratio)
         word_count_d = Signal(log_dw_ratio)
+
         self.sync += [
-            If(adcs.source.valid,
-               adc_data.eq(Cat(adc_data[adcs.dw:], adcs.source.data)),
+            If(adc_source.valid,
+               adc_data.eq(Cat(adc_data[adc_dw:], adc_source.data)),
                word_count.eq(word_count + 1)
             ),
             word_count_d.eq(word_count),
         ]
+
         self.comb += [
             dram_fifo.sink.valid.eq((word_count == 0) & (word_count_d != 0) & load_fifo),
             dram_fifo.sink.data.eq(adc_data)
@@ -219,12 +217,12 @@ class DataPipeWithoutBypass(Module, AutoCSR):
                fifo_counter.eq(0),
                load_fifo.eq(1)
             ),
-            If(load_fifo & adcs.source.valid,
+            If(load_fifo & adc_source.valid,
                self.fifo_full.status.eq(0),
                self.fifo_error.status.eq(~dram_fifo.dram_fifo.ctrl.writable),
                fifo_counter.eq(fifo_counter + 1)
             ),
-            If((fifo_counter == fifo_size - 1) & adcs.source.valid,
+            If((fifo_counter == fifo_size - 1) & adc_source.valid,
                load_fifo.eq(0),
                self.fifo_full.status.eq(1)
             ),
@@ -382,7 +380,8 @@ class SDRAMSimSoC(SimSoC):
         self.udp_port = udp_port = self.udp.crossbar.get_port(4321, 8)
 
         ddr_wr_port, ddr_rd_port = self.sdram.crossbar.get_port("write"), self.sdram.crossbar.get_port("read")
-        self.submodules.data_pipe = DataPipeWithoutBypass(ddr_wr_port, ddr_rd_port, udp_port, sim=True)
+        adcs = ADCStream(1, adc_dw)
+        self.submodules.data_pipe = DataPipeWithoutBypass(ddr_wr_port, ddr_rd_port, udp_port, adcs.source, 16)
         self.add_csr("data_pipe")
 
 
