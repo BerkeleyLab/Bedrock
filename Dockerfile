@@ -23,6 +23,7 @@ RUN apt-get update && \
 	python3-scipy \
 	python3-matplotlib \
 	gcc-riscv64-unknown-elf \
+	picolibc-riscv64-unknown-elf \
 	cmake \
 	flex \
 	bison \
