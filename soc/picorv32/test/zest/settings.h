@@ -12,4 +12,8 @@
 // Base addresses of Peripherals
 #define BASE_ZEST         0x01000000
 
+#define DEBUG_PRINT 0
+#define debug_printf(...) \
+        do { if (DEBUG_PRINT) printf(__VA_ARGS__); } while (0)
+
 #endif
