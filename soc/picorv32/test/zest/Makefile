@@ -6,7 +6,7 @@ VIVADO_BASE = $(dir $(shell which vivado))..
 vpath %.c $(BOARD_SUPPORT_DIR)/zest_soc/firmware
 vpath %.v $(FPGA_FAMILY_DIR)/xilinx $(BOARD_SUPPORT_DIR)/zest_soc $(BOARD_SUPPORT_DIR)/fmc11x $(DSP_DIR) $(BADGER_DIR)/tests/kc705
 
-BLOCK_RAM_SIZE = 1024
+BLOCK_RAM_SIZE = 16384
 SRC_V   = memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v spi_engine.v
 SRC_V  += idelays_pack.v freq_count.v flag_xdomain.v data_xdomain.v dpram.v phase_diff.v phaset.v
 SRC_V  += zest.v zest_clk_map.v zest_spi_dio_pack.v
