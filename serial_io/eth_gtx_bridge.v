@@ -28,7 +28,7 @@ module eth_gtx_bridge #(
    output [GTX_DW-1:0] gtx_txd,
 
    input               an_disable,
-   output [6:0]        an_status, // cfg_clk domain
+   output [8:0]        an_status, // cfg_clk domain
 
    // Status signals
    output              rx_mon,
@@ -53,8 +53,8 @@ module eth_gtx_bridge #(
    input  [31:0]       lb_rdata
 );
 
-   reg  [6:0] an_status_x_cfg_clk;
-   wire [6:0] an_status_l;
+   reg  [8:0] an_status_x_cfg_clk;
+   wire [8:0] an_status_l;
    wire [7:0] gmii_rxd, gmii_txd;
    wire gmii_tx_en, gmii_rx_dv;
 
@@ -66,6 +66,7 @@ module eth_gtx_bridge #(
        .gtx_txd      (gtx_txd),
 
        .an_disable   (an_disable),
+       .rx_err_los   (1'b0),
        .an_status_l  (an_status_l),
 
        .gmii_rxd     (gmii_rxd),
