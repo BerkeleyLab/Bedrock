@@ -1,5 +1,5 @@
 // Synthesizes to 86 slices at 312 MHz in XC3Sxxx-4 using XST-8.2i
-//  (well, that's just the unknwon frequency input; max sysclk is 132 MHz)
+//  (well, that's just the unknown frequency input; max sysclk is 132 MHz)
 
 `timescale 1ns / 1ns
 

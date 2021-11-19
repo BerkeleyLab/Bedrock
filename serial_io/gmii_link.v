@@ -21,7 +21,7 @@ module gmii_link(
 	input an_bypass,  // disables lacr transmission for autonegotiation
 	output operate,   // (GTX_CLK domain) tells upper levels we're ready to transmit
 	output [15:0] lacr_rx,  // (RX_CLK domain) layering violation
-	output [6:0] an_status
+	output [8:0] an_status
 );
 
 //New internal wires removed from the module interface (error signals from 8b10b enc/dec)
