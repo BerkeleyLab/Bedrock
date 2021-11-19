@@ -29,7 +29,6 @@ RUN apt-get update && \
 	bison \
 	libftdi1-dev \
 	libusb-dev \
-	yosys \
 	verilator \
 	openocd \
 	pkg-config && \
@@ -37,9 +36,10 @@ RUN apt-get update && \
 	python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
 	pip3 --version
 # Note that flex, bison, and iverilog (above) required for building vhd2vl.
-# gcc-riscv64-unknown-elf, yosys, and verilator above replace
-#   Buster's approach of building from source
+# gcc-riscv64-unknown-elf and verilator above replace our previous
+#   approach, used in Buster, of building from source
 
+# vhd2vl
 RUN git clone https://github.com/ldoolitt/vhd2vl && \
 	cd vhd2vl && \
 	git checkout 37e3143395ce4e7d2f2e301e12a538caf52b983c && \
@@ -47,6 +47,23 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 	install src/vhd2vl /usr/local/bin && \
 	cd .. && \
 	rm -rf vhd2vl
+
+# Yosys
+# For now we need to build yosys from source, since Debian Bullseye
+# is stuck at yosys-0.9 that doesn't have the features we need.
+# Revisit this choice when Debian catches up, maybe in Bookworm,
+# and hope to get back to "apt-get install yosys" then.
+# Note that the standard yosys build process used here requires
+# network access to download abc from https://github.com/berkeley-abc/abc.
+RUN git clone https://github.com/cliffordwolf/yosys.git && \
+	cd yosys && \
+	git checkout 40e35993af6ecb6207f15cc176455ff8d66bcc69 && \
+	apt-get update && \
+	apt-get install -y clang libreadline-dev tcl-dev libffi-dev graphviz \
+	xdot libboost-system-dev libboost-python-dev libboost-filesystem-dev zlib1g-dev && \
+	make config-clang && make -j4 && make install && \
+	cd .. && rm -rf yosys && \
+	rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4
 
