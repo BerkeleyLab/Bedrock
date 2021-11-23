@@ -10,7 +10,7 @@ soc_picorv32_unisims_test:
     - cd soc/picorv32/test/zest
   stage: test
   script:
-    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2018.3 PATH=$XILINX_VIVADO/bin:$PATH make
+    - XILINX_VIVADO=/non-free/Xilinx/Vivado/2019.1 PATH=$XILINX_VIVADO/bin:$PATH make
 
 soc_picorv32_kc705:
   stage: synthesis
