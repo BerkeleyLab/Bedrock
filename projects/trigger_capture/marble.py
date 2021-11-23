@@ -49,7 +49,7 @@ class SDRAMLoopbackSoC(BaseSoC):
             self.zest.rst.eq(~self.crg.pll.locked),
         ]
 
-        self.platform.add_period_constraint(self.cd_adc.clk, 8.7)
+        self.platform.add_period_constraint(self.platform.lookup_request("ZEST_CLK_TO_FPGA", 1, loose=True).p, 8.7)
         self.platform.add_false_path_constraints(self.crg.cd_sys.clk,
                                                  self.cd_adc.clk,
                                                  self.crg.cd_idelay.clk,
