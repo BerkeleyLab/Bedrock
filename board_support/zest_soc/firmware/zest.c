@@ -6,7 +6,7 @@
 #include "timer.h"
 #include "spi.h"
 #include "print.h"
-#include "printf.h"
+#include <stdio.h>
 #include "common.h"
 #include "iserdes.h"
 #include "sfr.h"
@@ -223,7 +223,6 @@ void init_zest_spi(uint8_t dev) {
 
 void write_zest_reg(uint8_t dev, uint32_t addr, uint32_t val) {
     uint32_t inst=0;
-
     if (dev != g_devinfo.dev) {
         init_zest_spi(dev);
     }
@@ -251,7 +250,7 @@ void write_zest_reg(uint8_t dev, uint32_t addr, uint32_t val) {
                 + (val & g_devinfo.data_mask);
             break;
         default:
-            printf("write_zest_reg:  Invalid Device.\n");
+            puts("write_zest_reg:  Invalid Device.\n");
             return;
     }
 	SPI_SET_DAT_BLOCK( g_base_spi, inst );
@@ -297,6 +296,7 @@ void write_zest_regs(uint8_t dev, const t_reg32 *regmap, size_t len) {
         write_zest_reg(dev, regmap->addr, regmap->data);
         regmap++;
     }
+  puts("foooooo\n");
 }
 
 bool check_zest_regs(uint8_t dev, const t_init_data *p_data) {

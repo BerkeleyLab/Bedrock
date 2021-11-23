@@ -67,11 +67,21 @@ class _CRG(Module):
         pll.register_clkin(platform.request("clk125"), 125e6)
         pll.create_clkout(self.cd_sys, sys_clk_freq)
         pll.create_clkout(self.cd_sys4x, 4*sys_clk_freq)
-        pll.create_clkout(self.cd_sys4x_dqs, 4*sys_clk_freq, phase=90)
+        # pll.create_clkout(self.cd_sys4x_dqs, 4*sys_clk_freq, phase=90)
         pll.create_clkout(self.cd_idelay, 200e6)
         # Ignore sys_clk to pll.clkin path created by SoC's rst.
         platform.add_false_path_constraints(self.cd_sys.clk, pll.clkin)
-
+        platform.add_period_constraint(self.cd_sys.clk, 1e9/sys_clk_freq)
+        platform.add_period_constraint(self.cd_idelay.clk, 1e9/200e6)
+        platform.add_platform_command("set_property LOC IDELAYCTRL_X1Y1 [get_cells IDELAYCTRL_REPLICATED_0]")
+        platform.add_platform_command("set_property LOC IDELAYCTRL_X1Y2 [get_cells IDELAYCTRL_REPLICATED_0_2]")
+        platform.add_platform_command("set_property LOC IDELAYCTRL_X0Y3 [get_cells IDELAYCTRL_REPLICATED_0_3]")
+        platform.add_platform_command("set_property LOC IDELAYCTRL_X0Y4 [get_cells IDELAYCTRL_REPLICATED_0_4]")
+        # platform.add_platform_command("set_property IODELAY_GROUP IO_DLY1 [get_cells *IDELAYCTRL*]")
+        # platform.add_platform_command("set_property IODELAY_GROUP IO_DLY1 [get_cells *ODELAYE2*]")
+        # platform.add_platform_command("set_property IODELAY_GROUP IO_DLY1 [get_cells -hier *IDELAYE2*]")
+        # platform.add_platform_command("set_property IODELAY_GROUP IO_DLY1 [get_cells -hier *idelaye2*]")
+        platform.add_false_path_constraint(self.cd_idelay.clk, self.cd_sys.clk)
         self.submodules.idelayctrl = S7IDELAYCTRL(self.cd_idelay)
 
 

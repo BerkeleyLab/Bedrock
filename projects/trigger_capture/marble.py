@@ -1,13 +1,16 @@
 import os
 import argparse
 
-from migen import Module
+from migen import Module, ClockDomain, ClockSignal, ClockDomainsRenamer
+from litex.soc.interconnect.stream import AsyncFIFO
 
 # from litex.tools.litex_sim import SimSoC
 from litex.tools.litex_sim import SimConfig
 
 from litex.soc.integration.builder import Builder, builder_argdict, builder_args
 from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
+from litex.soc.interconnect import wishbone
+
 # from litex.soc.cores.bitbang import I2CMaster
 from liteeth.core import LiteEthUDPIPCore
 from liteeth.common import convert_ip
@@ -20,20 +23,41 @@ from zest import zest_pads, Zest
 
 from targets.marble import BaseSoC
 
-
 class SDRAMLoopbackSoC(BaseSoC):
     '''
     SDRAM loopback tester over ethernet
     '''
+    mem_map = {
+        "zest": 0x80000000,
+    }
+    mem_map.update(BaseSoC.mem_map)
+
     def add_zest(self):
         self.platform.add_extension(zest_pads)
-        self.submodules.zest = Zest(self.platform)
+        bus = wishbone.Interface()
+        self.add_memory_region("zest", self.mem_map["zest"], 0x1000000)
+        self.add_wb_slave(self.mem_map["zest"], bus)
+
+        self.submodules.zest = Zest(self.platform, bus)
 
         self.clock_domains.cd_adc    = ClockDomain()
 
-        self.comb += ClockSignal("adc").eq(self.zest.adc_out_clk)
+        self.comb += [
+            ClockSignal("adc").eq(self.zest.dsp_clk_out),
+            self.zest.clk.eq(self.crg.cd_sys.clk),
+            self.zest.clk_200.eq(self.crg.cd_idelay.clk),
+            self.zest.rst.eq(~self.crg.pll.locked),
+        ]
 
-        self.platform.add_false_path_constraints(self.crg.cd_adc.clk, self.crg.cd_sys.clk)
+        self.platform.add_period_constraint(self.cd_adc.clk, 8.7)
+        self.platform.add_false_path_constraints(self.crg.cd_sys.clk,
+                                                 self.cd_adc.clk,
+                                                 self.crg.cd_idelay.clk,
+                                                 self.platform.lookup_request("ZEST_CLK_TO_FPGA", 1, loose=True).p,
+                                                 self.platform.lookup_request("ZEST_ADC_DCO", 0, loose=True).p,
+                                                 self.platform.lookup_request("ZEST_ADC_DCO", 1, loose=True).p,
+                                                 self.platform.lookup_request("ZEST_DAC_DCO", loose=True).p
+        )
 
         # self.dsp_clk_out      = Signal()
         # self.clk_div_out      = Signal(2)
@@ -58,16 +82,23 @@ class SDRAMLoopbackSoC(BaseSoC):
 
         ddr_wr_port, ddr_rd_port = self.sdram.crossbar.get_port("write"), self.sdram.crossbar.get_port("read")
 
-        REAL_ADC = False
+        REAL_ADC = True
         if REAL_ADC:
             self.add_zest()
-            adc_source = self.zest.source
             adc_dw = self.zest.dw
+            adc_source = self.zest.source
+            self.submodules.async_fifo = async_fifo = ClockDomainsRenamer({"write": "adc", "read":"sys"})(AsyncFIFO([("data", adc_dw)], depth=8, buffered=True))
+            self.comb += [
+                async_fifo.sink.data.eq(adc_source.data),
+                async_fifo.sink.valid.eq(adc_source.valid),
+            ]
+            adc_source = async_fifo.source
         else:
             adc_dw = 64
             self.submodules.adcs = adcs = ADCStream(1, adc_dw)
+            adc_source = adcs.source
 
-        self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port, adcs.source, adc_dw)
+        self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port, adc_source, adc_dw)
         self.add_csr("data_pipe")
 
 
