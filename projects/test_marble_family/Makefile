@@ -148,8 +148,8 @@ marble2.bit: marble.tcl marble2.d marble2_features
 # =====
 # bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'
 
-# IP address must match that configured in board_support/marblemini/marble_base.v
-RGMII_IP = 192.168.19.10
+# Default IP address set from microcontroller
+RGMII_IP = 192.168.19.31
 BIT = marble1.bit
 
 marble1_hwload:
