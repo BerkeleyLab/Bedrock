@@ -342,7 +342,7 @@ class LEEPDevice(DeviceBase):
                 _log.error("Reply truncated %d %d", len(tosend), len(reply))
                 continue
 
-            reply = numpy.fromstring(reply, be32)
+            reply = numpy.frombuffer(reply, be32)
             if (msg[:2] != reply[:2]).any():
                 _log.error('Ignore reply w/o matching nonce %s %s',
                            msg[:2], reply[:2])
