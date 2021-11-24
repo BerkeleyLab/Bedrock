@@ -15,9 +15,10 @@ RISCV_TOOLS_PREFIX = riscv32-unknown-elf-
 CC      = $(RISCV_TOOLS_PREFIX)gcc
 AR      = $(RISCV_TOOLS_PREFIX)ar
 VFLAGS  = -Wall -Wno-timescale -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
-CFLAGS  = -Wall -Wextra -Wundef -Wstrict-prototypes -std=c99 -march=rv32imc -Os -ffreestanding
-CFLAGS += -mabi=ilp32 -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) -nostartfiles
-LDFLAGS = $(CFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,-T,$(filter %.lds, $^),--defsym,BLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE),--gc-sections,--no-relax
+# CCSPECS = -specs=picolibc.specs
+CLFLAGS = -march=rv32imc -mabi=ilp32 -ffreestanding -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) -nostartfiles $(CCSPECS)
+CFLAGS  = -std=c99 -Os -Wall -Wextra -Wundef -Wstrict-prototypes $(CLFLAGS)
+LDFLAGS = $(CLFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,--defsym,BLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE),--gc-sections,--no-relax -T$(filter %.lds, $^)
 # --no-relax is a workaround for https://github.com/riscv/riscv-binutils-gdb/issues/144
 # --verbose=3,-M for verbose linker output / debugging
 

@@ -117,7 +117,7 @@ LDLIBS_pcap2v = -l pcap
 # VPI module support for live testing
 # https://en.wikipedia.org/wiki/TUN/TAP
 CFLAGS_tap-vpi.o = $(VPI_CFLAGS) -D_POSIX_C_SOURCE=200809L
-tap-vpi.vpi: ethernet_model.c tap_alloc.o crc32.o
+tap-vpi.vpi: ethernet_model.o tap_alloc.o crc32.o
 CFLAGS_udp-vpi.o = $(VPI_CFLAGS) -D_POSIX_C_SOURCE=200809L
 udp-vpi.vpi: udp_model.c
 
@@ -133,7 +133,7 @@ xfer1: xfer1.readable
 
 # =====
 # Tangent for client testing
-hello_tb: hello.v client_sub.v reg_delay.v
+hello_tb: hello.v client_sub.v reg_delay.v udp-vpi.vpi
 VFLAGS_hello_tb = -m ./udp-vpi
 hello.vcd: udp-vpi.vpi xfer1
 hello_run: hello_tb udp-vpi.vpi
@@ -143,7 +143,7 @@ hello.out: hello_tb udp-vpi.vpi xfer1
 
 # =====
 # Another tangent for another client
-speed_test_tb: speed_test.v client_sub.v reg_delay.v
+speed_test_tb: speed_test.v client_sub.v reg_delay.v udp-vpi.vpi
 VFLAGS_speed_test_tb = -m ./udp-vpi
 speed_test.vcd: udp-vpi.vpi xfer1
 speed_test_run: speed_test_tb udp-vpi.vpi
@@ -155,7 +155,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 # Another tangent for another client
 LB_DEMO_V = lb_demo_slave.v freq_count.v fake_config_romx.v dpram.v
 # LB_DEMO_V += badge_trace.v
-mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V)
+mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V) udp-vpi.vpi
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
 mem_gateway.vcd: udp-vpi.vpi xfer1
 mem_gateway_run: mem_gateway_tb udp-vpi.vpi
@@ -165,7 +165,7 @@ mem_gateway.out: mem_gateway_tb udp-vpi.vpi xfer1
 
 # ====
 # WIP client supporting SPI Flash
-spi_flash_tb: spiflash.v client_sub.v spi_flash.v spi_flash_engine.v reg_delay.v
+spi_flash_tb: spiflash.v client_sub.v spi_flash.v spi_flash_engine.v reg_delay.v udp-vpi.vpi
 VFLAGS_spi_flash_tb = -m ./udp-vpi
 spi_flash.vcd: udp-vpi.vpi spi_flash_pack lorem_ipsum.hex
 lorem_ipsum.hex: hexdump.py lorem_ipsum.txt
@@ -200,7 +200,7 @@ VCD_ARGS_rtefi_pipe.vcd = +packet_file=$(filter %udp4.dat, $^)
 # =====
 # unified version of assembled pipeline and test peripherals,
 # configured for on-line (tap) testing
-hw_test_tb: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v
+hw_test_tb: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v tap-vpi.vpi
 VFLAGS_hw_test_tb = -m ./tap-vpi
 hw_test.vcd: tap-vpi.vpi
 .PRECIOUS: hw_test.vcd  # work-around; better if vvp could exit with success
@@ -265,7 +265,7 @@ marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d $(SYNTH_SOU
 
 # =====
 # On-line test using Icarus and Linux's tun/tap feature
-rtefi_live: rtefi_pipe_tb.v $(RTEFI_V) fake_config_romx.v mac_compat_dpram.v
+rtefi_live: rtefi_pipe_tb.v $(RTEFI_V) fake_config_romx.v mac_compat_dpram.v tap-vpi.vpi
 	$(VERILOG) -m ./tap-vpi -DLINUX_TUN -o $@ $(filter %.v, $^)
 
 # Setup for a single-user machine is pretty easy: as root do a
@@ -287,9 +287,9 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 
 # =====
 # Verilator, slightly larger scope
-Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c
+Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c crc8e_guts.vh crc_genguts.vh
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
+	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $(filter-out crc8e_guts.vh crc_genguts.vh, $^)
 	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
 	mv obj_dir/$@ $@
 # TFTP server demo:

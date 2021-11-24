@@ -79,7 +79,7 @@ class SimServer(object):
             pass
         self.S.close()
         self.T.join(1.0)
-        assert not self.T.isAlive(), self.T
+        assert not self.T.is_alive(), self.T
         _log.info('SimServer %s joined', self.url)
 
     def run(self):
