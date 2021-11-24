@@ -19,7 +19,6 @@ services:
   - name: mohs.dhcp.lbl.gov/docker:18.09.7-dind
     command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
     alias: docker
-#    entrypoint: ["dockerd-entrypoint.sh"]
 
 include:
   - local: .gitlab/ci/build.gitlab-ci.yml
