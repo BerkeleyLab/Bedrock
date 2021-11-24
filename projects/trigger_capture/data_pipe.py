@@ -121,8 +121,7 @@ class UDPFragmenter(Module):
                       NextState("IDLE")
                    ).Else(
                        counter_ce.eq(0),
-                       NextState("NEXT_FRAGMENT")
-                   )
+                       NextState("NEXT_FRAGMENT"))
                 )
         )
 
@@ -380,8 +379,9 @@ class SDRAMSimSoC(SimSoC):
         self.udp_port = udp_port = self.udp.crossbar.get_port(4321, 8)
 
         ddr_wr_port, ddr_rd_port = self.sdram.crossbar.get_port("write"), self.sdram.crossbar.get_port("read")
+        adc_dw = 16
         adcs = ADCStream(1, adc_dw)
-        self.submodules.data_pipe = DataPipeWithoutBypass(ddr_wr_port, ddr_rd_port, udp_port, adcs.source, 16)
+        self.submodules.data_pipe = DataPipeWithoutBypass(ddr_wr_port, ddr_rd_port, udp_port, adcs.source, adc_dw)
         self.add_csr("data_pipe")
 
 

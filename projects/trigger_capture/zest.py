@@ -1,3 +1,4 @@
+# flake8: noqa
 from migen import *
 
 from litex.build.generic_platform import Subsignal, Pins, IOStandard, Misc

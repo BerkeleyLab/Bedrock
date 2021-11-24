@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from migen import Module, ClockDomain, ClockSignal, ClockDomainsRenamer
+from migen import ClockDomain, ClockSignal, ClockDomainsRenamer
 from litex.soc.interconnect.stream import AsyncFIFO
 
 # from litex.tools.litex_sim import SimSoC
@@ -22,6 +22,7 @@ from platforms import marble
 from zest import zest_pads, Zest
 
 from targets.marble import BaseSoC
+
 
 class SDRAMLoopbackSoC(BaseSoC):
     '''
@@ -71,7 +72,6 @@ class SDRAMLoopbackSoC(BaseSoC):
         # self.mem_packed_fwd   = Signal(69)
         # self.mem_packed_ret   = Signal(33)
 
-
     def __init__(self, ip="192.168.19.70", **kwargs):
         super().__init__(with_ethernet=True, **kwargs)
         self.submodules.udp_core = LiteEthUDPIPCore(self.ethphy, 0x12345678abcd,
@@ -87,7 +87,9 @@ class SDRAMLoopbackSoC(BaseSoC):
             self.add_zest()
             adc_dw = self.zest.dw
             adc_source = self.zest.source
-            self.submodules.async_fifo = async_fifo = ClockDomainsRenamer({"write": "adc", "read":"sys"})(AsyncFIFO([("data", adc_dw)], depth=8, buffered=True))
+            self.submodules.async_fifo = async_fifo = ClockDomainsRenamer(
+                {"write": "adc", "read": "sys"}
+            )(AsyncFIFO([("data", adc_dw)], depth=8, buffered=True))
             self.comb += [
                 async_fifo.sink.data.eq(adc_source.data),
                 async_fifo.sink.valid.eq(adc_source.valid),
