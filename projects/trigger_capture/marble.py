@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from migen import Module, ClockDomain, ClockSignal, ClockDomainsRenamer
+from migen import Module, ClockDomain, ClockSignal, ClockDomainsRenamer, Signal
 from litex.soc.interconnect.stream import AsyncFIFO
 
 # from litex.tools.litex_sim import SimSoC
@@ -9,6 +9,7 @@ from litex.tools.litex_sim import SimConfig
 
 from litex.soc.integration.builder import Builder, builder_argdict, builder_args
 from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
+from litex.soc.integration.common import get_mem_data
 from litex.soc.interconnect import wishbone
 
 # from litex.soc.cores.bitbang import I2CMaster
@@ -28,7 +29,7 @@ class SDRAMLoopbackSoC(BaseSoC):
     SDRAM loopback tester over ethernet
     '''
     mem_map = {
-        "zest": 0x80000000,
+        "zest": 0x8000000,
     }
     mem_map.update(BaseSoC.mem_map)
 
@@ -48,6 +49,14 @@ class SDRAMLoopbackSoC(BaseSoC):
             self.zest.clk_200.eq(self.crg.cd_idelay.clk),
             self.zest.rst.eq(~self.crg.pll.locked),
         ]
+
+        counter_adc = Signal(27)
+        self.sync.adc += counter_adc.eq(counter_adc+1)
+        self.comb += self.user_leds[0].eq(counter_adc[26])
+
+        counter_sys = Signal(27)
+        self.sync += counter_sys.eq(counter_sys+1)
+        self.comb += self.user_leds[1].eq(counter_sys[26])
 
         self.platform.add_period_constraint(self.platform.lookup_request("ZEST_CLK_TO_FPGA", 1, loose=True).p, 8.7)
         self.platform.add_false_path_constraints(self.crg.cd_sys.clk,
@@ -74,6 +83,10 @@ class SDRAMLoopbackSoC(BaseSoC):
 
     def __init__(self, ip="192.168.19.70", **kwargs):
         super().__init__(with_ethernet=True, **kwargs)
+
+        self.platform.add_extension(marble.break_off_pmod)
+        self.user_leds = self.platform.request("pmod0")
+
         self.submodules.udp_core = LiteEthUDPIPCore(self.ethphy, 0x12345678abcd,
                                                     convert_ip(ip),
                                                     clk_freq=self.sys_clk_freq)
@@ -86,20 +99,22 @@ class SDRAMLoopbackSoC(BaseSoC):
         if REAL_ADC:
             self.add_zest()
             adc_dw = self.zest.dw
-            adc_source = self.zest.source
             self.submodules.async_fifo = async_fifo = ClockDomainsRenamer({"write": "adc", "read":"sys"})(AsyncFIFO([("data", adc_dw)], depth=8, buffered=True))
             self.comb += [
-                async_fifo.sink.data.eq(adc_source.data),
-                async_fifo.sink.valid.eq(adc_source.valid),
+                async_fifo.sink.data.eq(self.zest.source.data),
+                async_fifo.sink.valid.eq(self.zest.source.valid),
             ]
-            adc_source = async_fifo.source
+            self.adc_source = adc_source = async_fifo.source
         else:
             adc_dw = 64
             self.submodules.adcs = adcs = ADCStream(1, adc_dw)
-            adc_source = adcs.source
+            self.adc_source = adc_source = adcs.source
 
         self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port, adc_source, adc_dw)
         self.add_csr("data_pipe")
+
+        self.add_rom("bootrom", 0x20000000, 2**14, contents=get_mem_data("firmware/app.bin", endianness="big"))
+        # self.add_constant("ROM_BOOT_ADDRESS", 0x20000000)
 
 
 class SDRAMDevSoC(SDRAMLoopbackSoC):
@@ -160,6 +175,10 @@ class SDRAMDevSoC(SDRAMLoopbackSoC):
             # self.data_pipe.first_sample,
             # self.data_pipe.last_sample,
         ]
+        analyzer_signals = [
+            self.adc_source,
+            self.data_pipe.read_from_dram_fifo,
+        ]
         self.submodules.analyzer = LiteScopeAnalyzer(analyzer_signals, 1024,
                                                      csr_csv="analyzer.csv")
         self.add_csr("analyzer")
@@ -217,7 +236,8 @@ def main():
 
     if args.build:
         kwargs = soc_core_argdict(args)
-        soc = SDRAMLoopbackSoC(ip=args.ip, phy=args.ethernet_phy, **kwargs)
+        # soc = SDRAMLoopbackSoC(ip=args.ip, phy=args.ethernet_phy, **kwargs)
+        soc = SDRAMDevSoC(ip=args.ip, phy=args.ethernet_phy, **kwargs)
         builder = Builder(soc, **builder_argdict(args))
         # discard result, or save in vns?
         builder.build(run=not args.program_only)

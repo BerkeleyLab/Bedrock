@@ -193,6 +193,8 @@ class Zest(Module, AutoCSR):
         platform.add_period_constraint(platform.lookup_request("ZEST_DAC_DCO",    loose=True).p, 8.7)
 
         self.specials += Instance("zest",
+                                  # parameter PH_DIFF_ADV = 4693,  // ADV: 500*11/48 / 200/2*(1<<14) = 4693
+                                  p_PH_DIFF_ADV = int(117.29 / 200/2*(1<<14)),
                                   o_ADC_PDWN=self.ADC_PDWN,
                                   o_ADC_CSB_0=self.ADC_CSB_0,
                                   o_ADC_SYNC=self.ADC_SYNC,
@@ -260,7 +262,7 @@ class Zest(Module, AutoCSR):
                                   o_mem_packed_fwd=self.mem_packed_fwd,
                                   i_mem_wdata=bus.dat_w,
                                   i_mem_wstrb=bus.sel,
-                                  i_mem_addr=bus.adr[2:],
+                                  i_mem_addr=Cat(Signal(2, reset=0), bus.adr),
                                   i_mem_valid=bus.stb,
                                   o_mem_ready=bus.ack,
                                   o_mem_rdata=bus.dat_r,

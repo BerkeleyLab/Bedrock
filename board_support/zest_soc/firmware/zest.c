@@ -296,7 +296,6 @@ void write_zest_regs(uint8_t dev, const t_reg32 *regmap, size_t len) {
         write_zest_reg(dev, regmap->addr, regmap->data);
         regmap++;
     }
-  puts("foooooo\n");
 }
 
 bool check_zest_regs(uint8_t dev, const t_init_data *p_data) {
@@ -328,6 +327,7 @@ bool check_zest_freq(uint8_t ch, uint16_t fcnt_exp) {
 
     fcnt = read_zest_fcnt(ch);
     printf("  Fclk %8s: ", zest_fcnt_names[ch]);
+    //printf("%d\n", fcnt*125);
     print_udec_fix(fcnt*125, fcnt_width, 3 );
     printf(" MHz\n");
     return (fcnt > fcnt_exp*0.98 && fcnt < fcnt_exp*1.02);

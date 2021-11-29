@@ -313,6 +313,12 @@ _connectors = [
     ("pmodb", "AE7 V7 Y7 AF7 V8 AA8 Y8 W9"),
 ]
 
+_pmod0_pins    = ["pmoda:{}".format(i) for i in range(8)]
+_pmod1_pins    = ["pmodb:{}".format(i) for i in range(8)]
+break_off_pmod = [
+    ("pmod0", 0, Pins(*_pmod0_pins), IOStandard("LVCMOS25")),
+    ("pmod1", 0, Pins(*_pmod1_pins), IOStandard("LVCMOS25")),
+]
 
 # Platform -----------------------------------------------------------------------------------------
 
