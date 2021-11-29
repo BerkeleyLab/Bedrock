@@ -24,6 +24,7 @@ from zest import zest_pads, Zest
 
 from targets.marble import BaseSoC
 
+
 class SDRAMLoopbackSoC(BaseSoC):
     '''
     SDRAM loopback tester over ethernet
@@ -80,7 +81,6 @@ class SDRAMLoopbackSoC(BaseSoC):
         # self.mem_packed_fwd   = Signal(69)
         # self.mem_packed_ret   = Signal(33)
 
-
     def __init__(self, ip="192.168.19.70", **kwargs):
         super().__init__(with_ethernet=True, **kwargs)
 
@@ -99,7 +99,10 @@ class SDRAMLoopbackSoC(BaseSoC):
         if REAL_ADC:
             self.add_zest()
             adc_dw = self.zest.dw
-            self.submodules.async_fifo = async_fifo = ClockDomainsRenamer({"write": "adc", "read":"sys"})(AsyncFIFO([("data", adc_dw)], depth=8, buffered=True))
+            adc_source = self.zest.source
+            self.submodules.async_fifo = async_fifo = ClockDomainsRenamer(
+                {"write": "adc", "read": "sys"}
+            )(AsyncFIFO([("data", adc_dw)], depth=8, buffered=True))
             self.comb += [
                 async_fifo.sink.data.eq(self.zest.source.data),
                 async_fifo.sink.valid.eq(self.zest.source.valid),

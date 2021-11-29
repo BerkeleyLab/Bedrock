@@ -1,5 +1,6 @@
 #
 # This file is part of LiteX-Boards.
+# flake8: noqa
 #
 # Copyright (c) 2021 Vamsi K Vytla <vamsi.vytla@gmail.com>
 # Copyright (c) 2021 Michael Betz <michibetz@gmail.com>
