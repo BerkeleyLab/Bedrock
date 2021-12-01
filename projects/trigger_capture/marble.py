@@ -106,6 +106,7 @@ class SDRAMLoopbackSoC(BaseSoC):
             self.comb += [
                 async_fifo.sink.data.eq(self.zest.source.data),
                 async_fifo.sink.valid.eq(self.zest.source.valid),
+                async_fifo.source.ready.eq(1)
             ]
             self.adc_source = adc_source = async_fifo.source
         else:

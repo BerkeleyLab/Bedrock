@@ -168,7 +168,7 @@ class DataPipeWithoutBypass(Module, AutoCSR):
         SIZE = 1024 * 1024
         self.fifo_full  = CSRStatus(reset=0)
         self.fifo_error = CSRStatus(reset=0)
-        self.fifo_load  = CSRStorage(reset=0)  # Load the coefficients in memory to the ROI Summer
+        self.fifo_load  = CSRStorage(reset=0)
         self.fifo_read  = CSRStorage(reset=0)
         self.fifo_size  = CSRStorage(32, reset=SIZE)
         self.dst_ip     = CSRStorage(32, reset=convert_ip("192.168.1.114"))
