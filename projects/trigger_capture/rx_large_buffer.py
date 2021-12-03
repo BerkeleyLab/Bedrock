@@ -12,7 +12,6 @@ ip = sys.argv[1]
 port = int(sys.argv[2])
 sock.bind((ip, port))
 
-
 def recvall(sock):
     BUFF_SIZE = 1024 * 1024 * 8
     data = []

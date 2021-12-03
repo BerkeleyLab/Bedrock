@@ -56,21 +56,28 @@ class UDPFragmenter(Module):
     # TODO: compute this from eth_mtu
 
     def __init__(self, dw=8):
-        self.UDP_FRAG_MTU = UDP_FRAG_MTU = 1472 - 8  # The -8 is because of FRAGMENTER header (which is unused)
+        self.UDP_FRAG_MTU = UDP_FRAG_MTU = 1472 - 8  # The -8 is because of FRAGMENTER header
         self.sink   = sink = stream.Endpoint([("data", dw), ("length", 32)])
         self.source = source = stream.Endpoint(eth_udp_user_description(dw))
         self.packetizer = packetizer = UDPFragmenterPacketizer()
         self.submodules += packetizer
 
+        self.mf = mf = Signal(reset=0)  # mf == More Fragments
+        self.fragment_offset = fragment_offset = Signal(32, reset=0)
+        self.identification = identification = Signal(16, reset=0)
+        self.fragment_id = fragment_id = Signal(32, reset=0)
+
         self.comb += [
             sink.connect(packetizer.sink, omit={"length"}),
+            packetizer.sink.total_fragmets.eq(identification),
+            packetizer.sink.fragment_id.eq(fragment_id),
             packetizer.source.connect(source),
         ]
 
         ww = dw // 8
 
         # counter logic ;)
-        self.foo_counter = counter = Signal(max=2048*2048)
+        self.foo_counter = counter = Signal(32)
         counter_reset = Signal()
         counter_ce = Signal()
         self.sync += \
@@ -80,9 +87,6 @@ class UDPFragmenter(Module):
                 counter.eq(counter + ww)
             )
         bytes_in_fragment = Signal(16, reset=0)
-        self.mf = mf = Signal(reset=0)  # mf == More Fragments
-        self.fragment_offset = fragment_offset = Signal(32, reset=0)
-        self.identification = identification = Signal(16, reset=0)
 
         self.submodules.fsm = fsm = FSM(reset_state="IDLE")
         fsm.act("IDLE",
@@ -98,6 +102,7 @@ class UDPFragmenter(Module):
                        counter_reset.eq(1),
                        NextValue(mf, 1),
                        NextValue(fragment_offset, 0),
+                       NextValue(fragment_id, 0),
                        NextValue(identification, identification + 1),
                        NextValue(bytes_in_fragment, UDP_FRAG_MTU),
                        NextState("FRAGMENTED_PACKET_SEND")
@@ -139,6 +144,7 @@ class UDPFragmenter(Module):
                               sink.length - (fragment_offset << 3)),
                     NextValue(mf, 0),
                 ),
+                NextValue(fragment_id, fragment_id + 1),
                 NextState("FRAGMENTED_PACKET_SEND")
         )
 

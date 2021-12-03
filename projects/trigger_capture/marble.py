@@ -117,8 +117,11 @@ class SDRAMLoopbackSoC(BaseSoC):
         self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port, adc_source, adc_dw)
         self.add_csr("data_pipe")
 
-        self.add_rom("bootrom", 0x20000000, 2**14, contents=get_mem_data("firmware/app.bin", endianness="big"))
-        # self.add_constant("ROM_BOOT_ADDRESS", 0x20000000)
+        self.add_rom("bootrom",
+                     origin=0x20000000,
+                     size=2**14,
+                     contents=get_mem_data("firmware/app.bin", endianness="little"))
+        self.add_constant("ROM_BOOT_ADDRESS", 0x20000000)
 
 
 class SDRAMDevSoC(SDRAMLoopbackSoC):
@@ -238,18 +241,15 @@ def main():
             trace=args.trace,
             sim_config=sim_config)
 
-    if args.build:
-        kwargs = soc_core_argdict(args)
-        # soc = SDRAMLoopbackSoC(ip=args.ip, phy=args.ethernet_phy, **kwargs)
-        soc = SDRAMDevSoC(ip=args.ip, phy=args.ethernet_phy, **kwargs)
-        builder = Builder(soc, **builder_argdict(args))
-        # discard result, or save in vns?
-        builder.build(run=not args.program_only)
+    kwargs = soc_core_argdict(args)
+    # soc = SDRAMLoopbackSoC(ip=args.ip, phy=args.ethernet_phy, **kwargs)
+    soc = SDRAMDevSoC(ip=args.ip, phy=args.ethernet_phy, **kwargs)
+    builder = Builder(soc, **builder_argdict(args))
+    builder.build()
 
     if args.load:
         prog = marble.Platform().create_programmer()
         prog.load_bitstream(os.path.join("build", "marble", "gateware", "marble.bit"))
-
 
 if __name__ == "__main__":
     main()

@@ -10,7 +10,7 @@ import os
 import argparse
 
 def main():
-    parser = argparse.ArgumentParser(description="LiteX Bare Metal App.")
+    parser = argparse.ArgumentParser(description="Zest App. targeted for bootrom")
     parser.add_argument("--build-path", help="Target's build path (ex build/board_name).", required=True)
     parser.add_argument("--app-dir-path", help="Application directory.", required=True)
     parser.add_argument("--with-cxx",   action="store_true", help="Enable CXX support.")

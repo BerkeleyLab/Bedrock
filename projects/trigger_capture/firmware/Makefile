@@ -1,4 +1,5 @@
-BUILD_DIR?=../build/
+BUILD_DIR?=../build/marble/
+APP_DIR?=../
 
 include $(BUILD_DIR)/software/include/generated/variables.mak
 include $(SOC_DIRECTORY)/software/common.mak

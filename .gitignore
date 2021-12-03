@@ -17,3 +17,6 @@ _autogen/
 _dep/
 _xilinx/
 # system_top.xdc
+*.bin
+*.jou
+*.log

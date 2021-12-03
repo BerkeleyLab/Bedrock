@@ -1,3 +1,5 @@
+import time
+
 from litex import RemoteClient
 wb = RemoteClient()
 wb.open()
@@ -13,4 +15,5 @@ while True:
     pass
 
 print("read", wb.regs.data_pipe_fifo_read.write(1))
+print(time.time())
 wb.close()
