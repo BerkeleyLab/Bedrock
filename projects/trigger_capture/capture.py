@@ -3,6 +3,7 @@ import struct
 import sys
 import time
 
+from multiprocessing import Process
 from functools import reduce
 
 import numpy as np
@@ -18,11 +19,13 @@ def trigger_hardware():
     print(wb.regs.data_pipe_fifo_size.read())
     print(wb.regs.data_pipe_fifo_read.write(0))
     print(wb.regs.data_pipe_fifo_load.write(1))
+    triggered_at = time.time()
     print(wb.regs.data_pipe_fifo_load.read())
     while wb.regs.data_pipe_fifo_full.read() != 1:
         pass
-
-    print("Fifo full, sending read command")
+    full_at = time.time()
+    print(f"triggered at {triggered_at}")
+    print(f"full at {full_at}. Now sending read command")
     wb.regs.data_pipe_fifo_read.write(1)
 
 
@@ -93,17 +96,19 @@ def main():
     parser.add_argument("--plot-n", default=0, help="make a plot of the first N points of all channels")
     parser.add_argument("--to-file", default="dump.bin", help="dump data to file")
     parser.add_argument("--from-file", default="", help="plot data from file; No capture in this case")
-    args = parser.parse_args()
-    if args.from_file != "":
-        D = np.fromfile(args.from_file, dtype=np.int16)
+    cmd_args = parser.parse_args()
+    if cmd_args.from_file != "":
+        D = np.fromfile(cmd_args.from_file, dtype=np.int16)
         D = np.reshape(D, (-1, 8))
         print(D)
-        print(args.plot_n)
+        print(cmd_args.plot_n)
         for i in range(8):
-            plt.plot(D[:,i][:int(args.plot_n)])
+            plt.plot(D[:,i][:int(cmd_args.plot_n)])
         plt.show()
     else:
-        capture(args.ip, args.port, args.plot_n, to_file=args.to_file)
-
+        p = Process(target=capture, args=(cmd_args.ip, cmd_args.port, cmd_args.plot_n), kwargs={"to_file":cmd_args.to_file})
+        p.start()
+        trigger_hardware()
+        p.join()
 if __name__ == "__main__":
     main()
