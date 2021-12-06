@@ -57,7 +57,7 @@ def capture(ip, port, plot_n, to_file="dump.bin"):
     # trigger_hardware()
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((ip, port))
-    print(sock.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 1024 * 1024 * 16))
+    sock.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 1024 * 1024 * 16)
     print(sock.getsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF))
     data = recvall(sock)
     ids = [struct.unpack(f'>{2}I', p[:8])[1] for p in data]
@@ -93,7 +93,7 @@ def main():
     parser = argparse.ArgumentParser(description="Capture buffer from zest")
     parser.add_argument("--ip", default="192.168.1.114", help="capture host ip")
     parser.add_argument("--port", default=7778, help="capture host port")
-    parser.add_argument("--plot-n", default=0, help="make a plot of the first N points of all channels")
+    parser.add_argument("--plot-n", default=0, type=int, help="make a plot of the first N points of all channels")
     parser.add_argument("--to-file", default="dump.bin", help="dump data to file")
     parser.add_argument("--from-file", default="", help="plot data from file; No capture in this case")
     cmd_args = parser.parse_args()
@@ -106,7 +106,7 @@ def main():
             plt.plot(D[:,i][:int(cmd_args.plot_n)])
         plt.show()
     else:
-        p = Process(target=capture, args=(cmd_args.ip, cmd_args.port, cmd_args.plot_n), kwargs={"to_file":cmd_args.to_file})
+        p = Process(target=capture, args=(cmd_args.ip, cmd_args.port, cmd_args.plot_n,), kwargs={"to_file":cmd_args.to_file})
         p.start()
         trigger_hardware()
         p.join()
