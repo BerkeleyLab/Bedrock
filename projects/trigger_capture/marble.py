@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from migen import Module, ClockDomain, ClockSignal, ClockDomainsRenamer, Signal
+from migen import ClockDomain, ClockSignal, ClockDomainsRenamer, Signal
 from litex.soc.interconnect.stream import AsyncFIFO
 
 # from litex.tools.litex_sim import SimSoC
@@ -250,6 +250,7 @@ def main():
     if args.load:
         prog = marble.Platform().create_programmer()
         prog.load_bitstream(os.path.join("build", "marble", "gateware", "marble.bit"))
+
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,5 @@
 import socket
 import struct
-import sys
 import time
 
 from multiprocessing import Process
@@ -12,6 +11,7 @@ from matplotlib import pyplot as plt
 from litex import RemoteClient
 
 # np.set_printoptions(threshold=sys.maxsize)
+
 
 def trigger_hardware():
     wb = RemoteClient()
@@ -35,7 +35,6 @@ def recvall(sock):
     data = []
     total_len = 0
     packet_cnt = 0
-    sta = []
     while True:
         if yet_to_rx > 1464:
             ask = 1472
@@ -53,12 +52,13 @@ def recvall(sock):
     print(f'time-rx-complete {time.time()}\npackets-received {len(data)}\nbytes-received {total_len}')
     return data
 
+
 def capture(ip, port, plot_n, to_file="dump.bin"):
     # trigger_hardware()
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((ip, port))
-    sock.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 1024 * 1024 * 16)
-    print(sock.getsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF))
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 1024 * 1024 * 16)
+    print(sock.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF))
     data = recvall(sock)
     ids = [struct.unpack(f'>{2}I', p[:8])[1] for p in data]
 
@@ -88,6 +88,7 @@ def capture(ip, port, plot_n, to_file="dump.bin"):
     if to_file is not None:
         D.tofile(to_file)
 
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Capture buffer from zest")
@@ -106,9 +107,12 @@ def main():
             plt.plot(D[:,i][:int(cmd_args.plot_n)])
         plt.show()
     else:
-        p = Process(target=capture, args=(cmd_args.ip, cmd_args.port, cmd_args.plot_n,), kwargs={"to_file":cmd_args.to_file})
+        p = Process(target=capture, args=(cmd_args.ip, cmd_args.port, cmd_args.plot_n,),
+                    kwargs={"to_file":cmd_args.to_file})
         p.start()
         trigger_hardware()
         p.join()
+
+
 if __name__ == "__main__":
     main()
