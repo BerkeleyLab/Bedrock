@@ -81,7 +81,7 @@ def capture(ip, port, plot_n, to_file="dump.bin"):
     print("plotting ..")
     if plot_n != 0:
         for i in range(8):
-            plt.plot(D[:,i][:plot_n])
+            plt.plot(D[:, i][:plot_n])
         plt.show()
 
     print(f"dumping to {to_file} ..")
@@ -104,11 +104,11 @@ def main():
         print(D)
         print(cmd_args.plot_n)
         for i in range(8):
-            plt.plot(D[:,i][:int(cmd_args.plot_n)])
+            plt.plot(D[:, i][:int(cmd_args.plot_n)])
         plt.show()
     else:
         p = Process(target=capture, args=(cmd_args.ip, cmd_args.port, cmd_args.plot_n,),
-                    kwargs={"to_file":cmd_args.to_file})
+                    kwargs={"to_file": cmd_args.to_file})
         p.start()
         trigger_hardware()
         p.join()

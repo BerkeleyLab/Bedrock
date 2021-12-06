@@ -9,6 +9,7 @@
 import os
 import argparse
 
+
 def main():
     parser = argparse.ArgumentParser(description="Zest App. targeted for bootrom")
     parser.add_argument("--build-path", help="Target's build path (ex build/board_name).", required=True)
@@ -25,10 +26,12 @@ def main():
     # Compile app
     build_path = args.build_path if os.path.isabs(args.build_path) else os.path.join("..", args.build_path)
     print(args.app_dir_path)
-    os.system(f"export BUILD_DIR={build_path} && export APP_DIR={args.app_dir_path} && {'export WITH_CXX=1 &&' if args.with_cxx else ''} cd build && make")
+    os.system(f"export BUILD_DIR={build_path} && export APP_DIR={args.app_dir_path} &&" +
+      "{'export WITH_CXX=1 &&' if args.with_cxx else ''} cd build && make")
 
     # Copy demo.bin
     os.system("cp build/app.bin ./")
+
 
 if __name__ == "__main__":
     main()
