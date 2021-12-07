@@ -80,7 +80,7 @@ def capture(ip, port, plot_n, n_points, to_file="dump.bin"):
     x = len(D)//2
 
     print("unpacking ..")
-    D = struct.unpack(f'>{x}h', D)
+    D = struct.unpack(f'<{x}h', D)
     D = np.array(D, np.dtype(np.int16))
     D = np.reshape(D, (-1, 8))
 
