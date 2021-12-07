@@ -13,10 +13,17 @@ from litex import RemoteClient
 # np.set_printoptions(threshold=sys.maxsize)
 
 
-def trigger_hardware():
+def trigger_hardware(n_points):
     wb = RemoteClient()
     wb.open()
-    print(wb.regs.data_pipe_fifo_size.read())
+    assert n_points <= 1024 * 1024
+    fifo_size = wb.regs.data_pipe_fifo_size.read()
+    print(f"Fifo size was set to {fifo_size}")
+    if n_points != fifo_size:
+        print(f"Setting fifo size to {n_points}")
+        wb.regs.data_pipe_fifo_size.write(n_points)
+        print(f"fifo size set to {wb.regs.data_pipe_fifo_size.read()}")
+
     print(wb.regs.data_pipe_fifo_read.write(0))
     print(wb.regs.data_pipe_fifo_load.write(1))
     triggered_at = time.time()
@@ -29,8 +36,8 @@ def trigger_hardware():
     wb.regs.data_pipe_fifo_read.write(1)
 
 
-def recvall(sock):
-    BUFF_SIZE = 1024 * 1024 * 8 * 2   # 1M points from 8 ADCs each 2 bytes wide
+def recvall(sock, n_points=1024 * 1024):
+    BUFF_SIZE = n_points * 8 * 2   # 1M points from 8 ADCs each 2 bytes wide
     yet_to_rx = BUFF_SIZE
     data = []
     total_len = 0
@@ -53,13 +60,12 @@ def recvall(sock):
     return data
 
 
-def capture(ip, port, plot_n, to_file="dump.bin"):
-    # trigger_hardware()
+def capture(ip, port, plot_n, n_points, to_file="dump.bin"):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((ip, port))
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 1024 * 1024 * 16)
     print(sock.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF))
-    data = recvall(sock)
+    data = recvall(sock, n_points)
     ids = [struct.unpack(f'>{2}I', p[:8])[1] for p in data]
 
     # Checking no packets went missing
@@ -94,7 +100,11 @@ def main():
     parser = argparse.ArgumentParser(description="Capture buffer from zest")
     parser.add_argument("--ip", default="192.168.1.114", help="capture host ip")
     parser.add_argument("--port", default=7778, help="capture host port")
-    parser.add_argument("--plot-n", default=0, type=int, help="make a plot of the first N points of all channels")
+    parser.add_argument("--plot-n", default=0, type=int,
+                        help="make a plot of the first N points of all channels")
+    parser.add_argument("--fifo-size", default=1024*1024, type=int,
+                        help="Number of ADC channel data points to store (8x"\
+                        "get stored as there are 8 ADC channels in zest)")
     parser.add_argument("--to-file", default="dump.bin", help="dump data to file")
     parser.add_argument("--from-file", default="", help="plot data from file; No capture in this case")
     cmd_args = parser.parse_args()
@@ -107,10 +117,15 @@ def main():
             plt.plot(D[:,i][:int(cmd_args.plot_n)])
         plt.show()
     else:
-        p = Process(target=capture, args=(cmd_args.ip, cmd_args.port, cmd_args.plot_n,),
+        fifo_size = cmd_args.fifo_size
+        p = Process(target=capture,
+                    args=(cmd_args.ip,
+                          cmd_args.port,
+                          cmd_args.plot_n,
+                          cmd_args.fifo_size,),
                     kwargs={"to_file":cmd_args.to_file})
         p.start()
-        trigger_hardware()
+        trigger_hardware(fifo_size)
         p.join()
 
 

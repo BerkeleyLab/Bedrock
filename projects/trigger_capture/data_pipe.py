@@ -259,7 +259,7 @@ class DataPipeWithoutBypass(Module, AutoCSR):
                         sc.source.connect(udp_fragmenter.sink, omit={'total_size', 'last'}))
 
         # TODO: 8 should be adcstream data width // 8
-        self.comb += udp_fragmenter.sink.length.eq(SIZE << log2_int(adc_dw//8))
+        self.comb += udp_fragmenter.sink.length.eq(fifo_size << log2_int(adc_dw//8))
         self.comb += udp_fragmenter.source.connect(udp_port.sink)
         self.comb += [
             # param
