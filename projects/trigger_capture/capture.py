@@ -103,7 +103,7 @@ def main():
     parser.add_argument("--plot-n", default=0, type=int,
                         help="make a plot of the first N points of all channels")
     parser.add_argument("--fifo-size", default=1024*1024, type=int,
-                        help="Number of ADC channel data points to store (8x"\
+                        help="Number of ADC channel data points to store (8x"
                         "get stored as there are 8 ADC channels in zest)")
     parser.add_argument("--to-file", default="dump.bin", help="dump data to file")
     parser.add_argument("--from-file", default="", help="plot data from file; No capture in this case")
@@ -123,7 +123,7 @@ def main():
                           cmd_args.port,
                           cmd_args.plot_n,
                           cmd_args.fifo_size,),
-                    kwargs={"to_file":cmd_args.to_file})
+                    kwargs={"to_file" : cmd_args.to_file})
         p.start()
         trigger_hardware(fifo_size)
         p.join()
