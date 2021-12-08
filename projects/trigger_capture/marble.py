@@ -84,6 +84,10 @@ class SDRAMLoopbackSoC(BaseSoC):
     def __init__(self, ip="192.168.19.70", **kwargs):
         super().__init__(with_ethernet=True, **kwargs)
 
+        if kwargs.get('uart_name') == "crossover+bridge":
+            self.uart.add_auto_tx_flush(self.sys_clk_freq)
+            print("added_flush")
+
         self.platform.add_extension(marble.break_off_pmod)
         self.user_leds = self.platform.request("pmod0")
 
