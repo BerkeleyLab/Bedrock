@@ -123,7 +123,7 @@ def main():
                           cmd_args.port,
                           cmd_args.plot_n,
                           cmd_args.fifo_size,),
-                    kwargs={"to_file" : cmd_args.to_file})
+                    kwargs={"to_file": cmd_args.to_file})
         p.start()
         trigger_hardware(fifo_size)
         p.join()
