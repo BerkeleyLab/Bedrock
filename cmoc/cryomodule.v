@@ -146,7 +146,7 @@ always @(posedge lb_clk) if (lb_write & (lb_addr == 17'h1022a)) cbuf_mode <= lb_
 
 genvar cavity_n;
 generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: cryomodule_cavity
-   reg signed [17:0] drive2=0; reg iq2=0;  // computed later
+   reg signed [17:0] drive2=0; reg iq2=1;  // computed later
    //wire [3:0] beam_timing=0;  // XXX for simulator
    wire signed [17:0] piezo_ctl;  // controller output
    wire signed [15:0] a2_field, a2_forward, a2_reflect;  // simulator output
@@ -297,12 +297,16 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
 
    // Clock phasing hack suggested by Eric, to avoid the old
    // (and non-working in Vivado 2020.2) iq2 <= ~clk1x;
-   // XXX should be considered untested
+   // Passes testbench, but still ugly and possibly fragile.
    reg clk1x_div2_r=0, clk1x_div2_rr=0;
+   reg iq2_bogus=0;
    always @(posedge clk2x) begin
       clk1x_div2_r <= clk1x_div2;  // traditional CDC
       clk1x_div2_rr <= clk1x_div2_r;
-      iq2 <= (clk1x_div2_rr ^ clk1x_div2_rr) ? 1'b1 : ~iq2;
+      iq2 <= (clk1x_div2_r ^ clk1x_div2_rr) ? 1'b1 : ~iq2;
+`ifdef SIMULATE
+      iq2_bogus <= ~clk1x;
+`endif
    end
 
    // Move iq and drive to clk2x domain unchanged
