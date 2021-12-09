@@ -291,6 +291,20 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
       `AUTOMATIC_llrf
       );
 
+   // Setup for clock phasing hack
+   reg clk1x_div2=0;
+   always @(posedge clk1x) clk1x_div2 <= ~clk1x_div2;
+
+   // Clock phasing hack suggested by Eric, to avoid the old
+   // (and non-working in Vivado 2020.2) iq2 <= ~clk1x;
+   // XXX should be considered untested
+   reg clk1x_div2_r=0, clk1x_div2_rr=0;
+   always @(posedge clk2x) begin
+      clk1x_div2_r <= clk1x_div2;  // traditional CDC
+      clk1x_div2_rr <= clk1x_div2_r;
+      iq2 <= (clk1x_div2_rr ^ clk1x_div2_rr) ? 1'b1 : ~iq2;
+   end
+
    // Move iq and drive to clk2x domain unchanged
    reg signed [17:0] drive2x=0;
    reg iq2x=0;
@@ -299,14 +313,13 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
       iq2x <= iq;
    end
 
-   // Now take care of iq and drive semantics in clk2 domain
+   // Now take care of iq and drive semantics in clk2x domain
    reg signed [17:0] drive2_d=0;
    reg iq2x_d=0;
    always @(posedge clk2x) begin
       iq2x_d <= iq2x;
       drive2 <= iq2x_d ? drive2x: drive2_d;
       drive2_d <= drive2;
-      iq2 <= ~clk1x;  // Double Yuck.
    end
 
 `else
