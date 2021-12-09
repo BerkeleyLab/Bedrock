@@ -287,9 +287,7 @@ if __name__ == "__main__":
         help='ip_address',
         dest='ip',
         type=str,
-        default='192.168.19.8')
-    parser.add_argument(
-        '-p', '--port', help='port', dest='port', type=int, default=803)
+        default='192.168.19.8:803')
     parser.add_argument(
         '-m', '--mask', help='mask', dest='mask', type=str, default='0x0f')
     parser.add_argument(
@@ -317,11 +315,9 @@ if __name__ == "__main__":
     else:
         carrier = ZestOnBMB7Carrier(
             ip_addr=args.ip,
-            port=args.port,
             mask=args.mask,
             npt_wish=args.npt_wish,
             count=args.count,
-            use_spartan=args.use_spartan,
             log_decimation_factor=args.log_decimation_factor,
             test=False)
     GUIGraph.setup_gui_graphs(carrier)
