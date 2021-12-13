@@ -16,7 +16,6 @@ from litex import RemoteClient
 def trigger_hardware(n_points):
     wb = RemoteClient()
     wb.open()
-    assert n_points <= 1024 * 1024
     fifo_size = wb.regs.data_pipe_fifo_size.read()
     print(f"Fifo size was set to {fifo_size}")
     if n_points != fifo_size:
