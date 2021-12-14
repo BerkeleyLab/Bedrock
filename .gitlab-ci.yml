@@ -15,7 +15,7 @@ variables:
 image: $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
 
 services:
-  - name: mohs.dhcp.lbl.gov/docker:20.10.11-dind
+  - name: mohs.dhcp.lbl.gov/docker:19.03.15-dind
     command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
     alias: docker
 #    entrypoint: ["dockerd-entrypoint.sh"]
