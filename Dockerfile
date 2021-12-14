@@ -38,7 +38,6 @@ RUN apt-get update && \
 	iproute2 \
 	bsdmainutils \
 	curl \
-	gawk \
 	flake8 \
 	python3-pip \
 	python3-numpy \
@@ -107,7 +106,7 @@ RUN apt-get update && \
 # SymbiYosys formal verification tool + Yices 2 solver (`sby` command)
 RUN apt-get update && \
 	apt-get install -y build-essential clang bison flex libreadline-dev \
-					 gawk tcl-dev libffi-dev git mercurial graphviz   \
+					 tcl-dev libffi-dev git graphviz   \
 					 xdot pkg-config python python3 libftdi-dev gperf \
 					 libboost-program-options-dev autoconf libgmp-dev \
 					 cmake && \
