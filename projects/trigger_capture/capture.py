@@ -9,11 +9,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from litex import RemoteClient
+from liteeth.common import convert_ip
 
 # np.set_printoptions(threshold=sys.maxsize)
 
 
-def trigger_hardware(n_points, csr_csv = None):
+def trigger_hardware(n_points, cap_ip, cap_port,
+                    csr_csv = None):
     wb = RemoteClient(csr_csv=csr_csv)
     wb.open()
     fifo_size = wb.regs.data_pipe_fifo_size.read()
@@ -23,6 +25,8 @@ def trigger_hardware(n_points, csr_csv = None):
         wb.regs.data_pipe_fifo_size.write(n_points)
         print(f"fifo size set to {wb.regs.data_pipe_fifo_size.read()}")
 
+    print(wb.regs.data_pipe_dst_ip.write(convert_ip(cap_ip)))
+    print(wb.regs.data_pipe_dst_port.write(cap_port))
     print(wb.regs.data_pipe_fifo_read.write(0))
     print(wb.regs.data_pipe_fifo_load.write(1))
     triggered_at = time.time()
@@ -124,7 +128,7 @@ def main():
                           cmd_args.fifo_size,),
                     kwargs={"to_file": cmd_args.to_file})
         p.start()
-        trigger_hardware(fifo_size)
+        trigger_hardware(fifo_size, cmd_args.ip, cmd_args.port)
         p.join()
 
 
