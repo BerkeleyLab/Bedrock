@@ -13,8 +13,8 @@ from litex import RemoteClient
 # np.set_printoptions(threshold=sys.maxsize)
 
 
-def trigger_hardware(n_points):
-    wb = RemoteClient()
+def trigger_hardware(n_points, csr_csv = None):
+    wb = RemoteClient(csr_csv=csr_csv)
     wb.open()
     assert n_points <= 1024 * 1024
     fifo_size = wb.regs.data_pipe_fifo_size.read()
