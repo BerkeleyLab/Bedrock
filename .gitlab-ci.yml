@@ -5,17 +5,17 @@ stages:
   - program
 
 variables:
-  XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1
+  XILINX_VIVADO: /non-free/Xilinx/Vivado/2020.2
   CI_REGISTRY: mohs.dhcp.lbl.gov
-  CONTAINER_IMAGE: $CI_REGISTRY/testing_base
-  CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
+  CONTAINER_IMAGE: $CI_REGISTRY/testing_base_bullseye
+  # CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
 
 image: $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
 
 services:
-  - name: mohs.dhcp.lbl.gov/docker:18.09.7-dind
+  - name: mohs.dhcp.lbl.gov/docker:19.03.15-dind
     command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
     alias: docker
 #    entrypoint: ["dockerd-entrypoint.sh"]

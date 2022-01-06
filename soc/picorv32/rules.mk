@@ -11,11 +11,11 @@ vpath %.S $(COMMON_DIR)
 vpath %.lds $(COMMON_DIR)
 vpath %.c $(LIB_DIR)/src
 
-RISCV_TOOLS_PREFIX = riscv32-unknown-elf-
+RISCV_TOOLS_PREFIX = riscv64-unknown-elf-
 CC      = $(RISCV_TOOLS_PREFIX)gcc
 AR      = $(RISCV_TOOLS_PREFIX)ar
 VFLAGS  = -Wall -Wno-timescale -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE)
-# CCSPECS = -specs=picolibc.specs
+CCSPECS = -specs=picolibc.specs
 CLFLAGS = -march=rv32imc -mabi=ilp32 -ffreestanding -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) -nostartfiles $(CCSPECS)
 CFLAGS  = -std=c99 -Os -Wall -Wextra -Wundef -Wstrict-prototypes $(CLFLAGS)
 LDFLAGS = $(CLFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,--defsym,BLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE),--gc-sections,--no-relax -T$(filter %.lds, $^)

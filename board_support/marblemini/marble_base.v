@@ -2,11 +2,7 @@
 // Instantiates rtefi_blob and support code
 // Needs to be kept 100% portable/synthesizable
 
-module marble_base #(
-	parameter USE_I2CBRIDGE = 1,
-	parameter MMC_CTRACE = 1,
-	parameter misc_config_default = 0
-)(
+module marble_base (
 	// GMII Tx port
 	input vgmii_tx_clk,
 	output [7:0] vgmii_txd,
@@ -82,6 +78,10 @@ module marble_base #(
 	output ZEST_PWR_EN,
 	output [7:0] LED
 );
+
+parameter USE_I2CBRIDGE = 1;
+parameter MMC_CTRACE = 1;
+parameter misc_config_default = 0;
 
 `ifdef VERILATOR
 parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4};  // 192.168.7.4
