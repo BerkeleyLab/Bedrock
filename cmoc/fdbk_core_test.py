@@ -678,7 +678,7 @@ def run_int_test_bench(plot=False):
     ki_text = r'$\rm k_{\rm i}$' + ': set to %.1f/s, measured %.1f/s, factor %.4f' % ll
     low_lim = fdbk_out[-1]
     limit_text = 'Lower limit set to %d, measured %.1f' % (-limit,
-                                                            np.imag(low_lim))
+                                                           np.imag(low_lim))
 
     print('\nKi: Set to %.1f, measured %.1f, factor %.4f' % ll)
     print(limit_text)
