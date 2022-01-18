@@ -64,8 +64,10 @@ int tap_alloc(char *dev)
 	 *        IFF_NO_PI - Do not provide packet information
 	 */
 	ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
-	if( *dev )
-		strncpy(ifr.ifr_name, dev, IFNAMSIZ);
+	if( *dev ) {
+		strncpy(ifr.ifr_name, dev, IFNAMSIZ-1);
+		ifr.ifr_name[IFNAMSIZ-1] = '\0';  /* work around strncpy stupidity */
+	}
 
 	if( (err = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0 ){
 		perror("tun-ioctl");
