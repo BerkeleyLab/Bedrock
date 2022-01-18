@@ -5,7 +5,8 @@ stages:
   - program
 
 variables:
-  XILINX_VIVADO: /non-free/Xilinx/Vivado/2018.1
+  XILINX_VIVADO_VER: "2020.2"
+  XILINX_VIVADO: /non-free/Xilinx/Vivado/$XILINX_VIVADO_VER
   CI_REGISTRY: mohs.dhcp.lbl.gov
   CONTAINER_IMAGE: $CI_REGISTRY/testing_base
   CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
@@ -15,10 +16,9 @@ variables:
 image: $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
 
 services:
-  - name: mohs.dhcp.lbl.gov/docker:18.09.7-dind
+  - name: mohs.dhcp.lbl.gov/docker:20.10.11-dind
     command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
     alias: docker
-#    entrypoint: ["dockerd-entrypoint.sh"]
 
 include:
   - local: .gitlab/ci/build.gitlab-ci.yml

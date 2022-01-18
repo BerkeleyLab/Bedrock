@@ -38,6 +38,10 @@ module circle_buf_serial #(
 
    // Channel selector controls
    input [n_chan-1:0]       chan_mask, // Bitmask of channels to record. See lsb_mask parameter
+   // Selected waveform data in iclk domain
+   output                   wave_gate,
+   output                   wave_dval,
+   output                   [buf_dw-1:0] wave_data,
 
    // Circular Buffer control and statistics
    // all of these signals are also in the iclk domain
@@ -62,10 +66,9 @@ module circle_buf_serial #(
    // ------
    // Interleaved channel selector
    // ------
-   wire              wave_gate, wave_trig;
-   wire [buf_dw-1:0] wave_data;
    wire              fchan_time_error; // For debug only - will pulse if gate-per-trigger ratio is broken
-
+   wire              wave_trig;
+   assign            wave_dval = ~wave_trig;
 
    fchan_subset #(
       .KEEP_OLD (lsb_mask),
