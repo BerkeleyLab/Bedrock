@@ -35,9 +35,9 @@ example column output:
   bus_digitizer_U3[16]  LVDS_25          H23       FMC1_LA22_P  ADC_D0A_N_1
 
 
-## Build FW and program Marble-Mini
+## Build FW and program Marble
 ```
-cd $BEDROCK/projects/oscope/marblemini
+cd $BEDROCK/projects/oscope/marble_family
 make clean && make oscope_top.bit
 openocd -f ../../../board_support/marblemini/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 oscope_top.bit; exit"
 ```
