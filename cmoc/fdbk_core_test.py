@@ -110,6 +110,39 @@ def run_test_bench(setmp_val,
         call(command, shell=True)
 
 
+def trace_plotter(title, trang, waves=[], yscale=1.0,
+                  xlim=None, ylim=None, ylabel='Amplitude [FPGA counts]',
+                  texts=[], x0=None, y1=None, y2=None, edge=None):
+    """
+    Stupid utility function; doesn't do much other than reduce
+    the space taken up by the python each time a plot is wanted.
+    """
+    for tt in texts:
+        plt.text(tt[0], tt[1]*yscale, tt[2], verticalalignment='top', fontsize=24)
+    for ww in waves:
+        plt.plot(trang*1e6, ww[0]*yscale, label=ww[1], linewidth=2)
+    # Format plot
+    plt.title(title, fontsize=30, y=1.01)
+    plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=24)
+    plt.ylabel(ylabel, fontsize=24)
+    plt.legend(loc='upper right')
+    if xlim is not None:
+        plt.xlim(xlim)
+    if ylim is not None:
+        plt.ylim(ylim)
+    # Optional decorations
+    if x0 is not None:
+        plt.axvline(x=x0*1e6, color='k', linestyle='--')
+    if y1 is not None:
+        plt.axhline(y=y1*yscale, color='r', linestyle='--')
+    if y2 is not None:
+        plt.axhline(y=y2*yscale, color='g', linestyle='--')
+    if edge is not None:
+        fdbk_out = waves[1][0]  # Hack!
+        plt.plot(trang[edge]*1e6, fdbk_out[edge]*yscale, label='Slope', linewidth=3)
+    plt.show()
+
+
 def run_sp_test_bench(plot=False):
     """
     Set-point scaling test:
@@ -166,29 +199,11 @@ def run_sp_test_bench(plot=False):
     print((">>> " + result))
 
     if plot:
-        # Plot results
-        plt.plot(
-            trang * 1e6,
-            np.abs(input_mp),
-            label='Input Amplitude',
-            linewidth=2)
-        plt.plot(
-            trang * 1e6,
-            np.abs(setpoint),
-            label='Set-point Amplitude',
-            linewidth=2)
-        plt.plot(
-            trang * 1e6, np.abs(error), label='Error Amplitude', linewidth=2)
-
-        # Format plot
-        plt.title(
-            "Set-point amplitude scaling test-bench", fontsize=30, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=24)
-        plt.ylabel('Amplitude [FPGA counts]', fontsize=24)
-        plt.legend(loc='upper right')
-        plt.ylim([-80000, 80000])
-
-        plt.show()
+        waves = [(np.abs(input_mp), 'Input Amplitude'), (np.abs(setpoint), 'Set-point Amplitude')]
+        waves += [(np.abs(error), 'Error Amplitude')]
+        trace_plotter(
+            "Set-point amplitude scaling test-bench", trang, waves=waves,
+            ylim=(-80000, 80000))
 
     print("---- Phase test ----\n")
     # Set set-point to pre-defined value on both amplitude and phase,
@@ -264,32 +279,12 @@ def run_sp_test_bench(plot=False):
         print((">>> " + result))
 
         if plot:
-            # Plot results
-            plt.plot(
-                trang * 1e6,
-                np.imag(input_mp) * 360 / 2**18,
-                label='Input',
-                linewidth=2)
-            plt.plot(
-                trang * 1e6,
-                np.imag(setpoint) * 360 / 2**18,
-                label='Set-point',
-                linewidth=2)
-            plt.plot(
-                trang * 1e6,
-                np.imag(error) * 360 / 2**18,
-                label='Error',
-                linewidth=2)
-
-            # Format plot
             title_text = 'Set-point phase scaling test-bench (%d' % (
                 int(phase)) + r'$\degree$' + ')'
-            plt.title(title_text, fontsize=30, y=1.01)
-            plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=24)
-            plt.ylabel('Phase [Degrees]', fontsize=24)
-            plt.legend(loc='upper right')
-
-            plt.show()
+            waves = [(np.imag(input_mp), 'Input'), (np.imag(setpoint), 'Set-point'), (np.imag(error), 'Error')]
+            trace_plotter(
+                title_text, trang, waves=waves,
+                yscale=360*0.5**18, ylabel='Phase [Degrees]')
 
         pass_phase_test = pass_phase_test & pass_this_phase_test
 
@@ -367,34 +362,12 @@ def run_prop_test_bench(plot=False):
     print('\nKp set to: %.3f, measured: %.3f' % ll)
 
     if plot:
-        plt.text(1.6, -60000, kp_text, verticalalignment='top', fontsize=24)
-
-        # Plot results
-        plt.plot(
-            trang * 1e6, np.real(setpoint), label='Set-point', linewidth=2)
-        plt.plot(
-            trang * 1e6,
-            np.real(fdbk_out),
-            label='Controller Output',
-            linewidth=2)
-        plt.plot(trang * 1e6, np.real(error), label='Error', linewidth=2)
-
-        # Format plot
-        plt.title(
-            "Proportional gain test-bench (Amplitude)", fontsize=30, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=24)
-        plt.ylabel('Amplitude [FPGA counts]', fontsize=24)
-        plt.legend(loc='upper right')
-        plt.xlim([1.4, 2.5])
-        plt.ylim([-140000, 30000])
-
-        plt.axvline(
-            x=(setmp_step_time) * Tstep * 1e6, color='k', linestyle='--')
-
-        plt.axhline(y=out1, color='r', linestyle='--')
-        plt.axhline(y=out2, color='g', linestyle='--')
-
-        plt.show()
+        texts = [(1.6, -60000, kp_text)]
+        waves = [(np.real(setpoint), 'Set-point'), (np.real(fdbk_out), 'Controller Output'), (np.real(error), 'Error')]
+        trace_plotter(
+            "Proportional gain test-bench (Amplitude)", trang, waves=waves,
+            xlim=(1.4, 2.5), ylim=(-140000, 30000), texts=texts,
+            x0=setmp_step_time*Tstep, y1=out1, y2=out2)
 
     print("---- Phase test ----\n")
 
@@ -461,44 +434,13 @@ def run_prop_test_bench(plot=False):
     print('\nKp: Set to %.3f, measured: %.3f' % ll)
 
     if plot:
-        plt.text(
-            1.6,
-            -60000 * 360 / 2**18,
-            kp_text,
-            verticalalignment='top',
-            fontsize=24)
-
-        # Plot results
-        plt.plot(
-            trang * 1e6,
-            np.imag(setpoint) * 360 / 2**18,
-            label='Set-point',
-            linewidth=2)
-        plt.plot(
-            trang * 1e6,
-            np.imag(fdbk_out) * 360 / 2**18,
-            label='Controller Output',
-            linewidth=2)
-        plt.plot(
-            trang * 1e6,
-            np.imag(error) * 360 / 2**18,
-            label='Error',
-            linewidth=2)
-
-        # Format plot
-        plt.title("Proportional gain test-bench (Phase)", fontsize=30, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=24)
-        plt.ylabel('Phase [Degrees]', fontsize=24)
-        plt.legend(loc='upper right')
-        plt.xlim([1.4, 2.5])
-
-        plt.axvline(
-            x=(setmp_step_time) * Tstep * 1e6, color='k', linestyle='--')
-
-        plt.axhline(y=out1 * 360 / 2**18, color='r', linestyle='--')
-        plt.axhline(y=out2 * 360 / 2**18, color='g', linestyle='--')
-
-        plt.show()
+        texts = [(1.6, -60000, kp_text)]
+        waves = [(np.imag(setpoint), 'Set-point'), (np.imag(fdbk_out), 'Controller Output'), (np.imag(error), 'Error')]
+        trace_plotter(
+            "Proportional gain test-bench (Phase)", trang, waves=waves,
+            yscale=360*0.5**18, ylabel='Phase [Degrees]',
+            xlim=(1.4, 2.5), texts=texts,
+            x0=setmp_step_time*Tstep, y1=out1, y2=out2)
 
 
 def run_int_test_bench(plot=False):
@@ -583,35 +525,12 @@ def run_int_test_bench(plot=False):
     print(limit_text)
 
     if plot:
-        plt.text(0.25, -10000, ki_text, verticalalignment='top', fontsize=24)
-        plt.text(
-            0.25, -15000, limit_text, verticalalignment='top', fontsize=24)
-
-        # Plot results
-        plt.plot(
-            trang * 1e6, np.real(setpoint), label='Set-point', linewidth=2)
-        plt.plot(
-            trang * 1e6,
-            np.real(fdbk_out),
-            label='Controller Output',
-            linewidth=2)
-
-        # Format plot
-        plt.title("Integral gain test-bench (Amplitude)", fontsize=30, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=24)
-        plt.ylabel('Amplitude [FPGA counts]', fontsize=24)
-        plt.legend(loc='upper right')
-        plt.xlim([0.0, 3.5])
-        plt.ylim([-40000, 20000])
-
-        # Highlight the region of the output signal where the slope is calculated
-        plt.plot(
-            trang[edge_ind] * 1e6,
-            np.real(fdbk_out[edge_ind]),
-            label='Slope',
-            linewidth=3)
-
-        plt.show()
+        texts = [(0.25, -10000, ki_text), (0.25, -15000, limit_text)]
+        waves = [(np.real(setpoint), 'Set-point'), (np.real(fdbk_out), 'Controller Output')]
+        trace_plotter(
+            "Integral gain test-bench (Amplitude)", trang, waves=waves,
+            xlim=(0.0, 3.5), ylim=(-40000, 20000), texts=texts,
+            edge=edge_ind)
 
     print("---- Phase test ----\n")
 
@@ -684,46 +603,13 @@ def run_int_test_bench(plot=False):
     print(limit_text)
 
     if plot:
-        plt.text(
-            0.25,
-            -10000 * 360 / 2**18,
-            ki_text,
-            verticalalignment='top',
-            fontsize=24)
-        plt.text(
-            0.25,
-            -15000 * 360 / 2**18,
-            limit_text,
-            verticalalignment='top',
-            fontsize=24)
-
-        # Plot results
-        plt.plot(
-            trang * 1e6,
-            np.imag(setpoint) * 360 / 2**18,
-            label='Set-point',
-            linewidth=2)
-        plt.plot(
-            trang * 1e6,
-            np.imag(fdbk_out) * 360 / 2**18,
-            label='Controller Output',
-            linewidth=2)
-
-        # Highlight the region of the output signal where the slope is calculated
-        plt.plot(
-            trang[edge_ind] * 1e6,
-            np.imag(fdbk_out[edge_ind]) * 360 / 2**18,
-            label='Slope',
-            linewidth=3)
-
-        # Format plot
-        plt.title("Integral gain test-bench (Phase)", fontsize=30, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=24)
-        plt.ylabel('Phase [Degrees]', fontsize=24)
-        plt.legend(loc='upper right')
-        plt.ylim([-70, 35])
-
-        plt.show()
+        texts = [(0.25, -10000, ki_text), (0.25, -15000, limit_text)]
+        waves = [(np.imag(setpoint), 'Set-point'), (np.imag(fdbk_out), 'Controller Output')]
+        trace_plotter(
+            "Integral gain test-bench", trang, waves=waves,
+            yscale=360*0.5**18, ylabel='Phase [Degrees]',
+            ylim=(-70, 35), texts=texts,
+            edge=edge_ind)
 
 
 def run_latency_test_bench(plot=False):
@@ -792,29 +678,11 @@ def run_latency_test_bench(plot=False):
     print("\n" + latency_text + "\n")
 
     if plot:
-        plt.text(
-            0.5, 20000, latency_text, verticalalignment='top', fontsize=24)
-
-        # Plot results
-        plt.plot(
-            trang * 1e6,
-            np.real(fdbk_in),
-            label='Controller Input',
-            linewidth=2)
-        plt.plot(
-            trang * 1e6,
-            np.real(fdbk_out),
-            label='Controller Output',
-            linewidth=2)
-
-        # Format plot
-        plt.title("Latency test-bench", fontsize=30, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=24)
-        plt.ylabel('Amplitude [FPGA counts]', fontsize=24)
-        plt.legend(loc='upper right')
-        plt.ylim([-10000, 50000])
-
-        plt.show()
+        texts = [(0.5, 20000, latency_text)]
+        waves = [(np.real(fdbk_in), 'Controller Input'), (np.real(fdbk_out), 'Controller Output')]
+        trace_plotter(
+            "Latency test-bench", trang, waves=waves, texts=texts,
+            ylim=(-10000, 50000))
 
 
 if __name__ == "__main__":
