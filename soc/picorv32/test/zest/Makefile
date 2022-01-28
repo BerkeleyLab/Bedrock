@@ -11,9 +11,9 @@ SRC_V   = memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v spi_engine.v
 SRC_V  += idelays_pack.v freq_count.v flag_xdomain.v data_xdomain.v dpram.v phase_diff.v phaset.v
 SRC_V  += zest.v zest_clk_map.v zest_spi_dio_pack.v
 SRC_V  += dco_buf.v iserdes_pack.v idelay_wrap.v wfm_pack.v
-SRC_V  += BUFG.v IBUFDS.v IDDR.v IDELAYE2.v OBUFDS.v BUFR.v BUFIO.v
-SRC_V  += ODDR.v
-SRC_V  += $(VIVADO_BASE)/data/verilog/src/unisims/ISERDESE2.v $(VIVADO_BASE)/data/verilog/src/glbl.v
+SRC_V  += $(VIVADO_BASE)/data/verilog/src/glbl.v
+# Xilinx primitives that Vivado finds without help:
+#  IBUFDS BUFG BUFIO BUFR IDELAYE2 ISERDESE2 ODDR OBUFDS IDELAYCTRL_default
 SRC_V  += sfr_pack.v gpio_pack.v
 
 SRCS    = print.c timer.c settings.h
