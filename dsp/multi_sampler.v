@@ -37,11 +37,10 @@ module multi_sampler #(
 `endif
 
    reg [sample_period_wi-1:0] samp_per_r=0;
-   reg [sample_period_wi-1:0] base_count = 0;
-   reg [dsample0_wi-1:0]      ds0_count = INITVAL;
-   reg [dsample1_wi-1:0]      ds1_count = INITVAL;
-   reg [dsample2_wi-1:0]      ds2_count = INITVAL;
-
+   (* ASYNC_REG= "TRUE" *)   reg [sample_period_wi-1:0] base_count = 0;
+   (* ASYNC_REG= "TRUE" *)   reg [dsample0_wi-1:0]      ds0_count = INITVAL;
+   (* ASYNC_REG= "TRUE" *)   reg [dsample1_wi-1:0]      ds1_count = INITVAL;
+   (* ASYNC_REG= "TRUE" *)   reg [dsample2_wi-1:0]      ds2_count = INITVAL;
    reg sample_out_l = 0;
 
    // Base-timing generation
