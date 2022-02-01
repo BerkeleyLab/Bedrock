@@ -394,29 +394,28 @@ class c_zest:
             # Check this if running on sliderule.dhcp with 377MHz input clock
             self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
                 RESET='0',
-                CLKin0_DIV="010",
-                CLKin1_DIV="000",
+                CLKin0_DIV="010",  # div-by-2
+                CLKin1_DIV="000",  # div-by-8
                 CLKin1_MUX="01",
                 CLKin0_MUX="01"))
         else:
             self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
                 RESET='0',
-                CLKin0_DIV="111",
-                CLKin1_DIV="000",
+                CLKin0_DIV="111",  # div-by-7
+                CLKin1_DIV="000",  # div-by-8
                 CLKin1_MUX="01",
                 CLKin0_MUX="01"))
-        # , CLKout4_7_PD='1', CLKout0_3_PD='0'))#, CLKin0_DIV='011'))
         self.spi_write(self.lmk_spi, 1, self.lmk_spi.R1(
-            CLKout7_TYPE="0000",  # Powerdown
-            CLKout4_TYPE="0000",  # Powerdown
-            CLKout2_TYPE="001"))  # LVCMOS
+            CLKout7_TYPE="0000",   # Powerdown  unused
+            CLKout4_TYPE="0000",   # Powerdown  P2-H4,H5 LMK_CLKout4_{P,N}
+            CLKout2_TYPE="001"))   # LVDS  J13 test point
         self.spi_write(self.lmk_spi, 2, self.lmk_spi.R2(
-            CLKout13_TYPE="0000",  # Powerdown
-            CLKout12_TYPE="0000",  # Powerdown
-            CLKout11_TYPE="0110",  # CMOS J24 test point
-            CLKout10_TYPE="0001",  # LVDS J20
-            CLKout9_TYPE="0000",   # Powerdown
-            CLKout8_TYPE="0000"))  # Powerdown
+            CLKout13_TYPE="0000",  # Powerdown  unused
+            CLKout12_TYPE="0000",  # Powerdown  unused
+            CLKout11_TYPE="0110",  # CMOS  J24 test point
+            CLKout10_TYPE="0001",  # LVDS  J20 SMA
+            CLKout9_TYPE="0000",   # Powerdown  unused
+            CLKout8_TYPE="0000"))  # Powerdown  unused
         sys.stdout.write("done\n")
         sys.stdout.flush()
         time.sleep(0.3)
