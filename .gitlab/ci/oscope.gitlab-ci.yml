@@ -45,8 +45,8 @@ synthesis:
     expire_in: 1 week
     when: always
     paths:
-      - build/marble/gateware/marble.bit
-      - csr.csv
+      - projects/trigger_capture/build/marble/gateware/marble.bit
+      - projects/trigger_capture/csr.csv
 
 # oscope_program:
 #   before_script:
