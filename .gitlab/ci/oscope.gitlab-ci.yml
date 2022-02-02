@@ -38,7 +38,8 @@ synthesis:
     - apt-get update && apt-get install -y ninja-build && pip3 install meson && python3 litex_setup.py install
     - cd /builds/hdl-libraries/bedrock/projects/trigger_capture
   script:
-    XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && make marble.bit
+    - XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && make marble.bit
+    - ls -la build; ls -la build/marble; ls -la build/marble/gateware
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week
