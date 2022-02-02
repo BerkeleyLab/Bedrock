@@ -29,6 +29,24 @@ oscope_top_marble:
     paths:
       - projects/oscope/marble_family/oscope_top.bit
 
+synthesis:
+  stage: synthesis
+  before_script:
+    - mkdir /litex_setup_dir && cd /litex_setup_dir
+    - wget https://raw.githubusercontent.com/enjoy-digital/litex/70c5be6fb8/litex_setup.py && python3 litex_setup.py init
+    - cd litex && git checkout 70c5be6fb8
+    - apt-get update && apt-get install -y ninja-build && pip3 install meson && python3 litex_setup.py install
+    - cd /builds/hdl-libraries/bedrock/projects/trigger_capture
+  script:
+    XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && make marble.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    when: always
+    paths:
+      - projects/trigger_capture/build/marble/gateware/marble.bit
+      - projects/trigger_capture/csr.csv
+
 # oscope_program:
 #   before_script:
 #     - cd projects/oscope/software/bmb7 && wget -r -nH http://sliderule.dhcp.lbl.gov:8000/{r1,configuration} && cd ..
