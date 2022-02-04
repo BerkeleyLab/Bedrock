@@ -1,0 +1,36 @@
+name: Bedrock documentation
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    # We want to run on external PRs, but not on our own internal PRs as
+    # they'll be run by the push to the branch. Without this if check,
+    # checks are duplicated since internal PRs match both the push and
+    # pull_request events.
+    if: >
+      github.event_name == 'push' ||
+        github.event.pull_request.head.repo.full_name != github.repository
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install documentation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install make xvfb pandoc xcircuit
+
+      - name: Build documentation
+        run: |
+          make -C badger/doc
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: badger-doc
+          path: badger/doc/*.svg
