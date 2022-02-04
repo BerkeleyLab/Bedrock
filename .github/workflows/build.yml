@@ -20,14 +20,29 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+            python-version: '3.8'
+
       - name: Install documentation tools
         run: |
           sudo apt-get update
-          sudo apt-get -y install make xvfb pandoc xcircuit
+          sudo apt-get -y install make xvfb pandoc xcircuit python3-sphinx
 
-      - name: Build documentation
+      - name: Build diagrams
         run: |
           make -C badger/doc
+
+      - name: Build sphinx docs
+        run: |
+          make -C doc html
+
+      - name: Deploy gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./doc/_build/html
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
