@@ -1,25 +1,24 @@
 [Required]
 make
 iverilog
-gawk [looks like mawk is the default install and isn't enough]
 
-python-numpy
-python-flake8
+python3-numpy
+flake8
 
-Note that python2 is very close to end-of-life; we support and
+Note that python2 is very much past its end-of-life; we support and
 recommend using python3.
 
 [optional]
 Verilator
 Yosys
 
-python-scipy
-python-matplotlib
+python3-scipy
+python3-matplotlib
 
 =====
-Summary, well tested on Debian Stretch and Buster:
+Summary, well tested on Debian Buster and Bullseye:
 
-apt-get install -y build-essential git iverilog gtkwave gawk verilator
+apt-get install -y build-essential git iverilog gtkwave verilator
 apt-get install -y python3-numpy python3-flake8 python3-scipy python3-matplotlib
 
 =====
