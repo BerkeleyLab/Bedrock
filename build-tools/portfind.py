@@ -32,6 +32,7 @@ else:
     def indent(text, amount, ch=" "):
         return textwrap.indent(text, amount * ch)
 
+
 class verilog_port():
     def __init__(self, io, signed, msb, lsb, ident, desc):
         self.io = io
@@ -65,7 +66,7 @@ class verilog_port():
 
     def table_row(self):
         return "<tr><td><tt>{}</tt></td><td>{}</td><td>{}</td></tr>" \
-                .format(self.ident+self.bits(), self.direction(), self.desc)
+               .format(self.ident+self.bits(), self.direction(), self.desc)
 
     def table_row_html(self):
         self.table_row()
@@ -106,7 +107,7 @@ class verilog_param():
 
     def table_row(self):
         return "<tr><td><tt>{}</tt></td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>" \
-                .format(self.ident, "?", "?", self.default, self.desc)
+               .format(self.ident, "?", "?", self.default, self.desc)
 
     def table_row_html(self):
         self.table_row()
@@ -145,7 +146,7 @@ def make_html(fname, param_list, port_list):
     print(hdata["intro_html"])
     if 1:
         print("<h3>Pinout</h3><p>")
-        print("<img src=\"{}_block.png\" alt=\"schematic symbol\">\n" \
+        print("<img src=\"{}_block.png\" alt=\"schematic symbol\">\n"
               .format(fbase))
 
     if param_list:
@@ -171,9 +172,9 @@ def make_html(fname, param_list, port_list):
     if 1:
         print("<p>")
         print("A <a href=\"http://gtkwave.sourceforge.net/\">GTKWave</a>-generated")
-        print("timing diagram showing {} is shown here:" \
+        print("timing diagram showing {} is shown here:"
               .format(hdata["timing_html"]))
-        print("<p><img src=\"{}_timing.png\" alt=\"timing diagram\">\n" \
+        print("<p><img src=\"{}_timing.png\" alt=\"timing diagram\">\n"
               .format(fbase))
 
     try:
@@ -186,6 +187,7 @@ def make_html(fname, param_list, port_list):
         pass
 
     print("</body></html>")
+
 
 def make_rst(fname, param_list, port_list):
     fbase, fext = os.path.splitext(os.path.basename(fname))
@@ -305,7 +307,8 @@ showpage
 
 
 def svg_line(x0, y0, x1, y1, w):
-    print('<line x1="{}" y1="{}" x2="{}" y2="{}" stroke="blue" stroke-width="{}" />'.format(x0, y0, x1, y1, w))
+    print("<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"blue\" stroke-width=\"{}\" />"
+          .format(x0, y0, x1, y1, w))
 
 
 def svg_box(dx, dy, x0, y0):
@@ -320,7 +323,8 @@ def svg_port(ident, x, y, w, cmd):
     sgn = 1 if cmd == "lpin" else -1
     svg_line(x, y, x-20*sgn, y, w)
     align = "start" if cmd == "lpin" else "end"
-    print('<text x="{}" y="{}" font-family="Verdana, sans-serif" font-size="16" text-anchor="{}">{}</text>'.format(x+7*sgn, y+5, align, ident))
+    print("<text x=\"{}\" y=\"{}\" font-family=\"Verdana, sans-serif\" "
+          "font-size=\"16\" text-anchor=\"{}\">{}</text>".format(x+7*sgn, y+5, align, ident))
 
 
 def make_svg(port_list):
@@ -358,10 +362,14 @@ def make_svg(port_list):
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Generate documentation from verilog files")
-    parser.add_argument("--gen-eps", default=False, action="store_true", help="Generate .eps block diagram from verilog file")
-    parser.add_argument("--gen-svg", default=False, action="store_true", help="Generate .svg block diagram from verilog file")
-    parser.add_argument("--gen-html", default=False, action="store_true", help="Generate .html documentation from verilog file")
-    parser.add_argument("--gen-rst", default=False, action="store_true", help="Generate .rst documentation from verilog file")
+    parser.add_argument("--gen-eps", default=False, action="store_true",
+                        help="Generate .eps block diagram from verilog file")
+    parser.add_argument("--gen-svg", default=False, action="store_true",
+                        help="Generate .svg block diagram from verilog file")
+    parser.add_argument("--gen-html", default=False, action="store_true",
+                        help="Generate .html documentation from verilog file")
+    parser.add_argument("--gen-rst", default=False, action="store_true",
+                        help="Generate .rst documentation from verilog file")
     parser.add_argument("file", default="", help="Verilog input file")
     cmd_args = parser.parse_args()
 
