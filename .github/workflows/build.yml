@@ -29,6 +29,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get -y install make python3-sphinx imagemagick ghostscript
+          sudo sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
+                      -e '/pattern="PDF"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
+                      -e '/pattern="EPS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
+                      -e '/<\/policymap>/i \  <policy domain="coder" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP}" \/>' /etc/ImageMagick-*/policy.xml
 
       - name: Build sphinx docs
         run: |
