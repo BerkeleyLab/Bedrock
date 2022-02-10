@@ -28,11 +28,7 @@ jobs:
       - name: Install documentation tools
         run: |
           sudo apt-get update
-          sudo apt-get -y install make xvfb pandoc xcircuit python3-sphinx
-
-      - name: Build diagrams
-        run: |
-          make -C badger/doc
+          sudo apt-get -y install make python3-sphinx imagemagick ghostscript
 
       - name: Build sphinx docs
         run: |
