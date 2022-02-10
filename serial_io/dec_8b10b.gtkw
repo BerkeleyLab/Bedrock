@@ -1,0 +1,40 @@
+[timestart] 0
+[size] 1000 600
+[pos] 0 2
+*-5.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 214
+[signals_width] 118
+[sst_expanded] 1
+[sst_vpaned_height] 152
+@28
+dec_8b10b_tb.code_err
+dec_8b10b_tb.disp_err
+dec_8b10b_tb.disp
+@22
+dec_8b10b_tb.d9[8:0]
+dec_8b10b_tb.abcdei[5:0]
+@28
+dec_8b10b_tb.vi
+dec_8b10b_tb.ki
+@22
+dec_8b10b_tb.edcba[4:0]
+@28
+dec_8b10b_tb.vj
+dec_8b10b_tb.ki
+@22
+dec_8b10b_tb.hgf[2:0]
+@28
+dec_8b10b_tb.disp
+@24
+dec_8b10b_tb.sum6[2:0]
+@28
+dec_8b10b_tb.disp6
+dec_8b10b_tb.disp6e
+@24
+dec_8b10b_tb.sum4[2:0]
+@28
+dec_8b10b_tb.disp4e
+dec_8b10b_tb.disp4
+dec_8b10b_tb.dispout
+[pattern_trace] 1
+[pattern_trace] 0

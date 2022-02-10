@@ -1,7 +1,7 @@
-[timestart] 0
+[timestart] 5802
 [size] 1421 793
 [pos] 7 17
-*-10.940936 1460 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-6.000000 5932 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] gmii_link_tb.
 [treeopen] gmii_link_tb.link.
 [sst_width] 294
@@ -10,12 +10,9 @@
 [sst_vpaned_height] 209
 @22
 gmii_link_tb.tx_data[7:0]
-gmii_link_tb.loop_d[7:0]
 @28
 gmii_link_tb.tx_enable
 gmii_link_tb.operate
-@22
-gmii_link_tb.gtx_data_10[9:0]
 @200
 -TX_PCS
 @22
@@ -27,6 +24,10 @@ gmii_link_tb.link.tx.ep_lacr_tx_en_i
 @22
 gmii_link_tb.link.tx.ep_lacr_tx_val_i[15:0]
 gmii_link_tb.link.tx.tx_odata_reg[7:0]
+gmii_link_tb.link.txdata[9:0]
+@28
+gmii_link_tb.link.enc_dispin
+gmii_link_tb.link.enc_dispout
 @200
 -RX_PCS
 @28
@@ -43,7 +44,6 @@ gmii_link_tb.link.negotiator.consistency_match
 gmii_link_tb.link.negotiator.lacr_out[15:0]
 @28
 gmii_link_tb.link.negotiator.an_state[2:0]
-gmii_link_tb.link.negotiator.an_restart
 @24
 [color] 1
 gmii_link_tb.link.negotiator.link_timer[20:0]
