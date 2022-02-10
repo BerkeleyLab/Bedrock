@@ -1,0 +1,116 @@
+.. _mp_proc:
+
+mp_proc
+=======
+
+Pinout
+''''''
+
+.. _fig:mp_proc_block:
+.. figure:: mp_proc_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: mp_proc_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - thresh_shift
+     - ?
+     - ?
+     - 9
+     - Threshold shift; typically 9 for SRF use
+   * - ff_dshift
+     - ?
+     - ?
+     - 0
+     - Deferred ff_ddrive downshift
+
+Ports
+'''''
+
+.. list-table:: mp_proc_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - sync
+     - Input
+     - 
+   * - in_mp[17:0]
+     - Input
+     - 
+   * - sel_en[0:0]
+     - Input
+     - external
+   * - ph_offset[17:0]
+     - Input
+     - external
+   * - sel_thresh[17:0]
+     - Input
+     - external
+   * - setmp[17:0]
+     - Input
+     - external
+   * - coeff[17:0]
+     - Input
+     - external
+   * - lim[17:0]
+     - Input
+     - external
+   * - setmp_addr[1:0]
+     - Output
+     - external address for setmp
+   * - coeff_addr[1:0]
+     - Output
+     - external address for coeff
+   * - lim_addr[1:0]
+     - Output
+     - external address for lim
+   * - ffd_en
+     - Input
+     - 
+   * - ff_setm[17:0]
+     - Input
+     - Magnitude setpoint
+   * - ff_setp[17:0]
+     - Input
+     - Phase setpoint
+   * - ff_ddrive[17:0]
+     - Input
+     - Drive derivative; accumulated in I term
+   * - ff_dphase[17:0]
+     - Input
+     - Phase derivative - unused
+   * - ffp_en
+     - Input
+     - 
+   * - ff_drive[17:0]
+     - Input
+     - Drive; added to P term
+   * - ff_phase[17:0]
+     - Input
+     - Phase;
+   * - out_sync
+     - Output
+     - 
+   * - out_xy[17:0]
+     - Output
+     - 
+   * - out_ph[18:0]
+     - Output
+     - 
+   * - cmp_event[11:0]
+     - Output
+     - 
+

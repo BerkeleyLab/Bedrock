@@ -1,0 +1,78 @@
+.. _multiply_accumulate:
+
+multiply_accumulate
+===================
+
+Pinout
+''''''
+
+.. _fig:multiply_accumulate_block:
+.. figure:: multiply_accumulate_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: multiply_accumulate_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - CW
+     - ?
+     - ?
+     - 17
+     - 
+   * - KW
+     - ?
+     - ?
+     - 18
+     - Constant Width
+   * - SW
+     - ?
+     - ?
+     - 18
+     - Signal Width
+   * - OW
+     - ?
+     - ?
+     - 21
+     - OutputWidth: Desired bitwidth of the accumulator
+
+Ports
+'''''
+
+.. list-table:: multiply_accumulate_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - reset
+     - Input
+     - 
+   * - enable
+     - Input
+     - 
+   * - correction[CW-1:0]
+     - Input
+     - 
+   * - downscale[3:0]
+     - Input
+     - 
+   * - constant[KW-1:0]
+     - Input
+     - 
+   * - signal[SW-1:0]
+     - Input
+     - 
+   * - accumulated[OW-1:0]
+     - Output
+     - 
+

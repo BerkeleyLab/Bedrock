@@ -1,0 +1,64 @@
+.. _serializer_multichannel:
+
+serializer_multichannel
+=======================
+
+Pinout
+''''''
+
+.. _fig:serializer_multichannel_block:
+.. figure:: serializer_multichannel_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: serializer_multichannel_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - n_chan
+     - ?
+     - ?
+     - 8
+     - Number of channels to serialize
+   * - dw
+     - ?
+     - ?
+     - 16
+     - 
+   * - l_to_r
+     - ?
+     - ?
+     - 1
+     - 
+
+Ports
+'''''
+
+.. list-table:: serializer_multichannel_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - sample_in
+     - Input
+     - Sampling signal which determines when to push inputs to belt
+   * - data_in[n_chan*dw-1:0]
+     - Input
+     - Flattened array of unprocessed data streams
+   * - gate_out
+     - Output
+     - 
+   * - stream_out[dw-1:0]
+     - Output
+     - Serialized stream of channels. Default order is CH0 first (l_to_r=1)
+

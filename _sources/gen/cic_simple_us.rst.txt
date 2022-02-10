@@ -1,0 +1,67 @@
+.. _cic_simple_us:
+
+cic_simple_us
+=============
+
+Pinout
+''''''
+
+.. _fig:cic_simple_us_block:
+.. figure:: cic_simple_us_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: cic_simple_us_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - ext_roll
+     - ?
+     - ?
+     - 0
+     - if set, use roll port instead of internal divider
+   * - dw
+     - ?
+     - ?
+     - 16
+     - 
+   * - ex
+     - ?
+     - ?
+     - 10
+     - decimate by 2^ex, up to 2^ex when using ext_roll
+
+Ports
+'''''
+
+.. list-table:: cic_simple_us_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - data_in[dw-1:0]
+     - Input
+     - 
+   * - data_in_gate
+     - Input
+     - 
+   * - roll
+     - Input
+     - sometimes unused, see ext_roll parameter
+   * - data_out[dw-1:0]
+     - Output
+     - 
+   * - data_out_gate
+     - Output
+     - 
+

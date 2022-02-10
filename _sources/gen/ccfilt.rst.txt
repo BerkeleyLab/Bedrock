@@ -1,0 +1,90 @@
+.. _ccfilt:
+
+ccfilt
+======
+
+Pinout
+''''''
+
+.. _fig:ccfilt_block:
+.. figure:: ccfilt_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: ccfilt_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dw
+     - ?
+     - ?
+     - 32
+     - data width of mon_chan output:
+   * - outw
+     - ?
+     - ?
+     - 20
+     - output data width
+   * - shift_wi
+     - ?
+     - ?
+     - 4
+     - 
+   * - shift_base
+     - ?
+     - ?
+     - 0
+     - 
+   * - dsr_len
+     - ?
+     - ?
+     - 12
+     - expected length of strobe pattern
+   * - use_hb
+     - ?
+     - ?
+     - 1
+     - compile-time conditional half-band code
+   * - use_delay
+     - ?
+     - ?
+     - 0
+     - match pipeline length with use_hb case
+
+Ports
+'''''
+
+.. list-table:: ccfilt_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - sr_in[dw-1:0]
+     - Input
+     - 
+   * - sr_valid
+     - Input
+     - 
+   * - shift[shift_wi-1:0]
+     - Input
+     - controls scaling of result
+   * - result[outw-1:0]
+     - Output
+     - 
+   * - reset
+     - Input
+     - 
+   * - strobe
+     - Output
+     - 
+

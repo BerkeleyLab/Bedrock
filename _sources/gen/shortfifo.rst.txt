@@ -1,0 +1,91 @@
+.. _shortfifo:
+
+shortfifo
+=========
+
+Pinout
+''''''
+
+.. _fig:shortfifo_block:
+.. figure:: shortfifo_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: shortfifo_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dw
+     - ?
+     - ?
+     - 8
+     - 
+   * - aw
+     - ?
+     - ?
+     - 3
+     - 
+   * - aw
+     - ?
+     - ?
+     - 4
+     - 
+
+Ports
+'''''
+
+.. list-table:: shortfifo_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - din[dw-1:0]
+     - Input
+     - 
+   * - we
+     - Input
+     - 
+   * - dout[dw-1:0]
+     - Output
+     - 
+   * - re
+     - Input
+     - 
+   * - full
+     - Output
+     - 
+   * - empty
+     - Output
+     - 
+   * - last
+     - Output
+     - 
+   * - count[aw:0]
+     - Output
+     - -1: empty, 0: single element, 2**aw - 1: full
+   * - clk
+     - Input
+     - 
+   * - ce
+     - Input
+     - 
+   * - din
+     - Input
+     - 
+   * - addr[aw-1:0]
+     - Input
+     - 
+   * - dout
+     - Output
+     - 
+

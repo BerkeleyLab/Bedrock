@@ -1,0 +1,46 @@
+.. _complex_mul:
+
+complex_mul
+===========
+
+Pinout
+''''''
+
+.. _fig:complex_mul_block:
+.. figure:: complex_mul_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: complex_mul_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - Rising edge clock input; all logic is synchronous in this domain
+   * - gate_in
+     - Input
+     - Flag marking input data valid
+   * - x[17:0]
+     - Input
+     - Multiplicand, signed, time-interleaved real and imaginary
+   * - y[17:0]
+     - Input
+     - Multiplicand, signed, time-interleaved real and imaginary
+   * - iq
+     - Input
+     - Flag marking the real (I) part of the complex pair
+   * - z[17:0]
+     - Output
+     - Result
+   * - z_all[35:0]
+     - Output
+     - Result
+   * - gate_out
+     - Output
+     - Delayed version of gate_in
+

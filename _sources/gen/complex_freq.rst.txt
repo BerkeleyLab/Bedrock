@@ -1,0 +1,72 @@
+.. _complex_freq:
+
+complex_freq
+============
+
+Pinout
+''''''
+
+.. _fig:complex_freq_block:
+.. figure:: complex_freq_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: complex_freq_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - refcnt_w
+     - ?
+     - ?
+     - 17
+     - 
+
+Ports
+'''''
+
+.. list-table:: complex_freq_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - single clock domain
+   * - sdata[17:0]
+     - Input
+     - 
+   * - sgate
+     - Input
+     - high for two cycles representing I and Q
+   * - freq[refcnt_w-1:0]
+     - Output
+     - 
+   * - freq_valid
+     - Output
+     - Asserted when freq output is valid
+   * - amp_max[16:0]
+     - Output
+     - 
+   * - amp_min[16:0]
+     - Output
+     - 
+   * - updated
+     - Output
+     - Asserted when amp_{max,min} are updated
+   * - timing_err
+     - Output
+     - New data received while calculation is ongoing
+   * - square_sum_out[23:0]
+     - Output
+     - 
+   * - square_sum_valid
+     - Output
+     - 
+

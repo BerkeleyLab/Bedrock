@@ -1,0 +1,70 @@
+.. _cpxmul_fullspeed:
+
+cpxmul_fullspeed
+================
+
+Pinout
+''''''
+
+.. _fig:cpxmul_fullspeed_block:
+.. figure:: cpxmul_fullspeed_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: cpxmul_fullspeed_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - DWI
+     - ?
+     - ?
+     - 18
+     - 
+   * - OUT_SHIFT
+     - ?
+     - ?
+     - 17
+     - Down-shift full-precision result
+   * - OWI
+     - ?
+     - ?
+     - 18
+     - 
+
+Ports
+'''''
+
+.. list-table:: cpxmul_fullspeed_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - re_a[DWI-1:0]
+     - Input
+     - 
+   * - im_a[DWI-1:0]
+     - Input
+     - 
+   * - re_b[DWI-1:0]
+     - Input
+     - 
+   * - im_b[DWI-1:0]
+     - Input
+     - 
+   * - re_out[OWI-1:0]
+     - Output
+     - 
+   * - im_out[OWI-1:0]
+     - Output
+     - 
+

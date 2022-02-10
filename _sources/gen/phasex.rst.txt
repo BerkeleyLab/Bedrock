@@ -1,0 +1,63 @@
+.. _phasex:
+
+phasex
+======
+
+Pinout
+''''''
+
+.. _fig:phasex_block:
+.. figure:: phasex_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: phasex_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - aw
+     - ?
+     - ?
+     - 10
+     - 
+
+Ports
+'''''
+
+.. list-table:: phasex_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - uclk1
+     - Input
+     - unknown clock 1
+   * - uclk2
+     - Input
+     - unknown clock 2
+   * - sclk
+     - Input
+     - sampling clock
+   * - rclk
+     - Input
+     - readout clock (data transfer, local bus)
+   * - trig
+     - Input
+     - 
+   * - ready
+     - Output
+     - 
+   * - addr[aw-1:0]
+     - Input
+     - 
+   * - dout[15:0]
+     - Output
+     - 
+

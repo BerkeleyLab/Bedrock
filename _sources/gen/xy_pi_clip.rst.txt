@@ -1,0 +1,81 @@
+.. _xy_pi_clip:
+
+xy_pi_clip
+==========
+
+Pinout
+''''''
+
+.. _fig:xy_pi_clip_block:
+.. figure:: xy_pi_clip_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: xy_pi_clip_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - ff_dshift
+     - ?
+     - ?
+     - 0
+     - Deferred ff_ddrive downshift
+
+Ports
+'''''
+
+.. list-table:: xy_pi_clip_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 6.8 ns
+   * - sync
+     - Input
+     - high for the first of the xy pair
+   * - in_xy[17:0]
+     - Input
+     - 
+   * - out_xy[17:0]
+     - Output
+     - 
+   * - o_sync
+     - Output
+     - 
+   * - coeff[17:0]
+     - Input
+     - 
+   * - lim[17:0]
+     - Input
+     - 
+   * - ffd_en
+     - Input
+     - 
+   * - ff_ddrive[17:0]
+     - Input
+     - FF drive (derivative) to be accumulated in I term
+   * - ff_dphase[17:0]
+     - Input
+     - FF phase (derivative); currently unused
+   * - ffp_en
+     - Input
+     - 
+   * - ff_drive[17:0]
+     - Input
+     - FF drive added to P term
+   * - ff_phase[17:0]
+     - Input
+     - FF phase
+   * - clipped[3:0]
+     - Output
+     - 
+

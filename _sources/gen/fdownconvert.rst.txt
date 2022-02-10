@@ -1,0 +1,77 @@
+.. _fdownconvert:
+
+fdownconvert
+============
+
+Pinout
+''''''
+
+.. _fig:fdownconvert_block:
+.. figure:: fdownconvert_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: fdownconvert_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - a_dw
+     - ?
+     - ?
+     - 16
+     - XXX don't change this
+   * - o_dw
+     - ?
+     - ?
+     - 16
+     - XXX don't change this
+
+Ports
+'''''
+
+.. list-table:: fdownconvert_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 6.66 ns
+   * - mod2
+     - Input
+     - 
+   * - cosd[17:0]
+     - Input
+     - LO input
+   * - sind[17:0]
+     - Input
+     - LO input
+   * - a_data[a_dw-1:0]
+     - Input
+     - ADC readings
+   * - a_gate
+     - Input
+     - 
+   * - a_trig
+     - Input
+     - 
+   * - o_data[o_dw-1:0]
+     - Output
+     - Interleaved I&Q
+   * - o_gate
+     - Output
+     - 
+   * - o_trig
+     - Output
+     - 
+   * - time_err
+     - Output
+     - TODO: Explain this
+

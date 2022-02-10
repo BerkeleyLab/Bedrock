@@ -1,0 +1,59 @@
+.. _doublediff:
+
+doublediff
+==========
+
+Pinout
+''''''
+
+.. _fig:doublediff_block:
+.. figure:: doublediff_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: doublediff_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dw
+     - ?
+     - ?
+     - 28
+     - 
+   * - dsr_len
+     - ?
+     - ?
+     - 4
+     - 
+
+Ports
+'''''
+
+.. list-table:: doublediff_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - d_in[dw-1:0]
+     - Input
+     - Input data
+   * - g_in
+     - Input
+     - A gate when set to high differentiates input daata
+   * - d_out[dw-1:0]
+     - Output
+     - 
+   * - g_out
+     - Output
+     - 
+

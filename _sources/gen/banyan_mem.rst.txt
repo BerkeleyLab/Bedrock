@@ -1,0 +1,83 @@
+.. _banyan_mem:
+
+banyan_mem
+==========
+
+Pinout
+''''''
+
+.. _fig:banyan_mem_block:
+.. figure:: banyan_mem_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: banyan_mem_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - aw
+     - ?
+     - ?
+     - 10
+     - 
+   * - dw
+     - ?
+     - ?
+     - 16
+     - 
+
+Ports
+'''''
+
+.. list-table:: banyan_mem_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 6.1 ns
+   * - adc_data[8*dw-1:0]
+     - Input
+     - 
+   * - banyan_mask[7:0]
+     - Input
+     - must be valid in clk domain
+   * - reset
+     - Input
+     - resets pointer and full
+   * - run
+     - Input
+     - set to enable writes to memory; Modulate to take valid adc_data (See TB)
+   * - pointer[aw+3-1:0]
+     - Output
+     - write location
+   * - rollover
+     - Output
+     - 
+   * - full
+     - Output
+     - 
+   * - permuted_data[8*dw-1:0]
+     - Output
+     - 
+   * - ro_clk
+     - Input
+     - 
+   * - ro_addr[aw+3-1:0]
+     - Input
+     - 
+   * - ro_data[dw-1:0]
+     - Output
+     - 
+   * - ro_data2[dw-1:0]
+     - Output
+     - 
+

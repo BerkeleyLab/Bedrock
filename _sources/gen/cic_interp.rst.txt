@@ -1,0 +1,51 @@
+.. _cic_interp:
+
+cic_interp
+==========
+
+Pinout
+''''''
+
+.. _fig:cic_interp_block:
+.. figure:: cic_interp_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: cic_interp_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - span
+     - ?
+     - ?
+     - 6
+     - 
+
+Ports
+'''''
+
+.. list-table:: cic_interp_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - d_in[17:0]
+     - Input
+     - 
+   * - strobe
+     - Input
+     - 
+   * - d_out[17:0]
+     - Output
+     - 
+

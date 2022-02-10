@@ -1,0 +1,46 @@
+.. _upconv:
+
+upconv
+======
+
+Pinout
+''''''
+
+.. _fig:upconv_block:
+.. figure:: upconv_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: upconv_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - in_d[15:0]
+     - Input
+     - baseband, interleaved I and Q
+   * - in_strobe
+     - Input
+     - Set at I time, Q follows
+   * - cos[15:0]
+     - Input
+     - LO input
+   * - sin[15:0]
+     - Input
+     - LO input
+   * - cos_interp[15:0]
+     - Output
+     - interpolated output immediately before upconversion
+   * - sin_interp[15:0]
+     - Output
+     - 
+   * - out_d[15:0]
+     - Output
+     - at IF
+

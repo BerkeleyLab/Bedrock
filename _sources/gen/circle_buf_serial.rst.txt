@@ -1,0 +1,121 @@
+.. _circle_buf_serial:
+
+circle_buf_serial
+=================
+
+Pinout
+''''''
+
+.. _fig:circle_buf_serial_block:
+.. figure:: circle_buf_serial_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: circle_buf_serial_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - n_chan
+     - ?
+     - ?
+     - 12
+     - 
+   * - lsb_mask
+     - ?
+     - ?
+     - 0
+     - lsb_mask=0: chan_mask is LEFT-to-RIGHT; MSB=CH0
+   * - buf_dw
+     - ?
+     - ?
+     - 16
+     - 
+   * - buf_aw
+     - ?
+     - ?
+     - 13
+     - 
+   * - buf_stat_w
+     - ?
+     - ?
+     - 16
+     - 
+   * - buf_auto_flip
+     - ?
+     - ?
+     - 1
+     - 
+
+Ports
+'''''
+
+.. list-table:: circle_buf_serial_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - iclk
+     - Input
+     - 
+   * - sr_in[buf_dw-1:0]
+     - Input
+     - Conveyor belt carrying n_chan channels
+   * - sr_stb
+     - Input
+     - 
+   * - chan_mask[n_chan-1:0]
+     - Input
+     - Bitmask of channels to record. See lsb_mask parameter
+   * - wave_gate
+     - Output
+     - 
+   * - wave_dval
+     - Output
+     - 
+   * - wave_data[buf_dw-1:0]
+     - Output
+     - 
+   * - buf_sync
+     - Output
+     - single-cycle when buffer starts/ends
+   * - buf_transferred
+     - Output
+     - single-cycle when a buffer has been
+   * - buf_stop
+     - Input
+     - single-cycle - interrupts cbuf writing
+   * - buf_count[buf_stat_w-1:0]
+     - Output
+     - 
+   * - buf_stat2[buf_aw-1:0]
+     - Output
+     - includes fault bit
+   * - buf_stat[buf_stat_w-1:0]
+     - Output
+     - includes fault bit, and (if set) the last valid location
+   * - debug_stat[buf_aw+4:0]
+     - Output
+     - {stb_in, boundary, btest, wbank, rbank, wr_addr}
+   * - oclk
+     - Input
+     - 
+   * - stb_out
+     - Input
+     - 
+   * - enable
+     - Output
+     - 
+   * - read_addr[buf_aw-1:0]
+     - Input
+     - nominally 8192 locations
+   * - d_out[buf_dw-1:0]
+     - Output
+     - 
+

@@ -1,0 +1,74 @@
+.. _phaset:
+
+phaset
+======
+
+Pinout
+''''''
+
+.. _fig:phaset_block:
+.. figure:: phaset_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: phaset_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - order
+     - ?
+     - ?
+     - 1
+     - 
+   * - dw
+     - ?
+     - ?
+     - 14
+     - 
+   * - adv
+     - ?
+     - ?
+     - 3861
+     - 
+   * - delta
+     - ?
+     - ?
+     - 264
+     - 8*33
+   * - ext_div_en
+     - ?
+     - ?
+     - 0
+     - 
+
+Ports
+'''''
+
+.. list-table:: phaset_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - uclk
+     - Input
+     - 
+   * - sclk
+     - Input
+     - 
+   * - ext_div
+     - Input
+     - 
+   * - phase[dw-1:0]
+     - Output
+     - 
+   * - fault
+     - Output
+     - single cycle
+

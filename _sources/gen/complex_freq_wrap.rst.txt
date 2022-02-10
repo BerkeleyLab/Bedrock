@@ -1,0 +1,96 @@
+.. _complex_freq_wrap:
+
+complex_freq_wrap
+=================
+
+Pinout
+''''''
+
+.. _fig:complex_freq_wrap_block:
+.. figure:: complex_freq_wrap_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: complex_freq_wrap_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - n_chan
+     - ?
+     - ?
+     - 12
+     - 
+   * - sr_wi
+     - ?
+     - ?
+     - 40
+     - Conveyor belt data width
+   * - shift_base
+     - ?
+     - ?
+     - 4
+     - 
+   * - refcnt_w
+     - ?
+     - ?
+     - 17
+     - 
+
+Ports
+'''''
+
+.. list-table:: complex_freq_wrap_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - single clock domain
+   * - channel_sel[1:0]
+     - Input
+     - 0 - Field, 1 - Forward, 2 - Reverse, 3 - IQ_Fiber (from PRC)
+   * - sample_wave
+     - Input
+     - 
+   * - wave_shift[3:0]
+     - Input
+     - 
+   * - sr_valid
+     - Input
+     - 
+   * - sr_data[sr_wi-1:0]
+     - Input
+     - 
+   * - reg_freq[refcnt_w-1:0]
+     - Output
+     - 
+   * - reg_freq_valid
+     - Output
+     - 
+   * - reg_amp_max[16:0]
+     - Output
+     - 
+   * - reg_amp_min[16:0]
+     - Output
+     - 
+   * - reg_updated
+     - Output
+     - 
+   * - avg_power[23:0]
+     - Output
+     - 
+   * - avg_power_strobe
+     - Output
+     - 
+   * - reg_timing_err
+     - Output
+     - 
+

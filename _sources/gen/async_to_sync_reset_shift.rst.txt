@@ -1,0 +1,58 @@
+.. _async_to_sync_reset_shift:
+
+async_to_sync_reset_shift
+=========================
+
+Pinout
+''''''
+
+.. _fig:async_to_sync_reset_shift_block:
+.. figure:: async_to_sync_reset_shift_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: async_to_sync_reset_shift_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - LENGTH
+     - ?
+     - ?
+     - 8
+     - 
+   * - INPUT_POLARITY
+     - ?
+     - ?
+     - 1
+     - 
+   * - OUTPUT_POLARITY
+     - ?
+     - ?
+     - 1
+     - 
+
+Ports
+'''''
+
+.. list-table:: async_to_sync_reset_shift_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - Pinput
+     - Input
+     - 
+   * - Poutput
+     - Output
+     - 
+

@@ -1,0 +1,81 @@
+.. _banyan:
+
+banyan
+======
+
+Pinout
+''''''
+
+.. _fig:banyan_block:
+.. figure:: banyan_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: banyan_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dw
+     - ?
+     - ?
+     - 16
+     - data width
+   * - np
+     - ?
+     - ?
+     - 8
+     - number of ports, must be a power of 2
+   * - rl
+     - ?
+     - ?
+     - 3
+     - number of routing layers == log_2(np)
+   * - dw
+     - ?
+     - ?
+     - 8
+     - 
+
+Ports
+'''''
+
+.. list-table:: banyan_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - time_state[rl-1:0]
+     - Input
+     - 
+   * - mask_in[np-1:0]
+     - Input
+     - 
+   * - data_in[dw*np-1:0]
+     - Input
+     - 
+   * - mask_out[np-1:0]
+     - Output
+     - for DPRAM write-enable
+   * - data_out[dw*np-1:0]
+     - Output
+     - 
+   * - d[dw-1:0]
+     - Input
+     - 
+   * - one
+     - Output
+     - or more bits of d are set
+   * - two
+     - Output
+     - or more bits of d are set
+

@@ -1,0 +1,76 @@
+.. _iirFilter:
+
+iirFilter
+=========
+
+Pinout
+''''''
+
+.. _fig:iirFilter_block:
+.. figure:: iirFilter_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: iirFilter_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - STAGES
+     - ?
+     - ?
+     - 
+     - 
+   * - DATA_WIDTH
+     - ?
+     - ?
+     - 
+     - 
+   * - DATA_COUNT
+     - ?
+     - ?
+     - 
+     - 
+   * - COEFFICIENT_WIDTH
+     - ?
+     - ?
+     - 
+     - 
+   * - DEBUG
+     - ?
+     - ?
+     - 
+     - 
+   * - STAGE_ADDRESS_WIDTH
+     - ?
+     - ?
+     - 
+     - 
+
+Ports
+'''''
+
+.. list-table:: iirFilter_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - sysClk
+     - Input
+     - 
+   * - sysGPIO_Strobe
+     - Input
+     - 
+   * - sysGPIO_Out[31:0]
+     - Input
+     - 
+   * - dataClk
+     - Input
+     - 
+

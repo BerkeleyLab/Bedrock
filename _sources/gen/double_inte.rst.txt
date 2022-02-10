@@ -1,0 +1,56 @@
+.. _double_inte:
+
+double_inte
+===========
+
+Pinout
+''''''
+
+.. _fig:double_inte_block:
+.. figure:: double_inte_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: double_inte_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dwi
+     - ?
+     - ?
+     - 16
+     - data width in
+   * - dwo
+     - ?
+     - ?
+     - 28
+     - data width out n bits more the in, 2^n should be more than the cic factor^2 in sel case, 47^2=2209 adding 12 bit seems a little limited
+
+Ports
+'''''
+
+.. list-table:: double_inte_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 8.4 ns
+   * - in[dwi-1:0]
+     - Input
+     - possibly muxed
+   * - out[dwo-1:0]
+     - Output
+     - 
+   * - reset
+     - Input
+     - reset integrator to 0
+

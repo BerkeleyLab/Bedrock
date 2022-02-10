@@ -1,0 +1,71 @@
+.. _fifo:
+
+fifo
+====
+
+Pinout
+''''''
+
+.. _fig:fifo_block:
+.. figure:: fifo_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: fifo_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - aw
+     - ?
+     - ?
+     - 3
+     - 
+   * - dw
+     - ?
+     - ?
+     - 8
+     - 
+
+Ports
+'''''
+
+.. list-table:: fifo_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - din[dw - 1: 0]
+     - Input
+     - 
+   * - we
+     - Input
+     - 
+   * - dout[dw - 1: 0]
+     - Output
+     - 
+   * - re
+     - Input
+     - 
+   * - full
+     - Output
+     - 
+   * - empty
+     - Output
+     - 
+   * - last
+     - Output
+     - 
+   * - count[aw:0]
+     - Output
+     - 
+

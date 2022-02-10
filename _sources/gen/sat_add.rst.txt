@@ -1,0 +1,53 @@
+.. _sat_add:
+
+sat_add
+=======
+
+Pinout
+''''''
+
+.. _fig:sat_add_block:
+.. figure:: sat_add_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: sat_add_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - isize
+     - ?
+     - ?
+     - 16
+     - 
+   * - osize
+     - ?
+     - ?
+     - 15
+     - 
+
+Ports
+'''''
+
+.. list-table:: sat_add_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - a[isize-1:0]
+     - Input
+     - 
+   * - sum[osize-1:0]
+     - Output
+     - 
+

@@ -1,0 +1,67 @@
+.. _doublediff1:
+
+doublediff1
+===========
+
+Pinout
+''''''
+
+.. _fig:doublediff1_block:
+.. figure:: doublediff1_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: doublediff1_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dw
+     - ?
+     - ?
+     - 28
+     - 
+   * - gw
+     - ?
+     - ?
+     - 1
+     - 
+   * - dsr_len
+     - ?
+     - ?
+     - 4
+     - 
+
+Ports
+'''''
+
+.. list-table:: doublediff1_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - reset
+     - Input
+     - 
+   * - d_in[dw-1:0]
+     - Input
+     - 
+   * - g_in[gw-1:0]
+     - Input
+     - 
+   * - d_out[dw-1:0]
+     - Output
+     - 
+   * - g_out[gw-1:0]
+     - Output
+     - 
+

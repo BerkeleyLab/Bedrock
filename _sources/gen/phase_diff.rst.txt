@@ -1,0 +1,99 @@
+.. _phase_diff:
+
+phase_diff
+==========
+
+Pinout
+''''''
+
+.. _fig:phase_diff_block:
+.. figure:: phase_diff_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: phase_diff_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - order1
+     - ?
+     - ?
+     - 1
+     - 
+   * - order2
+     - ?
+     - ?
+     - 1
+     - 
+   * - dw
+     - ?
+     - ?
+     - 14
+     - 
+   * - adv
+     - ?
+     - ?
+     - 3861
+     - 
+   * - delta
+     - ?
+     - ?
+     - 33
+     - 
+   * - ext_div1_en
+     - ?
+     - ?
+     - 0
+     - 
+   * - ext_div2_en
+     - ?
+     - ?
+     - 0
+     - 
+
+Ports
+'''''
+
+.. list-table:: phase_diff_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - uclk1
+     - Input
+     - unknown clock 1
+   * - ext_div1
+     - Input
+     - external divider on uclk1
+   * - uclk2
+     - Input
+     - unknown clock 2
+   * - ext_div2
+     - Input
+     - external divider on uclk2
+   * - sclk
+     - Input
+     - sampling clock
+   * - rclk
+     - Input
+     - readout clock (data transfer, local bus)
+   * - dval
+     - Output
+     - 
+   * - phdiff_out[dw-2:0]
+     - Output
+     - 
+   * - vfreq_out[dw-1:0]
+     - Output
+     - 
+   * - locked
+     - Output
+     - 
+

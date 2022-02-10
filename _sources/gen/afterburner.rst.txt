@@ -1,0 +1,54 @@
+.. _afterburner:
+
+afterburner
+===========
+
+Pinout
+''''''
+
+.. _fig:afterburner_block:
+.. figure:: afterburner_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: afterburner_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - triple
+     - ?
+     - ?
+     - 0
+     - 
+
+Ports
+'''''
+
+.. list-table:: afterburner_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 6.0 ns
+   * - data[16:0]
+     - Input
+     - This is level set data [.. a_n1, a_n2 ..]
+   * - coeff[15:0]
+     - Input
+     - Coefficient to correct for  interpolation
+   * - data_out0[15:0]
+     - Output
+     - Interpolated [coeff*[..(a_n1+a_n2), (a_n2+a_n3),..]]
+   * - data_out1[15:0]
+     - Output
+     - Untouched    [.. a_n1, a_n2 ..]
+

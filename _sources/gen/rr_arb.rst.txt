@@ -1,0 +1,54 @@
+.. _rr_arb:
+
+rr_arb
+======
+
+Pinout
+''''''
+
+.. _fig:rr_arb_block:
+.. figure:: rr_arb_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: rr_arb_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - NREQ
+     - ?
+     - ?
+     - 2
+     - 
+
+Ports
+'''''
+
+.. list-table:: rr_arb_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - req_bus[NREQ-1:0]
+     - Input
+     - 
+   * - grant_bus[NREQ-1:0]
+     - Output
+     - 
+   * - reqs[NREQ-1:0]
+     - Input
+     - 
+   * - base[NREQ-1:0]
+     - Input
+     - 
+

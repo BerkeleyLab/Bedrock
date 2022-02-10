@@ -1,0 +1,63 @@
+.. _serialize:
+
+serialize
+=========
+
+Pinout
+''''''
+
+.. _fig:serialize_block:
+.. figure:: serialize_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: serialize_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dwi
+     - ?
+     - ?
+     - 28
+     - result width
+
+Ports
+'''''
+
+.. list-table:: serialize_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 8.4 ns
+   * - samp
+     - Input
+     - Snap signal for data_in
+   * - data_in[dwi-1:0]
+     - Input
+     - 
+   * - stream_in[dwi-1:0]
+     - Input
+     - 
+   * - stream_out[dwi-1:0]
+     - Output
+     - 
+   * - gate_in
+     - Input
+     - 
+   * - gate_out
+     - Output
+     - 
+   * - strobe_out
+     - Output
+     - 
+

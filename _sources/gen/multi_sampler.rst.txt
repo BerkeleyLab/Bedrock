@@ -1,0 +1,99 @@
+.. _multi_sampler:
+
+multi_sampler
+=============
+
+Pinout
+''''''
+
+.. _fig:multi_sampler_block:
+.. figure:: multi_sampler_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: multi_sampler_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - sample_period_wi
+     - ?
+     - ?
+     - 8
+     - 
+   * - dsample0_en
+     - ?
+     - ?
+     - 0
+     - 
+   * - dsample0_wi
+     - ?
+     - ?
+     - 8
+     - 
+   * - dsample1_en
+     - ?
+     - ?
+     - 0
+     - 
+   * - dsample1_wi
+     - ?
+     - ?
+     - 8
+     - 
+   * - dsample2_en
+     - ?
+     - ?
+     - 0
+     - 
+   * - dsample2_wi
+     - ?
+     - ?
+     - 8
+     - 
+
+Ports
+'''''
+
+.. list-table:: multi_sampler_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - ext_trig
+     - Input
+     - 
+   * - sample_period[sample_period_wi-1:0]
+     - Input
+     - 
+   * - dsample0_period[dsample0_wi-1:0]
+     - Input
+     - 
+   * - dsample1_period[dsample1_wi-1:0]
+     - Input
+     - 
+   * - dsample2_period[dsample2_wi-1:0]
+     - Input
+     - 
+   * - sample_out
+     - Output
+     - 
+   * - dsample0_stb
+     - Output
+     - 
+   * - dsample1_stb
+     - Output
+     - 
+   * - dsample2_stb
+     - Output
+     - 
+

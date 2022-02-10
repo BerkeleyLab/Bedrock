@@ -1,0 +1,92 @@
+.. _cim_12x:
+
+cim_12x
+=======
+
+Pinout
+''''''
+
+.. _fig:cim_12x_block:
+.. figure:: cim_12x_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: cim_12x_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dw
+     - ?
+     - ?
+     - 32
+     - data width of mon_chan output
+   * - scale
+     - ?
+     - ?
+     - 18
+     - 
+
+Ports
+'''''
+
+.. list-table:: cim_12x_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - adca[15:0]
+     - Input
+     - 
+   * - adcb[15:0]
+     - Input
+     - 
+   * - adcc[15:0]
+     - Input
+     - 
+   * - inm[15:0]
+     - Input
+     - 
+   * - outm[15:0]
+     - Input
+     - 
+   * - iqs
+     - Input
+     - 
+   * - adcx[15:0]
+     - Input
+     - 
+   * - cosa[17:0]
+     - Input
+     - 
+   * - sina[17:0]
+     - Input
+     - 
+   * - cosb[17:0]
+     - Input
+     - 
+   * - sinb[17:0]
+     - Input
+     - 
+   * - sample
+     - Input
+     - 
+   * - sr_out[dw-1:0]
+     - Output
+     - 
+   * - sr_valid
+     - Output
+     - 
+   * - reset
+     - Input
+     - 
+

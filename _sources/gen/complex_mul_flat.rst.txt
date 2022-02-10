@@ -1,0 +1,55 @@
+.. _complex_mul_flat:
+
+complex_mul_flat
+================
+
+Pinout
+''''''
+
+.. _fig:complex_mul_flat_block:
+.. figure:: complex_mul_flat_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: complex_mul_flat_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - Rising edge clock input; all logic is synchronous in this domain
+   * - gate_in
+     - Input
+     - Flag marking input data valid
+   * - x_I[17:0]
+     - Input
+     - Multiplicand 1, real
+   * - x_Q[17:0]
+     - Input
+     - Multiplicand 1, imag
+   * - y_I[17:0]
+     - Input
+     - Multiplicand 2, real
+   * - y_Q[17:0]
+     - Input
+     - Multiplicand 2, imag
+   * - z_I[17:0]
+     - Output
+     - Result, real
+   * - z_Q[17:0]
+     - Output
+     - Result, imag
+   * - z_I_all[35:0]
+     - Output
+     - Result, real, large
+   * - z_Q_all[35:0]
+     - Output
+     - Result, imag, large
+   * - gate_out
+     - Output
+     - Delayed version of gate_in
+

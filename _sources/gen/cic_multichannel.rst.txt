@@ -1,0 +1,117 @@
+.. _cic_multichannel:
+
+cic_multichannel
+================
+
+Pinout
+''''''
+
+.. _fig:cic_multichannel_block:
+.. figure:: cic_multichannel_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: cic_multichannel_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - n_chan
+     - ?
+     - ?
+     - 12
+     - 
+   * - di_dwi
+     - ?
+     - ?
+     - 16
+     - data width
+   * - di_rwi
+     - ?
+     - ?
+     - 32
+     - result width
+   * - di_noise_bits
+     - ?
+     - ?
+     - 4
+     - Number of noise bits to discard at the output of Double Integrator.
+   * - shift_delay
+     - ?
+     - ?
+     - 0
+     - Optional shifter between Integrator and Comb. A value of 0 disables shifter
+   * - cc_outw
+     - ?
+     - ?
+     - 20
+     - CCFilt output width; Must be 20 if using half-band filter
+   * - cc_halfband
+     - ?
+     - ?
+     - 1
+     - 
+   * - cc_use_delay
+     - ?
+     - ?
+     - 0
+     - Match pipeline length of filt_halfband=1
+   * - cc_shift_base
+     - ?
+     - ?
+     - 0
+     - Bits to discard from previous acc step
+   * - cc_shift_wi
+     - ?
+     - ?
+     - 4
+     - 
+
+Ports
+'''''
+
+.. list-table:: cic_multichannel_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - reset
+     - Input
+     - 
+   * - stb_in
+     - Input
+     - Strobe signal for input samples
+   * - d_in[n_chan*di_dwi-1:0]
+     - Input
+     - Flattened array of unprocessed data streams. CH0 in LSBs
+   * - cic_sample
+     - Input
+     - CIC base sampling signal
+   * - cc_sample
+     - Input
+     - CCFilt sampling signal
+   * - cc_shift[cc_shift_wi-1:0]
+     - Input
+     - controls scaling of filter result
+   * - di_stb_out
+     - Output
+     - 
+   * - di_sr_out[di_rwi-1:0]
+     - Output
+     - 
+   * - cc_stb_out
+     - Output
+     - 
+   * - cc_sr_out[cc_outw-1:0]
+     - Output
+     - 
+

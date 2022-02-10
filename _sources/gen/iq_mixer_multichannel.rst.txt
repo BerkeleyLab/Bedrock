@@ -1,0 +1,77 @@
+.. _iq_mixer_multichannel:
+
+iq_mixer_multichannel
+=====================
+
+Pinout
+''''''
+
+.. _fig:iq_mixer_multichannel_block:
+.. figure:: iq_mixer_multichannel_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: iq_mixer_multichannel_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - NORMALIZE
+     - ?
+     - ?
+     - 0
+     - 
+   * - NCHAN
+     - ?
+     - ?
+     - 2
+     - Number of input channels
+   * - DWI
+     - ?
+     - ?
+     - 16
+     - Width of ADC input
+   * - DAVR
+     - ?
+     - ?
+     - 4
+     - Guard bits to keep in the output
+   * - DWLO
+     - ?
+     - ?
+     - 18
+     - 
+
+Ports
+'''''
+
+.. list-table:: iq_mixer_multichannel_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - adc[NCHAN*DWI-1:0]
+     - Input
+     - 
+   * - cos[DWLO-1:0]
+     - Input
+     - 
+   * - sin[DWLO-1:0]
+     - Input
+     - 
+   * - mixout_i[NCHAN*(DWI+DAVR)-1:0]
+     - Output
+     - 
+   * - mixout_q[NCHAN*(DWI+DAVR)-1:0]
+     - Output
+     - 
+

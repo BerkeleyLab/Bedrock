@@ -1,0 +1,84 @@
+.. _mon_2chiq:
+
+mon_2chiq
+=========
+
+Pinout
+''''''
+
+.. _fig:mon_2chiq_block:
+.. figure:: mon_2chiq_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: mon_2chiq_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dwi
+     - ?
+     - ?
+     - 16
+     - data width
+   * - rwi
+     - ?
+     - ?
+     - 28
+     - result width
+   * - davr
+     - ?
+     - ?
+     - 3
+     - how many guard bits to keep in output of multiplier
+   * - dwlo
+     - ?
+     - ?
+     - 18
+     - Local Oscillator data width
+
+Ports
+'''''
+
+.. list-table:: mon_2chiq_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 8.4 ns
+   * - iqd[dwi-1:0]
+     - Input
+     - two-way interleaved data
+   * - scale[17:0]
+     - Input
+     - e.g., 18'd61624 = floor((32/33)^2*2^16)
+   * - iqs
+     - Input
+     - sync high when iq_data holds I, low when iq_data holds Q
+   * - samp
+     - Input
+     - 
+   * - s_in[rwi-1:0]
+     - Input
+     - 
+   * - s_out[rwi-1:0]
+     - Output
+     - 
+   * - g_in
+     - Input
+     - 
+   * - g_out
+     - Output
+     - 
+   * - reset
+     - Input
+     - 
+

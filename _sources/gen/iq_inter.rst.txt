@@ -1,0 +1,56 @@
+.. _iq_inter:
+
+iq_inter
+========
+
+Pinout
+''''''
+
+.. _fig:iq_inter_block:
+.. figure:: iq_inter_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: iq_inter_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dwi
+     - ?
+     - ?
+     - 22
+     - data width in
+   * - dwo
+     - ?
+     - ?
+     - 18
+     - data width out
+
+Ports
+'''''
+
+.. list-table:: iq_inter_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - samp
+     - Input
+     - 
+   * - in[dwi-1:0]
+     - Input
+     - 
+   * - out[dwo-1:0]
+     - Output
+     - 
+

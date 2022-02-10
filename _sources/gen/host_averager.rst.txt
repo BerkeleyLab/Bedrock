@@ -1,0 +1,37 @@
+.. _host_averager:
+
+host_averager
+=============
+
+Pinout
+''''''
+
+.. _fig:host_averager_block:
+.. figure:: host_averager_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: host_averager_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - data_in[23:0]
+     - Input
+     - 
+   * - data_s
+     - Input
+     - 
+   * - read_s
+     - Input
+     - 
+   * - data_out[31:0]
+     - Output
+     - 
+

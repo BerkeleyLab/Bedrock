@@ -1,0 +1,51 @@
+.. _data_xdomain:
+
+data_xdomain
+============
+
+Pinout
+''''''
+
+.. _fig:data_xdomain_block:
+.. figure:: data_xdomain_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: data_xdomain_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - size
+     - ?
+     - ?
+     - 16
+     - 
+
+Ports
+'''''
+
+.. list-table:: data_xdomain_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk_in
+     - Input
+     - 
+   * - data_in[size-1:0]
+     - Input
+     - 
+   * - reg
+     - Output
+     - 
+   * - reg
+     - Output
+     - 
+

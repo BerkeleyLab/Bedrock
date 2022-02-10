@@ -1,0 +1,59 @@
+.. _reg_delay:
+
+reg_delay
+=========
+
+Pinout
+''''''
+
+.. _fig:reg_delay_block:
+.. figure:: reg_delay_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: reg_delay_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dw
+     - ?
+     - ?
+     - 16
+     - Width of data
+   * - len
+     - ?
+     - ?
+     - 4
+     - Cycles to delay
+
+Ports
+'''''
+
+.. list-table:: reg_delay_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - Rising edge clock input; all logic is synchronous in this domain
+   * - reset
+     - Input
+     - Please tie to 0 if you can; see below
+   * - gate
+     - Input
+     - Enable processing
+   * - din[dw-1:0]
+     - Input
+     - Input data
+   * - dout[dw-1:0]
+     - Output
+     - Output data
+

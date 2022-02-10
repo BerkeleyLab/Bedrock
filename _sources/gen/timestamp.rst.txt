@@ -1,0 +1,65 @@
+.. _timestamp:
+
+timestamp
+=========
+
+Pinout
+''''''
+
+.. _fig:timestamp_block:
+.. figure:: timestamp_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: timestamp_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dw
+     - ?
+     - ?
+     - 8
+     - 
+   * - aux_reg
+     - ?
+     - ?
+     - 0
+     - 
+
+Ports
+'''''
+
+.. list-table:: timestamp_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 6.6 ns
+   * - aux_trig
+     - Input
+     - 
+   * - aux_skip
+     - Output
+     - 
+   * - slow_op
+     - Input
+     - 
+   * - slow_snap
+     - Input
+     - 
+   * - shift_in[7:0]
+     - Input
+     - 
+   * - shift_out[7:0]
+     - Output
+     - 
+

@@ -1,0 +1,73 @@
+.. _fwashout:
+
+fwashout
+========
+
+Pinout
+''''''
+
+.. _fig:fwashout_block:
+.. figure:: fwashout_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: fwashout_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - a_dw
+     - ?
+     - ?
+     - 16
+     - 
+   * - o_dw
+     - ?
+     - ?
+     - 16
+     - 
+   * - cut
+     - ?
+     - ?
+     - 4
+     - 
+
+Ports
+'''''
+
+.. list-table:: fwashout_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 8.0 ns
+   * - rst
+     - Input
+     - 
+   * - track
+     - Input
+     - 
+   * - a_data[a_dw-1:0]
+     - Input
+     - Raw ADC samples
+   * - a_gate
+     - Input
+     - 
+   * - o_data[o_dw-1:0]
+     - Output
+     - 
+   * - o_gate
+     - Output
+     - 
+   * - time_err
+     - Output
+     - 
+

@@ -1,0 +1,31 @@
+.. _interp1:
+
+interp1
+=======
+
+Pinout
+''''''
+
+.. _fig:interp1_block:
+.. figure:: interp1_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: interp1_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - x[17:0]
+     - Input
+     - 
+   * - y[15:0]
+     - Output
+     - 
+

@@ -1,0 +1,114 @@
+.. _saturateMath:
+
+saturateMath
+============
+
+Pinout
+''''''
+
+.. _fig:saturateMath_block:
+.. figure:: saturateMath_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: saturateMath_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - IWIDTH
+     - ?
+     - ?
+     - 8
+     - 
+   * - OWIDTH
+     - ?
+     - ?
+     - 12
+     - 
+   * - IWIDTH
+     - ?
+     - ?
+     - 12
+     - 
+   * - OWIDTH
+     - ?
+     - ?
+     - 8
+     - 
+   * - AWIDTH
+     - ?
+     - ?
+     - 8
+     - 
+   * - BWIDTH
+     - ?
+     - ?
+     - 8
+     - 
+   * - SUMWIDTH
+     - ?
+     - ?
+     - 8
+     - 
+   * - AWIDTH
+     - ?
+     - ?
+     - 8
+     - 
+   * - BWIDTH
+     - ?
+     - ?
+     - 8
+     - 
+   * - DIFFWIDTH
+     - ?
+     - ?
+     - 8
+     - 
+
+Ports
+'''''
+
+.. list-table:: saturateMath_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - wire
+     - Input
+     - 
+   * - wire
+     - Output
+     - 
+   * - wire
+     - Input
+     - 
+   * - reg
+     - Output
+     - 
+   * - wire
+     - Input
+     - 
+   * - wire
+     - Input
+     - 
+   * - wire
+     - Output
+     - 
+   * - wire
+     - Input
+     - 
+   * - wire
+     - Input
+     - 
+   * - wire
+     - Output
+     - 
+

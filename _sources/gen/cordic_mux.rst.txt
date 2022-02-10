@@ -1,0 +1,43 @@
+.. _cordic_mux:
+
+cordic_mux
+==========
+
+Pinout
+''''''
+
+.. _fig:cordic_mux_block:
+.. figure:: cordic_mux_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: cordic_mux_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - phase
+     - Input
+     - 
+   * - in_iq[17:0]
+     - Input
+     - 
+   * - out_iq[17:0]
+     - Output
+     - 
+   * - in_xy[17:0]
+     - Input
+     - 
+   * - in_ph[18:0]
+     - Input
+     - 
+   * - out_mp[17:0]
+     - Output
+     - 
+

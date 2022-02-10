@@ -1,0 +1,59 @@
+.. _isqrt:
+
+isqrt
+=====
+
+Pinout
+''''''
+
+.. _fig:isqrt_block:
+.. figure:: isqrt_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: isqrt_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - X_WIDTH
+     - ?
+     - ?
+     - 32
+     - 
+   * - Y_WIDTH
+     - ?
+     - ?
+     - X_WIDTH
+     - 
+
+Ports
+'''''
+
+.. list-table:: isqrt_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - x[X_WIDTH-1:0]
+     - Input
+     - 
+   * - en
+     - Input
+     - 
+   * - y[Y_WIDTH-1:0]
+     - Output
+     - 
+   * - dav
+     - Output
+     - 
+

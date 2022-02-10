@@ -1,0 +1,85 @@
+.. _flevel_set:
+
+flevel_set
+==========
+
+Pinout
+''''''
+
+.. _fig:flevel_set_block:
+.. figure:: flevel_set_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: flevel_set_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - i_dw
+     - ?
+     - ?
+     - 17
+     - XXX don't change this
+   * - q_dw
+     - ?
+     - ?
+     - 17
+     - XXX don't change this
+   * - o_dw
+     - ?
+     - ?
+     - 16
+     - XXX don't change this
+
+Ports
+'''''
+
+.. list-table:: flevel_set_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - cosd[17:0]
+     - Input
+     - LO input
+   * - sind[17:0]
+     - Input
+     - LO input
+   * - i_data[i_dw-1:0]
+     - Input
+     - 
+   * - i_gate
+     - Input
+     - 
+   * - i_trig
+     - Input
+     - I baseband
+   * - q_data[q_dw-1:0]
+     - Input
+     - 
+   * - q_gate
+     - Input
+     - 
+   * - q_trig
+     - Input
+     - Q baseband
+   * - o_data[o_dw-1:0]
+     - Output
+     - 
+   * - o_gate
+     - Output
+     - 
+   * - time_err
+     - Output
+     - 
+

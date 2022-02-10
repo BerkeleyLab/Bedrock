@@ -1,0 +1,66 @@
+.. _mixer:
+
+mixer
+=====
+
+Pinout
+''''''
+
+.. _fig:mixer_block:
+.. figure:: mixer_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: mixer_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - NORMALIZE
+     - ?
+     - ?
+     - 0
+     - 
+   * - dwi
+     - ?
+     - ?
+     - 16
+     - Width of ADC input
+   * - davr
+     - ?
+     - ?
+     - 4
+     - Guard bits to keep at output. E.g. if downstream
+   * - dwlo
+     - ?
+     - ?
+     - 18
+     - 
+
+Ports
+'''''
+
+.. list-table:: mixer_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - adcf[dwi-1:0]
+     - Input
+     - 
+   * - mult[dwlo-1:0]
+     - Input
+     - 
+   * - mixout[dwi+davr-1:0]
+     - Output
+     - 
+

@@ -1,0 +1,29 @@
+.. _demand_gpt:
+
+demand_gpt
+==========
+
+Pinout
+''''''
+
+.. _fig:demand_gpt_block:
+.. figure:: demand_gpt_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: demand_gpt_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - gpt
+     - ?
+     - ?
+     - 16
+     - 
+

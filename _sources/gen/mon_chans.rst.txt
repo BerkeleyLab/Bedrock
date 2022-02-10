@@ -1,0 +1,86 @@
+.. _mon_chans:
+
+mon_chans
+=========
+
+Pinout
+''''''
+
+.. _fig:mon_chans_block:
+.. figure:: mon_chans_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: mon_chans_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - NCHAN
+     - ?
+     - ?
+     - 1
+     - 
+   * - DWI
+     - ?
+     - ?
+     - 16
+     - data width
+   * - RWI
+     - ?
+     - ?
+     - 28
+     - result width
+   * - DWLO
+     - ?
+     - ?
+     - 18
+     - Local Oscillator data width
+   * - DAVR
+     - ?
+     - ?
+     - 3
+     - 
+
+Ports
+'''''
+
+.. list-table:: mon_chans_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - adc[NCHAN*DWI-1:0]
+     - Input
+     - 
+   * - mlo[NCHAN*DWLO-1:0]
+     - Input
+     - 
+   * - samp
+     - Input
+     - 
+   * - s_in[RWI-1:0]
+     - Input
+     - 
+   * - s_out[RWI-1:0]
+     - Output
+     - 
+   * - g_in
+     - Input
+     - 
+   * - g_out
+     - Output
+     - 
+   * - reset
+     - Input
+     - 
+

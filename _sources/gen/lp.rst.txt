@@ -1,0 +1,61 @@
+.. _lp:
+
+lp
+==
+
+Pinout
+''''''
+
+.. _fig:lp_block:
+.. figure:: lp_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: lp_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 6.66 ns
+   * - iq
+     - Input
+     - 
+   * - x[17:0]
+     - Input
+     - 
+   * - kx[17:0]
+     - Input
+     - external
+   * - kx_addr[0:0]
+     - Output
+     - external address for kx
+   * - ky[17:0]
+     - Input
+     - external
+   * - ky_addr[0:0]
+     - Output
+     - external address for ky
+   * - y[19:0]
+     - Output
+     - 
+   * - clk
+     - Input
+     - 
+   * - iq
+     - Input
+     - 
+   * - x[17:0]
+     - Input
+     - 
+   * - y[17:0]
+     - Input
+     - 
+   * - z[19:0]
+     - Output
+     - 
+

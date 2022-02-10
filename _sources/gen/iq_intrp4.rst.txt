@@ -1,0 +1,43 @@
+.. _iq_intrp4:
+
+iq_intrp4
+=========
+
+Pinout
+''''''
+
+.. _fig:iq_intrp4_block:
+.. figure:: iq_intrp4_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: iq_intrp4_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - sync
+     - Input
+     - 
+   * - in[21:0]
+     - Input
+     - 
+   * - out1[17:0]
+     - Output
+     - 
+   * - out2[17:0]
+     - Output
+     - 
+   * - out3[17:0]
+     - Output
+     - 
+   * - out4[17:0]
+     - Output
+     - 
+

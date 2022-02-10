@@ -1,0 +1,70 @@
+.. _iq_deinterleaver:
+
+iq_deinterleaver
+================
+
+Pinout
+''''''
+
+.. _fig:iq_deinterleaver_block:
+.. figure:: iq_deinterleaver_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: iq_deinterleaver_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - scale_wi
+     - ?
+     - ?
+     - 18
+     - Width of scale input and downscale factor
+   * - dwi
+     - ?
+     - ?
+     - 16
+     - Width of iq stream
+   * - davr
+     - ?
+     - ?
+     - 4
+     - 
+
+Ports
+'''''
+
+.. list-table:: iq_deinterleaver_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - scale_in[scale_wi-1:0]
+     - Input
+     - Scaling factor; scale is typically positive;
+   * - iq_data_in[dwi-1:0]
+     - Input
+     - IQ interleaved data
+   * - iq_sel
+     - Input
+     - 1 (I), 0 (Q)
+   * - valid_out
+     - Output
+     - 
+   * - i_data_out[dwi+davr-1:0]
+     - Output
+     - 
+   * - q_data_out[dwi+davr-1:0]
+     - Output
+     - 
+

@@ -1,0 +1,43 @@
+.. _iq_chain4:
+
+iq_chain4
+=========
+
+Pinout
+''''''
+
+.. _fig:iq_chain4_block:
+.. figure:: iq_chain4_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: iq_chain4_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - sync
+     - Input
+     - 
+   * - in1[17:0]
+     - Input
+     - 
+   * - in2[17:0]
+     - Input
+     - 
+   * - in3[17:0]
+     - Input
+     - 
+   * - in4[17:0]
+     - Input
+     - 
+   * - out[21:0]
+     - Output
+     - 
+

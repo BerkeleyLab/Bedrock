@@ -1,0 +1,66 @@
+.. _dpram:
+
+dpram
+=====
+
+Pinout
+''''''
+
+.. _fig:dpram_block:
+.. figure:: dpram_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: dpram_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - aw
+     - ?
+     - ?
+     - 8
+     - 
+   * - dw
+     - ?
+     - ?
+     - 8
+     - 
+   * - sz
+     - ?
+     - ?
+     - 
+     - 
+   * - initial_file
+     - ?
+     - ?
+     - 
+     - 
+
+Ports
+'''''
+
+.. list-table:: dpram_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clka
+     - Input
+     - 
+   * - addra[aw-1:0]
+     - Input
+     - 
+   * - dina[dw-1:0]
+     - Input
+     - 
+   * - douta[dw-1:0]
+     - Output
+     - 
+

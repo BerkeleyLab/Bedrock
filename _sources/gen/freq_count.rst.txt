@@ -1,0 +1,75 @@
+.. _freq_count:
+
+freq_count
+==========
+
+Pinout
+''''''
+
+.. _fig:freq_count_block:
+.. figure:: freq_count_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: freq_count_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - glitch_thresh
+     - ?
+     - ?
+     - 2
+     - 
+   * - refcnt_width
+     - ?
+     - ?
+     - 24
+     - 
+   * - freq_width
+     - ?
+     - ?
+     - 28
+     - 
+   * - initv
+     - ?
+     - ?
+     - 0
+     - 
+
+Ports
+'''''
+
+.. list-table:: freq_count_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - sysclk
+     - Input
+     - timespec 8.0 ns
+   * - f_in
+     - Input
+     - unknown input
+   * - reg
+     - Output
+     - 
+   * - freq_strobe
+     - Output
+     - 
+   * - reg
+     - Output
+     - 
+   * - reg
+     - Output
+     - 
+   * - reg
+     - Output
+     - 
+

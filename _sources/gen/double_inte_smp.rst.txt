@@ -1,0 +1,62 @@
+.. _double_inte_smp:
+
+double_inte_smp
+===============
+
+Pinout
+''''''
+
+.. _fig:double_inte_smp_block:
+.. figure:: double_inte_smp_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: double_inte_smp_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dwi
+     - ?
+     - ?
+     - 16
+     - data width in
+   * - dwo
+     - ?
+     - ?
+     - 28
+     - 
+
+Ports
+'''''
+
+.. list-table:: double_inte_smp_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - strobe
+     - Input
+     - 
+   * - clk
+     - Input
+     - 
+   * - reset
+     - Input
+     - 
+   * - stb_in
+     - Input
+     - 
+   * - in[dwi-1:0]
+     - Input
+     - 
+   * - out[dwo-1:0]
+     - Output
+     - 
+

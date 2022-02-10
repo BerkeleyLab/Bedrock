@@ -1,0 +1,75 @@
+.. _iq_deinterleaver_multichannel:
+
+iq_deinterleaver_multichannel
+=============================
+
+Pinout
+''''''
+
+.. _fig:iq_deinterleaver_multichannel_block:
+.. figure:: iq_deinterleaver_multichannel_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: iq_deinterleaver_multichannel_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - NCHAN
+     - ?
+     - ?
+     - 2
+     - 
+   * - SCALE_WI
+     - ?
+     - ?
+     - 18
+     - 
+   * - DWI
+     - ?
+     - ?
+     - 16
+     - 
+   * - DAVR
+     - ?
+     - ?
+     - 4
+     - 
+
+Ports
+'''''
+
+.. list-table:: iq_deinterleaver_multichannel_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - scale_in[SCALE_WI-1:0]
+     - Input
+     - 
+   * - iq_data_in[NCHAN*DWI-1:0]
+     - Input
+     - 
+   * - iq_sel
+     - Input
+     - 
+   * - valid_out
+     - Output
+     - 
+   * - i_data_out[NCHAN*(DWI+DAVR)-1:0]
+     - Output
+     - 
+   * - q_data_out[NCHAN*(DWI+DAVR)-1:0]
+     - Output
+     - 
+

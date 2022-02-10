@@ -1,0 +1,46 @@
+.. _ll_prop:
+
+ll_prop
+=======
+
+Pinout
+''''''
+
+.. _fig:ll_prop_block:
+.. figure:: ll_prop_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: ll_prop_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - iq
+     - Input
+     - 
+   * - in_iq[17:0]
+     - Input
+     - 
+   * - out_iq[17:0]
+     - Output
+     - 
+   * - coarse_scale[1:0]
+     - Input
+     - max gain 8, 64, 512, 4096
+   * - set_iq[17:0]
+     - Input
+     - 
+   * - gain_iq[17:0]
+     - Input
+     - 
+   * - drive_iq[17:0]
+     - Input
+     - 
+

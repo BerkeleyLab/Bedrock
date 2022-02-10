@@ -1,0 +1,75 @@
+.. _fchan_subset:
+
+fchan_subset
+============
+
+Pinout
+''''''
+
+.. _fig:fchan_subset_block:
+.. figure:: fchan_subset_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: fchan_subset_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - KEEP_OLD
+     - ?
+     - ?
+     - 0
+     - 
+   * - a_dw
+     - ?
+     - ?
+     - 20
+     - 
+   * - o_dw
+     - ?
+     - ?
+     - 20
+     - 
+   * - len
+     - ?
+     - ?
+     - 16
+     - 
+
+Ports
+'''''
+
+.. list-table:: fchan_subset_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - keep[len-1:0]
+     - Input
+     - 
+   * - a_data[a_dw-1:0]
+     - Input
+     - 
+   * - a_gate
+     - Input
+     - 
+   * - o_data[o_dw-1:0]
+     - Output
+     - 
+   * - o_gate
+     - Output
+     - 
+   * - time_err
+     - Output
+     - 
+

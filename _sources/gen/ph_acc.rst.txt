@@ -1,0 +1,43 @@
+.. _ph_acc:
+
+ph_acc
+======
+
+Pinout
+''''''
+
+.. _fig:ph_acc_block:
+.. figure:: ph_acc_block.png
+    :alt: Schematic symbol
+
+Ports
+'''''
+
+.. list-table:: ph_acc_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - Rising edge clock input; all logic is synchronous in this domain
+   * - reset
+     - Input
+     - Active high, synchronous with clk
+   * - en
+     - Input
+     - Enable
+   * - phase_acc[18:0]
+     - Output
+     - Output phase word
+   * - phase_step_h[19:0]
+     - Input
+     - High order (coarse, binary) phase step
+   * - phase_step_l[11:0]
+     - Input
+     - Low order (fine, possibly non-binary) phase step
+   * - modulo[11:0]
+     - Input
+     - Encoding of non-binary modulus; 0 means binary
+

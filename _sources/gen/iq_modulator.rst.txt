@@ -1,0 +1,57 @@
+.. _iq_modulator:
+
+iq_modulator
+============
+
+Pinout
+''''''
+
+.. _fig:iq_modulator_block:
+.. figure:: iq_modulator_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: iq_modulator_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - WIDTH
+     - ?
+     - ?
+     - 16
+     - 
+
+Ports
+'''''
+
+.. list-table:: iq_modulator_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - sin[WIDTH-1:0]
+     - Input
+     - 
+   * - cos[WIDTH-1:0]
+     - Input
+     - 
+   * - d_out[WIDTH-1:0]
+     - Output
+     - 
+   * - ampi[WIDTH-1:0]
+     - Input
+     - 
+   * - ampq[WIDTH-1:0]
+     - Input
+     - 
+

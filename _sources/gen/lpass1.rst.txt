@@ -1,0 +1,56 @@
+.. _lpass1:
+
+lpass1
+======
+
+Pinout
+''''''
+
+.. _fig:lpass1_block:
+.. figure:: lpass1_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: lpass1_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dwi
+     - ?
+     - ?
+     - 16
+     - 
+   * - klog2
+     - ?
+     - ?
+     - 21
+     - Actual k is 0.5**klog2; max 31
+
+Ports
+'''''
+
+.. list-table:: lpass1_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - trim_sh[TRIM_SHIFT-1:0]
+     - Input
+     - Move corner up in steps of 2x; Extra logic
+   * - din[dwi-1:0]
+     - Input
+     - 
+   * - dout[dwi-1:0]
+     - Output
+     - 
+

@@ -1,0 +1,54 @@
+.. _minmax:
+
+minmax
+======
+
+Pinout
+''''''
+
+.. _fig:minmax_block:
+.. figure:: minmax_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: minmax_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - width
+     - ?
+     - ?
+     - 14
+     - 
+
+Ports
+'''''
+
+.. list-table:: minmax_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - xin[width-1:0]
+     - Input
+     - 
+   * - reset
+     - Input
+     - 
+   * - xmin[width-1:0]
+     - Output
+     - 
+   * - xmax[width-1:0]
+     - Output
+     - 
+

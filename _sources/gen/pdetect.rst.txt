@@ -1,0 +1,57 @@
+.. _pdetect:
+
+pdetect
+=======
+
+Pinout
+''''''
+
+.. _fig:pdetect_block:
+.. figure:: pdetect_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: pdetect_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - w
+     - ?
+     - ?
+     - 17
+     - 
+
+Ports
+'''''
+
+.. list-table:: pdetect_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - ang_in[w-1:0]
+     - Input
+     - 
+   * - strobe_in
+     - Input
+     - 
+   * - reset
+     - Input
+     - 
+   * - reg
+     - Output
+     - 
+   * - reg
+     - Output
+     - 
+

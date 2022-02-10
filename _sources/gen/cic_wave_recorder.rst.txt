@@ -1,0 +1,182 @@
+.. _cic_wave_recorder:
+
+cic_wave_recorder
+=================
+
+Pinout
+''''''
+
+.. _fig:cic_wave_recorder_block:
+.. figure:: cic_wave_recorder_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: cic_wave_recorder_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - n_chan
+     - ?
+     - ?
+     - 12
+     - 
+   * - di_dwi
+     - ?
+     - ?
+     - 16
+     - data width
+   * - di_rwi
+     - ?
+     - ?
+     - 32
+     - result width
+   * - di_noise_bits
+     - ?
+     - ?
+     - 4
+     - Number of noise bits to discard at the output of Double Integrator.
+   * - cc_outw
+     - ?
+     - ?
+     - 20
+     - CCFilt output width; Must be 20 if using half-band filter
+   * - cc_halfband
+     - ?
+     - ?
+     - 1
+     - 
+   * - cc_use_delay
+     - ?
+     - ?
+     - 0
+     - Match pipeline length of filt_halfband=1
+   * - cc_shift_base
+     - ?
+     - ?
+     - 0
+     - Bits to discard from previous acc step
+   * - cc_shift_wi
+     - ?
+     - ?
+     - 4
+     - 
+   * - buf_dw
+     - ?
+     - ?
+     - 16
+     - If buf_dw < cc_outw, lsb are dropped
+   * - buf_aw
+     - ?
+     - ?
+     - 13
+     - 
+   * - lsb_mask
+     - ?
+     - ?
+     - 1
+     - LSB of channel mask is CH0
+   * - buf_stat_w
+     - ?
+     - ?
+     - 16
+     - 
+   * - buf_auto_flip
+     - ?
+     - ?
+     - 1
+     - 
+
+Ports
+'''''
+
+.. list-table:: cic_wave_recorder_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - iclk
+     - Input
+     - 
+   * - reset
+     - Input
+     - 
+   * - stb_in
+     - Input
+     - Strobe signal for input samples
+   * - d_in[n_chan*di_dwi-1:0]
+     - Input
+     - Flattened array of unprocessed data streams. CH0 in LSBs
+   * - cic_sample
+     - Input
+     - CIC base sampling signal
+   * - di_stb_out
+     - Output
+     - 
+   * - di_sr_out[di_rwi-1:0]
+     - Output
+     - 
+   * - cc_sample
+     - Input
+     - CCFilt sampling signal
+   * - cc_shift[cc_shift_wi-1:0]
+     - Input
+     - controls scaling of filter result
+   * - chan_mask[n_chan-1:0]
+     - Input
+     - Bitmask of channels to record
+   * - wave_gate_out
+     - Output
+     - 
+   * - wave_dval_out
+     - Output
+     - 
+   * - wave_data_out[buf_dw-1:0]
+     - Output
+     - 
+   * - oclk
+     - Input
+     - 
+   * - buf_write
+     - Input
+     - Level-signal to enable writing into buffer
+   * - buf_sync
+     - Output
+     - single-cycle when buffer starts/ends
+   * - buf_transferred
+     - Output
+     - single-cycle when a buffer has been
+   * - buf_stop
+     - Input
+     - single-cycle - interrupts cbuf writing
+   * - buf_count[buf_stat_w-1:0]
+     - Output
+     - 
+   * - buf_stat2[buf_aw-1:0]
+     - Output
+     - includes fault bit
+   * - buf_stat[buf_stat_w-1:0]
+     - Output
+     - includes fault bit, and (if set) the last valid location
+   * - debug_stat[buf_aw+4:0]
+     - Output
+     - {stb_in, boundary, btest, wbank, rbank, wr_addr}
+   * - buf_stb
+     - Input
+     - 
+   * - buf_enable
+     - Output
+     - 
+   * - buf_read_addr[buf_aw-1:0]
+     - Input
+     - nominally 8192 locations
+   * - buf_d_out[buf_dw-1:0]
+     - Output
+     - 
+

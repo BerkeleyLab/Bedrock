@@ -1,0 +1,84 @@
+.. _mon_2chan:
+
+mon_2chan
+=========
+
+Pinout
+''''''
+
+.. _fig:mon_2chan_block:
+.. figure:: mon_2chan_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: mon_2chan_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dwi
+     - ?
+     - ?
+     - 16
+     - data width
+   * - rwi
+     - ?
+     - ?
+     - 28
+     - result width
+   * - davr
+     - ?
+     - ?
+     - 3
+     - how many guard bits to keep in output of multiplier
+   * - dwlo
+     - ?
+     - ?
+     - 18
+     - Local Oscillator data width
+
+Ports
+'''''
+
+.. list-table:: mon_2chan_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 8.4 ns
+   * - adcf[dwi-1:0]
+     - Input
+     - Full scale (?) ADC data, possibly muxed
+   * - mcos[dwlo-1:0]
+     - Input
+     - 
+   * - msin[dwlo-1:0]
+     - Input
+     - 
+   * - samp
+     - Input
+     - mixer + double_integrated output capture trigger
+   * - s_in[rwi-1:0]
+     - Input
+     - Stream IN
+   * - s_out[rwi-1:0]
+     - Output
+     - Stream OUT
+   * - g_in
+     - Input
+     - 
+   * - g_out
+     - Output
+     - 
+   * - reset
+     - Input
+     - 
+

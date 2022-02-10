@@ -1,0 +1,57 @@
+.. _half_filt:
+
+half_filt
+=========
+
+Pinout
+''''''
+
+.. _fig:half_filt_block:
+.. figure:: half_filt_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: half_filt_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - len
+     - ?
+     - ?
+     - 4
+     - number of interleaved data streams
+
+Ports
+'''''
+
+.. list-table:: half_filt_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - Rising edge clock input; all logic is synchronous in this domain
+   * - ind[19:0]
+     - Input
+     - Input data
+   * - ing
+     - Input
+     - Active high gate marking input data as valid
+   * - outd[19:0]
+     - Output
+     - Output data
+   * - outg
+     - Output
+     - Active high gate marking output data as valid
+   * - reset
+     - Input
+     - manually reset counter
+
