@@ -191,7 +191,7 @@ class DataPipeWithoutBypass(Module, AutoCSR):
         self.submodules.dram_fifo = dram_fifo = LiteDRAMFIFO(
             data_width  = dw,
             base        = 0,
-            depth       = SIZE,
+            depth       = SIZE * (dw // 8),  # liteDRAM expects this in bytes
             write_port  = ddr_wr_port,
             read_port   = ddr_rd_port,
         )
