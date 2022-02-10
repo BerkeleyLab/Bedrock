@@ -61,7 +61,7 @@ t_reg32 regmap_ad9653[] = {
     {0x100, 0x46 }, // sample rate override
     // {0x0ff, 0x01 }, // init sample rate override
     {0x014, 0x07 }, // format=two's comp, invert
-    {0x018, 0x04 }, // internal verf 2.0 Vpp
+    {0x018, 0x00 }, // internal verf 1.0 Vpp
     {0x021, 0x30 }  // DDR two-lane, bytewise
     // {0x021, 0x20 }  // DDR two-lane, bitwise
 };
