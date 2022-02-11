@@ -1,0 +1,172 @@
+.. _iq_trace:
+
+iq_trace
+========
+
+Description
+'''''''''''
+
+|  One more try to package up the LBNL conveyor belt in a usable and
+|  comprehensible form.
+| 
+|  New things going on here:
+|   1. adc count is parameterized, and therefore a single input port
+|      is nadc*dw bits wide; each block of dw bits is a signed number.
+|   2. Independent I and Q shift registers
+|   3. 32-bit wide memory read port can either hold the 20-bit full-resolution
+|      measurement, or two packed 16-bit I and Q data
+| 
+|  LCLS-II dissection of possible use cases
+|  1320/14 MHz raw ADC clock
+|  /33 for base CIC, 2.857 MS/s
+|  /8 to get 357 kS/s, suitable for loop characterization
+|  or /16 to get 179 kS/s, and a channel-subset is streamable for close-in
+|    noise characterization
+|    179 kS/s * 2 ADCs * 2 components * 20 bits = 14.3 Mbit/s
+|    or without re-writing any infrastructure now,
+|    179 kS/s * 2 ADCs * 2 components * 64 bits = 45.7 Mbit/s
+|  or /64 to get 44.64 kS/s, easily streamable and good for acoustic
+|    characterization, including most SRF trip analysis
+|    44.64 kS/s * 8 cavities * 2 components * 16 bits = 11.4 Mbit/s
+|    Useful to grab 8 packets at a time with 1024 octets each,
+|    requires each half of a ping-pong buffer to be 4K x 16.
+| 
+|  To support more than 33*16-point averaging, without losing resolution, you
+|  need wider data paths in ccfilt, with its recently-added outw parameter.
+|  16 + log2(33*16/2)/2 = 20
+|  where the /2 inside the log represents mean(sin(theta)^2), and the answer
+|  comes out slightly more than 20 because we've ignored the intended
+|  adjustment to lo_amp.
+| 
+|  See nco_setup.py for help setting phase_step_h, phase_step_l, and modulo.
+| 
+
+Pinout
+''''''
+
+.. _fig:iq_trace_block:
+.. figure:: iq_trace_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: iq_trace_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dw
+     - ?
+     - ?
+     - 16
+     - ADC input width
+   * - oscw
+     - ?
+     - ?
+     - 18
+     - Oscillator input width
+   * - davr
+     - ?
+     - ?
+     - 3
+     - Guard bits at output of mixer
+   * - ow
+     - ?
+     - ?
+     - 28
+     - second-order CIC data path width
+   * - rw
+     - ?
+     - ?
+     - 20
+     - result width out of ccfilt
+   * - pcw
+     - ?
+     - ?
+     - 13
+     - cic_period counter width
+   * - shift_base
+     - ?
+     - ?
+     - 7
+     - see ccfilt.v
+   * - nadc
+     - ?
+     - ?
+     - 8
+     - 
+   * - aw
+     - ?
+     - ?
+     - 13
+     - for circle_buf, see below
+
+Ports
+'''''
+
+.. list-table:: iq_trace_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - reset
+     - Input
+     - 
+   * - trig
+     - Input
+     - 
+   * - trig_mode[1:0]
+     - Input
+     - 0: free-run, 1: single-shot, 2: sync start, XXX not yet used
+   * - adcs[nadc*dw-1:0]
+     - Input
+     - each dw-wide adc data is signed
+   * - cosa[oscw-1:0]
+     - Input
+     - 
+   * - sina[oscw-1:0]
+     - Input
+     - 
+   * - cic_period[pcw-1:0]
+     - Input
+     - expected values 33 to 33*128
+   * - cic_shift[3:0]
+     - Input
+     - expected values 7 to 15
+   * - keep[nadc-1:0]
+     - Input
+     - bit n :: channel n
+   * - ro_clk
+     - Input
+     - 
+   * - ro_enable
+     - Output
+     - 
+   * - ro_ack
+     - Input
+     - 
+   * - ro_addr[aw+1:0]
+     - Input
+     - 
+   * - ro_data[31:0]
+     - Output
+     - 
+   * - ro_status[31:0]
+     - Output
+     - 
+
+Timing Diagram
+''''''''''''''
+
+.. _fig:iq_trace_timing:
+.. figure:: iq_trace_timing.png
+    :alt: Timing diagram
+

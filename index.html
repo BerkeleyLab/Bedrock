@@ -1,24 +1,24 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Welcome to Bedrock’s documentation! &#8212; Bedrock  documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Bedrock Modules" href="bedrock-modules.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -28,9 +28,16 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="welcome-to-bedrock-s-documentation">
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="welcome-to-bedrock-s-documentation">
 <h1>Welcome to Bedrock’s documentation!<a class="headerlink" href="#welcome-to-bedrock-s-documentation" title="Permalink to this headline">¶</a></h1>
 <p>This document is the user’s manual of Bedrock, largely an accumulation
 of Verilog codebase written over the past several years at LBNL.
@@ -38,7 +45,7 @@ It contains platform-independent Verilog, and whatever it takes to
 get it onto FPGA platforms like Xilinx etc. The public development
 mirror is the <a class="reference external" href="https://github.com/BerkeleyLab/Bedrock">Bedrock Github Repository</a>.</p>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="bedrock-modules.html">Bedrock Modules</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bedrock-modules.html#dsp">DSP</a><ul>
@@ -156,6 +163,12 @@ mirror is the <a class="reference external" href="https://github.com/BerkeleyLab
 <li class="toctree-l4"><a class="reference internal" href="gen/complex_mul_flat.html#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="gen/complex_mul_flat.html#ports">Ports</a></li>
 <li class="toctree-l4"><a class="reference internal" href="gen/complex_mul_flat.html#timing-diagram">Timing Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="gen/cordic_mux.html">cordic_mux</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="gen/cordic_mux.html#pinout">Pinout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/cordic_mux.html#ports">Ports</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/cordic_mux.html#timing-diagram">Timing Diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="gen/cpxmul_fullspeed.html">cpxmul_fullspeed</a><ul>
@@ -335,6 +348,14 @@ mirror is the <a class="reference external" href="https://github.com/BerkeleyLab
 <li class="toctree-l4"><a class="reference internal" href="gen/iq_modulator.html#ports">Ports</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="gen/iq_trace.html">iq_trace</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="gen/iq_trace.html#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/iq_trace.html#pinout">Pinout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/iq_trace.html#parameters">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/iq_trace.html#ports">Ports</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/iq_trace.html#timing-diagram">Timing Diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="gen/isqrt.html">isqrt</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="gen/isqrt.html#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="gen/isqrt.html#pinout">Pinout</a></li>
@@ -397,14 +418,6 @@ mirror is the <a class="reference external" href="https://github.com/BerkeleyLab
 <li class="toctree-l4"><a class="reference internal" href="gen/multiply_accumulate.html#timing-diagram">Timing Diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html">non_iq_interleaved_piloop</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html#description">Description</a></li>
-<li class="toctree-l4"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html#pinout">Pinout</a></li>
-<li class="toctree-l4"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html#parameters">Parameters</a></li>
-<li class="toctree-l4"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html#ports">Ports</a></li>
-<li class="toctree-l4"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html#timing-diagram">Timing Diagram</a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="gen/pdetect.html">pdetect</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="gen/pdetect.html#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="gen/pdetect.html#parameters">Parameters</a></li>
@@ -440,6 +453,14 @@ mirror is the <a class="reference external" href="https://github.com/BerkeleyLab
 <li class="toctree-l4"><a class="reference internal" href="gen/reg_delay.html#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="gen/reg_delay.html#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="gen/reg_delay.html#ports">Ports</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="gen/rot_dds.html">rot_dds</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="gen/rot_dds.html#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/rot_dds.html#pinout">Pinout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/rot_dds.html#parameters">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/rot_dds.html#ports">Ports</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/rot_dds.html#timing-diagram">Timing Diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="gen/rr_arb.html">rr_arb</a><ul>
@@ -481,6 +502,12 @@ mirror is the <a class="reference external" href="https://github.com/BerkeleyLab
 <li class="toctree-l4"><a class="reference internal" href="gen/shortfifo.html#ports">Ports</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="gen/ssb_out.html">ssb_out</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="gen/ssb_out.html#pinout">Pinout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/ssb_out.html#ports">Ports</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gen/ssb_out.html#timing-diagram">Timing Diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="gen/timestamp.html">timestamp</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="gen/timestamp.html#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="gen/timestamp.html#pinout">Pinout</a></li>
@@ -514,18 +541,19 @@ mirror is the <a class="reference external" href="https://github.com/BerkeleyLab
 </li>
 </ul>
 </div>
-</div>
-<div class="section" id="indices-and-tables">
+</section>
+<section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
-</div>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -540,7 +568,7 @@ mirror is the <a class="reference external" href="https://github.com/BerkeleyLab
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="bedrock-modules.html">Bedrock Modules</a></li>
 </ul>
@@ -554,17 +582,23 @@ mirror is the <a class="reference external" href="https://github.com/BerkeleyLab
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -573,8 +607,8 @@ mirror is the <a class="reference external" href="https://github.com/BerkeleyLab
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/index.rst.txt"

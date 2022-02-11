@@ -1,25 +1,25 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Bedrock Modules &#8212; Bedrock  documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="afterburner" href="gen/afterburner.html" />
     <link rel="prev" title="Welcome to Bedrock’s documentation!" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -29,18 +29,25 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="bedrock-modules">
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="bedrock-modules">
 <span id="id1"></span><h1>Bedrock Modules<a class="headerlink" href="#bedrock-modules" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="dsp">
+<section id="dsp">
 <h2>DSP<a class="headerlink" href="#dsp" title="Permalink to this headline">¶</a></h2>
 <p>In the DSP directory you can find various various digital signal
 processing algorithms implemented in platform-independent (portable)
 Verilog, and their test benches; modules include DDS, Down-conversion,
 Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="gen/afterburner.html">afterburner</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="gen/afterburner.html#description">Description</a></li>
@@ -156,6 +163,12 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 <li class="toctree-l2"><a class="reference internal" href="gen/complex_mul_flat.html#pinout">Pinout</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gen/complex_mul_flat.html#ports">Ports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gen/complex_mul_flat.html#timing-diagram">Timing Diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gen/cordic_mux.html">cordic_mux</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gen/cordic_mux.html#pinout">Pinout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/cordic_mux.html#ports">Ports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/cordic_mux.html#timing-diagram">Timing Diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="gen/cpxmul_fullspeed.html">cpxmul_fullspeed</a><ul>
@@ -335,6 +348,14 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 <li class="toctree-l2"><a class="reference internal" href="gen/iq_modulator.html#ports">Ports</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="gen/iq_trace.html">iq_trace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gen/iq_trace.html#description">Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/iq_trace.html#pinout">Pinout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/iq_trace.html#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/iq_trace.html#ports">Ports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/iq_trace.html#timing-diagram">Timing Diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="gen/isqrt.html">isqrt</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="gen/isqrt.html#description">Description</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gen/isqrt.html#pinout">Pinout</a></li>
@@ -397,14 +418,6 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 <li class="toctree-l2"><a class="reference internal" href="gen/multiply_accumulate.html#timing-diagram">Timing Diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html">non_iq_interleaved_piloop</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html#description">Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html#pinout">Pinout</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html#parameters">Parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html#ports">Ports</a></li>
-<li class="toctree-l2"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html#timing-diagram">Timing Diagram</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="gen/pdetect.html">pdetect</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="gen/pdetect.html#pinout">Pinout</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gen/pdetect.html#parameters">Parameters</a></li>
@@ -440,6 +453,14 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 <li class="toctree-l2"><a class="reference internal" href="gen/reg_delay.html#pinout">Pinout</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gen/reg_delay.html#parameters">Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gen/reg_delay.html#ports">Ports</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gen/rot_dds.html">rot_dds</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gen/rot_dds.html#description">Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/rot_dds.html#pinout">Pinout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/rot_dds.html#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/rot_dds.html#ports">Ports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/rot_dds.html#timing-diagram">Timing Diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="gen/rr_arb.html">rr_arb</a><ul>
@@ -481,6 +502,12 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 <li class="toctree-l2"><a class="reference internal" href="gen/shortfifo.html#ports">Ports</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="gen/ssb_out.html">ssb_out</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gen/ssb_out.html#pinout">Pinout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/ssb_out.html#ports">Ports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gen/ssb_out.html#timing-diagram">Timing Diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="gen/timestamp.html">timestamp</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="gen/timestamp.html#description">Description</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gen/timestamp.html#pinout">Pinout</a></li>
@@ -510,11 +537,12 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 </li>
 </ul>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -529,7 +557,7 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Bedrock Modules</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#dsp">DSP</a><ul>
@@ -550,6 +578,7 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 <li class="toctree-l3"><a class="reference internal" href="gen/complex_freq_wrap.html">complex_freq_wrap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/complex_mul.html">complex_mul</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/complex_mul_flat.html">complex_mul_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gen/cordic_mux.html">cordic_mux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/cpxmul_fullspeed.html">cpxmul_fullspeed</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/data_xdomain.html">data_xdomain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/demand_gpt.html">demand_gpt</a></li>
@@ -578,6 +607,7 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 <li class="toctree-l3"><a class="reference internal" href="gen/iq_intrp4.html">iq_intrp4</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/iq_mixer_multichannel.html">iq_mixer_multichannel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/iq_modulator.html">iq_modulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gen/iq_trace.html">iq_trace</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/isqrt.html">isqrt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/ll_prop.html">ll_prop</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/lpass1.html">lpass1</a></li>
@@ -588,19 +618,20 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 <li class="toctree-l3"><a class="reference internal" href="gen/mon_chans.html">mon_chans</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/multi_sampler.html">multi_sampler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/multiply_accumulate.html">multiply_accumulate</a></li>
-<li class="toctree-l3"><a class="reference internal" href="gen/non_iq_interleaved_piloop.html">non_iq_interleaved_piloop</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/pdetect.html">pdetect</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/ph_acc.html">ph_acc</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/phase_diff.html">phase_diff</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/phaset.html">phaset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/phasex.html">phasex</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/reg_delay.html">reg_delay</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gen/rot_dds.html">rot_dds</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/rr_arb.html">rr_arb</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/sat_add.html">sat_add</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/saturateMath.html">saturateMath</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/serialize.html">serialize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/serializer_multichannel.html">serializer_multichannel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/shortfifo.html">shortfifo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gen/ssb_out.html">ssb_out</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/timestamp.html">timestamp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/tt800.html">tt800</a></li>
 <li class="toctree-l3"><a class="reference internal" href="gen/upconv.html">upconv</a></li>
@@ -621,17 +652,23 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -640,8 +677,8 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.</p>
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/bedrock-modules.rst.txt"

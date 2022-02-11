@@ -1,25 +1,25 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>non_iq_interleaved_piloop &#8212; Bedrock  documentation</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>rot_dds &#8212; Bedrock  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pdetect" href="pdetect.html" />
-    <link rel="prev" title="multiply_accumulate" href="multiply_accumulate.html" />
+    <link rel="next" title="rr_arb" href="rr_arb.html" />
+    <link rel="prev" title="reg_delay" href="reg_delay.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -29,173 +29,174 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="non-iq-interleaved-piloop">
-<span id="id1"></span><h1>non_iq_interleaved_piloop<a class="headerlink" href="#non-iq-interleaved-piloop" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="description">
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="rot-dds">
+<span id="id1"></span><h1>rot_dds<a class="headerlink" href="#rot-dds" title="Permalink to this headline">¶</a></h1>
+<section id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
-<div class="line">There are MANY pi-loops among us, but none seemed to fit the ORNL cause, so here we go:</div>
-<div class="line">PI Loop</div>
+<div class="line">Phase Rotating Direct Digital Synthesis of sin/cos</div>
+<div class="line">18 bit output coming from cordicg</div>
+<div class="line">Note that phase_step_h and phase_step_l combined fit in a 32-bit word.</div>
+<div class="line">This is intentional, to allow atomic updates of the two controls</div>
+<div class="line">in 32-bit systems.  Indeed, when modulo==0, those 32 bits can be considered</div>
+<div class="line"><br /></div>
+<div class="line">a simple fast binary DDS control for quirky (non-binary-rounding) phase</div>
+<div class="line">steps like:</div>
+<div class="line">7/33 for LCLS-II</div>
+<div class="line">8/11 for SSRF</div>
+<div class="line">9/13 for Argonne RIA</div>
+<div class="line"><br /></div>
+<div class="line">The phase generation algorithm</div>
+<div class="line">0. The phase increments for dds are generated using a technique described</div>
+<div class="line">in these 2 places:</div>
+<div class="line">Section: PROGRAMMABLE MODULUS MODE in:</div>
 <div class="line-block">
-<div class="line-block">
-<div class="line">K_p</div>
-<div class="line-block">
-<div class="line">+</div>
-<div class="line"><a href="#id2"><span class="problematic" id="id3">|</span></a></div>
+<div class="line"><a class="reference external" href="https://www.analog.com/media/en/technical-documentation/data-sheets/ad9915.pdf">https://www.analog.com/media/en/technical-documentation/data-sheets/ad9915.pdf</a></div>
+<div class="line">(AND) <a class="reference external" href="https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm">https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm</a></div>
+<div class="line">Basically, increment the phase step at a coarse resolution, accumulate the</div>
+<div class="line">error on the side, and when that error accumulates to the lowest bit of</div>
+<div class="line">the coarse counter, add an extra 1 to the following phase step.</div>
 </div>
+<div class="line">1. phase_step_h is the coarse (20 bit) integer truncated phase increment for</div>
+<div class="line-block">
+<div class="line">the cordic. There is a 1-bit increment of phase that comes from</div>
+<div class="line">accumulating residue phase.</div>
 </div>
-<div class="line">-Measure  +—–+          v</div>
+<div class="line">2. This residue phase is accumulating in steps of phase_step_l, in a 12-bit</div>
+<div class="line-block">
+<div class="line">counter.</div>
 </div>
-<div class="line">+———&gt;+     |    +—–+—–+                                    +—–+</div>
+<div class="line">3. However, there will be an extra residue even for this 12-bit counter,</div>
+<div class="line">which is the modulus, and this added as an offset when the counter crosses 0</div>
+<div class="line"><br /></div>
+<div class="line">12-bit modulo supports largest known periodicity in a suggested LLRF system,</div>
+<div class="line">1427 for JLab.  For more normal periodicities, use a multiple to get finer</div>
+<div class="line">granularity.</div>
+<div class="line">Note that the downloaded modulo control is the 2’s complement of the</div>
+<div class="line">mathematical modulus.</div>
+<div class="line">e.g., SSRF IF/F_s ratio 8/11, use</div>
 <div class="line-block">
-<div class="line">| Sum +—&gt;+complex_mul+-+———————————&gt;+     |</div>
+<div class="line">modulo = 4096 - 372*11 = 4</div>
+<div class="line">phase_step_h = 2^20*8/11 = 762600</div>
+<div class="line">phase_step_l = (2^20*8%11)*372 = 2976</div>
 </div>
-<div class="line">+———&gt;+     |    +———–+ |                                  |     <a href="#id4"><span class="problematic" id="id5">|</span></a>Pi_Out</div>
+<div class="line">e.g., Argonne RIA test IF/F_s ratio 9/13, use</div>
 <div class="line-block">
-<div class="line">Setpoint  +—–+                  |                                  | SUM +——&gt;</div>
-<div class="line-block">
-<div class="line">|    +—+      +————+     |     |</div>
-<div class="line">+—&gt;+mul+—–&gt;+ Integrator +—-&gt;+     |</div>
-<div class="line-block">
-<div class="line-block">
-<div class="line">+-+-+      +————+     +—–+</div>
-<div class="line-block">
-<div class="line">^</div>
-<div class="line"><a href="#id6"><span class="problematic" id="id7">|</span></a></div>
-<div class="line">+</div>
-</div>
-</div>
-<div class="line">K_i/K_p</div>
+<div class="line">modulo = 4096 - 315*13 = 1</div>
+<div class="line">phase_step_h = 2^20*9/13 = 725937</div>
+<div class="line">phase_step_l = (2^20*9%13)*315 = 945</div>
 <div class="line"><br /></div>
 </div>
+<div class="line">TODO:</div>
+<div class="line">Potentially, isolate phase generation into a separate module.</div>
+<div class="line">Haha, turns out there is ph_acc.v (We should USE it).</div>
+<div class="line">Synthesizes to ??? slices at ??? MHz in XC3Sxxx-4 using XST-??</div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
 </div>
-</div>
-<div class="line">Created with <a class="reference external" href="http://asciiflow.com">http://asciiflow.com</a></div>
-<div class="line">DELAY: 9 cycles of delay at &#64;clk</div>
-</div>
-</div>
-<div class="section" id="pinout">
+</section>
+<section id="pinout">
 <h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
-<div class="figure" id="fig-non-iq-interleaved-piloop-block">
-<img alt="Schematic symbol" src="../_images/non_iq_interleaved_piloop_block.png" />
-</div>
-</div>
-<div class="section" id="parameters">
+<figure class="align-default" id="fig-rot-dds-block">
+<img alt="Schematic symbol" src="../_images/rot_dds_block.png" />
+</figure>
+</section>
+<section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="docutils" id="id8">
-<caption><span class="caption-number">Table 102 </span><span class="caption-text">non_iq_interleaved_piloop_param_table</span><a class="headerlink" href="#id8" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-number">Table 116 </span><span class="caption-text">rot_dds_param_table</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col width="20%" />
-<col width="20%" />
-<col width="20%" />
-<col width="20%" />
-<col width="20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Name</th>
-<th class="head">Min</th>
-<th class="head">Max</th>
-<th class="head">Default</th>
-<th class="head">Description</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Min</p></th>
+<th class="head"><p>Max</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>KW</td>
-<td>?</td>
-<td>?</td>
-<td>18</td>
-<td>Bit-width of PI gains</td>
+<tbody>
+<tr class="row-even"><td><p>lo_amp</p></td>
+<td><p>?</p></td>
+<td><p>?</p></td>
+<td><p>18</p></td>
+<td></td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="ports">
+</section>
+<section id="ports">
 <h2>Ports<a class="headerlink" href="#ports" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="docutils" id="id9">
-<caption><span class="caption-number">Table 103 </span><span class="caption-text">non_iq_interleaved_piloop_port_table</span><a class="headerlink" href="#id9" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-number">Table 117 </span><span class="caption-text">rot_dds_port_table</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col width="33%" />
-<col width="33%" />
-<col width="33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Signal</th>
-<th class="head">Direction</th>
-<th class="head">Description</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>Signal</p></th>
+<th class="head"><p>Direction</p></th>
+<th class="head"><p>Description</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>clk</td>
-<td>Input</td>
-<td>&#160;</td>
+<tbody>
+<tr class="row-even"><td><p>clk</p></td>
+<td><p>Input</p></td>
+<td><p>timespec 9.0 ns</p></td>
 </tr>
-<tr class="row-odd"><td>feedback_enable</td>
-<td>Input</td>
-<td>&#160;</td>
+<tr class="row-odd"><td><p>reset</p></td>
+<td><p>Input</p></td>
+<td><p>active high, synchronous with clk</p></td>
 </tr>
-<tr class="row-even"><td>Kp_I[KW-1:0]</td>
-<td>Input</td>
-<td>external</td>
+<tr class="row-even"><td><p>sina[17:0]</p></td>
+<td><p>Output</p></td>
+<td></td>
 </tr>
-<tr class="row-odd"><td>Kp_Q[KW-1:0]</td>
-<td>Input</td>
-<td>external</td>
+<tr class="row-odd"><td><p>cosa[17:0]</p></td>
+<td><p>Output</p></td>
+<td></td>
 </tr>
-<tr class="row-even"><td>Ki_over_Kp[KW-1:0]</td>
-<td>Input</td>
-<td>external</td>
+<tr class="row-even"><td><p>phase_step_h[19:0]</p></td>
+<td><p>Input</p></td>
+<td></td>
 </tr>
-<tr class="row-odd"><td>post_mult_shift[3:0]</td>
-<td>Input</td>
-<td>&#160;</td>
+<tr class="row-odd"><td><p>phase_step_l[11:0]</p></td>
+<td><p>Input</p></td>
+<td></td>
 </tr>
-<tr class="row-even"><td>err_i[18:0]</td>
-<td>Input</td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td>err_q[18:0]</td>
-<td>Input</td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td>fdfwd_i[16:0]</td>
-<td>Input</td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td>fdfwd_q[16:0]</td>
-<td>Input</td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td>integrator_gate</td>
-<td>Input</td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td>integrator_reset</td>
-<td>Input</td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td>reg</td>
-<td>Output</td>
-<td>&#160;</td>
-</tr>
-<tr class="row-odd"><td>reg</td>
-<td>Output</td>
-<td>&#160;</td>
+<tr class="row-even"><td><p>modulo[11:0]</p></td>
+<td><p>Input</p></td>
+<td></td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="timing-diagram">
+</section>
+<section id="timing-diagram">
 <h2>Timing Diagram<a class="headerlink" href="#timing-diagram" title="Permalink to this headline">¶</a></h2>
-<div class="figure" id="fig-non-iq-interleaved-piloop-timing">
-<img alt="Timing diagram" src="../_images/non_iq_interleaved_piloop_timing.png" />
-</div>
-</div>
-</div>
+<figure class="align-default" id="fig-rot-dds-timing">
+<img alt="Timing diagram" src="../_images/rot_dds_timing.png" />
+</figure>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -210,7 +211,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../bedrock-modules.html#dsp">DSP</a><ul class="current">
@@ -231,6 +232,7 @@
 <li class="toctree-l3"><a class="reference internal" href="complex_freq_wrap.html">complex_freq_wrap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="complex_mul.html">complex_mul</a></li>
 <li class="toctree-l3"><a class="reference internal" href="complex_mul_flat.html">complex_mul_flat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cordic_mux.html">cordic_mux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cpxmul_fullspeed.html">cpxmul_fullspeed</a></li>
 <li class="toctree-l3"><a class="reference internal" href="data_xdomain.html">data_xdomain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="demand_gpt.html">demand_gpt</a></li>
@@ -259,6 +261,7 @@
 <li class="toctree-l3"><a class="reference internal" href="iq_intrp4.html">iq_intrp4</a></li>
 <li class="toctree-l3"><a class="reference internal" href="iq_mixer_multichannel.html">iq_mixer_multichannel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="iq_modulator.html">iq_modulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="iq_trace.html">iq_trace</a></li>
 <li class="toctree-l3"><a class="reference internal" href="isqrt.html">isqrt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ll_prop.html">ll_prop</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lpass1.html">lpass1</a></li>
@@ -269,7 +272,13 @@
 <li class="toctree-l3"><a class="reference internal" href="mon_chans.html">mon_chans</a></li>
 <li class="toctree-l3"><a class="reference internal" href="multi_sampler.html">multi_sampler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="multiply_accumulate.html">multiply_accumulate</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">non_iq_interleaved_piloop</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pdetect.html">pdetect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ph_acc.html">ph_acc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="phase_diff.html">phase_diff</a></li>
+<li class="toctree-l3"><a class="reference internal" href="phaset.html">phaset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="phasex.html">phasex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reg_delay.html">reg_delay</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">rot_dds</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
@@ -277,18 +286,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#timing-diagram">Timing Diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="pdetect.html">pdetect</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ph_acc.html">ph_acc</a></li>
-<li class="toctree-l3"><a class="reference internal" href="phase_diff.html">phase_diff</a></li>
-<li class="toctree-l3"><a class="reference internal" href="phaset.html">phaset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="phasex.html">phasex</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reg_delay.html">reg_delay</a></li>
 <li class="toctree-l3"><a class="reference internal" href="rr_arb.html">rr_arb</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sat_add.html">sat_add</a></li>
 <li class="toctree-l3"><a class="reference internal" href="saturateMath.html">saturateMath</a></li>
 <li class="toctree-l3"><a class="reference internal" href="serialize.html">serialize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="serializer_multichannel.html">serializer_multichannel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="shortfifo.html">shortfifo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ssb_out.html">ssb_out</a></li>
 <li class="toctree-l3"><a class="reference internal" href="timestamp.html">timestamp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tt800.html">tt800</a></li>
 <li class="toctree-l3"><a class="reference internal" href="upconv.html">upconv</a></li>
@@ -304,24 +308,30 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../bedrock-modules.html">Bedrock Modules</a><ul>
-      <li>Previous: <a href="multiply_accumulate.html" title="previous chapter">multiply_accumulate</a></li>
-      <li>Next: <a href="pdetect.html" title="next chapter">pdetect</a></li>
+      <li>Previous: <a href="reg_delay.html" title="previous chapter">reg_delay</a></li>
+      <li>Next: <a href="rr_arb.html" title="next chapter">rr_arb</a></li>
   </ul></li>
   </ul></li>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -330,11 +340,11 @@
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="../_sources/gen/non_iq_interleaved_piloop.rst.txt"
+      <a href="../_sources/gen/rot_dds.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 
