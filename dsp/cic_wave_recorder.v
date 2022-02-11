@@ -172,6 +172,7 @@ module cic_wave_recorder #(
       .buf_auto_flip (buf_auto_flip))
    i_circle_buf_serial (
       .iclk            (iclk),
+      .reset           (reset),
       .sr_in           (wave_data_i),
       .sr_stb          (cic_stb_out & (~wr_gated & ~wr_gated_r)),
       .chan_mask       (chan_mask),

@@ -33,6 +33,7 @@ module circle_buf_serial #(
 (
    // Incoming stream
    input                    iclk,
+   input                    reset,
    input [buf_dw-1:0]       sr_in, // Conveyor belt carrying n_chan channels
    input                    sr_stb,
 
@@ -77,6 +78,7 @@ module circle_buf_serial #(
       .len      (n_chan))
    i_fchan_subset (
       .clk      (iclk),
+      .reset    (reset),
       .keep     (chan_mask),
       .a_data   (sr_in),
       .a_gate   (sr_stb),
