@@ -84,7 +84,6 @@ SRC = \
    mon_chans.v \
    multiply_accumulate.v \
    multi_sampler.v \
-   non_iq_interleaved_piloop.v \
    pdetect.v \
    ph_acc.v \
    phase_diff.v \
@@ -101,6 +100,7 @@ SRC = \
    tt800.v \
    upconv.v \
    xy_pi_clip.v
+   # non_iq_interleaved_piloop.v # ascii diagram does not render properly with RST
    # ssb_out.v # needs extra rules to build cordic
    # second_if_out.v # needs extra rules to build cordic
    # rot_dds.v  # needs extra rules to build cordic
