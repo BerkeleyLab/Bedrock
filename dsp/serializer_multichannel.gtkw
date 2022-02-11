@@ -1,9 +1,9 @@
 [timestart] 0
-[size] 1525 817
+[size] 1436 817
 [pos] -1 -1
 *-3.938666 3 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] serializer_multichannel_tb.
-[sst_width] 246
+[sst_width] 210
 [signals_width] 225
 [sst_expanded] 1
 [sst_vpaned_height] 243

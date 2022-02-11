@@ -1,9 +1,9 @@
 [timestart] 0
-[size] 1796 913
+[size] 1436 896
 [pos] -1 -1
 *-4.509571 31 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] iq_deinterleaver_tb.
-[sst_width] 341
+[sst_width] 210
 [signals_width] 356
 [sst_expanded] 1
 [sst_vpaned_height] 251

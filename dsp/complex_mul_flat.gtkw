@@ -1,10 +1,10 @@
 [dumpfile] "complex_mul_flat.vcd"
 [timestart] 0
 [size] 956 275
-[pos] -1 -98
+[pos] -1 -1
 *-3.773491 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] complex_mul_tb.
-[sst_width] 213
+[sst_width] 210
 [signals_width] 134
 [sst_expanded] 1
 [sst_vpaned_height] 60

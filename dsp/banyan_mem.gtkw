@@ -1,6 +1,6 @@
 [timestart] 0
 [size] 1195 648
-[pos] 220 164
+[pos] -1 -1
 *-9.326305 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] banyan_mem_tb.
 [treeopen] banyan_mem_tb.dut3.
@@ -11,7 +11,7 @@
 [treeopen] banyan_mem_tb.dut3.banyan.halvsies.top.
 [treeopen] banyan_mem_tb.dut3.banyan.halvsies.top.halvsies.
 [treeopen] banyan_mem_tb.dut3.ram_bank[0].
-[sst_width] 265
+[sst_width] 210
 [signals_width] 220
 [sst_expanded] 1
 [sst_vpaned_height] 171

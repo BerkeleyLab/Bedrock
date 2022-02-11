@@ -1,9 +1,9 @@
 [timestart] 0
 [size] 1197 363
-[pos] -367 -21
+[pos] -1 -1
 *-14.173025 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] lpass1_tb.
-[sst_width] 228
+[sst_width] 210
 [signals_width] 286
 [sst_expanded] 1
 [sst_vpaned_height] 58

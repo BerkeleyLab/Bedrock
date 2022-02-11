@@ -3,7 +3,7 @@
 [pos] -1 -1
 *-5.658963 324 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] multiply_accumulate_tb.
-[sst_width] 213
+[sst_width] 210
 [signals_width] 230
 [sst_expanded] 1
 [sst_vpaned_height] 142

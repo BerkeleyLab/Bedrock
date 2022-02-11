@@ -1,9 +1,9 @@
 [timestart] 188
-[size] 1493 417
-[pos] 37 -64
+[size] 1436 417
+[pos] -1 -1
 *-7.323990 505 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] afterburner_tb.
-[sst_width] 264
+[sst_width] 210
 [signals_width] 203
 [sst_expanded] 1
 [sst_vpaned_height] 77
