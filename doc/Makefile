@@ -95,13 +95,13 @@ SRC = \
    timestamp.v \
    tt800.v \
    upconv.v \
-   xy_pi_clip.v
-   # non_iq_interleaved_piloop.v # ascii diagram does not render properly with RST
-   # ssb_out.v # needs extra rules to build cordic
+   xy_pi_clip.v \
+   ssb_out.v \
+   rot_dds.v  \
+   iq_trace.v \
+   cordic_mux.v
    # second_if_out.v # needs extra rules to build cordic
-   # rot_dds.v  # needs extra rules to build cordic
-   # iq_trace.v # needs extra rules to build cordic
-   # cordic_mux.v # needs extra rules to build cordic
+   # non_iq_interleaved_piloop.v # ascii diagram does not render properly with RST
    # lp_notch.v  # must generate _auto files
    # lp.v # must generate _auto files
    # mp_proc.v # must generate _auto files
@@ -135,6 +135,9 @@ TIMING_PNG  = $(addprefix $(GEN_DIR)/, $(_TIMING_PNG))
 GEN_TB     = $(addprefix $(GEN_DIR)/, $(basename $(TB)))
 DEP_TB     = $(addsuffix .d, $(GEN_TB))
 VCD        = $(addprefix $(GEN_DIR)/, $(notdir $(SRC:.v=.vcd)))
+
+# CORDIC rules
+include $(CORDIC_DIR)/rules.mk
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -174,6 +177,13 @@ $(GEN_DIR)/%_timing.png: %.vcd %.gtkw
 # Special additional prerequisites as iverilog does not catch them
 biquad_tb: ../dsp/saturateMath.v
 iirFilter_tb: ../dsp/saturateMath.v
+
+# Special additional prerequisites for CORDIC generation
+rot_dds_auto: cordicg_b22.v
+mon_12_auto: cordicg_b22.v
+ssb_out_auto: cordicg_b22.v
+cordic_mux_auto: cordicg_b22.v
+fdbk_core_auto: cordicg_b22.v
 
 images::
 	if [ -d images ]; then $(MAKE) -C images || exit 1; fi
