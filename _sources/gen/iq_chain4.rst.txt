@@ -41,3 +41,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:iq_chain4_timing:
+.. figure:: iq_chain4_timing.png
+    :alt: Timing diagram
+

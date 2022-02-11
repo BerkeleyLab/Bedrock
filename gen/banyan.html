@@ -33,6 +33,54 @@
             
   <div class="section" id="banyan">
 <span id="id1"></span><h1>banyan<a class="headerlink" href="#banyan" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">permute np ports, each dw bits wide, using rl levels of 2-way mux</div>
+<div class="line-block">
+<div class="line">np must be 2**rl</div>
+<div class="line"><br /></div>
+</div>
+<div class="line">Networking equipment with similar topology is known as a Banyan switch,</div>
+<div class="line">so I’ll use that name.  A non-folded Banyan switch actually has two</div>
+<div class="line">switches of this type back-to-back; I can leave off the second half</div>
+<div class="line">because in my application the output channels are fungible.</div>
+<div class="line"><br /></div>
+<div class="line">The intended use case is to route 8 x ADC data to 8 x data sinks,</div>
+<div class="line">in any of the following configurations:</div>
+<div class="line-block">
+<div class="line">8 parallel  :   1 combination    x  1 time state</div>
+<div class="line">4 parallel  :  70 combinations   x  2 time states</div>
+<div class="line">2 parallel  :  28 combinations   x  4 time states</div>
+<div class="line">1 at a time :   8 possibilities  x  8 time states</div>
+</div>
+<div class="line">for 1*1 + 70*2 + 28*4 + 8*8 = 317 useful configurations</div>
+<div class="line"><br /></div>
+<div class="line">Represent the channel selection configuration with an 8-bit mask of</div>
+<div class="line">which channels to look at.  Only 1+70+28+8 = 107 of 256 possible masks</div>
+<div class="line">are valid, since it’s invalid to have 0, 3, 5, 6, or 7 bits set.</div>
+<div class="line">Configuration also includes 3 bits of time_state.</div>
+<div class="line"><br /></div>
+<div class="line">time_state and mask_in are processed at full bandwidth.</div>
+<div class="line">There are rl+1 cycles of latency from a change of these</div>
+<div class="line">control inputs to the new data_out permutation appearing.</div>
+<div class="line">There are only rl cycles of latency to mask_out.</div>
+<div class="line"><br /></div>
+<div class="line">The implementation is done with recursive instantiation of itself.</div>
+<div class="line">The capability of doing recursion in Verilog is explicitly acknowledged</div>
+<div class="line">and blessed by the Verilog-2005 standard, and it works without problem</div>
+<div class="line">for me in Icarus Verilog, Verilator, Xilinx XST, and Xilinx Vivado.</div>
+<div class="line"><br /></div>
+<div class="line">An N=8 dw=16 instantiation in Kintex speed grade 2 seems capable of</div>
+<div class="line">running at ridiculous clock rates (over 550 MHz?), consuming on the</div>
+<div class="line">order of 430 LUT.  The data muxes alone ought to use 384 LUT outputs.</div>
+<div class="line">Even a lowly Spartan-6 should manage 160 MHz, using about 226 LUT</div>
+<div class="line">(437 LUT outputs).</div>
+<div class="line"><br /></div>
+<div class="line">Used successfully on hardware since 2016.</div>
+<div class="line"><br /></div>
+</div>
+</div>
 <div class="section" id="pinout">
 <h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
 <div class="figure" id="fig-banyan-block">
@@ -166,6 +214,7 @@
 <li class="toctree-l3"><a class="reference internal" href="afterburner.html">afterburner</a></li>
 <li class="toctree-l3"><a class="reference internal" href="async_to_sync_reset_shift.html">async_to_sync_reset_shift</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">banyan</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>
@@ -185,7 +234,6 @@
 <li class="toctree-l3"><a class="reference internal" href="complex_freq_wrap.html">complex_freq_wrap</a></li>
 <li class="toctree-l3"><a class="reference internal" href="complex_mul.html">complex_mul</a></li>
 <li class="toctree-l3"><a class="reference internal" href="complex_mul_flat.html">complex_mul_flat</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cordic_mux.html">cordic_mux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cpxmul_fullspeed.html">cpxmul_fullspeed</a></li>
 <li class="toctree-l3"><a class="reference internal" href="data_xdomain.html">data_xdomain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="demand_gpt.html">demand_gpt</a></li>
@@ -214,18 +262,14 @@
 <li class="toctree-l3"><a class="reference internal" href="iq_intrp4.html">iq_intrp4</a></li>
 <li class="toctree-l3"><a class="reference internal" href="iq_mixer_multichannel.html">iq_mixer_multichannel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="iq_modulator.html">iq_modulator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="iq_trace.html">iq_trace</a></li>
 <li class="toctree-l3"><a class="reference internal" href="isqrt.html">isqrt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ll_prop.html">ll_prop</a></li>
-<li class="toctree-l3"><a class="reference internal" href="lp.html">lp</a></li>
-<li class="toctree-l3"><a class="reference internal" href="lp_notch.html">lp_notch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lpass1.html">lpass1</a></li>
 <li class="toctree-l3"><a class="reference internal" href="minmax.html">minmax</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mixer.html">mixer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mon_2chan.html">mon_2chan</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mon_2chiq.html">mon_2chiq</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mon_chans.html">mon_chans</a></li>
-<li class="toctree-l3"><a class="reference internal" href="mp_proc.html">mp_proc</a></li>
 <li class="toctree-l3"><a class="reference internal" href="multi_sampler.html">multi_sampler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="multiply_accumulate.html">multiply_accumulate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="non_iq_interleaved_piloop.html">non_iq_interleaved_piloop</a></li>
@@ -235,15 +279,12 @@
 <li class="toctree-l3"><a class="reference internal" href="phaset.html">phaset</a></li>
 <li class="toctree-l3"><a class="reference internal" href="phasex.html">phasex</a></li>
 <li class="toctree-l3"><a class="reference internal" href="reg_delay.html">reg_delay</a></li>
-<li class="toctree-l3"><a class="reference internal" href="rot_dds.html">rot_dds</a></li>
 <li class="toctree-l3"><a class="reference internal" href="rr_arb.html">rr_arb</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sat_add.html">sat_add</a></li>
 <li class="toctree-l3"><a class="reference internal" href="saturateMath.html">saturateMath</a></li>
-<li class="toctree-l3"><a class="reference internal" href="second_if_out.html">second_if_out</a></li>
 <li class="toctree-l3"><a class="reference internal" href="serialize.html">serialize</a></li>
 <li class="toctree-l3"><a class="reference internal" href="serializer_multichannel.html">serializer_multichannel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="shortfifo.html">shortfifo</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ssb_out.html">ssb_out</a></li>
 <li class="toctree-l3"><a class="reference internal" href="timestamp.html">timestamp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tt800.html">tt800</a></li>
 <li class="toctree-l3"><a class="reference internal" href="upconv.html">upconv</a></li>

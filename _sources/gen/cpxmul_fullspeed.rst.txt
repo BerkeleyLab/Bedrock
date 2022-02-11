@@ -68,3 +68,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:cpxmul_fullspeed_timing:
+.. figure:: cpxmul_fullspeed_timing.png
+    :alt: Timing diagram
+

@@ -54,3 +54,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:lpass1_timing:
+.. figure:: lpass1_timing.png
+    :alt: Timing diagram
+

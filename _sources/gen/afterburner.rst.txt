@@ -3,6 +3,23 @@
 afterburner
 ===========
 
+Description
+'''''''''''
+
+|  Synthesizes to 47 slices and 1 MULT18X18 at 166 MHz in XC3Sxxx-4 using XST-9.2.04i
+|   Use parameter triple instead of preprocesor variable AFTERBURNER_TRIPLE
+|   User port coeff instead of parameter coeff
+|  If the port coeff is set to a constant value, should synthesize identically
+|  There is a latency of 3 clock cycles (??)
+|  Note: The output of the module is Offset Binary
+|  [It is perhaps stupid to have that here and it should be moved into another module]
+| 
+|  CONCEPT: The mid point along the circle of a of 2 complex numbers that already lie
+|           on a circle is not a plain average. To obtain the (real/imaginary) component
+|           of this mid-point one has to multiply by what is called "coeff"
+|           k = 0.5*sec(theta) .. where theta is the angle between the complex numbers
+| 
+
 Pinout
 ''''''
 
@@ -51,4 +68,11 @@ Ports
    * - data_out1[15:0]
      - Output
      - Untouched    [.. a_n1, a_n2 ..]
+
+Timing Diagram
+''''''''''''''
+
+.. _fig:afterburner_timing:
+.. figure:: afterburner_timing.png
+    :alt: Timing diagram
 

@@ -71,3 +71,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:fwashout_timing:
+.. figure:: fwashout_timing.png
+    :alt: Timing diagram
+

@@ -3,6 +3,13 @@
 freq_count
 ==========
 
+Description
+'''''''''''
+
+|  Synthesizes to 86 slices at 312 MHz in XC3Sxxx-4 using XST-8.2i
+|   (well, that's just the unknown frequency input; max sysclk is 132 MHz)
+| 
+
 Pinout
 ''''''
 
@@ -72,4 +79,11 @@ Ports
    * - reg
      - Output
      - 
+
+Timing Diagram
+''''''''''''''
+
+.. _fig:freq_count_timing:
+.. figure:: freq_count_timing.png
+    :alt: Timing diagram
 

@@ -3,6 +3,11 @@
 data_xdomain
 ============
 
+Description
+'''''''''''
+
+|  clk_out must be more than twice as fast as the gate_in rate.
+
 Pinout
 ''''''
 
@@ -48,4 +53,11 @@ Ports
    * - reg
      - Output
      - 
+
+Timing Diagram
+''''''''''''''
+
+.. _fig:data_xdomain_timing:
+.. figure:: data_xdomain_timing.png
+    :alt: Timing diagram
 

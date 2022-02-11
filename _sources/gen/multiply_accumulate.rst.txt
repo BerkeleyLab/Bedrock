@@ -76,3 +76,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:multiply_accumulate_timing:
+.. figure:: multiply_accumulate_timing.png
+    :alt: Timing diagram
+

@@ -44,3 +44,10 @@ Ports
      - Output
      - at IF
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:upconv_timing:
+.. figure:: upconv_timing.png
+    :alt: Timing diagram
+

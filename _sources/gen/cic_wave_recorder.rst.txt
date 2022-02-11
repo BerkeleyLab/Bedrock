@@ -180,3 +180,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:cic_wave_recorder_timing:
+.. figure:: cic_wave_recorder_timing.png
+    :alt: Timing diagram
+

@@ -79,3 +79,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:xy_pi_clip_timing:
+.. figure:: xy_pi_clip_timing.png
+    :alt: Timing diagram
+

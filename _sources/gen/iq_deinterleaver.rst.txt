@@ -68,3 +68,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:iq_deinterleaver_timing:
+.. figure:: iq_deinterleaver_timing.png
+    :alt: Timing diagram
+

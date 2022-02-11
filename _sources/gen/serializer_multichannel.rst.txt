@@ -62,3 +62,10 @@ Ports
      - Output
      - Serialized stream of channels. Default order is CH0 first (l_to_r=1)
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:serializer_multichannel_timing:
+.. figure:: serializer_multichannel_timing.png
+    :alt: Timing diagram
+

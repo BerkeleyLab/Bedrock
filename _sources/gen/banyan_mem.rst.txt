@@ -3,6 +3,13 @@
 banyan_mem
 ==========
 
+Description
+'''''''''''
+
+|  Single-buffered capture of raw ADC data
+|  Hard-code number of ADCs at 8, at least for now
+| 
+
 Pinout
 ''''''
 
@@ -80,4 +87,11 @@ Ports
    * - ro_data2[dw-1:0]
      - Output
      - 
+
+Timing Diagram
+''''''''''''''
+
+.. _fig:banyan_mem_timing:
+.. figure:: banyan_mem_timing.png
+    :alt: Timing diagram
 

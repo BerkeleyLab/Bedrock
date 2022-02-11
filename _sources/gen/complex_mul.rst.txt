@@ -44,3 +44,10 @@ Ports
      - Output
      - Delayed version of gate_in
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:complex_mul_timing:
+.. figure:: complex_mul_timing.png
+    :alt: Timing diagram
+

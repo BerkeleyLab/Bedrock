@@ -3,6 +3,16 @@
 timestamp
 =========
 
+Description
+'''''''''''
+
+|  High-speed cycle counter
+|  Synthesizes to 54 LUTs and 31 Flip flops at 150 MHz in XC3S1000-5 with XST 12.1 (aux_reg=0)
+|  Synthesizes to 101 LUTs and 65 Flip flops at 150 MHz in XC3S1000-5 with XST 12.1 (aux_reg=1)
+|  59-bit counter will wrap every 182 years if clocked at 100 MHz.
+|  8-bit-wide shift-register-style output for merging in the "slow" DSP data stream.
+|  LSB-first.  Sorry about that, but it's intrinsic to the mechanism used.
+
 Pinout
 ''''''
 
@@ -62,4 +72,11 @@ Ports
    * - shift_out[7:0]
      - Output
      - 
+
+Timing Diagram
+''''''''''''''
+
+.. _fig:timestamp_timing:
+.. figure:: timestamp_timing.png
+    :alt: Timing diagram
 

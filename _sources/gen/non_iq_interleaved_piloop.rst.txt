@@ -3,6 +3,30 @@
 non_iq_interleaved_piloop
 =========================
 
+Description
+'''''''''''
+
+|  There are MANY pi-loops among us, but none seemed to fit the ORNL cause, so here we go:
+|  PI Loop
+|                             K_p
+|                              +
+|                              |
+|   -Measure  +-----+          v
+|  +--------->+     |    +-----+-----+                                    +-----+
+|             | Sum +--->+complex_mul+-+--------------------------------->+     |
+|  +--------->+     |    +-----------+ |                                  |     |Pi_Out
+|   Setpoint  +-----+                  |                                  | SUM +------>
+|                                      |    +---+      +------------+     |     |
+|                                      +--->+mul+----->+ Integrator +---->+     |
+|                                           +-+-+      +------------+     +-----+
+|                                             ^
+|                                             |
+|                                             +
+|                                          K_i/K_p
+| 
+|  Created with http://asciiflow.com
+|  DELAY: 9 cycles of delay at @clk
+
 Pinout
 ''''''
 
@@ -78,4 +102,11 @@ Ports
    * - reg
      - Output
      - 
+
+Timing Diagram
+''''''''''''''
+
+.. _fig:non_iq_interleaved_piloop_timing:
+.. figure:: non_iq_interleaved_piloop_timing.png
+    :alt: Timing diagram
 

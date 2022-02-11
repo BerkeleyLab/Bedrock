@@ -70,3 +70,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:complex_freq_timing:
+.. figure:: complex_freq_timing.png
+    :alt: Timing diagram
+

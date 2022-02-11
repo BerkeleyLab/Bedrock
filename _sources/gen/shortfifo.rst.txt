@@ -3,6 +3,16 @@
 shortfifo
 =========
 
+Description
+'''''''''''
+
+|  Short (2-32 long) FIFO meant to be efficiently implemented with
+|  Xilinx SRL16E or similar
+|  Except for the unified clock and the count output port,
+|  this is pin-compatible with ordinary fifo.v
+|  max. elements: 2**aw
+| 
+
 Pinout
 ''''''
 

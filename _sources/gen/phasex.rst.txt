@@ -61,3 +61,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:phasex_timing:
+.. figure:: phasex_timing.png
+    :alt: Timing diagram
+

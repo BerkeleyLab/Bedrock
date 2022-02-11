@@ -100,3 +100,10 @@ Ports
      - Output
      - {stb_in, boundary, btest, wbank, rbank, wr_addr}
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:circle_buf_timing:
+.. figure:: circle_buf_timing.png
+    :alt: Timing diagram
+

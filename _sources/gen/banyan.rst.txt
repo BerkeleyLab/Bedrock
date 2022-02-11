@@ -3,6 +3,49 @@
 banyan
 ======
 
+Description
+'''''''''''
+
+|  permute np ports, each dw bits wide, using rl levels of 2-way mux
+|   np must be 2**rl
+| 
+|  Networking equipment with similar topology is known as a Banyan switch,
+|  so I'll use that name.  A non-folded Banyan switch actually has two
+|  switches of this type back-to-back; I can leave off the second half
+|  because in my application the output channels are fungible.
+| 
+|  The intended use case is to route 8 x ADC data to 8 x data sinks,
+|  in any of the following configurations:
+|   8 parallel  :   1 combination    x  1 time state
+|   4 parallel  :  70 combinations   x  2 time states
+|   2 parallel  :  28 combinations   x  4 time states
+|   1 at a time :   8 possibilities  x  8 time states
+|  for 1*1 + 70*2 + 28*4 + 8*8 = 317 useful configurations
+| 
+|  Represent the channel selection configuration with an 8-bit mask of
+|  which channels to look at.  Only 1+70+28+8 = 107 of 256 possible masks
+|  are valid, since it's invalid to have 0, 3, 5, 6, or 7 bits set.
+|  Configuration also includes 3 bits of time_state.
+| 
+|  time_state and mask_in are processed at full bandwidth.
+|  There are rl+1 cycles of latency from a change of these
+|  control inputs to the new data_out permutation appearing.
+|  There are only rl cycles of latency to mask_out.
+| 
+|  The implementation is done with recursive instantiation of itself.
+|  The capability of doing recursion in Verilog is explicitly acknowledged
+|  and blessed by the Verilog-2005 standard, and it works without problem
+|  for me in Icarus Verilog, Verilator, Xilinx XST, and Xilinx Vivado.
+| 
+|  An N=8 dw=16 instantiation in Kintex speed grade 2 seems capable of
+|  running at ridiculous clock rates (over 550 MHz?), consuming on the
+|  order of 430 LUT.  The data muxes alone ought to use 384 LUT outputs.
+|  Even a lowly Spartan-6 should manage 160 MHz, using about 226 LUT
+|  (437 LUT outputs).
+| 
+|  Used successfully on hardware since 2016.
+| 
+
 Pinout
 ''''''
 

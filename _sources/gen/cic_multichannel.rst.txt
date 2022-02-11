@@ -115,3 +115,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:cic_multichannel_timing:
+.. figure:: cic_multichannel_timing.png
+    :alt: Timing diagram
+

@@ -3,6 +3,24 @@
 isqrt
 =====
 
+Description
+'''''''''''
+
+| 
+|  Simple-minded integer square root
+| 
+|  General purpose with the caveat that XWIDTH should be even.
+|  X_WIDTH/2 + 1 cycles per operation, non-pipelined.
+|  Setting en when computation is in progress will
+|  cancel the computation and start another.
+| 
+|  With XWIDTH=32, synthesizable to 110 MHz on Spartan3-5.
+| 
+|  Eric Norum
+|  LBNL
+| 
+| 
+
 Pinout
 ''''''
 

@@ -3,6 +3,13 @@
 fifo
 ====
 
+Description
+'''''''''''
+
+|  blockram based FIFO
+|  exchangeable with shortfifo.v
+| 
+
 Pinout
 ''''''
 

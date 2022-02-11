@@ -35,3 +35,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:host_averager_timing:
+.. figure:: host_averager_timing.png
+    :alt: Timing diagram
+

@@ -35,3 +35,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:tt800_timing:
+.. figure:: tt800_timing.png
+    :alt: Timing diagram
+

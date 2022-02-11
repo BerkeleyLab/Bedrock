@@ -3,6 +3,12 @@
 cic_simple_us
 =============
 
+Description
+'''''''''''
+
+|  Simple first-order CIC filter and decimator
+|  Note that this module is configured with unsigned input and output!
+
 Pinout
 ''''''
 
@@ -64,4 +70,11 @@ Ports
    * - data_out_gate
      - Output
      - 
+
+Timing Diagram
+''''''''''''''
+
+.. _fig:cic_simple_us_timing:
+.. figure:: cic_simple_us_timing.png
+    :alt: Timing diagram
 

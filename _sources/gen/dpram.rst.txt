@@ -64,3 +64,10 @@ Ports
      - Output
      - 
 
+Timing Diagram
+''''''''''''''
+
+.. _fig:dpram_timing:
+.. figure:: dpram_timing.png
+    :alt: Timing diagram
+

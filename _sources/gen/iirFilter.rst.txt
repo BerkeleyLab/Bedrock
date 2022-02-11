@@ -3,6 +3,14 @@
 iirFilter
 =========
 
+Description
+'''''''''''
+
+|  Infinite Impulse Response Filter
+| 
+|  Chain of biquad elements
+| 
+
 Pinout
 ''''''
 
@@ -73,4 +81,11 @@ Ports
    * - dataClk
      - Input
      - 
+
+Timing Diagram
+''''''''''''''
+
+.. _fig:iirFilter_timing:
+.. figure:: iirFilter_timing.png
+    :alt: Timing diagram
 

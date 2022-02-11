@@ -3,6 +3,22 @@
 biquad
 ======
 
+Description
+'''''''''''
+
+|  Biquad IIR filter
+| 
+|  y(t) = u(t)*b0 + u(t-1)*b1 + u(t-2)*b2 + y(t-1)*(-a1) + y(t-2)*(-a2)
+| 
+|  Minimizes latency by computing all but u(t)*b0 at end of previous sample.
+| 
+|  Minimizes resource consumption by using internal
+|  DSP registers for between-sample storage.
+| 
+|  Writing a coefficient holds the filter in reset until address 7 is written.
+|  This allows usage of a consistent set of coefficients.
+| 
+
 Pinout
 ''''''
 
@@ -89,4 +105,11 @@ Ports
    * - accum_out[SIZEOUT-1:0]
      - Output
      - 
+
+Timing Diagram
+''''''''''''''
+
+.. _fig:biquad_timing:
+.. figure:: biquad_timing.png
+    :alt: Timing diagram
 

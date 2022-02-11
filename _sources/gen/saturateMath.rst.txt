@@ -3,6 +3,15 @@
 saturateMath
 ============
 
+Description
+'''''''''''
+
+| 
+|  Useful modules for performing saturating arithmetic //
+| 
+| 
+|  Expand a net's width
+
 Pinout
 ''''''
 
