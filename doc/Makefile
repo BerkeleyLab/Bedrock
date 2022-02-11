@@ -205,5 +205,6 @@ clean::
 
 include $(BUILD_DIR)/bottom_rules.mk
 
-CLEAN += $(RST) $(BLOCK_EPS) $(BLOCK_PNG) $(TIMING_PNG) $(GEN_TB) $(addsuffix *, $(DEP_TB)) $(VCD)
+CLEAN += $(RST) $(BLOCK_EPS) $(BLOCK_PNG) $(TIMING_PNG) $(GEN_TB) $(addsuffix *, $(DEP_TB)) $(VCD) \
+		 cordicg_b22.v *_tb *.out
 CLEAN_DIRS += $(GEN_DIR)
