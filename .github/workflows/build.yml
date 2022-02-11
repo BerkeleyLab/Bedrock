@@ -25,10 +25,14 @@ jobs:
         with:
             python-version: '3.8'
 
+      - name: Install python PIP packages
+        run: |
+          python -m pip install sphinx numpy
+
       - name: Install documentation tools
         run: |
           sudo apt-get update
-          sudo apt-get -y install make python3-sphinx python3-numpy \
+          sudo apt-get -y install make \
                           imagemagick ghostscript \
                           iverilog xvfb gtkwave
           sudo sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
