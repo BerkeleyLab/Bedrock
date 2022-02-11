@@ -189,7 +189,7 @@ def make_html(fname, param_list, port_list):
     print("</body></html>")
 
 
-def make_rst(fname, param_list, port_list):
+def make_rst(fname, param_list, port_list, with_timing=None):
     fbase, fext = os.path.splitext(os.path.basename(fname))
     print(".. _{}:".format(fbase))
     print("")
@@ -236,6 +236,16 @@ def make_rst(fname, param_list, port_list):
   - Description""", 3))
         for p in port_list:
             print(indent(p.table_row_rst(), 3))
+        print("")
+
+    if with_timing:
+        timing_txt = "Timing Diagram"
+        print('{}'.format(timing_txt))
+        print('{}'.format("".join(["\'"*len(timing_txt)])))
+        print("")
+        print(".. _fig:{}_timing:".format(fbase))
+        print(".. figure:: {}_timing.png".format(fbase))
+        print("    :alt: Timing diagram")
         print("")
 
 
@@ -370,6 +380,8 @@ def main():
                         help="Generate .html documentation from verilog file")
     parser.add_argument("--gen-rst", default=False, action="store_true",
                         help="Generate .rst documentation from verilog file")
+    parser.add_argument("--rst-with-timing", default=False, action="store_true",
+                        help="Add timing diagram to .rst documentation (only affects .rst files)")
     parser.add_argument("file", default="", help="Verilog input file")
     cmd_args = parser.parse_args()
 
@@ -377,6 +389,7 @@ def main():
     do_svg = cmd_args.gen_svg
     do_html = cmd_args.gen_html
     do_rst = cmd_args.gen_rst
+    rst_with_timing = cmd_args.rst_with_timing
     fname = cmd_args.file
 
     ifile = open(fname, 'r')
@@ -401,7 +414,7 @@ def main():
     elif do_html:
         make_html(fname, param_list, port_list)
     elif do_rst:
-        make_rst(fname, param_list, port_list)
+        make_rst(fname, param_list, port_list, rst_with_timing)
 
 
 if __name__ == "__main__":
