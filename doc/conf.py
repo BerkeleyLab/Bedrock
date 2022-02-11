@@ -28,6 +28,10 @@ version = ''
 # The full version, including alpha/beta/rc tags
 release = ''
 
+rst_prolog = """.. attention::
+    This documentation is a work in progress.
+    Expect to see errors and unfinished things.
+"""
 
 # -- General configuration ---------------------------------------------------
 
