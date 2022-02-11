@@ -8,24 +8,20 @@ SPHINXPROJ    = BEDROCK
 SOURCEDIR     = .
 BUILDDIR      = _build
 MAKE          = make
-PYTHON        = python3
-VERILOG       = iverilog$(ICARUS_SUFFIX) -Wall -DSIMULATE
-VVP           = vvp$(ICARUS_SUFFIX) -n
-GTKWAVE       = gtkwave
+
+include ../dir_list.mk
+include $(BUILD_DIR)/top_rules.mk
+
 # convert is an imagemagick program; apt-get install imagemagick
-CONVERT       = convert
 # convert in Debian stretch gives unreproducible output
 # the following doesn't help
 # CONVERT = SOURCE_DATE_EPOCH=$(DATE_HACK) convert
 # DATE_HACK := $(shell stat -c %Y README)
-V_TB 	       = -Wno-timescale
+CONVERT       = convert
 # apt-get install xvfb
 # maybe OK to blank out XVFB if you don't have xvfb-run and don't mind pop-ups
 XVFB           = xvfb-run -a -s "-screen 0 1440x900x24"
-# Get verilog sources dependencies
-MAKEDEP        = $(VERILOG) $(V_TB) -o /dev/null -M$@.$$$$ $<
 
-TOP = ..
 GEN_DIR = gen
 
 SRC = \
@@ -111,8 +107,8 @@ SRC = \
    # mp_proc.v # must generate _auto files
    #via.v # not properly formatted for portfind.py
 
-DIRS       = $(TOP)/dsp $(TOP)/badger $(TOP)/cordic
-VFLAGS_DEP = -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS))
+DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR)
+VFLAGS_DEP += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS))
 
 vpath %.v $(DIRS)
 vpath %.gtkw $(DIRS)
@@ -156,45 +152,28 @@ html: images Makefile block_png timing rst
 
 $(GEN_DIR)/%.rst: %.v
 	if [ -f $(GEN_DIR)/$*_timing.png ]; then \
-		$(PYTHON) $(TOP)/build-tools/portfind.py --gen-rst --rst-with-timing $< > $@; \
+		$(PYTHON) $(BUILD_DIR)/portfind.py --gen-rst --rst-with-timing $< > $@; \
 	else \
-		$(PYTHON) $(TOP)/build-tools/portfind.py --gen-rst $< > $@; \
+		$(PYTHON) $(BUILD_DIR)/portfind.py --gen-rst $< > $@; \
 	fi
 
 $(GEN_DIR)/%_block.eps: %.v
-	$(PYTHON) $(TOP)/build-tools/portfind.py --gen-eps $< > $@
+	$(PYTHON) $(BUILD_DIR)/portfind.py --gen-eps $< > $@
 
 $(GEN_DIR)/%.png: $(GEN_DIR)/%.eps
 	$(CONVERT) $< $@
-
-$(GEN_DIR)/%.vcd: $(GEN_DIR)/%_tb
-	$(VVP) $< $(VVP_FLAGS) +vcd $(VCD_ARGS) && mv $(notdir $@) $@
-
-$(GEN_DIR)/%_tb: %_tb.v
-	$(VERILOG) ${VFLAGS_$@} $(VFLAGS_DEP) $(VFLAGS) -o $@ $(filter %.v, $^)
 
 # Expect the magic numbers 229 and 68 to be gtkwave-version-dependent.
 # Note that gtkwave must be run from a session with X enabled.
 # The xvfb setup creates that independent of what's going on with
 # the environment of the process running this script.
-$(GEN_DIR)/%_timing.png: $(GEN_DIR)/%.vcd %.gtkw
-	$(XVFB) $(GTKWAVE) $^ -r gtkwave_nosplash.rc -S fancy.tcl
+$(GEN_DIR)/%_timing.png: %.vcd %.gtkw
+	$(XVFB) $(GTKWAVE) $^ -r gtkwave_nosplash.rc -S fancy.tcl && mv $*_timing.png $@
 	$(CONVERT) -crop 1200x1000+229+68 $@ foo.$$$$ && mv foo.$$$$ $@
 
-# Generate list of dependencies for each top/testbench verilog module
-$(GEN_DIR)/%_tb.d: %_tb.v
-	set -e
-	mkdir -p $(GEN_DIR)
-	($(MAKEDEP) ${VFLAGS_$@} $(VFLAGS_DEP) && \
-		( printf "$(GEN_DIR)/$*_tb $@: "; sort -u $@.$$$$ | tr '\n' ' '; printf "\n" ) > $@ && \
-		rm -f $@.$$$$) || true
-
-# Include testbench dependencies *.d file target
--include $(GEN_TB:_tb=_tb.d)
-
 # Special additional prerequisites as iverilog does not catch them
-$(GEN_DIR)/biquad_tb: ../dsp/saturateMath.v
-$(GEN_DIR)/iirFilter_tb: ../dsp/saturateMath.v
+biquad_tb: ../dsp/saturateMath.v
+iirFilter_tb: ../dsp/saturateMath.v
 
 images::
 	if [ -d images ]; then $(MAKE) -C images || exit 1; fi
@@ -210,8 +189,11 @@ timing: gen_dir $(TIMING_PNG)
 gen_dir:
 	mkdir -p $(GEN_DIR)
 
-clean:
+clean::
 	if [ -d images ]; then $(MAKE) -C images clean || exit 1; fi
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	rm -f $(RST) $(BLOCK_EPS) $(BLOCK_PNG) $(TIMING_PNG) $(GEN_TB) $(addsuffix *, $(DEP_TB)) $(VCD)
-	if [ -d $(GEN_DIR) ]; then rmdir $(GEN_DIR); fi
+
+include $(BUILD_DIR)/bottom_rules.mk
+
+CLEAN += $(RST) $(BLOCK_EPS) $(BLOCK_PNG) $(TIMING_PNG) $(GEN_TB) $(addsuffix *, $(DEP_TB)) $(VCD)
+CLEAN_DIRS += $(GEN_DIR)
