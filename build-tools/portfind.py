@@ -129,6 +129,34 @@ def parse_vline_param(l):
     return None
 
 
+class mod_comment():
+    def __init__(self, desc=None):
+        self.desc = desc if desc else ""
+
+    def description(self):
+        return self.desc
+
+    def xprint(self):
+        print(self.desc)
+
+    def desc_row_rst(self):
+        return self.desc
+
+
+def parse_whole_line_comment_or_blank(l):
+    m = re.search(r'^\s*\/[\/]+(.*)', l)
+    if m:
+        g = [m.group(i) for i in range(1, 2)]
+        # print(g)
+        return mod_comment(desc=g[0])
+    m = re.search(r'(^\s*$)', l)
+    if m:
+        g = [m.group(i) for i in range(1, 2)]
+        # print(g)
+        return mod_comment(desc=g[0])
+    return None
+
+
 def make_html(fname, param_list, port_list):
     fbase, fext = os.path.splitext(os.path.basename(fname))
     hstring = open(fbase+'.html.in').read()
@@ -189,13 +217,24 @@ def make_html(fname, param_list, port_list):
     print("</body></html>")
 
 
-def make_rst(fname, param_list, port_list, with_timing=None):
+def make_rst(fname, param_list, port_list, mod_comment_list, with_timing=None):
     fbase, fext = os.path.splitext(os.path.basename(fname))
     print(".. _{}:".format(fbase))
     print("")
     print('{}'.format(fbase))
     print('{}'.format("".join(['='*len(fbase)])))
     print("")
+
+    if mod_comment_list:
+        description_txt = "Description"
+        print('{}'.format(description_txt))
+        print('{}'.format("".join(["\'"*len(description_txt)])))
+        print("")
+        for c in mod_comment_list:
+            # RST is sensitive with leading spaces, use line blocks
+            print("| " + c.desc_row_rst())
+        print("")
+
     if 1:
         pinout_txt = "Pinout"
         print('{}'.format(pinout_txt))
@@ -396,14 +435,24 @@ def main():
     fdata = ifile.read()
     port_list = []
     param_list = []
+    mod_comment_list = []
+    try_mod_desc = True
     for line in fdata.split('\n'):
-        p = parse_vline_port(line.strip())
-        if p:
-            port_list.append(p)
+        if try_mod_desc:
+            c = parse_whole_line_comment_or_blank(line.strip())
+            if c:
+                mod_comment_list.append(c)
+            else:
+                try_mod_desc = False
+                continue
         else:
-            p = parse_vline_param(line.strip())
+            p = parse_vline_port(line.strip())
             if p:
-                param_list.append(p)
+                port_list.append(p)
+            else:
+                p = parse_vline_param(line.strip())
+                if p:
+                    param_list.append(p)
     if 0:
         for p in param_list+port_list:
             p.xprint()
@@ -414,7 +463,7 @@ def main():
     elif do_html:
         make_html(fname, param_list, port_list)
     elif do_rst:
-        make_rst(fname, param_list, port_list, rst_with_timing)
+        make_rst(fname, param_list, port_list, mod_comment_list, rst_with_timing)
 
 
 if __name__ == "__main__":
