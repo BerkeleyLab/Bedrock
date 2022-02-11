@@ -1,6 +1,5 @@
 `timescale 1ns / 1ns
-
-// A stupid simple test bench. 
+// A stupid simple test bench.
 module multi_sampler_tb;
 
    localparam SIM_TIME = 8000;
@@ -32,7 +31,7 @@ module multi_sampler_tb;
        end
     end
 
-   wire sample_out, sample0, sample1, sample2; 
+    wire sample_out, sample0, sample1, sample2;
 
    // ---------------------
    // Instantiate DUT

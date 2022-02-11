@@ -28,11 +28,19 @@ reg_delay #(.dw(20),.len(len)) h9(clk, 1'b0, ing, d9, d10);
 reg signed [20:0] s1=0, s2=0, s3=0, s4=0;
 reg sg=0;
 always @(posedge clk) begin
-	s1 <= d0 + d10;
-	s2 <= d2 + d8;
-	s3 <= d4 + d6;
-	s4 <= d5 + 0; // {d5[19],d5};
-	sg <= ing;
+    if (reset) begin
+	    s1 <= 0;
+        s2 <= 0;
+	    s3 <= 0;
+	    s4 <= 0;
+	    sg <= 0;
+    end else begin
+        s1 <= d0 + d10;
+	    s2 <= d2 + d8;
+	    s3 <= d4 + d6;
+	    s4 <= d5 + 0; // {d5[19],d5};
+	    sg <= ing;
+    end
 end
 
 // FIR filter coefficients:
@@ -42,18 +50,26 @@ end
 reg signed [21:0] a1=0, a2=0, a3=0, a4=0;
 reg ag=0;
 always @(posedge clk) begin
-`ifdef TRUST_VERILOG_DIVISION
-	a1 <= s1/16 + 0;
-	a2 <= s2/4 + s2/32;
-	a3 <= s3/4 - s3/32;
-	a4 <= s3 + 2*s4;
-`else
-	a1 <= {{5{s1[20]}},s1[20:4]};
-	a2 <= {{3{s2[20]}},s2[20:2]} + {{6{s2[20]}},s2[20:5]};
-	a3 <= {{3{s3[20]}},s3[20:2]} - {{6{s3[20]}},s3[20:5]};
-	a4 <= {{1{s3[20]}},s3[20:0]} + {            s4[20:0],1'b0};
-`endif
-	ag <= sg;
+    if (reset) begin
+        a1 <= 0;
+        a2 <= 0;
+        a3 <= 0;
+        a4 <= 0;
+        ag <= 0;
+    end else begin
+        `ifdef TRUST_VERILOG_DIVISION
+	        a1 <= s1/16 + 0;
+	        a2 <= s2/4 + s2/32;
+	        a3 <= s3/4 - s3/32;
+	        a4 <= s3 + 2*s4;
+        `else
+            a1 <= {{5{s1[20]}},s1[20:4]};
+	        a2 <= {{3{s2[20]}},s2[20:2]} + {{6{s2[20]}},s2[20:5]};
+	        a3 <= {{3{s3[20]}},s3[20:2]} - {{6{s3[20]}},s3[20:5]};
+	        a4 <= {{1{s3[20]}},s3[20:0]} + {            s4[20:0],1'b0};
+        `endif
+	    ag <= sg;
+end
 end
 
 reg signed [22:0] b1=0, b2=0;
@@ -61,14 +77,16 @@ reg bg=0;
 reg [8:0] samp=0;
 reg show=0;
 always @(posedge clk) begin
-	b1 <= a1 - a2;
-	b2 <= a3 + a4 + 1;
-	bg <= ag;
 	if (reset) begin
+        b1 <= 0;
+        b2 <= 0;
+        bg <= 0;
 		samp <= 0;
 		show <= 0;
-	end
-	else begin
+	end else begin
+        b1 <= a1 - a2;
+        b2 <= a3 + a4 + 1;
+        bg <= ag;
 		if (bg) begin
 			samp <= (samp==len-1'b1) ? 0 : samp+1'b1;
 			if (samp==len-1) show <= ~show;
