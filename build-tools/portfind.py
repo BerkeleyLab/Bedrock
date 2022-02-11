@@ -172,7 +172,7 @@ def make_html(fname, param_list, port_list):
     print('<body>')
     print('<h1>' + fname + ": " + hdata["title"] + "</h1>")
     print(hdata["intro_html"])
-    if 1:
+    if True:
         print("<h3>Pinout</h3><p>")
         print("<img src=\"{}_block.png\" alt=\"schematic symbol\">\n"
               .format(fbase))
@@ -191,27 +191,26 @@ def make_html(fname, param_list, port_list):
         for p in port_list:
             print(p.table_row())
         print("</table>\n")
-    if 1:
+    if True:
         print("<h3>Implementation and use</h3><p>")
         print("The <a href=\"https://en.wikipedia.org/wiki/Software_portability\">portable</a>")
         print("<a href=\"https://en.wikipedia.org/wiki/Verilog\">Verilog</a>")
         print("implementation in <a href=\"{}\">{}</a>".format(fname, fname))
         print(hdata["implement_html"] + "\n")
-    if 1:
+    if True:
         print("<p>")
         print("A <a href=\"http://gtkwave.sourceforge.net/\">GTKWave</a>-generated")
         print("timing diagram showing {} is shown here:"
               .format(hdata["timing_html"]))
         print("<p><img src=\"{}_timing.png\" alt=\"timing diagram\">\n"
               .format(fbase))
-
     try:
         cfile = open(fbase+"_check", 'r')
         print("<h3>Regression test</h3>")
         print("<p>")
         print("Expected results of <tt>make {}_check</tt>:<pre>".format(fbase))
         print(cfile.read()+"</pre>\n")
-    except:
+    except FileNotFoundError:
         pass
 
     print("</body></html>")
@@ -235,7 +234,7 @@ def make_rst(fname, param_list, port_list, mod_comment_list, with_timing=None):
             print("| " + c.desc_row_rst())
         print("")
 
-    if 1:
+    if True:
         pinout_txt = "Pinout"
         print('{}'.format(pinout_txt))
         print('{}'.format("".join(["\'"*len(pinout_txt)])))
@@ -453,7 +452,7 @@ def main():
                 p = parse_vline_param(line.strip())
                 if p:
                     param_list.append(p)
-    if 0:
+    if False:
         for p in param_list+port_list:
             p.xprint()
     if do_eps:
