@@ -45,8 +45,10 @@ integer xCheck, x, xOld;
 integer i;
 
 initial begin
-    $dumpfile("biquad_tb.lxt");
-    $dumpvars(0, biquad_tb);
+    if ($test$plusargs("vcd")) begin
+        $dumpfile("biquad.vcd");
+        $dumpvars(3,biquad_tb);
+    end
     #40;
 
     $display("Unity gain");
