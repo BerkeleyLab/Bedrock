@@ -17,3 +17,8 @@ _autogen/
 _dep/
 _xilinx/
 # system_top.xdc
+
+# sphinx files
+_build/
+_static/
+_templates/

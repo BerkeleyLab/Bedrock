@@ -45,8 +45,10 @@ integer xCheck, x, xOld;
 integer i;
 
 initial begin
-    $dumpfile("iirFilter_tb.lxt");
-    $dumpvars(0, iirFilter_tb);
+    if ($test$plusargs("vcd")) begin
+        $dumpfile("iirFilter.vcd");
+        $dumpvars(3,iirFilter_tb);
+    end
     #40;
 
     $display("Unity gain");
