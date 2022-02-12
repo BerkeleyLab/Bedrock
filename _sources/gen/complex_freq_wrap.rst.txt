@@ -72,7 +72,7 @@ Ports
    * - reg_freq[refcnt_w-1:0]
      - Output
      - 
-   * - reg_freq_valid
+   * - _freq_valid
      - Output
      - 
    * - reg_amp_max[16:0]
@@ -81,7 +81,7 @@ Ports
    * - reg_amp_min[16:0]
      - Output
      - 
-   * - reg_updated
+   * - _updated
      - Output
      - 
    * - avg_power[23:0]
@@ -90,7 +90,7 @@ Ports
    * - avg_power_strobe
      - Output
      - 
-   * - reg_timing_err
+   * - _timing_err
      - Output
      - 
 

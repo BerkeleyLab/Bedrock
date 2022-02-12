@@ -99,7 +99,7 @@ Ports
    * - wire
      - Input
      - 
-   * - reg
+   * - O[OWIDTH-1:0]
      - Output
      - 
    * - wire

@@ -64,19 +64,19 @@ Ports
    * - f_in
      - Input
      - unknown input
-   * - reg
+   * - frequency[freq_width-1:0]
      - Output
      - 
    * - freq_strobe
      - Output
      - 
-   * - reg
+   * - diff_stream[15:0]
      - Output
      - 
-   * - reg
+   * - diff_stream_strobe
      - Output
      - 
-   * - reg
+   * - glitch_catcher
      - Output
      - 
 

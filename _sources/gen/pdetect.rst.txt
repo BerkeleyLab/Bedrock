@@ -48,10 +48,10 @@ Ports
    * - reset
      - Input
      - 
-   * - reg
+   * - ang_out[w-1:0]
      - Output
      - 
-   * - reg
+   * - strobe_out
      - Output
      - 
 

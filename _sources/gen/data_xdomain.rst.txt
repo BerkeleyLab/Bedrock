@@ -47,10 +47,10 @@ Ports
    * - data_in[size-1:0]
      - Input
      - 
-   * - reg
+   * - data_out[size-1:0]
      - Output
      - 
-   * - reg
+   * - gate_out
      - Output
      - 
 
