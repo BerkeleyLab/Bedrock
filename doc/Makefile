@@ -113,6 +113,8 @@ VFLAGS_DEP += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS))
 vpath %.v $(DIRS)
 vpath %.gtkw $(DIRS)
 
+_SRC_RST   = $(SRC:.v=_source.rst)
+SRC_RST    = $(addprefix $(GEN_DIR)/, $(_SRC_RST))
 _RST       = $(SRC:.v=.rst)
 RST        = $(addprefix $(GEN_DIR)/, $(_RST))
 _BLOCK_EPS = $(SRC:.v=_block.eps)
@@ -143,15 +145,18 @@ include $(CORDIC_DIR)/rules.mk
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help images Makefile gen_dir rst block_png block_eps timing
+.PHONY: help images Makefile gen_dir src_rst rst block_png block_eps timing
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 #
 # rst should be last as this targets checks some files to change
 # the way it generates its output
-html: images Makefile block_png timing rst
+html: images Makefile block_png timing src_rst rst
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+$(GEN_DIR)/%_source.rst: %.v
+	$(PYTHON) $(BUILD_DIR)/portfind.py --gen-src-rst $< > $@
 
 $(GEN_DIR)/%.rst: %.v
 	if [ -f $(GEN_DIR)/$*_timing.png ]; then \
@@ -188,6 +193,8 @@ fdbk_core_auto: cordicg_b22.v
 images::
 	if [ -d images ]; then $(MAKE) -C images || exit 1; fi
 
+src_rst: gen_dir $(SRC_RST)
+
 rst: gen_dir $(RST)
 
 block_eps: gen_dir $(BLOCK_EPS)
@@ -205,6 +212,6 @@ clean::
 
 include $(BUILD_DIR)/bottom_rules.mk
 
-CLEAN += $(RST) $(BLOCK_EPS) $(BLOCK_PNG) $(TIMING_PNG) $(GEN_TB) $(addsuffix *, $(DEP_TB)) $(VCD) \
+CLEAN += $(SRC_RST) $(RST) $(BLOCK_EPS) $(BLOCK_PNG) $(TIMING_PNG) $(GEN_TB) $(addsuffix *, $(DEP_TB)) $(VCD) \
 		 cordicg_b22.v *_tb *.out
 CLEAN_DIRS += $(GEN_DIR)
