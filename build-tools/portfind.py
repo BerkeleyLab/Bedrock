@@ -157,6 +157,13 @@ def parse_whole_line_comment_or_blank(l):
     return None
 
 
+def parse_endmodule(l):
+    m = re.search(r'^\s*\bendmodule.*', l)
+    if m:
+        return True
+    return False
+
+
 def make_html(fname, param_list, port_list):
     fbase, fext = os.path.splitext(os.path.basename(fname))
     hstring = open(fbase+'.html.in').read()
@@ -437,6 +444,11 @@ def main():
     mod_comment_list = []
     try_mod_desc = True
     for line in fdata.split('\n'):
+        # Avoid parsing more than 1 module per file. This confuses
+        # our current way of parsing with
+        if parse_endmodule(line.strip()):
+            break
+
         if try_mod_desc:
             c = parse_whole_line_comment_or_blank(line.strip())
             if c:
