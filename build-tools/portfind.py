@@ -225,6 +225,21 @@ def make_html(fname, param_list, port_list):
     print("</body></html>")
 
 
+def make_src_rst(fname):
+    fbase, fext = os.path.splitext(os.path.basename(fname))
+    print(".. _{}_source:".format(fbase))
+    print("")
+    print('{} Source File'.format(fbase))
+    print('{}'.format("".join(['='*(len(fbase)+12)])))
+    print("")
+
+    print(".. code-block:: verilog")
+    print("   :linenos:")
+    print("")
+    with open(fname, 'r') as ifile:
+        print(indent(ifile.read(), 3))
+
+
 def make_rst(fname, param_list, port_list, mod_comment_list, with_timing=None):
     fbase, fext = os.path.splitext(os.path.basename(fname))
     print(".. _{}:".format(fbase))
@@ -283,6 +298,18 @@ def make_rst(fname, param_list, port_list, mod_comment_list, with_timing=None):
   - Description""", 3))
         for p in port_list:
             print(indent(p.table_row_rst(), 3))
+        print("")
+
+    if True:
+        imp_txt = "Implementation and use"
+        print('{}'.format(imp_txt))
+        print('{}'.format("".join(["\'"*len(imp_txt)])))
+        print("")
+        print("The `portable`_ `Verilog`_")
+        print("implementation can be found in :ref:`{}_source`".format(fbase))
+        print("")
+        print(".. _`portable`: https://en.wikipedia.org/wiki/Software_portability")
+        print(".. _`Verilog`: https://en.wikipedia.org/wiki/Verilog")
         print("")
 
     if with_timing:
@@ -431,6 +458,8 @@ def main():
                         help="Generate .html documentation from verilog file")
     parser.add_argument("--gen-rst", default=False, action="store_true",
                         help="Generate .rst documentation from verilog file")
+    parser.add_argument("--gen-src-rst", default=False, action="store_true",
+                        help="Generate .rst source file from verilog file")
     parser.add_argument("--rst-with-timing", default=False, action="store_true",
                         help="Add timing diagram to .rst documentation (only affects .rst files)")
     parser.add_argument("file", default="", help="Verilog input file")
@@ -440,6 +469,7 @@ def main():
     do_svg = cmd_args.gen_svg
     do_html = cmd_args.gen_html
     do_rst = cmd_args.gen_rst
+    do_src_rst = cmd_args.gen_src_rst
     rst_with_timing = cmd_args.rst_with_timing
     fname = cmd_args.file
 
@@ -479,6 +509,8 @@ def main():
         make_svg(port_list)
     elif do_html:
         make_html(fname, param_list, port_list)
+    elif do_src_rst:
+        make_src_rst(fname)
     elif do_rst:
         make_rst(fname, param_list, port_list, mod_comment_list, rst_with_timing)
 
