@@ -56,3 +56,12 @@ Ports
      - Output
      - 
 
+Implementation and use
+''''''''''''''''''''''
+
+The `portable`_ `Verilog`_
+implementation can be found in :ref:`async_to_sync_reset_shift_source`
+
+.. _`portable`: https://en.wikipedia.org/wiki/Software_portability
+.. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
+

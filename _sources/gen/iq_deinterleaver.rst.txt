@@ -68,8 +68,21 @@ Ports
      - Output
      - 
 
+Implementation and use
+''''''''''''''''''''''
+
+The `portable`_ `Verilog`_
+implementation can be found in :ref:`iq_deinterleaver_source`
+
+.. _`portable`: https://en.wikipedia.org/wiki/Software_portability
+.. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
+
 Timing Diagram
 ''''''''''''''
+
+A `GTKWave`_-generated timing diagram is shown below:
+
+.. _`GTKWave`: http://gtkwave.sourceforge.net/
 
 .. _fig:iq_deinterleaver_timing:
 .. figure:: iq_deinterleaver_timing.png

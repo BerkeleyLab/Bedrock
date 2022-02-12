@@ -62,8 +62,21 @@ Ports
      - Output
      - Serialized stream of channels. Default order is CH0 first (l_to_r=1)
 
+Implementation and use
+''''''''''''''''''''''
+
+The `portable`_ `Verilog`_
+implementation can be found in :ref:`serializer_multichannel_source`
+
+.. _`portable`: https://en.wikipedia.org/wiki/Software_portability
+.. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
+
 Timing Diagram
 ''''''''''''''
+
+A `GTKWave`_-generated timing diagram is shown below:
+
+.. _`GTKWave`: http://gtkwave.sourceforge.net/
 
 .. _fig:serializer_multichannel_timing:
 .. figure:: serializer_multichannel_timing.png

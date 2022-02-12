@@ -101,8 +101,21 @@ Ports
      - Input
      - 
 
+Implementation and use
+''''''''''''''''''''''
+
+The `portable`_ `Verilog`_
+implementation can be found in :ref:`biquad_source`
+
+.. _`portable`: https://en.wikipedia.org/wiki/Software_portability
+.. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
+
 Timing Diagram
 ''''''''''''''
+
+A `GTKWave`_-generated timing diagram is shown below:
+
+.. _`GTKWave`: http://gtkwave.sourceforge.net/
 
 .. _fig:biquad_timing:
 .. figure:: biquad_timing.png

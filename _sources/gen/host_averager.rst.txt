@@ -35,8 +35,21 @@ Ports
      - Output
      - 
 
+Implementation and use
+''''''''''''''''''''''
+
+The `portable`_ `Verilog`_
+implementation can be found in :ref:`host_averager_source`
+
+.. _`portable`: https://en.wikipedia.org/wiki/Software_portability
+.. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
+
 Timing Diagram
 ''''''''''''''
+
+A `GTKWave`_-generated timing diagram is shown below:
+
+.. _`GTKWave`: http://gtkwave.sourceforge.net/
 
 .. _fig:host_averager_timing:
 .. figure:: host_averager_timing.png
