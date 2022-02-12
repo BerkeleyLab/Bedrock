@@ -81,16 +81,16 @@ def parse_vline_port(l):
     # Try to match the most complex regex first, as it might be able to
     # to match the simpler one by using the optional groups. Maybe use a non-greedy
     # pattern?
-    m = re.search(r'^\s*\b(input|output|inout)\s+(signed)?\s*\[([^:]+):([^]]+)\]\s*(\w+),?\s*(//\s*(.*))?', l)
+    m = re.search(r'^\s*\b(input|output|inout)\s+(reg)?\s*(signed)?\s*\[([^:]+):([^]]+)\]\s*(\w+),?\s*(//\s*(.*))?', l)
     if m:
-        g = [m.group(i) for i in range(1, 8)]
+        g = [m.group(i) for i in range(1, 9)]
         # print(g)
-        return verilog_port(io=g[0], signed=g[1], msb=g[2], lsb=g[3], ident=g[4], desc=g[6])
-    m = re.search(r'^\s*\b(input|output|inout)\s+(signed)?\s*(\w+),?\s*(//\s*(.*))?', l)
+        return verilog_port(io=g[0], signed=g[2], msb=g[3], lsb=g[4], ident=g[5], desc=g[7])
+    m = re.search(r'^\s*\b(input|output|inout)\s+(reg)?\s*(signed)?\s*(\w+),?\s*(//\s*(.*))?', l)
     if m:
-        g = [m.group(i) for i in range(1, 6)]
+        g = [m.group(i) for i in range(1, 7)]
         # print(g)
-        return verilog_port(io=g[0], signed=g[1], msb=0, lsb=0, ident=g[2], desc=g[4])
+        return verilog_port(io=g[0], signed=g[2], msb=0, lsb=0, ident=g[3], desc=g[5])
     return None
 
 
