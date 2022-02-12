@@ -77,18 +77,18 @@ class verilog_port():
   - {}""".format(self.ident+self.bits(), self.direction(), self.desc)
 
 
-def parse_vline_port(l):
+def parse_vline_port(ll):
     # Try to match the most complex regex first, as it might be able to
     # to match the simpler one by using the optional groups. Maybe use a non-greedy
     # pattern?
     m = re.search(r'^\s*(\(\*.*?\*\))?\s*\b(input|output|inout)\s+(wire|reg)?'
-                  r'\s*(signed)?\s*\[([^:]+):([^]]+)\]\s*(\w+),?\s*(//\s*(.*))?', l)
+                  r'\s*(signed)?\s*\[([^:]+):([^]]+)\]\s*(\w+),?\s*(//\s*(.*))?', ll)
     if m:
         g = [m.group(i) for i in range(2, 10)]
         # print(g)
         return verilog_port(io=g[0], signed=g[2], msb=g[3], lsb=g[4], ident=g[5], desc=g[7])
     m = re.search(r'^\s*(\(\*.*?\*\))?\s*\b(input|output|inout)\s+(wire|reg)?'
-                  r'\s*(signed)?\s*(\w+),?\s*(//\s*(.*))?', l)
+                  r'\s*(signed)?\s*(\w+),?\s*(//\s*(.*))?', ll)
     if m:
         g = [m.group(i) for i in range(2, 8)]
         # print(g)
@@ -122,8 +122,8 @@ class verilog_param():
   - {}""".format(self.ident, "?", "?", self.default, self.desc)
 
 
-def parse_vline_param(l):
-    m = re.search(r'^\s*\bparameter\s+(\w+)\s*=\s*(\w*)[,;]?\s*(//\s*(.*))?', l)
+def parse_vline_param(ll):
+    m = re.search(r'^\s*\bparameter\s+(\w+)\s*=\s*(\w*)[,;]?\s*(//\s*(.*))?', ll)
     if m:
         g = [m.group(i) for i in range(1, 5)]
         # print(g)
@@ -145,13 +145,13 @@ class mod_comment():
         return self.desc
 
 
-def parse_whole_line_comment_or_blank(l):
-    m = re.search(r'^\s*\/[\/]+(.*)', l)
+def parse_whole_line_comment_or_blank(ll):
+    m = re.search(r'^\s*\/[\/]+(.*)', ll)
     if m:
         g = [m.group(i) for i in range(1, 2)]
         # print(g)
         return mod_comment(desc=g[0])
-    m = re.search(r'(^\s*$)', l)
+    m = re.search(r'(^\s*$)', ll)
     if m:
         g = [m.group(i) for i in range(1, 2)]
         # print(g)
@@ -159,8 +159,8 @@ def parse_whole_line_comment_or_blank(l):
     return None
 
 
-def parse_endmodule(l):
-    m = re.search(r'^\s*\bendmodule.*', l)
+def parse_endmodule(ll):
+    m = re.search(r'^\s*\bendmodule.*', ll)
     if m:
         return True
     return False
