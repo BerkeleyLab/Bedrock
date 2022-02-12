@@ -79,11 +79,6 @@ Parameters
      - ?
      - 3
      - number of routing layers == log_2(np)
-   * - dw
-     - ?
-     - ?
-     - 8
-     - 
 
 Ports
 '''''
@@ -112,13 +107,4 @@ Ports
    * - data_out[dw*np-1:0]
      - Output
      - 
-   * - d[dw-1:0]
-     - Input
-     - 
-   * - one
-     - Output
-     - or more bits of d are set
-   * - two
-     - Output
-     - or more bits of d are set
 

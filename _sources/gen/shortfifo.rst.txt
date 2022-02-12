@@ -41,11 +41,6 @@ Parameters
      - ?
      - 3
      - 
-   * - aw
-     - ?
-     - ?
-     - 4
-     - 
 
 Ports
 '''''
@@ -83,19 +78,4 @@ Ports
    * - count[aw:0]
      - Output
      - -1: empty, 0: single element, 2**aw - 1: full
-   * - clk
-     - Input
-     - 
-   * - ce
-     - Input
-     - 
-   * - din
-     - Input
-     - 
-   * - addr[aw-1:0]
-     - Input
-     - 
-   * - dout
-     - Output
-     - 
 

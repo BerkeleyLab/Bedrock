@@ -57,11 +57,6 @@ Parameters
      - ?
      - 
      - 
-   * - SIZEA
-     - ?
-     - ?
-     - 25
-     - 
 
 Ports
 '''''
@@ -87,23 +82,23 @@ Ports
    * - dataClk
      - Input
      - 
-   * - clk
+   * - S_TDATA[(DATA_COUNT*DATA_WIDTH)-1:0]
      - Input
      - 
-   * - ce
+   * - S_TVALID
      - Input
      - 
-   * - sload
-     - Input
-     - 
-   * - a[SIZEA-1:0]
-     - Input
-     - 
-   * - b[SIZEB-1:0]
-     - Input
-     - 
-   * - accum_out[SIZEOUT-1:0]
+   * - S_TREADY
      - Output
+     - 
+   * - M_TDATA[(DATA_COUNT*DATA_WIDTH)-1:0]
+     - Output
+     - 
+   * - M_TVALID
+     - Output
+     - 
+   * - M_TREADY
+     - Input
      - 
 
 Timing Diagram

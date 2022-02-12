@@ -107,12 +107,6 @@ Expect to see errors and unfinished things.</p>
 <td></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>SIZEA</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>25</p></td>
-<td></td>
-</tr>
 </tbody>
 </table>
 </section>
@@ -152,28 +146,28 @@ Expect to see errors and unfinished things.</p>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>clk</p></td>
+<tr class="row-odd"><td><p>S_TDATA[(DATA_COUNT*DATA_WIDTH)-1:0]</p></td>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>ce</p></td>
+<tr class="row-even"><td><p>S_TVALID</p></td>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>sload</p></td>
-<td><p>Input</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>a[SIZEA-1:0]</p></td>
-<td><p>Input</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>b[SIZEB-1:0]</p></td>
-<td><p>Input</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>accum_out[SIZEOUT-1:0]</p></td>
+<tr class="row-odd"><td><p>S_TREADY</p></td>
 <td><p>Output</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>M_TDATA[(DATA_COUNT*DATA_WIDTH)-1:0]</p></td>
+<td><p>Output</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>M_TVALID</p></td>
+<td><p>Output</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>M_TREADY</p></td>
+<td><p>Input</p></td>
 <td></td>
 </tr>
 </tbody>

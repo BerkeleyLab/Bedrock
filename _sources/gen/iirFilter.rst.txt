@@ -81,6 +81,24 @@ Ports
    * - dataClk
      - Input
      - 
+   * - S_TDATA[(DATA_COUNT*DATA_WIDTH)-1:0]
+     - Input
+     - 
+   * - S_TVALID
+     - Input
+     - 
+   * - S_TREADY
+     - Output
+     - 
+   * - M_TDATA[(DATA_COUNT*DATA_WIDTH)-1:0]
+     - Output
+     - 
+   * - M_TVALID
+     - Output
+     - 
+   * - M_TREADY
+     - Input
+     - 
 
 Timing Diagram
 ''''''''''''''

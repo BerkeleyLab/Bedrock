@@ -40,46 +40,6 @@ Parameters
      - ?
      - 12
      - 
-   * - IWIDTH
-     - ?
-     - ?
-     - 12
-     - 
-   * - OWIDTH
-     - ?
-     - ?
-     - 8
-     - 
-   * - AWIDTH
-     - ?
-     - ?
-     - 8
-     - 
-   * - BWIDTH
-     - ?
-     - ?
-     - 8
-     - 
-   * - SUMWIDTH
-     - ?
-     - ?
-     - 8
-     - 
-   * - AWIDTH
-     - ?
-     - ?
-     - 8
-     - 
-   * - BWIDTH
-     - ?
-     - ?
-     - 8
-     - 
-   * - DIFFWIDTH
-     - ?
-     - ?
-     - 8
-     - 
 
 Ports
 '''''
@@ -90,34 +50,10 @@ Ports
    * - Signal
      - Direction
      - Description
-   * - wire
-     - Input
-     - 
-   * - wire
-     - Output
-     - 
-   * - wire
+   * - I[IWIDTH-1:0]
      - Input
      - 
    * - O[OWIDTH-1:0]
-     - Output
-     - 
-   * - wire
-     - Input
-     - 
-   * - wire
-     - Input
-     - 
-   * - wire
-     - Output
-     - 
-   * - wire
-     - Input
-     - 
-   * - wire
-     - Input
-     - 
-   * - wire
      - Output
      - 
 
