@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>cordic_mux Source File &#8212; Bedrock  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="cordic-mux-source-file">
+<span id="cordic-mux-source"></span><h1>cordic_mux Source File<a class="headerlink" href="#cordic-mux-source-file" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"></span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="c1">// in this module,</span>
+<span class="linenos"> 4</span><span class="c1">// data flows from in_iq, through the CORDIC, to out_mp</span>
+<span class="linenos"> 5</span><span class="c1">// data flows from in_xy and in_ph, through the CORDIC, to out_iq</span>
+<span class="linenos"> 6</span><span class="c1">// delay is 23 clock cycles</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="c1">//               1   2   3   4         23  24  25  26  27</span>
+<span class="linenos"> 9</span><span class="c1">// clk      -\_/-\_/-\_/-\_/-\_/-..._/-\_/-\_/-\_/-\_/-\_/-\</span>
+<span class="linenos">10</span><span class="c1">// phase    ___/---\___/---\___/-..._/---\___/---\___/---\__</span>
+<span class="linenos">11</span><span class="c1">// in_iq     .   I   Q   .   .         .   .   .   .   .</span>
+<span class="linenos">12</span><span class="c1">// out_mp    .   .   .   .   .         .   M   P   .   .</span>
+<span class="linenos">13</span><span class="c1">// in_xy     .   .   X   Y   .         .   .   .   .   .</span>
+<span class="linenos">14</span><span class="c1">// in_ph     .   .   .   P   .         .   .   .   .   .</span>
+<span class="linenos">15</span><span class="c1">// out_iq    .   .   .   .   .         .   .   I   Q   .</span>
+<span class="linenos">16</span><span class="k">module</span><span class="w"> </span><span class="n">cordic_mux</span><span class="p">(</span><span class="w"></span>
+<span class="linenos">17</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">18</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">phase</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">19</span><span class="w">     </span><span class="c1">// rectangular ports</span>
+<span class="linenos">20</span><span class="w">     </span><span class="k">input</span><span class="w">  </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">in_iq</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">21</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">out_iq</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">22</span><span class="w">     </span><span class="c1">// polar ports</span>
+<span class="linenos">23</span><span class="w">     </span><span class="k">input</span><span class="w">  </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">in_xy</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">24</span><span class="w">     </span><span class="k">input</span><span class="w">  </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">18</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">in_ph</span><span class="p">,</span><span class="w"></span>
+<span class="linenos">25</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">out_mp</span><span class="w"></span>
+<span class="linenos">26</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">27</span>
+<span class="linenos">28</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">in_iq_se</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">in_iq</span><span class="p">[</span><span class="mh">17</span><span class="p">],</span><span class="n">in_iq</span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">1</span><span class="p">]};</span><span class="w"></span>
+<span class="linenos">29</span><span class="kt">reg</span><span class="w">  </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">in_iq_hold</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">30</span><span class="kt">reg</span><span class="w">  </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">in_xy_hold</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">31</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<span class="linenos">32</span><span class="w">     </span><span class="n">in_iq_hold</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">in_iq_se</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">33</span><span class="w">     </span><span class="n">in_xy_hold</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">in_xy</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">34</span><span class="k">end</span><span class="w"></span>
+<span class="linenos">35</span>
+<span class="linenos">36</span><span class="c1">// CORDIC input selection</span>
+<span class="linenos">37</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">feed_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">phase</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">in_xy_hold</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">in_iq_hold</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">38</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">feed_y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">phase</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">in_xy</span><span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="n">in_iq_se</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">39</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">18</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">feed_z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">phase</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">in_ph</span><span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">40</span>
+<span class="linenos">41</span><span class="c1">// CORDIC instantiation</span>
+<span class="linenos">42</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">out_x</span><span class="p">,</span><span class="w"> </span><span class="n">out_y</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">43</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">18</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">out_z</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">44</span><span class="n">cordicg_b22</span><span class="w"> </span><span class="p">#(.</span><span class="n">nstg</span><span class="p">(</span><span class="mh">20</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">width</span><span class="p">(</span><span class="mh">18</span><span class="p">))</span><span class="w"> </span><span class="n">cordic</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">opin</span><span class="p">({</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">,</span><span class="o">~</span><span class="n">phase</span><span class="p">}),</span><span class="w"></span>
+<span class="linenos">45</span><span class="w">     </span><span class="p">.</span><span class="n">xin</span><span class="p">(</span><span class="n">feed_x</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">yin</span><span class="p">(</span><span class="n">feed_y</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">phasein</span><span class="p">(</span><span class="n">feed_z</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">46</span><span class="w">     </span><span class="p">.</span><span class="n">xout</span><span class="p">(</span><span class="n">out_x</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">yout</span><span class="p">(</span><span class="n">out_y</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">phaseout</span><span class="p">(</span><span class="n">out_z</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">47</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">48</span>
+<span class="linenos">49</span><span class="c1">// output stream generation</span>
+<span class="linenos">50</span><span class="kt">reg</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">hold_y</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">out_iq_r</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">out_mp_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">51</span><span class="kt">reg</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">18</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">hold_z</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">52</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<span class="linenos">53</span><span class="w">     </span><span class="n">hold_y</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">out_y</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">54</span><span class="w">     </span><span class="n">hold_z</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">out_z</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">55</span><span class="w">     </span><span class="n">out_iq_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">phase</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">hold_y</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">out_x</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">56</span><span class="w">     </span><span class="n">out_mp_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">phase</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">out_x</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">hold_z</span><span class="p">[</span><span class="mh">18</span><span class="o">:</span><span class="mh">1</span><span class="p">];</span><span class="w"></span>
+<span class="linenos">57</span><span class="k">end</span><span class="w"></span>
+<span class="linenos">58</span>
+<span class="linenos">59</span><span class="k">assign</span><span class="w"> </span><span class="n">out_iq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">out_iq_r</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">60</span><span class="k">assign</span><span class="w"> </span><span class="n">out_mp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">out_mp_r</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">61</span>
+<span class="linenos">62</span><span class="k">endmodule</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Bedrock</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, LBNL ATG.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/_gen_src_rst/cordic_mux_source.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

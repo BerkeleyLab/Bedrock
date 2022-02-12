@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>flag_xdomain Source File &#8212; Bedrock  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="flag-xdomain-source-file">
+<span id="flag-xdomain-source"></span><h1>flag_xdomain Source File<a class="headerlink" href="#flag-xdomain-source-file" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"></span>
+<span class="linenos"> 2</span><span class="k">module</span><span class="w"> </span><span class="n">flag_xdomain</span><span class="p">(</span><span class="w"></span>
+<span class="linenos"> 3</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk1</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 4</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">flagin_clk1</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk2</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 6</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="n">flagout_clk2</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="kt">reg</span><span class="w"> </span><span class="n">flagtoggle_clk1</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">10</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">sync1_clk2</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">11</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk1</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">flagin_clk1</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">12</span><span class="w">     </span><span class="n">flagtoggle_clk1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="o">~</span><span class="n">flagtoggle_clk1</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">13</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk2</span><span class="p">)</span><span class="w"> </span><span class="n">sync1_clk2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">sync1_clk2</span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">],</span><span class="n">flagtoggle_clk1</span><span class="p">};</span><span class="w"></span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="k">assign</span><span class="w"> </span><span class="n">flagout_clk2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sync1_clk2</span><span class="p">[</span><span class="mh">2</span><span class="p">]</span><span class="o">^</span><span class="n">sync1_clk2</span><span class="p">[</span><span class="mh">1</span><span class="p">];</span><span class="w"></span>
+<span class="linenos">16</span><span class="k">endmodule</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Bedrock</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, LBNL ATG.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/_gen_src_rst/flag_xdomain_source.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

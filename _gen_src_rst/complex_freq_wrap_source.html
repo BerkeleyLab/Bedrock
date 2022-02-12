@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>complex_freq_wrap Source File &#8212; Bedrock  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="complex-freq-wrap-source-file">
+<span id="complex-freq-wrap-source"></span><h1>complex_freq_wrap Source File<a class="headerlink" href="#complex-freq-wrap-source-file" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="cm">/** COMPLEX_FREQ_WRAP **</span>
+<span class="linenos">  2</span><span class="cm">    Wraps around complex_freq.v and adds COMB (CCFILT) portion</span>
+<span class="linenos">  3</span><span class="cm">    of upstream CIC filter and conveyor belt channel selection.</span>
+<span class="linenos">  4</span>
+<span class="linenos">  5</span><span class="cm">    Assumes following conveyor belt ordering:</span>
+<span class="linenos">  6</span><span class="cm">    {I,Q} * {Field, Forward, Reverse, Fiber, Drive, spare}</span>
+<span class="linenos">  7</span><span class="cm">*/</span><span class="w"></span>
+<span class="linenos">  8</span>
+<span class="linenos">  9</span><span class="k">module</span><span class="w"> </span><span class="n">complex_freq_wrap</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<span class="linenos"> 10</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">n_chan</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mh">12</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 11</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">sr_wi</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">40</span><span class="p">,</span><span class="w"> </span><span class="c1">// Conveyor belt data width</span>
+<span class="linenos"> 12</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">shift_base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">4</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 13</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">refcnt_w</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">17</span><span class="w"></span>
+<span class="linenos"> 14</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="linenos"> 15</span><span class="w">   </span><span class="k">input</span><span class="w">              </span><span class="n">clk</span><span class="p">,</span><span class="w">         </span><span class="c1">// single clock domain</span>
+<span class="linenos"> 16</span><span class="w">   </span><span class="k">input</span><span class="w">  </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">       </span><span class="n">channel_sel</span><span class="p">,</span><span class="w"> </span><span class="c1">// 0 - Field, 1 - Forward, 2 - Reverse, 3 - IQ_Fiber (from PRC)</span>
+<span class="linenos"> 17</span><span class="w">   </span><span class="k">input</span><span class="w">              </span><span class="n">sample_wave</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 18</span><span class="w">   </span><span class="k">input</span><span class="w">  </span><span class="p">[</span><span class="mh">3</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">       </span><span class="n">wave_shift</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 19</span><span class="w">   </span><span class="k">input</span><span class="w">              </span><span class="n">sr_valid</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 20</span><span class="w">   </span><span class="k">input</span><span class="w">  </span><span class="p">[</span><span class="n">sr_wi</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">sr_data</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 21</span><span class="w">   </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">refcnt_w</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">reg_freq</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 22</span><span class="w">   </span><span class="k">output</span><span class="w">             </span><span class="n">reg_freq_valid</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 23</span><span class="w">   </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">16</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">      </span><span class="n">reg_amp_max</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 24</span><span class="w">   </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">16</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">      </span><span class="n">reg_amp_min</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 25</span><span class="w">   </span><span class="k">output</span><span class="w">             </span><span class="n">reg_updated</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 26</span><span class="w">   </span><span class="c1">// Additional outputs</span>
+<span class="linenos"> 27</span><span class="w">   </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">23</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">      </span><span class="n">avg_power</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 28</span><span class="w">   </span><span class="k">output</span><span class="w">             </span><span class="n">avg_power_strobe</span><span class="p">,</span><span class="w"></span>
+<span class="linenos"> 29</span><span class="w">   </span><span class="k">output</span><span class="w">             </span><span class="n">reg_timing_err</span><span class="w"></span>
+<span class="linenos"> 30</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 31</span><span class="w">   </span><span class="k">localparam</span><span class="w"> </span><span class="n">CCFILT_OUTW</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">20</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 32</span><span class="w">   </span><span class="k">localparam</span><span class="w"> </span><span class="n">CFREQ_INW</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mh">18</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 33</span><span class="w">   </span><span class="k">localparam</span><span class="w"> </span><span class="n">FIELD_CHID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">FWD_CHID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="p">,</span><span class="w"> </span><span class="n">REV_CHID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">2</span><span class="p">,</span><span class="w"> </span><span class="n">IQFIB_CHID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">3</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 34</span>
+<span class="linenos"> 35</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">CCFILT_OUTW</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">cc_result</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 36</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">cc_strobe</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 37</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">CFREQ_INW</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">cfreq_data</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 38</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">CFREQ_INW</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">cfreq_din</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 39</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">cfreq_valid</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 40</span>
+<span class="linenos"> 41</span><span class="w">   </span><span class="kt">reg</span><span class="w">  </span><span class="p">[</span><span class="n">n_chan</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">fchan_mask</span><span class="p">,</span><span class="w"> </span><span class="n">fchan_mask_r</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 42</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">fchan_time_err</span><span class="p">,</span><span class="w"> </span><span class="n">cfreq_time_err</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 43</span>
+<span class="linenos"> 44</span><span class="w">   </span><span class="n">ccfilt</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<span class="linenos"> 45</span><span class="w">      </span><span class="p">.</span><span class="n">use_hb</span><span class="w">     </span><span class="p">(</span><span class="mh">0</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 46</span><span class="w">      </span><span class="p">.</span><span class="n">use_delay</span><span class="w">  </span><span class="p">(</span><span class="mh">0</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 47</span><span class="w">      </span><span class="p">.</span><span class="n">dsr_len</span><span class="w">    </span><span class="p">(</span><span class="n">n_chan</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 48</span><span class="w">      </span><span class="p">.</span><span class="n">dw</span><span class="w">         </span><span class="p">(</span><span class="n">sr_wi</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 49</span><span class="w">      </span><span class="p">.</span><span class="n">outw</span><span class="w">       </span><span class="p">(</span><span class="n">CCFILT_OUTW</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 50</span><span class="w">      </span><span class="p">.</span><span class="n">shift_base</span><span class="w"> </span><span class="p">(</span><span class="n">shift_base</span><span class="p">))</span><span class="w"></span>
+<span class="linenos"> 51</span><span class="w">   </span><span class="n">ccfilt</span><span class="p">(</span><span class="w"></span>
+<span class="linenos"> 52</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">        </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 53</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">      </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 54</span><span class="w">      </span><span class="p">.</span><span class="n">sr_in</span><span class="w">      </span><span class="p">(</span><span class="n">sr_data</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 55</span><span class="w">      </span><span class="p">.</span><span class="n">sr_valid</span><span class="w">   </span><span class="p">(</span><span class="n">sr_valid</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">sample_wave</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 56</span><span class="w">      </span><span class="p">.</span><span class="n">shift</span><span class="w">      </span><span class="p">(</span><span class="n">wave_shift</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 57</span><span class="w">      </span><span class="p">.</span><span class="n">result</span><span class="w">     </span><span class="p">(</span><span class="n">cc_result</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 58</span><span class="w">      </span><span class="p">.</span><span class="n">strobe</span><span class="w">     </span><span class="p">(</span><span class="n">cc_strobe</span><span class="p">));</span><span class="w"></span>
+<span class="linenos"> 59</span>
+<span class="linenos"> 60</span><span class="w">   </span><span class="c1">// Truncate LSBs - Assumes that CCFILT_OUTW &gt;= CFREQ_INW</span>
+<span class="linenos"> 61</span><span class="w">   </span><span class="k">assign</span><span class="w"> </span><span class="n">cfreq_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cc_result</span><span class="p">[</span><span class="n">CCFILT_OUTW</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="n">CCFILT_OUTW</span><span class="o">-</span><span class="n">CFREQ_INW</span><span class="p">];</span><span class="w"></span>
+<span class="linenos"> 62</span>
+<span class="linenos"> 63</span><span class="w">   </span><span class="c1">// Channel selection</span>
+<span class="linenos"> 64</span><span class="w">   </span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="n">channel_sel</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<span class="linenos"> 65</span><span class="w">      </span><span class="n">fchan_mask</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 66</span><span class="w">      </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="n">channel_sel</span><span class="p">)</span><span class="w"></span>
+<span class="linenos"> 67</span><span class="w">         </span><span class="n">FIELD_CHID</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">fchan_mask</span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">2</span><span class="mb">&#39;b11</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 68</span><span class="w">         </span><span class="n">FWD_CHID</span><span class="w">   </span><span class="o">:</span><span class="w"> </span><span class="n">fchan_mask</span><span class="p">[</span><span class="mh">3</span><span class="o">:</span><span class="mh">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">2</span><span class="mb">&#39;b11</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 69</span><span class="w">         </span><span class="n">REV_CHID</span><span class="w">   </span><span class="o">:</span><span class="w"> </span><span class="n">fchan_mask</span><span class="p">[</span><span class="mh">5</span><span class="o">:</span><span class="mh">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">2</span><span class="mb">&#39;b11</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 70</span><span class="w">         </span><span class="n">IQFIB_CHID</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">fchan_mask</span><span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">6</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">2</span><span class="mb">&#39;b11</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 71</span><span class="w">      </span><span class="k">endcase</span><span class="w"></span>
+<span class="linenos"> 72</span><span class="w">   </span><span class="k">end</span><span class="w"></span>
+<span class="linenos"> 73</span>
+<span class="linenos"> 74</span><span class="w">   </span><span class="c1">// Latch onto new mask between strobes</span>
+<span class="linenos"> 75</span><span class="w">   </span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cc_strobe</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0</span><span class="p">)</span><span class="w"> </span><span class="n">fchan_mask_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">fchan_mask</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 76</span>
+<span class="linenos"> 77</span><span class="w">   </span><span class="n">fchan_subset</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<span class="linenos"> 78</span><span class="w">      </span><span class="p">.</span><span class="n">KEEP_OLD</span><span class="w"> </span><span class="p">(</span><span class="mh">1</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 79</span><span class="w">      </span><span class="p">.</span><span class="n">a_dw</span><span class="w">     </span><span class="p">(</span><span class="n">CFREQ_INW</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 80</span><span class="w">      </span><span class="p">.</span><span class="n">o_dw</span><span class="w">     </span><span class="p">(</span><span class="n">CFREQ_INW</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 81</span><span class="w">      </span><span class="p">.</span><span class="n">len</span><span class="w">      </span><span class="p">(</span><span class="n">n_chan</span><span class="p">))</span><span class="w"></span>
+<span class="linenos"> 82</span><span class="w">   </span><span class="n">i_fchan_subset</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="linenos"> 83</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">      </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 84</span><span class="w">      </span><span class="p">.</span><span class="n">keep</span><span class="w">     </span><span class="p">(</span><span class="n">fchan_mask_r</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 85</span><span class="w">      </span><span class="p">.</span><span class="n">a_data</span><span class="w">   </span><span class="p">(</span><span class="n">cfreq_data</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 86</span><span class="w">      </span><span class="p">.</span><span class="n">a_gate</span><span class="w">   </span><span class="p">(</span><span class="n">cc_strobe</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 87</span><span class="w">      </span><span class="p">.</span><span class="n">a_trig</span><span class="w">   </span><span class="p">(</span><span class="o">~</span><span class="n">cc_strobe</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 88</span><span class="w">      </span><span class="p">.</span><span class="n">o_data</span><span class="w">   </span><span class="p">(</span><span class="n">cfreq_din</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 89</span><span class="w">      </span><span class="p">.</span><span class="n">o_gate</span><span class="w">   </span><span class="p">(</span><span class="n">cfreq_valid</span><span class="p">),</span><span class="w"></span>
+<span class="linenos"> 90</span><span class="w">      </span><span class="p">.</span><span class="n">o_trig</span><span class="w">   </span><span class="p">(),</span><span class="w"></span>
+<span class="linenos"> 91</span><span class="w">      </span><span class="p">.</span><span class="n">time_err</span><span class="w"> </span><span class="p">(</span><span class="n">fchan_time_err</span><span class="p">)</span><span class="w"></span>
+<span class="linenos"> 92</span><span class="w">   </span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 93</span>
+<span class="linenos"> 94</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">23</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">square_sum_out</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 95</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">square_sum_valid</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 96</span><span class="w">   </span><span class="n">complex_freq</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<span class="linenos"> 97</span><span class="w">      </span><span class="p">.</span><span class="n">refcnt_w</span><span class="p">(</span><span class="n">refcnt_w</span><span class="p">))</span><span class="w"></span>
+<span class="linenos"> 98</span><span class="w">   </span><span class="n">i_complex_freq</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="linenos"> 99</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">        </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">100</span><span class="w">      </span><span class="p">.</span><span class="n">sdata</span><span class="w">      </span><span class="p">(</span><span class="n">cfreq_din</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">101</span><span class="w">      </span><span class="p">.</span><span class="n">sgate</span><span class="w">      </span><span class="p">(</span><span class="n">cfreq_valid</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">102</span><span class="w">      </span><span class="p">.</span><span class="n">freq</span><span class="w">       </span><span class="p">(</span><span class="n">reg_freq</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">103</span><span class="w">      </span><span class="p">.</span><span class="n">freq_valid</span><span class="w"> </span><span class="p">(</span><span class="n">reg_freq_valid</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">104</span><span class="w">      </span><span class="p">.</span><span class="n">amp_max</span><span class="w">    </span><span class="p">(</span><span class="n">reg_amp_max</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">105</span><span class="w">      </span><span class="p">.</span><span class="n">amp_min</span><span class="w">    </span><span class="p">(</span><span class="n">reg_amp_min</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">106</span><span class="w">      </span><span class="p">.</span><span class="n">updated</span><span class="w">    </span><span class="p">(</span><span class="n">reg_updated</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">107</span><span class="w">      </span><span class="p">.</span><span class="n">timing_err</span><span class="w"> </span><span class="p">(</span><span class="n">cfreq_time_err</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">108</span><span class="w">      </span><span class="p">.</span><span class="n">square_sum_out</span><span class="w">   </span><span class="p">(</span><span class="n">square_sum_out</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">109</span><span class="w">      </span><span class="p">.</span><span class="n">square_sum_valid</span><span class="w"> </span><span class="p">(</span><span class="n">square_sum_valid</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">110</span><span class="w">   </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">111</span>
+<span class="linenos">112</span><span class="w">   </span><span class="c1">// First-order CIC filter of square_sum</span>
+<span class="linenos">113</span><span class="w">   </span><span class="k">localparam</span><span class="w"> </span><span class="n">square_sum_ex</span><span class="o">=</span><span class="mh">15</span><span class="p">;</span><span class="w">  </span><span class="c1">// average and decimate by 2^square_sum_ex</span>
+<span class="linenos">114</span><span class="w">   </span><span class="n">cic_simple_us</span><span class="w"> </span><span class="p">#(.</span><span class="n">dw</span><span class="p">(</span><span class="mh">24</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">ex</span><span class="p">(</span><span class="n">square_sum_ex</span><span class="p">))</span><span class="w"> </span><span class="n">cic</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">115</span><span class="w">      </span><span class="p">.</span><span class="n">data_in</span><span class="p">(</span><span class="n">square_sum_out</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">data_in_gate</span><span class="p">(</span><span class="n">square_sum_valid</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">116</span><span class="w">      </span><span class="p">.</span><span class="n">roll</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">117</span><span class="w">      </span><span class="p">.</span><span class="n">data_out</span><span class="p">(</span><span class="n">avg_power</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">data_out_gate</span><span class="p">(</span><span class="n">avg_power_strobe</span><span class="p">)</span><span class="w"></span>
+<span class="linenos">118</span><span class="w">   </span><span class="p">);</span><span class="w"></span>
+<span class="linenos">119</span>
+<span class="linenos">120</span><span class="w">   </span><span class="k">assign</span><span class="w"> </span><span class="n">reg_timing_err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfreq_time_err</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">fchan_time_err</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">121</span>
+<span class="linenos">122</span><span class="k">endmodule</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Bedrock</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, LBNL ATG.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/_gen_src_rst/complex_freq_wrap_source.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
