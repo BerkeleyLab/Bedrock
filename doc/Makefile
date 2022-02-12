@@ -22,7 +22,8 @@ CONVERT       = convert
 # maybe OK to blank out XVFB if you don't have xvfb-run and don't mind pop-ups
 XVFB           = xvfb-run -a -s "-screen 0 1440x900x24"
 
-GEN_DIR = gen
+GEN_DIR = _gen_rst
+GEN_SRC_DIR = _gen_src_rst
 
 SRC = \
    afterburner.v \
@@ -114,7 +115,7 @@ vpath %.v $(DIRS)
 vpath %.gtkw $(DIRS)
 
 _SRC_RST   = $(SRC:.v=_source.rst)
-SRC_RST    = $(addprefix $(GEN_DIR)/, $(_SRC_RST))
+SRC_RST    = $(addprefix $(GEN_SRC_DIR)/, $(_SRC_RST))
 _RST       = $(SRC:.v=.rst)
 RST        = $(addprefix $(GEN_DIR)/, $(_RST))
 _BLOCK_EPS = $(SRC:.v=_block.eps)
@@ -155,7 +156,7 @@ help:
 html: images Makefile block_png timing src_rst rst
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-$(GEN_DIR)/%_source.rst: %.v
+$(GEN_SRC_DIR)/%_source.rst: %.v
 	$(PYTHON) $(BUILD_DIR)/portfind.py --gen-src-rst $< > $@
 
 $(GEN_DIR)/%.rst: %.v
@@ -204,7 +205,7 @@ block_png: gen_dir $(BLOCK_PNG)
 timing: gen_dir $(TIMING_PNG)
 
 gen_dir:
-	mkdir -p $(GEN_DIR)
+	mkdir -p $(GEN_DIR) $(GEN_SRC_DIR)
 
 clean::
 	if [ -d images ]; then $(MAKE) -C images clean || exit 1; fi
@@ -214,4 +215,4 @@ include $(BUILD_DIR)/bottom_rules.mk
 
 CLEAN += $(SRC_RST) $(RST) $(BLOCK_EPS) $(BLOCK_PNG) $(TIMING_PNG) $(GEN_TB) $(addsuffix *, $(DEP_TB)) $(VCD) \
 		 cordicg_b22.v *_tb *.out
-CLEAN_DIRS += $(GEN_DIR)
+CLEAN_DIRS += $(GEN_DIR) $(GEN_SRC_DIR)
