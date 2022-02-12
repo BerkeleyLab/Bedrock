@@ -25,7 +25,7 @@ circle_buf_tb.record_type
 circle_buf_tb.buffer_mark
 circle_buf_tb.fault
 @24
-circle_buf_tb.cc[31:0]
+circle_buf_tb.cc
 @28
 circle_buf_tb.stop
 circle_buf_tb.boundary
@@ -55,7 +55,7 @@ circle_buf_tb.dut.buf_count[15:0]
 @28
 circle_buf_tb.dut.stb_out
 @24
-circle_buf_tb.dut.read_addr[12:0]
+circle_buf_tb.dut.read_addr[5:0]
 @28
 circle_buf_tb.dut.end_read_addr
 circle_buf_tb.dut.rbank
