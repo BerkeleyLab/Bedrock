@@ -1,14 +1,23 @@
-[timestart] 3810
-[size] 1000 600
+[timestart] 4201
+[size] 1116 589
 [pos] -1 -1
-*-9.892243 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-5.414307 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] half_filt_tb.
+[sst_width] 210
+[signals_width] 110
+[sst_expanded] 1
+[sst_vpaned_height] 148
 @28
 half_filt_tb.ing
+@420
+half_filt_tb.ind[19:0]
+@28
 half_filt_tb.outg
+@420
+half_filt_tb.outd[19:0]
 @22
 half_filt_tb.dut.samp[8:0]
-@29
+@28
 half_filt_tb.dut.show
 [pattern_trace] 1
 [pattern_trace] 0
