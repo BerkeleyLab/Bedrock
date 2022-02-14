@@ -39,6 +39,57 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="xy-pi-clip">
 <span id="id1"></span><h1>xy_pi_clip<a class="headerlink" href="#xy-pi-clip" title="Permalink to this headline">¶</a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line">Proportional-Integral gain for multiplexed X-Y data stream,</div>
+<div class="line">with programmable clip levels.  Timing plan shown below.</div>
+<div class="line"><br /></div>
+<div class="line">Spartan-6: 159 LUTs, 1 DSP48A1</div>
+<div class="line-block">
+<div class="line">(not counting ~36 LUTs needed to generate coeff and lim)</div>
+</div>
+<div class="line">XXX this is the critical timing path, streamline and/or pipeline some more</div>
+<div class="line">XXX proportional and integral gain terms need very different scaling?</div>
+<div class="line"><br /></div>
+<div class="line">Serious pipelining internally.</div>
+<div class="line">At any one point, the data flow sequence is:</div>
+<div class="line-block">
+<div class="line-block">
+<div class="line">X integral     high-side clip (new data from multiplier summed with previous X integral term)</div>
+<div class="line">Y integral     high-side clip (new data from multiplier summed with previous Y integral term)</div>
+<div class="line">X proportional high-side clip (new data from multiplier summed with previous X integral term)</div>
+<div class="line">Y proportional high-side clip (new data from multiplier summed with previous Y integral term)</div>
+<div class="line">X integral      low-side clip (recirculated data from high-side clip)</div>
+<div class="line">Y integral      low-side clip (recirculated data from high-side clip)</div>
+<div class="line">X proportional  low-side clip (recirculated data from high-side clip)</div>
+<div class="line">Y proportional  low-side clip (recirculated data from high-side clip)</div>
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line">in_xy  coeff   lim</div>
+</div>
+</div>
+<div class="line">sync  xerr</div>
+<div class="line">.     yerr   x_int</div>
+<div class="line">.     .      y_int</div>
+<div class="line">.     .      x_prop</div>
+<div class="line">.     .      y_prop</div>
+<div class="line">.     .      .       x_hi</div>
+<div class="line">.     .      .       y_hi</div>
+<div class="line">.     .      .       x_hi</div>
+<div class="line">sync  .      .       y_hi</div>
+<div class="line">.     .      .       x_lo</div>
+<div class="line">.     .      .       y_lo</div>
+<div class="line">.     .      .       x_lo</div>
+<div class="line">.     .      .       y_lo</div>
+<div class="line">.     .      .       .      o_sync  out_x</div>
+<div class="line">.     .      .       .      .       out_y</div>
+</div>
+</div>
+</div>
+</section>
 <section id="pinout">
 <h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
 <figure class="align-default" id="fig-xy-pi-clip-block">
@@ -259,6 +310,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
 <li class="toctree-l3"><a class="reference internal" href="tt800.html">tt800</a></li>
 <li class="toctree-l3"><a class="reference internal" href="upconv.html">upconv</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">xy_pi_clip</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>

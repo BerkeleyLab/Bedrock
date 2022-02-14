@@ -3,6 +3,12 @@
 cic_interp
 ==========
 
+Description
+'''''''''''
+
+| 
+|  First-order CIC interpolator
+
 Pinout
 ''''''
 

@@ -12,6 +12,7 @@ Description
 |  this is pin-compatible with ordinary fifo.v
 |  max. elements: 2**aw
 | 
+| 
 
 Pinout
 ''''''

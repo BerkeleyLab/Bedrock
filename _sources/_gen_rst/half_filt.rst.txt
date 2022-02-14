@@ -7,6 +7,7 @@ Description
 '''''''''''
 
 |  Synthesizes to 251 slices at 116 MHz in XC3Sxxx-4 using XST-8.2i
+| 
 
 Pinout
 ''''''

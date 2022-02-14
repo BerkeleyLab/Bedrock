@@ -40,6 +40,18 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="fwashout">
 <span id="id1"></span><h1>fwashout<a class="headerlink" href="#fwashout" title="Permalink to this headline">¶</a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line">Name: Washout (DC-reject) filter</div>
+<div class="line">track input allows freezing DC offset.</div>
+<div class="line">let N = 2^cut</div>
+<div class="line">The filter has a Zero at DC [1 + 0j] and 2 poles [0 + 0j], [(N-1)/N + 0j]</div>
+</div>
+</div>
+</section>
 <section id="pinout">
 <h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
 <figure class="align-default" id="fig-fwashout-block">
@@ -207,6 +219,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
 <li class="toctree-l3"><a class="reference internal" href="flevel_set.html">flevel_set</a></li>
 <li class="toctree-l3"><a class="reference internal" href="freq_count.html">freq_count</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">fwashout</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>

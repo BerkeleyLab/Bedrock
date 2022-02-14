@@ -3,6 +3,23 @@
 ssb_out
 =======
 
+Description
+'''''''''''
+
+|  SSB stands for Single Side Band.
+|  https://en.wikipedia.org/wiki/Single-sideband_modulation
+|  (Almost) pin compatible with second_if_out,
+|  but this one relies on interpolators (afterburner) to up-sample the output
+|  data to DDR so it can drive a double-frequency DAC.
+| 
+|  It nominally produces an I and Q drive output but single-drive usage is possible
+|  by simply leaving dac2_out{0,1} floating, letting the synthesizer optimize-away
+|  the redundant code.
+| 
+|  Directly uses the provided LO (cosa,sina), thus output IF will be determined by
+|  the LO frequency
+| 
+
 Pinout
 ''''''
 

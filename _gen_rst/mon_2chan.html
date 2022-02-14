@@ -40,6 +40,19 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="mon-2chan">
 <span id="id1"></span><h1>mon_2chan<a class="headerlink" href="#mon-2chan" title="Permalink to this headline">¶</a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">2 x 3-in-1 functionality</div>
+<div class="line">1. Mix an ADC output with LO sin (or) cos (see mixer.v)</div>
+<div class="line">2. Double CIC integrate the output signal from step-1. (via double_inte.v)</div>
+<div class="line">3. Take a sample from step-2 when the <cite>input samp</cite> is high AND</div>
+<div class="line-block">
+<div class="line">put the sampled data out on the stream when g_in is high (via serialize.v)</div>
+</div>
+<div class="line">TODO: Find a better name</div>
+</div>
+</section>
 <section id="pinout">
 <h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
 <figure class="align-default" id="fig-mon-2chan-block">
@@ -233,6 +246,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
 <li class="toctree-l3"><a class="reference internal" href="minmax.html">minmax</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mixer.html">mixer</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">mon_2chan</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>

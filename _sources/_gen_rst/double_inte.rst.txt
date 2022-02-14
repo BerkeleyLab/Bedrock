@@ -3,6 +3,13 @@
 double_inte
 ===========
 
+Description
+'''''''''''
+
+|  2 steps of CIC integration. Reset to 0
+|  *** N.B: USES AN UNDOCUMENTED IMPLIED DIVIDE-BY-TWO
+| 
+
 Pinout
 ''''''
 

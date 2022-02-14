@@ -3,6 +3,13 @@
 iq_intrp4
 =========
 
+Description
+'''''''''''
+
+| 
+|  Pull apart and interpolate a four-way interpolated IQ stream
+|  into its individual components
+
 Pinout
 ''''''
 

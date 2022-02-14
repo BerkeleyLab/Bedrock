@@ -3,6 +3,11 @@
 cic_multichannel
 ================
 
+Description
+'''''''''''
+
+| 
+
 Pinout
 ''''''
 

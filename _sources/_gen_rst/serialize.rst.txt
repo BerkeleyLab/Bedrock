@@ -3,6 +3,13 @@
 serialize
 =========
 
+Description
+'''''''''''
+
+| 
+|  Encapsulation of the serialization step in LBNL's conveyor belt
+|  Instantiated by e.g., serializer_multichannel.v
+
 Pinout
 ''''''
 

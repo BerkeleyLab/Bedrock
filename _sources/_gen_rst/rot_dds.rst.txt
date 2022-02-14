@@ -55,6 +55,7 @@ Description
 |  Synthesizes to ??? slices at ??? MHz in XC3Sxxx-4 using XST-??
 | 
 | 
+| 
 
 Pinout
 ''''''

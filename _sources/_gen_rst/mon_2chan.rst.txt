@@ -3,6 +3,16 @@
 mon_2chan
 =========
 
+Description
+'''''''''''
+
+|  2 x 3-in-1 functionality
+|  1. Mix an ADC output with LO sin (or) cos (see mixer.v)
+|  2. Double CIC integrate the output signal from step-1. (via double_inte.v)
+|  3. Take a sample from step-2 when the `input samp` is high AND
+|     put the sampled data out on the stream when g_in is high (via serialize.v)
+|  TODO: Find a better name
+
 Pinout
 ''''''
 

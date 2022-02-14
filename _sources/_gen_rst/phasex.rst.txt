@@ -3,6 +3,13 @@
 phasex
 ======
 
+Description
+'''''''''''
+
+| 
+|  DMTD-inspired investigation into clock phasing
+|  No on-chip analysis, that could be added later once we see the captured patterns
+
 Pinout
 ''''''
 

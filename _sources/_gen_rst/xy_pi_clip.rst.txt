@@ -3,6 +3,46 @@
 xy_pi_clip
 ==========
 
+Description
+'''''''''''
+
+| 
+|  Proportional-Integral gain for multiplexed X-Y data stream,
+|  with programmable clip levels.  Timing plan shown below.
+| 
+|  Spartan-6: 159 LUTs, 1 DSP48A1
+|   (not counting ~36 LUTs needed to generate coeff and lim)
+|  XXX this is the critical timing path, streamline and/or pipeline some more
+|  XXX proportional and integral gain terms need very different scaling?
+| 
+|  Serious pipelining internally.
+|  At any one point, the data flow sequence is:
+|    X integral     high-side clip (new data from multiplier summed with previous X integral term)
+|    Y integral     high-side clip (new data from multiplier summed with previous Y integral term)
+|    X proportional high-side clip (new data from multiplier summed with previous X integral term)
+|    Y proportional high-side clip (new data from multiplier summed with previous Y integral term)
+|    X integral      low-side clip (recirculated data from high-side clip)
+|    Y integral      low-side clip (recirculated data from high-side clip)
+|    X proportional  low-side clip (recirculated data from high-side clip)
+|    Y proportional  low-side clip (recirculated data from high-side clip)
+| 
+|         in_xy  coeff   lim
+|   sync  xerr
+|   .     yerr   x_int
+|   .     .      y_int
+|   .     .      x_prop
+|   .     .      y_prop
+|   .     .      .       x_hi
+|   .     .      .       y_hi
+|   .     .      .       x_hi
+|   sync  .      .       y_hi
+|   .     .      .       x_lo
+|   .     .      .       y_lo
+|   .     .      .       x_lo
+|   .     .      .       y_lo
+|   .     .      .       .      o_sync  out_x
+|   .     .      .       .      .       out_y
+
 Pinout
 ''''''
 

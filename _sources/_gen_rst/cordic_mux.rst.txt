@@ -3,6 +3,24 @@
 cordic_mux
 ==========
 
+Description
+'''''''''''
+
+| 
+|  in this module,
+|  data flows from in_iq, through the CORDIC, to out_mp
+|  data flows from in_xy and in_ph, through the CORDIC, to out_iq
+|  delay is 23 clock cycles
+| 
+|                1   2   3   4         23  24  25  26  27
+|  clk      -\_/-\_/-\_/-\_/-\_/-..._/-\_/-\_/-\_/-\_/-\_/-\
+|  phase    ___/---\___/---\___/-..._/---\___/---\___/---\__
+|  in_iq     .   I   Q   .   .         .   .   .   .   .
+|  out_mp    .   .   .   .   .         .   M   P   .   .
+|  in_xy     .   .   X   Y   .         .   .   .   .   .
+|  in_ph     .   .   .   P   .         .   .   .   .   .
+|  out_iq    .   .   .   .   .         .   .   I   Q   .
+
 Pinout
 ''''''
 

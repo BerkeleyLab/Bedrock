@@ -3,6 +3,14 @@
 iq_double_inte
 ==============
 
+Description
+'''''''''''
+
+| 
+|  Double-integrator for interleaved I-Q samples
+|  Front end of a second-order CIC, see iq_chain4
+| 
+
 Pinout
 ''''''
 

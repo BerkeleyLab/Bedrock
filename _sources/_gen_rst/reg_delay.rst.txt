@@ -3,6 +3,13 @@
 reg_delay
 =========
 
+Description
+'''''''''''
+
+| 
+|  Encapsulation of a register delay, z^{-n} in DSP-speak
+|  Properly handles odd-ball special cases like len==0
+
 Pinout
 ''''''
 

@@ -3,6 +3,11 @@
 cic_wave_recorder
 =================
 
+Description
+'''''''''''
+
+| 
+
 Pinout
 ''''''
 

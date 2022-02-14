@@ -3,6 +3,17 @@
 tt800
 =====
 
+Description
+'''''''''''
+
+| 
+|  A synthesizable Verilog program for TT800
+|  Adapted from Twisted GFSR Generators II
+|  Makoto Matsumoto and Yoshiharu Kurita
+|  December 2, 1992
+|  http://www.math.sci.hiroshima-u.ac.jp/~m-mat/eindex.html
+| 
+
 Pinout
 ''''''
 

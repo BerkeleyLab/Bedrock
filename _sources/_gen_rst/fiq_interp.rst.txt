@@ -3,6 +3,14 @@
 fiq_interp
 ==========
 
+Description
+'''''''''''
+
+| 
+|  Name: IQ interpolator
+| % Takes interleaved I-Q, produces interpolated,
+| % separate streams ready for upconversion
+
 Pinout
 ''''''
 

@@ -3,6 +3,11 @@
 doublediff
 ==========
 
+Description
+'''''''''''
+
+|  Differentiate when the gate is HIGH
+
 Pinout
 ''''''
 

@@ -40,6 +40,29 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="cordic-mux">
 <span id="id1"></span><h1>cordic_mux<a class="headerlink" href="#cordic-mux" title="Permalink to this headline">¶</a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line">in this module,</div>
+<div class="line">data flows from in_iq, through the CORDIC, to out_mp</div>
+<div class="line">data flows from in_xy and in_ph, through the CORDIC, to out_iq</div>
+<div class="line">delay is 23 clock cycles</div>
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line">1   2   3   4         23  24  25  26  27</div>
+</div>
+<div class="line">clk      -_/-_/-_/-_/-_/-…_/-_/-_/-_/-_/-_/-</div>
+<div class="line">phase    ___/—___/—___/-…_/—___/—___/—__</div>
+<div class="line">in_iq     .   I   Q   .   .         .   .   .   .   .</div>
+<div class="line">out_mp    .   .   .   .   .         .   M   P   .   .</div>
+<div class="line">in_xy     .   .   X   Y   .         .   .   .   .   .</div>
+<div class="line">in_ph     .   .   .   P   .         .   .   .   .   .</div>
+<div class="line">out_iq    .   .   .   .   .         .   .   I   Q   .</div>
+</div>
+</div>
+</section>
 <section id="pinout">
 <h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
 <figure class="align-default" id="fig-cordic-mux-block">
@@ -146,6 +169,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
 <li class="toctree-l3"><a class="reference internal" href="complex_mul.html">complex_mul</a></li>
 <li class="toctree-l3"><a class="reference internal" href="complex_mul_flat.html">complex_mul_flat</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">cordic_mux</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#implementation-and-use">Implementation and use</a></li>

@@ -3,6 +3,11 @@
 mixer
 =====
 
+Description
+'''''''''''
+
+| 
+
 Pinout
 ''''''
 

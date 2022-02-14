@@ -3,6 +3,15 @@
 flevel_set
 ==========
 
+Description
+'''''''''''
+
+| 
+|  Name: Set carrier level from I and Q
+| % Provide LO at cosd and sind ports
+|  Essentially a dot product of the LO signal [cosd, sind] with [i_data, q_data]
+|  N.B.: full-scale negative is an invalid LO value.
+
 Pinout
 ''''''
 

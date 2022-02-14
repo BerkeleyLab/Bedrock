@@ -40,6 +40,29 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="fdownconvert">
 <span id="id1"></span><h1>fdownconvert<a class="headerlink" href="#fdownconvert" title="Permalink to this headline">¶</a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line-block">
+<div class="line">Synthesizes to 80 4-LUTs and 2 MULT18X18s at 150 MHz in XC3Sxxx-4 using XST-10.1i</div>
+<div class="line"><br /></div>
+<div class="line">Name: Near-IQ Downconverter</div>
+</div>
+<div class="line">% Provide LO at cosd and sind ports</div>
+<div class="line">% Output is stream of IQ samples</div>
+<div class="line-block">
+<div class="line">Input cosd and sind are ordinary LO signals, and this module reorders them.</div>
+<div class="line">N.B.: full-scale negative is an invalid LO value.</div>
+<div class="line"><br /></div>
+<div class="line">Compute IQ by performing the matrix muliplication described in the paper below</div>
+<div class="line"><a class="reference external" href="http://recycle.lbl.gov/~ldoolitt/llrf/down/reconstruct.pdf">http://recycle.lbl.gov/~ldoolitt/llrf/down/reconstruct.pdf</a></div>
+<div class="line">Where n and n+1 are consecutive samples in time</div>
+<div class="line">| I | =  |  sin[n + 1]theta   -sin ntheta |  X  | a_data[n]   |</div>
+<div class="line">| Q |    | -cos[n + 1]theta    cos ntheta |     | a_data[n+1] |</div>
+<div class="line">Larry Doolittle, LBNL, 2014</div>
+</div>
+</div>
+</section>
 <section id="pinout">
 <h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
 <figure class="align-default" id="fig-fdownconvert-block">
@@ -200,6 +223,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
 <li class="toctree-l3"><a class="reference internal" href="dpram.html">dpram</a></li>
 <li class="toctree-l3"><a class="reference internal" href="fchan_subset.html">fchan_subset</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">fdownconvert</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>

@@ -3,6 +3,16 @@
 iq_chain4
 =========
 
+Description
+'''''''''''
+
+| 
+|  Filters and decimates four I-Q multiplexed data streams
+|  down to a single data path
+|  Uses second-order CIC filtering.
+|  Larry Doolittle, LBNL, 2014
+| 
+
 Pinout
 ''''''
 

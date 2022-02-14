@@ -3,6 +3,12 @@
 complex_mul_flat
 ================
 
+Description
+'''''''''''
+
+|  TODO:
+|  Could potentially save a cycle in the flip-flop, by combining Add and Saturate into 1 cycle
+
 Pinout
 ''''''
 

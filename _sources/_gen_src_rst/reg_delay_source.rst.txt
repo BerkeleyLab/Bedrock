@@ -8,6 +8,8 @@ reg_delay Source File
 
    `timescale 1ns / 1ns
 
+   // Encapsulation of a register delay, z^{-n} in DSP-speak
+   // Properly handles odd-ball special cases like len==0
    module reg_delay #(
    	parameter dw=16,  // Width of data
    	parameter len=4   // Cycles to delay

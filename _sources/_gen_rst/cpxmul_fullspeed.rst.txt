@@ -3,6 +3,20 @@
 cpxmul_fullspeed
 ================
 
+Description
+'''''''''''
+
+| 
+|  ------------------------------------
+|  cpxmul_fullspeed.v
+| 
+|  Full data-rate pipelined complex multiplier with 3-cycle latency, 4 hw multipliers
+|  and 2 adders
+|  Expects time-aligned parallel inputs on all data inputs
+| 
+|  ------------------------------------
+| 
+
 Pinout
 ''''''
 

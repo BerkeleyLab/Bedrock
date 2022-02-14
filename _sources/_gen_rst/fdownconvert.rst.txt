@@ -3,6 +3,24 @@
 fdownconvert
 ============
 
+Description
+'''''''''''
+
+|  Synthesizes to 80 4-LUTs and 2 MULT18X18s at 150 MHz in XC3Sxxx-4 using XST-10.1i
+| 
+|  Name: Near-IQ Downconverter
+| % Provide LO at cosd and sind ports
+| % Output is stream of IQ samples
+|  Input cosd and sind are ordinary LO signals, and this module reorders them.
+|  N.B.: full-scale negative is an invalid LO value.
+| 
+|  Compute IQ by performing the matrix muliplication described in the paper below
+|  http://recycle.lbl.gov/~ldoolitt/llrf/down/reconstruct.pdf
+|  Where n and n+1 are consecutive samples in time
+|  | I | =  |  sin[n + 1]\theta   -sin n\theta |  X  | a_data[n]   |
+|  | Q |    | -cos[n + 1]\theta    cos n\theta |     | a_data[n+1] |
+|  Larry Doolittle, LBNL, 2014
+
 Pinout
 ''''''
 

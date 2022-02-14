@@ -40,6 +40,20 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="flevel-set">
 <span id="id1"></span><h1>flevel_set<a class="headerlink" href="#flevel-set" title="Permalink to this headline">¶</a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line">Name: Set carrier level from I and Q</div>
+</div>
+<div class="line">% Provide LO at cosd and sind ports</div>
+<div class="line-block">
+<div class="line">Essentially a dot product of the LO signal [cosd, sind] with [i_data, q_data]</div>
+<div class="line">N.B.: full-scale negative is an invalid LO value.</div>
+</div>
+</div>
+</section>
 <section id="pinout">
 <h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
 <figure class="align-default" id="fig-flevel-set-block">
@@ -214,6 +228,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
 <li class="toctree-l3"><a class="reference internal" href="fiq_interp.html">fiq_interp</a></li>
 <li class="toctree-l3"><a class="reference internal" href="flag_xdomain.html">flag_xdomain</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">flevel_set</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>

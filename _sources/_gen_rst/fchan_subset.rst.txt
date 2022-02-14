@@ -3,6 +3,14 @@
 fchan_subset
 ============
 
+Description
+'''''''''''
+
+| 
+|  Name: Channel Subset
+| % Runtime-configurable selection of which data to keep within each block
+| % Typically used on the input to a waveform memory
+
 Pinout
 ''''''
 

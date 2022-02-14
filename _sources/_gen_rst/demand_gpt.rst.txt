@@ -3,6 +3,13 @@
 demand_gpt
 ==========
 
+Description
+'''''''''''
+
+| 
+|  timing error logic for simple single-input module that
+|  requires a fixed gates-per-trig (gpt).
+
 Pinout
 ''''''
 

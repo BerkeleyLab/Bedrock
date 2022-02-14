@@ -3,6 +3,17 @@
 iq_inter
 ========
 
+Description
+'''''''''''
+
+| 
+|  Second-order CIC interpolation of an IQ data stream
+|  Expect input valid for 2 cycles (marked by active-high samp signal)
+|  out of 2*N.
+|  Well, this is only the integration half of the CIC filter, someone
+|  else (e.g., iq_intrp4) needs to do the differentiation.
+| 
+
 Pinout
 ''''''
 

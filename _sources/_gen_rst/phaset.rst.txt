@@ -13,6 +13,7 @@ Description
 |  as any, and it makes the arithmetic for subtracting the two results
 |  (from the two unknown clocks) easy.
 | 
+| 
 
 Pinout
 ''''''

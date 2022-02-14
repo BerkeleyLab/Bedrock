@@ -8,6 +8,9 @@ minmax Source File
 
    `timescale 1ns / 1ns
 
+   // Simple always-on minmax finder, designed to be applied to ADC inputs.
+   // reset is single-cycle, designed such that you can capture the outputs
+   // on the same cycle as you apply the reset, resulting in no blind cycles.
    module minmax(clk,xin,reset,xmin,xmax);
    parameter width=14;
 

@@ -3,6 +3,11 @@
 serializer_multichannel
 =======================
 
+Description
+'''''''''''
+
+| 
+
 Pinout
 ''''''
 

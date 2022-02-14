@@ -3,6 +3,23 @@
 pdetect
 =======
 
+Description
+'''''''''''
+
+|  Synthesizes to 17 slices at 155 MHz in XC3Sxxx-4 using XST-10.1i
+| 
+|  Transform a raw phase difference (-pi to pi) into a control signal
+|  for a PLL.  Uses internal state to generate the right full-scale
+|  DC signal when the frequencies are mismatched.  In the final,
+|  locked-at-zero-phase state, the output equals the input.
+| 
+|  Subtle API change from old pdetect: when strobe_in is not set,
+|  the output follows the input exactly.
+| 
+|  Yet another API change: new input "reset", only used when strobe_in
+|  is set, resets the state machine to unwound.
+| 
+
 Pinout
 ''''''
 

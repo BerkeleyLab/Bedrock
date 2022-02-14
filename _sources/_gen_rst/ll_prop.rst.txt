@@ -3,6 +3,14 @@
 ll_prop
 =======
 
+Description
+'''''''''''
+
+| 
+|  Keep the interface to this module simple:
+|   all IQ inputs and outputs are co-phased,
+|   i.e., I values when iq is high, Q values when iq is low.
+
 Pinout
 ''''''
 

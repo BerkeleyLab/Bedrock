@@ -40,6 +40,24 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="ssb-out">
 <span id="id1"></span><h1>ssb_out<a class="headerlink" href="#ssb-out" title="Permalink to this headline">¶</a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">SSB stands for Single Side Band.</div>
+<div class="line"><a class="reference external" href="https://en.wikipedia.org/wiki/Single-sideband_modulation">https://en.wikipedia.org/wiki/Single-sideband_modulation</a></div>
+<div class="line">(Almost) pin compatible with second_if_out,</div>
+<div class="line">but this one relies on interpolators (afterburner) to up-sample the output</div>
+<div class="line">data to DDR so it can drive a double-frequency DAC.</div>
+<div class="line"><br /></div>
+<div class="line">It nominally produces an I and Q drive output but single-drive usage is possible</div>
+<div class="line">by simply leaving dac2_out{0,1} floating, letting the synthesizer optimize-away</div>
+<div class="line">the redundant code.</div>
+<div class="line"><br /></div>
+<div class="line">Directly uses the provided LO (cosa,sina), thus output IF will be determined by</div>
+<div class="line">the LO frequency</div>
+<div class="line"><br /></div>
+</div>
+</section>
 <section id="pinout">
 <h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
 <figure class="align-default" id="fig-ssb-out-block">
@@ -219,6 +237,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
 <li class="toctree-l3"><a class="reference internal" href="serializer_multichannel.html">serializer_multichannel</a></li>
 <li class="toctree-l3"><a class="reference internal" href="shortfifo.html">shortfifo</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ssb_out</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#implementation-and-use">Implementation and use</a></li>

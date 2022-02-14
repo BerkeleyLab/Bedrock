@@ -40,6 +40,24 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="pdetect">
 <span id="id1"></span><h1>pdetect<a class="headerlink" href="#pdetect" title="Permalink to this headline">¶</a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Synthesizes to 17 slices at 155 MHz in XC3Sxxx-4 using XST-10.1i</div>
+<div class="line"><br /></div>
+<div class="line">Transform a raw phase difference (-pi to pi) into a control signal</div>
+<div class="line">for a PLL.  Uses internal state to generate the right full-scale</div>
+<div class="line">DC signal when the frequencies are mismatched.  In the final,</div>
+<div class="line">locked-at-zero-phase state, the output equals the input.</div>
+<div class="line"><br /></div>
+<div class="line">Subtle API change from old pdetect: when strobe_in is not set,</div>
+<div class="line">the output follows the input exactly.</div>
+<div class="line"><br /></div>
+<div class="line">Yet another API change: new input “reset”, only used when strobe_in</div>
+<div class="line">is set, resets the state machine to unwound.</div>
+<div class="line"><br /></div>
+</div>
+</section>
 <section id="pinout">
 <h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
 <figure class="align-default" id="fig-pdetect-block">
@@ -204,6 +222,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
 <li class="toctree-l3"><a class="reference internal" href="multi_sampler.html">multi_sampler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="multiply_accumulate.html">multiply_accumulate</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pdetect</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#description">Description</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pinout">Pinout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>

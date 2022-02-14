@@ -3,6 +3,12 @@
 cim_12x
 =======
 
+Description
+'''''''''''
+
+| 
+|  Cascaded Integrator Multiplexor
+
 Pinout
 ''''''
 

@@ -3,6 +3,12 @@
 phase_diff
 ==========
 
+Description
+'''''''''''
+
+| 
+|  DMTD measurement of clock phasing
+
 Pinout
 ''''''
 

@@ -3,6 +3,12 @@
 dpram
 =====
 
+Description
+'''''''''''
+
+|  Dual port memory with independent clocks, port B is read-only
+|  Altera and Xilinx synthesis tools successfully "find" this as block memory
+
 Pinout
 ''''''
 
