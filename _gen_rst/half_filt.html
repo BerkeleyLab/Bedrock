@@ -43,6 +43,40 @@ Expect to see errors and unfinished things.</p>
 <section id="description">
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
+<div class="line">Multiplier-free half-band filter and decimator.</div>
+<div class="line">See <a class="reference external" href="http://recycle.lbl.gov/~ldoolitt/halfband/">http://recycle.lbl.gov/~ldoolitt/halfband/</a></div>
+<div class="line"><br /></div>
+<div class="line">This is an FIR filter</div>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://en.wikipedia.org/wiki/Finite_impulse_response">https://en.wikipedia.org/wiki/Finite_impulse_response</a></div>
+</div>
+<div class="line">with 7 non-zero taps, categorized as an order-3 half-band filter.</div>
+<div class="line">The taps are</div>
+<div class="line-block">
+<div class="line">2  0  -9  0  39  64  39  0  -9  0  2</div>
+<div class="line"><br /></div>
+</div>
+<div class="line">The filter has a nominal low-frequency gain of unity.  But since</div>
+<div class="line">the gain peaks at +0.074 dB (at an input frequency of 0.12 of the input</div>
+<div class="line">sample rate), the output can clip.  The module correctly saturates</div>
+<div class="line">its arithmetic.</div>
+<div class="line"><br /></div>
+<div class="line">This filter is linear-phase (note the symmetric tap coefficients),</div>
+<div class="line">with an essential DSP group delay of 5 samples.</div>
+<div class="line">Additional pipeline delay is added by the implementation; see below.</div>
+<div class="line"><br /></div>
+<div class="line">The input can consist of a fixed (set by the parameter len at</div>
+<div class="line">build-time) number of interleaved signal data streams.</div>
+<div class="line">The half-band filter is applied to each stream independently.</div>
+<div class="line"><br /></div>
+<div class="line">half_filt() can accept 20-bit data at the full clock rate.</div>
+<div class="line">The output stream is decimated by two; blocks of len cycles of 20-bit</div>
+<div class="line">output data are interleaved with len silent cycles.  The input data</div>
+<div class="line">and ing control are pipelined four cycles before getting to the output.</div>
+<div class="line"><br /></div>
+<div class="line">There are no restrictions on the ing pattern.  The len-way</div>
+<div class="line">interleaving of the input data ignores cycles with ing low.</div>
+<div class="line"><br /></div>
 <div class="line">Synthesizes to 251 slices at 116 MHz in XC3Sxxx-4 using XST-8.2i</div>
 <div class="line"><br /></div>
 </div>

@@ -44,6 +44,34 @@ Expect to see errors and unfinished things.</p>
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
 <div class="line"><br /></div>
+<div class="line-block">
+<div class="line">Complex number multiplication, as in</div>
+<div class="line-block">
+<div class="line">(a+ib)*(c+id) = (a*c-b*d)+i(a*d+b*c).</div>
+</div>
+<div class="line">All the complex numbers are IQ-serialized, such that port x</div>
+<div class="line">carries a+ib, port y carries c+id, and port z carries the result.</div>
+<div class="line"><br /></div>
+<div class="line">It produces up to one answer every two clock cycles.</div>
+<div class="line">The 18-bit inputs and output are assumed scaled to [-1,1).</div>
+<div class="line"><br /></div>
+<div class="line">This module uses two 18-bit signed hardware multipliers,</div>
+<div class="line">and can clock at over 100 MHz in Spartan-6.</div>
+<div class="line"><br /></div>
+<div class="line">It’s pretty easy to ask for results that would overflow the representable</div>
+<div class="line">numbers; an extreme case is (1+i)*(1-i) = 2.  All such results get</div>
+<div class="line">saturated to the maximum representable positive or negative number.</div>
+<div class="line"><br /></div>
+<div class="line">A second copy of the result with no rounding error is also provided</div>
+<div class="line">in z_all.  Using both outputs will consume more FPGA resources than</div>
+<div class="line">using either one alone.</div>
+<div class="line"><br /></div>
+<div class="line">Output results are delayed four cycles from the input.</div>
+<div class="line">The gate_out port is nothing more or less than the gate_in</div>
+<div class="line">port, delayed four cycles.  Only the iq control is used to control</div>
+<div class="line">the data paths inside this module.</div>
+<div class="line"><br /></div>
+</div>
 </div>
 </section>
 <section id="pinout">

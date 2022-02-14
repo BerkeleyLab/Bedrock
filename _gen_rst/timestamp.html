@@ -44,11 +44,18 @@ Expect to see errors and unfinished things.</p>
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
 <div class="line">High-speed cycle counter</div>
+<div class="line"><br /></div>
+<div class="line">This module attaches to the slow readout bus used in many</div>
+<div class="line">LBNL DAQ builds. It provides a 59-bit cycle counter (since chip boot),</div>
+<div class="line">and an optional timestamp capture register.</div>
+<div class="line"><br /></div>
+<div class="line">The 8-bit-wide shift-register-style output is ready to be merged</div>
+<div class="line">in a “slow” DSP data stream, LSB-first.  Sorry about the byte-order,</div>
+<div class="line">but it’s intrinsic to the mechanism used.</div>
+<div class="line"><br /></div>
 <div class="line">Synthesizes to 54 LUTs and 31 Flip flops at 150 MHz in XC3S1000-5 with XST 12.1 (aux_reg=0)</div>
 <div class="line">Synthesizes to 101 LUTs and 65 Flip flops at 150 MHz in XC3S1000-5 with XST 12.1 (aux_reg=1)</div>
 <div class="line">59-bit counter will wrap every 182 years if clocked at 100 MHz.</div>
-<div class="line">8-bit-wide shift-register-style output for merging in the “slow” DSP data stream.</div>
-<div class="line">LSB-first.  Sorry about that, but it’s intrinsic to the mechanism used.</div>
 </div>
 </section>
 <section id="pinout">

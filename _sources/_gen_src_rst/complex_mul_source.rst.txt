@@ -8,6 +8,30 @@ complex_mul Source File
 
    `timescale 1ns / 1ns
 
+   // Complex number multiplication, as in
+   //   (a+ib)*(c+id) = (a*c-b*d)+i(a*d+b*c).
+   // All the complex numbers are IQ-serialized, such that port x
+   // carries a+ib, port y carries c+id, and port z carries the result.
+
+   // It produces up to one answer every two clock cycles.
+   // The 18-bit inputs and output are assumed scaled to [-1,1).
+
+   // This module uses two 18-bit signed hardware multipliers,
+   // and can clock at over 100 MHz in Spartan-6.
+
+   // It's pretty easy to ask for results that would overflow the representable
+   // numbers; an extreme case is (1+i)*(1-i) = 2.  All such results get
+   // saturated to the maximum representable positive or negative number.
+
+   // A second copy of the result with no rounding error is also provided
+   // in z_all.  Using both outputs will consume more FPGA resources than
+   // using either one alone.
+
+   // Output results are delayed four cycles from the input.
+   // The gate_out port is nothing more or less than the gate_in
+   // port, delayed four cycles.  Only the iq control is used to control
+   // the data paths inside this module.
+
    module complex_mul(
    	input clk,  // Rising edge clock input; all logic is synchronous in this domain
    	input gate_in,  // Flag marking input data valid
