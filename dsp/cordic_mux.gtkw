@@ -1,6 +1,6 @@
 [timestart] 55
 [size] 1325 600
-[pos] 54 8
+[pos] -1 -1
 *-6.060625 302 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] cordic_mux_tb.
 [sst_width] 210
@@ -8,7 +8,7 @@
 [sst_expanded] 1
 [sst_vpaned_height] 154
 @25
-cordic_mux_tb.ccx[31:0]
+cordic_mux_tb.ccx
 @28
 cordic_mux_tb.iq
 @22

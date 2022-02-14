@@ -16,4 +16,4 @@ Up-conversion, CIC Filters, Low-Pass filters, High-Pass filters, Mixers.
    :caption: Contents:
    :glob:
 
-   gen/*
+   _gen_rst/*
