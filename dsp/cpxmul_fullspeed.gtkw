@@ -1,9 +1,9 @@
 [timestart] 0
-[size] 1639 501
+[size] 1436 501
 [pos] -1 -1
 *-4.609763 29 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] cpxmul_fullspeed_tb.
-[sst_width] 228
+[sst_width] 210
 [signals_width] 310
 [sst_expanded] 1
 [sst_vpaned_height] 105

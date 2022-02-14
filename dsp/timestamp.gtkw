@@ -1,10 +1,14 @@
 [timestart] 0
 [size] 1152 693
-[pos] 259 30
+[pos] -1 -1
 *-12.116870 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] timestamp_tb.
+[sst_width] 210
+[signals_width] 158
+[sst_expanded] 1
+[sst_vpaned_height] 184
 @24
-timestamp_tb.cc[31:0]
+timestamp_tb.cc
 @28
 timestamp_tb.mut.clk
 timestamp_tb.slow_op
@@ -27,7 +31,7 @@ timestamp_tb.mut.snap_shift
 @200
 -result
 @22
-timestamp_tb.right_answer[31:0]
+timestamp_tb.right_answer
 timestamp_tb.upper_bits[23:0]
 timestamp_tb.sr[31:0]
 @28

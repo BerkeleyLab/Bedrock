@@ -1,5 +1,5 @@
 // Ethernet PCS autonegotiation
-// http://www.iol.unh.edu/services/testing/ge/training/1000BASE-X/Clause%2037%20Auto-Negotiation.pdf
+// https://www.iol.unh.edu/sites/default/files/knowledgebase/ge/Clause_37_Auto-Negotiation.pdf
 
 // lacr == Link Autonegotiation Configuration Register
 // module can clock over 180 MHz (need 125 MHz)

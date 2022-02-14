@@ -1,5 +1,7 @@
 `timescale 1ns / 1ns
 
+// Encapsulation of the serialization step in LBNL's conveyor belt
+// Instantiated by e.g., serializer_multichannel.v
 module serialize(
 	input clk,  // timespec 8.4 ns
 	input samp, // Snap signal for data_in

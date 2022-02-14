@@ -1,6 +1,6 @@
 # RISC-V SOC
 
-An open-source system on a chip based on the [PicoRV32](https://github.com/cliffordwolf/picorv32) softcore.
+An open-source system on a chip based on the [PicoRV32](https://github.com/YosysHQ/picorv32) softcore.
 
 # Tested hardware platforms
 
@@ -16,12 +16,27 @@ An open-source system on a chip based on the [PicoRV32](https://github.com/cliff
 
 # Tools needed
 
-## Simulation tools
-* `iverilog`, `gtkwave`
-* [RISC-V](https://github.com/cliffordwolf/picorv32#building-a-pure-rv32i-toolchain) cross complier tool-chain.
+## Cross compiling tools
+* Tested in Debian 11:
+   * `sudo apt install iverilog gtkwave gcc-riscv64-unknown-elf picolibc-riscv64-unknown-elf`
+* Tested in MacOS 12.1:
+   * Equivalent to step 3 (RiscV tool chain) in [litex](https://github.com/enjoy-digital/litex) installation:
+   * `pip3 install meson ninja`
+   * `wget https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-apple-darwin.tar.gz`, unpack and add binary directory to `PATH`.
+   * build and install `picolibc` into `/usr/local/picolibc` following its building [instructions](https://github.com/picolibc/picolibc/blob/main/doc/build.md):
+```bash
+mkdir -p /usr/local/picolibc
+git clone https://github.com/picolibc/picolibc.git
+cd picolibc
+mkdir build-riscv64-unknown-elf
+cd build-riscv64-unknown-elf
+../do-riscv-configure
+ninja
+ninja install
+```
 
 ## Synthesis tool
-* Xilinx Vivado (tested between 2015.3 to 2017.4, 2018.1, 2018.3) suite
+* Xilinx Vivado (tested between 2015.3 to 2017.4, 2018.1, 2018.3, 2020.2) suite
 
 # Features
 
@@ -61,7 +76,7 @@ Within each project directory, use `make` to synthesize a bitstream file.
 
 ## FPGA config
 
-Use `make system_config` to program the FPGA with a bitstream file, using xc3sprog or
+Use `make system_config` to program the FPGA with a bitstream file, using `xc3sprog` or
 Digilent Adept2, which is available from
 [digilent](https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads).
 

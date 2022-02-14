@@ -20,3 +20,7 @@ _xilinx/
 # system_top.xdc
 *.jou
 *.log
+# sphinx files
+_build/
+_static/
+_templates/

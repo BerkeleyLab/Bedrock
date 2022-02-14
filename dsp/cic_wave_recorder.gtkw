@@ -1,9 +1,9 @@
 [timestart] 41140
-[size] 1557 820
+[size] 1436 820
 [pos] -1 -1
 *-8.662539 41595 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] cic_wave_recorder_tb.
-[sst_width] 216
+[sst_width] 210
 [signals_width] 359
 [sst_expanded] 1
 [sst_vpaned_height] 244

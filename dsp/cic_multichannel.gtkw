@@ -1,10 +1,10 @@
 [timestart] 2
-[size] 1437 631
-[pos] 89 -34
+[size] 1436 631
+[pos] -1 -1
 *-6.873309 289 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] cic_multichannel_tb.
 [treeopen] cic_multichannel_tb.dut.i_serializer_multich.g_serializer[0].
-[sst_width] 261
+[sst_width] 210
 [signals_width] 272
 [sst_expanded] 1
 [sst_vpaned_height] 174
