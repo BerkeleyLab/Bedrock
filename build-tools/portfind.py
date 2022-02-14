@@ -484,7 +484,8 @@ def main():
         # our current way of parsing with
         if parse_endmodule(line.strip()):
             break
-
+        if line.startswith("`timescale "):  # a lot of modules start with this
+            continue  # just ignore it
         if try_mod_desc:
             c = parse_whole_line_comment_or_blank(line.strip())
             if c:

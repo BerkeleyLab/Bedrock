@@ -1,4 +1,9 @@
 `timescale 1ns / 1ns
+
+// Phase accumulator, to act as basis for DDS (direct digital synthesizer).
+// Tuned to allow 32-bit control, divided 20-bit high and 12-bit low,
+// which gets merged to 32-bit binary when modulo is zero.
+// But also supports non-binary frequencies: see the modulo input port.
 module ph_acc(
 	input clk,  // Rising edge clock input; all logic is synchronous in this domain
 	input reset,  // Active high, synchronous with clk
