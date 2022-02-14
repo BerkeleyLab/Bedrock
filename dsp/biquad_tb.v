@@ -47,7 +47,7 @@ integer i;
 initial begin
     if ($test$plusargs("vcd")) begin
         $dumpfile("biquad.vcd");
-        $dumpvars(3,biquad_tb);
+        $dumpvars(4,biquad_tb);
     end
     #40;
 

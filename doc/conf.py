@@ -46,6 +46,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.imgmath',
     'sphinx.ext.githubpages',
+    'sphinx.ext.intersphinx',
 ]
 
 # If true, figures, tables and code-blocks are automatically numbered if they
