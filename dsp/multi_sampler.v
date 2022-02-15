@@ -50,9 +50,6 @@ module multi_sampler #(
         sample_out_l <= 0;
         samp_per_r <= 0;
         base_count <= 0;
-        ds0_count <= 0;
-        ds1_count <= 0;
-        ds2_count <= 0;
       end else if (ext_trig) begin
          samp_per_r <= sample_period;
 
