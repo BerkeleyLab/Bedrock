@@ -36,8 +36,10 @@ proc ip_properties {ip_name ip_version} {
   set_property supported_families \
     {{kintex7}    {Production} \
      {artix7}     {Production} \
-     {virtex7}     {Production}} \
-  [ipx::current_core]
+     {virtex7}    {Production} \
+     {zynq}       {Production} \
+     {zynquplus}  {Production} \
+    } [ipx::current_core]
 }
 
 proc set_ports_dependency {port_prefix dependency} {
