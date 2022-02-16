@@ -1,0 +1,37 @@
+[timestart] 0
+[size] 1920 1016
+[pos] -1 -1
+*-14.114603 22350 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] multi_sampler_tb.
+[sst_width] 212
+[signals_width] 249
+[sst_expanded] 1
+[sst_vpaned_height] 292
+@28
+multi_sampler_tb.i_dut.clk
+multi_sampler_tb.i_dut.reset
+multi_sampler_tb.i_dut.ext_trig
+@24
+multi_sampler_tb.i_dut.sample_period[5:0]
+multi_sampler_tb.i_dut.dsample0_period[5:0]
+multi_sampler_tb.i_dut.dsample1_period[5:0]
+multi_sampler_tb.i_dut.dsample2_period[5:0]
+@28
+multi_sampler_tb.i_dut.ext_trig
+@22
+multi_sampler_tb.i_dut.samp_per_r[5:0]
+multi_sampler_tb.i_dut.base_count[5:0]
+@200
+-
+@28
+multi_sampler_tb.i_dut.sample_out
+multi_sampler_tb.i_dut.dsample0_stb
+multi_sampler_tb.i_dut.dsample1_stb
+multi_sampler_tb.i_dut.dsample2_stb
+@25
+multi_sampler_tb.i_dut.ds0_count[5:0]
+@24
+multi_sampler_tb.i_dut.ds1_count[5:0]
+multi_sampler_tb.i_dut.ds2_count[5:0]
+[pattern_trace] 1
+[pattern_trace] 0
