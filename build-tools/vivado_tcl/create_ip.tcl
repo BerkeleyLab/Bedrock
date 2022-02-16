@@ -1,7 +1,7 @@
 # Usage: "vivado -mode batch -source create_ip.tcl -tclargs <source_files>"
-if { $argc <1 } {
+if { $argc <4 } {
     puts "Not enough arguments"
-    puts "Usage: vivado -mode batch -source create_ip.tcl -tclargs <ip_name> <ip_path> <source_files>"
+    puts "Usage: vivado -mode batch -source create_ip.tcl -tclargs <ip_name> <ip_path> <ip_version> <source_files>"
     exit
 }
 
