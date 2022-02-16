@@ -22,12 +22,13 @@ proc ip_constraints {ip_name ip_constr_files} {
   set_property library_name {} [ipx::get_file $ip_constr_files $proj_filegroup]
 }
 
-proc ip_properties {ip_name} {
+proc ip_properties {ip_name ip_version} {
 
   ipx::package_project -import_files -root_dir [get_property directory [current_project]]/../
 
   set_property vendor {lbl.gov} [ipx::current_core]
   set_property library {user} [ipx::current_core]
+  set_property version $ip_version [ipx::current_core]
   set_property vendor_display_name {LBNL} [ipx::current_core]
   set_property company_url {www.lbl.gov} [ipx::current_core]
   set_property sim.ip.auto_export_scripts false [current_project]
