@@ -19,6 +19,7 @@ module multi_sampler #(
    parameter dsample2_wi=8)
 (
    input                        clk,
+   input                        reset,
    input                        ext_trig,
    input [sample_period_wi-1:0] sample_period,
    input [dsample0_wi-1:0]      dsample0_period,
@@ -36,17 +37,20 @@ module multi_sampler #(
    localparam INITVAL=0; // Longer startup
 `endif
 
-   reg [sample_period_wi-1:0] samp_per_r=0;
-   (* ASYNC_REG= "TRUE" *)   reg [sample_period_wi-1:0] base_count = 0;
-   (* ASYNC_REG= "TRUE" *)   reg [dsample0_wi-1:0]      ds0_count = INITVAL;
-   (* ASYNC_REG= "TRUE" *)   reg [dsample1_wi-1:0]      ds1_count = INITVAL;
-   (* ASYNC_REG= "TRUE" *)   reg [dsample2_wi-1:0]      ds2_count = INITVAL;
+   reg [sample_period_wi-1:0] samp_per_r = 0;
+   reg [sample_period_wi-1:0] base_count = 0;
+   reg [dsample0_wi-1:0]      ds0_count = INITVAL;
+   reg [dsample1_wi-1:0]      ds1_count = INITVAL;
+   reg [dsample2_wi-1:0]      ds2_count = INITVAL;
    reg sample_out_l = 0;
 
    // Base-timing generation
    always @(posedge clk) begin
-      sample_out_l <= 0;
-      if (ext_trig) begin
+      if (reset) begin
+        sample_out_l <= 0;
+        samp_per_r <= 0;
+        base_count <= 0;
+      end else if (ext_trig) begin
          samp_per_r <= sample_period;
 
          base_count <= (base_count == (sample_period-1)) ? 0 : base_count+1;
