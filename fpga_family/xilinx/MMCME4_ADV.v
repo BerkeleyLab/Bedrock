@@ -69,8 +69,25 @@ module MMCME4_ADV #(
     output  LOCKED,
     input   CLKFBIN,
     input   CLKIN1,
+    input   CLKIN2,
+    input   CLKINSEL,
     input   PWRDWN,
-    input   RST
+    input   RST,
+    input   DADDR,
+    input   DCLK,
+    input   DEN,
+    input   DI,
+    input   DO,
+    input   DRDY,
+    input   DWE,
+    output  CDDCDONE,
+    input   CDDCREQ,
+    input   PSCLK,
+    input   PSEN,
+    input   PSINCDEC,
+    output  PSDONE,
+    output  CLKINSTOPPED,
+    output  CLKFBSTOPPED
 );
 
 assign CLKOUT0 = CLKIN1;
