@@ -23,6 +23,7 @@ VPI_LDFLAGS := $(shell $(VERILOG_VPI) --ldflags)
 DEPDIR = _dep
 IPX_DIR = _ipx
 AUTOGEN_DIR = _autogen
+CHECK_CLEAN = sh $(BUILD_DIR)/check_clean
 
 # Build tools
 #CC = $(BUILD_DIR)/ccd-gcc
