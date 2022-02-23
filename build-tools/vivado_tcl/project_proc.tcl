@@ -181,7 +181,9 @@ proc project_write_bitstream {platform} {
     if {($platform ne "vc707" && $platform ne "zcu111")} {
         set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [get_designs impl_1]
     }
-    set_property BITSTREAM.CONFIG.CONFIGRATE 33 [get_designs impl_1]
+    if {$platform ne "zcu111"} {
+        set_property BITSTREAM.CONFIG.CONFIGRATE 33 [get_designs impl_1]
+    }
 
     write_bitstream -force [current_project].bit
     write_cfgmem -force -format bin -interface spix4 -size 16 -loadbit "up 0x0 [current_project].bit" -file [current_project].bin
