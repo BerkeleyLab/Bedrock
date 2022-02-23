@@ -186,5 +186,7 @@ proc project_write_bitstream {platform} {
     }
 
     write_bitstream -force [current_project].bit
-    write_cfgmem -force -format bin -interface spix4 -size 16 -loadbit "up 0x0 [current_project].bit" -file [current_project].bin
+    if {$platform ne "zcu111"} {
+        write_cfgmem -force -format bin -interface spix4 -size 16 -loadbit "up 0x0 [current_project].bit" -file [current_project].bin
+    }
 }
