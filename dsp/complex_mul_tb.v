@@ -17,11 +17,11 @@ initial begin
 	$display("%s", fail ? "FAIL" : "PASS");
 	$finish();
 end
-
-reg signed [17:0] x=0, y=0, xo=0, yo=0, zo=0;
-wire signed [17:0] z;
-reg signed [35:0] fi=0, fq=0, fqd=0;  // reference results
-reg signed [35:0] fr1=0, fr2=0;
+parameter aw = 16;
+reg signed [(aw-1):0] x=0, y=0, xo=0, yo=0, zo=0;
+wire signed [(aw-1):0] z;
+reg signed [(2*aw)-1:0] fi=0, fq=0, fqd=0;  // reference results
+reg signed [(2*aw)-1:0] fr1=0, fr2=0;
 //reg iq=0;
 reg [2:0] state=0;
 wire iq=state[0];
@@ -42,17 +42,17 @@ always @(posedge clk) begin
 end
 
 wire g_out;
-complex_mul dut(.clk(clk), .gate_in(ena), .x(x), .y(y), .iq(iq&ena),
+complex_mul #(.aw(aw)) dut(.clk(clk), .gate_in(ena), .x(x), .y(y), .iq(iq&ena),
 	.z(z), .gate_out(g_out));
 
-reg signed [35:0] frd, zx;
+reg signed [(2*aw)-1:0] frd, zx;
 reg fault=0;
 always @(negedge clk) if (cc>6 && g_out) begin
-	zx = z*131072;
+	zx = z*(2**(aw-1));
 	frd = fr2;
-	if (frd >  131072*131071) frd =  131072*131071;
-	if (frd < -131072*131072) frd = -131072*131072;
-	fault = zx > frd+131072 || zx < frd-131072;
+	if (frd >  (2**(aw-1))*(2**(aw-1)-1)) frd = (2**(aw-1))*(2**(aw-1)-1);
+	if (frd < -(2**(aw-1))*(2**(aw-1))) frd = -(2**(aw-1))*(2**(aw-1));
+	fault = zx > frd+(2**(aw-1)) || zx < frd-(2**(aw-1));
 	if (fault) fail=1;
 	$display("%d %d %d %d %s",
 	 iq, zx, frd, zx-frd, fault ? "FAULT" : "    .");
