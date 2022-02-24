@@ -76,6 +76,14 @@ proc project_create {platform_name project_name} {
     set_property top $project_name [current_fileset]
 }
 
+proc project_add_syn_props {syn_prop_dict} {
+    set_property -dict $syn_prop_dict [get_runs synth_1]
+}
+
+proc project_add_impl_props {impl_prop_dict} {
+    set_property -dict $impl_prop_dict [get_runs impl_1]
+}
+
 proc project_bd_design {library_dir project_name} {
     set_property ip_repo_paths $library_dir [current_fileset]
     update_ip_catalog -rebuild
