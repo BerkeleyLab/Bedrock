@@ -54,8 +54,8 @@ reg lb_write=0;
 `AUTOMATIC_decode
 
 wire signed [19:0] z;
-phs_avg duti // auto
-	(.clk(clk), .iq(iq), .x(x), .y(y), .z(z), `AUTOMATIC_duti);
+phs_avg dut // auto
+	(.clk(clk), .iq(iq), .x(x), .y(y), .z(z), `AUTOMATIC_dut);
 
 // Set control registers from command line
 // See also lp_setup in lp_notch_test.py
@@ -66,10 +66,10 @@ initial begin
 	if (!$value$plusargs("kyr=%d", kyr)) kyr = 600;
 	if (!$value$plusargs("kyi=%d", kyi)) kyi = 200;
 	#1;
-	dp_duti_kx.mem[0] = kxr;  // k_X  real part
-	dp_duti_kx.mem[1] = kxi;  // k_X  imag part
-	dp_duti_ky.mem[0] = kyr;  // k_Y  real part
-	dp_duti_ky.mem[1] = kyi;  // k_Y  imag part
+	dp_dut_kx.mem[0] = kxr;  // k_X  real part
+	dp_dut_kx.mem[1] = kxi;  // k_X  imag part
+	dp_dut_ky.mem[0] = kyr;  // k_Y  real part
+	dp_dut_ky.mem[1] = kyi;  // k_Y  imag part
 end
 
 // Write a comprehensible output file

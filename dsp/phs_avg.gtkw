@@ -1,58 +1,48 @@
-[*]
-[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
-[*] Fri Feb 25 20:58:50 2022
-[*]
-[dumpfile] "/home/shree/bedrock/dsp/phs_avg.vcd"
-[dumpfile_mtime] "Fri Feb 25 20:57:18 2022"
-[dumpfile_size] 117955
-[savefile] "/home/shree/bedrock/dsp/phs_avg.gtkw"
 [timestart] 0
-[size] 1920 1056
-[pos] -296 -168
-*-8.000000 56 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[size] 959 1055
+[pos] -1 -12
+*-6.000000 28 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] phs_avg_tb.
-[treeopen] phs_avg_tb.duti.
+[treeopen] phs_avg_tb.dut.
 [sst_width] 212
 [signals_width] 445
 [sst_expanded] 1
 [sst_vpaned_height] 309
+@28
+phs_avg_tb.dut.xmul.clk
+phs_avg_tb.dut.xmul.iq
 @200
 -
 -MUL1
-@28
-phs_avg_tb.duti.xmul.clk
-phs_avg_tb.duti.xmul.iq
 @420
-phs_avg_tb.duti.xmul.x[17:0]
-phs_avg_tb.duti.xmul.y[17:0]
-phs_avg_tb.duti.xmul.y1[17:0]
-phs_avg_tb.duti.xmul.prod[35:0]
-phs_avg_tb.duti.xmul.prod_i[18:0]
-phs_avg_tb.duti.xmul.prod_msb[18:0]
-phs_avg_tb.duti.xmul.sum[19:0]
-phs_avg_tb.duti.xmul.z[19:0]
-@200
+phs_avg_tb.dut.xmul.x[17:0]
+phs_avg_tb.dut.xmul.y1[17:0]
+phs_avg_tb.dut.xmul.y1[17:0]
+phs_avg_tb.dut.xmul.z[19:0]
+@600
 -
 -MUL2
 @420
-phs_avg_tb.duti.ymul.x[17:0]
-phs_avg_tb.duti.ymul.y[17:0]
-phs_avg_tb.duti.ymul.z[19:0]
+phs_avg_tb.dut.ymul.x[17:0]
+phs_avg_tb.dut.ymul.y[17:0]
+phs_avg_tb.dut.ymul.y1[17:0]
+phs_avg_tb.dut.ymul.z[19:0]
 @200
 -
-@201
 -Final addition
 @28
-phs_avg_tb.duti.clk
-phs_avg_tb.duti.iq
+phs_avg_tb.dut.clk
+phs_avg_tb.dut.iq
 @420
-phs_avg_tb.duti.kx[17:0]
-phs_avg_tb.duti.x[17:0]
-phs_avg_tb.duti.ky[17:0]
-phs_avg_tb.duti.y[17:0]
-phs_avg_tb.duti.xmr[19:0]
-phs_avg_tb.duti.ymr[19:0]
-phs_avg_tb.duti.sum[20:0]
-phs_avg_tb.duti.z[19:0]
+phs_avg_tb.dut.kx[17:0]
+phs_avg_tb.dut.x[17:0]
+phs_avg_tb.dut.ky[17:0]
+phs_avg_tb.dut.y[17:0]
+phs_avg_tb.dut.xmr[19:0]
+phs_avg_tb.dut.ymr[19:0]
+@421
+phs_avg_tb.dut.sum[20:0]
+@420
+phs_avg_tb.dut.z[19:0]
 [pattern_trace] 1
 [pattern_trace] 0
