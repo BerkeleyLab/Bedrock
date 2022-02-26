@@ -36,7 +36,7 @@ reg [2:0] state=0;
 wire iq=state[0];
 always @(posedge clk) begin
 	state <= state+1;
-    if (cc<205) begin
+    if (cc<425) begin
         x  <= ~iq ? 2000 : 600;
         y  <= ~iq ? 1000 : 500;
     end else begin

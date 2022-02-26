@@ -1,7 +1,7 @@
 [timestart] 0
-[size] 959 1055
-[pos] -1 -12
-*-6.000000 28 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[size] 1920 1056
+[pos] -1 -1
+*-5.000000 30 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] phs_avg_tb.
 [treeopen] phs_avg_tb.dut.
 [sst_width] 212
@@ -18,14 +18,18 @@ phs_avg_tb.dut.xmul.iq
 phs_avg_tb.dut.xmul.x[17:0]
 phs_avg_tb.dut.xmul.y1[17:0]
 phs_avg_tb.dut.xmul.y1[17:0]
+phs_avg_tb.dut.xmul.prod[35:0]
+phs_avg_tb.dut.xmul.prod_msb[19:0]
 phs_avg_tb.dut.xmul.z[19:0]
-@600
+@200
 -
 -MUL2
 @420
 phs_avg_tb.dut.ymul.x[17:0]
 phs_avg_tb.dut.ymul.y[17:0]
 phs_avg_tb.dut.ymul.y1[17:0]
+phs_avg_tb.dut.ymul.prod[35:0]
+phs_avg_tb.dut.ymul.prod_msb[19:0]
 phs_avg_tb.dut.ymul.z[19:0]
 @200
 -
@@ -40,9 +44,12 @@ phs_avg_tb.dut.ky[17:0]
 phs_avg_tb.dut.y[17:0]
 phs_avg_tb.dut.xmr[19:0]
 phs_avg_tb.dut.ymr[19:0]
-@421
 phs_avg_tb.dut.sum[20:0]
+@421
+[color] 1
+phs_avg_tb.dut.intg[21:0]
 @420
+[color] 1
 phs_avg_tb.dut.z[19:0]
 [pattern_trace] 1
 [pattern_trace] 0
