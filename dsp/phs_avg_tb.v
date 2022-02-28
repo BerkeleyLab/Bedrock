@@ -30,8 +30,8 @@ initial begin
 		out_file = $fopen(out_file_name,"w");
 end
 
-reg signed [17:0] x=0;
-reg signed [17:0] y=0;
+reg signed [16:0] x=0;
+reg signed [16:0] y=0;
 reg [2:0] state=0;
 wire iq=state[0];
 always @(posedge clk) begin
@@ -53,13 +53,13 @@ reg lb_write=0;
 
 `AUTOMATIC_decode
 
-wire signed [19:0] z;
+wire signed [18:0] z;
 phs_avg dut // auto
 	(.clk(clk), .iq(iq), .x(x), .y(y), .z(z), `AUTOMATIC_dut);
 
 // Set control registers from command line
 // See also lp_setup in lp_notch_test.py
-reg signed [17:0] kxr, kxi, kyr, kyi;
+reg signed [15:0] kxr, kxi, kyr, kyi;
 initial begin
 	if (!$value$plusargs("kxr=%d", kxr)) kxr = 700;
 	if (!$value$plusargs("kxi=%d", kxi)) kxi = 100;
@@ -75,9 +75,9 @@ end
 // Write a comprehensible output file
 // One line per pair of clock cycles
 // Also gives the timing diagram something comprehensible to look at and graph
-reg signed [19:0] z1=0;
-reg signed [17:0] y1=0, y_i=0, y_q=0;
-reg signed [17:0] x1=0, x_i=0, x_q=0;
+reg signed [18:0] z1=0;
+reg signed [16:0] y1=0, y_i=0, y_q=0;
+reg signed [16:0] x1=0, x_i=0, x_q=0;
 always @(posedge clk) begin
 	x1 <= x;
 	y1 <= y;

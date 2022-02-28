@@ -28,52 +28,52 @@
 // real when iq==1 and imaginary when iq==0.
 
 module phs_avg #(
-    parameter dw = 18)
+    parameter dwi = 17,
+    parameter dwj = 16)
 (
 	input clk,  // timespec 6.66 ns
 	input iq,
-	input signed [dw-1:0] x,
-	input signed [dw-1:0] kx,  // external
+	input signed [dwi-1:0] x,
+	input signed [15:0] kx,  // external
 	output [0:0] kx_addr,    // external address for kx
-	input signed [dw-1:0] y,
-	input signed [dw-1:0] ky,  // external
+	input signed [dwi-1:0] y,
+	input signed [15:0] ky,  // external
 	output [0:0] ky_addr,    // external address for kx
-	output signed [dw+1:0] z
+	output signed [dwi+1:0] z
 );
 
 assign kx_addr = iq;
 assign ky_addr = iq;
 
-wire signed [dw+1:0] xmr, ymr;
+wire signed [dwi+1:0] xmr, ymr;
 
-phs_avg_mul xmul(.clk(clk), .iq(iq), .x(x),  .y(kx), .z(xmr));
-phs_avg_mul ymul(.clk(clk), .iq(iq), .x(y),  .y(ky), .z(ymr));
+phs_avg_mul #(.dwi(17), .dwj(16)) xmul(.clk(clk), .iq(iq), .x(x),  .y(kx), .z(xmr));
+phs_avg_mul #(.dwi(17), .dwj(16)) ymul(.clk(clk), .iq(iq), .x(y),  .y(ky), .z(ymr));
 
-`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
-
-reg signed [dw+2:0] sum = 0;
-reg signed [dw+3:0] intg = 0;
+reg signed [dwi+2:0] sum = 0;
+reg signed [dwi+3:0] intg = 0;
 always @(posedge clk) begin
 	sum <= xmr + ymr;
         intg <= sum + intg; // Integrator
 end
-assign z = intg[dw+2:1];
+assign z = intg[dwi+2:1];
 
 endmodule
 
 module phs_avg_mul #(
-    parameter dw = 18)
+    parameter dwi = 17,
+    parameter dwj = 16)
 (
 	input clk,
 	input iq,
-	input signed [dw-1:0] x,
-	input signed [dw-1:0] y,
-	output signed [dw+1:0] z
+	input signed [dwi-1:0] x,
+	input signed [dwj-1:0] y,
+	output signed [dwi+1:0] z
 );
 
-reg signed [dw-1:0] y1 = 0;
-reg signed [(2*dw)-1:0] prod = 0;
-wire signed [dw+1:0] prod_msb = prod[(2*dw)-2:dw-3];
+reg signed [dwi-1:0] y1 = 0;
+reg signed [(dwi+dwj)-1:0] prod = 0;
+wire signed [dwi+1:0] prod_msb = prod[(dwi+dwj)-2:dwi-4];
 always @(posedge clk) begin
 	y1 <= y;
 	prod <= x * y1;
