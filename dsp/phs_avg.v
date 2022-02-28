@@ -33,10 +33,10 @@ module phs_avg #(
 	input clk,  // timespec 6.66 ns
 	input iq,
 	input signed [dw-1:0] x,
-	input signed [17:0] kx,  // external
+	input signed [dw-1:0] kx,  // external
 	output [0:0] kx_addr,    // external address for kx
 	input signed [dw-1:0] y,
-	input signed [17:0] ky,  // external
+	input signed [dw-1:0] ky,  // external
 	output [0:0] ky_addr,    // external address for kx
 	output signed [dw+1:0] z
 );
