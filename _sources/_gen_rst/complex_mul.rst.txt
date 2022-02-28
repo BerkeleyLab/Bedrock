@@ -50,7 +50,7 @@ Parameters
      - Max
      - Default
      - Description
-   * - aw
+   * - dw
      - ?
      - ?
      - 18
@@ -71,19 +71,19 @@ Ports
    * - gate_in
      - Input
      - Flag marking input data valid
-   * - x[aw-1:0]
+   * - x[dw-1:0]
      - Input
      - Multiplicand, signed, time-interleaved real and imaginary
-   * - y[aw-1:0]
+   * - y[dw-1:0]
      - Input
      - Multiplicand, signed, time-interleaved real and imaginary
    * - iq
      - Input
      - Flag marking the real (I) part of the complex pair
-   * - z[aw-1:0]
+   * - z[dw-1:0]
      - Output
      - Result
-   * - z_all[(2*aw)-1:0]
+   * - z_all[(2*dw)-1:0]
      - Output
      - Result
    * - gate_out
