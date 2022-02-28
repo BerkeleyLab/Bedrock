@@ -55,7 +55,7 @@ reg signed [dw+2:0] sum = 0;
 reg signed [dw+3:0] intg = 0;
 always @(posedge clk) begin
 	sum <= xmr + ymr;
-       intg <= sum + intg; // Integrator
+        intg <= sum + intg; // Integrator
 end
 assign z = intg[dw+2:1];
 

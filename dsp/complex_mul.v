@@ -25,15 +25,15 @@
 // the data paths inside this module.
 
 module complex_mul #(
-    parameter aw = 18)
+    parameter dw = 18)
 (
 	input clk,  // Rising edge clock input; all logic is synchronous in this domain
 	input gate_in,  // Flag marking input data valid
-	input signed [aw-1:0] x,  // Multiplicand, signed, time-interleaved real and imaginary
-	input signed [aw-1:0] y,  // Multiplicand, signed, time-interleaved real and imaginary
+	input signed [dw-1:0] x,  // Multiplicand, signed, time-interleaved real and imaginary
+	input signed [dw-1:0] y,  // Multiplicand, signed, time-interleaved real and imaginary
 	input iq,  // Flag marking the real (I) part of the complex pair
-	output signed [aw-1:0] z,  // Result
-	output signed [(2*aw)-1:0] z_all,  // Result
+	output signed [dw-1:0] z,  // Result
+	output signed [(2*dw)-1:0] z_all,  // Result
 	output gate_out  // Delayed version of gate_in
 );
 
@@ -50,11 +50,11 @@ always @(posedge clk) iq_sr <= {iq_sr[3:0],iq};
 // strange-looking "+1" below, reduces the average error offset
 // to -1/4 result bit.
 
-reg signed [aw-1:0] x1=0, x2=0, y1=0;
-reg signed [(2*aw)-1:0] prod1=0, prod2=0;
-reg signed [(2*aw)-1:0] prod1_d=0, prod2_d=0;
-reg signed [(2*aw)-1:0] sumi=0, sumq=0;
-wire signed [aw-1:0] m2mux = iq_sr[1] ? x2 : x;
+reg signed [dw-1:0] x1=0, x2=0, y1=0;
+reg signed [(2*dw)-1:0] prod1=0, prod2=0;
+reg signed [(2*dw)-1:0] prod1_d=0, prod2_d=0;
+reg signed [(2*dw)-1:0] sumi=0, sumq=0;
+wire signed [dw-1:0] m2mux = iq_sr[1] ? x2 : x;
 always @(posedge clk) begin
 	x1 <= x;
 	x2 <= x1;
@@ -69,15 +69,15 @@ end
 
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 wire iqx = iq_sr[3];
-wire signed [(2*aw)-1:0] mux = iqx ? sumq : sumi;
-reg signed [aw:0] zr=0;
-reg signed [(2*aw)-1:0] mux_r=0;
-wire signed [(aw+1):0] zsel=mux[(2*aw)-1:(aw-2)];
+wire signed [(2*dw)-1:0] mux = iqx ? sumq : sumi;
+reg signed [dw:0] zr=0;
+reg signed [(2*dw)-1:0] mux_r=0;
+wire signed [(dw+1):0] zsel=mux[(2*dw)-1:(dw-2)];
 always @(posedge clk) begin
-	zr <= `SAT(zsel, aw+1, aw);
+	zr <= `SAT(zsel, dw+1, dw);
 	mux_r <= mux;
 end
-assign z = zr[aw:1];
+assign z = zr[dw:1];
 assign z_all = mux_r;
 
 // This gate input isn't really used, but describes the length of this
