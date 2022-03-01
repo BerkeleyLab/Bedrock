@@ -9,8 +9,8 @@ module BUFG_GT (
     input DIV,
     output O
 );
-	reg x=0;
-	always @(posedge I) if (CE) x<=1;
-	always @(negedge I) x<=0;
-	buf b(O, x);
+    reg x=0;
+    always @(posedge I) if (CE) x<=1;
+    always @(negedge I) x<=0;
+    buf b(O, x);
 endmodule
