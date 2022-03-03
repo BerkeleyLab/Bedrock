@@ -25,6 +25,8 @@
 #define SFR_IN_BYTE_PCNT        0
 #define SFR_IN_BYTE_FCNT        2
 
+#define FCNT_WIDTH              15
+
 enum ZEST_DEV {
     ZEST_DEV_ILLEGAL   =  0xFF,
     ZEST_DEV_AD9653A   =  0x00,     // U2 ADC

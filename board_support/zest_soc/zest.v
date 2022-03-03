@@ -2,7 +2,7 @@ module zest #(
     parameter PH_DIFF_ADV = 4693,  // ADV: 500*11/48 / 200/2*(1<<14) = 4693
     parameter N_ADC = 2,
     parameter N_CH = N_ADC*4,
-    parameter FCNT_WIDTH = 16,
+    parameter FCNT_WIDTH = 15,
     parameter [7:0] BASE_ADDR = 8'h05
 ) (
     // Hardware pins

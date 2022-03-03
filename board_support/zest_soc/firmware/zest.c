@@ -317,7 +317,6 @@ bool check_zest_regs(uint8_t dev, const t_init_data *p_data) {
 
 bool check_zest_freq(uint8_t ch, uint16_t fcnt_exp) {
     uint16_t fcnt;
-    uint16_t fcnt_width = 16;
     // uint16_t fcnt_exp = 60074; // 500 * 11 / 48 / 125 * (1<<fcnt_width);
 #ifdef SIMULATION
     fcnt_width = 8;
@@ -328,7 +327,7 @@ bool check_zest_freq(uint8_t ch, uint16_t fcnt_exp) {
 
     fcnt = read_zest_fcnt(ch);
     printf("  Fclk %8s: ", zest_fcnt_names[ch]);
-    print_udec_fix(fcnt*125, fcnt_width, 3 );
+    print_udec_fix(fcnt*125, FCNT_WIDTH, 3);
     printf(" MHz\n");
     return (fcnt > fcnt_exp*0.98 && fcnt < fcnt_exp*1.02);
 }
