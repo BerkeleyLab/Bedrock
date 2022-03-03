@@ -54,8 +54,9 @@ reg lb_write=0;
 `AUTOMATIC_decode
 
 wire signed [18:0] z;
+wire signed [19:0] sum_filt;
 phs_avg dut // auto
-	(.clk(clk), .iq(iq), .x(x), .y(y), .z(z), `AUTOMATIC_dut);
+	(.clk(clk), .iq(iq), .x(x), .y(y), .sum_filt(sum_filt), .z(z), `AUTOMATIC_dut);
 
 // Set control registers from command line
 // See also lp_setup in lp_notch_test.py
