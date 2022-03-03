@@ -564,7 +564,7 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     //------------------------------
     // Align clk_div
     //------------------------------
-    for (ix=0; ix<2; ix++) {
+    for (ix=0; ix<3; ix++) {
         pass &= check_zest_freq(ix+1, fcnt_exp[ix+1]);
         printf("  Clk DIV freq  %d Check: %s.\n", ix, pass?"PASS":"FAIL");
         pass &= align_adc_clk_phase(ix, phs_center[ix]);
