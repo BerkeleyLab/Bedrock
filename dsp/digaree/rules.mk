@@ -1,7 +1,7 @@
 DIG_DIR ?= $(DSP_DIR)/digaree
 
 VFLAGS_DEP += -y$(DIG_DIR) -I$(DIG_DIR)
-VFLAGS += -y$(DIG_DIR) -I$(DIG_DIR)
+VFLAGS += -I$(DIG_DIR)
 
 # Enable this stanza for SRF cavity detune and quench finding
 STYLE = _srf
