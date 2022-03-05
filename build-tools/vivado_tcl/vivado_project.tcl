@@ -16,6 +16,9 @@ if {[info exists syn_prop_dict]} {
 if {[info exists impl_prop_dict]} {
     project_add_impl_props $impl_prop_dict
 }
+if {[info exists ipcore_dirs]} {
+    project_add_ip_repos $ipcore_dirs
+}
 
 project_add_files $my_proj_files
 project_run $my_verilog_defines

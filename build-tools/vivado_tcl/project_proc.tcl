@@ -84,6 +84,11 @@ proc project_add_impl_props {impl_prop_dict} {
     set_property -dict $impl_prop_dict [get_runs impl_1]
 }
 
+proc project_add_ip_repos {ipcore_dirs} {
+    set_property ip_repo_paths $ipcore_dirs [current_fileset]
+    update_ip_catalog -rebuild
+}
+
 proc project_bd_design {library_dir project_name} {
     set_property ip_repo_paths $library_dir [current_fileset]
     update_ip_catalog -rebuild
