@@ -74,6 +74,9 @@ Ports
    * - clk
      - Input
      - 
+   * - reset
+     - Input
+     - 
    * - ext_trig
      - Input
      - 
@@ -110,4 +113,15 @@ implementation can be found in :ref:`multi_sampler_source`
 
 .. _`portable`: https://en.wikipedia.org/wiki/Software_portability
 .. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
+
+Timing Diagram
+''''''''''''''
+
+A `GTKWave`_-generated timing diagram is shown below:
+
+.. _`GTKWave`: http://gtkwave.sourceforge.net/
+
+.. _fig:multi_sampler_timing:
+.. figure:: multi_sampler_timing.png
+    :alt: Timing diagram
 
