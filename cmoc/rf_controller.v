@@ -147,7 +147,7 @@ ccfilt #(.dw(40), .dsr_len(12), .shift_base(4)) ccfilt(.clk(clk),
 );
 
 fchan_subset #(.a_dw(20), .o_dw(20), .len(12)) fchan_subset(
-	.clk(clk), .keep(chan_keep),
+	.clk(clk), .keep(chan_keep), .reset(1'b0),
 	.a_data(mon_12_result), .a_gate(mon_12_strobe), .a_trig(~mon_12_strobe),
 	.o_data(mon_result), .o_gate(mon_strobe), .o_trig(mon_boundary)
 );

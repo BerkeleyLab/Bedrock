@@ -1,6 +1,7 @@
 include $(CORDIC_DIR)/rules.mk
 
-VFLAGS_DEP += -y. -I. -y$(DSP_DIR) -I$(DSP_DIR) -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
+# be lazy about dependencies
+VFLAGS += -y. -I. -y$(DSP_DIR) -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
 cav_mode_auto: cordicg_b22.v
 cav_elec_auto: cav_mode_auto
