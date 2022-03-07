@@ -569,7 +569,6 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     //------------------------------
     // Align clk_div
     //------------------------------
-<<<<<<< HEAD
     p = true;
     for (ix=0; ix<3; ix++) {
         p = check_zest_freq(ix+1, fcnt_exp[ix+1]); pass &= p;
