@@ -30,8 +30,8 @@ FPGAs sitting on various boards that talk various platforms
 A few comments regarding the codebase
 
 1. All software is set up to easily run on *nix systems.
-2. Currently everything is built using GNU Make. We are on an active lookout for
-other methods.
+2. Currently everything is [built using GNU Make](build-tools/makefile.md).
+We are on an active lookout for other methods, if they're actually better for us.
 3. iverilog is used for simulation. We are slowly starting to use [Verilator](https://www.veripool.org/wiki/verilator) as well
 (see badger)
 4. Xilinx tools are used for synthesis, and starting to support [YoSys](http://www.clifford.at/yosys/) (again see badger)
