@@ -6,7 +6,11 @@
 #include "timer.h"
 #include "spi.h"
 #include "print.h"
+#ifdef NONSTD_PRINTF
+#include "printf.h"
+#else
 #include <stdio.h>
+#endif
 #include "common.h"
 #include "iserdes.h"
 #include "sfr.h"
@@ -43,7 +47,7 @@ uint32_t wait_ad7794_spi_ready(void) {
             break;
         }
     }
-    debug_printf("    wait_ad7794_spi_ready: %d \n", count);
+    debug_printf("    wait_ad7794_spi_ready: %u \n", count);
     return count;
 }
 
@@ -250,7 +254,7 @@ void write_zest_reg(uint8_t dev, uint32_t addr, uint32_t val) {
                 + (val & g_devinfo.data_mask);
             break;
         default:
-            puts("write_zest_reg:  Invalid Device.\n");
+            printf("write_zest_reg:  Invalid Device.\n");
             return;
     }
 	SPI_SET_DAT_BLOCK( g_base_spi, inst );
@@ -458,7 +462,7 @@ void read_ad7794_adcs(void) {
     printf("ZEST AD7794 ADC:\n");
     for (ix=0; ix<6; ix++) {
         adc_vals[ix] = read_ad7794_channel(ix);
-        printf("  AIN %d: %#x", ix+1, adc_vals[ix]);
+        printf("  AIN %u: %#x", ix+1, adc_vals[ix]);
         printf(" Volt:");
         print_dec_fix((adc_vals[ix]) * 1.17, 24, 3); // internal 1.17V ref
         printf("[V]\n");

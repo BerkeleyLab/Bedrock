@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <stdbool.h>
+// printf() here uses %b format, not compatible with stdio
 #include "printf.h"
 #include "print.h"
 #include "i2c_soft.h"

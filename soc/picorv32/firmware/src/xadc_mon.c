@@ -2,7 +2,6 @@
 #include "settings.h"
 #include "xadc_mon.h"
 #include "common.h"
-#include <stdio.h>
 #include <stdbool.h>
 
 static uint16_t XADCValues[N_CHAN];
