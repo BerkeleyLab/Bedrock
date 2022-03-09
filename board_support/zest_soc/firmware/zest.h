@@ -1,9 +1,10 @@
 #ifndef ZEST_H
 #define ZEST_H
 
+#include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "print.h"
+// #include "print.h"
 
 // BASE2_ADDR
 #define ZEST_BASE2_ADC   0x000000

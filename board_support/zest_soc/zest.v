@@ -68,6 +68,14 @@ module zest #(
     input  [68:0] mem_packed_fwd,
     output [32:0] mem_packed_ret
 );
+//   attribute IODELAY_GROUP of IDELAYCTRL_adc_inst       : label is "in_delay_adc_grp";
+
+// (* IODELAY_GROUP="in_delay_adc_grp" *)
+// IDELAYCTRL idelayctrl_inst (
+//   .RST          ( rst ),
+//   .REFCLK       ( clk_200      ),
+//   .RDY          (              )
+// );
 
 wire [32:0] mem_packed_rets [N_CH-1:0];
 wire [32:0] mem_packed_ret_spi;

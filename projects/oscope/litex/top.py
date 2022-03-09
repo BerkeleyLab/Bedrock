@@ -7,7 +7,7 @@ from migen.genlib.cdc import PulseSynchronizer
 from litex.soc.cores.freqmeter import FreqMeter
 from litex.soc.cores import spi
 from litex.soc.interconnect import wishbone
-from litex.soc.integration.soc_sdram import soc_sdram_args, soc_sdram_argdict
+from litex.soc.integration.soc_core import soc_core_args, soc_core_argdict
 from litex.soc.integration.builder import builder_args, builder_argdict, Builder
 from litex.soc.interconnect.csr import CSRStatus, CSRField, AutoCSR, CSRStorage
 
@@ -91,8 +91,8 @@ class LTCSocDev(EthernetSoC, AutoCSR):
 def main():
     parser = argparse.ArgumentParser(description="LiteX SoC on MarbleMini")
     builder_args(parser)
-    soc_sdram_args(parser)
-    # soc_core_args(parser)
+    # soc_sdram_args(parser)
+    soc_core_args(parser)
     parser.add_argument("--with-ethernet", action="store_true",
                         help="enable Ethernet support")
     parser.add_argument("--ethernet-phy", default="rgmii",
@@ -102,11 +102,11 @@ def main():
     args = parser.parse_args()
 
     if args.with_ethernet:
-        soc = LTCSocDev(phy=args.ethernet_phy, **soc_sdram_argdict(args))
+        soc = LTCSocDev(phy=args.ethernet_phy, **soc_core_argdict(args))
         # soc = EthernetSoC(phy=args.ethernet_phy, **soc_sdram_argdict(args))
         # soc = EthernetSoC(phy=args.ethernet_phy, **soc_core_argdict(args))
     else:
-        soc = BaseSoC(**soc_sdram_argdict(args))
+        soc = BaseSoC(**soc_core_argdict(args))
 
     builder = Builder(soc, **builder_argdict(args))
     if not args.program_only:

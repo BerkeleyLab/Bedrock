@@ -6,7 +6,11 @@
 #include "timer.h"
 #include "spi.h"
 #include "print.h"
+#ifdef NONSTD_PRINTF
 #include "printf.h"
+#else
+#include <stdio.h>
+#endif
 #include "common.h"
 #include "iserdes.h"
 #include "sfr.h"
@@ -43,7 +47,7 @@ uint32_t wait_ad7794_spi_ready(void) {
             break;
         }
     }
-    debug_printf("    wait_ad7794_spi_ready: %d \n", count);
+    debug_printf("    wait_ad7794_spi_ready: %u \n", count);
     return count;
 }
 
@@ -223,7 +227,6 @@ void init_zest_spi(uint8_t dev) {
 
 void write_zest_reg(uint8_t dev, uint32_t addr, uint32_t val) {
     uint32_t inst=0;
-
     if (dev != g_devinfo.dev) {
         init_zest_spi(dev);
     }
@@ -457,7 +460,7 @@ void read_ad7794_adcs(void) {
     printf("ZEST AD7794 ADC:\n");
     for (ix=0; ix<6; ix++) {
         adc_vals[ix] = read_ad7794_channel(ix);
-        printf("  AIN %d: %#x", ix+1, adc_vals[ix]);
+        printf("  AIN %u: %#x", ix+1, adc_vals[ix]);
         printf(" Volt:");
         print_dec_fix((adc_vals[ix]) * 1.17, 24, 3); // internal 1.17V ref
         printf("[V]\n");
@@ -495,6 +498,7 @@ void dump_zest_dac_regs(void) {
 
 bool init_zest(uint32_t base, t_zest_init *init_data) {
     bool pass=true;
+    bool p = true;
     size_t ix;
     select_zest_addr(base);
 
@@ -513,8 +517,8 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     // LMK01801 init (CLK)
     //------------------------------
     init_zest_clocks(p_lmk01801_data);
-    pass &= check_zest_freq(0, fcnt_exp[0]);
-    printf("==== ZEST DSP CLK Freq====  : %s.\n", pass?"PASS":"FAIL");
+    p &= check_zest_freq(0, fcnt_exp[0]); pass &= p;
+    printf("==== ZEST DSP CLK Freq====  : %s.\n", p?"PASS":"FAIL");
 
     //------------------------------
     // AD9653 init (ADC)
@@ -523,11 +527,12 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     write_zest_reg(ZEST_DEV_AD9653_BOTH, 0x100, 0x46); // sample override to 125MSPS
     write_zest_reg(ZEST_DEV_AD9653_BOTH, 0xff, 1); // init sample override
     write_zest_regs(ZEST_DEV_AD9653_BOTH, p_ad9653_data->regmap, p_ad9653_data->len);
+    p = true;
     for (ix=0; ix<2; ix++) {
         debug_printf("  --- Checking ADC: AD9653 %d\n", ix);
-        pass &= check_zest_regs(g_zest_adcs[ix], p_ad9653_data);
+        p &= check_zest_regs(g_zest_adcs[ix], p_ad9653_data); pass &= p;
     }
-    printf("==== ZEST ADC(AD9653) ====  : %s.\n", pass?"PASS":"FAIL");
+    printf("==== ZEST ADC(AD9653) ====  : %s.\n", p?"PASS":"FAIL");
 
     dump_zest_adc_regs();
 
@@ -538,8 +543,8 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     write_zest_reg(ZEST_DEV_AD9781, 0x0, 0x20); // soft reset
     write_zest_regs(ZEST_DEV_AD9781, p_ad9781_data->regmap, p_ad9781_data->len);
     debug_printf("  --- Checking DAC: AD9781...\n");
-    pass &= check_zest_regs(ZEST_DEV_AD9781, p_ad9781_data);
-    printf("==== ZEST DAC(AD9781) ====  : %s.\n", pass?"PASS":"FAIL");
+    p = check_zest_regs(ZEST_DEV_AD9781, p_ad9781_data); pass &= p;
+    printf("==== ZEST DAC(AD9781) ====  : %s.\n", p?"PASS":"FAIL");
 
     dump_zest_dac_regs();
 
@@ -549,8 +554,8 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     reset_ad7794();
     write_zest_regs(ZEST_DEV_AD7794, p_ad7794_data->regmap, p_ad7794_data->len);
     debug_printf("  --- Checking Slow ADC: AD7794...\n");
-    pass &= check_zest_regs(ZEST_DEV_AD7794, p_ad7794_data);
-    printf("==== ZEST AD7794      ====  : %s.\n", pass?"PASS":"FAIL");
+    p = check_zest_regs(ZEST_DEV_AD7794, p_ad7794_data); pass &= p;
+    printf("==== ZEST AD7794      ====  : %s.\n", p?"PASS":"FAIL");
 
     //------------------------------
     // AMC7823 (8ADC+8DAC)
@@ -558,41 +563,43 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     write_zest_reg(ZEST_DEV_AMC7823, ((1<<6)|0xc), 0xbb30); // reset
     write_zest_regs(ZEST_DEV_AMC7823, p_amc7823_data->regmap, p_amc7823_data->len);
     debug_printf("  --- Checking Slow ADC/DAC: AMC7823...\n");
-    pass &= check_zest_regs(ZEST_DEV_AMC7823, p_amc7823_data);
-    printf("==== ZEST AMC7823     ====  : %s.\n", pass?"PASS":"FAIL");
+    p = check_zest_regs(ZEST_DEV_AMC7823, p_amc7823_data); pass &= p;
+    printf("==== ZEST AMC7823     ====  : %s.\n", p?"PASS":"FAIL");
 
     //------------------------------
     // Align clk_div
     //------------------------------
+    p = true;
     for (ix=0; ix<3; ix++) {
-        pass &= check_zest_freq(ix+1, fcnt_exp[ix+1]);
-        printf("  Clk DIV freq  %d Check: %s.\n", ix, pass?"PASS":"FAIL");
-        pass &= align_adc_clk_phase(ix, phs_center[ix]);
-        printf("  Clk DIV phase %d Check: %s.\n", ix, pass?"PASS":"FAIL");
+        p = check_zest_freq(ix+1, fcnt_exp[ix+1]); pass &= p;
+        printf("  Clk DIV freq  %d Check: %s.\n", ix, p?"PASS":"FAIL");
+        p = align_adc_clk_phase(ix, phs_center[ix]); pass &= p;
+        printf("  Clk DIV phase %d Check: %s.\n", ix, p?"PASS":"FAIL");
     }
-    pass &= check_zest_freq(3, fcnt_exp[3]);
-    printf("  DAC DCO freq  %d Check: %s.\n", ix, pass?"PASS":"FAIL");
-    pass &= check_div_clk_phase(2, phs_center[2]);
-    printf("  DAC DCO phase %d Check: %s.\n", ix, pass?"PASS":"FAIL");
+    p = check_zest_freq(3, fcnt_exp[3]); pass &= p;
+    printf("  DAC DCO freq  %d Check: %s.\n", ix, p?"PASS":"FAIL");
+    p = check_div_clk_phase(2, phs_center[2]); pass &= p;
+    printf("  DAC DCO phase %d Check: %s.\n", ix, p?"PASS":"FAIL");
 
     //------------------------------
     // ADC LVDS init
     //------------------------------
-    pass &= init_zest_adcs(g_base_adc, -1);
-    printf("==== ZEST ADC LVDS    ====  : %s.\n", pass?"PASS":"FAIL");
+    p = init_zest_adcs(g_base_adc, -1); pass &= p;
+    printf("==== ZEST ADC LVDS    ====  : %s.\n", p?"PASS":"FAIL");
     setup_waveform(g_base_wfm, 16);  // diagnostics
 
     //------------------------------
     // ADC PN9 validation
     //------------------------------
-    pass &= check_adc_prbs9();
-    printf("==== ZEST ADC PN9 Check====  : %s.\n", pass?"PASS":"FAIL");
+    p = check_adc_prbs9(); pass &= p;
+    printf("==== ZEST ADC PN9 Check====  : %s.\n", p?"PASS":"FAIL");
 
     //------------------------------
     // DAC SMP alignment
     //------------------------------
-    pass &= align_ad9781(phs_center[3]);
-    printf("==== ZEST DAC SMP Check====  : %s.\n", pass?"PASS":"FAIL");
+    p = align_ad9781(phs_center[3]); pass &= p;
+    printf("==== ZEST DAC SMP Check====  : %s.\n", p?"PASS":"FAIL");
+    printf("==== Overall Zest INIT ====  : %s.\n", pass?"PASS":"FAIL");
     return pass;
 }
 
