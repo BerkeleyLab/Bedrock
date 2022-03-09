@@ -1,5 +1,5 @@
 VFLAGS_DEP += -y$(DSP_DIR)/lo_lut -I$(DSP_DIR)/lo_lut
-VFLAGS += -y$(DSP_DIR)/lo_lut -I$(DSP_DIR)/lo_lut
+VFLAGS += -I$(DSP_DIR)/lo_lut
 
 lo_lut_f40.v: $(DSP_DIR)/lo_lut/lo_lut_gen.py
 	$(PYTHON) $< -a 131071.0 -p 14/33 -s 0.0 -b 18 -t "f40"
