@@ -118,7 +118,7 @@ class Zest(Module, AutoCSR):
         # set_property PROCESSING_ORDER LATE [get_files /home/w/work/lbl/bedrock/projects/trigger_capture/build/marble/gateware/marble.srcs/constrs_1/new/vivado_sucks_balls.xdc]
         platform.add_sources("../../", *sources)
 
-    def __init__(self, platform, bus):
+    def __init__(self, platform, bus, base_addr = 0x8):
         clk_to_fpga_dummy = platform.request("ZEST_CLK_TO_FPGA", 0)
         clk_to_fpga = platform.request("ZEST_CLK_TO_FPGA", 1)
         adc_d0 = platform.request("ZEST_ADC_D", 0)
@@ -178,6 +178,7 @@ class Zest(Module, AutoCSR):
         self.rst              = Signal()
         self.mem_packed_fwd   = Signal(69)
         self.mem_packed_ret   = Signal(33)
+        self.BASE_ADDR        = base_addr
 
         # # #
         self.dw = dw = 128
@@ -196,6 +197,7 @@ class Zest(Module, AutoCSR):
         self.specials += Instance("zest",
                                   # parameter PH_DIFF_ADV = 4693,  // ADV: 500*11/48 / 200/2*(1<<14) = 4693
                                   p_PH_DIFF_ADV = int(117.29 / 200/2*(1<<14)),
+                                  p_BASE_ADDR=self.BASE_ADDR,
                                   o_ADC_PDWN=self.ADC_PDWN,
                                   o_ADC_CSB_0=self.ADC_CSB_0,
                                   o_ADC_SYNC=self.ADC_SYNC,

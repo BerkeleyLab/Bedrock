@@ -40,7 +40,7 @@ class SDRAMLoopbackSoC(BaseSoC):
         self.add_memory_region("zest", self.mem_map["zest"], 0x1000000)
         self.add_wb_slave(self.mem_map["zest"], bus)
 
-        self.submodules.zest = Zest(self.platform, bus)
+        self.submodules.zest = Zest(self.platform, bus, 0x8)
 
         self.clock_domains.cd_adc    = ClockDomain()
 
