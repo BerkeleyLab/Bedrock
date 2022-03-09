@@ -6,6 +6,7 @@ module multi_sampler_tb;
 
    reg clk, trace;
    integer cc, endcc;
+   reg fail=0;
    initial begin
       if ($test$plusargs("vcd")) begin
          $dumpfile("multi_sampler.vcd");
@@ -15,7 +16,12 @@ module multi_sampler_tb;
          clk=0; #5;
          clk=1; #5;
       end
-      $finish();
+
+      $display("Validation: %s.", fail ? "FAIL":"PASS");
+      $display("##################################################");
+      if (~fail) $finish();
+      else $stop();
+
    end
 
    reg reset = 0, ext_trig = 0;
@@ -28,6 +34,14 @@ module multi_sampler_tb;
        @(cc==50) begin
             reset <= 0;
             ext_trig <= 1;
+       end
+
+       @(cc==997) begin
+            ext_trig <= 0;
+       end
+
+       @(cc==1200) begin
+            ext_trig <= 0;
        end
     end
 
@@ -50,14 +64,21 @@ module multi_sampler_tb;
       .reset           (reset),
       .ext_trig        (ext_trig),
 
-      .sample_period        (6'd33),
-      .dsample0_period      (6'd32),
-      .dsample1_period      (6'd32), //LCLS-II values, piezo sample
-      .dsample2_period      (6'd1),
+      .sample_period        (6'd2),
+      .dsample0_period      (6'd1),
+      .dsample1_period      (6'd1),
+      .dsample2_period      (6'd0),
       .sample_out           (sample_out),
       .dsample0_stb         (sample0),
       .dsample1_stb         (sample1),
       .dsample2_stb         (sample2)
    );
+
+   always @(posedge clk) begin
+        // check if sample_out_l stays high even after ext_trig = is zero.
+        // fixes the wavefrom freezing issue caused when sample_out_l was within
+        // reset.
+        if (cc > 997 && (ext_trig == 0) && i_dut.sample_out_l) fail = 1;
+   end
 
 endmodule
