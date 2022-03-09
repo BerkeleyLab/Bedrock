@@ -1,19 +1,20 @@
 [timestart] 8009
-[size] 1920 1016
+[size] 1436 896
 [pos] -1 -1
 *-9.114603 9970 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] multi_sampler_tb.
-[sst_width] 212
+[sst_width] 210
 [signals_width] 249
 [sst_expanded] 1
-[sst_vpaned_height] 292
+[sst_vpaned_height] 252
 @420
 multi_sampler_tb.cc
 @28
+multi_sampler_tb.fail
 multi_sampler_tb.i_dut.clk
 multi_sampler_tb.i_dut.reset
 multi_sampler_tb.i_dut.ext_trig
-@25
+@24
 multi_sampler_tb.i_dut.base_count[5:0]
 @28
 multi_sampler_tb.i_dut.sample_out_l

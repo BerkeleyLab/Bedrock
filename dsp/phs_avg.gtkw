@@ -1,10 +1,10 @@
 [timestart] 0
-[size] 1920 1056
-[pos] -1 -12
+[size] 1436 896
+[pos] -1 -1
 *-5.000000 17 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] phs_avg_tb.
 [treeopen] phs_avg_tb.dut.
-[sst_width] 212
+[sst_width] 210
 [signals_width] 445
 [sst_expanded] 1
 [sst_vpaned_height] 324
@@ -42,9 +42,7 @@ phs_avg_tb.dut.x[16:0]
 phs_avg_tb.dut.kx[15:0]
 phs_avg_tb.dut.y[16:0]
 phs_avg_tb.dut.ky[15:0]
-@421
 phs_avg_tb.dut.xmr[18:0]
-@420
 phs_avg_tb.dut.ymr[18:0]
 phs_avg_tb.dut.sum[19:0]
 phs_avg_tb.dut.intg[20:0]
