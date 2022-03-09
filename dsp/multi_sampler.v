@@ -46,8 +46,8 @@ module multi_sampler #(
 
    // Base-timing generation
    always @(posedge clk) begin
+      sample_out_l <= 0;
       if (reset) begin
-        sample_out_l <= 0;
         samp_per_r <= 0;
         base_count <= 0;
       end else if (ext_trig) begin
