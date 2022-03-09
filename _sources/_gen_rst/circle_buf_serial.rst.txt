@@ -69,6 +69,9 @@ Ports
    * - iclk
      - Input
      - 
+   * - reset
+     - Input
+     - 
    * - sr_in[buf_dw-1:0]
      - Input
      - Conveyor belt carrying n_chan channels
