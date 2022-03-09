@@ -21,6 +21,11 @@ if {[info exists ipcore_dirs]} {
 }
 
 project_add_files $my_proj_files
+
+if {[info exists prio_xci_files]} {
+    project_move_xci_to_front $prio_xci_files
+}
+
 project_run $my_verilog_defines
 project_rpt $my_proj_name
 project_write_bitstream $my_platform_name

@@ -125,6 +125,14 @@ proc project_add_files {project_files} {
     update_compile_order -fileset sources_1
 }
 
+proc project_move_xci_to_front {xci_files} {
+    # put .xci files on front as they need to be
+    # generated first.
+    update_compile_order -fileset sources_1
+    set_property source_mgmt_mode DisplayOnly [current_project]
+    reorder_files -fileset sources_1 -front $xci_files
+}
+
 # planAhead
 proc project_add_ucf {project_ucf} {
     import_files -fileset constrs_1 -force -norecurse $project_ucf
