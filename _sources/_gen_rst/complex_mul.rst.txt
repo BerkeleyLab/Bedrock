@@ -39,6 +39,23 @@ Pinout
 .. figure:: complex_mul_block.png
     :alt: Schematic symbol
 
+Parameters
+''''''''''
+
+.. list-table:: complex_mul_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - dw
+     - ?
+     - ?
+     - 18
+     - 
+
 Ports
 '''''
 
@@ -54,19 +71,19 @@ Ports
    * - gate_in
      - Input
      - Flag marking input data valid
-   * - x[17:0]
+   * - x[dw-1:0]
      - Input
      - Multiplicand, signed, time-interleaved real and imaginary
-   * - y[17:0]
+   * - y[dw-1:0]
      - Input
      - Multiplicand, signed, time-interleaved real and imaginary
    * - iq
      - Input
      - Flag marking the real (I) part of the complex pair
-   * - z[17:0]
+   * - z[dw-1:0]
      - Output
      - Result
-   * - z_all[35:0]
+   * - z_all[(2*dw)-1:0]
      - Output
      - Result
    * - gate_out
