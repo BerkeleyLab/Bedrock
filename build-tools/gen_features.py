@@ -85,7 +85,7 @@ def write_vlog(basename, cfg_dict, split=False, verbose=False):
         if (v == 0):
             FD.write("//")
         FD.write(d_string % d.upper())
-    FD.write("\n`endif // __%s__" % basename.upper())
+    FD.write("\n`endif // __%s__\n" % basename.upper())
 
 
 if __name__ == "__main__":

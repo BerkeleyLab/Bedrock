@@ -279,9 +279,12 @@ tap_start: rtefi_live tap-vpi.vpi
 # =====
 # Verilator
 # My first ever attempt!  Probably full of bogosities, but it does work.
+# References for adding -CFLAGS -Wno-logical-op to the verilator command line:
+# https://github.com/verilator/verilator/issues/3334
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=69602
 Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
+	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -CFLAGS -Wno-logical-op -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vrtefi_blob.mk
 	mv obj_dir/$@ $@
 
