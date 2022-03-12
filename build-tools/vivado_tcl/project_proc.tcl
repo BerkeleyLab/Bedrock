@@ -62,6 +62,11 @@ proc project_create {platform_name project_name} {
         set project_part "xczu28dr-ffvg1517-2-e"
         set project_board "xilinx.com:zcu111:part0:1.1"
     }
+    if [regexp "zcu208" $platform_name] {
+        set platform "zcu208"
+        set project_part "xczu48dr-fsvg1517-2-e"
+        set project_board "xilinx.com:zcu208:part0:2.0"
+    }
     # planahead
     #
     if {$platform eq "ml605"} {
@@ -199,15 +204,15 @@ proc project_rpt {project_name} {
 }
 
 proc project_write_bitstream {platform} {
-    if {($platform ne "vc707" && $platform ne "zcu111")} {
+    if {($platform ne "vc707" && $platform ne "zcu111" && $platform ne "zcu208")} {
         set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [get_designs impl_1]
     }
-    if {$platform ne "zcu111"} {
+    if {$platform ne "zcu111" && $platform ne "zcu208"} {
         set_property BITSTREAM.CONFIG.CONFIGRATE 33 [get_designs impl_1]
     }
 
     write_bitstream -force [current_project].bit
-    if {$platform ne "zcu111"} {
+    if {$platform ne "zcu111" && $platform ne "zcu208"} {
         write_cfgmem -force -format bin -interface spix4 -size 16 -loadbit "up 0x0 [current_project].bit" -file [current_project].bin
     }
 }
