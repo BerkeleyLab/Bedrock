@@ -175,7 +175,7 @@ else
 	promgen -w -spi -p mcs -o $@ -s 16384 -u 0 $<
 endif
 
-UNISIM_CRAP = 'BUFGCE|IOBUF|BUFG|IBUF|IBUFDS_GTE2|ICAPE2|STARTUPE2|MMCME2_BASE'
+UNISIM_CRAP = 'BUFG|BUFGCE|BUFG_GT|BUFH|FD|IBUF|IBUFDS|IBUFDS_GTE2|IBUFDS_GTE4|IBUFGDS|IDDR|IDELAYE2|IOBUF|MMCME2_BASE|MMCME4_A|OBUF|OBUFDS'
 
 # Auto-generated verilog entities shall be set by globally appending to this variable
 $(DEPDIR)/%.bit.d: %.v $(VERILOG_AUTOGEN)
