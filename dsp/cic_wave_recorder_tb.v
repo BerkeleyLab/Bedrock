@@ -1,7 +1,7 @@
 `timescale 1ns / 1ns
 `include "constants.vams"
 
-/* Barebones testbench to facilitate compile checks on DUT and check connectivity.
+/* Bare-bones testbench to facilitate compile checks on DUT and check connectivity.
    Not intended to be comprehensive or do any self-checks. For more thorough testing see:
    - cic_multichannel_tb
    - circle_buf_serial_tb

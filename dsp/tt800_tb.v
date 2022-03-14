@@ -28,7 +28,7 @@ always @(posedge clk) begin
 	en <= (cc>=10 && cc<35) | (cc>47);
 	initv <= 32'bx;
 	case (cc-9)
-	// run the five lines of inital seeds in tt800_ref.c through the following pipe:
+	// run the five lines of initial seeds in tt800_ref.c through the following pipe:
 	// tr ' ' '\n' | grep . | sed -e "s/0x/32'h/" -e "s/,/;/" | awk '{print "\t" FNR ": initv <=",$0}'
 	1: initv <= 32'h95f24dab;
 	2: initv <= 32'h0b685215;

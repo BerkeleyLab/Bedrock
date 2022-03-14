@@ -1,6 +1,6 @@
 class c_lmk01801:
     # LMK01801 register names taken directly from TI datasheet:
-    #   SNAS573A – JANUARY 2012 – REVISED APRIL 2013
+    #   SNAS573A - JANUARY 2012 - REVISED APRIL 2013
     # Default values given here match default (power-on) values listed in table 8-2
     # Comments about output channel assignments refer to LBNL Zest board
 

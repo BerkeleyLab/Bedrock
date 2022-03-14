@@ -44,7 +44,8 @@ XCIRCUIT = xcircuit
 VIVADOEXEC = vivado
 SYNTH_VIVADO = $(VIVADOEXEC) -mode batch -source
 # apt-get install xvfb
-# normally OK to blank out XVFB if you don't have xvfb-run and don't mind pop-ups
+# Normally OK to blank out XVFB if you don't have xvfb-run and don't mind pop-ups.
+# Plus, it's only used in one maintainer-mode target below.
 XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
 
 # used for size and speed measurements, not actual hardware
@@ -362,9 +363,10 @@ VCD_ARGS_selfmac.vcd = +packet_file=$(filter %selfmac_in.dat, $^)
 # =====
 # If you've kept your .gtkw files up to date, this target should do nothing.
 # Still learning how window managers affect [sst_width].
-# rtefi_sim.gtkw is an oddball.
+# rtefi_sim.gtkw and hw_test.gtkw are oddball, only useful interactively.
+# The tail command gets rid of the non-reproducible GTKWave header.
 gtkw_refresh:
-	for f in *.gtkw; do if test $$f != rtefi_sim.gtkw; then $(XVFB) make $${f%.gtkw}_view GTKW_OPT="-r gtkwave_nosplash.rc -S resave.tcl"; tail -n +9 $$f > temp_$$$$.gtkw && mv temp_$$$$.gtkw $$f; fi; done
+	for f in *.gtkw; do if test $$f != rtefi_sim.gtkw && test $$f != hw_test.gtkw; then $(XVFB) make $${f%.gtkw}_view GTKW_OPT="-r gtkwave_nosplash.rc -S resave.tcl"; tail -n +9 $$f > temp_$$$$.gtkw && mv temp_$$$$.gtkw $$f; fi; done
 
 # Documentation from Du
 lb_timing_demo.pdf: lb_timing_demo.vcd lb_timing_demo.gtkw

@@ -1,10 +1,10 @@
 `timescale 1ns / 1ns
 
 // Phase averaging: LCLS-II
-// Basic idea is to multiply the foward downconverted signal with a user-settable PRL gain.
+// Basic idea is to multiply the forward downconverted signal with a user-settable PRL gain.
 // Similarly multiply the reverse downconverted signal with a PRL gain.
 // Note: All inputs are complex interleaved I/Q data.
-// Then average these products and disgard real values, consider only imag.
+// Then average these products and discard real values, consider only imag.
 // Finally integrate the averaged values.
 
 // Complex multiplication:
