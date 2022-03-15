@@ -11,7 +11,7 @@
 module iq_deinterleaver #(
    parameter scale_wi  = 18, // Width of scale input and downscale factor
    parameter dwi       = 16, // Width of iq stream
-   parameter davr      = 4)  // Guard bits to keep at output of scale multiplicaiton
+   parameter davr      = 4)  // Guard bits to keep at output of scale multiplication
 (
    input                        clk,
    input  signed [scale_wi-1:0] scale_in,   // Scaling factor; scale is typically positive;

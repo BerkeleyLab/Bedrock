@@ -36,7 +36,7 @@ always #5 clk=~clk;  // 100 MHz clk
 
 reg start=0;
 //============================================================
-// spi start generater
+// spi start generator
 //============================================================
 always @(posedge clk) begin
 	if ((($time>50)&&($time<100))||(($time>3000)&&($time<3050)))

@@ -220,7 +220,7 @@ strongly pipelined logic.
 ### Coding and style guidelines
 
 In addition to the general recommendations above, we strive for a uniform
-Verilog coding style that emphasizes readibility, reduces systematic errors and promotes
+Verilog coding style that emphasizes readability, reduces systematic errors and promotes
 code re-use. The [RTL Guidelines](rtl_guidelines.md) document, which is itself
 open to improvements and suggestions, attempts to formalize this process in the
 form of coding and style guidelines that apply to some of the most common facets of RTL coding.

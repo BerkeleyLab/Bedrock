@@ -76,7 +76,7 @@ module multi_sampler_tb;
 
    always @(posedge clk) begin
         // check if sample_out_l stays high even after ext_trig = is zero.
-        // fixes the wavefrom freezing issue caused when sample_out_l was within
+        // fixes the waveform freezing issue caused when sample_out_l was within
         // reset.
         if (cc > 997 && (ext_trig == 0) && i_dut.sample_out_l) fail = 1;
    end

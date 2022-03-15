@@ -1,6 +1,6 @@
 # badger_lwip
 
-Demonstrates the badger MAC with the `Lightweight TCPIP stack` (lwIP).
+Demonstrates the badger MAC with the `Lightweight TCP/IP stack` (lwIP).
 Verilator is used to build an emulator which connects to the real world through a virtual TAP network interface.
 
 # Instructions
@@ -35,7 +35,7 @@ sudo ip link set dev tap0 up
     on the local TAP0 network
 
 ### (Bridging)[https://wiki.archlinux.org/index.php/Network_bridge] tap0
-A bridge is like a virtual network switch, connecting two or more links together (here tap0 and eth0). This allows the verilog simulation to access the internet.
+A bridge is like a virtual network switch, connecting two or more links together (here tap0 and eth0). This allows the Verilog simulation to access the Internet.
 
 ```bash
 sudo ip link add name br0 type bridge

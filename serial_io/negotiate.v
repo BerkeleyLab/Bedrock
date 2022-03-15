@@ -256,7 +256,7 @@ module negotiate(
       an_status      <= an_status_r;
    end
 
-   // 16-bit ethernet configuration register as documented in
+   // 16-bit Ethernet configuration register as documented in
    // Networking Protocol Fundamentals, by James Long
    // and http://grouper.ieee.org/groups/802/3/z/public/presentations/nov1996/RTpcs8b_sum5.pdf
    reg  FD=1;   // Full Duplex capable

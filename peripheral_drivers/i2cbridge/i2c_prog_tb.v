@@ -90,7 +90,7 @@ i2c_bit bit (.clk(clk),
 	.scl_o(scl_o), .sda_o(sda_o), .sda_v(sda_v), .sda_h(sda_h)
 );
 
-// Simulated slave hardare
+// Simulated slave hardware
 i2c_slave_model #(.I2C_ADR(SADR), .debug(0)) slave (.scl(scl_v), .sda(sda_v));
 
 // Check of results
