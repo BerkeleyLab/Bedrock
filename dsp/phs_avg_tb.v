@@ -8,7 +8,11 @@
 
 module phs_avg_tb;
 
+parameter dwi = 17;
+parameter dwj = 16;
+
 reg clk;
+reg fail=0;
 integer cc;
 initial begin
 	if ($test$plusargs("vcd")) begin
@@ -19,6 +23,13 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+    $display("Validation: %s.", fail ? "FAIL":"PASS");
+    if (~fail) $finish();
+    else begin
+	    $display("### Check code for bit-width incompatibility ###");
+        $display("##################################################");
+        $stop();
+    end
 end
 
 // Output file (if any) for dumping the results
@@ -30,15 +41,15 @@ initial begin
 		out_file = $fopen(out_file_name,"w");
 end
 
-reg signed [16:0] x=0;
-reg signed [16:0] y=0;
+reg signed [dwi-1:0] x=0;
+reg signed [dwi-1:0] y=0;
 reg [2:0] state=0;
 wire iq=state[0];
 always @(posedge clk) begin
 	state <= state+1;
     if (cc<425) begin
-        x  <= ~iq ? 2000 : 600;
-        y  <= ~iq ? 1000 : 500;
+        x  <= ~iq ? 32000 : 600;
+        y  <= ~iq ? 32000 : 500;
     end else begin
         x <= 0;
         y <= 0;
@@ -53,18 +64,18 @@ reg lb_write=0;
 
 `AUTOMATIC_decode
 
-wire signed [18:0] z;
-wire signed [19:0] sum_filt;
+wire signed [dwi+1:0] z;
+wire signed [dwi+3:0] sum_filt;
 phs_avg dut // auto
 	(.clk(clk), .iq(iq), .x(x), .y(y), .sum_filt(sum_filt), .z(z), `AUTOMATIC_dut);
 
 // Set control registers from command line
 // See also lp_setup in lp_notch_test.py
-reg signed [15:0] kxr, kxi, kyr, kyi;
+reg signed [dwj-1:0] kxr, kxi, kyr, kyi;
 initial begin
-	if (!$value$plusargs("kxr=%d", kxr)) kxr = 700;
+	if (!$value$plusargs("kxr=%d", kxr)) kxr = 1000;
 	if (!$value$plusargs("kxi=%d", kxi)) kxi = 100;
-	if (!$value$plusargs("kyr=%d", kyr)) kyr = 600;
+	if (!$value$plusargs("kyr=%d", kyr)) kyr = -1000;
 	if (!$value$plusargs("kyi=%d", kyi)) kyi = 200;
 	#1;
 	dp_dut_kx.mem[0] = kxr;  // k_X  real part
@@ -76,9 +87,9 @@ end
 // Write a comprehensible output file
 // One line per pair of clock cycles
 // Also gives the timing diagram something comprehensible to look at and graph
-reg signed [18:0] z1=0;
-reg signed [16:0] y1=0, y_i=0, y_q=0;
-reg signed [16:0] x1=0, x_i=0, x_q=0;
+reg signed [dwi+1:0] z1=0;
+reg signed [dwi-1:0] y1=0, y_i=0, y_q=0;
+reg signed [dwi-1:0] x1=0, x_i=0, x_q=0;
 always @(posedge clk) begin
 	x1 <= x;
 	y1 <= y;
@@ -88,6 +99,20 @@ always @(posedge clk) begin
 	if (~iq) x_i <= x1;
 	if (~iq) x_q <= x;
 	if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d %d\n", x_i, x_q, y_i, y_q, z1);
+end
+
+// to check the bit-width
+reg signed [dwj-1:0] kx_i=0, ky_i=0;
+always @(posedge clk) begin
+    kx_i  <= dut.xmul.y;
+    ky_i  <= dut.ymul.y;
+end
+// get the parity bit to compare
+wire xmul_val = (~^kx_i != ~^dut.xmul.y1);
+wire ymul_val = (~^ky_i != ~^dut.ymul.y1);
+
+always @(posedge clk) begin
+    if (xmul_val || ymul_val) fail = 1;
 end
 
 endmodule

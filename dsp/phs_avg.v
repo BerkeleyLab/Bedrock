@@ -77,7 +77,7 @@ module phs_avg_mul #(
 	output signed [dwi+1:0] z
 );
 
-reg signed [dwi-1:0] y1 = 0;
+reg signed [dwj-1:0] y1 = 0;
 reg signed [(dwi+dwj)-1:0] prod = 0;
 wire signed [dwi+1:0] prod_msb = prod[(dwi+dwj)-2:dwi-4];
 always @(posedge clk) begin

@@ -1,10 +1,10 @@
 [timestart] 0
 [size] 1436 896
 [pos] -1 -1
-*-5.000000 17 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-5.000000 15 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] phs_avg_tb.
 [treeopen] phs_avg_tb.dut.
-[sst_width] 210
+[sst_width] 212
 [signals_width] 445
 [sst_expanded] 1
 [sst_vpaned_height] 324
@@ -20,7 +20,6 @@ phs_avg_tb.dut.iq
 @420
 phs_avg_tb.dut.xmul.x[16:0]
 phs_avg_tb.dut.xmul.y[15:0]
-phs_avg_tb.dut.xmul.y1[16:0]
 phs_avg_tb.dut.xmul.prod[32:0]
 phs_avg_tb.dut.xmul.prod_msb[18:0]
 phs_avg_tb.dut.xmul.z[18:0]
@@ -47,5 +46,14 @@ phs_avg_tb.dut.ymr[18:0]
 phs_avg_tb.dut.sum[19:0]
 phs_avg_tb.dut.intg[20:0]
 phs_avg_tb.dut.z[18:0]
+@200
+-
+@201
+-Check bit-width
+@22
+phs_avg_tb.kx_i[15:0]
+phs_avg_tb.dut.xmul.y1[15:0]
+phs_avg_tb.ky_i[15:0]
+phs_avg_tb.dut.ymul.y1[15:0]
 [pattern_trace] 1
 [pattern_trace] 0
