@@ -7,7 +7,7 @@ TEST_BENCH = data_xdomain_tb upconv_tb half_filt_tb complex_mul_tb tt800_tb rot_
 
 TGT_ := $(TEST_BENCH)
 
-NO_CHECK = piloop2_check cavity_check lp_check phs_avg_check banyan_mem_check
+NO_CHECK = piloop2_check cavity_check lp_check banyan_mem_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 CHK_ += multiply_accumulate_pycheck non_iq_interleaved_piloop_pycheck
 NO_LINT = $(NO_CHECK) mon_12_lint biquad_lint

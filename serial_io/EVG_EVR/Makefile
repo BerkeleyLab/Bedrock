@@ -24,6 +24,6 @@ NMEAtest_check: NMEAtest
         '$$GPRMC,010455.000,A,3754.7666,N,12201.4667,W,0.01,0.00,220420,,,D*7C'\
         '$$GPGSV,1,1,00*79'
 
-CLEAN += NMEAtest NMEAtest.o NMEA.o tinyEVR_tb
+CLEAN += NMEAtest NMEAtest.o NMEA.o tinyEVR_tb evrSROC_tb
 
 include $(BUILD_DIR)/bottom_rules.mk
