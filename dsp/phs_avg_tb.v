@@ -45,8 +45,11 @@ reg signed [dwi-1:0] x=0;
 reg signed [dwi-1:0] y=0;
 reg [2:0] state=0;
 wire iq=state[0];
+reg reset = 0;
 always @(posedge clk) begin
-	state <= state+1;
+    state <= state+1;
+    if (cc<5) reset <= 1;
+    else reset <= 0;
     if (cc<425) begin
         x  <= ~iq ? 32000 : 600;
         y  <= ~iq ? 32000 : 500;
@@ -67,7 +70,7 @@ reg lb_write=0;
 wire signed [dwi+1:0] z;
 wire signed [dwi+3:0] sum_filt;
 phs_avg dut // auto
-	(.clk(clk), .iq(iq), .x(x), .y(y), .sum_filt(sum_filt), .z(z), `AUTOMATIC_dut);
+	(.clk(clk), .reset(reset), .iq(iq), .x(x), .y(y), .sum_filt(sum_filt), .z(z), `AUTOMATIC_dut);
 
 // Set control registers from command line
 // See also lp_setup in lp_notch_test.py

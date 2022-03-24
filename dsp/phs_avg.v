@@ -32,6 +32,7 @@ module phs_avg #(
     parameter dwj = 16)
 (
 	input clk,  // timespec 6.66 ns
+	input reset,
 	input iq,
 	input signed [dwi-1:0] x,
 	input signed [15:0] kx,  // external
@@ -54,9 +55,10 @@ phs_avg_mul #(.dwi(17), .dwj(16)) ymul(.clk(clk), .iq(iq), .x(y),  .y(ky), .z(ym
 reg signed [dwi+2:0] sum = 0, sum1 = 0;
 reg signed [dwi+3:0] intg = 0;
 always @(posedge clk) begin
-	sum <= xmr + ymr;
+        sum <= xmr + ymr;
         sum1 <= sum;
-        intg <= sum + intg; // Integrator
+        if (reset) intg <= 0;
+        else intg <= sum + intg; // Integrator
 end
 
 // 2-tap filter [1, 1]
@@ -81,8 +83,8 @@ reg signed [dwj-1:0] y1 = 0;
 reg signed [(dwi+dwj)-1:0] prod = 0;
 wire signed [dwi+1:0] prod_msb = prod[(dwi+dwj)-2:dwi-4];
 always @(posedge clk) begin
-	y1 <= y;
-	prod <= x * y1;
+        y1 <= y;
+        prod <= x * y1;
 end
 
 assign z = prod_msb;
