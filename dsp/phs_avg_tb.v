@@ -68,7 +68,7 @@ reg lb_write=0;
 `AUTOMATIC_decode
 
 wire signed [dwi+1:0] z;
-wire signed [dwi+3:0] sum_filt;
+wire signed [dwi+7:0] sum_filt;
 phs_avg dut // auto
 	(.clk(clk), .reset(reset), .iq(iq), .x(x), .y(y), .sum_filt(sum_filt), .z(z), `AUTOMATIC_dut);
 

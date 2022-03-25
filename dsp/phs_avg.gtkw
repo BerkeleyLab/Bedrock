@@ -1,13 +1,13 @@
 [timestart] 0
-[size] 1436 896
-[pos] -1 -1
-*-5.000000 15 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[size] 959 1055
+[pos] 727 -72
+*-5.000000 25 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] phs_avg_tb.
 [treeopen] phs_avg_tb.dut.
 [sst_width] 212
 [signals_width] 445
 [sst_expanded] 1
-[sst_vpaned_height] 324
+[sst_vpaned_height] 395
 @28
 phs_avg_tb.dut.xmul.clk
 phs_avg_tb.dut.xmul.iq
@@ -21,15 +21,17 @@ phs_avg_tb.dut.iq
 phs_avg_tb.dut.xmul.x[16:0]
 phs_avg_tb.dut.xmul.y[15:0]
 phs_avg_tb.dut.xmul.prod[32:0]
-phs_avg_tb.dut.xmul.prod_msb[18:0]
-phs_avg_tb.dut.xmul.z[18:0]
+phs_avg_tb.dut.xmul.prod_msb[22:0]
+phs_avg_tb.dut.xmul.z[22:0]
 @200
 -
 -MUL2
 @420
 phs_avg_tb.dut.ymul.x[16:0]
 phs_avg_tb.dut.ymul.y[15:0]
-phs_avg_tb.dut.ymul.z[18:0]
+phs_avg_tb.dut.ymul.prod[32:0]
+phs_avg_tb.dut.ymul.prod_msb[22:0]
+phs_avg_tb.dut.ymul.z[22:0]
 @200
 -
 -Final addition
@@ -39,16 +41,19 @@ phs_avg_tb.dut.xmul.iq
 @420
 phs_avg_tb.dut.x[16:0]
 phs_avg_tb.dut.kx[15:0]
+phs_avg_tb.dut.xmr[22:0]
 phs_avg_tb.dut.y[16:0]
 phs_avg_tb.dut.ky[15:0]
-phs_avg_tb.dut.xmr[18:0]
-phs_avg_tb.dut.ymr[18:0]
-phs_avg_tb.dut.sum[19:0]
-phs_avg_tb.dut.intg[20:0]
+phs_avg_tb.dut.ymr[22:0]
+phs_avg_tb.dut.sum[23:0]
+phs_avg_tb.dut.sum1[23:0]
+@421
+phs_avg_tb.dut.sum_filt[24:0]
+@420
+phs_avg_tb.dut.intg[24:0]
 phs_avg_tb.dut.z[18:0]
 @200
 -
-@201
 -Check bit-width
 @22
 phs_avg_tb.kx_i[15:0]

@@ -40,20 +40,20 @@ module phs_avg #(
 	input signed [dwi-1:0] y,
 	input signed [15:0] ky,  // external
 	output [0:0] ky_addr,    // external address for kx
-       output signed [dwi+3:0] sum_filt, // debug only
+       output signed [dwi+7:0] sum_filt, // debug only
 	output signed [dwi+1:0] z
 );
 
 assign kx_addr = iq;
 assign ky_addr = iq;
 
-wire signed [dwi+1:0] xmr, ymr;
+wire signed [dwi+5:0] xmr, ymr;
 
 phs_avg_mul #(.dwi(17), .dwj(16)) xmul(.clk(clk), .iq(iq), .x(x),  .y(kx), .z(xmr));
 phs_avg_mul #(.dwi(17), .dwj(16)) ymul(.clk(clk), .iq(iq), .x(y),  .y(ky), .z(ymr));
 
-reg signed [dwi+2:0] sum = 0, sum1 = 0;
-reg signed [dwi+3:0] intg = 0;
+reg signed [dwi+6:0] sum = 0, sum1 = 0;
+reg signed [dwi+7:0] intg = 0;
 always @(posedge clk) begin
         sum <= xmr + ymr;
         sum1 <= sum;
@@ -64,7 +64,7 @@ end
 // 2-tap filter [1, 1]
 assign sum_filt = sum1 + sum; // Debug only
 
-assign z = intg[dwi+2:1];
+assign z = intg[dwi+6:5];
 
 endmodule
 
@@ -76,12 +76,12 @@ module phs_avg_mul #(
 	input iq,
 	input signed [dwi-1:0] x,
 	input signed [dwj-1:0] y,
-	output signed [dwi+1:0] z
+	output signed [dwi+5:0] z
 );
 
 reg signed [dwj-1:0] y1 = 0;
 reg signed [(dwi+dwj)-1:0] prod = 0;
-wire signed [dwi+1:0] prod_msb = prod[(dwi+dwj)-2:dwi-4];
+wire signed [dwi+5:0] prod_msb = prod[(dwi+dwj)-2:dwi-8];
 always @(posedge clk) begin
         y1 <= y;
         prod <= x * y1;
