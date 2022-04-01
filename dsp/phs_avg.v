@@ -40,7 +40,7 @@ module phs_avg #(
 	input signed [dwi-1:0] y,
 	input signed [15:0] ky,  // external
 	output [0:0] ky_addr,    // external address for kx
-       output signed [dwi+7:0] sum_filt, // debug only
+	output signed [dwi+7:0] sum_filt, // debug
 	output signed [dwi+1:0] z
 );
 
@@ -53,17 +53,16 @@ phs_avg_mul #(.dwi(17), .dwj(16)) xmul(.clk(clk), .iq(iq), .x(x),  .y(kx), .z(xm
 phs_avg_mul #(.dwi(17), .dwj(16)) ymul(.clk(clk), .iq(iq), .x(y),  .y(ky), .z(ymr));
 
 reg signed [dwi+6:0] sum = 0, sum1 = 0;
+reg signed [dwi+7:0] sum_f = 0;
 reg signed [dwi+7:0] intg = 0;
 always @(posedge clk) begin
         sum <= xmr + ymr;
         sum1 <= sum;
+        sum_f <= sum1 + sum;  // 2-tap filter [1, 1]
         if (reset) intg <= 0;
-        else intg <= sum + intg; // Integrator
+        else intg <= (sum_f >>> 1) + intg; // Integrator
 end
-
-// 2-tap filter [1, 1]
-assign sum_filt = sum1 + sum; // Debug only
-
+assign sum_filt = sum_f;
 assign z = intg[dwi+6:5];
 
 endmodule
