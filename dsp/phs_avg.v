@@ -80,11 +80,12 @@ module phs_avg_mul #(
 );
 
 reg signed [dwj-1:0] y1 = 0;
-reg signed [(dwi+dwj)-1:0] prod = 0;
-wire signed [dwi+1:0] prod_msb = prod[(dwi+dwj)-2:dwi-4];
+reg signed [(dwi+dwj)-1:0] prod = 0, prod1 = 0;
+wire signed [dwi+1:0] prod_msb = prod1[(dwi+dwj)-2:dwi-4];
 always @(posedge clk) begin
         y1 <= y;
         prod <= x * y1;
+	 prod1 <= prod; // pipelining as suggested by the tool
 end
 
 assign z = prod_msb;
