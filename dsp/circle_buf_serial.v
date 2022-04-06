@@ -94,6 +94,29 @@ module circle_buf_serial #(
       $display("ERROR: Gate-per-Trigger ratio violated in fchan_selector.");
       $finish;
    end
+   // Output file (if any) for dumping the results
+   integer out_file;
+   reg [255:0] out_file_name;
+   reg signed [19:0] wave_i, wave_q;
+   reg needs_cr=0;
+   initial begin
+      out_file = 0;
+      if ($value$plusargs("conveyor_file=%s", out_file_name))
+         out_file = $fopen(out_file_name,"w");
+   end
+   always @(negedge iclk) if (out_file != 0) begin
+      if (wave_trig && needs_cr) begin
+         $fwrite(out_file, "\n");
+         needs_cr = 0;
+      end
+      if (wave_gate) begin
+         // Statically configured hack for now
+         wave_i = wave_data[39:20];
+         wave_q = wave_data[19:0];
+         $fwrite(out_file, " %d %d", wave_i, wave_q);
+         needs_cr = 1;
+      end
+   end
 `endif
 
    // ------

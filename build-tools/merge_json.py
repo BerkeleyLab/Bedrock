@@ -18,7 +18,14 @@ def merge_with_quit_on_collision(*args):
                 if k in final:
                     exit('key {} in file {} already exists in a previously merged file'.format(k, f))
                 else:
-                    final[k] = json_dict[k]
+                    entry = json_dict[k]
+                    # Allow (string) hex numbers for base_addr in input,
+                    # but convert them to numeric here; always emit decimal.
+                    if "base_addr" in entry:
+                        aa = entry["base_addr"]
+                        if type(aa) is str:
+                            entry["base_addr"] = int(aa, 0)
+                    final[k] = entry
     return final
 
 
