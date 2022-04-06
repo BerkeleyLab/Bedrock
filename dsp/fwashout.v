@@ -7,7 +7,7 @@
 // Evaluating gain at f_s*7/33 using python3:
 // from numpy import exp, pi; cut=4; N=2**cut; p=(N-1)/N
 // z=exp(2j*pi*7/33); gain=(z-1)/z/(z-p); print(abs(gain))
-module fwashout(
+module fwashout #(
 	parameter a_dw = 16,
 	parameter o_dw = 16,
 	parameter cut = 4
