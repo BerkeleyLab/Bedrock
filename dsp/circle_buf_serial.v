@@ -97,7 +97,7 @@ module circle_buf_serial #(
    // Output file (if any) for dumping the results
    integer out_file;
    reg [255:0] out_file_name;
-   reg signed [19:0] wave_i, wave_q;
+   reg signed [21:0] wave_i, wave_q;
    reg needs_cr=0;
    initial begin
       out_file = 0;
@@ -111,8 +111,8 @@ module circle_buf_serial #(
       end
       if (wave_gate) begin
          // Statically configured hack for now
-         wave_i = wave_data[39:20];
-         wave_q = wave_data[19:0];
+         wave_i = wave_data[43:22];
+         wave_q = wave_data[21:0];
          $fwrite(out_file, " %d %d", wave_i, wave_q);
          needs_cr = 1;
       end
