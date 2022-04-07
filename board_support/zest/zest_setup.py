@@ -107,7 +107,7 @@ class c_zest:
         print('clkout3 Frequency %.3f MHz' % self._freq_get_convert("frequency_clkout3"))
         print('DCO Frequency     %.3f MHz' % self._freq_get_convert("frequency_dco"))
 
-    def hardware_reset(self):
+    def hardware_reset(self, injector=False):
         print("Entering hardware_reset")
         aok = self.digitizer_spi_init(dac_nm_mode=self.dac_nm_mode)
         if not aok:
