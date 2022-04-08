@@ -107,12 +107,12 @@ end
 // to check the bit-width
 reg signed [dwj-1:0] kx_i=0, ky_i=0;
 always @(posedge clk) begin
-    kx_i  <= dut.xmul.y;
-    ky_i  <= dut.ymul.y;
+    kx_i  <= dut.kx;
+    ky_i  <= dut.ky;
 end
 // get the parity bit to compare
-wire xmul_val = (~^kx_i != ~^dut.xmul.y1);
-wire ymul_val = (~^ky_i != ~^dut.ymul.y1);
+wire xmul_val = (~^kx_i != ~^dut.kx1);
+wire ymul_val = (~^ky_i != ~^dut.ky1);
 
 always @(posedge clk) begin
     if (xmul_val || ymul_val) fail = 1;

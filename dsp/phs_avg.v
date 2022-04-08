@@ -47,10 +47,18 @@ module phs_avg #(
 assign kx_addr = iq;
 assign ky_addr = iq;
 
-wire signed [dwi+5:0] xmr, ymr;
+wire signed [dwi+5:0] xmr = prod_x[(dwi+dwj)-2:dwi-8];
+wire signed [dwi+5:0] ymr = prod_y[(dwi+dwj)-2:dwi-8];
 
-phs_avg_mul #(.dwi(17), .dwj(16)) xmul(.clk(clk), .iq(iq), .x(x),  .y(kx), .z(xmr));
-phs_avg_mul #(.dwi(17), .dwj(16)) ymul(.clk(clk), .iq(iq), .x(y),  .y(ky), .z(ymr));
+reg signed [dwj-1:0] kx1 = 0, ky1 = 0;
+reg signed [(dwi+dwj)-1:0] prod_x = 0, prod_y = 0;
+always @(posedge clk) begin
+        // Delay gains, to multiply I*R
+        kx1 <= kx;
+        ky1 <= ky;
+        prod_x <= x * kx1;
+        prod_y <= y * ky1;
+end
 
 reg signed [dwi+6:0] sum = 0, sum1 = 0;
 reg signed [dwi+7:0] sum_f = 0;
@@ -65,26 +73,4 @@ end
 assign sum_filt = sum_f;
 assign z = intg[dwi+6:5];
 
-endmodule
-
-module phs_avg_mul #(
-    parameter dwi = 17,
-    parameter dwj = 16)
-(
-	input clk,
-	input iq,
-	input signed [dwi-1:0] x,
-	input signed [dwj-1:0] y,
-	output signed [dwi+5:0] z
-);
-
-reg signed [dwj-1:0] y1 = 0;
-reg signed [(dwi+dwj)-1:0] prod = 0;
-wire signed [dwi+5:0] prod_msb = prod[(dwi+dwj)-2:dwi-8];
-always @(posedge clk) begin
-        y1 <= y;
-        prod <= x * y1;
-end
-
-assign z = prod_msb;
 endmodule
