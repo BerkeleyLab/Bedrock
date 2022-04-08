@@ -107,7 +107,7 @@ class c_zest:
         print('clkout3 Frequency %.3f MHz' % self._freq_get_convert("frequency_clkout3"))
         print('DCO Frequency     %.3f MHz' % self._freq_get_convert("frequency_dco"))
 
-    def hardware_reset(self):
+    def hardware_reset(self, injector=False):
         print("Entering hardware_reset")
         aok = self.digitizer_spi_init(dac_nm_mode=self.dac_nm_mode)
         if not aok:
@@ -853,7 +853,7 @@ class c_zest:
             sys.stdout.flush()
         return cntlist
 
-    def pntest2(self, quiet=False):
+    def pntest2(self, quiet=False, slow_chain=True):
         # first check the configuration to see if banyan_mem is in this FPGA build
         b_status = self.leep.reg_read(["banyan_status"])[0]
         npt = 1 << ((b_status >> 24) & 0x3f)
@@ -868,7 +868,8 @@ class c_zest:
         self.adc_twos_comp(twoscomp=False)
         self.leep.reg_write([('banyan_mask', 0xff)])
         from get_raw_adcs import collect
-        (dataset, timestamp) = collect(self.leep, npt, print_minmax=False, allow_clk_frozen=True)
+        (dataset, timestamp) = collect(self.leep, npt, print_minmax=False,
+                                       allow_clk_frozen=True, slow_chain=slow_chain)
         cntlist = []
         for chan in range(8):
             if not quiet:

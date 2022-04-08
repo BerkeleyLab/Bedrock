@@ -1,3 +1,9 @@
+# XXX There's another file with this same name, and similar
+# (but incompatible) collect() routine, in lcls2_llrf/software/prc/ .
+# These two versions desperately need to be reconciled,
+# and one of them removed.
+# XXX This copy is _not_ used by lcls2_llrf flows (prc or injector).
+
 import time
 import struct
 from banyan_ch_find import banyan_ch_find
