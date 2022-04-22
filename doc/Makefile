@@ -109,7 +109,7 @@ SRC = \
    #via.v # not properly formatted for portfind.py
 
 DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR)
-VFLAGS_DEP += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS))
+VFLAGS     += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS)) -y$(AUTOGEN_DIR)
 
 vpath %.v $(DIRS)
 vpath %.gtkw $(DIRS)
