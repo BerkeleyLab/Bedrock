@@ -89,7 +89,7 @@ shortfifo Source File
    		f_r_addr <= f_r_addr + 1;
 
    	// FIFO sequence
-   	// Follow up the FIFO state transistions as 2 values enter and leave it
+   	// Follow up the FIFO state transitions as 2 values enter and leave it
    	// Need to do it for 2 values to verify the correct order
    	case (f_state)
    		0: begin  // IDLE state

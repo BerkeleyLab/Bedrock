@@ -48,7 +48,10 @@ Expect to see errors and unfinished things.</p>
 <div class="line">Name: Washout (DC-reject) filter</div>
 <div class="line">track input allows freezing DC offset.</div>
 <div class="line">let N = 2^cut</div>
-<div class="line">The filter has a Zero at DC [1 + 0j] and 2 poles [0 + 0j], [(N-1)/N + 0j]</div>
+<div class="line">The filter has a z-plane zero at DC [1 + 0j] and 2 poles [0 + 0j], [(N-1)/N + 0j]</div>
+<div class="line">Evaluating gain at f_s*7/33 using python3:</div>
+<div class="line">from numpy import exp, pi; cut=4; N=2**cut; p=(N-1)/N</div>
+<div class="line">z=exp(2j*pi*7/33); gain=(z-1)/z/(z-p); print(abs(gain))</div>
 </div>
 </div>
 </section>
@@ -61,7 +64,7 @@ Expect to see errors and unfinished things.</p>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
 <table class="docutils align-default" id="id2">
-<caption><span class="caption-number">Table 62 </span><span class="caption-text">fwashout_param_table</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<caption><span class="caption-number">Table 63 </span><span class="caption-text">fwashout_param_table</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 20%" />
 <col style="width: 20%" />
@@ -102,7 +105,7 @@ Expect to see errors and unfinished things.</p>
 <section id="ports">
 <h2>Ports<a class="headerlink" href="#ports" title="Permalink to this headline">¶</a></h2>
 <table class="docutils align-default" id="id3">
-<caption><span class="caption-number">Table 63 </span><span class="caption-text">fwashout_port_table</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<caption><span class="caption-number">Table 64 </span><span class="caption-text">fwashout_port_table</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 33%" />
 <col style="width: 33%" />
@@ -121,11 +124,11 @@ Expect to see errors and unfinished things.</p>
 </tr>
 <tr class="row-odd"><td><p>rst</p></td>
 <td><p>Input</p></td>
-<td></td>
+<td><p>active high, resets internal DC offset to zero</p></td>
 </tr>
 <tr class="row-even"><td><p>track</p></td>
 <td><p>Input</p></td>
-<td></td>
+<td><p>high for normal operation</p></td>
 </tr>
 <tr class="row-odd"><td><p>a_data[a_dw-1:0]</p></td>
 <td><p>Input</p></td>
@@ -137,7 +140,7 @@ Expect to see errors and unfinished things.</p>
 </tr>
 <tr class="row-odd"><td><p>o_data[o_dw-1:0]</p></td>
 <td><p>Output</p></td>
-<td></td>
+<td><p>Output data</p></td>
 </tr>
 <tr class="row-even"><td><p>o_gate</p></td>
 <td><p>Output</p></td>
@@ -311,7 +314,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
