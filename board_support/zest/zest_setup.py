@@ -1,6 +1,9 @@
 import struct
 import sys
 import time
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../projects/common"))
 
 from llspi_lmk01801 import c_llspi_lmk01801
 from llspi_ad9653 import c_llspi_ad9653
