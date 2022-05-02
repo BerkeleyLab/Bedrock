@@ -68,7 +68,7 @@ reg lb_write=0;
 `AUTOMATIC_decode
 
 wire signed [dwi+1:0] z;
-wire signed [dwi+3:0] sum_filt;
+wire signed [dwi+7:0] sum_filt;
 phs_avg dut // auto
 	(.clk(clk), .reset(reset), .iq(iq), .x(x), .y(y), .sum_filt(sum_filt), .z(z), `AUTOMATIC_dut);
 
@@ -107,12 +107,12 @@ end
 // to check the bit-width
 reg signed [dwj-1:0] kx_i=0, ky_i=0;
 always @(posedge clk) begin
-    kx_i  <= dut.xmul.y;
-    ky_i  <= dut.ymul.y;
+    kx_i  <= dut.kx;
+    ky_i  <= dut.ky;
 end
 // get the parity bit to compare
-wire xmul_val = (~^kx_i != ~^dut.xmul.y1);
-wire ymul_val = (~^ky_i != ~^dut.ymul.y1);
+wire xmul_val = (~^kx_i != ~^dut.kx1);
+wire ymul_val = (~^ky_i != ~^dut.ky1);
 
 always @(posedge clk) begin
     if (xmul_val || ymul_val) fail = 1;
