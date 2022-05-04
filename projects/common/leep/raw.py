@@ -127,7 +127,10 @@ class LEEPDevice(DeviceBase):
 
         self._readrom()
 
-        app_string = self.regmap["__metadata__"]["application"]
+        try:
+            app_string = self.regmap["__metadata__"]["application"]
+        except KeyError:
+            app_string = "Unknown"
         self.rfs = False
         self.resctrl = False
         self.injector = False
