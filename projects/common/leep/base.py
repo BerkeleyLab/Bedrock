@@ -1,16 +1,37 @@
-
-import re
 import logging
 _log = logging.getLogger(__name__)
+
+import re
+import os
+
+
+class RomError(Exception):
+    """Exception raised for errors during ROM read."""
+    pass
+
+
 # flags for _wait_acq
 IGNORE = "IGNORE"
 WARN = "WARN"
 ERROR = "ERROR"
 
 
-class RomError(Exception):
-    """Exception raised for errors during ROM read."""
-    pass
+# Decorator to wrap read/write functions
+def print_reg(fcn):
+    def wrapper(*args, **kwargs):
+        # args[0] is the 'self' reference
+        if args[0].trace:
+            regs = args[1]
+            if len(regs) and isinstance(regs[0], str):
+                # it's a read operation
+                for reg in regs:
+                    print('reading register {}'.format(reg))
+            else:
+                # it's a write operation, 'regs' is now a tuple, not str
+                for reg, val in regs:
+                    print('writing {} to register {}'.format(val, reg))
+        return fcn(*args, **kwargs)
+    return wrapper
 
 
 def open(addr, **kws):
@@ -35,12 +56,6 @@ def open(addr, **kws):
     :returns: :py:class:`base.DeviceBase`
     """
     if addr.startswith('ca://'):
-        try:
-            import importlib
-            importlib.import_module('cothread')
-        except Exception:
-            raise RuntimeError(
-                'ca:// not available, cothread module not found in PYTHONPATH')
         from .ca import CADevice
         return CADevice(addr[5:], **kws)
 
@@ -53,8 +68,7 @@ def open(addr, **kws):
         return FileDevice(addr[7:], **kws)
 
     else:
-        raise ValueError(
-            "Unknown '%s' must begin with ca://, leep://, or file://" % addr)
+        raise ValueError("Unknown '%s' must begin with ca://, leep://, or file://" % addr)
 
 
 class DeviceBase(object):
@@ -62,6 +76,13 @@ class DeviceBase(object):
 
     def __init__(self, instance=[]):
         self.instance = instance[:]  # shallow copy
+
+        # Machinery to enable r/w tracing. See print_reg decorator.
+        self.trace = False
+        pat = re.compile(r'\byes\b | \btrue\b | \b1\b', flags=re.I | re.X)
+        tr = os.getenv('LEEP_TRACE_RW')
+        if tr is not None and re.match(pat, tr):
+            self.trace = True
 
     def close(self):
         pass
@@ -86,19 +107,18 @@ class DeviceBase(object):
 
         # build a regexp
         # from a list of name fragments
-        inst = self.instance + instance + [name]
+        fragments = self.instance + instance + [name]
         # match when consecutive fragments are seperated by
         #  1. a single '_'.  ['A', 'B'] matches 'A_B'.
         #  2. two '_' with anything inbetween.  'A_blah_B' or 'A_x_y_z_B'.
-        inst = r'_(?:.*_)?'.join([re.escape(str(i)) for i in inst])
-        R = re.compile('^.*%s$' % inst)
+        regx = r'_(?:.*_)?'.join([re.escape(str(i)) for i in fragments])
+        R = re.compile('^.*%s$' % regx)
 
         ret = [x for x in self.regmap if R.match(x)]
         if len(ret) == 1:
             return ret[0]
         elif len(ret) > 1:
-            raise RuntimeError('%s Matches more than one register: %s' % (
-                R.pattern, ' '.join(ret)))
+            raise RuntimeError('%s Matches more than one register: %s' % (R.pattern, ' '.join(ret)))
         else:
             raise RuntimeError('No match for register pattern %s' % R.pattern)
 
@@ -246,8 +266,7 @@ class DeviceBase(object):
 
                     N = 2**info.get('addr_width', 0)
                     if offset >= N:
-                        raise RuntimeError(
-                            'offset out of bounds (%s < %s)' % (offset, N))
+                        raise RuntimeError('offset out of bounds (%s < %s)' % (offset, N))
 
                     addr = info['base_addr'] + offset
 
@@ -265,8 +284,7 @@ class DeviceBase(object):
                     _inst, delay = inst
                     exp = self.regmap["__metadata__"]["tgen_granularity_log2"]
                     if exp < 0:
-                        raise RuntimeError(
-                            'tgen delay scale exponent out of bounds (%s < 0)' % (exp))
+                        raise RuntimeError('tgen delay scale exponent out of bounds (%s < 0)' % (exp))
                     delay = delay/(pow(2, exp))
                     delay = int(delay)
 
@@ -301,8 +319,7 @@ class DeviceBase(object):
         maxcnt = 2**info['addr_width']
         assert maxcnt >= 4, info
         if len(ret) > maxcnt-4:
-            raise RuntimeError('tget Sequence %d exceeds max %d' %
-                               (len(ret), maxcnt-4))
+            raise RuntimeError('tget Sequence %d exceeds max %d' % (len(ret), maxcnt-4))
         ret.extend([0]*(maxcnt-len(ret)))
         assert len(ret) == maxcnt, (len(ret), maxcnt)
         return ret
