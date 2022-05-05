@@ -26,7 +26,7 @@ SYNTH_VIVADO = $(VIVADOEXEC) -mode batch -source
 # =====
 # Attention!!!!
 vpath %.v $(BADGER_DIR)/tests $(HOMELESS_DIR) $(DSP_DIR) $(SERIAL_IO_DIR) $(I2CBRIDGE_DIR) $(PERIPH_DRIVERS_DIR) $(BOARD_SUPPORT_DIR)/marblemini $(HOMELESS_DIR)/freq_demo ./pps_lock
-vpath %.c $(BADGER_DIR)/tests
+vpath %.c $(BADGER_DIR)/tests $(BUILD_DIR)
 
 # =====
 # gets us $(FREQ_DEMO_V)
@@ -136,14 +136,16 @@ MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA
 marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
 	echo $^ | tr ' ' '\n' > $@
 
-marble1.bit: marble.tcl marble1.d marble1_features
+marble1.bit: marble.tcl marble1.d marble1_features bit_stamp_mod
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1
+	G=$$(git rev-parse --short=8 --verify HEAD) && ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) marble1.$$G.bit < marble1.$$G.x.bit && ln marble1.$$G.bit $@
 
 marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
 	echo $^ | tr ' ' '\n' > $@
 
-marble2.bit: marble.tcl marble2.d marble2_features
+marble2.bit: marble.tcl marble2.d marble2_features bit_stamp_mod
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2
+	G=$$(git rev-parse --short=8 --verify HEAD) && ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) marble2.$$G.bit < marble2.$$G.x.bit && ln marble2.$$G.bit $@
 
 # =====
 # bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'
@@ -163,5 +165,5 @@ clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
 	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
-	rm -f read_sfp.dat Vmarble_base
+	rm -f read_sfp.dat Vmarble_base bit_stamp_mod
 	rm -rf _xilinx .Xil obj_dir
