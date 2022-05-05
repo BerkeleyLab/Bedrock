@@ -16,7 +16,7 @@ typedef unsigned int uint32;
  * File format documented by Alan Nishioka <alann@accom.com>
  */
 
-int xget_char(FILE *o)
+static int xget_char(FILE *o)
 {
 	int c;
 	if ((c = getchar()) == EOF) exit(1);
@@ -24,7 +24,7 @@ int xget_char(FILE *o)
 	return c;
 }
 
-uint32 get_long(FILE *o)
+static uint32 get_long(FILE *o)
 {
 	uint32 l;
 	l = xget_char(o);
@@ -34,7 +34,7 @@ uint32 get_long(FILE *o)
 	return l;
 }
 
-int get_short(FILE *o)
+static int get_short(FILE *o)
 {
 	int c, l;
 	if ((c = getchar()) == EOF) return -1;
@@ -46,7 +46,7 @@ int get_short(FILE *o)
 	return l;
 }
 
-void find_key(int key, FILE *o)
+static void find_key(int key, FILE *o)
 {
 	int c;
 	if ((c = getchar()) != key) {
@@ -56,7 +56,7 @@ void find_key(int key, FILE *o)
 	if (o) fputc(c, o);
 }
 
-void emit_string(const char *str, FILE *o)
+static void emit_string(const char *str, FILE *o)
 {
 	if (!o) return;
 	int l = strlen(str)+1;  /* include the trailing 0 */
@@ -69,7 +69,7 @@ void emit_string(const char *str, FILE *o)
 	for (int ix=0; ix<l; ix++) fputc(str[ix], o);
 }
 
-void print_string(const char *name, FILE *o, const char *subst_string)
+static void print_string(const char *name, FILE *o, const char *subst_string)
 {
 	int i, c, len;
 	char *str;
@@ -94,7 +94,7 @@ void print_string(const char *name, FILE *o, const char *subst_string)
 	emit_string(subst_string ? subst_string : str, o);
 }
 
-int load_main(const char *stime, const char *outfile_name)
+static int load_main(const char *stime, const char *outfile_name)
 {
 	FILE *o = NULL;
 	int i, c, len;
