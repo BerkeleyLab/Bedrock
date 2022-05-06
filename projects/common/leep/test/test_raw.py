@@ -45,6 +45,9 @@ class SimServer(object):
             'base_addr': 102,
             'data_width': 32,
         },
+        '__metadata__': {
+            'application': 'testing',
+        },
     }
 
     def __init__(self):

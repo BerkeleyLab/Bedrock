@@ -1,12 +1,12 @@
-
 from __future__ import print_function
-import json
-import hashlib
-
-from .base import DeviceBase
 
 import logging
 _log = logging.getLogger(__name__)
+
+import hashlib
+import json
+
+from .base import DeviceBase
 
 
 class FileDevice(DeviceBase):
