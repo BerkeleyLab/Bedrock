@@ -1,5 +1,4 @@
 import logging
-_log = logging.getLogger(__name__)
 
 import json
 import zlib
@@ -13,11 +12,16 @@ from .base import DeviceBase, print_reg
 
 caget = caput = camonitor = None
 try:
-    from cothread.catools import caget as _caget, caput as _caput, camonitor, FORMAT_TIME, DBR_CHAR_STR
+    from cothread.catools import caget as _caget, caput as _caput
+    from cothread.catools import camonitor, FORMAT_TIME, DBR_CHAR_STR
 except ImportError:
-    raise RuntimeError('ca:// not available, cothread module not found in PYTHONPATH')
+    msg = 'ca:// not available, cothread module not found in PYTHONPATH'
+    raise RuntimeError(msg)
 else:
     from cothread import Event
+
+
+_log = logging.getLogger(__name__)
 
 
 def caget(*args, **kws):
@@ -51,12 +55,14 @@ class CADevice(DeviceBase):
         #  'input' PV to read register
         #  'output' PV to write register
         #  'increment' PV to +1 register
-        info = json.loads(zlib.decompress(caget(self.prefix+'CTRL_JINFO')))
+        jstr = zlib.decompress(caget(self.prefix + 'CTRL_JINFO'))
+        info = json.loads(jstr)
         self._info = info['records']
 
         # raw JSON blob from device
         # {'reg_name:{'base_addr':0, ...}}
-        self.regmap = json.loads(zlib.decompress(caget(self.prefix+'CTRL_JSON')))
+        jstr = zlib.decompress(caget(self.prefix + 'CTRL_JSON'))
+        self.regmap = json.loads(jstr)
 
         extra_reg = set(self._info) - set(self.regmap)
         if extra_reg:
@@ -104,15 +110,16 @@ class CADevice(DeviceBase):
 
     @print_reg
     def reg_read(self, names, instance=[]):
-        ret = [None]*len(names)
+        ret = [None] * len(names)
         for i, name in enumerate(names):
             name = self.expand_regname(name, instance=instance)
             info = self._info[name]
             pvname = str(info['input'])
 
-            caput(pvname+'.PROC', 1, wait=True, timeout=self.timeout)
+            caput(pvname + '.PROC', 1, wait=True, timeout=self.timeout)
             # force as unsigned
-            ret[i] = numpy.asanyarray(caget(pvname, timeout=self.timeout), dtype='i')
+            pv_val = caget(pvname, timeout=self.timeout)
+            ret[i] = numpy.asanyarray(pv_val, dtype='i')
             # cope with lack of unsigned in CA
             info = self.regmap[name]
             if info.get('sign', 'unsigned') == 'unsigned':
@@ -122,11 +129,12 @@ class CADevice(DeviceBase):
 
     @property
     def descript(self):
-        return caget(str(self.prefix+'CTRL_FW_DESC'), datatype=DBR_CHAR_STR)
+        return caget(str(self.prefix + 'CTRL_FW_DESC'), datatype=DBR_CHAR_STR)
 
     @property
     def codehash(self):
-        return caget(str(self.prefix+'CTRL_FW_CODEHASH'), datatype=DBR_CHAR_STR)
+        return caget(str(self.prefix + 'CTRL_FW_CODEHASH'),
+                     datatype=DBR_CHAR_STR)
 
     @property
     def jsonhash(self):
@@ -150,7 +158,7 @@ class CADevice(DeviceBase):
             li = []
             for i in range(12):
                 if chans & (1 << i):
-                    li.append(11-i)
+                    li.append(11 - i)
             chans = tuple(li)
 
         chans = set(chans)
@@ -158,16 +166,20 @@ class CADevice(DeviceBase):
         # enable/disable for even/odd channels are actually aliases
         # so disable first, then enable
         if disable:
-            [self.pv_write('circle_data', 'enable%d' % ch, 'Disable') for ch in disable]
+            for ch in disable:
+                self.pv_write('circle_data', 'enable%d' % ch, 'Disable')
         if chans:
-            [self.pv_write('circle_data', 'enable%d' % ch, 'Enable') for ch in chans]
+            for ch in chans:
+                self.pv_write('circle_data', 'enable%d' % ch, 'Enable')
 
     def get_channel_mask(self, instance=[]):
         # make list of masks for each bit which is set.
-        chans = [2**(11-n) for n in range(12) if self.pv_read('circle_data', 'enable%d' % n)]
+        chans = [2**(11 - n) for n in range(12)
+                 if self.pv_read('circle_data', 'enable%d' % n)]
         return reduce(lambda l, r: l | r, chans, 0)
 
-    def wait_for_acq(self, toggle_tag=False, tag=False, timeout=5.0, instance=[]):
+    def wait_for_acq(self, toggle_tag=False, tag=False, timeout=5.0,
+                     instance=[]):
         """Wait for next waveform acquisition to complete.
         If tag=True, then wait for the next acquisition which includes the
         side-effects of all preceding register writes
@@ -204,7 +216,9 @@ class CADevice(DeviceBase):
                 break  # all done, waveform reflects latest parameter changes
 
             if dT != 0xff:
-                raise RuntimeError('acquisition collides with another client: %d %d %d' % (tag_old, tag_new, T))
+                msg = 'acquisition collides with another client: '
+                msg += '%d %d %d' % (tag_old, tag_new, T)
+                raise RuntimeError(msg)
 
             _log.debug('Acquire retry')
 
@@ -214,8 +228,11 @@ class CADevice(DeviceBase):
         """:returns: a list of :py:class:`numpy.ndarray` with the numbered channels.
         chans may be a bit mask or a list of channel numbers
         """
-        names = [self.pv_name('circle_data', 'input%d' % ch, instance=instance) for ch in chans]
-        names += [self.pv_name('circle_data', 'scale%d' % ch, instance=instance) for ch in chans]
+        names = [self.pv_name('circle_data', 'input%d' % ch, instance=instance)
+                 for ch in chans]
+        names += [self.pv_name('circle_data', 'scale%d' % ch,
+                               instance=instance)
+                  for ch in chans]
 
         ret = caget(names, format=FORMAT_TIME)
 
@@ -226,13 +243,20 @@ class CADevice(DeviceBase):
             wf /= scale
 
         # ensure that waveform timestamps are consistent
-        if len(wfs) >= 2 and not all([wfs[0].raw_stamp == R.raw_stamp for R in wfs[1:]]):
-            raise RuntimeError("Inconsistent timestamps! %s" % [R.raw_stamp for R in wfs])
+        if len(wfs) >= 2 and not \
+                all([wfs[0].raw_stamp == R.raw_stamp for R in wfs[1:]]):
+            msg = "Inconsistent timestamps! %s" % [R.raw_stamp for R in wfs]
+            raise RuntimeError(msg)
 
         return wfs
 
     def get_timebase(self, chans=[], instance=[]):
-        ret = caget([self.pv_name('circle_data', 'time%d' % ch, instance=instance) for ch in chans], format=FORMAT_TIME)
-        if len(ret) >= 2 and not all([ret[0].raw_stamp == R.raw_stamp for R in ret[1:]]):
-            raise RuntimeError("Inconsistent timestamps! %s" % [R.raw_stamp for R in ret])
+        ret = caget([self.pv_name('circle_data', 'time%d' % ch,
+                                  instance=instance)
+                     for ch in chans],
+                    format=FORMAT_TIME)
+        if len(ret) >= 2 and not \
+                all([ret[0].raw_stamp == R.raw_stamp for R in ret[1:]]):
+            msg = "Inconsistent timestamps! %s" % [R.raw_stamp for R in ret]
+            raise RuntimeError(msg)
         return ret

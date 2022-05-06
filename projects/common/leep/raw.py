@@ -1,4 +1,3 @@
-
 from __future__ import print_function
 import numpy
 from datetime import datetime
@@ -7,18 +6,17 @@ import zlib
 import random
 import socket
 import sys
-import os
 from functools import reduce
 
 from . import RomError
+from .base import DeviceBase, print_reg
 import logging
+
+
 _log = logging.getLogger(__name__)
 # special logger for use in exchange()
-_spam = logging.getLogger(__name__+'.packets')
+_spam = logging.getLogger(__name__ + '.packets')
 _spam.propagate = False
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "."))
-from base import DeviceBase, print_reg
 
 if sys.version_info >= (3, 0):
     unicode = str
@@ -38,16 +36,17 @@ def yscale_inj(wave_samp_per=1):
         shift_base = ceil(log(cic_period ** cic_order, 2))
 
         # FW LO pre-scaling to cancel out non-unit CIC gain
-        pre_gain = 2**shift_base/cic_period**cic_order
+        pre_gain = 2**shift_base / cic_period**cic_order
         pre_gain *= 0.5
 
         per = cic_period * wave_samp_per
         bit_g = per**cic_order  # Bit growth
         bit_g_shift = ceil(log(bit_g, 2))
         wave_shift = bit_g_shift - shift_base
-        wave_shift *= 1.0 / cic_order  # FW accounts for cic_order when shifting
+        # FW accounts for cic_order when shifting
+        wave_shift *= 1.0 / cic_order
 
-        cic_gain = bit_g / 2**(cic_order*wave_shift + shift_base)
+        cic_gain = bit_g / 2**(cic_order * wave_shift + shift_base)
 
         adc_fs = 2.0**19 * cic_gain * pre_gain
 
@@ -65,9 +64,10 @@ def yscale_resctrl(wave_samp_per=1):
         per = cic_period * wave_samp_per
 
         bit_g = per**cic_order  # Bit growth
-        wave_shift = ceil(log(bit_g, 2)/cic_order)  # FW accounts for cic_order when shifting
+        # FW accounts for cic_order when shifting
+        wave_shift = ceil(log(bit_g, 2) / cic_order)
 
-        cic_gain = bit_g / 2**(cic_order*wave_shift)
+        cic_gain = bit_g / 2**(cic_order * wave_shift)
 
         adc_fs = 2.0**17 * cic_gain
 
@@ -82,7 +82,7 @@ def yscale_rfs(wave_samp_per=1):
     try:
         from math import ceil, log
 
-        lo_cheat = (74762*1.646760258)/2**17
+        lo_cheat = (74762 * 1.646760258) / 2**17
 
         shift_base = 4
         cic_period = 33
@@ -94,10 +94,11 @@ def yscale_rfs(wave_samp_per=1):
             except ValueError as e:
                 raise ValueError("log2(%s) %s" % (n, e))
 
-        shift_min = log2(cic_n**2 * lo_cheat)-12
+        shift_min = log2(cic_n**2 * lo_cheat) - 12
 
-        wave_shift = max(0, ceil(shift_min/2))
-        adc_fs = 16 * lo_cheat * (33 * wave_samp_per)**2 * 4**(8 - wave_shift)/512.0/(2**shift_base)
+        wave_shift = max(0, ceil(shift_min / 2))
+        adc_fs = (16 * lo_cheat * (33 * wave_samp_per)**2) * \
+                 (4**(8 - wave_shift) / 512.0 / (2**shift_base))
 
         return wave_shift, adc_fs
     except Exception as e:
@@ -108,10 +109,14 @@ class LEEPDevice(DeviceBase):
     backend = 'leep'
     init_rom_addr = 0x800
     max_rom_addr = 0x4000
-    # preamble is bound in build_rom.py by limiting description to 40 words (80 bytes)
-    # each hash is 10 words. 40 + 10 + 10 = 60. Plus 4 for each of the types.
+    ''' Preamble is bound in build_rom.py by limiting description
+        to 40 words (80 bytes). Each hash is 10 words.
+        40 + 10 + 10 = 60. Plus 4 for each of the types.
+    '''
     preamble_max_size = 64
-    # Hash = 10 + 10 and descriptor for each type (hash and description) is one.
+    ''' Hash = 10 + 10 and descriptor for each type
+        (hash and description) is one.
+    '''
     hash_descriptor_size = 24
     size_desc = 0
     size_rom = 0
@@ -161,7 +166,8 @@ class LEEPDevice(DeviceBase):
 
             if L > 1:
                 _log.debug('reg_write %s <- %s ...', name, value[:10])
-                assert value.ndim == 1 and value.shape[0] == L, ('must write whole register', value.shape, L)
+                assert value.ndim == 1 and value.shape[0] == L, \
+                       ('must write whole register', value.shape, L)
                 # array register
                 for A, V in enumerate(value, base_addr):
                     addrs.append(A)
@@ -191,7 +197,7 @@ class LEEPDevice(DeviceBase):
             base_addr = info['base_addr']
             if isinstance(base_addr, (bytes, str, unicode)):
                 base_addr = int(base_addr, 0)
-            addrs.extend(range(base_addr, base_addr+L))
+            addrs.extend(range(base_addr, base_addr + L))
 
         raw = self.exchange(addrs)
 
@@ -202,7 +208,7 @@ class LEEPDevice(DeviceBase):
             if info.get('sign', 'unsigned') == 'signed':
                 # sign extend
                 # mask of data bits excluding sign bit
-                mask = (2**(info['data_width']-1))-1
+                mask = (2**(info['data_width'] - 1)) - 1
                 # invert to give mask of sign bit and extension bits
                 mask ^= 0xffffffff
                 # test sign bit
@@ -244,14 +250,16 @@ class LEEPDevice(DeviceBase):
         nch = info['data_width']
         # list of channel numbers to mask
         if isinstance(chans, list):
-            chans = reduce(lambda l, r: l | r, [2**(nch-1-n) for n in chans], 0)
+            chans = reduce(lambda l, r: l | r,
+                           [2**(nch - 1 - n) for n in chans], 0)
         self.reg_write([('chan_keep', chans)], instance=instance)
 
     def get_channel_mask(self, instance=[]):
         chans, =  self.reg_read(['chan_keep'], instance=instance)
         return chans
 
-    def wait_for_acq(self, tag=False, toggle_tag=False, timeout=5.0, instance=[]):
+    def wait_for_acq(self, tag=False, toggle_tag=False, timeout=5.0,
+                     instance=[]):
         """Wait for next waveform acquisition to complete.
         If tag=True, then wait for the next acquisition which includes the
         side-effects of all preceding register writes
@@ -261,7 +269,7 @@ class LEEPDevice(DeviceBase):
         if self.rfs:
             T, = self.reg_read(['dsp_tag'], instance=instance)
             if tag or toggle_tag:
-                T = (T+1) & 0xff
+                T = (T + 1) & 0xff
                 self.reg_write([('dsp_tag', T)], instance=instance)
                 _log.debug('Set Tag %d', T)
 
@@ -282,13 +290,18 @@ class LEEPDevice(DeviceBase):
 
             while True:
                 now = datetime.utcnow()
-                delta = now-start
-                delta_us = delta.seconds + delta.microseconds/1e6
+                delta = now - start
+                delta_us = delta.seconds + delta.microseconds / 1e6
                 if delta_us >= timeout:
                     raise RuntimeError('Timeout')
 
-                # TODO: use exchange() and optimize to fetch slow_data[33] as well
-                ready_register = 'llrf_circle_ready' if self.rfs or self.injector else 'circle_data_ready'
+                ''' TODO:
+                    use exchange() and optimize to fetch slow_data[33] as well
+                '''
+                if self.rfs or self.injector:
+                    ready_register = 'llrf_circle_ready'
+                else:
+                    ready_register = 'circle_data_ready'
                 ready, = self.reg_read([ready_register], instance=None)
 
                 if ready & mask:
@@ -305,10 +318,13 @@ class LEEPDevice(DeviceBase):
                     break
 
                 if tag_match:
-                    break  # all done, waveform reflects latest parameter changes
+                    # all done, waveform reflects latest parameter changes
+                    break
 
                 if dT != 0xff:
-                    raise RuntimeError('acquisition collides with another client: %d %d %d' % (tag_old, tag_new, T))
+                    msg = 'acquisition collides with another client:'
+                    msg += '%d %d %d' % (tag_old, tag_new, T)
+                    raise RuntimeError(msg)
             else:
                 return now
 
@@ -323,19 +339,24 @@ class LEEPDevice(DeviceBase):
         """
         info = self.get_reg_info('chan_keep', instance=instance)
         nch = info['data_width']
-        interested = reduce(lambda l, r: l | r, [2**(nch-1-n) for n in chans], 0)
+        interested = reduce(lambda l, r: l | r,
+                            [2**(nch - 1 - n) for n in chans], 0)
 
         if self.rfs:
-            keep, dec = self.reg_read(['chan_keep', 'wave_samp_per'], instance=instance)
+            keep, dec = self.reg_read(['chan_keep', 'wave_samp_per'],
+                                      instance=instance)
             data, = self.reg_read(['circle_data'], instance=instance)
             wave_shift, Ymax = yscale_rfs(dec)
         else:
             if self.resctrl:
-                keep, dec = self.reg_read(['chan_keep', 'wave_samp_per'], instance=None)
-                data, = self.reg_read(['circle_data_%s' % (instance[0])], instance=None)
+                keep, dec = self.reg_read(['chan_keep', 'wave_samp_per'],
+                                          instance=None)
+                data, = self.reg_read(['circle_data_%s' % (instance[0])],
+                                      instance=None)
                 wave_shift, Ymax = yscale_resctrl(dec)
             elif self.injector:
-                keep, dec = self.reg_read(['chan_keep', 'wave_samp_per'], instance=[])
+                keep, dec = self.reg_read(['chan_keep', 'wave_samp_per'],
+                                          instance=[])
                 data, = self.reg_read(['circle_data'], instance=[])
                 wave_shift, Ymax = yscale_inj(dec)
 
@@ -344,7 +365,8 @@ class LEEPDevice(DeviceBase):
 
         if (keep & interested) != interested:
             # chans must be a strict sub-set of keep
-            raise RuntimeError('Requested channels (%x) not kept (%x)' % (interested, keep))
+            msg = 'Requested channels (%x) not kept (%x)' % (interested, keep)
+            raise RuntimeError(msg)
 
         # count number of bits set
         nbits, M = 0, keep
@@ -356,14 +378,14 @@ class LEEPDevice(DeviceBase):
         # Lop off extra samples to get same number of samples per channel
         L = len(data)
         xtra = L % nbits
-        data = numpy.delete(data, range(L-xtra, L))
+        data = numpy.delete(data, range(L - xtra, L))
         cdata, M = {}, 0
         for ch in range(nch):
-            cmask = 2**(nch-1-ch)
+            cmask = 2**(nch - 1 - ch)
             if not (keep & cmask):
                 continue
             if interested & cmask:
-                cdata[ch] = data[M::nbits]/Ymax
+                cdata[ch] = data[M::nbits] / Ymax
 
             M += 1
 
@@ -377,17 +399,16 @@ class LEEPDevice(DeviceBase):
                 'chan_keep',
                 'wave_samp_per',
             ], instance=instance)
-            period = 2*33*dec*14/1320e6
+            period = 2 * 33 * dec * 14 / 1320e6
         else:
-            info = self.get_reg_info('circle_%s_data' % instance[0], instance=None)
-            keep, dec = self.reg_read([
-                'chan_keep',
-                'wave_samp_per',
-            ], instance=None)
+            info = self.get_reg_info('circle_%s_data' % instance[0],
+                                     instance=None)
+            keep, dec = self.reg_read(['chan_keep', 'wave_samp_per'],
+                                      instance=None)
             if self.resctrl:
-                period = dec/8e3
+                period = dec / 8e3
             elif self.injector:
-                period = 22*dec*140/(11*1300e6)
+                period = 22 * dec * 140 / (11 * 1300e6)
 
         totalsamp = 2**info['addr_width']
 
@@ -397,8 +418,8 @@ class LEEPDevice(DeviceBase):
             if M & 1:
                 nbits += 1
             M >>= 1
-
-        T = numpy.arange(1+totalsamp/nbits) * period  # result is often one sample too long
+        # result is often one sample too long
+        T = numpy.arange(1 + totalsamp / nbits) * period
 
         T = T.repeat(nbits)  # [a, b, ...] w/ nbits=2 --> [a, a, b, b, ...]
         assert len(T) >= totalsamp, (len(T), totalsamp)
@@ -416,11 +437,11 @@ class LEEPDevice(DeviceBase):
         """
         pad = None
         if len(addrs) < 3:
-            pad = 3-len(addrs)
-            addrs.extend([0]*pad)
-            values.extend([None]*pad)
+            pad = 3 - len(addrs)
+            addrs.extend([0] * pad)
+            values.extend([None] * pad)
 
-        msg = numpy.zeros(2+2*len(addrs), dtype=be32)
+        msg = numpy.zeros(2 + 2 * len(addrs), dtype=be32)
         msg[0] = random.randint(0, 0xffffffff)
         msg[1] = msg[0] ^ 0xffffffff
 
@@ -428,8 +449,8 @@ class LEEPDevice(DeviceBase):
             A &= 0x00ffffff
             if V is None:
                 A |= 0x10000000
-            msg[2*i] = A
-            msg[2*i+1] = V or 0
+            msg[2 * i] = A
+            msg[2 * i + 1] = V or 0
 
         tosend = msg.tostring()
         _spam.debug("%s Send (%d) %s", self.dest, len(tosend), repr(tosend))
@@ -448,7 +469,8 @@ class LEEPDevice(DeviceBase):
 
             reply = numpy.fromstring(reply, be32)
             if (msg[:2] != reply[:2]).any():
-                _log.error('Ignore reply w/o matching nonce %s %s', msg[:2], reply[:2])
+                _log.error('Ignore reply w/o matching nonce %s %s',
+                           msg[:2], reply[:2])
                 continue
             elif (msg[2::2] != reply[2::2]).any():
                 _log.error('reply addresses are out of order')
@@ -468,29 +490,31 @@ class LEEPDevice(DeviceBase):
         addrs = list(addrs)
 
         if values is None:
-            values = [None]*len(addrs)
+            values = [None] * len(addrs)
         else:
             values = list(values)
 
         ret = numpy.zeros(len(addrs), be32)
         for i in range(0, len(addrs), 127):
-            A, B = addrs[i:i+127], values[i:i+127]
+            A, B = addrs[i:i + 127], values[i:i + 127]
 
             P = self._exchange(A, B)
-            ret[i:i+127] = P
+            ret[i:i + 127] = P
 
         return ret
 
     def _trysize(self, start_addr):
-        end_addr = start_addr+self.preamble_max_size
+        end_addr = start_addr + self.preamble_max_size
         values = self.exchange(range(start_addr, end_addr))
         values_preamble = numpy.array(values)
         self._checkrom(values, True)
         if self.size_rom != 0:
-            total_rom_size = self.hash_descriptor_size+self.size_desc+self.size_rom
-            stop_addr = end_addr+total_rom_size-self.preamble_max_size
+            total_rom_size = (self.hash_descriptor_size
+                              + self.size_desc + self.size_rom)
+            stop_addr = end_addr + total_rom_size - self.preamble_max_size
             values_json = self.exchange(range(end_addr, stop_addr))
-            values_full = numpy.array(numpy.concatenate((values_preamble, values_json)), be32)
+            preamble_json = numpy.concatenate((values_preamble, values_json))
+            values_full = numpy.array(preamble_json, be32)
             self._checkrom(values_full)
             return values_full
         else:
@@ -512,12 +536,12 @@ class LEEPDevice(DeviceBase):
             pp = desc_ix, desc_addr, type, size
             _log.debug("ROM Descriptor #%d addr=%d type=%d size=%d" % pp)
             desc_ix += 1
-            desc_addr += (size+1)
+            desc_addr += (size + 1)
 
             if type == 0:
                 break
 
-            blob, values = values[1:size+1], values[size+1:]
+            blob, values = values[1:size + 1], values[size + 1:]
             if len(blob) != size and preamble_check is False:
                 _log.error("Truncated: %d", len(blob))
                 raise RomError("Truncated ROM Descriptor")
@@ -571,5 +595,6 @@ class LEEPDevice(DeviceBase):
                 _log.error("raw.py: %s. Quitting." % str(e))
                 raise
             except (RuntimeError, ValueError):
-                raise ValueError("Could not read ROM using either start addresses")
+                msg = "Could not read ROM using either start addresses"
+                raise ValueError(msg)
         _log.debug("ROM was successfully read")
