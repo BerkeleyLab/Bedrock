@@ -65,7 +65,7 @@ proc test_proc8 {} {
     set init0 "256'h388F5DDA0643504C4204D5E8F8E0590A12AB781E0AB3F9B0CD799F8FFF2C1F0A"
     set init1 "256'hE34DC578CA52204E4C409A12AD2125C4F034A814802241CDC38F70929BBB2780"
     set xx [gitid_proc8 $old_commit $new_commit $init0 $init1]
-    if {[llength $xx] != 2} {return 0} 
+    if {[llength $xx] != 2} {return 0}
     lassign $xx init0x init1x
     if {$init0x != "256'h388F5DDA0643504C420409D89060EF550D6BEE390AB3F9B0CD799F8FFF2C1F0A"} {return 0}
     if {$init1x != "256'hE34DC578CA52204E4C4007AF1895BF324B5EA3DA802241CDC38F70929BBB2780"} {return 0}
@@ -84,7 +84,7 @@ proc swap_gitid8 {old_commit new_commit} {
     set init0 [get_property INIT_00 $c0]
     set init1 [get_property INIT_00 $c1]
     set xx [gitid_proc8 $old_commit $new_commit $init0 $init1]
-    if {[llength $xx] != 2} {return 0} 
+    if {[llength $xx] != 2} {return 0}
     lassign $xx init0x init1x
     set_property INIT_00 $init0x $c0
     set_property INIT_00 $init1x $c1
@@ -140,7 +140,7 @@ proc test_proc16 {} {
     set init0 "256'hCBAE5AF245A66030800A0F6858D77AC2B85D06D3D8DF2C3E529A12FBDFF5800A"
     set init1 "256'h78DAC0E66E677469657320546C6572624D6140073F07F0E5E49A0578DF496570"
     set xx [gitid_proc16 $old_commit $new_commit $init0 $init1]
-    if {[llength $xx] != 2} {return 0} 
+    if {[llength $xx] != 2} {return 0}
     lassign $xx init0x init1x
     puts $init0x
     puts $init1x
