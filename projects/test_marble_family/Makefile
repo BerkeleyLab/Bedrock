@@ -51,7 +51,7 @@ scalar_marble_regmap.json: lb_marble_slave.v
 marble_regmap.json: static_regmap.json scalar_marble_regmap.json
 	$(PYTHON) $(BUILD_DIR)/merge_json.py -o $@ -i $(filter %.json, $^)
 config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOURCE))
-	$(PYTHON) $(BUILD_DIR)/build_rom.py -v $@ -j $< -d "Marble Testing"
+	$(PYTHON) $(BUILD_DIR)/build_rom.py --placeholder_rev -v $@ -j $< -d "Marble Testing"
 
 # gen_features.py rules (note the use of PHONY targets)
 # actual file outputs are marble_features_params.vh and marble_features_defs.vh
@@ -137,7 +137,7 @@ marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
 	echo $^ | tr ' ' '\n' > $@
 
 marble1.bit: marble.tcl marble1.d marble1_features bit_stamp_mod
-	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1
+	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
 	G=$$(git rev-parse --short=8 --verify HEAD) && ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) marble1.$$G.bit < marble1.$$G.x.bit && rm marble1.$$G.x.bit
 
 marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
