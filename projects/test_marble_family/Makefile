@@ -51,7 +51,7 @@ scalar_marble_regmap.json: lb_marble_slave.v
 marble_regmap.json: static_regmap.json scalar_marble_regmap.json
 	$(PYTHON) $(BUILD_DIR)/merge_json.py -o $@ -i $(filter %.json, $^)
 config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOURCE))
-	$(PYTHON) $(BUILD_DIR)/build_rom.py -v $@ -j $< -d "Marble Testing"
+	$(PYTHON) $(BUILD_DIR)/build_rom.py --placeholder_rev -v $@ -j $< -d "Marble Testing"
 
 # gen_features.py rules (note the use of PHONY targets)
 # actual file outputs are marble_features_params.vh and marble_features_defs.vh
@@ -137,15 +137,15 @@ marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
 	echo $^ | tr ' ' '\n' > $@
 
 marble1.bit: marble.tcl marble1.d marble1_features bit_stamp_mod
-	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1
-	G=$$(git rev-parse --short=8 --verify HEAD) && ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) marble1.$$G.bit < marble1.$$G.x.bit && rm marble1.$$G.x.bit
+	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
+	G=marble1.$$(git rev-parse --short=8 --verify HEAD); if git diff | grep -q .; then echo "modified code; not coercing bitfile header timestamp"; mv $$G.x.bit $$G.bit; else ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) $$G.bit < $$G.x.bit && rm $$G.x.bit && sha256sum $$G.bit; fi
 
 marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
 	echo $^ | tr ' ' '\n' > $@
 
 marble2.bit: marble.tcl marble2.d marble2_features bit_stamp_mod
-	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2
-	G=$$(git rev-parse --short=8 --verify HEAD) && ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) marble2.$$G.bit < marble2.$$G.x.bit && rm marble2.$$G.x.bit
+	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
+	G=marble2.$$(git rev-parse --short=8 --verify HEAD); if git diff | grep -q .; then echo "modified code; not coercing bitfile header timestamp"; mv $$G.x.bit $$G.bit; else ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) $$G.bit < $$G.x.bit && rm $$G.x.bit && sha256sum $$G.bit; fi
 
 # =====
 # bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'
@@ -159,7 +159,7 @@ marble1_hwload:
 
 marble1_hwtest: udprtx
 	ping -c 2 ${RGMII_IP}
-	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD)
+	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
 	$(PYTHON) testcase.py --ip=${RGMII_IP} --sfp
 
