@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>i2cbridge README &#8212; Bedrock  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="idelay_scanner README" href="../idelay_scanner/README_md.html" />
+    <link rel="prev" title="guidelines rtl_guidelines" href="../../guidelines/rtl_guidelines_md.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="i2cbridge-readme">
+<span id="readme"></span><h1>i2cbridge README<a class="headerlink" href="#i2cbridge-readme" title="Permalink to this headline">¶</a></h1>
+<section id="yet-another-i2c-really-twi-bridge-controller-interface">
+<h2>Yet another I2C (really TWI) bridge/controller/interface<a class="headerlink" href="#yet-another-i2c-really-twi-bridge-controller-interface" title="Permalink to this headline">¶</a></h2>
+<p>Larry Doolittle, LBNL, August 2018</p>
+<section id="primary-goals">
+<h3>Primary goals<a class="headerlink" href="#primary-goals" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>When the FPGA boots, it should be able to send a batch of
+configuration writes to one or more I2C busses, without external help.</p></li>
+<li><p>After boot, it should go into a polling loop, reading out status
+and making it available via a convenient dual-port-memory interface to
+a host (local or network-based).</p></li>
+<li><p>A host (local or network-based) should be able to modify existing or
+create new command strings to send to the I2C busses.</p></li>
+<li><p>Collect bus activity traces to let people diagnose bus behavior</p></li>
+<li><p>Be small enough to be ignored in the resource accounting of an SoC</p></li>
+</ul>
+<p>As of February 2020, it appears to meet all these goals.</p>
+</section>
+<section id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
+<p>The expected interface to the rest of your chip design is i2c_chunk.
+This is a single-clock-domain design (input clk).</p>
+<a class="reference external image-reference" href="i2c_chunk.svg"><img alt="symbol" src="_gen_md/peripheral_drivers/i2cbridge/i2c_chunk.svg" /></a>
+<p>Parameter tick_scale controls the bus timing, default value is 6.
+One I2C bit time is (clk period) * 14 * 2^(tick_scale).
+With 125 MHz clock, that yields 7.168 uS, for a bus bit rate of 140 kHz.</p>
+<p>Parameter initial_file allows loading a program at synthesis time.
+Default value of “” (empty string) means no load; otherwise provide
+a filename suitable for use with Verilog $readmemh().</p>
+<p>Local bus ports:</p>
+<ul class="simple">
+<li><p>12-bit lb_addr</p></li>
+<li><p>lb_write</p></li>
+<li><p>8-bit lb_din</p></li>
+<li><p>8-bit lb_dout</p></li>
+</ul>
+<p>The 4 kByte local bus memory is subdivided into quarters:</p>
+<ul class="simple">
+<li><p>0x000 - 0x3ff   program</p></li>
+<li><p>0x400 - 0x7ff   logic analyzer</p></li>
+<li><p>0x800 - 0xbff   results</p></li>
+<li><p>0xc00 - 0xfff   result buffer in progress (not meant for host access)</p></li>
+</ul>
+<p>See below for more discussion of the sequence (program) that is held
+in that first section of memory.</p>
+<p>Auxiliary control and status:</p>
+<ul class="simple">
+<li><p>input run_cmd</p></li>
+<li><p>input freeze</p></li>
+<li><p>output run_stat</p></li>
+<li><p>output updated</p></li>
+<li><p>output err_flag</p></li>
+</ul>
+<p>Hardware tie-in:</p>
+<ul class="simple">
+<li><p>output scl</p></li>
+<li><p>output sda_drive</p></li>
+<li><p>input sda_sense</p></li>
+<li><p>output hw_config (Can be used to select between I2C busses)</p></li>
+</ul>
+<p>The scl port should drive the SCL pin directly.  The SDA pin is open-collector
+style, and requires three-state hardware that is not universally considered
+part of synthesizable Verilog.  The sda_drive pin has the same polarity as
+the final SDA pin, so a low value should cause pull-down (tri-state enable
+with value 0).  The sda_sense port passes the logic value of the I/O pin back
+to this module.</p>
+<p>Using the hw_config output to select between multiple I2C busses is
+possible (and has been hardware-tested) but complicates handling of the
+scl and sda pins.  The value of hw_config is set by the hw instruction,
+described below.</p>
+<p>When running, a typical instruction sequence will fill one half of the
+output ping-pong buffer, and then request an atomic swap so that new data
+is accessible from the host side (bf command, see below).
+This buffer flip request is willfully ignored if the freeze bit
+is set by the host.  This supports a guaranteed-self-consistent
+readout paradigm that should be used by the host:</p>
+<ul class="simple">
+<li><p>Set freeze bit</p></li>
+<li><p>Read out buffer</p></li>
+<li><p>Clear freeze bit</p></li>
+</ul>
+<p>The idea is that this operation will be quick compared to the polling
+cycle, and is permitted to happen at any time.  This assumes there are
+negligible consequences of dropping an occasional buffer of data;
+new data will arrive shortly anyway.</p>
+<p>The host can optimize this process somewhat by checking the updated bit,
+and only reading data out when it is set.  The updated flag is cleared
+as a side effect of clearing the freeze bit.</p>
+<p>Whether or not an initial program was set up at synthesis time with
+initial_file, new programs can be tested as follows:</p>
+<ul class="simple">
+<li><p>de-assert run_cmd</p></li>
+<li><p>wait for run_stat to read back 0</p></li>
+<li><p>write a new program into addresses 0x000 - 0x3fff</p></li>
+<li><p>assert run_cmd</p></li>
+</ul>
+</section>
+<section id="design">
+<h3>Design<a class="headerlink" href="#design" title="Permalink to this headline">¶</a></h3>
+<a class="reference external image-reference" href="blocks.svg"><img alt="block diagram" src="_gen_md/peripheral_drivers/i2cbridge/blocks.svg" /></a>
+<p>A simplified block diagram of i2c_chunk.v is shown above,
+It is annotated, to possibly be useful as a top-level introduction to the code.
+That svg file was converted from an xcircuit file blocks.eps.
+If you’d rather look at it as a PDF, “make blocks.pdf”.</p>
+<dl class="simple">
+<dt>Current synthesis result in Spartan-6 using ISE 14.7:</dt><dd><p>197 LUT/FF pairs and 2 x 16K BRAM, compatible with clocks up to 200 MHz.</p>
+</dd>
+</dl>
+<p>Extensively hardware-tested on Artix-7/Vivado at 125 MHz,
+as part of a much larger design.</p>
+</section>
+<section id="workstation-requirements">
+<h3>Workstation requirements<a class="headerlink" href="#workstation-requirements" title="Permalink to this headline">¶</a></h3>
+<p>Standard <a href="#id1"><span class="problematic" id="id2">*</span></a>nix tools, Icarus Verilog, gtkwave,
+GhostScript.  At some point you’ll also need chip-specific synthesis,
+place, and route for the full chip that will instantiate this module.</p>
+<p>To exercise some simple regression tests, just do “make”.
+To exercise the logic-analyzer part, “make a2trace_view”.
+Makefile targets can also give you waveform views of the internal states:
+i2c_bit_view, i2c_prog_view, i2c_analyze_view, and i2c_chunk_view.</p>
+</section>
+<section id="programming">
+<h3>Programming<a class="headerlink" href="#programming" title="Permalink to this headline">¶</a></h3>
+<p>There is some python code in here that acts as an assembler for
+the instruction sequence that gets loaded into i2cbridge to control
+the I2C operations.</p>
+<p>Instruction encoding:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span><span class="o">-</span><span class="n">bits</span> <span class="n">opcode</span>
+<span class="mi">5</span><span class="o">-</span><span class="n">bits</span> <span class="n">numeric</span> <span class="n">parameter</span> <span class="n">n</span>
+</pre></div>
+</div>
+<p>opcode</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">000</span>  <span class="n">oo</span>   <span class="n">special</span>
+<span class="mi">001</span>  <span class="n">rd</span>   <span class="n">read</span>
+<span class="mi">010</span>  <span class="n">wr</span>   <span class="n">write</span>
+<span class="mi">011</span>  <span class="n">wx</span>   <span class="n">write</span> <span class="n">followed</span> <span class="n">by</span> <span class="n">repeated</span> <span class="n">start</span>
+<span class="mi">100</span>  <span class="n">p1</span>   <span class="n">pause</span> <span class="p">(</span><span class="n">ticks</span> <span class="n">are</span> <span class="mi">8</span> <span class="n">bit</span> <span class="n">times</span><span class="p">)</span>
+<span class="mi">101</span>  <span class="n">p2</span>   <span class="n">pause</span> <span class="p">(</span><span class="n">ticks</span> <span class="n">are</span> <span class="mi">256</span> <span class="n">bit</span> <span class="n">times</span><span class="p">)</span>
+<span class="mi">110</span>  <span class="n">jp</span>   <span class="n">jump</span>
+<span class="mi">111</span>  <span class="n">sx</span>   <span class="nb">set</span> <span class="n">result</span> <span class="n">address</span>
+</pre></div>
+</div>
+<p>specials</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">000</span> <span class="mi">00000</span>  <span class="n">zz</span>  <span class="n">sleep</span>
+<span class="mi">000</span> <span class="mi">00010</span>  <span class="n">bf</span>  <span class="n">result</span> <span class="n">buffer</span> <span class="n">flip</span>
+<span class="mi">000</span> <span class="mi">00011</span>  <span class="n">ta</span>  <span class="n">trigger</span> <span class="n">logic</span> <span class="n">analyzer</span>
+<span class="mi">000</span> <span class="mi">1</span><span class="n">xxxx</span>  <span class="n">hw</span>  <span class="n">hardware</span> <span class="n">bus</span> <span class="n">select</span><span class="o">/</span><span class="n">configure</span>
+</pre></div>
+</div>
+<p>The jump command jumps to the address constructed as {n, 5’b0}, thus can
+reach the whole 10-bit address space reach with granularity of 32 bytes.</p>
+<p>wr and wx instructions are followed by n words of data.
+A rd instruction is followed by only 1 data word (the device address);
+the remaining n-1 words are all sent as high bits on the i2c bus, allowing
+the data coming back from the slave to be read and posted to result memory.</p>
+<p>The alert Makefile reader will observe that the instruction sequence fed to
+the test bench is created by a python program, ramtest.py.  This program
+includes a built-in assembler that encapsulates the instruction encoding
+shown above.</p>
+</section>
+</section>
+<section id="other-notes">
+<h2>Other notes<a class="headerlink" href="#other-notes" title="Permalink to this headline">¶</a></h2>
+<p>The I2C czars would be unhappy that this code doesn’t handle clock
+stretching or multi-mastering.  So officially this should be called TWI
+(two-wire interface) instead.  But it’s intended for use with commonly
+available I2C peripherals, including SFP modules, and none of the chips
+I’ve encountered actually use those exotic features.</p>
+</section>
+<section id="to-do">
+<h2>To do<a class="headerlink" href="#to-do" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Better design of assembler: integrate readout decoder</p></li>
+<li><p>Write more and better documentation</p></li>
+<li><p>Add more features to i2c_prog: skip if interrupt</p></li>
+<li><p>Add more features to analyzer: commands, reset, interrupt</p></li>
+<li><p>Wishbone and/or AXI bridge?</p></li>
+</ul>
+<p>See design.txt for a longer story.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Bedrock</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../general-docs.html">General Docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../general-docs.html#docs">Docs</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../badger/README_md.html">badger README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../badger/doc/README_md.html">doc README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../badger/mem_gate_md.html">badger mem_gate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../badger/status_md.html">badger status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../board_support/bmb7_kintex/README_md.html">bmb7_kintex README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../board_support/zest/README_md.html">zest README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../build-tools/makefile_md.html">build-tools makefile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dsp/README_md.html">dsp README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../fpga_family/xilinx/README_md.html">xilinx README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../guidelines/rtl_guidelines_md.html">guidelines rtl_guidelines</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">i2cbridge README</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#yet-another-i2c-really-twi-bridge-controller-interface">Yet another I2C (really TWI) bridge/controller/interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#other-notes">Other notes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#to-do">To do</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../idelay_scanner/README_md.html">idelay_scanner README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../projects/common/README_md.html">common README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../projects/comms_top/README_md.html">comms_top README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../projects/oscope/bmb7_cu/README_md.html">bmb7_cu README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../projects/oscope/marble_family/README_md.html">marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../projects/test_marble_family/README_md.html">test_marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../rtsim/README_md.html">rtsim README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../serial_io/chitchat/README_md.html">chitchat README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../serial_io/chitchat/chitchat_txrx_wrap_md.html">chitchat chitchat_txrx_wrap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/README_md.html">picorv32 README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/test/badger_lwip/README_md.html">badger_lwip README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/test/fv/README_md.html">fv README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/test/lb_bridge/README_md.html">lb_bridge README</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bedrock-modules.html">Bedrock Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../general-docs.html">General Docs</a><ul>
+      <li>Previous: <a href="../../guidelines/rtl_guidelines_md.html" title="previous chapter">guidelines rtl_guidelines</a></li>
+      <li>Next: <a href="../idelay_scanner/README_md.html" title="next chapter">idelay_scanner README</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, LBNL ATG.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/_gen_md/peripheral_drivers/i2cbridge/README_md.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

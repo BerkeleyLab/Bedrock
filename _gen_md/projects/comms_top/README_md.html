@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>comms_top README &#8212; Bedrock  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="bmb7_cu README" href="../oscope/bmb7_cu/README_md.html" />
+    <link rel="prev" title="common README" href="../common/README_md.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="comms-top-readme">
+<span id="readme"></span><h1>comms_top README<a class="headerlink" href="#comms-top-readme" title="Permalink to this headline">¶</a></h1>
+<section id="comms-top">
+<h2>COMMS TOP<a class="headerlink" href="#comms-top" title="Permalink to this headline">¶</a></h2>
+<p>The main purpose of this Bedrock project is to serve as a reference on how to set up
+multiple serial link protocols based on the TCL-based Quad MGT instantiation flow.</p>
+<p>Additionally, as part of the CI/CD, it provides coverage and protects against
+regressions in the following Bedrock sub-systems and features:</p>
+<ul class="simple">
+<li><p>Ethernet to Local Bus bridge over fiber</p></li>
+<li><p>ChitChat serial protocol over fiber</p></li>
+<li><p>Generation of QF2PRE-compatible bitfiles</p></li>
+<li><p>Communication with QF2PRE over Ethernet/Local Bus</p></li>
+</ul>
+<p><strong>NOTE:</strong> While this project mainly focuses on exercising QF2PRE hardware and its
+GTX transceivers, a minimal example of Ethernet-over-fiber functionality using GTP
+transceivers can be found under <code class="docutils literal notranslate"><span class="pre">gige_eth/</span></code>, which targets an AC701 development board.</p>
+<blockquote>
+<div><p>Generate bitfile:</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">comms_top.bit</span></code></p>
+<blockquote>
+<div><p>Load bitfile:</p>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qf2_python</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">program_kintex_7</span> <span class="o">-</span><span class="n">b</span> <span class="n">comms_top</span><span class="o">.</span><span class="n">bit</span>
+
+<span class="n">TODO</span><span class="p">:</span> <span class="n">Integrate</span> <span class="n">into</span> <span class="n">Makefile</span><span class="o">/</span><span class="n">CI</span>
+</pre></div>
+</div>
+<blockquote>
+<div><p>Run hardware test:</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">hwtest</span></code></p>
+<section id="architecture">
+<h3>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">comms_top.v</span></code> consists of an Ethernet to Local Bus bridge running over a Fiber link at 1.25 GBaud
+and a ChitChat link also routed through a Fiber link at 2.5 GBaud. Limited test-pattern
+generation is provided, with the Ethernet/Local Bus guaranteeing the interface with the Host.</p>
+</section>
+</section>
+<section id="ethernet-and-local-bus">
+<h2>Ethernet and Local Bus<a class="headerlink" href="#ethernet-and-local-bus" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">eth_gtx_bridge.v</span></code> combines packet Badger with PCS/PMA logic and a GTX interface. This module
+performs its own 8b/10b line coding and, as such, outputs 20-bits of raw data to the GTX.</p>
+<p>Packet Badger is clocked at 125 MHz, while the GTX interface is clocked at 62.5 MHz.
+Data width/rate conversion is performed within <code class="docutils literal notranslate"><span class="pre">eth_gtx_bridge.v</span></code>.</p>
+<p>Two clock managers are used to convert the 125 MHz <code class="docutils literal notranslate"><span class="pre">{tx,rx}outclk_out</span></code> clock outputs from
+the TX and RX GTXs to half-rate, 62.5 MHz.</p>
+<p>The Local Bus interface is on the <code class="docutils literal notranslate"><span class="pre">gmii_tx_clk</span></code> domain and expects fixed-latency read responses.</p>
+<p>A bare-bones register bank, <code class="docutils literal notranslate"><span class="pre">comms_top_regbank.v</span></code>, decodes incoming Local Bus commands and writes
+and reads to a pre-defined set of registers which provide access to the ChitChat core.</p>
+</section>
+<section id="chitchat">
+<h2>ChitChat<a class="headerlink" href="#chitchat" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">chitchat_txrx_wrap.v</span></code> implements a pair of TX/RX endpoints running the ChitChat protocol, along
+with the necessary clock domain crossing between the following clock domains:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tx_clk</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rx_clk</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lb_clk</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gtx_tx_clk</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gtx_rx_clk</span></code></p></li>
+</ul>
+<p>To emulate its typical use, TX data is clocked in at a lower rate (<code class="docutils literal notranslate"><span class="pre">sys_clk</span></code> - 50 MHz) than the
+TX/RX rates (125 MHz). Both return data and RX registers are clocked at <code class="docutils literal notranslate"><span class="pre">lb_clk</span></code>(125 MHz).</p>
+<p>The ChitChat wrapper relies on the GTXs to perform 8b/10b line coding. Comma characters are
+periodically transmitted and indicated by the <code class="docutils literal notranslate"><span class="pre">gtx_{tx,rx}_k</span></code> qualifier.</p>
+<section id="mgt-setup">
+<h3>MGT Setup<a class="headerlink" href="#mgt-setup" title="Permalink to this headline">¶</a></h3>
+<p>The two serial protocols used in this design communicate over two independent MGTs co-located in
+the same Quad. Their configuration is entirely contained within <code class="docutils literal notranslate"><span class="pre">gtx_comms_top.tcl</span></code>, which is the
+entry point to the TCL-based MGT configuration flow described below.</p>
+</section>
+</section>
+<section id="tcl-based-mgt-configuration">
+<h2>TCL-based MGT configuration<a class="headerlink" href="#tcl-based-mgt-configuration" title="Permalink to this headline">¶</a></h2>
+<p>The Quad MGT used in this system is configured with a TCL-based flow, essentially comprised of a
+TCL configuration script, <code class="docutils literal notranslate"><span class="pre">mgt_gen.tcl</span></code> and a QGT Verilog wrapper, <code class="docutils literal notranslate"><span class="pre">qgt_wrap.v</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">mgt_gen.tcl</span></code> implements two user-facing procedures:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">proc</span> <span class="pre">add_aux_ip</span> <span class="pre">{ipname</span> <span class="pre">config_file</span> <span class="pre">module_name}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">proc</span> <span class="pre">add_gt_protocol</span> <span class="pre">{config_file</span> <span class="pre">quad_num</span> <span class="pre">gt_num</span> <span class="pre">en8b10b</span> <span class="pre">pll_type}</span></code></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">add_aux_ip</span></code> provides a convenient way of adding arbitrary IP, that would otherwise have to be
+generated manually through the GUI wizard.</p>
+<p><code class="docutils literal notranslate"><span class="pre">add_gt_protocol</span></code> can be used to configure up to 4 Quad MGTs at MGT granularity. <code class="docutils literal notranslate"><span class="pre">config_file</span></code> specifies
+a TCL file containing a dictionary with all configuration parameters for a specific MGT. The remaining
+arguments associate the configuration with a specific MGT in the chip and set options that are used in
+the generation of the final Verilog modules (<code class="docutils literal notranslate"><span class="pre">q0_gt_wrap</span></code>, <code class="docutils literal notranslate"><span class="pre">q1_gt_wrap</span></code>, <code class="docutils literal notranslate"><span class="pre">q2_gt_wrap</span></code>, <code class="docutils literal notranslate"><span class="pre">q3_gt_wrap</span></code>),
+which all remain in <code class="docutils literal notranslate"><span class="pre">qgt_wrap.v</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">qgt_wrap.v</span></code> makes extensive use of Verilog macros to generate the correct code in the presence of
+different configuration parameters. These are defined in <code class="docutils literal notranslate"><span class="pre">qgt_wrap_stub.vh</span></code> and <code class="docutils literal notranslate"><span class="pre">qgt_wrap_pack.vh</span></code> and
+are selectively activated based on compile-time defines set by <code class="docutils literal notranslate"><span class="pre">mgt_gen.tcl</span></code>.</p>
+<blockquote>
+<div><p>An expanded version of <code class="docutils literal notranslate"><span class="pre">qgt_wrap.v</span></code> can be generated, for debug purposes or otherwise, by running:</p>
+</div></blockquote>
+<p><code class="docutils literal notranslate"><span class="pre">bedrock/fpga_family$</span> <span class="pre">make</span> <span class="pre">qgt_template</span></code></p>
+<section id="self-testing">
+<h3>(Self-)Testing<a class="headerlink" href="#self-testing" title="Permalink to this headline">¶</a></h3>
+<p>A basic test-pattern generator feeds Chitchat with a looping stream of well-known data. The data
+consists of two ASCII strings that can be easily identified when read from the Host over Local Bus.</p>
+<p>Note that the transmitted data is currently not tested for correctness on the RX side.</p>
+<p><code class="docutils literal notranslate"><span class="pre">comms_top_test.py</span></code> allows configuration registers to be accessed over UDP.
+This test script contains a basic parser for ‘command files’ which can be used to quickly
+create test cases composed of sequences of localbus commands, along with a few meta-commands.
+The following commands are currently supported:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RDW</span> <span class="pre">:ADDR</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WRW</span> <span class="pre">:ADDR</span> <span class="pre">DATA</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PRINT</span> <span class="pre">&quot;STRING&quot;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CMP</span> <span class="pre">:ADDR</span> <span class="pre">EXPECTED_VALUE</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">WAIT</span> <span class="pre">TIME_IN_SECONDS</span></code></p></li>
+</ul>
+<p>A somewhat self-checking ‘command file’ is run with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">hwtest</span></code>. While not an exhaustive test,
+it is capable capable of finding basic issues with the ChitChat link, localbus decoding
+and, by implication, Ethernet over fiber.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Bedrock</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../general-docs.html">General Docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../general-docs.html#docs">Docs</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../badger/README_md.html">badger README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../badger/doc/README_md.html">doc README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../badger/mem_gate_md.html">badger mem_gate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../badger/status_md.html">badger status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../board_support/bmb7_kintex/README_md.html">bmb7_kintex README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../board_support/zest/README_md.html">zest README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../build-tools/makefile_md.html">build-tools makefile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dsp/README_md.html">dsp README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../fpga_family/xilinx/README_md.html">xilinx README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../guidelines/rtl_guidelines_md.html">guidelines rtl_guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../peripheral_drivers/i2cbridge/README_md.html">i2cbridge README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../peripheral_drivers/idelay_scanner/README_md.html">idelay_scanner README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/README_md.html">common README</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">comms_top README</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#comms-top">COMMS TOP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ethernet-and-local-bus">Ethernet and Local Bus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#chitchat">ChitChat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tcl-based-mgt-configuration">TCL-based MGT configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../oscope/bmb7_cu/README_md.html">bmb7_cu README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../oscope/marble_family/README_md.html">marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../test_marble_family/README_md.html">test_marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../rtsim/README_md.html">rtsim README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../serial_io/chitchat/README_md.html">chitchat README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../serial_io/chitchat/chitchat_txrx_wrap_md.html">chitchat chitchat_txrx_wrap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/README_md.html">picorv32 README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/test/badger_lwip/README_md.html">badger_lwip README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/test/fv/README_md.html">fv README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/test/lb_bridge/README_md.html">lb_bridge README</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bedrock-modules.html">Bedrock Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../general-docs.html">General Docs</a><ul>
+      <li>Previous: <a href="../common/README_md.html" title="previous chapter">common README</a></li>
+      <li>Next: <a href="../oscope/bmb7_cu/README_md.html" title="next chapter">bmb7_cu README</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, LBNL ATG.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/_gen_md/projects/comms_top/README_md.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
