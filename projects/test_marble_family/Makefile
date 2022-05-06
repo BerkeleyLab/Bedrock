@@ -160,7 +160,7 @@ marble1_hwload:
 marble1_hwtest: udprtx
 	ping -c 2 ${RGMII_IP}
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD)
-	time ./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
+	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
 	$(PYTHON) testcase.py --ip=${RGMII_IP} --sfp
 
 clean:
