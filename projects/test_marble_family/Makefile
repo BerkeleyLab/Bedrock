@@ -157,13 +157,15 @@ BIT = marble1.bit
 marble1_hwload:
 	openocd -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT}; exit"
 
-# TODO: Add udprtx stress test
-marble1_hwtest:
-	ping -c 2 ${RGMII_IP} && $(PYTHON) testcase.py --ip=${RGMII_IP} --sfp
+marble1_hwtest: udprtx
+	ping -c 2 ${RGMII_IP}
+	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD)
+	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
+	$(PYTHON) testcase.py --ip=${RGMII_IP} --sfp
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
 	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
-	rm -f read_sfp.dat Vmarble_base bit_stamp_mod
+	rm -f read_sfp.dat Vmarble_base bit_stamp_mod udprtx
 	rm -rf _xilinx .Xil obj_dir

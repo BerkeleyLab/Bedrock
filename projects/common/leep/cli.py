@@ -96,6 +96,10 @@ def dumpjson(args, dev):
     sys.stdout.write('\n')
 
 
+def dumpgitid(args, dev):
+    print(dev.codehash)
+
+
 def dumpdrv(args, dev):
     if dev.backend != 'ca':
         _log.error("Only 'ca' backend supports, not '%s'", dev.backend)
@@ -226,6 +230,9 @@ def getargs():
 
     S = SP.add_parser('json', help='print json')
     S.set_defaults(func=dumpjson)
+
+    S = SP.add_parser('gitid', help='print gitid')
+    S.set_defaults(func=dumpgitid)
 
     S = SP.add_parser('drvinfo', help='print drive info json (ca:// only)')
     S.set_defaults(func=dumpdrv)
