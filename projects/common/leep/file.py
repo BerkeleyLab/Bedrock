@@ -1,12 +1,14 @@
 from __future__ import print_function
 
 import logging
-_log = logging.getLogger(__name__)
 
 import hashlib
 import json
 
 from .base import DeviceBase
+
+
+_log = logging.getLogger(__name__)
 
 
 class FileDevice(DeviceBase):
@@ -28,4 +30,4 @@ class FileDevice(DeviceBase):
         pass
 
     def reg_read(self, names, instance=[]):
-        return [0]*len(names)
+        return [0] * len(names)

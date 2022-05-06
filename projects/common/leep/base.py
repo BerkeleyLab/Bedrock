@@ -1,8 +1,10 @@
 import logging
-_log = logging.getLogger(__name__)
 
 import re
 import os
+
+
+_log = logging.getLogger(__name__)
 
 
 class RomError(Exception):
@@ -37,11 +39,12 @@ def print_reg(fcn):
 def open(addr, **kws):
     """Access to a single LEEP Device.
 
-    Device addresses take the form of "ca://<prefix>" or "leep://<ip>[:<port>]".
+    Device addresses take the form of "ca://<prefix>" or "leep://<ip>[:<port>]"
 
     "ca://" addresses take a Process Variable (PV) name prefix string.
 
-    "leep://" addresses are a hostname or IP address, with an optional port number.
+    "leep://" addresses are a hostname or IP address, with an optional port
+    number.
 
     >>> from leep import open
     >>> dev = open('leep://localhost')
@@ -68,7 +71,8 @@ def open(addr, **kws):
         return FileDevice(addr[7:], **kws)
 
     else:
-        raise ValueError("Unknown '%s' must begin with ca://, leep://, or file://" % addr)
+        msg = "Unknown '%s' must begin with ca://, leep://, or file://" % addr
+        raise ValueError(msg)
 
 
 class DeviceBase(object):
@@ -94,10 +98,11 @@ class DeviceBase(object):
         self.close()
 
     def expand_regname(self, name, instance=[]):
-        """Return a full register name from the short name and optionally instance number(s)
+        """ Return a full register name from the short name and optionally
+            instance number(s)
 
-        >>> D.expand_regname('XXX', instance=[0])
-        'tget_0_delay_pc_XXX'
+            >>> D.expand_regname('XXX', instance=[0])
+            'tget_0_delay_pc_XXX'
         """
 
         # check for full register name,
@@ -118,9 +123,12 @@ class DeviceBase(object):
         if len(ret) == 1:
             return ret[0]
         elif len(ret) > 1:
-            raise RuntimeError('%s Matches more than one register: %s' % (R.pattern, ' '.join(ret)))
+            subs = (R.pattern, ' '.join(ret))
+            msg = '%s Matches more than one register: %s' % subs
+            raise RuntimeError(msg)
         else:
-            raise RuntimeError('No match for register pattern %s' % R.pattern)
+            msg = 'No match for register pattern %s' % R.pattern
+            raise RuntimeError(msg)
 
     def reg_write(self, ops, instance=[]):
         """Write to registers.
@@ -156,7 +164,8 @@ class DeviceBase(object):
 
     def get_reg_info(self, name, instance=[]):
         """Return a dict describing the named register.
-        This dictionary is passed through from the information read from the device ROM.
+        This dictionary is passed through from the information read from the
+        device ROM.
 
         Common dict keys are:
 
@@ -190,21 +199,23 @@ class DeviceBase(object):
         side-effects of all preceding register writes
 
         ;param bool tag: Whether to use the tag mechanism to wait for a update
-        :param float timeout: How long to wait for an acquisition.  Seperate from the communications timeout.
+        :param float timeout: How long to wait for an acquisition.
+                              Seperate from the communications timeout.
         :param list instance: List of instance identifiers.
         """
         raise NotImplementedError
 
     def get_channels(self, chans=[], instance=[]):
-        """:returns: a list of :py:class:`numpy.ndarray` with the numbered channels.
-        chans may be a bit mask or a list of channel numbers.
+        """:returns: a list of :py:class:`numpy.ndarray` with the numbered
+        channels. `chans` may be a bit mask or a list of channel numbers.
 
         The returned arrays have been scaled.
         """
         raise NotImplementedError
 
     def get_timebase(self, chans=[], instance=[]):
-        """Return an array of times for each sample returned by :py:meth:`get_channels`.
+        """Return an array of times for each sample returned by
+        :py:meth:`get_channels`.
 
         Note that the number of samples may be different for some channels
         if the number of selected channels is not a power of two.
@@ -266,12 +277,10 @@ class DeviceBase(object):
 
                     N = 2**info.get('addr_width', 0)
                     if offset >= N:
-                        raise RuntimeError('offset out of bounds (%s < %s)' % (offset, N))
+                        msg = 'offset out of bounds (%s < %s)' % (offset, N)
+                        raise RuntimeError(msg)
 
                     addr = info['base_addr'] + offset
-
-                    # if addr > 0xffff:
-                    #       raise RuntimeError('XXX requires registers below 16-bit limit (%x)'%addr)
 
                     ret.extend([
                         0,  # all delays start as zero
@@ -284,7 +293,9 @@ class DeviceBase(object):
                     _inst, delay = inst
                     exp = self.regmap["__metadata__"]["tgen_granularity_log2"]
                     if exp < 0:
-                        raise RuntimeError('tgen delay scale exponent out of bounds (%s < 0)' % (exp))
+                        msg = 'tgen delay scale exponent '
+                        msg += 'out of bounds (%s < 0)' % (exp)
+                        raise RuntimeError(msg)
                     delay = delay/(pow(2, exp))
                     delay = int(delay)
 
@@ -319,7 +330,8 @@ class DeviceBase(object):
         maxcnt = 2**info['addr_width']
         assert maxcnt >= 4, info
         if len(ret) > maxcnt-4:
-            raise RuntimeError('tget Sequence %d exceeds max %d' % (len(ret), maxcnt-4))
+            msg = 'tget Sequence %d exceeds max %d' % (len(ret), maxcnt-4)
+            raise RuntimeError()
         ret.extend([0]*(maxcnt-len(ret)))
         assert len(ret) == maxcnt, (len(ret), maxcnt)
         return ret
@@ -331,5 +343,4 @@ class DeviceBase(object):
         val = self.assemble_tgen(prog, instance=instance)
         next, = self.reg_read(['bank_next'])
 
-        return [('XXX', val),
-                ('bank_next', next ^ 1), ]
+        return [('XXX', val), ('bank_next', next ^ 1), ]
