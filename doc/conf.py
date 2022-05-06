@@ -47,6 +47,7 @@ extensions = [
     'sphinx.ext.imgmath',
     'sphinx.ext.githubpages',
     'sphinx.ext.intersphinx',
+    'm2r2',
 ]
 
 # If true, figures, tables and code-blocks are automatically numbered if they
@@ -60,8 +61,7 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 
 # The master toctree document.
 master_doc = 'index'
