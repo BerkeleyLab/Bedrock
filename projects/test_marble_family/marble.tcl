@@ -61,4 +61,4 @@ proc project_rpt {project_name} {
 open_run impl_1
 set my_proj_name "${build_id}.runs"
 project_rpt $my_proj_name
-write_bitstream -force $build_id.$gitid.bit
+write_bitstream -force $build_id.$gitid.x.bit
