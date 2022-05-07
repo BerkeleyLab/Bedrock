@@ -2,9 +2,10 @@
 
 import os
 
+
 def make_md_include(fname, title=""):
-    flastdir = os.path.basename(os.path.realpath(fname))
-    fdir = os.path.dirname(os.path.realpath(fname))
+    # flastdir = os.path.basename(os.path.realpath(fname))
+    # fdir = os.path.dirname(os.path.realpath(fname))
     fbase, fext = os.path.splitext(os.path.basename(fname))
 
     print(".. _{}:".format(fbase))
@@ -21,6 +22,7 @@ def make_md_include(fname, title=""):
         print(".. mdinclude:: {}".format(fname))
         print("")
 
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Generate .rst stubs")
@@ -36,6 +38,7 @@ def main():
 
     if do_md_include:
         make_md_include(fname, title)
+
 
 if __name__ == "__main__":
     main()
