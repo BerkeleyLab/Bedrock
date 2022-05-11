@@ -123,6 +123,7 @@ SRC_MD = \
    projects/oscope/marble_family/README.md \
    projects/oscope/bmb7_cu/README.md \
    projects/comms_top/README.md \
+   guidelines/CONTRIBUTING.md \
    guidelines/rtl_guidelines.md \
    badger/README.md \
    badger/status.md \
