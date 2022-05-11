@@ -109,7 +109,7 @@ always @(posedge clk) begin
 	else if (test_type==5) begin
 		in1 <= (~iq) ? in_i: in_q;
 		if (control_cnt2>sp_step_time)
-			in1 <= (~iq) ? in_i + 5000: in_q + 0; // Step in control input
+			in1 <= (~iq) ? in_i: in_q + 5000; // Step in control input
 	end
 	else if (test_type==4) begin
 		in1 <= (~iq) ? mag_test4: 0;

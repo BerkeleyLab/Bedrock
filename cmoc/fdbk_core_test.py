@@ -370,7 +370,7 @@ def run_prop_test_bench(plot=False):
                  (np.real(error), 'Error')]
         trace_plotter(
             "Proportional gain test-bench (Amplitude)", trang, waves=waves,
-            # xlim=(1.4, 2.5), ylim=(-140000, 30000),
+            xlim=(1.4, 2.5), ylim=(-140000, 30000),
             texts=texts,
             x0=setmp_step_time*Tstep, y1=out1, y2=out2)
 
@@ -445,7 +445,7 @@ def run_prop_test_bench(plot=False):
         trace_plotter(
             "Proportional gain test-bench (Phase)", trang, waves=waves,
             yscale=360*0.5**18, ylabel='Phase [Degrees]',
-            # xlim=(1.4, 2.5),
+            xlim=(1.4, 2.5),
             texts=texts,
             x0=setmp_step_time*Tstep, y1=out1, y2=out2)
 
@@ -506,9 +506,10 @@ def run_int_test_bench(plot=False):
     # Note that these signals are really in polar coordinates,
     # arranged here in Cartesian for convenience,
     # but real is really amplitude and imaginary is phase.
-    setpoint = data[:, 0] + 1j * data[:, 1]
-    fdbk_out = data[:, 2] + 1j * data[:, 3]
-    # error = data[:, 4] + 1j * data[:, 5]
+    fdbk_in = data[:, 0] + 1j * data[:, 1]
+    setpoint = data[:, 2] + 1j * data[:, 3]
+    fdbk_out = data[:, 4] + 1j * data[:, 5]
+    error = data[:, 6] + 1j * data[:, 7]
 
     # Scale by the appropriate scaling factor
     ki = coeff_val[0] * 1.646760258 / 2**15 / Tstep
@@ -584,9 +585,10 @@ def run_int_test_bench(plot=False):
     # Note that these signals are really in polar coordinates,
     # arranged here in Cartesian for convenience,
     # but real is really amplitude and imaginary is phase.
-    setpoint = data[:, 0] + 1j * data[:, 1]
-    fdbk_out = data[:, 2] + 1j * data[:, 3]
-    # error = data[:, 4] + 1j * data[:, 5]
+    fdbk_in = data[:, 0] + 1j * data[:, 1]
+    setpoint = data[:, 2] + 1j * data[:, 3]
+    fdbk_out = data[:, 4] + 1j * data[:, 5]
+    error = data[:, 6] + 1j * data[:, 7]
 
     # Scale by the appropriate scaling factor
     ki = coeff_val[1] * 1.646760258 / 2**15 / Tstep
@@ -693,8 +695,17 @@ def run_latency_test_bench(plot=False):
 
 
 def run_cavity_step_test(plot=False):
+    """
+    Proportional Cavity Step test:
+    The test-bench drives the input of the feedback controller with a given value
+    that combined with the set-point setting produces a 0 output signal.
+    Then a step is applied to the cavity I&Q value and the change in the output signal is characterized.
+    The integral gain is set to 0 to isolate its effect from the proportional path.
+    This exercise is done for both amplitude and phase.
+    """
 
     print("\n---- Cavity Step Test ----\n")
+    print("---- Amplitude test ----\n")
 
     amplitude_set = 10000  # FPGA Counts
     phase_set = 0  # Degrees
@@ -781,6 +792,94 @@ def run_cavity_step_test(plot=False):
                  (np.real(error), 'Error')]
         trace_plotter("Cavity step test-bench", trang, waves=waves,
                       x0=setmp_step_time*Tstep)
+
+    print("---- Phase test ----\n")
+
+    amplitude_set = 5000  # FPGA Counts
+    phase_set = 35  # Degrees
+    phase_set_rad = phase_set * np.pi / 180  # Radians
+    setmp_val = [
+        amplitude_set * 1.646760258 / 2,
+        phase_set_rad * (2**17 - 1) * 2.0 / (2 * np.pi)
+    ]
+    coeff_val = [0, 0, 0, 900]  # coeff X I, coeff Y I, coeff X P, coeff Y P
+    lim_val = [0, 0, 0, 0]
+
+    # Calculate the input in I and Q coordinates corresponding to the set
+    in_i = int(amplitude_set * np.cos(phase_set_rad))
+    in_q = int(amplitude_set * np.sin(phase_set_rad))
+    print(in_i)
+    print(in_q)
+
+    test_type = 5
+    in_file = 'fdbk_core_cav_step_in.dat'
+    out_file = 'fdbk_core_cav_step_out.dat'
+
+    setmp_step_time = 150
+    setmp_step_val = 0
+
+    limit_amp = 60000
+    limit_pha = 100000
+    lim_step_val = [
+        limit_amp / 1.646760258, limit_pha / 1.646760258, -limit_amp / 1.646760258,
+        -limit_pha / 1.646760258
+    ]
+    lim_step_time = 100
+
+    # Run Verilog test-bench
+    run_test_bench(
+        setmp_val,
+        coeff_val,
+        lim_val,
+        test_type,
+        in_file,
+        out_file,
+        setmp_step_time=setmp_step_time,
+        setmp_step_val=setmp_step_val,
+        lim_step_time=lim_step_time,
+        lim_step_val=lim_step_val,
+        in_i=in_i,
+        in_q=in_q)
+
+    # Load output file from Verilog test-bench
+    data = np.loadtxt(out_file, skiprows=1)
+    # Build time vector
+    Tstep = 10e-9  # Step size is 10 ns
+    # Need the factor of two on the time step since data is recored every other 10ns cycle
+    trang = np.arange(0.0, 2.0 * Tstep * data.shape[0], 2.0 * Tstep)
+
+    # Grab controller's input and output signals from data
+    # Note that these signals are really in polar coordinates,
+    # arranged here in Cartesian for convenience,
+    # but real is really amplitude and imaginary is phase.
+    fdbk_in = data[:, 0] + 1j * data[:, 1]
+    setpoint = data[:, 2] + 1j * data[:, 3]
+    fdbk_out = data[:, 4] + 1j * data[:, 5]
+    error = data[:, 6] + 1j * data[:, 7]
+
+    # Scale by the appropriate scaling factor
+    kp = coeff_val[3] * 1.646760258 / 2**6 * ( 1.646760258 / 2) # n=-1 
+
+    # Find latency in clock cycles
+    out1 = np.imag(fdbk_out[int(setmp_step_time / 2)])
+    out2 = np.imag(fdbk_out[int(setmp_step_time / 2) + int(100 / 2)])
+    edge_ind = np.where((np.imag(fdbk_out) < out1 - 2) &
+                        (np.imag(fdbk_out) > out2 + 2))[0]
+
+    print(out1, out2, edge_ind)
+    kp_measured = (fdbk_out[edge_ind[0] - 1] - fdbk_out[edge_ind[-1] + 1]
+                   ) / -5000
+    ll = kp, np.imag(kp_measured)
+    kp_text = r'$\rm k_{\rm p}$' + ' set to: %.3f, measured: %.3f' % ll
+    print('\nKp set to: %.3f, measured: %.3f' % ll)
+
+    if plot:
+        waves = [(np.real(fdbk_in), 'Controller Input'),
+                 (np.real(setpoint), 'Setpoint'),
+                 (np.real(fdbk_out), 'Controller Output'),
+                 (np.real(error), 'Error')]
+        trace_plotter("Cavity step test-bench", trang, waves=waves,
+                      x0=setmp_step_time*Tstep)
         waves = [(np.imag(setpoint), 'Setpoint'),
                  (np.imag(fdbk_out), 'Controller Output'),
                  (np.imag(error), 'Error')]
@@ -801,7 +900,7 @@ if __name__ == "__main__":
     run_cavity_step_test(plot=plot)
 
     # Run Set-point scaling test
-    #run_sp_test_bench(plot=plot)
+    run_sp_test_bench(plot=plot)
 
     # Run feedback proportional gain scaling test
     run_prop_test_bench(plot=plot)
