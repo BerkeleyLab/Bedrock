@@ -62,13 +62,13 @@ def run_test_bench(setmp_val,
     # Start with empty command to handle exception
     command = ''
 
-    if ((test_type == 2) or (test_type == 3) or (test_type == 4) or (test_type == 5)):
+    if ((test_type == 2) or (test_type == 3) or (test_type == 4) or (test_type == 5) or (test_type == 6)):
         # Write configuration file for set-point step
         setmp_file = 'setmp_step_file_in.dat'
         # index selects either amplitude or phase step on the set-point
         if (test_type == 2 or test_type == 4):  # Amplitude modulation
             index = 0
-        elif (test_type == 3 or test_type == 5):  # Phase modulation
+        elif (test_type == 3 or test_type == 5 or test_type == 6):  # Phase modulation
             index = 1
 
         # Apply step to set-point to amplitude or phase depending on the test
@@ -88,7 +88,7 @@ def run_test_bench(setmp_val,
             ' +sp_step_time=' + str(setmp_step_time) + ' +sp_step_file=' + setmp_file +\
             ' +lim_step_time=' + str(lim_step_time) + ' +lim_step_file=' + lim_file
 
-        if (test_type == 3) or (test_type == 5):
+        if (test_type == 3) or (test_type == 5) or (test_type == 6):
             command = command + ' +in_i=' + str(in_i) + ' +in_q=' + str(in_q)
 
     elif (test_type == 0 or test_type == 4):
@@ -811,7 +811,7 @@ def run_cavity_step_test(plot=False):
     print(in_i)
     print(in_q)
 
-    test_type = 5
+    test_type = 6
     in_file = 'fdbk_core_cav_step_in.dat'
     out_file = 'fdbk_core_cav_step_out.dat'
 
@@ -863,11 +863,11 @@ def run_cavity_step_test(plot=False):
     # Find latency in clock cycles
     out1 = np.imag(fdbk_out[int(setmp_step_time / 2)])
     out2 = np.imag(fdbk_out[int(setmp_step_time / 2) + int(100 / 2)])
-    edge_ind = np.where((np.imag(fdbk_out) < out1 - 2) &
-                        (np.imag(fdbk_out) > out2 + 2))[0]
+    edge_ind = np.where((np.imag(fdbk_out) > out1 - 2) &
+                        (np.imag(fdbk_out) < out2 + 2))[0]
 
     print(out1, out2, edge_ind)
-    kp_measured = (fdbk_out[edge_ind[0] - 1] - fdbk_out[edge_ind[-1] + 1]
+    kp_measured = (fdbk_out[edge_ind[0] - 1] - fdbk_out[edge_ind[-1]]# + 1]
                    ) / -5000
     ll = kp, np.imag(kp_measured)
     kp_text = r'$\rm k_{\rm p}$' + ' set to: %.3f, measured: %.3f' % ll

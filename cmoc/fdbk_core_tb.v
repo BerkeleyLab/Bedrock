@@ -18,6 +18,9 @@ module fdbk_core_tb;
 // 1: Set-point phase scaling
 // 2: Proportional/Integral feedback gain scaling (Amplitude)
 // 3: Proportional/Integral feedback gain scaling (Phase)
+// 4: Latency test
+// 5: Cavity Set-point amplitude test
+// 6: Cavity Set-point phase test
 integer test_type;
 
 // Parameters used in feedback gain scaling exercise to put a step on the set-point
@@ -61,12 +64,12 @@ initial begin
 
 	if (!$value$plusargs("test=%d", test_type)) test_type=0;
 
-	if (test_type==1 || test_type==3 || test_type==5) begin
+	if (test_type==1 || test_type==3 || test_type==5 || test_type==6) begin
 		if (!$value$plusargs("in_i=%d", in_i)) in_i=0;
 		if (!$value$plusargs("in_q=%d", in_q)) in_q=0;
 	end
 
-	if (test_type==2 || test_type==3 || test_type == 4 || test_type == 5) begin
+	if (test_type==2 || test_type==3 || test_type == 4 || test_type == 5 || test_type==6) begin
 		if (!$value$plusargs("sp_step_time=%d", sp_step_time)) sp_step_time=0;
 
 		if (!$value$plusargs("sp_step_file=%s", sp_step_file_name)) sp_step_file_name="setmp_step_file.dat";
@@ -94,7 +97,8 @@ reg signed [17:0] mag_test4 = 32000;
 // 2: Proportional/Integral feedback gain scaling (Amplitude)
 // 3: Proportional/Integral feedback gain scaling (Phase)
 // 4: Latency test
-// 5: Cavity Set-point test
+// 5: Cavity Set-point amplitude test
+// 6: Cavity Set-point phase test
 
 integer control_cnt2=0;
 always @(posedge clk) begin
@@ -107,6 +111,11 @@ always @(posedge clk) begin
 	else if (test_type==2)
 		in1 <= (~iq) ? 320: 0;
 	else if (test_type==5) begin
+		in1 <= (~iq) ? in_i: in_q;
+		if (control_cnt2>sp_step_time)
+			in1 <= (~iq) ? in_i + 5000: in_q; // Step in control input
+	end
+	else if (test_type==6) begin
 		in1 <= (~iq) ? in_i: in_q;
 		if (control_cnt2>sp_step_time)
 			in1 <= (~iq) ? in_i: in_q + 5000; // Step in control input
@@ -138,7 +147,7 @@ always @(posedge lb_clk) begin
 			lb_write <= 1;
 		end
 	end else
-		if (control_cnt>lim_step_time && control_cnt%3==1 && (test_type==2 || test_type==3 || test_type==4 || test_type==5) && rc2==2) begin
+		if (control_cnt>lim_step_time && control_cnt%3==1 && (test_type==2 || test_type==3 || test_type==4 || test_type==5 || test_type==6) && rc2==2) begin
 			rc2=$fscanf(lim_step_file,"%d %d\n",ca,cd);
 			if (rc2==2) begin
 				$display("local bus[%d] = 0x%x (%d)", ca, cd, cd);
@@ -224,7 +233,7 @@ always @(posedge clk) begin
 	// Write aligned input and output signals onto file (feedback gain scaling test)
 	if (out_file != 0 && ~iq && (test_type==2 || test_type==3)) $fwrite(out_file," %d %d %d %d %d %d %d %d\n", in1_d, in1, setmp_d, setmp, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
 	if (out_file != 0 && ~iq && test_type==4) $fwrite(out_file," %d %d %d %d %d %d\n", in1_d, in1, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
-	if (out_file != 0 && ~iq && test_type==5) $fwrite(out_file," %d %d %d %d %d %d %d %d\n", in1_d, in1, setmp_d, setmp, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
+	if (out_file != 0 && ~iq && (test_type==5 || test_type==6)) $fwrite(out_file," %d %d %d %d %d %d %d %d\n", in1_d, in1, setmp_d, setmp, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
 	if (sync_d) count_syncs <= count_syncs + 1'b1;
 end
 
