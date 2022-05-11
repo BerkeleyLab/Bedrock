@@ -1,0 +1,8 @@
+.. _CONTRIBUTING:
+
+------------
+guidelines CONTRIBUTING
+------------
+
+.. mdinclude:: /home/runner/work/Bedrock/Bedrock/guidelines/CONTRIBUTING.md
+
