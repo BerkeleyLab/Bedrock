@@ -506,10 +506,10 @@ def run_int_test_bench(plot=False):
     # Note that these signals are really in polar coordinates,
     # arranged here in Cartesian for convenience,
     # but real is really amplitude and imaginary is phase.
-    fdbk_in = data[:, 0] + 1j * data[:, 1]
+    # fdbk_in = data[:, 0] + 1j * data[:, 1]
     setpoint = data[:, 2] + 1j * data[:, 3]
     fdbk_out = data[:, 4] + 1j * data[:, 5]
-    error = data[:, 6] + 1j * data[:, 7]
+    # error = data[:, 6] + 1j * data[:, 7]
 
     # Scale by the appropriate scaling factor
     ki = coeff_val[0] * 1.646760258 / 2**15 / Tstep
@@ -585,10 +585,10 @@ def run_int_test_bench(plot=False):
     # Note that these signals are really in polar coordinates,
     # arranged here in Cartesian for convenience,
     # but real is really amplitude and imaginary is phase.
-    fdbk_in = data[:, 0] + 1j * data[:, 1]
+    # fdbk_in = data[:, 0] + 1j * data[:, 1]
     setpoint = data[:, 2] + 1j * data[:, 3]
     fdbk_out = data[:, 4] + 1j * data[:, 5]
-    error = data[:, 6] + 1j * data[:, 7]
+    # error = data[:, 6] + 1j * data[:, 7]
 
     # Scale by the appropriate scaling factor
     ki = coeff_val[1] * 1.646760258 / 2**15 / Tstep
@@ -770,7 +770,7 @@ def run_cavity_step_test(plot=False):
     error = data[:, 6] + 1j * data[:, 7]
 
     # Scale by the appropriate scaling factor
-    kp = coeff_val[2] * 1.646760258 / 2**6 * ( 1.646760258 / 2) # n=-1 
+    kp = coeff_val[2] * 1.646760258 / 2**6 * (1.646760258 / 2)  # n=-1
 
     # Find latency in clock cycles
     out1 = np.real(fdbk_out[int(setmp_step_time / 2)])
@@ -786,12 +786,14 @@ def run_cavity_step_test(plot=False):
     print('\nKp set to: %.3f, measured: %.3f' % ll)
 
     if plot:
+        texts = [(1.6, -60000, kp_text)]
         waves = [(np.real(fdbk_in), 'Controller Input'),
                  (np.real(setpoint), 'Setpoint'),
                  (np.real(fdbk_out), 'Controller Output'),
                  (np.real(error), 'Error')]
         trace_plotter("Cavity step test-bench", trang, waves=waves,
-                      x0=setmp_step_time*Tstep)
+                      x0=setmp_step_time*Tstep,
+                      texts=texts)
 
     print("---- Phase test ----\n")
 
@@ -858,7 +860,7 @@ def run_cavity_step_test(plot=False):
     error = data[:, 6] + 1j * data[:, 7]
 
     # Scale by the appropriate scaling factor
-    kp = coeff_val[3] * 1.646760258 / 2**6 * ( 1.646760258 / 2) # n=-1 
+    kp = coeff_val[3] * 1.646760258 / 2**6 * (1.646760258 / 2)
 
     # Find latency in clock cycles
     out1 = np.imag(fdbk_out[int(setmp_step_time / 2)])
@@ -867,19 +869,21 @@ def run_cavity_step_test(plot=False):
                         (np.imag(fdbk_out) < out2 + 2))[0]
 
     print(out1, out2, edge_ind)
-    kp_measured = (fdbk_out[edge_ind[0] - 1] - fdbk_out[edge_ind[-1]]# + 1]
+    kp_measured = (fdbk_out[edge_ind[0] - 1] - fdbk_out[edge_ind[-1]]  # + 1]
                    ) / -5000
     ll = kp, np.imag(kp_measured)
     kp_text = r'$\rm k_{\rm p}$' + ' set to: %.3f, measured: %.3f' % ll
     print('\nKp set to: %.3f, measured: %.3f' % ll)
 
     if plot:
+        texts = [(1.6, -60000, kp_text)]
         waves = [(np.real(fdbk_in), 'Controller Input'),
                  (np.real(setpoint), 'Setpoint'),
                  (np.real(fdbk_out), 'Controller Output'),
                  (np.real(error), 'Error')]
         trace_plotter("Cavity step test-bench", trang, waves=waves,
-                      x0=setmp_step_time*Tstep)
+                      x0=setmp_step_time*Tstep,
+                      texts=texts)
         waves = [(np.imag(setpoint), 'Setpoint'),
                  (np.imag(fdbk_out), 'Controller Output'),
                  (np.imag(error), 'Error')]
