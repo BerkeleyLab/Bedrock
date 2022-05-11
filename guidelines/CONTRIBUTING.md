@@ -104,9 +104,10 @@ a git commit ID (or similar) instead.
 
 PDF and object files often take extra effort to make reproducible.
 
-FPGA bitfiles are not typically shown to be reproducible, but it would
-be great if that can change.
-
+FPGA bitfiles are not typically shown to be reproducible, but Xilinx
+[acknowledges](https://support.xilinx.com/s/article/61599) that is a
+reasonable goal (they call it "repeatable").
+Our toolchain has demonstrated this working in at least couple of cases.
 
 ## Readability
 
