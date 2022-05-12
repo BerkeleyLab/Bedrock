@@ -47,11 +47,8 @@ module phs_avg #(
 assign kx_addr = iq;
 assign ky_addr = iq;
 
-wire signed [dwi+5:0] xmr = prod_x[(dwi+dwj)-2:dwi-8];
-wire signed [dwi+5:0] ymr = prod_y[(dwi+dwj)-2:dwi-8];
-
-reg signed [dwj-1:0] kx1 = 0, ky1 = 0;
-reg signed [(dwi+dwj)-1:0] prod_x = 0, prod_y = 0;
+(* DONT_TOUCH = "TRUE" *) reg signed [dwj-1:0] kx1 = 0, ky1 = 0;
+(* DONT_TOUCH = "TRUE" *) reg signed [(dwi+dwj)-1:0] prod_x = 0, prod_y = 0;
 always @(posedge clk) begin
         // Delay gains, to multiply I*R
         kx1 <= kx;
@@ -60,9 +57,12 @@ always @(posedge clk) begin
         prod_y <= y * ky1;
 end
 
-reg signed [dwi+6:0] sum = 0, sum1 = 0;
-reg signed [dwi+7:0] sum_f = 0;
-reg signed [dwi+7:0] intg = 0;
+(* DONT_TOUCH = "TRUE" *) wire signed [dwi+5:0] xmr = prod_x[(dwi+dwj)-2:dwi-8];
+(* DONT_TOUCH = "TRUE" *) wire signed [dwi+5:0] ymr = prod_y[(dwi+dwj)-2:dwi-8];
+
+(* DONT_TOUCH = "TRUE" *) reg signed [dwi+6:0] sum = 0, sum1 = 0;
+(* DONT_TOUCH = "TRUE" *) reg signed [dwi+7:0] sum_f = 0;
+(* DONT_TOUCH = "TRUE" *) reg signed [dwi+7:0] intg = 0;
 always @(posedge clk) begin
         sum <= xmr + ymr;
         sum1 <= sum;
