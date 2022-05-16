@@ -59,7 +59,7 @@ async def cic_simple_s_test(dut):
     await RisingEdge(dut.clk)
 
     for i, value in enumerate(trace):
-        if (i % 1000 == 0):
+        if i % 1000 == 0:
             print(i, '/', len(trace))
 
         dut.data_in_gate.value = True
@@ -87,8 +87,6 @@ async def cic_simple_s_test(dut):
     plt.ylabel("Amplitude (a.u.)")
     plt.legend()
     plt.show()
-
-
 
 
 def main():
