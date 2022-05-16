@@ -11,10 +11,8 @@
 '''
 
 import os
-import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 import cocotb
 from cocotb.clock import Clock
 from cocotb.runner import get_runner
@@ -36,6 +34,7 @@ S2_FREQ = 10
 S3_FREQ = 12
 
 SAMPLE_RATE = 8
+
 
 @cocotb.test()
 async def cic_simple_s_test(dut):
@@ -93,6 +92,9 @@ async def cic_simple_s_test(dut):
 
 
 def main():
+    '''
+        Main entry point
+    '''
     sim = os.getenv("SIM", "icarus")
 
     verilog_sources = ["cic_simple_s.v"]
@@ -103,8 +105,6 @@ def main():
 
     runner.test(toplevel="cic_simple_s", py_module="cic_simple_s_tb")
 
-    with open('cic_simple_s_data.npz', 'rb') as f:
-        data = np.load('cic_simple_s_data.npz')
 
 if __name__ == '__main__':
     main()
