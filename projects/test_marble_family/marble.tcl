@@ -73,6 +73,6 @@ project_rpt $my_proj_name
 # this old_commit value matches that in build_rom.py --placeholder_rev
 set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
 set new_commit [string toupper [exec git rev-parse HEAD]]
-swap_gitid16 $old_commit $new_commit
+swap_gitid $old_commit $new_commit 16 0
 
 write_bitstream -force $build_id.$gitid.x.bit
