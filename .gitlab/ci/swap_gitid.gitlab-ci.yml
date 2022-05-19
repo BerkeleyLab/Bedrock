@@ -1,0 +1,6 @@
+swap_gitid_test:
+  before_script:
+    - cd build-tools/vivado_tcl
+  stage: test
+  script:
+    - tclsh test_swap_gitid.tcl
