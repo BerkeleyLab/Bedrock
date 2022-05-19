@@ -20,13 +20,12 @@ variable GITID_LENGTH 40
 variable INIT_LENGTH  69
 variable RECORD_MARKER 800A
 
-# Checks if vivado has finished implementation
-proc check_impl {} {
-    set impl_runs [get_runs impl_*]
-    if {$impl_runs eq ""} {
-        puts "ERROR: Did not find active Vivado implemenation run"
-    }
-}
+# Comment about INIT_LENGTH: that's the length of the string Vivado uses
+# to describe the (partial) initial contents of a Xilinx block memory.
+# It takes the form
+# "256'h388F5DDA0643504C420409D89060EF550D6BEE390AB3F9B0CD799F8FFF2C1F0A"
+# i.e., 64 hex digits describing 256 data bits, plus the Verilog-inspired
+# leading "256'h", for a total of 69 characters.
 
 
 # Checks if GIT ID has a proper length
@@ -169,7 +168,19 @@ proc gitid_proc {old_commit new_commit init0 init1 rowwidth} {
 }
 
 
-# These functions need Vivado and a routed design
+# Above this point are general string handling functions,
+# which can be tested by a vanilla tclsh.  See test_swap_gitid.tcl.
+# The functions below need Vivado and a routed design.
+
+
+# Checks if vivado has finished implementation
+proc check_impl {} {
+    set impl_runs [get_runs impl_*]
+    if {$impl_runs eq ""} {
+        puts "ERROR: Did not find active Vivado implemenation run"
+    }
+}
+
 
 proc check_bmem {pattern width} {
     set c [get_cells -hier -filter {PRIMITIVE_TYPE =~ BMEM.*.*} $pattern]
