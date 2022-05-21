@@ -25,8 +25,8 @@
        | +-----+   +-^-+                |    |
        |             |                  |    |
        +-------------------------------------+
-                     |          |
-          cic_sample +          + cc_sample
+                     |                  |
+          cic_sample +                  + cc_sample
 */
 
 module cic_multichannel #(
