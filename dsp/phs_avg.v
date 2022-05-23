@@ -28,8 +28,7 @@
 // real when iq==1 and imaginary when iq==0.
 
 module phs_avg #(
-    parameter dwi = 17,
-    parameter dwj = 16)
+    parameter dwi = 17)
 (
 	input clk,  // timespec 6.66 ns
 	input reset,
@@ -43,7 +42,7 @@ module phs_avg #(
 	output signed [dwi+7:0] sum_filt, // debug
 	output signed [dwi+1:0] z
 );
-
+localparam dwj = 16;  // coefficient width (hard-coded due to limitations in newad)
 assign kx_addr = iq;
 assign ky_addr = iq;
 
@@ -57,8 +56,8 @@ always @(posedge clk) begin
         prod_y <= y * ky1;
 end
 
-wire signed [dwi+5:0] xmr = prod_x[(dwi+dwj)-2:dwi-8];
-wire signed [dwi+5:0] ymr = prod_y[(dwi+dwj)-2:dwi-8];
+wire signed [dwi+5:0] xmr = prod_x[(dwi+dwj)-2:dwj-7];
+wire signed [dwi+5:0] ymr = prod_y[(dwi+dwj)-2:dwj-7];
 
 reg signed [dwi+6:0] sum = 0, sum1 = 0;
 reg signed [dwi+7:0] sum_f = 0;
