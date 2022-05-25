@@ -38,7 +38,7 @@ module phs_avg #(
 	output [0:0] kx_addr,    // external address for kx
 	input signed [dwi-1:0] y,
 	input signed [15:0] ky,  // external
-	output [0:0] ky_addr,    // external address for kx
+	output [0:0] ky_addr,    // external address for ky
 	output signed [dwi+7:0] sum_filt, // debug
 	output signed [dwi+1:0] z
 );
