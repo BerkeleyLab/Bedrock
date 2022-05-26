@@ -7,6 +7,9 @@ module flag_xdomain(
 );
 
 reg flagtoggle_clk1=0;
+(* ASYNC_REG="TRUE", RLOC="X0Y0" *)
+(* SHREG_EXTRACT="NO", KEEP="TRUE" *)
+(* ALTERA_ATTRIBUTE="-name AUTO_SHIFT_REGISTER_RECOGNITION OFF" *)
 reg [2:0] sync1_clk2=0;
 always @(posedge clk1) if (flagin_clk1)
 	flagtoggle_clk1 <= ~flagtoggle_clk1;
