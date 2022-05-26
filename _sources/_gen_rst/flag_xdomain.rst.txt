@@ -3,11 +3,6 @@
 flag_xdomain
 ============
 
-Description
-'''''''''''
-
-| 
-
 Pinout
 ''''''
 
