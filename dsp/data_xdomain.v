@@ -6,7 +6,7 @@ module data_xdomain(clk_in, gate_in, data_in,
 parameter size=16;
 	input clk_in, gate_in, clk_out;
 	input [size-1:0] data_in;
-	output reg [size-1:0] data_out;
+	(* DONT_TOUCH="TRUE" *) output reg [size-1:0] data_out;
 	output reg gate_out;
 initial gate_out=0;
 initial data_out=0;
@@ -21,7 +21,7 @@ flag_xdomain foo(
 
 // It can be argued that the final pipeline stage is not needed,
 // but then you'd need oddball timing constraints on the data path.
-reg [size-1:0] data_pipe=0;
+(* DONT_TOUCH="TRUE" *) reg [size-1:0] data_pipe=0;
 always @(posedge clk_out) begin
 	data_pipe <= data_latch;
 	gate_out <= gate_x;
