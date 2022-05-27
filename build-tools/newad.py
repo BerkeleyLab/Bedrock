@@ -292,6 +292,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
         searchpath = '.'
     this_mod = fin.split('/')[-1].split('.')[0]
     verilog_file_lines = []
+    port_clock = clk_domain
     # Looks like the reason we read the whole file is to avoid opening
     # several files at the same time
     with open(fin, 'r') as f:
@@ -353,12 +354,12 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
         if m:
             info = [m.group(i) for i in range(7)]
             p = Port(info[5], (info[3], info[4]), info[1], info[2], this_mod,
-                     info[6], clk_domain, cd_indexed, **attributes)
+                     info[6], port_clock, cd_indexed, **attributes)
             this_port_list.append(p)
             consider_port(p, fd)
             if info[6] == 'plus-we':
                 p = Port(info[5] + '_we', (0, 0), info[1], None, this_mod,
-                         info[6] + '-VOID', clk_domain, cd_indexed,
+                         info[6] + '-VOID', port_clock, cd_indexed,
                          **attributes)
                 this_port_list.append(p)
                 consider_port(p, fd)
@@ -368,10 +369,18 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
             if m:
                 info = [m.group(i) for i in range(5)]
                 p = Port(info[3], (0, 0), info[1], info[2], this_mod, info[4],
-                         clk_domain, cd_indexed, **attributes)
+                         port_clock, cd_indexed, **attributes)
                 this_port_list.append(p)
                 consider_port(p, fd)
                 attributes = {}
+        # new feature:  local override of clock domain
+        # some modules have control inputs in multiple domains
+        # used in lcls2_llrf digitizer_config.v digitizer_dsp.v
+        m = re.search(r'^\s*//\s*newad-force\s+(\w+)\s+domain', line)
+        if m:
+            new_clock = m.group(1)
+            # print("clock domain local override: %s in %s" % (new_clock, fin))
+            port_clock = new_clock
 
         # (c) registers in the top-level file
         if not stack:
@@ -379,7 +388,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
             if m:
                 info = [m.group(i) for i in range(6)]
                 p = Port(info[4], (info[2], info[3]), 'top_level', info[1],
-                         this_mod, info[5], clk_domain, cd_indexed,
+                         this_mod, info[5], port_clock, cd_indexed,
                          **attributes)
                 this_port_list.append(p)
                 # Since these are top level registers, decoders can be generated here
