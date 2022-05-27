@@ -3,6 +3,7 @@ make
 iverilog
 
 python3-numpy
+python3-pip
 flake8
 
 Note that python2 is very much past its end-of-life; we support and
@@ -18,13 +19,15 @@ python3-matplotlib
 =====
 Summary, well tested on Debian Buster and Bullseye:
 
-apt-get install -y build-essential git iverilog gtkwave verilator
+apt-get install -y build-essential git iverilog gtkwave verilator python3-pip
 apt-get install -y python3-numpy python3-flake8 python3-scipy python3-matplotlib
+pip3 install cocotb
 
 =====
 The setup instructions for bedrock on Fedora should be:
 
-yum install iverilog gtkwave make g++ python3-numpy python3-scipy
+yum install iverilog gtkwave make g++ python3-numpy python3-scipy python3-pip
+pip3 install cocotb
 
 but then we hit a iverilog-vpi configuration bug seemingly caused by RedHat.
 The evasive action I suggest is to build iverilog from source:
