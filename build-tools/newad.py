@@ -314,6 +314,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
             cd_indexed_l = cd_indexed
             if m.group(6) is not None:
                 clk_domain_l = m.group(6)
+                fd.write('// instance %s: clk_domain override %s\n' % (inst, clk_domain_l))
                 if m.group(8) is not None:
                     cd_indexed_l = True
             if gspec is not None:
@@ -323,8 +324,8 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
             else:
                 gvar = None
                 gcnt = None
-            fd.write('// module=%s instance=%s gvar=%s gcnt=%s\n' %
-                     (mod, inst, gvar, str(gcnt)))
+            fd.write('// module=%s instance=%s gvar=%s gcnt=%s clk=%s\n' %
+                     (mod, inst, gvar, str(gcnt), clk_domain_l))
             if mod not in port_lists:
                 # recurse
                 parse_vfile(stack + ':' + fin, searchpath + '/' + mod + '.v',
