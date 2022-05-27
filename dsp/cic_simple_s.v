@@ -1,6 +1,10 @@
 // Simple first-order CIC filter and decimator
 // Note that this module is configured with signed input and output!
-module cic_simple_s(
+module cic_simple_s #(
+  parameter ext_roll=0,  // if set, use roll port instead of internal divider
+  parameter dw=16,
+  parameter ex=10  // decimate by 2^ex, up to 2^ex when using ext_roll
+)(
 	input clk,
 	input signed [dw-1:0] data_in,
 	input data_in_gate,
@@ -8,9 +12,6 @@ module cic_simple_s(
 	output signed [dw-1:0] data_out,
 	output data_out_gate
 );
-parameter ext_roll=0;  // if set, use roll port instead of internal divider
-parameter dw=16;
-parameter ex=10;  // decimate by 2^ex, up to 2^ex when using ext_roll
 
 reg signed [dw+ex-1:0] data_int=0, data_int_h=0, diff=0;
 reg [ex-1:0] div=0;
