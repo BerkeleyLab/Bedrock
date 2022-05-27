@@ -6,7 +6,7 @@ module data_xdomain(clk_in, gate_in, data_in,
 parameter size=16;
 	input clk_in, gate_in, clk_out;
 	input [size-1:0] data_in;
-	(* DONT_TOUCH="TRUE" *) output reg [size-1:0] data_out;
+	output reg [size-1:0] data_out;
 	output reg gate_out;
 initial gate_out=0;
 initial data_out=0;
