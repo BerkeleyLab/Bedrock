@@ -91,7 +91,7 @@ print("#")
 # At one point we planned to send delta-V to the computer, rather than
 # let it compute differences.  Instead we are now set up to figure the
 # differences in the computer with a [-2 -1 0 1 2] FIR, with zero extra
-# hardware footrpint.
+# hardware footprint.
 
 sclv = 2*cv*cv/(T*fir_gain)/omega0/RoverQ
 sclf = ck**2

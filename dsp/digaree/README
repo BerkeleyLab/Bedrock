@@ -37,7 +37,7 @@ instructions is done in that latter step by sched.py -- maybe not perfectly,
 but the results are good enough.  I used some concepts from (and indeed the
 existence proof of) Sebastien Bourdeauducq's gfpus scheduler written for
 Milkymist's PFPU.  If this process seems opaque and esoteric, it's not:
-it fits in 198 lines (non-blank, non-comment) of python, orders of magnitude
+it fits in 204 lines (non-blank, non-comment) of python, orders of magnitude
 smaller than the code base used in the toolchain for a conventional CPU.
 
 That ops.h file is also C code; "make sim1" to compile it with its support
@@ -107,11 +107,11 @@ Tools needed:
   gtkwave
   python (with sys, re, and numpy modules)
   make
-(tested on Debian Jessie)
+(tested in turn on Debian Jessie, Stretch, Buster, and Bullseye)
 
 Ages ago, I used Xilinx XST 12.1 to test synthesis.
 This is the only non-Free software involved.  All the hard work of this effort
 is portable Verilog, that should synthesize for any FPGA chip family, or even
-an ASIC.
+an ASIC.  Currently we use primarily Vivado 2022.2.
 
-Larry Doolittle, LBNL, April 2017 (updated from earlier May 2013 version)
+Larry Doolittle, LBNL, May 2022 (earlier versions go back to May 2013)
