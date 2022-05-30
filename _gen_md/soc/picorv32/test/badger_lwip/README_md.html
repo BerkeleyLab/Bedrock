@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>badger_lwip README &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
     <script src="../../../../../_static/jquery.js"></script>
     <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -39,14 +40,14 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="badger-lwip-readme">
-<span id="readme"></span><h1>badger_lwip README<a class="headerlink" href="#badger-lwip-readme" title="Permalink to this headline">¶</a></h1>
+<span id="readme"></span><h1>badger_lwip README<a class="headerlink" href="#badger-lwip-readme" title="Permalink to this heading">¶</a></h1>
 <section id="badger-lwip">
-<h2>badger_lwip<a class="headerlink" href="#badger-lwip" title="Permalink to this headline">¶</a></h2>
+<h2>badger_lwip<a class="headerlink" href="#badger-lwip" title="Permalink to this heading">¶</a></h2>
 <p>Demonstrates the badger MAC with the <code class="docutils literal notranslate"><span class="pre">Lightweight</span> <span class="pre">TCP/IP</span> <span class="pre">stack</span></code> (lwIP).
 Verilator is used to build an emulator which connects to the real world through a virtual TAP network interface.</p>
 </section>
 <section id="instructions">
-<h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
+<h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this heading">¶</a></h2>
 <p>Clone the master branch of lwIP …</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://git.savannah.nongnu.org/git/lwip.git
 </pre></div>
@@ -56,7 +57,7 @@ Verilator is used to build an emulator which connects to the real world through 
 </pre></div>
 </div>
 <section id="setup-the-tap-interface">
-<h3>Setup the tap interface<a class="headerlink" href="#setup-the-tap-interface" title="Permalink to this headline">¶</a></h3>
+<h3>Setup the tap interface<a class="headerlink" href="#setup-the-tap-interface" title="Permalink to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo tunctl -u <span class="nv">$USER</span>
 sudo ip addr add dev tap0 <span class="m">192</span>.168.7.1/24
 sudo ip link <span class="nb">set</span> dev tap0 up
@@ -64,7 +65,7 @@ sudo ip link <span class="nb">set</span> dev tap0 up
 </div>
 </section>
 <section id="run-it">
-<h3>Run it<a class="headerlink" href="#run-it" title="Permalink to this headline">¶</a></h3>
+<h3>Run it<a class="headerlink" href="#run-it" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>run the code with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">all</span></code> or <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">badger_lwip.vcd</span></code> to debug hardware</p></li>
 <li><p>lwIP sends a UDP packet to 192.168.7.1:1234, receive it with <code class="docutils literal notranslate"><span class="pre">nc</span> <span class="pre">-u</span> <span class="pre">-l</span> <span class="pre">-p</span> <span class="pre">1234</span></code></p></li>
@@ -76,7 +77,7 @@ on the local TAP0 network</p></li>
 </ul>
 </section>
 <section id="bridging-https-wiki-archlinux-org-index-php-network-bridge-tap0">
-<h3>(Bridging)[<a class="reference external" href="https://wiki.archlinux.org/index.php/Network_bridge">https://wiki.archlinux.org/index.php/Network_bridge</a>] tap0<a class="headerlink" href="#bridging-https-wiki-archlinux-org-index-php-network-bridge-tap0" title="Permalink to this headline">¶</a></h3>
+<h3>(Bridging)[<a class="reference external" href="https://wiki.archlinux.org/index.php/Network_bridge">https://wiki.archlinux.org/index.php/Network_bridge</a>] tap0<a class="headerlink" href="#bridging-https-wiki-archlinux-org-index-php-network-bridge-tap0" title="Permalink to this heading">¶</a></h3>
 <p>A bridge is like a virtual network switch, connecting two or more links together (here tap0 and eth0). This allows the Verilog simulation to access the Internet.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo ip link add name br0 <span class="nb">type</span> bridge
 sudo ip link <span class="nb">set</span> br0 up
@@ -165,7 +166,7 @@ sudo ip link <span class="nb">set</span> eth0 master br0
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -182,7 +183,7 @@ sudo ip link <span class="nb">set</span> eth0 master br0
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>picorv32 README &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -39,13 +40,13 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="picorv32-readme">
-<span id="readme"></span><h1>picorv32 README<a class="headerlink" href="#picorv32-readme" title="Permalink to this headline">¶</a></h1>
+<span id="readme"></span><h1>picorv32 README<a class="headerlink" href="#picorv32-readme" title="Permalink to this heading">¶</a></h1>
 <section id="risc-v-soc">
-<h2>RISC-V SOC<a class="headerlink" href="#risc-v-soc" title="Permalink to this headline">¶</a></h2>
+<h2>RISC-V SOC<a class="headerlink" href="#risc-v-soc" title="Permalink to this heading">¶</a></h2>
 <p>An open-source system on a chip based on the <a class="reference external" href="https://github.com/YosysHQ/picorv32">PicoRV32</a> softcore.</p>
 </section>
 <section id="tested-hardware-platforms">
-<h2>Tested hardware platforms<a class="headerlink" href="#tested-hardware-platforms" title="Permalink to this headline">¶</a></h2>
+<h2>Tested hardware platforms<a class="headerlink" href="#tested-hardware-platforms" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Digilent Cmod A7</p></li>
 <li><p>Xilinx KC705 + FMC150</p></li>
@@ -54,16 +55,16 @@ Expect to see errors and unfinished things.</p>
 </ul>
 </section>
 <section id="projects-at-lbnl">
-<h2>Projects at LBNL<a class="headerlink" href="#projects-at-lbnl" title="Permalink to this headline">¶</a></h2>
+<h2>Projects at LBNL<a class="headerlink" href="#projects-at-lbnl" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Advanced Light Source digital Low-Level-RF Control System</p></li>
 <li><p>DOE Early Career Research Program: Scalable Control for Coherent Laser Combining</p></li>
 </ul>
 </section>
 <section id="tools-needed">
-<h2>Tools needed<a class="headerlink" href="#tools-needed" title="Permalink to this headline">¶</a></h2>
+<h2>Tools needed<a class="headerlink" href="#tools-needed" title="Permalink to this heading">¶</a></h2>
 <section id="cross-compiling-tools">
-<h3>Cross compiling tools<a class="headerlink" href="#cross-compiling-tools" title="Permalink to this headline">¶</a></h3>
+<h3>Cross compiling tools<a class="headerlink" href="#cross-compiling-tools" title="Permalink to this heading">¶</a></h3>
 <ul>
 <li><p>Tested in Debian 11:</p>
 <ul class="simple">
@@ -93,21 +94,21 @@ ninja install</p>
 </ul>
 </section>
 <section id="synthesis-tool">
-<h3>Synthesis tool<a class="headerlink" href="#synthesis-tool" title="Permalink to this headline">¶</a></h3>
+<h3>Synthesis tool<a class="headerlink" href="#synthesis-tool" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Xilinx Vivado (tested between 2015.3 to 2017.4, 2018.1, 2018.3, 2020.2) suite</p></li>
 </ul>
 </section>
 </section>
 <section id="features">
-<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this heading">¶</a></h2>
 <section id="system-simulation">
-<h3>System simulation<a class="headerlink" href="#system-simulation" title="Permalink to this headline">¶</a></h3>
+<h3>System simulation<a class="headerlink" href="#system-simulation" title="Permalink to this heading">¶</a></h3>
 <p>Each feature is independently tested under <code class="docutils literal notranslate"><span class="pre">test/</span></code> directory with a <code class="docutils literal notranslate"><span class="pre">PASS/FAIL</span></code> check using <code class="docutils literal notranslate"><span class="pre">iverilog</span></code> simulator.</p>
 <p>Each project has a system level test bench <code class="docutils literal notranslate"><span class="pre">system_tb.v</span></code>. Use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">system.vcd</span></code> to generate waveforms that are viewable using <code class="docutils literal notranslate"><span class="pre">gtkwave</span></code>.</p>
 </section>
 <section id="peripheral-support">
-<h3>Peripheral support<a class="headerlink" href="#peripheral-support" title="Permalink to this headline">¶</a></h3>
+<h3>Peripheral support<a class="headerlink" href="#peripheral-support" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>SPI master (hardware)</p></li>
 <li><p>I2C master (software)</p></li>
@@ -117,11 +118,11 @@ ninja install</p>
 </ul>
 </section>
 <section id="xilinx-axi-lite-bus-bridge">
-<h3>Xilinx AXI-lite bus bridge<a class="headerlink" href="#xilinx-axi-lite-bus-bridge" title="Permalink to this headline">¶</a></h3>
+<h3>Xilinx AXI-lite bus bridge<a class="headerlink" href="#xilinx-axi-lite-bus-bridge" title="Permalink to this heading">¶</a></h3>
 <p>Implemented using <code class="docutils literal notranslate"><span class="pre">picorv32_axi_adapter</span></code> as used in <code class="docutils literal notranslate"><span class="pre">vc707_fmc120</span></code> project.</p>
 </section>
 <section id="lbnl-localbus-bridge">
-<h3>LBNL localbus bridge<a class="headerlink" href="#lbnl-localbus-bridge" title="Permalink to this headline">¶</a></h3>
+<h3>LBNL localbus bridge<a class="headerlink" href="#lbnl-localbus-bridge" title="Permalink to this heading">¶</a></h3>
 <p>LBNL localbus is a non-blocking bus that is typically controlled by UDP
 Ethernet engine. When it comes to the case where a CPU wants to play as a
 master as well, one has to deal with conflicts between the two masters
@@ -132,17 +133,17 @@ done by <code class="docutils literal notranslate"><span class="pre">gateware/lb
 collision cases are tested.</p>
 </section>
 <section id="system-synthesize">
-<h3>System synthesize<a class="headerlink" href="#system-synthesize" title="Permalink to this headline">¶</a></h3>
+<h3>System synthesize<a class="headerlink" href="#system-synthesize" title="Permalink to this heading">¶</a></h3>
 <p>Within each project directory, use <code class="docutils literal notranslate"><span class="pre">make</span></code> to synthesize a bitstream file.</p>
 </section>
 <section id="fpga-config">
-<h3>FPGA config<a class="headerlink" href="#fpga-config" title="Permalink to this headline">¶</a></h3>
+<h3>FPGA config<a class="headerlink" href="#fpga-config" title="Permalink to this heading">¶</a></h3>
 <p>Use <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">system_config</span></code> to program the FPGA with a bitstream file, using <code class="docutils literal notranslate"><span class="pre">xc3sprog</span></code> or
 Digilent Adept2, which is available from
 <a class="reference external" href="https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads">digilent</a>.</p>
 </section>
 <section id="reload-cpu-program-without-re-synthesizing">
-<h3>Reload CPU program without re-synthesizing<a class="headerlink" href="#reload-cpu-program-without-re-synthesizing" title="Permalink to this headline">¶</a></h3>
+<h3>Reload CPU program without re-synthesizing<a class="headerlink" href="#reload-cpu-program-without-re-synthesizing" title="Permalink to this heading">¶</a></h3>
 <p>Once the core is running, it launches into a serial bootloader program. From there, a new firmware can be quickly loaded and verified with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">system_load</span></code>.</p>
 <ul class="simple">
 <li><p>For KC705/VC707, UART CTS pin is used to remote hardware reset;</p></li>
@@ -151,14 +152,14 @@ bootloader.</p></li>
 </ul>
 </section>
 <section id="memory-size">
-<h3>Memory size<a class="headerlink" href="#memory-size" title="Permalink to this headline">¶</a></h3>
+<h3>Memory size<a class="headerlink" href="#memory-size" title="Permalink to this heading">¶</a></h3>
 <p>Currently the program is stored in fpga block-ram.
 Its size can be adjusted (in bytes) in the Makefile with the parameter <code class="docutils literal notranslate"><span class="pre">MEM_SIZE</span></code> in each project.
 This gets passed to the linker (to print memory utilization), assembler (to set the C stack-pointer) and synthesizer (to set the size of the block-ram segment).</p>
 </section>
 </section>
 <section id="getting-started">
-<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading">¶</a></h2>
 <p>running all the testbenches</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nb">test</span>
 make clean all
@@ -276,7 +277,7 @@ make clean all
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -293,7 +294,7 @@ make clean all
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

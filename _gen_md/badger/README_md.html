@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>badger README &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -39,11 +40,11 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="badger-readme">
-<span id="readme"></span><h1>badger README<a class="headerlink" href="#badger-readme" title="Permalink to this headline">¶</a></h1>
+<span id="readme"></span><h1>badger README<a class="headerlink" href="#badger-readme" title="Permalink to this heading">¶</a></h1>
 <section id="packet-badger">
-<h2>Packet Badger<a class="headerlink" href="#packet-badger" title="Permalink to this headline">¶</a></h2>
+<h2>Packet Badger<a class="headerlink" href="#packet-badger" title="Permalink to this heading">¶</a></h2>
 <section id="introduction">
-<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h3>
+<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h3>
 <p>Packet Badger is a digital logic design, implemented on an FPGA, that
 digs through Ethernet packets to construct a response.  Its intended
 application is to let workstations and servers communicate with FPGA-based
@@ -86,11 +87,11 @@ squirreled away in the tests/ directory.  Projects that instantiate this
 code are expected to accomplish the build step by including rules.mk.</p>
 </section>
 <section id="block-diagram">
-<h3>Block Diagram<a class="headerlink" href="#block-diagram" title="Permalink to this headline">¶</a></h3>
+<h3>Block Diagram<a class="headerlink" href="#block-diagram" title="Permalink to this heading">¶</a></h3>
 <a class="reference external image-reference" href="doc/rtefi.svg"><img alt="block diagram" src="_gen_md/badger/doc/rtefi.svg" /></a>
 </section>
 <section id="self-tests">
-<h3>Self-tests<a class="headerlink" href="#self-tests" title="Permalink to this headline">¶</a></h3>
+<h3>Self-tests<a class="headerlink" href="#self-tests" title="Permalink to this heading">¶</a></h3>
 <p>An extensive set of self-tests and demonstrations are programmed up in
 the tests subdirectory.  These range from simple exercises for the
 input packet scanner to running a TFTP server that uses the MAC feature.
@@ -99,7 +100,7 @@ Some of these tests attach the simulated logic to the host network.</p>
 You can also run them on your workstation with a simple “cd tests; make”.</p>
 </section>
 <section id="functionality">
-<h3>Functionality<a class="headerlink" href="#functionality" title="Permalink to this headline">¶</a></h3>
+<h3>Functionality<a class="headerlink" href="#functionality" title="Permalink to this heading">¶</a></h3>
 <p>Input packets are checked according to the following.
 Failures are not reported, just dropped.</p>
 <p>All packets:</p>
@@ -160,7 +161,7 @@ This can be overridden at build time with Verilog parameters, or
 at run time with a local configuration bus.</p>
 </section>
 <section id="example-live-test-run">
-<h3>Example “live” test run<a class="headerlink" href="#example-live-test-run" title="Permalink to this headline">¶</a></h3>
+<h3>Example “live” test run<a class="headerlink" href="#example-live-test-run" title="Permalink to this heading">¶</a></h3>
 <p>Demonstrating both Packet Badger functionality, and the test framework’s
 ability to attach the simulation to the host’s Ethernet subsystem.</p>
 <p>Your development machine needs to provide a traditional unix-y environment,
@@ -189,13 +190,13 @@ have left behind a rtefi_pipe.vcd file that can be viewed with gtkwave;
 a pre-configured gtkwave pane can be brought up with “make rtefi_pipe_view”.</p>
 </section>
 <section id="attachment-of-clients">
-<h3>Attachment of clients:<a class="headerlink" href="#attachment-of-clients" title="Permalink to this headline">¶</a></h3>
+<h3>Attachment of clients:<a class="headerlink" href="#attachment-of-clients" title="Permalink to this heading">¶</a></h3>
 <a class="reference external image-reference" href="doc/clients.svg"><img alt="client interface timing diagram" src="_gen_md/badger/doc/clients.svg" /></a>
 <p>Each client handles one UDP port.
 Up to eight clients can be attached to a Packet Badger instance.</p>
 </section>
 <section id="other-documentation">
-<h3>Other documentation<a class="headerlink" href="#other-documentation" title="Permalink to this headline">¶</a></h3>
+<h3>Other documentation<a class="headerlink" href="#other-documentation" title="Permalink to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Design notes: <a class="reference external" href="rtefi_notes.txt">rtefi_notes.txt</a></p></li>
 <li><p>Memory addressing figure: <a class="reference external" href="doc/memory.svg">memory access diagram</a></p></li>
@@ -282,7 +283,7 @@ Up to eight clients can be attached to a Packet Badger instance.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -299,7 +300,7 @@ Up to eight clients can be attached to a Packet Badger instance.</p>
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

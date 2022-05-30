@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>complex_mul_flat &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -39,29 +40,24 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="complex-mul-flat">
-<span id="id1"></span><h1>complex_mul_flat<a class="headerlink" href="#complex-mul-flat" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>complex_mul_flat<a class="headerlink" href="#complex-mul-flat" title="Permalink to this heading">¶</a></h1>
 <section id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this heading">¶</a></h2>
 <div class="line-block">
 <div class="line">TODO:</div>
 <div class="line">Could potentially save a cycle in the flip-flop, by combining Add and Saturate into 1 cycle</div>
 </div>
 </section>
 <section id="pinout">
-<h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this headline">¶</a></h2>
+<h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this heading">¶</a></h2>
 <figure class="align-default" id="fig-complex-mul-flat-block">
 <img alt="Schematic symbol" src="../_images/complex_mul_flat_block.png" />
 </figure>
 </section>
 <section id="ports">
-<h2>Ports<a class="headerlink" href="#ports" title="Permalink to this headline">¶</a></h2>
+<h2>Ports<a class="headerlink" href="#ports" title="Permalink to this heading">¶</a></h2>
 <table class="docutils align-default" id="id2">
 <caption><span class="caption-number">Table 33 </span><span class="caption-text">complex_mul_flat_port_table</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Signal</p></th>
 <th class="head"><p>Direction</p></th>
@@ -117,12 +113,12 @@ Expect to see errors and unfinished things.</p>
 </table>
 </section>
 <section id="implementation-and-use">
-<h2>Implementation and use<a class="headerlink" href="#implementation-and-use" title="Permalink to this headline">¶</a></h2>
+<h2>Implementation and use<a class="headerlink" href="#implementation-and-use" title="Permalink to this heading">¶</a></h2>
 <p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Software_portability">portable</a> <a class="reference external" href="https://en.wikipedia.org/wiki/Verilog">Verilog</a>
 implementation can be found in <a class="reference internal" href="../_gen_src_rst/complex_mul_flat_source.html#complex-mul-flat-source"><span class="std std-ref">complex_mul_flat Source File</span></a></p>
 </section>
 <section id="timing-diagram">
-<h2>Timing Diagram<a class="headerlink" href="#timing-diagram" title="Permalink to this headline">¶</a></h2>
+<h2>Timing Diagram<a class="headerlink" href="#timing-diagram" title="Permalink to this heading">¶</a></h2>
 <p>A <a class="reference external" href="http://gtkwave.sourceforge.net/">GTKWave</a>-generated timing diagram is shown below:</p>
 <figure class="align-default" id="fig-complex-mul-flat-timing">
 <img alt="Timing diagram" src="../_images/complex_mul_flat_timing.png" />
@@ -260,7 +256,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -277,7 +273,7 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

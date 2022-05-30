@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>guidelines CONTRIBUTING &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -39,9 +40,9 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="guidelines-contributing">
-<span id="contributing"></span><h1>guidelines CONTRIBUTING<a class="headerlink" href="#guidelines-contributing" title="Permalink to this headline">¶</a></h1>
+<span id="contributing"></span><h1>guidelines CONTRIBUTING<a class="headerlink" href="#guidelines-contributing" title="Permalink to this heading">¶</a></h1>
 <section id="contributing-guidelines">
-<h2>Contributing Guidelines<a class="headerlink" href="#contributing-guidelines" title="Permalink to this headline">¶</a></h2>
+<h2>Contributing Guidelines<a class="headerlink" href="#contributing-guidelines" title="Permalink to this heading">¶</a></h2>
 <p>Entails contribution guidelines to all projects in the group hdl-libraries.
 We are actively looking for meaningful contributions to our codebase. A
 meaningful contribution can entail anything from:</p>
@@ -59,9 +60,9 @@ preferably a test that goes with it!</p></li>
 <li><p>New synthesis or simulation framework</p></li>
 </ol>
 <section id="tl-dr">
-<h3>TL;DR<a class="headerlink" href="#tl-dr" title="Permalink to this headline">¶</a></h3>
+<h3>TL;DR<a class="headerlink" href="#tl-dr" title="Permalink to this heading">¶</a></h3>
 <section id="adding-a-small-feature">
-<h4>Adding a small feature?<a class="headerlink" href="#adding-a-small-feature" title="Permalink to this headline">¶</a></h4>
+<h4>Adding a small feature?<a class="headerlink" href="#adding-a-small-feature" title="Permalink to this heading">¶</a></h4>
 <ol class="arabic simple">
 <li><p>Create a branch, and write code following guidelines here</p></li>
 <li><p>Add tests</p></li>
@@ -71,7 +72,7 @@ preferably a test that goes with it!</p></li>
 </ol>
 </section>
 <section id="adding-a-large-feature">
-<h4>Adding a large feature?<a class="headerlink" href="#adding-a-large-feature" title="Permalink to this headline">¶</a></h4>
+<h4>Adding a large feature?<a class="headerlink" href="#adding-a-large-feature" title="Permalink to this heading">¶</a></h4>
 <ol class="arabic simple">
 <li><p>Start an issue or a wiki link with a detailed feature description/request</p></li>
 <li><p>Obtain general consensus or feedback</p></li>
@@ -84,7 +85,7 @@ preferably a test that goes with it!</p></li>
 </section>
 </section>
 <section id="code-of-conduct">
-<h3>Code of Conduct<a class="headerlink" href="#code-of-conduct" title="Permalink to this headline">¶</a></h3>
+<h3>Code of Conduct<a class="headerlink" href="#code-of-conduct" title="Permalink to this heading">¶</a></h3>
 <p>Behavior in this community is always expected to be professional, courteous, and constructive.
 Berkeley Lab in particular mandates support of
 <a class="reference external" href="https://diversity.lbl.gov/">Inclusion, Diversity, Equity, and Accountability</a>.
@@ -97,7 +98,7 @@ part of our workplace environment, it is not obvious that we have
 the right to unilaterally choose, impose, or enforce such a covenant.</p>
 </section>
 <section id="contents-of-a-repository">
-<h3>Contents of a repository<a class="headerlink" href="#contents-of-a-repository" title="Permalink to this headline">¶</a></h3>
+<h3>Contents of a repository<a class="headerlink" href="#contents-of-a-repository" title="Permalink to this heading">¶</a></h3>
 <p>A source repository should be primarily reserved for source code.
 “The source code for a work means the preferred form of the work for
 making modifications to it.”</p>
@@ -127,12 +128,12 @@ and network runtime support is in Python, C, or C++.</p>
 <p>Automatic generation of documentation is a topic of current discussion. Suggestions welcome!</p>
 </section>
 <section id="makefiles">
-<h3>Makefiles<a class="headerlink" href="#makefiles" title="Permalink to this headline">¶</a></h3>
+<h3>Makefiles<a class="headerlink" href="#makefiles" title="Permalink to this heading">¶</a></h3>
 <p>We have an <a class="reference external" href="../build-tools/makefile.md">explanation</a> about how
 our existing Makefiles are put together.</p>
 </section>
 <section id="reproducible-builds">
-<h3>Reproducible builds<a class="headerlink" href="#reproducible-builds" title="Permalink to this headline">¶</a></h3>
+<h3>Reproducible builds<a class="headerlink" href="#reproducible-builds" title="Permalink to this heading">¶</a></h3>
 <p>All constructed files (sometimes called artifacts) should be reproducible.
 See <a class="reference external" href="https://reproducible-builds.org">reproducible-builds.org</a>.  This includes pretty much any machine-generated file.</p>
 <p>Purposefully embedded “built-on” date stamps are deprecated; use
@@ -144,7 +145,7 @@ reasonable goal (they call it “repeatable”).
 Our toolchain has demonstrated this working in at least couple of cases.</p>
 </section>
 <section id="readability">
-<h3>Readability<a class="headerlink" href="#readability" title="Permalink to this headline">¶</a></h3>
+<h3>Readability<a class="headerlink" href="#readability" title="Permalink to this heading">¶</a></h3>
 <p>Readability is a key goal for shared software. Lowering the barrier of entry for
 a newcomer enables the codebase to flourish. This can be easily achieved by adhering
 to commonly accepted best practices. Although, it may be impractical to adhere to
@@ -159,9 +160,9 @@ useful resources:</p>
 </ol>
 <p>Please spell-check your code, comments, and documentation.</p>
 <section id="a-few-rules-of-thumb">
-<h4>A few rules of thumb<a class="headerlink" href="#a-few-rules-of-thumb" title="Permalink to this headline">¶</a></h4>
+<h4>A few rules of thumb<a class="headerlink" href="#a-few-rules-of-thumb" title="Permalink to this heading">¶</a></h4>
 <section id="naming">
-<h5>Naming<a class="headerlink" href="#naming" title="Permalink to this headline">¶</a></h5>
+<h5>Naming<a class="headerlink" href="#naming" title="Permalink to this heading">¶</a></h5>
 <p>(This includes traditional function and variable names in compiled languages
 like C, as wall as the various user-created names in Python, and wires,
 regs, and module names in Verilog)</p>
@@ -176,7 +177,7 @@ that value, please do so.  Creating new and slightly different names
 for the same thing is a wasteful cognitive load.</p>
 </section>
 <section id="whitespace">
-<h5>Whitespace<a class="headerlink" href="#whitespace" title="Permalink to this headline">¶</a></h5>
+<h5>Whitespace<a class="headerlink" href="#whitespace" title="Permalink to this heading">¶</a></h5>
 <p>Readability is the goal, and specialized techniques to gain readability
 (like vertical alignment of parallel semantics) is allowed and even encouraged.</p>
 <p>Trailing whitespace is pure useless entropy.</p>
@@ -202,9 +203,9 @@ change the tab vs. spaces convention of a file.  See also
 </section>
 </section>
 <section id="verilog">
-<h4>Verilog<a class="headerlink" href="#verilog" title="Permalink to this headline">¶</a></h4>
+<h4>Verilog<a class="headerlink" href="#verilog" title="Permalink to this heading">¶</a></h4>
 <section id="of-syntax">
-<h5>Of syntax<a class="headerlink" href="#of-syntax" title="Permalink to this headline">¶</a></h5>
+<h5>Of syntax<a class="headerlink" href="#of-syntax" title="Permalink to this heading">¶</a></h5>
 <p>Verilog files should always start with a human-readable description of
 its function.  Adding a template giving name, version, and author is
 discouraged; that’s what we have version control for.</p>
@@ -222,7 +223,7 @@ and complicated modules, that egregiously violate Linux style guide section
 “6) Functions”.  Please find ways to break up and/or autogenerate those modules.</p>
 </section>
 <section id="of-semantics">
-<h5>Of semantics<a class="headerlink" href="#of-semantics" title="Permalink to this headline">¶</a></h5>
+<h5>Of semantics<a class="headerlink" href="#of-semantics" title="Permalink to this heading">¶</a></h5>
 <p>Most of our effort should be focused on portable synthesizable Verilog modules
 and their testing.  FPGA-specific instantiations (e.g., clock management and
 MGTs) should be separated from our functional code.  Too-tight a connection
@@ -238,7 +239,7 @@ strongly pipelined logic.</p>
 </section>
 </section>
 <section id="coding-and-style-guidelines">
-<h4>Coding and style guidelines<a class="headerlink" href="#coding-and-style-guidelines" title="Permalink to this headline">¶</a></h4>
+<h4>Coding and style guidelines<a class="headerlink" href="#coding-and-style-guidelines" title="Permalink to this heading">¶</a></h4>
 <p>In addition to the general recommendations above, we strive for a uniform
 Verilog coding style that emphasizes readability, reduces systematic errors and promotes
 code re-use. The <a class="reference external" href="rtl_guidelines.md">RTL Guidelines</a> document, which is itself
@@ -246,7 +247,7 @@ open to improvements and suggestions, attempts to formalize this process in the
 form of coding and style guidelines that apply to some of the most common facets of RTL coding.</p>
 </section>
 <section id="python">
-<h4>Python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h4>
+<h4>Python<a class="headerlink" href="#python" title="Permalink to this heading">¶</a></h4>
 <p>We want all python files compatible with python2 and python3.
 Some legacy code can be tolerated as python2 only.
 Some new code can be tolerated as python3 only.</p>
@@ -254,7 +255,7 @@ Some new code can be tolerated as python3 only.</p>
 </section>
 </section>
 <section id="testing">
-<h3>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h3>
+<h3>Testing<a class="headerlink" href="#testing" title="Permalink to this heading">¶</a></h3>
 <p>Ideally all code will be paired with a regression test that fully exercises
 its functionality, maybe even cross-checked with a code coverage tool.
 The more complex the function, the more important are such tests.</p>
@@ -347,7 +348,7 @@ a Makefile rule called foo_check.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -364,7 +365,7 @@ a Makefile rule called foo_check.</p>
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

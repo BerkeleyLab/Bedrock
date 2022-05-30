@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>dsp README &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -39,9 +40,9 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="dsp-readme">
-<span id="readme"></span><h1>dsp README<a class="headerlink" href="#dsp-readme" title="Permalink to this headline">¶</a></h1>
+<span id="readme"></span><h1>dsp README<a class="headerlink" href="#dsp-readme" title="Permalink to this heading">¶</a></h1>
 <section id="digital-down-conversion">
-<h2>Digital down-conversion<a class="headerlink" href="#digital-down-conversion" title="Permalink to this headline">¶</a></h2>
+<h2>Digital down-conversion<a class="headerlink" href="#digital-down-conversion" title="Permalink to this heading">¶</a></h2>
 <p>The down-conversion here is different from a typical down convert module in the sense that resulting
 stream of IQs are at half the data rate of the ADCs. And the low-pass filter that is applied after a typical
 down-conversion to get rid of the sum frequency, in our case, is nothing but an implicit decimation filter
@@ -56,21 +57,21 @@ down-conversion to get rid of the sum frequency, in our case, is nothing but an 
 </ol>
 </section>
 <section id="iq-interpolation">
-<h2>IQ interpolation<a class="headerlink" href="#iq-interpolation" title="Permalink to this headline">¶</a></h2>
+<h2>IQ interpolation<a class="headerlink" href="#iq-interpolation" title="Permalink to this heading">¶</a></h2>
 <p>Takes an interleaved IQ data stream at X samples per sec, and outputs 2 data streams I and Q at X samples per sec each. Does so by interpolating them.</p>
 <p><a class="reference external" href="https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/master/dsp/fiq_interp.v">Code</a></p>
 </section>
 <section id="level-set">
-<h2>Level set<a class="headerlink" href="#level-set" title="Permalink to this headline">¶</a></h2>
+<h2>Level set<a class="headerlink" href="#level-set" title="Permalink to this heading">¶</a></h2>
 <p>Dot product of the LO signal with (I-Q) baseband data/signal. This module is used to generate the
 real or imaginary components of the upconversion.</p>
 <p><a class="reference external" href="https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/master/dsp/flevel_set.v">Code</a></p>
 </section>
 <section id="afterburner-secant-interpolation">
-<h2>Afterburner [secant interpolation]<a class="headerlink" href="#afterburner-secant-interpolation" title="Permalink to this headline">¶</a></h2>
+<h2>Afterburner [secant interpolation]<a class="headerlink" href="#afterburner-secant-interpolation" title="Permalink to this heading">¶</a></h2>
 </section>
 <section id="ssb-out-up-conversion">
-<h2>SSB Out [up-conversion]<a class="headerlink" href="#ssb-out-up-conversion" title="Permalink to this headline">¶</a></h2>
+<h2>SSB Out [up-conversion]<a class="headerlink" href="#ssb-out-up-conversion" title="Permalink to this heading">¶</a></h2>
 <p>The goal here is to upconvert the feedback loop output IQ baseband stream to a DAC output stream. The IQ stream is running at half the data rate (see down-conversion above) assuming the DACs are running at the same frequency as the ADCs.</p>
 <ol class="arabic simple">
 <li><p>Input of an IQ interleaved data stream.</p></li>
@@ -162,7 +163,7 @@ real or imaginary components of the upconversion.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -179,7 +180,7 @@ real or imaginary components of the upconversion.</p>
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

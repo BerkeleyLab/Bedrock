@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>build-tools makefile &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -39,11 +40,11 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="build-tools-makefile">
-<span id="makefile"></span><h1>build-tools makefile<a class="headerlink" href="#build-tools-makefile" title="Permalink to this headline">¶</a></h1>
+<span id="makefile"></span><h1>build-tools makefile<a class="headerlink" href="#build-tools-makefile" title="Permalink to this heading">¶</a></h1>
 <section id="makefiles">
-<h2>Makefiles<a class="headerlink" href="#makefiles" title="Permalink to this headline">¶</a></h2>
+<h2>Makefiles<a class="headerlink" href="#makefiles" title="Permalink to this heading">¶</a></h2>
 <section id="introduction">
-<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h3>
+<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h3>
 <p>The Unix “make” program and its associated Makefiles are old,
 dating to around 1976.
 It’s four decades later, and many of today’s practical Makefiles,
@@ -64,7 +65,7 @@ any of the dependency files change.  Note that the line with system
 command(s) on it must start with a tab character.</p>
 </section>
 <section id="example">
-<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this heading">¶</a></h3>
 <p>Our code base is based in large part on test benches written in Verilog
 and simulated using Icarus Verilog, so that’s what our examples will cover.
 For concrete discussion purposes, consider the following Makefile:</p>
@@ -104,7 +105,7 @@ Referring to the fib_check rule above, the second command</p>
 command, only its result; the prefix &#64; prevents the usual echo in this case.</p>
 </section>
 <section id="generalization">
-<h3>Generalization<a class="headerlink" href="#generalization" title="Permalink to this headline">¶</a></h3>
+<h3>Generalization<a class="headerlink" href="#generalization" title="Permalink to this heading">¶</a></h3>
 <p>The above Makefile can be generalized using
 <a class="reference external" href="https://www.gnu.org/software/make/manual/html_node/Pattern-Rules.html">pattern rules</a>
 and special Makefile macros.  Quoting Wikipedia again:</p>
@@ -136,7 +137,7 @@ fib_tb: fib.v
 </div>
 </section>
 <section id="configurability">
-<h3>Configurability<a class="headerlink" href="#configurability" title="Permalink to this headline">¶</a></h3>
+<h3>Configurability<a class="headerlink" href="#configurability" title="Permalink to this heading">¶</a></h3>
 <p>The next layer of indirection allows command-line overrides of strings used
 in the Makefile.  In particular,</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>VERILOG = iverilog
@@ -161,7 +162,7 @@ VVP = vvp$(ICARUS_SUFFIX)
 <p>to configure both the iverilog and vvp version used.</p>
 </section>
 <section id="makefile-includes">
-<h3>Makefile includes<a class="headerlink" href="#makefile-includes" title="Permalink to this headline">¶</a></h3>
+<h3>Makefile includes<a class="headerlink" href="#makefile-includes" title="Permalink to this heading">¶</a></h3>
 <p>Finally, we normally take all the generic definitions and put
 them in a single file called top_rules.mk, which can be shared
 by the individual Makefiles scattered around in various directories.
@@ -209,7 +210,7 @@ timing diagrams using gtkwave, and the traditional “clean” rule to
 remove generated files.</p>
 </section>
 <section id="dependencies">
-<h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading">¶</a></h3>
 <p>What’s not covered here is dependency derivation and/or management, something
 that gets increasingly complicated as the number of files involved climbs.
 One approach we use is based on combining the -y and -M options to iverilog.
@@ -219,7 +220,7 @@ The -M flag emits a list of files used, which (with some trickery)
 can be converted to a dependency list for make.</p>
 </section>
 <section id="one-more-trick">
-<h3>One more trick<a class="headerlink" href="#one-more-trick" title="Permalink to this headline">¶</a></h3>
+<h3>One more trick<a class="headerlink" href="#one-more-trick" title="Permalink to this heading">¶</a></h3>
 <p>The $&#64; symbol (target name) can be used to pull in
 extra configuration for commands.
 The setup starts by adding an extra element to the
@@ -236,7 +237,7 @@ additional parameters, like this:</p>
 without perturbing the commands to build other _tb targets.</p>
 </section>
 <section id="discussion">
-<h3>Discussion<a class="headerlink" href="#discussion" title="Permalink to this headline">¶</a></h3>
+<h3>Discussion<a class="headerlink" href="#discussion" title="Permalink to this heading">¶</a></h3>
 <p>There have been <a class="reference external" href="https://en.wikipedia.org/wiki/List_of_build_automation_software">many attempts</a>,
 continuing today, to build on, enhance, or replace make.
 Two in particular attempt to address the needs of an HDL environment.</p>
@@ -251,7 +252,7 @@ and self-tests.  These ideas are not normally priorities of these
 more specialized tools.</p>
 </section>
 <section id="cross-check">
-<h3>Cross-check<a class="headerlink" href="#cross-check" title="Permalink to this headline">¶</a></h3>
+<h3>Cross-check<a class="headerlink" href="#cross-check" title="Permalink to this heading">¶</a></h3>
 <p>A demo “project” using the example Makefiles above produces the
 following output:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">iverilog</span> <span class="o">-</span><span class="n">o</span> <span class="n">b2d_tb</span> <span class="n">b2d_tb</span><span class="o">.</span><span class="n">v</span> <span class="n">b2d</span><span class="o">.</span><span class="n">v</span>
@@ -358,7 +359,7 @@ the same output (at least when whitespace is ignored).</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -375,7 +376,7 @@ the same output (at least when whitespace is ignored).</p>
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

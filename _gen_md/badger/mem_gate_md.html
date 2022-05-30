@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>badger mem_gate &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -39,9 +40,9 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="badger-mem-gate">
-<span id="mem-gate"></span><h1>badger mem_gate<a class="headerlink" href="#badger-mem-gate" title="Permalink to this headline">¶</a></h1>
+<span id="mem-gate"></span><h1>badger mem_gate<a class="headerlink" href="#badger-mem-gate" title="Permalink to this heading">¶</a></h1>
 <section id="lightweight-address-space-serialization">
-<h2>Lightweight Address Space Serialization<a class="headerlink" href="#lightweight-address-space-serialization" title="Permalink to this headline">¶</a></h2>
+<h2>Lightweight Address Space Serialization<a class="headerlink" href="#lightweight-address-space-serialization" title="Permalink to this heading">¶</a></h2>
 <p>LASS is an encoding of reads and writes to a traditional VME-like address space.
 It is designed for transport over UDP, and has a coordinated set of features
 that make it useful for data exchange between a commodity computer master and
@@ -52,7 +53,7 @@ The underlying bus configuration is fixed at 32 bits data, 24 bits of
 word-address.  Byte access is not supported.  Of course, fewer address bits
 and narrower data words can be accommodated with padding.</p>
 <section id="packet-structure">
-<h3>Packet structure<a class="headerlink" href="#packet-structure" title="Permalink to this headline">¶</a></h3>
+<h3>Packet structure<a class="headerlink" href="#packet-structure" title="Permalink to this heading">¶</a></h3>
 <p>LASS packets are composed of a 64-bit transaction ID followed by a string of
 consecutive transactions.</p>
 <p>Two types of transactions are supported. A single-beat transaction where single read
@@ -136,7 +137,7 @@ be structured.</p>
 </div>
 </section>
 <section id="data-encoding">
-<h3>Data encoding<a class="headerlink" href="#data-encoding" title="Permalink to this headline">¶</a></h3>
+<h3>Data encoding<a class="headerlink" href="#data-encoding" title="Permalink to this heading">¶</a></h3>
 <p>For both transaction types, the bit-widths add up such that all transactions
 start on a 32-bit boundary. Data encoding is big-endian, a.k.a. network byte order.</p>
 <p>In order to preserve 32-bit boundaries, the Command and Repetition Count fields
@@ -179,7 +180,7 @@ outlined in the next section.</p>
 </div>
 </section>
 <section id="practical-considerations">
-<h3>Practical considerations<a class="headerlink" href="#practical-considerations" title="Permalink to this headline">¶</a></h3>
+<h3>Practical considerations<a class="headerlink" href="#practical-considerations" title="Permalink to this heading">¶</a></h3>
 <p>A key design element of this protocol is that every reply packet has
 the same structure and length as the corresponding request packet.
 Read requests put padding in the place where results will be returned;
@@ -206,7 +207,7 @@ to be adaptable to changes in MTU or additional protocol layering.
 An authentication layer could reduce the available packet size by 16 octets.</p>
 </section>
 <section id="implementation-and-discussion">
-<h3>Implementation and discussion<a class="headerlink" href="#implementation-and-discussion" title="Permalink to this headline">¶</a></h3>
+<h3>Implementation and discussion<a class="headerlink" href="#implementation-and-discussion" title="Permalink to this heading">¶</a></h3>
 <p>A subset of LASS, without the repeat-count feature, has been used at LBNL
 since about 2010.  Its FPGA-side implementation was rewritten in 2018
 (Packet Badger) to operate properly on high-traffic networks.
@@ -308,7 +309,7 @@ features like ARP and ICMP echo, for attachment to a GMII PHY) occupies about
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -325,7 +326,7 @@ features like ARP and ICMP echo, for attachment to a GMII PHY) occupies about
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
