@@ -4,7 +4,7 @@
 # Takes in cavity field, forward, and reverse vector measurements
 # and computes the cavity detune frequency, decay parameter, and
 # power imbalance for the purposes of a tuning loop and quench detector.
-# Keeps a history of the previous four cavity field mesurements so it
+# Keeps a history of the previous four cavity field measurements so it
 # can get dV/dt.
 
 # Output of this program should be both valid c99 and valid input
@@ -66,10 +66,10 @@ mul("powr", "sclr", "magr", 0)
 cpx_mag("magf", "k", 0)  # forward
 mul("powf", "sclf", "magf", 0)
 sub("wgnet", "powf", "powr", 1)  # net power transferred by waveguide
-cpx_dot("dv2", "v", "dvx", 2)    # 2 * V * dV/dt = d/dt(V^2)
-mul("dudt", "dv2", "sclv", 3)  # dU/dt = power to stored energy
+cpx_dot("dvsq", "v", "dvx", 2)   # 2 * V * dV/dt = d/dt(V^2)
+mul("dudt", "dvsq", "sclv", 3)   # dU/dt = power to stored energy
 sub("diss", "wgnet", "dudt", 1)  # est. of dissipation in cold cavity
-sub("perr", "diss", "powt", 1)  # allow for measurement error
+sub("perr", "diss", "powt", 1)   # allow for measurement error
 set_result("cd", "diss", "perr")  # trigger quench fault if perr > 0
 
 # Watch these like a hawk:  order of execution matters,
