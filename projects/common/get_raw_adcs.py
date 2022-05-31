@@ -1,12 +1,13 @@
 import time
 import struct
-from banyan_ch_find import banyan_ch_find
 import numpy
 import datetime
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../submodules/FEED/src/python"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../dsp"))
+
+from banyan_ch_find import banyan_ch_find
 
 # Grab the start time early, so things like
 # python get_raw_adcs.py | tee `date "+%Y%m%d_%H%M%S"`.log
