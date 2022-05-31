@@ -26,11 +26,11 @@ int verbose = 1;
 // Valid shift values are 0, 1, 2, and 3.
 static int shifter(int a, int shift, const char *label)
 {
-	if (TRACE) printf("shifter in  %d (%+8.5f)\n", a, F(a));
+	if (TRACE) printf("shifter in  %d (%+9.6f)\n", a, F(a));
 	a = a>>(3-shift);
 	if (a> (VMAX-1)) a=  VMAX-1;
 	if (a< (-VMAX )) a= -VMAX;
-	if (VERBOSE) printf("%s result %9d (%+8.5f)\n", label, a, F(a));
+	if (VERBOSE) printf("%s result %9d (%+9.6f)\n", label, a, F(a));
 	return a;
 }
 
@@ -222,7 +222,7 @@ static void file_loop(const char *fname, int given[], unsigned given_size)
 		given[2] = r[4]*fs;  given[3] = r[5]*fs;  // reverse
 		given[4] = r[6]*fs;  given[5] = r[7]*fs;  // cavity
 		for (unsigned u=0; u<given_size; u++) {
-			printf("%3u: given %9d (%+8.5f)\n", u, given[u], (double)given[u]/(double)VMAX);
+			printf("%3u: given %9d (%+9.6f)\n", u, given[u], (double)given[u]/(double)VMAX);
 		}
 		cycle(given);
 	}
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 		file_loop(argv[1], given, given_size);
 	} else {
 		for (u=0; u<given_size; u++) {
-			printf("%3u: given %9d (%+8.5f)\n", u, given[u], (double)given[u]/(double)VMAX);
+			printf("%3u: given %9d (%+9.6f)\n", u, given[u], (double)given[u]/(double)VMAX);
 		}
 		cycle(given);
 	}

@@ -43,7 +43,7 @@ ck = sqrt(4400)  # sqrt(W) full-scale forward
 cr = sqrt(7100)  # sqrt(W) full-scale reverse
 beta = b*(ck/cv)  # /s
 fs = 2**17  # full-scale for an 18-bit signed register
-fq = 0.010  # Hz frequency quantum
+fq = 0.025  # Hz frequency quantum
 ffs = fq*fs*2*pi  # s^{-1} full-scale
 print("# beta = %.2f%+.2fj /s   beta/ffs = %.4f%+.4fj" % (beta.real, beta.imag, beta.real/ffs, beta.imag/ffs))
 
@@ -52,8 +52,8 @@ ai = a/ffs*fs*16  # 22 bit internal vs. 18 bit external; see parameter extra in 
 wave_samp_per = 32  # or equivalent
 use_hb = 0
 T = wave_samp_per*(use_hb+1)*33*14/1320.0e6  # s time interval between loop iterations
-fir_gain = 80  # prescale on dV/dt, see FIR filter comments in cgen_srf.py
-v_series = [(V-tx*T*dVdt)/cv*fs for tx in range(5)]
+fir_gain = 32  # prescale on dV/dt, see FIR filter comments in cgen_srf2.py
+v_series = [(V-tx*T*dVdt)/cv*fs for tx in range(3)]
 
 # x5 = conj(cv/V)/8
 # print("# conj(1/v) (x5) %f+%f" % (x5.real, x5.imag))
@@ -90,7 +90,7 @@ print("#")
 
 # At one point we planned to send delta-V to the computer, rather than
 # let it compute differences.  Instead we are now set up to figure the
-# differences in the computer with a [-2 -1 0 1 2] FIR, with zero extra
+# differences in the computer with a [-1 0 1] FIR, with zero extra
 # hardware footprint.
 
 sclv = 2*cv*cv/(T*fir_gain)/omega0/RoverQ
@@ -144,6 +144,10 @@ for vx in range(1, len(v_series)):
     vp = v_series[vx]/fs  # 22-bit internal, vs. 18-bit I/O
     xprint("p", "v%d_r" % vx, vp.real)
     xprint("p", "v%d_i" % vx, vp.imag)
+xprint("p", "k1_r", real(m_k))
+xprint("p", "k1_i", imag(m_k))
+xprint("p", "r1_r", real(m_r))
+xprint("p", "r1_i", imag(m_r))
 
 print("#")
 print("# Test stream (conveyor belt) values")
