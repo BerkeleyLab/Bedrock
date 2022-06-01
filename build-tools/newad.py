@@ -578,28 +578,28 @@ def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror):
     obuf.close()
 
 
-def write_address_header(fi, fo, low_res, lb_width, gen_mirror, base_addr,
+def write_address_header(output_file, low_res, lb_width, gen_mirror, base_addr,
                          plot_map):
     addr_bufs = StringIO()
     addr_bufs.write('`define LB_HI %d\n' % lb_width)
     address_allocation(addr_bufs, 0, sorted(gch.keys()), base_addr, low_res,
                        gen_mirror, plot_map)
-    with open(fo, 'w') as fd:
+    with open(output_file, 'w') as fd:
         fd.write(addr_bufs.getvalue())
     addr_bufs.close()
 
 
-def write_regmap_file(fi, fo, low_res, gen_mirror, base_addr, plot_map):
+def write_regmap_file(output_file, low_res, gen_mirror, base_addr, plot_map):
     address_allocation(
-        0,
-        0,
-        sorted(gch.keys()),
-        base_addr,
+        fd=0,
+        hierarchy=0,
+        names=sorted(gch.keys()),
+        address=base_addr,
         low_res=low_res,
         gen_mirror=gen_mirror,
         plot_map=plot_map)
     addr_map = {x: g_flat_addr_map[x] for x in g_flat_addr_map}
-    with open(fo, 'w') as fd:
+    with open(output_file, 'w') as fd:
         json.dump(
             addr_map, fd, sort_keys=True, indent=4, separators=(',', ': '))
         fd.write('\n')
@@ -687,12 +687,18 @@ def main(argv):
                         args.lb_width, args.gen_mirror)
 
     if addr_header_fname:
-        write_address_header(input_fname, addr_header_fname, args.low_res,
-                             args.lb_width, args.gen_mirror, args.base_addr,
-                             args.plot_map)
+        write_address_header(output_file=addr_header_fname, 
+                             low_res = args.low_res,
+                             lb_width=args.lb_width, 
+                             gen_mirror=args.gen_mirror, 
+                             base_addr=args.base_addr,
+                             plot_map=args.plot_map)
     if regmap_fname:
-        write_regmap_file(input_fname, regmap_fname, args.low_res,
-                          args.gen_mirror, args.base_addr, args.plot_map)
+        write_regmap_file(output_file=regmap_fname, 
+                          low_res=args.low_res,
+                          gen_mirror=args.gen_mirror,
+                          base_addr=args.base_addr, 
+                          plot_map=args.plot_map)
 
 
 if __name__ == '__main__':
