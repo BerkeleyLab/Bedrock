@@ -50,7 +50,7 @@ newad starts by parsing the top file and starts going deeper into the hierarchy.
 
 The following verilog snippet shows how instantiated verilog module is marked `auto` by a developer
 
-```
+```verilog
 digitizer_slowread digitizer_slowread // auto
 (
         .lb_clk(lb_clk),
@@ -72,7 +72,7 @@ In this example, ports marked with a macro `AUTOMATIC_digitizer_slowread` of thi
 
 Following verilog snippet shows a single bit register defined as `external` indicating that it should be a register and it has a property of `single-cycle`
 
-```
+```verilog
 input prc_dds_ph_reset,  // external single-cycle
 ```
 
@@ -88,19 +88,21 @@ Below is a list of those additional attributes for a register defined in newad:
 * we-strobe
 * plus-we
 
-% TODO: explain each of those options and how it changes the output
+<!-- % TODO: explain each of those options and how it changes the output -->
 
 
 
 
 ### Verilog Header Generation
 
-when used with `-a` option, newad creates verilog header file for given top level object. This `.vh` file will contain following items: 
+when used with `-a` argument, newad creates verilog header containing the address map for given top level object. This file will have the name `addr_map_<module_name>.vh`. Inside the file, newad will place all address decoding for each register.
 
-* Address Decoded lines
+The following is an example of a decoded register address macro definition.
 
-```
+```verilog
 `define ADDR_HIT_digitizer_dsp_real_sim_mux_shell_0_dsp_ff_driver_mem (lb4_addr[0][`LB_HI:11]==4096) // digitizer_dsp bitwidth: 11, base_addr: 8388608
-
 ```
+
+When used with `-r` argument, newad creates address map in `.json` format. 
+
 
