@@ -438,8 +438,8 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
                 gvar = None
                 gcnt = None
             fd.write(
-                "// module=%s instance=%s gvar=%s gcnt=%s clk=%s\n"
-                % (mod, inst, gvar, str(gcnt), clk_domain_l)
+                "// module=%s instance=%s gvar=%s gcnt=%s\n"
+                % (mod, inst, gvar, str(gcnt))
             )
             if mod not in port_lists:
                 # recurse
@@ -480,7 +480,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
                 info[2],
                 this_mod,
                 info[6],
-                port_clock,
+                clk_domain,
                 cd_indexed,
                 **attributes
             )
@@ -494,7 +494,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
                     None,
                     this_mod,
                     info[6] + "-VOID",
-                    port_clock,
+                    clk_domain,
                     cd_indexed,
                     **attributes
                 )
@@ -512,7 +512,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
                     info[2],
                     this_mod,
                     info[4],
-                    port_clock,
+                    clk_domain,
                     cd_indexed,
                     **attributes
                 )
@@ -540,7 +540,7 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
                     info[1],
                     this_mod,
                     info[5],
-                    port_clock,
+                    clk_domain,
                     cd_indexed,
                     **attributes
                 )
