@@ -1,19 +1,26 @@
 ## newad Documentation
 
-`newad.py` is a python script used for automatic address generation and port assignments. The main goal is to hide the complexity of dealing with registers inside FPGA and reduce the boilerplate code. 
+`newad.py` is a python script used for automatic address generation and port
+assignments. The main goal is to hide the complexity of dealing with
+software-settable registers inside FPGA and reduce the boilerplate code.
 
-The output (therefore functionality) of `newad.py` can be changed depending on how it is called from the CLI. 
+The output (therefore functionality) of `newad.py` can be changed depending on
+how it is called from the CLI.
 
-The ports on the input verilog file can be marked as a register on the final address map. The marking is done by adding `external` comment. Additional properties of the given register can be indicated to the newad by extending the 'external comment with additional arguments. 
+The ports on the input Verilog file can be marked as a register on the final
+address map. The marking is done by adding `external` comment. Additional
+properties of the given register can be indicated to the newad by extending
+the `external` comment with additional arguments.
 
-Users can call newad with -h option to see all of its arguments: 
+Users can call newad with -h option to see all of its arguments:
 
 ```
-usage: newad.py [-h] [-i INPUT_FILE] [-o OUTPUT] [-d DIR_LIST] [-a ADDR_MAP_HEADER] [-r REGMAP] [-l] [-m] [-pl] [-w LB_WIDTH]
+usage: newad.py [-h] [-i INPUT_FILE] [-o OUTPUT] [-d DIR_LIST]
+                [-a ADDR_MAP_HEADER] [-r REGMAP] [-l] [-m] [-pl] [-w LB_WIDTH]
                 [-b BASE_ADDR] [-p CLK_PREFIX]
 
-Automatic address generator: Parses verilog lines and generates addresses and decoders for registers declared external across module
-instantiations
+Automatic address generator: Parses Verilog lines and generates addresses and
+decoders for registers declared external across module instantiations
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -22,7 +29,7 @@ optional arguments:
   -o OUTPUT, --output OUTPUT
                         Outputs generated header file
   -d DIR_LIST, --dir_list DIR_LIST
-                        A list of directories to look for verilog source files. <dir_0>[,<dir_1>]*
+                        A list of directories to look for Verilog source files. <dir_0>[,<dir_1>]*
   -a ADDR_MAP_HEADER, --addr_map_header ADDR_MAP_HEADER
                         Outputs generated address map header file
   -r REGMAP, --regmap REGMAP
@@ -42,13 +49,18 @@ optional arguments:
 
 ### The workflow of newad
 
-The 'main' input to the newad is essentially two arguments. The top verilog file to start the parser and the list of directories to go through. 
+The 'main' input to the newad is essentially two arguments: the top Verilog
+file to start the parser, and the list of directories to go through.
 
-newad starts by parsing the top file and starts going deeper into the hierarchy. There is two main process is happening during this traverse;
+newad starts by parsing the top file and starts going deeper into the
+hierarchy. There are two main processes happening during this traverse;
 
-1) Looking for verilog module instantiations marked `automatic`, for which newad needs to generate port assignments. When such an instantiation is found, it calls back itself recursively to look deeper into the hierarchy.
+1) Looking for Verilog module instantiations marked `automatic`, for which
+newad needs to generate port assignments. When such an instantiation is found,
+it calls back itself recursively to look deeper into the hierarchy.
 
-The following verilog snippet shows how instantiated verilog module is marked `auto` by a developer
+The following Verilog snippet shows how instantiated Verilog module is marked
+`auto` by a developer
 
 ```verilog
 digitizer_slowread digitizer_slowread // auto
@@ -64,13 +76,18 @@ digitizer_slowread digitizer_slowread // auto
 );
 ```
 
-In this example, ports marked with a macro `AUTOMATIC_digitizer_slowread` of this verilog module will be connected by newad generated wires/regs. 
+In this example, ports marked with a macro `AUTOMATIC_digitizer_slowread` of
+this Verilog module will be connected by newad generated wires/regs.
 
 
-2) Looking for input/output ports labeled 'external'. Record them in the port_lists dictionary for this module. Searches ports on each line of verilog code by looking at its directionality (while also catching if it is signed or not) and very specific verilog comment describing the other att
+2) Looking for input/output ports labeled 'external'. Record them in the
+port_lists dictionary for this module. Searches ports on each line of Verilog
+code by looking at its directionality (while also catching if it is signed or
+not) and very specific Verilog comment describing the other attributes
 
 
-Following verilog snippet shows a single bit register defined as `external` indicating that it should be a register and it has a property of `single-cycle`
+Following Verilog snippet shows a single bit register defined as `external`
+indicating that it should be a register and it has a property of `single-cycle`
 
 ```verilog
 input prc_dds_ph_reset,  // external single-cycle
@@ -79,9 +96,11 @@ input prc_dds_ph_reset,  // external single-cycle
 
 #### Register Attributes
 
-Each port defined as 'external' using the comment of verilog, will end up as a register. Users can then attach additional features for this register by adding more attributes: 
+Each port defined as 'external' using the comment of Verilog will end up as a
+software-settable register. Users can then attach additional features for this
+register by adding more attributes:
 
-Below is a list of those additional attributes for a register defined in newad: 
+Below is a list of those additional attributes for a register defined in newad:
 
 * single-cycle
 * strobe
@@ -92,10 +111,12 @@ Below is a list of those additional attributes for a register defined in newad:
 
 
 
-
 ### Verilog Header Generation
 
-when used with `-a` argument, newad creates verilog header containing the address map for given top level object. This file will have the name `addr_map_<module_name>.vh`. Inside the file, newad will place all address decoding for each register.
+When used with `-a` argument, newad creates a Verilog header containing the
+address map for given top level object. This file will have the name
+`addr_map_<module_name>.vh`. Inside the file, newad will place all address
+decoding for each register.
 
 The following is an example of a decoded register address macro definition.
 
@@ -103,6 +124,4 @@ The following is an example of a decoded register address macro definition.
 `define ADDR_HIT_digitizer_dsp_real_sim_mux_shell_0_dsp_ff_driver_mem (lb4_addr[0][`LB_HI:11]==4096) // digitizer_dsp bitwidth: 11, base_addr: 8388608
 ```
 
-When used with `-r` argument, newad creates address map in `.json` format. 
-
-
+When used with `-r` argument, newad creates an address map in `.json` format.

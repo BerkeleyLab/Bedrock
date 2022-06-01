@@ -135,7 +135,7 @@ SRC_MD = \
    board_support/zest/README.md \
    board_support/bmb7_kintex/README.md \
    fpga_family/xilinx/README.md \
-   build-tools/newad.md 
+   build-tools/newad.md
 
 DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR)
 VFLAGS     += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS)) -y$(AUTOGEN_DIR)
