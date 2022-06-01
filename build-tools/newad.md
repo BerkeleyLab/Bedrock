@@ -1,17 +1,10 @@
 ## newad Documentation
 
-`newad.py` is a python script used for automatic address generation and automatic port assignments. Main goal is to hide the complexity of dealing with registers inside FPGA and reduce the boilerplate code. 
+`newad.py` is a python script used for automatic address generation and port assignments. The main goal is to hide the complexity of dealing with registers inside FPGA and reduce the boilerplate code. 
 
-The output (therefore functionality) of newad.py can be changed depending on how it is called from the CLI. 
+The output (therefore functionality) of `newad.py` can be changed depending on how it is called from the CLI. 
 
-The ports on the input verilog file can be 'marked' as a register on the final address map. The marking is done by adding `external` comment. Additional properties of the given register can be indicated to the newad by extending the 'external comment with additional arguments. 
-
-Following verilog sniplet shows a single bit register defined as `external` indicating that it should be a register and it has a property of `single-cycle`
-
-```
-input prc_dds_ph_reset,  // external single-cycle
-```
-
+The ports on the input verilog file can be marked as a register on the final address map. The marking is done by adding `external` comment. Additional properties of the given register can be indicated to the newad by extending the 'external comment with additional arguments. 
 
 Users can call newad with -h option to see all of its arguments: 
 
@@ -46,16 +39,43 @@ optional arguments:
 
 ```
 
+
 ### The workflow of newad
 
 The 'main' input to the newad is essentially two arguments. The top verilog file to start the parser and the list of directories to go through. 
 
-newad starts by parsing the top file and starts going deeper into the hiearchy. There is two main process is happening during this traverse;
+newad starts by parsing the top file and starts going deeper into the hierarchy. There is two main process is happening during this traverse;
 
-1) Looking for module instantiations marked `automatic`, for which newad needs to generate port assignments. When such an instantiation is found, it calls back itself recursively.
+1) Looking for verilog module instantiations marked `automatic`, for which newad needs to generate port assignments. When such an instantiation is found, it calls back itself recursively to look deeper into the hierarchy.
+
+The following verilog snippet shows how instantiated verilog module is marked `auto` by a developer
+
+```
+digitizer_slowread digitizer_slowread // auto
+(
+        .lb_clk(lb_clk),
+        .adc_clk(adc_clk),
+        .adc_data(adc_data),
+        .slow_snap(slow_snap),
+        .slow_chain_out(slow_chain_out),
+        .slow_read_lb(slow_read_lb),
+        .tag_now(tag_now)
+        //`AUTOMATIC_digitizer_slowread
+);
+```
+
+In this example, ports marked with a macro `AUTOMATIC_digitizer_slowread` of this verilog module will be connected by newad generated wires/regs. 
 
 
-2) Looking for input/output ports labeled 'external'. Record them in the port_lists dictionary for this module. Searches ports on each line of verilog code by looking at its directionality (while also catching if it is signed or not) and very specific verilog comment describing the other attributes. THese register atrributes are explained below;
+2) Looking for input/output ports labeled 'external'. Record them in the port_lists dictionary for this module. Searches ports on each line of verilog code by looking at its directionality (while also catching if it is signed or not) and very specific verilog comment describing the other att
+
+
+Following verilog snippet shows a single bit register defined as `external` indicating that it should be a register and it has a property of `single-cycle`
+
+```
+input prc_dds_ph_reset,  // external single-cycle
+```
+
 
 #### Register Attributes
 
@@ -84,11 +104,3 @@ when used with `-a` option, newad creates verilog header file for given top leve
 
 ```
 
-
-### parse_vfile 
-
-looking for module instantiations marked automatic,
-    for which we need to generate port assignments.
-    When such an instantiation is found, recurse.
-    (b) looking for input/output ports labeled 'external'.
-    Record them in the port_lists dictionary for this module.
