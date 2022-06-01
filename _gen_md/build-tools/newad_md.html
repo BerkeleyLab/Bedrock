@@ -43,15 +43,22 @@ Expect to see errors and unfinished things.</p>
 <span id="newad"></span><h1>build-tools newad<a class="headerlink" href="#build-tools-newad" title="Permalink to this heading">¶</a></h1>
 <section id="newad-documentation">
 <h2>newad Documentation<a class="headerlink" href="#newad-documentation" title="Permalink to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">newad.py</span></code> is a python script used for automatic address generation and port assignments. The main goal is to hide the complexity of dealing with registers inside FPGA and reduce the boilerplate code.</p>
-<p>The output (therefore functionality) of <code class="docutils literal notranslate"><span class="pre">newad.py</span></code> can be changed depending on how it is called from the CLI.</p>
-<p>The ports on the input verilog file can be marked as a register on the final address map. The marking is done by adding <code class="docutils literal notranslate"><span class="pre">external</span></code> comment. Additional properties of the given register can be indicated to the newad by extending the ‘external comment with additional arguments.</p>
+<p><code class="docutils literal notranslate"><span class="pre">newad.py</span></code> is a python script used for automatic address generation and port
+assignments. The main goal is to hide the complexity of dealing with
+software-settable registers inside FPGA and reduce the boilerplate code.</p>
+<p>The output (therefore functionality) of <code class="docutils literal notranslate"><span class="pre">newad.py</span></code> can be changed depending on
+how it is called from the CLI.</p>
+<p>The ports on the input Verilog file can be marked as a register on the final
+address map. The marking is done by adding <code class="docutils literal notranslate"><span class="pre">external</span></code> comment. Additional
+properties of the given register can be indicated to the newad by extending
+the <code class="docutils literal notranslate"><span class="pre">external</span></code> comment with additional arguments.</p>
 <p>Users can call newad with -h option to see all of its arguments:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">newad</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">d</span> <span class="n">DIR_LIST</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">a</span> <span class="n">ADDR_MAP_HEADER</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">REGMAP</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">pl</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">LB_WIDTH</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">newad</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">i</span> <span class="n">INPUT_FILE</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">d</span> <span class="n">DIR_LIST</span><span class="p">]</span>
+                <span class="p">[</span><span class="o">-</span><span class="n">a</span> <span class="n">ADDR_MAP_HEADER</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">r</span> <span class="n">REGMAP</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">pl</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">w</span> <span class="n">LB_WIDTH</span><span class="p">]</span>
                 <span class="p">[</span><span class="o">-</span><span class="n">b</span> <span class="n">BASE_ADDR</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">p</span> <span class="n">CLK_PREFIX</span><span class="p">]</span>
 
-<span class="n">Automatic</span> <span class="n">address</span> <span class="n">generator</span><span class="p">:</span> <span class="n">Parses</span> <span class="n">verilog</span> <span class="n">lines</span> <span class="ow">and</span> <span class="n">generates</span> <span class="n">addresses</span> <span class="ow">and</span> <span class="n">decoders</span> <span class="k">for</span> <span class="n">registers</span> <span class="n">declared</span> <span class="n">external</span> <span class="n">across</span> <span class="n">module</span>
-<span class="n">instantiations</span>
+<span class="n">Automatic</span> <span class="n">address</span> <span class="n">generator</span><span class="p">:</span> <span class="n">Parses</span> <span class="n">Verilog</span> <span class="n">lines</span> <span class="ow">and</span> <span class="n">generates</span> <span class="n">addresses</span> <span class="ow">and</span>
+<span class="n">decoders</span> <span class="k">for</span> <span class="n">registers</span> <span class="n">declared</span> <span class="n">external</span> <span class="n">across</span> <span class="n">module</span> <span class="n">instantiations</span>
 
 <span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
   <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
@@ -60,7 +67,7 @@ Expect to see errors and unfinished things.</p>
   <span class="o">-</span><span class="n">o</span> <span class="n">OUTPUT</span><span class="p">,</span> <span class="o">--</span><span class="n">output</span> <span class="n">OUTPUT</span>
                         <span class="n">Outputs</span> <span class="n">generated</span> <span class="n">header</span> <span class="n">file</span>
   <span class="o">-</span><span class="n">d</span> <span class="n">DIR_LIST</span><span class="p">,</span> <span class="o">--</span><span class="n">dir_list</span> <span class="n">DIR_LIST</span>
-                        <span class="n">A</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">directories</span> <span class="n">to</span> <span class="n">look</span> <span class="k">for</span> <span class="n">verilog</span> <span class="n">source</span> <span class="n">files</span><span class="o">.</span> <span class="o">&lt;</span><span class="n">dir_0</span><span class="o">&gt;</span><span class="p">[,</span><span class="o">&lt;</span><span class="n">dir_1</span><span class="o">&gt;</span><span class="p">]</span><span class="o">*</span>
+                        <span class="n">A</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">directories</span> <span class="n">to</span> <span class="n">look</span> <span class="k">for</span> <span class="n">Verilog</span> <span class="n">source</span> <span class="n">files</span><span class="o">.</span> <span class="o">&lt;</span><span class="n">dir_0</span><span class="o">&gt;</span><span class="p">[,</span><span class="o">&lt;</span><span class="n">dir_1</span><span class="o">&gt;</span><span class="p">]</span><span class="o">*</span>
   <span class="o">-</span><span class="n">a</span> <span class="n">ADDR_MAP_HEADER</span><span class="p">,</span> <span class="o">--</span><span class="n">addr_map_header</span> <span class="n">ADDR_MAP_HEADER</span>
                         <span class="n">Outputs</span> <span class="n">generated</span> <span class="n">address</span> <span class="nb">map</span> <span class="n">header</span> <span class="n">file</span>
   <span class="o">-</span><span class="n">r</span> <span class="n">REGMAP</span><span class="p">,</span> <span class="o">--</span><span class="n">regmap</span> <span class="n">REGMAP</span>
@@ -78,12 +85,15 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="the-workflow-of-newad">
 <h3>The workflow of newad<a class="headerlink" href="#the-workflow-of-newad" title="Permalink to this heading">¶</a></h3>
-<p>The ‘main’ input to the newad is essentially two arguments. The top verilog file to start the parser and the list of directories to go through.</p>
-<p>newad starts by parsing the top file and starts going deeper into the hierarchy. There is two main process is happening during this traverse;</p>
-<ol class="arabic simple">
-<li><p>Looking for verilog module instantiations marked <code class="docutils literal notranslate"><span class="pre">automatic</span></code>, for which newad needs to generate port assignments. When such an instantiation is found, it calls back itself recursively to look deeper into the hierarchy.</p></li>
-</ol>
-<p>The following verilog snippet shows how instantiated verilog module is marked <code class="docutils literal notranslate"><span class="pre">auto</span></code> by a developer</p>
+<p>The ‘main’ input to the newad is essentially two arguments: the top Verilog
+file to start the parser, and the list of directories to go through.</p>
+<p>newad starts by parsing the top file and starts going deeper into the
+hierarchy. There are two main processes happening during this traverse;</p>
+<p>1) Looking for Verilog module instantiations marked <code class="docutils literal notranslate"><span class="pre">automatic</span></code>, for which
+newad needs to generate port assignments. When such an instantiation is found,
+it calls back itself recursively to look deeper into the hierarchy.</p>
+<p>The following Verilog snippet shows how instantiated Verilog module is marked
+<code class="docutils literal notranslate"><span class="pre">auto</span></code> by a developer</p>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="n">digitizer_slowread</span><span class="w"> </span><span class="n">digitizer_slowread</span><span class="w"> </span><span class="c1">// auto</span>
 <span class="p">(</span><span class="w"></span>
 <span class="w">        </span><span class="p">.</span><span class="n">lb_clk</span><span class="p">(</span><span class="n">lb_clk</span><span class="p">),</span><span class="w"></span>
@@ -97,17 +107,22 @@ Expect to see errors and unfinished things.</p>
 <span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
-<p>In this example, ports marked with a macro <code class="docutils literal notranslate"><span class="pre">AUTOMATIC_digitizer_slowread</span></code> of this verilog module will be connected by newad generated wires/regs.</p>
-<ol class="arabic simple" start="2">
-<li><p>Looking for input/output ports labeled ‘external’. Record them in the port_lists dictionary for this module. Searches ports on each line of verilog code by looking at its directionality (while also catching if it is signed or not) and very specific verilog comment describing the other att</p></li>
-</ol>
-<p>Following verilog snippet shows a single bit register defined as <code class="docutils literal notranslate"><span class="pre">external</span></code> indicating that it should be a register and it has a property of <code class="docutils literal notranslate"><span class="pre">single-cycle</span></code></p>
+<p>In this example, ports marked with a macro <code class="docutils literal notranslate"><span class="pre">AUTOMATIC_digitizer_slowread</span></code> of
+this Verilog module will be connected by newad generated wires/regs.</p>
+<p>2) Looking for input/output ports labeled ‘external’. Record them in the
+port_lists dictionary for this module. Searches ports on each line of Verilog
+code by looking at its directionality (while also catching if it is signed or
+not) and very specific Verilog comment describing the other attributes</p>
+<p>Following Verilog snippet shows a single bit register defined as <code class="docutils literal notranslate"><span class="pre">external</span></code>
+indicating that it should be a register and it has a property of <code class="docutils literal notranslate"><span class="pre">single-cycle</span></code></p>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="k">input</span><span class="w"> </span><span class="n">prc_dds_ph_reset</span><span class="p">,</span><span class="w">  </span><span class="c1">// external single-cycle</span>
 </pre></div>
 </div>
 <section id="register-attributes">
 <h4>Register Attributes<a class="headerlink" href="#register-attributes" title="Permalink to this heading">¶</a></h4>
-<p>Each port defined as ‘external’ using the comment of verilog, will end up as a register. Users can then attach additional features for this register by adding more attributes:</p>
+<p>Each port defined as ‘external’ using the comment of Verilog will end up as a
+software-settable register. Users can then attach additional features for this
+register by adding more attributes:</p>
 <p>Below is a list of those additional attributes for a register defined in newad:</p>
 <ul class="simple">
 <li><p>single-cycle</p></li>
@@ -119,12 +134,15 @@ Expect to see errors and unfinished things.</p>
 </section>
 <section id="verilog-header-generation">
 <h3>Verilog Header Generation<a class="headerlink" href="#verilog-header-generation" title="Permalink to this heading">¶</a></h3>
-<p>when used with <code class="docutils literal notranslate"><span class="pre">-a</span></code> argument, newad creates verilog header containing the address map for given top level object. This file will have the name <code class="docutils literal notranslate"><span class="pre">addr_map_&lt;module_name&gt;.vh</span></code>. Inside the file, newad will place all address decoding for each register.</p>
+<p>When used with <code class="docutils literal notranslate"><span class="pre">-a</span></code> argument, newad creates a Verilog header containing the
+address map for given top level object. This file will have the name
+<code class="docutils literal notranslate"><span class="pre">addr_map_&lt;module_name&gt;.vh</span></code>. Inside the file, newad will place all address
+decoding for each register.</p>
 <p>The following is an example of a decoded register address macro definition.</p>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="cp">`define ADDR_HIT_digitizer_dsp_real_sim_mux_shell_0_dsp_ff_driver_mem (lb4_addr[0][`LB_HI:11]==4096) </span><span class="c1">// digitizer_dsp bitwidth: 11, base_addr: 8388608</span>
 </pre></div>
 </div>
-<p>When used with <code class="docutils literal notranslate"><span class="pre">-r</span></code> argument, newad creates address map in <code class="docutils literal notranslate"><span class="pre">.json</span></code> format.</p>
+<p>When used with <code class="docutils literal notranslate"><span class="pre">-r</span></code> argument, newad creates an address map in <code class="docutils literal notranslate"><span class="pre">.json</span></code> format.</p>
 </section>
 </section>
 </section>
