@@ -1,6 +1,8 @@
 ## newad Documentation
 
-`newad.py` is a python script used for automatic address generation. It does so by scanning the given verilog file and parses the port declaration. The output from newad.py is a `.json` file which includes all registers along with their specific properties.
+`newad.py` is a python script used for automatic address generation and automatic port assignments. Main goal is to hide the complexity of dealing with registers inside FPGA and reduce the boilerplate code. 
+
+The output (therefore functionality) of newad.py can be changed depending on how it is called from the CLI. 
 
 The ports on the input verilog file can be 'marked' as a register on the final address map. The marking is done by adding `external` comment. Additional properties of the given register can be indicated to the newad by extending the 'external comment with additional arguments. 
 
@@ -44,7 +46,18 @@ optional arguments:
 
 ```
 
-### Port Decleration Options
+### The workflow of newad
+
+The 'main' input to the newad is essentially two arguments. The top verilog file to start the parser and the list of directories to go through. 
+
+newad starts by parsing the top file and starts going deeper into the hiearchy. There is two main process is happening during this traverse;
+
+1) Looking for module instantiations marked `automatic`, for which newad needs to generate port assignments. When such an instantiation is found, it calls back itself recursively.
+
+
+2) Looking for input/output ports labeled 'external'. Record them in the port_lists dictionary for this module. Searches ports on each line of verilog code by looking at its directionality (while also catching if it is signed or not) and very specific verilog comment describing the other attributes. THese register atrributes are explained below;
+
+#### Register Attributes
 
 Each port defined as 'external' using the comment of verilog, will end up as a register. Users can then attach additional features for this register by adding more attributes: 
 
@@ -58,4 +71,24 @@ Below is a list of those additional attributes for a register defined in newad:
 % TODO: explain each of those options and how it changes the output
 
 
-### 
+
+
+### Verilog Header Generation
+
+when used with `-a` option, newad creates verilog header file for given top level object. This `.vh` file will contain following items: 
+
+* Address Decoded lines
+
+```
+`define ADDR_HIT_digitizer_dsp_real_sim_mux_shell_0_dsp_ff_driver_mem (lb4_addr[0][`LB_HI:11]==4096) // digitizer_dsp bitwidth: 11, base_addr: 8388608
+
+```
+
+
+### parse_vfile 
+
+looking for module instantiations marked automatic,
+    for which we need to generate port assignments.
+    When such an instantiation is found, recurse.
+    (b) looking for input/output ports labeled 'external'.
+    Record them in the port_lists dictionary for this module.
