@@ -5,14 +5,13 @@ registers within Verilog, typically in an FPGA context.  The amount of
 boilerplate code required is marginally zero.  In the background, addresses
 are generated and bus decoders are created.
 
-The current version is based on `magic comments` (see examples below), which
+The current version is based on "magic comments" (see examples below), which
 imposes some limitations on its use. We have hopes to rewrite the system
 someday to use Verilog attributes and a Real Verilog parser.
 
-The ports on the input Verilog file can be marked as a register on the final
-address map. The marking is done by adding `external` comment. Additional
-properties of the given register can be indicated to the newad by extending
-the `external` comment with additional flags.
+Ports on the input Verilog file can be marked (using an `external` comment)
+as a register to show up in the final address map. Some properties of those
+registers can be controlled with additional flags in the comment.
 
 The output (therefore functionality) of `newad.py` can be changed depending on
 how it is called from the CLI.  These calls are typically buried in a Makefile.
@@ -53,29 +52,29 @@ optional arguments:
 
 ### The workflow of newad
 
-The main input to the newad is essentially two arguments: the top Verilog file
+The main input to newad is essentially two arguments: the top Verilog file
 to start the parser, and the list of directories where modules can be found.
 
 newad starts by parsing the top file, and then starts going deeper into the
 hierarchy. There are two main processes happening during this traverse:
 
-1) Looking for input/output ports labeled 'external'. These will turn into
+1) Looking for input/output ports labeled `external`. These will turn into
 software-settable registers. Some of its properties are deduced from the
 native Verilog syntax: bit width, signed or not.  Additional options can be
 set by more magic comments; see below.
 
-Following Verilog snippet shows a 12-bit register defined as `external`.
+The following Verilog snippet shows a 12-bit register defined as `external`.
 
 ```verilog
         input [11:0] phase_step, // external
 ```
 
-2) Looking for Verilog module instantiations marked `automatic`, for which
-newad needs to generate port assignments. When such an instantiation is found,
-it calls back recursively to look deeper into the hierarchy.
+2) Looking for Verilog module instantiations marked `auto` (short for automatic),
+for which newad needs to generate port assignments. When such an instantiation
+is found, newad recurses to look deeper into the hierarchy.
 
-The following Verilog snippet shows how instantiated Verilog module is marked
-`auto` by a developer:
+The following Verilog snippet shows how an instantiated Verilog module is
+marked `auto` by a developer:
 
 ```verilog
 pair_couple drive_couple // auto
@@ -87,22 +86,24 @@ pair_couple drive_couple // auto
 ```
 
 In this example, software-settable ports found within drive_couple will
-get filled in using an machine-generated macro `AUTOMATIC_drive_couple`.
+get filled in using the machine-generated macro `AUTOMATIC_drive_couple`.
 These ports will be automatically propagated outwards to the bus controller
 and decoder.
 
 
 #### Register Attributes
 
-Each port defined as 'external' using the comment of Verilog will end up as a
+Each port defined as `external` using the comment of Verilog will end up as a
 software-settable register with an automatically-assigned address. Users can
-attach additional features for this register by adding more attributes:
+modify features of this register by adding more attributes:
 
 * single-cycle: the register will only stay high (asserted) for a single
-cycle when written.  Maps nicely to operations like `clear` and `trigger`,
+cycle when written.  Maps nicely to operations like "clear" and "trigger",
 where no state is held in the register.
 * we-strobe: reserved for special cases where the register semantics requires
 access to the write-enable signal *plus* the data bus, like pushing into a FIFO.
+Implementing that behavior, given the write-enable strobe, is still the job of
+the HDL program.
 
 
 ### Verilog Header Generation
@@ -164,11 +165,18 @@ with comments of the form ``newad-force foo domain``.  Example:
 ```
 
 The result will include `cic_period` in the `clk1x_clk` domain, and `buf_trig`
-in the `lb_clk` domain. The hops is that option (1) will cover most use cases.
+in the `lb_clk` domain. The hope is that option (1) will cover most use cases.
 
 Note also in this example that the trace_ack and trace_reset ports will *not*
 be managed by newad.  The extra `--` intentionally disables the pattern-match
 for the `external` keyword.
+
+You are encouraged to occasionally cross-check the register decoder produced
+by newad with its `-o` flag, typically named `<module_name>_auto.vh`, to make
+sure clock domains and other behavior are emitted as intended.  Those files
+can be long, but should be legible to Verilog programmers.  They even have
+helpful comments at the beginning showing how newad has traversed the Verilog
+hierarchy.
 
 It is the responsibility of the bus controller to create local busses in each
 of the clock domains needed by its submodules.
