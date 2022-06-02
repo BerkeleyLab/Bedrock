@@ -120,12 +120,13 @@ and decoder.</p>
 <section id="register-attributes">
 <h4>Register Attributes<a class="headerlink" href="#register-attributes" title="Permalink to this heading">¶</a></h4>
 <p>Each port defined as <code class="docutils literal notranslate"><span class="pre">external</span></code> using the comment of Verilog will end up as a
-software-settable register with an automatically-assigned address. Users can
-modify features of this register by adding more attributes:</p>
+software-settable register with an automatically-assigned address.  Behavior
+of this port can be modified by adding more attributes in the Verilog source
+file:</p>
 <ul class="simple">
-<li><p>single-cycle: the register will only stay high (asserted) for a single
-cycle when written.  Maps nicely to operations like “clear” and “trigger”,
-where no state is held in the register.</p></li>
+<li><p>single-cycle: the port will only stay high (asserted) for a single cycle
+when written.  Maps nicely to operations like “clear” and “trigger”, where
+no state is held in the register.</p></li>
 <li><p>we-strobe: reserved for special cases where the register semantics requires
 access to the write-enable signal <em>plus</em> the data bus, like pushing into a FIFO.
 Implementing that behavior, given the write-enable strobe, is still the job of
