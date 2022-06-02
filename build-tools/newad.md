@@ -1,17 +1,21 @@
 ## newad Documentation
 
-`newad.py` is a python script used for automatic address generation and port
-assignments. The main goal is to hide the complexity of dealing with
-software-settable registers inside FPGA and reduce the boilerplate code.
+`newad.py` is a python script used to simplify creation of software-settable
+registers within Verilog, typically in an FPGA context.  The amount of
+boilerplate code required is marginally zero.  In the background, addresses
+are generated and bus decoders are created.
 
-The output (therefore functionality) of `newad.py` can be changed depending on
-how it is called from the CLI.
+The current version is based on `magic comments` (see examples below), which
+imposes some limitations on its use. We have hopes to rewrite the system
+someday to use Verilog attributes and a Real Verilog parser.
 
 The ports on the input Verilog file can be marked as a register on the final
 address map. The marking is done by adding `external` comment. Additional
 properties of the given register can be indicated to the newad by extending
-the `external` comment with additional arguments.
+the `external` comment with additional flags.
 
+The output (therefore functionality) of `newad.py` can be changed depending on
+how it is called from the CLI.  These calls are typically buried in a Makefile.
 Users can call newad with -h option to see all of its arguments:
 
 ```
@@ -34,7 +38,7 @@ optional arguments:
                         Outputs generated address map header file
   -r REGMAP, --regmap REGMAP
                         Outputs generated address map in json format
-  -l, --low_res         When not selected generates a seperate address name for each
+  -l, --low_res         When not selected generates a separate address name for each
   -m, --gen_mirror      Generates a mirror where all registers and register arrays with size < 32are available for readback
   -pl, --plot_map       Plots the register map using a broken bar graph
   -w LB_WIDTH, --lb_width LB_WIDTH
@@ -49,66 +53,56 @@ optional arguments:
 
 ### The workflow of newad
 
-The 'main' input to the newad is essentially two arguments: the top Verilog
-file to start the parser, and the list of directories to go through.
+The main input to the newad is essentially two arguments: the top Verilog file
+to start the parser, and the list of directories where modules can be found.
 
-newad starts by parsing the top file and starts going deeper into the
-hierarchy. There are two main processes happening during this traverse;
+newad starts by parsing the top file, and then starts going deeper into the
+hierarchy. There are two main processes happening during this traverse:
 
-1) Looking for Verilog module instantiations marked `automatic`, for which
-newad needs to generate port assignments. When such an instantiation is found,
-it calls back itself recursively to look deeper into the hierarchy.
+1) Looking for input/output ports labeled 'external'. These will turn into
+software-settable registers. Some of its properties are deduced from the
+native Verilog syntax: bit width, signed or not.  Additional options can be
+set by more magic comments; see below.
 
-The following Verilog snippet shows how instantiated Verilog module is marked
-`auto` by a developer
+Following Verilog snippet shows a 12-bit register defined as `external`.
 
 ```verilog
-digitizer_slowread digitizer_slowread // auto
-(
-        .lb_clk(lb_clk),
-        .adc_clk(adc_clk),
-        .adc_data(adc_data),
-        .slow_snap(slow_snap),
-        .slow_chain_out(slow_chain_out),
-        .slow_read_lb(slow_read_lb),
-        .tag_now(tag_now)
-        //`AUTOMATIC_digitizer_slowread
+        input [11:0] phase_step, // external
+```
+
+2) Looking for Verilog module instantiations marked `automatic`, for which
+newad needs to generate port assignments. When such an instantiation is found,
+it calls back recursively to look deeper into the hierarchy.
+
+The following Verilog snippet shows how instantiated Verilog module is marked
+`auto` by a developer:
+
+```verilog
+pair_couple drive_couple // auto
+        (.clk(clk), .iq(iq),
+        .drive(prompt_drive), .lo_phase(lo_phase_d),
+        .pair(fwd_ref),
+        `AUTOMATIC_drive_couple
 );
 ```
 
-In this example, ports marked with a macro `AUTOMATIC_digitizer_slowread` of
-this Verilog module will be connected by newad generated wires/regs.
-
-
-2) Looking for input/output ports labeled 'external'. Record them in the
-port_lists dictionary for this module. Searches ports on each line of Verilog
-code by looking at its directionality (while also catching if it is signed or
-not) and very specific Verilog comment describing the other attributes
-
-
-Following Verilog snippet shows a single bit register defined as `external`
-indicating that it should be a register and it has a property of `single-cycle`
-
-```verilog
-input prc_dds_ph_reset,  // external single-cycle
-```
+In this example, software-settable ports found within drive_couple will
+get filled in using an machine-generated macro `AUTOMATIC_drive_couple`.
+These ports will be automatically propagated outwards to the bus controller
+and decoder.
 
 
 #### Register Attributes
 
 Each port defined as 'external' using the comment of Verilog will end up as a
-software-settable register. Users can then attach additional features for this
-register by adding more attributes:
+software-settable register with an automatically-assigned address. Users can
+attach additional features for this register by adding more attributes:
 
-Below is a list of those additional attributes for a register defined in newad:
-
-* single-cycle
-* strobe
-* we-strobe
-* plus-we
-
-<!-- % TODO: explain each of those options and how it changes the output -->
-
+* single-cycle: the register will only stay high (asserted) for a single
+cycle when written.  Maps nicely to operations like `clear` and `trigger`,
+where no state is held in the register.
+* we-strobe: reserved for special cases where the register semantics requires
+access to the write-enable signal *plus* the data bus, like pushing into a FIFO.
 
 
 ### Verilog Header Generation
@@ -125,3 +119,83 @@ The following is an example of a decoded register address macro definition.
 ```
 
 When used with `-r` argument, newad creates an address map in `.json` format.
+
+
+### Managing clock domains
+
+By default, registers are set in the `lb_clk` domain in the top-level bus
+controller module.  There are two provisions to override that.
+
+1) In an instantiation, the default clock domain for ports for that instance
+can be set.  Example:
+
+```verilog
+prc_dsp prc_dsp // auto clk1x
+        (.clk(adc_clk), .qmode(qmode[1:0]), .adc_data(adc_data),
+        .iq_result1(iq_cav01), .iq_result2(iq_cav23), .qmode_out(qmode_out),
+        .cosd(cosa), .sind(sina), .phase_zero(phase_zero), .fwd_in(fwd_in), .rev_in(rev_in), .phs_avg_sum(phs_avg_sum),
+        `AUTOMATIC_prc_dsp
+);
+```
+
+Registers in the prc_dsp module will be created in the clk1x_clk domain
+(happens to be equivalent to adc_clk).
+
+2) Within a list of ports, the clock domain can be set in a sticky manner
+with comments of the form ``newad-force foo domain``.  Example:
+
+```verilog
+        // newad-force lb domain
+        input [0:0] trace_reset_we,  // external we-strobe
+        input [0:0] trace_ack,  // -- external single-cycle
+        // newad-force clk1x domain
+        input [0:0] trace_reset,  // -- external single-cycle
+        input [13:0] cic_period,  // external
+        input [7:0] trace_keep, // external
+        input [3:0] cic_shift, // external
+        // newad-force lb domain
+        input start_fdbk_dac_enable,  // external
+        input buf_trig,  // external
+        // newad-force clk2x domain
+        input [15:0] amplitude,  // external
+        input [19:0] ddsa_phstep_h,  // external
+        input [11:0] ddsa_phstep_l,  // external
+        input [11:0] ddsa_modulo,  // external
+```
+
+The result will include `cic_period` in the `clk1x_clk` domain, and `buf_trig`
+in the `lb_clk` domain. The hops is that option (1) will cover most use cases.
+
+Note also in this example that the trace_ack and trace_reset ports will *not*
+be managed by newad.  The extra `--` intentionally disables the pattern-match
+for the `external` keyword.
+
+It is the responsibility of the bus controller to create local busses in each
+of the clock domains needed by its submodules.
+
+
+### Register names and uniqueness
+
+Software-visible register names are created based on the instance hierarchy.
+For example, `ssa_stim_ampstep` is a name generated for register `ampstep`
+in module instance name `ssa_stim`.  The newad-generated json file contains
+the mapping from name to (generated) address.  That json file is normally
+compressed, held in FPGA memory, and made available to software.  Application
+software can therefore always refer to registers by name.
+
+A more exotic example is `shell_1_dsp_fdbk_core_mp_proc_sel_thresh`.  Here
+the instance name hierarchy is `shell`, `dsp`, `fdbk_core`, `mp_proc`, the
+register name is `sel_thresh`, and the extra `1` comes from `shell` being
+created in a Verilog generate loop.  The (abbreviated) syntax for that example
+is
+
+```verilog
+genvar c_n;
+generate for (c_n=0; c_n < 2; c_n=c_n+1) begin: cryomodule_cavity
+    llrf_shell shell // auto(c_n,2) lb4[c_n]
+        (.clk(adc_clk),
+        ...
+        `AUTOMATIC_shell
+    );
+end endgenerate
+```

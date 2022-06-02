@@ -852,7 +852,7 @@ def main(argv):
         "--low_res",
         action="store_true",
         default=False,
-        help="When not selected generates a seperate address name for each",
+        help="When not selected generates a separate address name for each",
     )
     parser.add_argument(
         "-m",
