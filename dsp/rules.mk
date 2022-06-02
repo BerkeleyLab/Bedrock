@@ -94,6 +94,13 @@ ssb_out_check: ssb_out_tb $(SSB_TEST_PY)
 	$(VVP) $< +trace && $(PYTHON) $(word 2, $^) ssb_out.dat SSB_OUT
 	$(VVP) $< +trace +single && $(PYTHON) $(word 2, $^) ssb_out.dat SSB_OUT SINGLE
 
+
+
+# data_xdomain_handshake
+data_xdomain_handshake_tb: data_xdomain_handshake.v data_xdomain_handshake_tb.v  
+data_xdomain_handshake_check: data_xdomain_handshake_tb
+	$(VVP) $< +trace
+
 # 1st order low/high pass filters
 FTEST_PY = filter_test.py
 fwashout_check: $(FTEST_PY) fwashout_tb
