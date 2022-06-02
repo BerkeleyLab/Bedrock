@@ -94,12 +94,13 @@ and decoder.
 #### Register Attributes
 
 Each port defined as `external` using the comment of Verilog will end up as a
-software-settable register with an automatically-assigned address. Users can
-modify features of this register by adding more attributes:
+software-settable register with an automatically-assigned address.  Behavior
+of this port can be modified by adding more attributes in the Verilog source
+file:
 
-* single-cycle: the register will only stay high (asserted) for a single
-cycle when written.  Maps nicely to operations like "clear" and "trigger",
-where no state is held in the register.
+* single-cycle: the port will only stay high (asserted) for a single cycle
+when written.  Maps nicely to operations like "clear" and "trigger", where
+no state is held in the register.
 * we-strobe: reserved for special cases where the register semantics requires
 access to the write-enable signal *plus* the data bus, like pushing into a FIFO.
 Implementing that behavior, given the write-enable strobe, is still the job of
