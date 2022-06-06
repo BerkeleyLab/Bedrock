@@ -18,12 +18,15 @@
 // where z^{-1} represents two clock cycles (21.2 ns in LCLS-II) delay,
 // matching the two-cycle update rate of complex numbers flowing in and out;
 // this formulation takes kx and ky as signed 18-bit integers.
+// That expression assumes default shift=2, otherwise those 19s turn into 17+shift.
 // Also see scaling comments in lp_tb.v.
 
 // Do not use negative full-scale values for kx or ky.
 // Needs evaluation for round-off error and possible resulting bias.
 
-module lp(
+module lp #(
+	parameter shift=2
+) (
 	input clk,  // timespec 6.66 ns
 	input iq,
 	input signed [17:0] x,
@@ -31,29 +34,29 @@ module lp(
 	output [0:0] kx_addr,    // external address for kx
 	input signed [17:0] ky,  // external
 	output [0:0] ky_addr,    // external address for ky
-	output signed [19:0] y
+	output signed [17+shift:0] y
 );
 
 assign kx_addr = iq;
 assign ky_addr = iq;
 
-reg signed [20:0] yr=0;
+reg signed [18+shift:0] yr=0;
 wire signed [19:0] xmr, ymr;
 // x and y inputs to sub_mul are 18-bits, for efficient multiplier setup in Xilinx
 // output is 20-bits, with one lsb guard bit added, and one msb carry bit
 sub_mul xmul(.clk(clk), .iq(iq), .x(x),  .y(kx), .z(xmr));
-sub_mul ymul(.clk(clk), .iq(iq), .x(yr[20:3]), .y(ky), .z(ymr));
+sub_mul ymul(.clk(clk), .iq(iq), .x(yr[18+shift:1+shift]), .y(ky), .z(ymr));
 
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 
-reg signed [21:0] sum=0;
+reg signed [19+shift:0] sum=0;
 always @(posedge clk) begin
 	// When you peek inside sub_mul, you can see
 	// this is really a five-way summing junction.
 	sum <= xmr + ymr + yr;
-	yr <= `SAT(sum,21,20);
+	yr <= `SAT(sum,19+shift,18+shift);
 end
-assign y = yr[20:1];
+assign y = yr[18+shift:1];
 
 endmodule
 
