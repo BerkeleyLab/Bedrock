@@ -85,8 +85,7 @@ class notch_setup:
             shifts=[4, 2, 0],  # hardware config; use [2, 2] for older lp_notch.v
             freqs=[0],     # Hz filter center frequencies
             bws=[300e3],   # Hz filter bandwidths
-            targs=[1.0],   # target gain at the given frequencies
-            ):
+            targs=[1.0]):   # target gain at the given frequencies
         self.T = 2.0 / f_clk  # processing rate of IQ pairs
         self.bankn = len(freqs)
         self.hwbankn = len(shifts)
