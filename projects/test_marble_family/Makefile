@@ -154,8 +154,9 @@ marble2.bit: marble.tcl marble2.d marble2_features bit_stamp_mod
 RGMII_IP = 192.168.19.31
 BIT = marble1.bit
 
+# add the Marble serial number
 marble1_hwload:
-	openocd -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT}; exit"
+	openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT}; exit"
 
 marble1_hwtest: udprtx
 	ping -c 2 ${RGMII_IP}
