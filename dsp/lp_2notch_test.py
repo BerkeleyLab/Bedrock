@@ -35,6 +35,7 @@ class lp_setup:
         return num, ky
 
     def integers(self):
+        # XXX fix scaling issues while using historical lp_notch.v (sfit=[2,2])
         " Convert abstract setup to specific lp.v hardware register values "
         kx, ky = self.dsp()
         scale_kx = 2**21
@@ -101,8 +102,8 @@ class notch_setup:
         eq_B = numpy.array(targs)
         raw_gains = numpy.linalg.solve(eq_A, eq_B)
 
-        if abs(raw_gains[0]) > 0.99:
-            raw_gains = raw_gains * 0.99 / abs(raw_gains[0])
+        if abs(raw_gains[0]) > 0.9999:
+            raw_gains = raw_gains * 0.9999 / abs(raw_gains[0])
 
         # create new filters with the right gains
         self.filts = [lp_setup(shift=shifts[ix], pole=poles[ix], gain=raw_gains[ix]) for ix in ixs]
@@ -152,10 +153,14 @@ class notch_setup:
 
     def dict(self, base, leaves=["lp2a_", "lp2b_", "lp2c_"]):
         # XXX not exercised by test bench
-        # XXX what happens if hwbankn != bankn?
         d1 = {}
-        for ix in range(self.bankn):
-            d1.update(self.filts[ix].dict(base + leaves[ix]))
+        for ix in range(self.hwbankn):
+            bb = base + leaves[ix]
+            if ix+1 > self.bankn:
+                dd = {bb + 'kx': [0, 0], bb + 'ky': [-20000, 0]}
+            else:
+                dd = self.filts[ix].dict(bb)
+            d1.update(dd)
         return d1
 
 
