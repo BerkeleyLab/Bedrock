@@ -48,7 +48,7 @@ always @(posedge clk) y_out <= `SAT(y_sum, 22, 21);
 // Very stupid extra delay, only here to keep historical I-Q relationship.
 // XXX get rid of this!
 reg [21:0] y_del=0;
-always @(posedge clk) y_del = y_out;
+always @(posedge clk) y_del <= y_out;
 assign y = y_del[21:2];
 
 endmodule
