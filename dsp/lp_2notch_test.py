@@ -12,9 +12,11 @@ class lp_setup:
     def __init__(
             self,
             shift=2,
+            datapath=22,  # see comments in integers()
             pole=0.93,  # dimensionless Z-plane pole location
             gain=1.0):  # peak gain, complex number is OK
         self.shift = shift
+        self.datapath = datapath
         self.gain = gain
         self.pole = pole
 
@@ -38,7 +40,7 @@ class lp_setup:
         # XXX fix scaling issues while using historical lp_notch.v (sfit=[2,2])
         " Convert abstract setup to specific lp.v hardware register values "
         kx, ky = self.dsp()
-        scale_kx = 2**21
+        scale_kx = 2**(self.datapath-1)
         scale_ky = 2**(17+self.shift)
         kxr = int(scale_kx * kx.real)
         kxi = int(scale_kx * kx.imag)
@@ -57,6 +59,8 @@ class lp_setup:
         # 2**shift component in scale_ky.  What's left is effectively the
         # overall 22-bit output word-width of lp_2notch, or 2**21.  Whew.
         # Fortunately we have simulations to verify this analysis.
+        # The datapath parameter is here to allow compatibility with the older
+        # lp_notch.v, for which you should use datapath=20.
 
         mv = 2**17 - 1  # max allowed register value
         if abs(kxr) > mv or abs(kxi) > mv or abs(kyr) > mv or abs(kyi) > mv:
@@ -83,6 +87,7 @@ class notch_setup:
     def __init__(
             self,
             f_clk=1320e6 / 14.0,  # LCLS-II LLRF
+            datapath=22,
             shifts=[4, 2, 0],  # hardware config; use [2, 2] for older lp_notch.v
             freqs=[0],     # Hz filter center frequencies
             bws=[300e3],   # Hz filter bandwidths
@@ -96,7 +101,7 @@ class notch_setup:
         ixs = range(len(freqs))
         zcens = [exp(-2 * pi * 1j * freqs[ix] * self.T) for ix in ixs]
         poles = [exp(-2 * pi * (bws[ix] + 1j * freqs[ix]) * self.T) for ix in ixs]
-        filts = [lp_setup(shift=shifts[ix], pole=poles[ix], gain=1.0) for ix in ixs]
+        filts = [lp_setup(datapath=datapath, shift=shifts[ix], pole=poles[ix], gain=1.0) for ix in ixs]
         resps = [filts[ix].response(numpy.array(zcens)) for ix in ixs]
         eq_A = numpy.array(resps).transpose()
         eq_B = numpy.array(targs)
