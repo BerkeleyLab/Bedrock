@@ -76,9 +76,11 @@ class lp_setup:
         ok = all(abs(rr) < 1.0)
         return ok, rr
 
-    def dict(self, base):
+    def reg_list(self, base):
         ivals = self.integers()
-        return {base + 'kx': ivals[0], base + 'ky': ivals[1]}
+        rl = [(base + 'kx_0', ivals[0][0]), (base + 'ky_0', ivals[0][1])]
+        rl += [(base + 'ky_0', ivals[1][0]), (base + 'ky_1', ivals[1][1])]
+        return rl
 
 
 class notch_setup:
@@ -111,7 +113,7 @@ class notch_setup:
             raw_gains = raw_gains * 0.9999 / abs(raw_gains[0])
 
         # create new filters with the right gains
-        self.filts = [lp_setup(shift=shifts[ix], pole=poles[ix], gain=raw_gains[ix]) for ix in ixs]
+        self.filts = [lp_setup(datapath=datapath, shift=shifts[ix], pole=poles[ix], gain=raw_gains[ix]) for ix in ixs]
 
     def response(self, z):  # z should be dimensionless numpy array
         A = 0*z
@@ -156,16 +158,15 @@ class notch_setup:
             olist += [t]
         return olist
 
-    def dict(self, base, leaves=["lp2a_", "lp2b_", "lp2c_"]):
-        # XXX not exercised by test bench
-        d1 = {}
+    def reg_list(self, base, leaves=["lp2a_", "lp2b_", "lp2c_"]):
+        d1 = []
         for ix in range(self.hwbankn):
             bb = base + leaves[ix]
             if ix+1 > self.bankn:
-                dd = {bb + 'kx': [0, 0], bb + 'ky': [-20000, 0]}
+                dd = [(bb + 'kx_0', 0), (bb + 'kx_1', 0), (bb + 'ky_0', -20000), (bb + 'ky_1', 0)]
             else:
-                dd = self.filts[ix].dict(bb)
-            d1.update(dd)
+                dd = self.filts[ix].reg_list(bb)
+            d1 += dd
         return d1
 
 
@@ -287,7 +288,7 @@ def check_notch(bw, notch1, bw_n1, plot, notch2=None, bw_n2=0.0):
         print("values for hardware: lpa_kx lpa_ky lpb_kx lpb_ky lpc_xk lpc_ky")
         print(regs)
     else:
-        print(ns.dict("shell_0_dsp_lp_notch_"))
+        print(ns.reg_list("dsp_lp_notch_"))
 
     dth1 = -notch1 * 2 * pi * dt
     a1 = notch_run(ns, dth=dth1, force=plot)
@@ -330,15 +331,66 @@ def check_notch(bw, notch1, bw_n1, plot, notch2=None, bw_n2=0.0):
     return tests_pass
 
 
+def notch_regs(regmap={}, bw=100e3, notch=None):
+    " create register list ready to send to leep.reg_write() "
+    " assumes instance=[zone] will be part of the reg_write() call "
+    " provides compatibility with both lp_notch and lp_2notch "
+    " peeks at regmap to see which filter is instantiated "
+    shifts = [4, 2, 0]
+    freqs = [0, notch, 3e6]
+    bws = [bw, 200e3, 400e3]
+    targs = [1.0, 0.0, 0.0]
+    leaves = ["lp2a_", "lp2b_", "lp2c_"]
+    datapath = 22
+    if "shell_0_dsp_lp_notch_lp1b_kx_0" in regmap:
+        print("Using single-notch support")
+        shifts = [2, 2]
+        freqs = freqs[0:2]
+        bws = bws[0:2]
+        targs = targs[0:2]
+        leaves = ["lp1a_", "lp1b_"]
+        datapath = 20
+    elif "shell_0_dsp_lp_notch_lp2c_kx_0" in regmap:
+        print("Using double-notch support")
+    else:
+        print("Error: No filter instantiation")
+        return None
+    if notch is None:
+        print("Using low-pass only")
+        freqs = freqs[0:1]
+        bws = bws[0:1]
+        targs = targs[0:1]
+    ns_cav = notch_setup(shifts=shifts, freqs=freqs, bws=bws, targs=targs, datapath=datapath)
+    lp_notch_base = 'dsp_lp_notch_'
+    notch_reg = ns_cav.reg_list(lp_notch_base, leaves=leaves)
+
+    return notch_reg
+
+
 if __name__ == "__main__":
     import sys
     plot = len(sys.argv) > 1 and sys.argv[1] == "plot"
+    if True:
+        fake_regmap1 = {"shell_0_dsp_lp_notch_lp1b_kx_0": 0}
+        fake_regmap2 = {"shell_0_dsp_lp_notch_lp2c_kx_0": 0}
+        print("-- notch_regs test 1 --")
+        print(notch_regs())
+        print("-- notch_regs test 2 --")
+        print(notch_regs(regmap=fake_regmap1))
+        print("-- notch_regs test 3 --")
+        print(notch_regs(regmap=fake_regmap2))
+        print("-- notch_regs test 4 --")
+        print(notch_regs(regmap=fake_regmap1, notch=750e3))
+        print("-- notch_regs test 5 --")
+        print(notch_regs(regmap=fake_regmap2, notch=750e3))
     if not plot:
         me = sys.argv[0]
         print(me + " testing for regressions only; plot option is available")
     dt = 2 * 14 / 1320e6
     bw = 240e3
     # check only low pass filter
+    print("#######################")
+    print("Testing low filter only with %.1f kHz bandwidth" % (bw * 0.001))
     if True:
         offset1 = 0
         ns = notch_setup(freqs=[offset1], bws=[bw], targs=[1.0])
