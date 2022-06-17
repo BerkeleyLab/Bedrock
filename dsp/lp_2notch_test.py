@@ -78,6 +78,8 @@ class lp_setup:
 
     def reg_list(self, base):
         ivals = self.integers()
+        if ivals is None:
+            return None
         rl = [(base + 'kx_0', ivals[0][0]), (base + 'ky_0', ivals[0][1])]
         rl += [(base + 'ky_0', ivals[1][0]), (base + 'ky_1', ivals[1][1])]
         return rl
@@ -166,6 +168,8 @@ class notch_setup:
                 dd = [(bb + 'kx_0', 0), (bb + 'kx_1', 0), (bb + 'ky_0', -20000), (bb + 'ky_1', 0)]
             else:
                 dd = self.filts[ix].reg_list(bb)
+            if dd is None:
+                return None
             d1 += dd
         return d1
 
@@ -331,27 +335,29 @@ def check_notch(bw, notch1, bw_n1, plot, notch2=None, bw_n2=0.0):
     return tests_pass
 
 
-def notch_regs(regmap={}, bw=100e3, notch=None):
+def notch_regs(regmap={}, bw=100e3, notch=None, notch2=3.0e6):
     " create register list ready to send to leep.reg_write() "
     " assumes instance=[zone] will be part of the reg_write() call "
     " provides compatibility with both lp_notch and lp_2notch "
     " peeks at regmap to see which filter is instantiated "
     shifts = [4, 2, 0]
-    freqs = [0, notch, 3e6]
+    freqs = [0, notch, notch2]
     bws = [bw, 200e3, 400e3]
     targs = [1.0, 0.0, 0.0]
     leaves = ["lp2a_", "lp2b_", "lp2c_"]
     datapath = 22
-    if "shell_0_dsp_lp_notch_lp1b_kx_0" in regmap:
-        print("Using single-notch support")
-        shifts = [2, 2]
+    if "shell_0_dsp_lp_notch_lp1b_kx_0" in regmap or notch2 is None:
+        print("Disabling second notch")
         freqs = freqs[0:2]
         bws = bws[0:2]
         targs = targs[0:2]
+    if "shell_0_dsp_lp_notch_lp1b_kx_0" in regmap:
+        print("Using lp_notch config")
+        shifts = [2, 2]
         leaves = ["lp1a_", "lp1b_"]
         datapath = 20
     elif "shell_0_dsp_lp_notch_lp2c_kx_0" in regmap:
-        print("Using double-notch support")
+        print("Using lp_2notch config")
     else:
         print("Error: No filter instantiation")
         return None
@@ -363,7 +369,6 @@ def notch_regs(regmap={}, bw=100e3, notch=None):
     ns_cav = notch_setup(shifts=shifts, freqs=freqs, bws=bws, targs=targs, datapath=datapath)
     lp_notch_base = 'dsp_lp_notch_'
     notch_reg = ns_cav.reg_list(lp_notch_base, leaves=leaves)
-
     return notch_reg
 
 
@@ -383,6 +388,10 @@ if __name__ == "__main__":
         print(notch_regs(regmap=fake_regmap1, notch=750e3))
         print("-- notch_regs test 5 --")
         print(notch_regs(regmap=fake_regmap2, notch=750e3))
+        print("-- notch_regs test 6 --")
+        print(notch_regs(regmap=fake_regmap2, notch=750e3, notch2=None))
+        print("-- notch_regs test 6 --")
+        print(notch_regs(regmap=fake_regmap2, notch=750e3, notch2=9.0e6))
     if not plot:
         me = sys.argv[0]
         print(me + " testing for regressions only; plot option is available")
