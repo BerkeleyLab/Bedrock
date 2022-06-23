@@ -37,13 +37,15 @@ module chirp_driver #(
    localparam CORDIC_STAGE = 20;
 
    wire chirp_gate;
+   wire [15:0] chirp_rate_16b = CHIRP_RATE;
 
    multi_sampler #(
       .sample_period_wi(16))
    i_multi_sampler (
       .clk             (clk),
+      .reset           (1'b0),
       .ext_trig        (chirp_en), // Always enabled
-      .sample_period   (CHIRP_RATE),
+      .sample_period   (chirp_rate_16b),
       .dsample0_period (8'h0),
       .dsample1_period (8'h0),
       .dsample2_period (8'h0),
