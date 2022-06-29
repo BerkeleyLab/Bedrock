@@ -1,0 +1,41 @@
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-6.326666 118 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] slew_xarray_tb.
+[sst_width] 214
+[signals_width] 151
+[sst_expanded] 1
+[sst_vpaned_height] 152
+@420
+slew_xarray_tb.cc
+@24
+slew_xarray_tb.setm[4:0]
+slew_xarray_tb.setp[4:0]
+slew_xarray_tb.setmp[4:0]
+slew_xarray_tb.setmp_l[4:0]
+@28
+slew_xarray_tb.setmp_addr
+slew_xarray_tb.step
+slew_xarray_tb.enable
+slew_xarray_tb.motion[1:0]
+@24
+slew_xarray_tb.setm_l[4:0]
+slew_xarray_tb.setp_l[4:0]
+@28
+slew_xarray_tb.fail
+@200
+-DUT
+@24
+slew_xarray_tb.dut.setmp[4:0]
+slew_xarray_tb.dut.current[4:0]
+slew_xarray_tb.dut.prev[4:0]
+slew_xarray_tb.dut.diff[5:0]
+@28
+slew_xarray_tb.dut.match
+slew_xarray_tb.dut.dir
+slew_xarray_tb.dut.step1
+slew_xarray_tb.dut.motionm
+slew_xarray_tb.dut.motionp
+[pattern_trace] 1
+[pattern_trace] 0
