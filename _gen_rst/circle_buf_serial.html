@@ -120,79 +120,75 @@ Expect to see errors and unfinished things.</p>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>reset</p></td>
-<td><p>Input</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>sr_in[buf_dw-1:0]</p></td>
+<tr class="row-odd"><td><p>sr_in[buf_dw-1:0]</p></td>
 <td><p>Input</p></td>
 <td><p>Conveyor belt carrying n_chan channels</p></td>
 </tr>
-<tr class="row-odd"><td><p>sr_stb</p></td>
+<tr class="row-even"><td><p>sr_stb</p></td>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>chan_mask[n_chan-1:0]</p></td>
+<tr class="row-odd"><td><p>chan_mask[n_chan-1:0]</p></td>
 <td><p>Input</p></td>
 <td><p>Bitmask of channels to record. See lsb_mask parameter</p></td>
 </tr>
-<tr class="row-odd"><td><p>wave_gate</p></td>
+<tr class="row-even"><td><p>wave_gate</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>wave_dval</p></td>
+<tr class="row-odd"><td><p>wave_dval</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>wave_data[buf_dw-1:0]</p></td>
+<tr class="row-even"><td><p>wave_data[buf_dw-1:0]</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>buf_sync</p></td>
+<tr class="row-odd"><td><p>buf_sync</p></td>
 <td><p>Output</p></td>
 <td><p>single-cycle when buffer starts/ends</p></td>
 </tr>
-<tr class="row-odd"><td><p>buf_transferred</p></td>
+<tr class="row-even"><td><p>buf_transferred</p></td>
 <td><p>Output</p></td>
 <td><p>single-cycle when a buffer has been</p></td>
 </tr>
-<tr class="row-even"><td><p>buf_stop</p></td>
+<tr class="row-odd"><td><p>buf_stop</p></td>
 <td><p>Input</p></td>
 <td><p>single-cycle - interrupts cbuf writing</p></td>
 </tr>
-<tr class="row-odd"><td><p>buf_count[buf_stat_w-1:0]</p></td>
+<tr class="row-even"><td><p>buf_count[buf_stat_w-1:0]</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>buf_stat2[buf_aw-1:0]</p></td>
+<tr class="row-odd"><td><p>buf_stat2[buf_aw-1:0]</p></td>
 <td><p>Output</p></td>
 <td><p>includes fault bit</p></td>
 </tr>
-<tr class="row-odd"><td><p>buf_stat[buf_stat_w-1:0]</p></td>
+<tr class="row-even"><td><p>buf_stat[buf_stat_w-1:0]</p></td>
 <td><p>Output</p></td>
 <td><p>includes fault bit, and (if set) the last valid location</p></td>
 </tr>
-<tr class="row-even"><td><p>debug_stat[buf_aw+4:0]</p></td>
+<tr class="row-odd"><td><p>debug_stat[buf_aw+4:0]</p></td>
 <td><p>Output</p></td>
 <td><p>{stb_in, boundary, btest, wbank, rbank, wr_addr}</p></td>
 </tr>
-<tr class="row-odd"><td><p>oclk</p></td>
+<tr class="row-even"><td><p>oclk</p></td>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>stb_out</p></td>
+<tr class="row-odd"><td><p>stb_out</p></td>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>enable</p></td>
+<tr class="row-even"><td><p>enable</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>read_addr[buf_aw-1:0]</p></td>
+<tr class="row-odd"><td><p>read_addr[buf_aw-1:0]</p></td>
 <td><p>Input</p></td>
 <td><p>nominally 8192 locations</p></td>
 </tr>
-<tr class="row-odd"><td><p>d_out[buf_dw-1:0]</p></td>
+<tr class="row-even"><td><p>d_out[buf_dw-1:0]</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
@@ -232,7 +228,6 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../general-docs.html">General Docs</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../bedrock-modules.html#dsp">DSP</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="afterburner.html">afterburner</a></li>

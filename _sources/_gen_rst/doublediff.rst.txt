@@ -54,7 +54,7 @@ Ports
      - Input data
    * - g_in
      - Input
-     - A gate when set to high differentiates input data
+     - A gate when set to high differentiates input daata
    * - d_out[dw-1:0]
      - Output
      - 

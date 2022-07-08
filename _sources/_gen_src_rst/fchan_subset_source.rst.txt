@@ -18,7 +18,6 @@ fchan_subset Source File
    	parameter len      = 16
    ) (
    	input clk,
-   	input reset,
    	input [len-1:0] keep,
    	input signed [a_dw-1:0] a_data,
    	input a_gate, a_trig,
@@ -47,9 +46,7 @@ fchan_subset Source File
 
    reg [len-1:0] live=0;
    always @(posedge clk) begin
-       if (reset)
-           live <= 0;
-       else if (a_gate|a_trig) live <= a_trig ? keep_use : {live[len-2:0],1'b0};
+   	if (a_gate|a_trig) live <= a_trig ? keep_use : {live[len-2:0],1'b0};
    end
 
    assign o_data = a_data;

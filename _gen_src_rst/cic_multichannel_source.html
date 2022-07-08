@@ -66,8 +66,8 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 25</span><span class="cm">       | +-----+   +-^-+                |    |</span>
 <span class="linenos"> 26</span><span class="cm">       |             |                  |    |</span>
 <span class="linenos"> 27</span><span class="cm">       +-------------------------------------+</span>
-<span class="linenos"> 28</span><span class="cm">                     |                  |</span>
-<span class="linenos"> 29</span><span class="cm">          cic_sample +                  + cc_sample</span>
+<span class="linenos"> 28</span><span class="cm">                     |          |</span>
+<span class="linenos"> 29</span><span class="cm">          cic_sample +          + cc_sample</span>
 <span class="linenos"> 30</span><span class="cm">*/</span><span class="w"></span>
 <span class="linenos"> 31</span>
 <span class="linenos"> 32</span><span class="k">module</span><span class="w"> </span><span class="n">cic_multichannel</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
@@ -179,7 +179,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">138</span><span class="w">   </span><span class="k">assign</span><span class="w"> </span><span class="n">di_sr_out</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">sr_out_shift</span><span class="p">;</span><span class="w"></span>
 <span class="linenos">139</span>
 <span class="linenos">140</span><span class="w">   </span><span class="c1">// ------</span>
-<span class="linenos">141</span><span class="w">   </span><span class="c1">// Cascaded differentiator and post-filter</span>
+<span class="linenos">141</span><span class="w">   </span><span class="c1">// Cascaded diferentiator and post-filter</span>
 <span class="linenos">142</span><span class="w">   </span><span class="c1">// ------</span>
 <span class="linenos">143</span><span class="no">`ifdef</span><span class="w"> </span><span class="n">SIMULATE</span><span class="w"></span>
 <span class="linenos">144</span><span class="w">   </span><span class="c1">// Enforces correct parameter settings</span>
@@ -234,7 +234,6 @@ Expect to see errors and unfinished things.</p>
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../general-docs.html">General Docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a></li>
 </ul>
 

@@ -1,8 +1,0 @@
-.. _rtl_guidelines:
-
---------------
-guidelines rtl_guidelines
---------------
-
-.. mdinclude:: /home/runner/work/Bedrock/Bedrock/guidelines/rtl_guidelines.md
-
