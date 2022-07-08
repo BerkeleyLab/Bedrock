@@ -80,7 +80,7 @@ class lp_setup:
         ivals = self.integers()
         if ivals is None:
             return None
-        rl = [(base + 'kx_0', ivals[0][0]), (base + 'ky_0', ivals[0][1])]
+        rl = [(base + 'kx_0', ivals[0][0]), (base + 'kx_1', ivals[0][1])]
         rl += [(base + 'ky_0', ivals[1][0]), (base + 'ky_1', ivals[1][1])]
         return rl
 
