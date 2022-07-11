@@ -62,6 +62,9 @@ Ports
    * - clk
      - Input
      - 
+   * - reset
+     - Input
+     - 
    * - keep[len-1:0]
      - Input
      - 

@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>badger README &#8212; Bedrock  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="doc README" href="doc/README_md.html" />
+    <link rel="prev" title="General Docs" href="../../general-docs.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="badger-readme">
+<span id="readme"></span><h1>badger README<a class="headerlink" href="#badger-readme" title="Permalink to this heading">¶</a></h1>
+<section id="packet-badger">
+<h2>Packet Badger<a class="headerlink" href="#packet-badger" title="Permalink to this heading">¶</a></h2>
+<section id="introduction">
+<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h3>
+<p>Packet Badger is a digital logic design, implemented on an FPGA, that
+digs through Ethernet packets to construct a response.  Its intended
+application is to let workstations and servers communicate with FPGA-based
+instruments over UDP.  On its own, it provides ARP, ICMP echo, and UDP echo
+services.  It has a (documented and tested) interface to add additional
+UDP services that provide the application-useful data flow.</p>
+<p>Packet Badger attaches to Ethernet using the GMII standard.  Adapter layers
+inside the FPGA can let it connect to GMII, RGMII, SGMII, or MGT PHY hardware.
+Mechanisms are provided to attach a software-based simulation of Packet Badger
+to the computer’s TUN/TAP subsystem (requires root access for setup),
+or single clients to a UDP socket, permitting development of client software
+and HDL without depending on the target hardware.</p>
+<p>Packet Badger is written in portable, synthesizable Verilog.  When targeting
+Xilinx 7-series chips, it occupies about 1000 LUTs and 1 RAMB18.</p>
+<p>Packet Badger is designed to only respond promptly to packets, never initiate
+traffic.  It is tuned for plug-in modules (one per UDP service port) that can
+respond in a fixed number (parameterized) of clock cycles latency.  Examples
+are given for such modules that:</p>
+<ul class="simple">
+<li><p>Gateway to an on-chip local bus (protocol <a class="reference external" href="mem_gate.md">documentation</a>)</p></li>
+<li><p>Give read/write access to an SPI Flash memory</p></li>
+</ul>
+<p>Unlike logic designs that use a soft core to implement Ethernet/IP protocols,
+it is capable of full-rate gigabit-per-second data transfer, and has a
+relatively small footprint in the FPGA fabric and memory.</p>
+<p>This design roughly parallels an earlier LBNL Ethernet fabric design
+(PSPEPS), but with architectural bugs fixed.  If the Ethernet physical
+link stays up, it will never drop a packet.</p>
+<p>The architecture permits adding a MAC for a soft-core CPU, that could be
+useful for low-bandwidth setup functions like DHCP or SCPI.  An initial
+implementation is included.</p>
+<p>The author asserts that its architecture will permit addition of strong
+authentication to each packet, without adding (much) overhead in latency,
+throughput, or hardware resources.  Efforts to demonstrate that are still
+in a prototyping stage, and are not included here.</p>
+<p>Only synthesizable code, programs (and their data) to generate synthesizable
+code, and documentation are here in the base directory.  Files that implement
+the extensive self-test capability, including test builds for hardware, are
+squirreled away in the tests/ directory.  Projects that instantiate this
+code are expected to accomplish the build step by including rules.mk.</p>
+</section>
+<section id="block-diagram">
+<h3>Block Diagram<a class="headerlink" href="#block-diagram" title="Permalink to this heading">¶</a></h3>
+<a class="reference external image-reference" href="doc/rtefi.svg"><img alt="block diagram" src="_gen_md/badger/doc/rtefi.svg" /></a>
+</section>
+<section id="self-tests">
+<h3>Self-tests<a class="headerlink" href="#self-tests" title="Permalink to this heading">¶</a></h3>
+<p>An extensive set of self-tests and demonstrations are programmed up in
+the tests subdirectory.  These range from simple exercises for the
+input packet scanner to running a TFTP server that uses the MAC feature.
+Some of these tests attach the simulated logic to the host network.</p>
+<p>The self-tests are run as part of a Continuous Integration (CI) process.
+You can also run them on your workstation with a simple “cd tests; make”.</p>
+</section>
+<section id="functionality">
+<h3>Functionality<a class="headerlink" href="#functionality" title="Permalink to this heading">¶</a></h3>
+<p>Input packets are checked according to the following.
+Failures are not reported, just dropped.</p>
+<p>All packets:</p>
+<ul class="simple">
+<li><p>Source MAC is unicast, not multicast</p></li>
+<li><p>CRC32 OK</p></li>
+<li><p>Total GMII frame length (including Ethernet header and CRC32) &lt;= 1536</p></li>
+<li><p>Minimum frame length <em>not</em> checked</p></li>
+</ul>
+<p>ARP request:</p>
+<ul class="simple">
+<li><p>EtherType 0x0806</p></li>
+<li><p>Hardware address space 1 (Ethernet)</p></li>
+<li><p>Protocol address space 0x0800 (Ethernet/IP)</p></li>
+<li><p>6-byte hardware addresses, 4-byte protocol addresses</p></li>
+<li><p>Opcode 1 (request)</p></li>
+<li><p><em>No</em> checks on embedded source IP or MAC</p></li>
+<li><p>Dest IP matches our configuration</p></li>
+<li><p><em>No</em> checks on embedded dest MAC</p></li>
+<li><p><em>No</em> checks on Ethernet header dest MAC (normally broadcast)</p></li>
+</ul>
+<p>IP:</p>
+<ul class="simple">
+<li><p>Dest MAC matches our configuration</p></li>
+<li><p>EtherType 0x0800</p></li>
+<li><p>IPv4</p></li>
+<li><p>No options</p></li>
+<li><p>IP total length fits within its GMII frame</p></li>
+<li><p>No fragmentation</p></li>
+<li><p>Non-zero TTL</p></li>
+<li><p>IP header checksum OK</p></li>
+<li><p><em>No</em> checks on source IP address</p></li>
+<li><p>Dest IP matches our configuration</p></li>
+</ul>
+<p>ICMP echo request (depends on IP):</p>
+<ul class="simple">
+<li><p>IP Protocol 1</p></li>
+<li><p>ICMP type 8, code 0</p></li>
+<li><p>ICMP checksum OK</p></li>
+</ul>
+<p>UDP (depends on IP):</p>
+<ul class="simple">
+<li><p>IP Protocol 17</p></li>
+<li><p>Source port &gt;= 1024</p></li>
+<li><p>Dest port matches one of the clients (but not zero)</p></li>
+<li><p>Length fits within IP packet</p></li>
+<li><p>UDP checksum <em>not</em> checked</p></li>
+</ul>
+<p>If a reply is sent, it <em>always</em> has its destination MAC transcribed
+from the requesting packet’s source MAC.  Likewise, the destination IP
+is transcribed from the source IP (although this means different things
+for ARP and IP), and the UDP destination port is transcribed from the
+source port.</p>
+<p>It is strongly recommended that UDP destination port numbers get configured
+to be &lt; 1024.  Up to eight clients (UDP ports) are currently supported,
+and their default ports are numbered sequentially starting at 801.
+This can be overridden at build time with Verilog parameters, or
+at run time with a local configuration bus.</p>
+</section>
+<section id="example-live-test-run">
+<h3>Example “live” test run<a class="headerlink" href="#example-live-test-run" title="Permalink to this heading">¶</a></h3>
+<p>Demonstrating both Packet Badger functionality, and the test framework’s
+ability to attach the simulation to the host’s Ethernet subsystem.</p>
+<p>Your development machine needs to provide a traditional unix-y environment,
+e.g., make, cc, python, awk, cmp.  Also some version of <a class="reference external" href="http://iverilog.icarus.com/">Icarus Verilog</a>; see <a class="reference external" href="status.md">status.md</a> for more details.</p>
+<p>In one shell session (Linux terminal), try:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd tests
+sudo tunctl -u $USER &amp;&amp; sudo ifconfig tap0 192.168.7.1 up
+make tap_start
+</pre></div>
+</div>
+<p>In another terminal, try the following to pull contents from <code class="docutils literal notranslate"><span class="pre">fake_config_romx.v</span></code>
+through <code class="docutils literal notranslate"><span class="pre">mem_gateway.v</span></code> at IP address <code class="docutils literal notranslate"><span class="pre">192.168.7.4</span></code>, localbus UDP port 803:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">printf</span> <span class="s2">&quot;sillyoneT\x1\x0\x0yyyyT\x1\x0\x1yyyyT\x1\x0\x2yyyyT\x1\x0\x3yyyy&quot;</span> <span class="o">|</span> <span class="n">nc</span> <span class="o">-</span><span class="n">q</span> <span class="mi">1</span> <span class="o">-</span><span class="n">u</span> <span class="mf">192.168.7.4</span> <span class="mi">803</span> <span class="o">|</span> <span class="n">hexdump</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;8/1 &quot;</span><span class="si">%2.2x</span><span class="s1"> &quot; &quot;  &quot;&#39;</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;8/1 &quot;%_p&quot; &quot;</span><span class="se">\n</span><span class="s1">&quot;&#39;</span>
+</pre></div>
+</div>
+<p>Expected result:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">73</span> <span class="mi">69</span> <span class="mi">6</span><span class="n">c</span> <span class="mi">6</span><span class="n">c</span> <span class="mi">79</span> <span class="mi">6</span><span class="n">f</span> <span class="mi">6</span><span class="n">e</span> <span class="mi">65</span>  <span class="n">sillyone</span>
+<span class="mi">54</span> <span class="mi">01</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">80</span> <span class="mi">0</span><span class="n">a</span>  <span class="n">T</span><span class="o">.......</span>
+<span class="mi">54</span> <span class="mi">01</span> <span class="mi">00</span> <span class="mi">01</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">73</span> <span class="mi">34</span>  <span class="n">T</span><span class="o">.....</span><span class="n">s4</span>
+<span class="mi">54</span> <span class="mi">01</span> <span class="mi">00</span> <span class="mi">02</span> <span class="mi">00</span> <span class="mi">00</span> <span class="n">b9</span> <span class="mi">48</span>  <span class="n">T</span><span class="o">......</span><span class="n">H</span>
+<span class="mi">54</span> <span class="mi">01</span> <span class="mi">00</span> <span class="mi">03</span> <span class="mi">00</span> <span class="mi">00</span> <span class="n">d2</span> <span class="mi">76</span>  <span class="n">T</span><span class="o">......</span><span class="n">v</span>
+</pre></div>
+</div>
+<p>You can now interrupt (control-C) the simulation.  That process should
+have left behind a rtefi_pipe.vcd file that can be viewed with gtkwave;
+a pre-configured gtkwave pane can be brought up with “make rtefi_pipe_view”.</p>
+</section>
+<section id="attachment-of-clients">
+<h3>Attachment of clients:<a class="headerlink" href="#attachment-of-clients" title="Permalink to this heading">¶</a></h3>
+<a class="reference external image-reference" href="doc/clients.svg"><img alt="client interface timing diagram" src="_gen_md/badger/doc/clients.svg" /></a>
+<p>Each client handles one UDP port.
+Up to eight clients can be attached to a Packet Badger instance.</p>
+</section>
+<section id="other-documentation">
+<h3>Other documentation<a class="headerlink" href="#other-documentation" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Design notes: <a class="reference external" href="rtefi_notes.txt">rtefi_notes.txt</a></p></li>
+<li><p>Memory addressing figure: <a class="reference external" href="doc/memory.svg">memory access diagram</a></p></li>
+<li><p>Data path in construct.v: <a class="reference external" href="doc/tx_path.svg">data path diagram</a></p></li>
+<li><p>Status: <a class="reference external" href="status.md">status.md</a></p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Bedrock</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../general-docs.html">General Docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../general-docs.html#docs">Docs</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">badger README</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#packet-badger">Packet Badger</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="doc/README_md.html">doc README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mem_gate_md.html">badger mem_gate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="status_md.html">badger status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../board_support/bmb7_kintex/README_md.html">bmb7_kintex README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../board_support/zest/README_md.html">zest README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build-tools/makefile_md.html">build-tools makefile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build-tools/newad_md.html">build-tools newad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dsp/README_md.html">dsp README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fpga_family/xilinx/README_md.html">xilinx README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guidelines/CONTRIBUTING_md.html">guidelines CONTRIBUTING</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guidelines/rtl_guidelines_md.html">guidelines rtl_guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../peripheral_drivers/i2cbridge/README_md.html">i2cbridge README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../peripheral_drivers/idelay_scanner/README_md.html">idelay_scanner README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/common/README_md.html">common README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/comms_top/README_md.html">comms_top README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/oscope/bmb7_cu/README_md.html">bmb7_cu README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/oscope/marble_family/README_md.html">marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/test_marble_family/README_md.html">test_marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rtsim/README_md.html">rtsim README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../serial_io/chitchat/README_md.html">chitchat README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../serial_io/chitchat/chitchat_txrx_wrap_md.html">chitchat chitchat_txrx_wrap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/README_md.html">picorv32 README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/badger_lwip/README_md.html">badger_lwip README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/fv/README_md.html">fv README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/lb_bridge/README_md.html">lb_bridge README</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../bedrock-modules.html">Bedrock Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../../general-docs.html">General Docs</a><ul>
+      <li>Previous: <a href="../../general-docs.html" title="previous chapter">General Docs</a></li>
+      <li>Next: <a href="doc/README_md.html" title="next chapter">doc README</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, LBNL ATG.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/_gen_md/badger/README_md.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

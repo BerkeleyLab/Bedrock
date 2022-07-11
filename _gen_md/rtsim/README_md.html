@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>rtsim README &#8212; Bedrock  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="chitchat README" href="../serial_io/chitchat/README_md.html" />
+    <link rel="prev" title="test_marble_family README" href="../projects/test_marble_family/README_md.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="rtsim-readme">
+<span id="readme"></span><h1>rtsim README<a class="headerlink" href="#rtsim-readme" title="Permalink to this heading">¶</a></h1>
+<section id="full-speed-full-featured-cavity-simulation-to-exercise-llrf-controls">
+<h2>full-speed full-featured cavity simulation, to exercise LLRF controls<a class="headerlink" href="#full-speed-full-featured-cavity-simulation-to-exercise-llrf-controls" title="Permalink to this heading">¶</a></h2>
+<section id="larry-doolittle-lbnl-may-june-2014">
+<h3>Larry Doolittle, LBNL, May-June 2014<a class="headerlink" href="#larry-doolittle-lbnl-may-june-2014" title="Permalink to this heading">¶</a></h3>
+<p><em>(work-in-progress)</em></p>
+<p>This code is supposed to be approachable.  There are 885 non-blank non-comment lines of <em>Verilog</em> (and references to a few other routines in <code class="docutils literal notranslate"><span class="pre">bedrock:</span> <span class="pre">cordicg</span> <span class="pre">complex_mul</span> <span class="pre">dpram</span> <span class="pre">reg_delay</span></code>), and 286 of those lines are in test benches.  That <em>Verilog</em> also has 432 lines with comments!</p>
+<p>There are waveforms to view, and most importantly, it comes with unit tests that exercise the code under realistic conditions – see below.</p>
+<ul class="simple">
+<li><p>Summary of the hierarchy, not including test benches:</p></li>
+</ul>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">vmod1</span></code>:             Full single-cavity physics module</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">resonator</span></code>:       Mechanical eigenmode state-space propagator<code class="docutils literal notranslate"><span class="pre">outer_prod</span></code>:     Scale a data stream vector by a scalar<code class="docutils literal notranslate"><span class="pre">tt800v</span></code>:          Pseudo-random number generator<code class="docutils literal notranslate"><span class="pre">adc_em</span></code>:         ADC emulator (noise, offset, delay)<code class="docutils literal notranslate"><span class="pre">cav_elec</span></code>:      Represents the electromagnetic component of a cavity</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">pair_couple</span></code>:  Applies a pair of complex couplings to IQ data stream<code class="docutils literal notranslate"><span class="pre">ph_gacc</span></code>:      Gated phase accumulator adapted from ph_acc.v<code class="docutils literal notranslate"><span class="pre">dot_prod</span></code>:     Dot product of state vector to get freq perturbation<code class="docutils literal notranslate"><span class="pre">cic_interp</span></code>:       Want smooth changes in frequency<code class="docutils literal notranslate"><span class="pre">cav_mode</span></code>:    Represents a single cavity electromagnetic mode</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">lp_pair</span></code>:    Time-interleaved pair of low-pass filters<code class="docutils literal notranslate"><span class="pre">pair_couple</span></code>:  Applies a pair of complex couplings to an interleaved IQ data stream<code class="docutils literal notranslate"><span class="pre">cordicg</span></code>:     Bare CORDIC algorithm<code class="docutils literal notranslate"><span class="pre">complex_mul</span></code>:   Multiply two IQ streams<code class="docutils literal notranslate"><span class="pre">mag_square</span></code>: Magnitude-squared of an IQ stream</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p>You can see some of this visually in the doc directory’s <code class="docutils literal notranslate"><span class="pre">block.eps</span></code> and <code class="docutils literal notranslate"><span class="pre">block_mode.eps</span></code> (<em>xcircuit</em> files, that can be viewed with standard <em>PostScript</em> tools like <em>gv</em>).  The physical system that the Verilog attempts to model is described in <code class="docutils literal notranslate"><span class="pre">physics.tex</span></code>; convert that to PDF for viewing with “make physics.pdf”.</p>
+<section id="get-started">
+<h4>Get started<a class="headerlink" href="#get-started" title="Permalink to this heading">¶</a></h4>
+<p>Run the unit tests with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">checks</span>
+</pre></div>
+</div>
+<p>Everything should print <code class="docutils literal notranslate"><span class="pre">PASS</span></code>. Of course, this assumes you try this on a reasonable Verilog development workstation, which I define as a vanilla <em>nix platform with *Icarus Verilog</em>, <em>Octave</em>, and <em>gtkwave</em> installed.  I recommend <em>Debian Wheezy</em>, although other Linux systems and Mac OS X can also be made to work.</p>
+<p>If you then run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">cav_mode_check.py</span></code>, you’ll see a couple of plots of the emitted wave from a cavity.  Study the data file, the <em>$display</em> command in <code class="docutils literal notranslate"><span class="pre">cav_mode_tb.v</span></code> that generated it, and the curves extracted by <code class="docutils literal notranslate"><span class="pre">cav_mode_check.py</span></code>, and you should have a decent feeling for what’s going on.</p>
+<p>The nested decoding of host-writable registers is messy, as always. Note that the four configuration registers implemented in pair_couple will themselves get replicated three times: once in each of two <code class="docutils literal notranslate"><span class="pre">cav_mode</span></code> instantiations, and once more directly in <code class="docutils literal notranslate"><span class="pre">cav_elec</span></code>.</p>
+<p>A mechanical resonance (state-space) processor is shown in <code class="docutils literal notranslate"><span class="pre">resonator.v</span></code>.  The regression test exercises a single mode’s response to a step function, and a plot of that response can be seen from <em>Octave</em> by running <code class="docutils literal notranslate"><span class="pre">res_check</span></code> interactively.  This processor is instantiated in <code class="docutils literal notranslate"><span class="pre">cav_elec_tb</span></code>, but not <code class="docutils literal notranslate"><span class="pre">cav_elec</span></code>, for two reasons:</p>
+<ol class="arabic simple">
+<li><p>I don’t categorize the mechanical resonator as an electromagnetic element, and</p></li>
+<li><p>I’d like to be able to instantiate multiple <code class="docutils literal notranslate"><span class="pre">cav_elec</span></code> modules sharing a single resonator computation.</p></li>
+</ol>
+<p>That would permit simulation of a single mechanical mode connecting multiple cavities, important for considering stability of the single-source multiple-cavity architecture, and could be used to model the phenomenon of cavity fratricide seen at Jefferson Lab.  The state-space processor is also instantiated in the single-cavity <code class="docutils literal notranslate"><span class="pre">vmod1</span></code>, but that module is just a stepping stone to what’s possible with this code base.</p>
+<p>I may want to move the squaring step out of <code class="docutils literal notranslate"><span class="pre">cav_mode.v</span></code>, since it’s only used at the rate of the mechanical resonator computational engine.</p>
+<p>It can be argued that I use twice as many multipliers as necessary in <code class="docutils literal notranslate"><span class="pre">dot_prod.v</span></code> and <code class="docutils literal notranslate"><span class="pre">outer_prod.v</span></code>, since only the low-pass term of the second-order filter is of interest.  So we should be able to zero out one of two drive terms, and one of two response terms, converting to and from eigen-space. But using half a multiplier requires some breakage to the modularity of this code, and using a whole multiplier gives flexibility in confirming that everything is phased correctly.  Also, I seem to be using up fabric faster than multipliers, at least in Xilinx 7 series chips, so I shouldn’t fret excessively about multipliers.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Bedrock</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../general-docs.html">General Docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../general-docs.html#docs">Docs</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../badger/README_md.html">badger README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/doc/README_md.html">doc README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/mem_gate_md.html">badger mem_gate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/status_md.html">badger status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../board_support/bmb7_kintex/README_md.html">bmb7_kintex README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../board_support/zest/README_md.html">zest README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build-tools/makefile_md.html">build-tools makefile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build-tools/newad_md.html">build-tools newad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dsp/README_md.html">dsp README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fpga_family/xilinx/README_md.html">xilinx README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guidelines/CONTRIBUTING_md.html">guidelines CONTRIBUTING</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guidelines/rtl_guidelines_md.html">guidelines rtl_guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../peripheral_drivers/i2cbridge/README_md.html">i2cbridge README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../peripheral_drivers/idelay_scanner/README_md.html">idelay_scanner README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/common/README_md.html">common README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/comms_top/README_md.html">comms_top README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/oscope/bmb7_cu/README_md.html">bmb7_cu README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/oscope/marble_family/README_md.html">marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/test_marble_family/README_md.html">test_marble_family README</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">rtsim README</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#full-speed-full-featured-cavity-simulation-to-exercise-llrf-controls">full-speed full-featured cavity simulation, to exercise LLRF controls</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../serial_io/chitchat/README_md.html">chitchat README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../serial_io/chitchat/chitchat_txrx_wrap_md.html">chitchat chitchat_txrx_wrap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/README_md.html">picorv32 README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/badger_lwip/README_md.html">badger_lwip README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/fv/README_md.html">fv README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/lb_bridge/README_md.html">lb_bridge README</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../bedrock-modules.html">Bedrock Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../../general-docs.html">General Docs</a><ul>
+      <li>Previous: <a href="../projects/test_marble_family/README_md.html" title="previous chapter">test_marble_family README</a></li>
+      <li>Next: <a href="../serial_io/chitchat/README_md.html" title="next chapter">chitchat README</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, LBNL ATG.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/_gen_md/rtsim/README_md.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

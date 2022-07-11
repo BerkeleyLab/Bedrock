@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>chitchat chitchat_txrx_wrap &#8212; Bedrock  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="picorv32 README" href="../../soc/picorv32/README_md.html" />
+    <link rel="prev" title="chitchat README" href="README_md.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="chitchat-chitchat-txrx-wrap">
+<span id="chitchat-txrx-wrap"></span><h1>chitchat chitchat_txrx_wrap<a class="headerlink" href="#chitchat-chitchat-txrx-wrap" title="Permalink to this heading">¶</a></h1>
+<p>This document provides an extended description of the chitchat_txrx_wrap module and its ports.</p>
+<section id="clocking">
+<h2>Clocking<a class="headerlink" href="#clocking" title="Permalink to this heading">¶</a></h2>
+<p>A total of 5 independent clock domains are supported; crossing between these domains is handled
+by internal synchronizers. The user need not drive all of these independently.</p>
+<ul class="simple">
+<li><p>tx<em>clk - Clock domain used to drive user data in the tx</em>* ports.</p></li>
+<li><p>rx<em>clk - Clock domain of rx</em>* ports, on which return data is presented to the user.</p></li>
+<li><p>lb_clk - ‘Register interface’ clock domain on which status information is provided.</p></li>
+<li><p>gtx_tx_clk - Clock used for the (parallel) transmit channel of the serial transceiver.</p></li>
+<li><p>gtx_rx_clk - Clock used for the (parallel) receive channel of the serial transceiver.</p></li>
+</ul>
+</section>
+<section id="transceiver-connection">
+<h2>Transceiver connection<a class="headerlink" href="#transceiver-connection" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>gtx_tx_d - Parallel data sent to the transmit side of the serial transceiver.</p></li>
+<li><p>gtx_tx_k - Comma flag sent to the transmit side of the serial transceiver. While this</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span><span class="o">-</span><span class="n">bit</span> <span class="n">signal</span> <span class="n">can</span> <span class="n">flag</span> <span class="n">a</span> <span class="n">comma</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">lower</span> <span class="ow">and</span> <span class="n">upper</span> <span class="n">byte</span> <span class="n">of</span> <span class="n">gtx_tx_d</span><span class="p">,</span> <span class="n">only</span>
+<span class="n">the</span> <span class="n">former</span> <span class="ow">is</span> <span class="n">used</span><span class="o">.</span> <span class="n">I</span><span class="o">.</span><span class="n">e</span><span class="o">.</span><span class="p">,</span> <span class="n">gtx_tx_k</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="n">always</span> <span class="mf">0.</span>
+</pre></div>
+</div>
+</li>
+<li><p>gtx_rx_d - Incoming parallel data from the receiver side of the serial transceiver.</p></li>
+<li><p>gtx_rx_k - Incoming comma flag from the receiver side of the serial transceiver. Only</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">the</span> <span class="n">LSB</span> <span class="p">(</span><span class="n">least</span> <span class="n">significant</span> <span class="n">bit</span><span class="p">)</span> <span class="n">will</span> <span class="n">ever</span> <span class="n">be</span> <span class="n">non</span><span class="o">-</span><span class="n">zero</span><span class="o">.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="data-flow">
+<h2>Data flow<a class="headerlink" href="#data-flow" title="Permalink to this heading">¶</a></h2>
+<p>The chitchat_txrx_wrap module cannot transmit data at full-rate, as it takes several cycles
+to assemble a transmit packet and send it over the link. As a result, the input data stream
+must be presented at a low enough rate, if dropped data elements are to be avoided.</p>
+<ul>
+<li><p>tx_transmit_en - Enables data transmission. Can be held high throughout.</p></li>
+<li><p>tx_valid{0,1} - Qualifies tx_data{0,1} as valid and causes it to be latched internally and</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transmitted</span> <span class="n">on</span> <span class="n">the</span> <span class="nb">next</span> <span class="n">packet</span><span class="o">.</span>
+</pre></div>
+</div>
+</li>
+<li><p>rx_valid - Signals that valid return data is present in rx_data{0,1} and ready to be sampled</p></li>
+</ul>
+</section>
+<section id="status-debug-signals">
+<h2>Status/Debug signals<a class="headerlink" href="#status-debug-signals" title="Permalink to this heading">¶</a></h2>
+<p>All of the following qualify as status/debug signals and convey useful link information and statistics.</p>
+<ul class="simple">
+<li><p>txrx_latency</p></li>
+<li><p>rx_frame_counter</p></li>
+<li><p>rx_protocol_ver</p></li>
+<li><p>rx_gateware_type</p></li>
+<li><p>rx_location</p></li>
+<li><p>rx_rev_id</p></li>
+<li><p>ccrx_fault</p></li>
+<li><p>ccrx_fault_cnt</p></li>
+<li><p>ccrx_los</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Bedrock</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../general-docs.html">General Docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../general-docs.html#docs">Docs</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../badger/README_md.html">badger README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../badger/doc/README_md.html">doc README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../badger/mem_gate_md.html">badger mem_gate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../badger/status_md.html">badger status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../board_support/bmb7_kintex/README_md.html">bmb7_kintex README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../board_support/zest/README_md.html">zest README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../build-tools/makefile_md.html">build-tools makefile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../build-tools/newad_md.html">build-tools newad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../dsp/README_md.html">dsp README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../fpga_family/xilinx/README_md.html">xilinx README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../guidelines/CONTRIBUTING_md.html">guidelines CONTRIBUTING</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../guidelines/rtl_guidelines_md.html">guidelines rtl_guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../peripheral_drivers/i2cbridge/README_md.html">i2cbridge README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../peripheral_drivers/idelay_scanner/README_md.html">idelay_scanner README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../projects/common/README_md.html">common README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../projects/comms_top/README_md.html">comms_top README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../projects/oscope/bmb7_cu/README_md.html">bmb7_cu README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../projects/oscope/marble_family/README_md.html">marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../projects/test_marble_family/README_md.html">test_marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../rtsim/README_md.html">rtsim README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="README_md.html">chitchat README</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">chitchat chitchat_txrx_wrap</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#clocking">Clocking</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transceiver-connection">Transceiver connection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-flow">Data flow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#status-debug-signals">Status/Debug signals</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/README_md.html">picorv32 README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/test/badger_lwip/README_md.html">badger_lwip README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/test/fv/README_md.html">fv README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../soc/picorv32/test/lb_bridge/README_md.html">lb_bridge README</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bedrock-modules.html">Bedrock Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../general-docs.html">General Docs</a><ul>
+      <li>Previous: <a href="README_md.html" title="previous chapter">chitchat README</a></li>
+      <li>Next: <a href="../../soc/picorv32/README_md.html" title="next chapter">picorv32 README</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, LBNL ATG.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../_sources/_gen_md/serial_io/chitchat/chitchat_txrx_wrap_md.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

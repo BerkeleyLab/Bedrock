@@ -7,7 +7,7 @@ afterburner Source File
    :linenos:
 
    // Synthesizes to 47 slices and 1 MULT18X18 at 166 MHz in XC3Sxxx-4 using XST-9.2.04i
-   //  Use parameter triple instead of preprocesor variable AFTERBURNER_TRIPLE
+   //  Use parameter triple instead of preprocessor variable AFTERBURNER_TRIPLE
    //  User port coeff instead of parameter coeff
    // If the port coeff is set to a constant value, should synthesize identically
    // There is a latency of 3 clock cycles (??)
