@@ -335,7 +335,7 @@ def check_notch(bw, notch1, bw_n1, plot, notch2=None, bw_n2=0.0):
     return tests_pass
 
 
-def notch_regs(regmap={}, bw=100e3, notch=None, notch2=-3.0e6):
+def notch_regs(regmap={}, bw=100e3, notch=None, notch2=-3.3e6):
     " create register list ready to send to leep.reg_write() "
     " assumes instance=[zone] will be part of the reg_write() call "
     " provides compatibility with both lp_notch and lp_2notch "
