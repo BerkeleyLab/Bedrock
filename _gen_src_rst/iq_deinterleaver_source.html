@@ -52,7 +52,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">11</span><span class="k">module</span><span class="w"> </span><span class="n">iq_deinterleaver</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
 <span class="linenos">12</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">scale_wi</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mh">18</span><span class="p">,</span><span class="w"> </span><span class="c1">// Width of scale input and downscale factor</span>
 <span class="linenos">13</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">dwi</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">16</span><span class="p">,</span><span class="w"> </span><span class="c1">// Width of iq stream</span>
-<span class="linenos">14</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">davr</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">4</span><span class="p">)</span><span class="w">  </span><span class="c1">// Guard bits to keep at output of scale multiplication</span>
+<span class="linenos">14</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">davr</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="mh">4</span><span class="p">)</span><span class="w">  </span><span class="c1">// Guard bits to keep at output of scale multiplicaiton</span>
 <span class="linenos">15</span><span class="p">(</span><span class="w"></span>
 <span class="linenos">16</span><span class="w">   </span><span class="k">input</span><span class="w">                        </span><span class="n">clk</span><span class="p">,</span><span class="w"></span>
 <span class="linenos">17</span><span class="w">   </span><span class="k">input</span><span class="w">  </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">scale_wi</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">scale_in</span><span class="p">,</span><span class="w">   </span><span class="c1">// Scaling factor; scale is typically positive;</span>
@@ -123,7 +123,6 @@ Expect to see errors and unfinished things.</p>
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../general-docs.html">General Docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a></li>
 </ul>
 

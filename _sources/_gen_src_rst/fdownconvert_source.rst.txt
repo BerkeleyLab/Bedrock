@@ -15,7 +15,7 @@ fdownconvert Source File
    // Input cosd and sind are ordinary LO signals, and this module reorders them.
    // N.B.: full-scale negative is an invalid LO value.
    //
-   // Compute IQ by performing the matrix multiplication described in the paper below
+   // Compute IQ by performing the matrix muliplication described in the paper below
    // http://recycle.lbl.gov/~ldoolitt/llrf/down/reconstruct.pdf
    // Where n and n+1 are consecutive samples in time
    // | I | =  |  sin[n + 1]\theta   -sin n\theta |  X  | a_data[n]   |

@@ -10,10 +10,7 @@ Description
 |  Name: Washout (DC-reject) filter
 |  track input allows freezing DC offset.
 |  let N = 2^cut
-|  The filter has a z-plane zero at DC [1 + 0j] and 2 poles [0 + 0j], [(N-1)/N + 0j]
-|  Evaluating gain at f_s*7/33 using python3:
-|  from numpy import exp, pi; cut=4; N=2**cut; p=(N-1)/N
-|  z=exp(2j*pi*7/33); gain=(z-1)/z/(z-p); print(abs(gain))
+|  The filter has a Zero at DC [1 + 0j] and 2 poles [0 + 0j], [(N-1)/N + 0j]
 
 Pinout
 ''''''
@@ -63,10 +60,10 @@ Ports
      - timespec 8.0 ns
    * - rst
      - Input
-     - active high, resets internal DC offset to zero
+     - 
    * - track
      - Input
-     - high for normal operation
+     - 
    * - a_data[a_dw-1:0]
      - Input
      - Raw ADC samples
@@ -75,7 +72,7 @@ Ports
      - 
    * - o_data[o_dw-1:0]
      - Output
-     - Output data
+     - 
    * - o_gate
      - Output
      - 

@@ -1,8 +1,0 @@
-.. _newad:
-
------
-build-tools newad
------
-
-.. mdinclude:: /home/runner/work/Bedrock/Bedrock/build-tools/newad.md
-
