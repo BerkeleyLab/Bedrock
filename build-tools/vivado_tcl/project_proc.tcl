@@ -123,7 +123,12 @@ proc project_add_files {project_files} {
     remove_files -fileset sources_1 -quiet $ip_tcl_src
 
     # prevent tools from compiling verilog headers
-    set_property file_type {Verilog Header} [get_files *.vh]
+    set verilog_header_src [get_files *.vh]
+    if {! [string match "" $verilog_header_src]} {
+        foreach verilog_header $verilog_header_src {
+            set_property file_type {Verilog Header} [get_files $verilog_header]
+        }
+    }
 
     set imp_xdc_src [get_files *_imp.xdc]
     if {! [string match "" $ip_tcl_src]} {
