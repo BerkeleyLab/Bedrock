@@ -20,4 +20,20 @@ if {![info exists ip_vendor]} {
 
 ip_properties $ip_name $ip_version $ip_vendor
 
+# list of dicts containing:
+#
+# bus_name
+# bus_type
+# mode
+# list(port_maps)
+#
+# add to IP
+if {[info exists ip_bus]} {
+    dict for {id info} $ip_bus {
+        dict with info {
+            add_bus $id $bus_type $mode $port_maps
+        }
+    }
+}
+
 ipx::save_core [ipx::current_core]
