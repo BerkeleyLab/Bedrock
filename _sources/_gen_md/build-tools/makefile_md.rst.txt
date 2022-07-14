@@ -1,0 +1,8 @@
+.. _makefile:
+
+--------
+build-tools makefile
+--------
+
+.. mdinclude:: /home/runner/work/Bedrock/Bedrock/build-tools/makefile.md
+
