@@ -43,6 +43,7 @@ module phs_avg #(
 	output signed [dwi+1:0] z
 );
 localparam dwj = 16;  // coefficient width (hard-coded due to limitations in newad)
+localparam intg_scale = 13;  // integrator width
 assign kx_addr = iq;
 assign ky_addr = iq;
 
@@ -61,7 +62,7 @@ wire signed [dwi+5:0] ymr = prod_y[(dwi+dwj)-2:dwj-7];
 
 reg signed [dwi+6:0] sum = 0, sum1 = 0;
 reg signed [dwi+7:0] sum_f = 0;
-reg signed [dwi+7:0] intg = 0;
+reg signed [dwi+intg_scale:0] intg = 0;
 always @(posedge clk) begin
         sum <= xmr + ymr;
         sum1 <= sum;
@@ -70,6 +71,6 @@ always @(posedge clk) begin
         else intg <= (sum_f >>> 1) + intg; // Integrator
 end
 assign sum_filt = sum_f;
-assign z = intg[dwi+6:5];
+assign z = intg[dwi+intg_scale:intg_scale-1];
 
 endmodule
