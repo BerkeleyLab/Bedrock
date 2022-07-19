@@ -43,7 +43,7 @@ module phs_avg #(
 	output signed [dwi+1:0] z
 );
 localparam dwj = 16;  // coefficient width (hard-coded due to limitations in newad)
-localparam intg_scale = 13;  // integrator width
+localparam intg_scale = 11;  // integrator width
 assign kx_addr = iq;
 assign ky_addr = iq;
 
