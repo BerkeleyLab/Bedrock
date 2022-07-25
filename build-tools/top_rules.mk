@@ -55,8 +55,7 @@ FMC_MAP = awk -F\" 'NR==FNR{a[$$2]=$$4;next}$$4 in a{printf "NET %-15s LOC = %-4
 XDC_MAP = awk -F"[ \"\t]+" 'NR==FNR{gsub(/]/,"",$$8);a[$$8]=$$4;next}($$3 in a){printf "set_property -dict \"PACKAGE_PIN %-4s IOSTANDARD %s\" [get_ports %s]\n",a[$$3], $$4, $$2}'
 ISE_SYNTH = bash $(BUILD_DIR)/xil_syn
 VIVADO_CMD = vivado -mode batch -nojou -nolog
-VIVADO_SYNTH_EXTRA_TCL ?=
-VIVADO_SYNTH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(VIVADO_SYNTH_EXTRA_TCL) $(BUILD_DIR)/vivado_tcl/vivado_project.tcl -tclargs
+VIVADO_SYNTH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(BUILD_DIR)/vivado_tcl/vivado_project.tcl -tclargs
 VIVADO_REMOTE_SYNTH = $(VIVADO_SYNTH)
 # SYNTH_OPT = -DMEM_SIZE=16384
 PLANAHEAD_SYNTH = planAhead -mode batch -nojou -nolog -source $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(BUILD_DIR)/vivado_tcl/planahead_project.tcl -tclargs
