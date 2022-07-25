@@ -78,7 +78,7 @@ phase_diff Source File
    		vernier_freq <= ph_sum - ph_sum_old;
    	end
    end
-   assign locked = ~err_r;  // no fancy clock domain crossing
+   assign locked = ~err_r;  // no fancy clock daomain crossing
 
    // Periodically pass the result to rclk domain
    wire din_stb = &cnt[4:0] && locked;

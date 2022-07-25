@@ -1,8 +1,0 @@
-.. _chitchat_txrx_wrap:
-
-------------------
-chitchat chitchat_txrx_wrap
-------------------
-
-.. mdinclude:: /home/runner/work/Bedrock/Bedrock/serial_io/chitchat/chitchat_txrx_wrap.md
-
