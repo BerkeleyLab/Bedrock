@@ -31,7 +31,7 @@
 // (cavity electrical mode frequency shifts).
 
 // The size and speed of this module is such that it might be able to
-// handle simulation of a whole croymodule at once (8 cavities) in the
+// handle simulation of a whole cryomodule at once (8 cavities) in the
 // XC7A200T of an AC701 board.
 module resonator(
 	input clk,

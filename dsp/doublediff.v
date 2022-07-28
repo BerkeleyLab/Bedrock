@@ -3,7 +3,7 @@
 module doublediff(
 	input clk,
 	input [dw-1:0] d_in, // Input data
-	input g_in, // A gate when set to high differentiates input daata
+	input g_in, // A gate when set to high differentiates input data
 	output [dw-1:0] d_out,
 	output g_out
 );

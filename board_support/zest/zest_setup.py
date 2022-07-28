@@ -1,6 +1,9 @@
 import struct
 import sys
 import time
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../projects/common"))
 
 from llspi_lmk01801 import c_llspi_lmk01801
 from llspi_ad9653 import c_llspi_ad9653
@@ -107,7 +110,7 @@ class c_zest:
         print('clkout3 Frequency %.3f MHz' % self._freq_get_convert("frequency_clkout3"))
         print('DCO Frequency     %.3f MHz' % self._freq_get_convert("frequency_dco"))
 
-    def hardware_reset(self):
+    def hardware_reset(self, injector=False):
         print("Entering hardware_reset")
         aok = self.digitizer_spi_init(dac_nm_mode=self.dac_nm_mode)
         if not aok:
@@ -394,29 +397,28 @@ class c_zest:
             # Check this if running on sliderule.dhcp with 377MHz input clock
             self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
                 RESET='0',
-                CLKin0_DIV="010",
-                CLKin1_DIV="000",
+                CLKin0_DIV="010",  # div-by-2
+                CLKin1_DIV="000",  # div-by-8
                 CLKin1_MUX="01",
                 CLKin0_MUX="01"))
         else:
             self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
                 RESET='0',
-                CLKin0_DIV="111",
-                CLKin1_DIV="000",
+                CLKin0_DIV="111",  # div-by-7
+                CLKin1_DIV="000",  # div-by-8
                 CLKin1_MUX="01",
                 CLKin0_MUX="01"))
-        # , CLKout4_7_PD='1', CLKout0_3_PD='0'))#, CLKin0_DIV='011'))
         self.spi_write(self.lmk_spi, 1, self.lmk_spi.R1(
-            CLKout7_TYPE="0000",  # Powerdown
-            CLKout4_TYPE="0000",  # Powerdown
-            CLKout2_TYPE="001"))  # LVCMOS
+            CLKout7_TYPE="0000",   # Powerdown  unused
+            CLKout4_TYPE="0000",   # Powerdown  P2-H4,H5 LMK_CLKout4_{P,N}
+            CLKout2_TYPE="001"))   # LVDS  J13 test point
         self.spi_write(self.lmk_spi, 2, self.lmk_spi.R2(
-            CLKout13_TYPE="0000",  # Powerdown
-            CLKout12_TYPE="0000",  # Powerdown
-            CLKout11_TYPE="0110",  # CMOS J24 test point
-            CLKout10_TYPE="0001",  # LVDS J20
-            CLKout9_TYPE="0000",   # Powerdown
-            CLKout8_TYPE="0000"))  # Powerdown
+            CLKout13_TYPE="0000",  # Powerdown  unused
+            CLKout12_TYPE="0000",  # Powerdown  unused
+            CLKout11_TYPE="0110",  # CMOS  J24 test point
+            CLKout10_TYPE="0001",  # LVDS  J20 SMA
+            CLKout9_TYPE="0000",   # Powerdown  unused
+            CLKout8_TYPE="0000"))  # Powerdown  unused
         sys.stdout.write("done\n")
         sys.stdout.flush()
         time.sleep(0.3)
@@ -854,7 +856,7 @@ class c_zest:
             sys.stdout.flush()
         return cntlist
 
-    def pntest2(self, quiet=False):
+    def pntest2(self, quiet=False, slow_chain=True):
         # first check the configuration to see if banyan_mem is in this FPGA build
         b_status = self.leep.reg_read(["banyan_status"])[0]
         npt = 1 << ((b_status >> 24) & 0x3f)
@@ -869,7 +871,8 @@ class c_zest:
         self.adc_twos_comp(twoscomp=False)
         self.leep.reg_write([('banyan_mask', 0xff)])
         from get_raw_adcs import collect
-        (dataset, timestamp) = collect(self.leep, npt, print_minmax=False, allow_clk_frozen=True)
+        (dataset, timestamp) = collect(self.leep, npt, print_minmax=False,
+                                       allow_clk_frozen=True, slow_chain=slow_chain)
         cntlist = []
         for chan in range(8):
             if not quiet:

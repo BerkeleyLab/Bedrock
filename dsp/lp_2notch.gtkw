@@ -1,0 +1,34 @@
+[timestart] 63
+[size] 1000 600
+[pos] 2371 117
+*-5.000000 165 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] lp_2notch_tb.
+[sst_width] 214
+[signals_width] 118
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+lp_2notch_tb.clk
+lp_2notch_tb.iq
+@24
+lp_2notch_tb.dds
+@420
+lp_2notch_tb.sint[17:0]
+lp_2notch_tb.cost[17:0]
+lp_2notch_tb.x[17:0]
+lp_2notch_tb.x_i[17:0]
+lp_2notch_tb.x_q[17:0]
+lp_2notch_tb.y[21:0]
+lp_2notch_tb.y_i[17:0]
+lp_2notch_tb.y_q[17:0]
+@200
+-
+@420
+lp_2notch_tb.dut.y1[21:0]
+lp_2notch_tb.dut.y2[19:0]
+lp_2notch_tb.dut.y3[17:0]
+lp_2notch_tb.dut.y_sum[22:0]
+lp_2notch_tb.dut.y_out[21:0]
+lp_2notch_tb.dut.y_del[21:0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -70,7 +70,7 @@ always @(posedge clk) begin
 		rd_addr <= rd_addr + 1;
 
 		// we need to look one cycle into the future to compensate the 2 cycle
-		// latency of the xilinx block-ram
+		// latency of the Xilinx block-ram
 		read <= mem[rd_addr_next_];
 	end
 end
@@ -87,7 +87,7 @@ reg f_past_valid = 0;
 (* anyconst *) reg [aw: 0] f_first_addr;
 wire [aw:0] f_second_addr = f_first_addr + 1;
 
-// adress pointers are circular. read_pointer is index0 of FIFO
+// address pointers are circular. read_pointer is index0 of FIFO
 // If these are < fill the addresses are valid
 wire [aw: 0] f_first_dist = f_first_addr - rd_addr;
 wire [aw: 0] f_second_dist = f_second_addr - rd_addr;
@@ -103,7 +103,7 @@ always @(posedge clk) begin
 	f_past_valid <= 1;
 
 	// FIFO sequence
-	// Follow up the FIFO state transistions as 2 values enter and leave it
+	// Follow up the FIFO state transitions as 2 values enter and leave it
 	// Need to do it for 2 values to verify the correct order
 	case (f_state)
 		0: begin  // IDLE state
@@ -166,7 +166,7 @@ always @(posedge clk) begin
 	// cover(f_past_valid && $past(f_state) == 3 && f_state == 0);
 end
 
-// cover mode: Fill up the fIFO and empty it again
+// cover mode: Fill up the FIFO and empty it again
 reg f_was_full = 0;
 reg f_both = 0; // show what happens when both are high
 always @(posedge clk) begin

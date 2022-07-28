@@ -30,8 +30,8 @@ FPGAs sitting on various boards that talk various platforms
 A few comments regarding the codebase
 
 1. All software is set up to easily run on *nix systems.
-2. Currently everything is built using GNU Make. We are on an active lookout for
-other methods.
+2. Currently everything is [built using GNU Make](build-tools/makefile.md).
+We are on an active lookout for other methods, if they're actually better for us.
 3. iverilog is used for simulation. We are slowly starting to use [Verilator](https://www.veripool.org/wiki/verilator) as well
 (see badger)
 4. Xilinx tools are used for synthesis, and starting to support [YoSys](http://www.clifford.at/yosys/) (again see badger)
@@ -39,6 +39,39 @@ other methods.
 automatically upon every commit on the continuous integration server. This helps
 us move faster (without breaking things)
 
+
+Graphical x Batch mode
+======================
+
+Bedrock is structured in such a way to make use of traditional *nix
+tools, suck as `make` and `grep`, bash-like and python scripts from the
+command-line. This makes it easy to automate the build process, customize
+steps and gives flexibility to add hooks for generating code, stubs,
+definitions and much more.
+
+However, there are valid cases for using a graphical, interactive
+interface such as: analyzing eleborated, synthesized or implemented
+design schematic; adding/removing placement constraints;
+customizing a block design; customizing an IP core from a vendor.
+
+Bedrock keeps all the vendor-specific generated files in a _<VENDOR_NAME>
+directory in the synthesis directory. So, for instance, when synthesizing
+a design for `Xilinx`, Bedrock scripts will create a directory called
+`_xilinx` with the unmodified vendor files within.
+
+In this way, after the vendor project file is created (see the [build-tools discussion](build-tools/makefile.md) for details), one can simply invoke the
+vendor tool manually with the project file name as the argument.
+
+For instance, if using Vivado, one can use the following command
+to open a project in Graphical mode:
+
+```bash
+vivado <PROJECT_DIRECTORY>/_xilinx/<TOP_LEVEL_DESIGN_NAME>/<TOP_LEVEL_DESIGN_NAME>.xpr
+```
+
+in which `<PROJECT_DIRECTORY>` is the direcotry in which you invoked
+`make` and `<TOP_LEVEL_DESIGN_NAME>` is the bitstream name without the
+`.bit` extension.
 
 Dependencies
 ============

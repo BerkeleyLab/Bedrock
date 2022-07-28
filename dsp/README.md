@@ -7,7 +7,7 @@ down-conversion to get rid of the sum frequency, in our case, is nothing but an 
 
 The detailed description of the mathematics behind it is written in a note by Larry Doolittle [here](http://recycle.lbl.gov/~ldoolitt/llrf/down/reconstruct.pdf).
 
-Source code in [fdownconvert.v](https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/master/dsp/fdownconvert.v). The jist is as follows:
+Source code in [fdownconvert.v](https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/master/dsp/fdownconvert.v). The gist is as follows:
 
 1. Mix an Intermediate Frequency generated from a [DDS](https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/master/dsp/rot_dds.v) (DDS here comes from a [CORDIC](https://gitlab.lbl.gov/hdl-libraries/bedrock/blob/master/cordic)).
 2. Perform the matrix computation to extract I and Q.

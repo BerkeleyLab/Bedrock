@@ -6,8 +6,8 @@ import hashlib
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../projects/common/", "leep"))
-from raw import LEEPDevice
+sys.path.append(os.path.join(os.path.dirname(__file__), "../projects/common"))
+import leep
 
 
 def chunk(li, flag=1):
@@ -39,12 +39,17 @@ def compress_file(fname):
     return sha.hexdigest(), sixteen(file_zip)
 
 
-def create_array(descrip, json_file):
-    try:
-        git_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
-    except subprocess.CalledProcessError:
-        print("Warning: no git info found, filling in with zeros")
-        git_sha = 40*"0"
+def create_array(descrip, json_file, placeholder_rev=False):
+    if placeholder_rev:
+        # output of sha1sum < /dev/null
+        # sure hope this doesn't collide with an actual commit ID
+        git_sha = "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+    else:
+        try:
+            git_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+        except subprocess.CalledProcessError:
+            print("Warning: no git info found, filling in with zeros")
+            git_sha = 40*"0"
     git_binary = [int(git_sha[ix * 4 + 0:ix * 4 + 4], 16) for ix in range(10)]
     sha1sum, regmap = compress_file(json_file)
     json_sha1_binary = [
@@ -130,7 +135,7 @@ def opt_bus_width(entries, min_rom_size, max_rom_size):
 
 
 def read_live_array(dev):
-    leep_dev = LEEPDevice(addr=dev, timeout=20)
+    leep_dev = leep.open(addr=dev, timeout=20)
     foo = leep_dev.the_rom
     return foo
 
@@ -197,6 +202,12 @@ if __name__ == "__main__":
         dest='mod_suffix',
         help='Suffix for Verilog module name',
         default='')
+    parser.add_argument(
+        '--placeholder_rev',
+        help='Use placeholder instead of git commit ID',
+        dest='placeholder_rev',
+        action='store_true',
+        default=False)
     args = parser.parse_args()
     if args.live:
         dev = str(args.ip) + ':' + str(args.port)
@@ -212,7 +223,7 @@ if __name__ == "__main__":
 
         dev_desc = args.dev_descript.encode('utf-8')
         desc_limit_check(dev_desc)
-        a = create_array(dev_desc, args.json)
+        a = create_array(dev_desc, args.json, placeholder_rev=args.placeholder_rev)
         if args.loopback:
             r = decode_array(a)
             for rr in r:

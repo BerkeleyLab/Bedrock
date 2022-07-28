@@ -27,7 +27,7 @@ jobs:
 
       - name: Install python PIP packages
         run: |
-          python -m pip install sphinx numpy
+          python -m pip install sphinx numpy m2r2
 
       - name: Install documentation tools
         run: |

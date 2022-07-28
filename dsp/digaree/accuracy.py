@@ -10,6 +10,7 @@ def close(a, b):
     if a < 0:
         a = -a
         b = -b
+    # _srf2 needs return a > b*0.999-0.0015 and a < b*1.001+.0015
     return a > b*0.999-0.00015 and a < b*1.001+.00015
 
 
@@ -45,7 +46,7 @@ for line in fdata.split('\n'):
     do_trace_line(line)
 
 # helpful header
-print("  Results from run   ||   Prediction from setup phase")
+print("  Results from run    ||   Prediction from setup phase")
 
 # read init.dat, print output as we go
 xfile = open('init.dat')

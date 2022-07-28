@@ -1,5 +1,5 @@
 /* F(eed)F(orward) Pulser
-   Fixed-function feedfoward driver that coherently pulses a pair
+   Fixed-function feedforward driver that coherently pulses a pair
    of setpoints, e.g., magnitude+phase or I+Q.
    Pulse settings are runtime-configurable but triggering options are
    deliberately left out and left to the instantiation site.

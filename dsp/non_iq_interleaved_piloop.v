@@ -27,7 +27,7 @@
 //  3. Else: Rail the signal
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 
-// TODO: Potentially parametrize input and output signal widths
+// TODO: Potentially parameterize input and output signal widths
 //     : Rename Ref_i/q to Setpoint_i/q
 module non_iq_interleaved_piloop (
 	// Everything here is in one clock domain, matches ADC

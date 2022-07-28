@@ -5,7 +5,7 @@ module i2c_chunk_tb;
 reg clk;
 integer cc, ix, worked=0, file2;
 reg [255:0] file2_name;
-reg [7:0] td;  // scractch copy of trace data
+reg [7:0] td;  // scratch copy of trace data
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("i2c_chunk.vcd");

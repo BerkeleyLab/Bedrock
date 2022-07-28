@@ -1,12 +1,13 @@
 import time
 import struct
-from banyan_ch_find import banyan_ch_find
 import numpy
 import datetime
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../submodules/FEED/src/python"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../dsp"))
+
+from banyan_ch_find import banyan_ch_find
 
 # Grab the start time early, so things like
 # python get_raw_adcs.py | tee `date "+%Y%m%d_%H%M%S"`.log
@@ -71,6 +72,19 @@ def get_raw_adcs_run(dev, filewritepath='raw_adcs_', mask="0xff", npt_wish=0, co
             numpy.savetxt(filename, nblock, fmt="%d", header=header)
     return header, filename, block
 
+    # print 'try this'
+    # print process_adcs(dev,npt,mask_int)#,block,timestamp);
+
+
+def pair_ram(buff, idx, count):
+
+    buff_slice = buff[idx:idx+count]
+
+    # break 32-bit elements into 16-bit raw ADC samples
+    ram1 = [(x >> 16) & 0xffff for x in buff_slice]
+    ram2 = [x & 0xffff for x in buff_slice]
+    return [ram2, ram1]
+
 
 def pair_ram_prc(prc, addr, count):
     foo = prc.reg_read_alist(range(addr, addr+count))
@@ -98,9 +112,14 @@ def gen_test_data(npt):
     return numpy.hstack([numpy.ones(npt).astype(numpy.int32) * (i+1) for i in range(8)])
 
 
-def collect(dev, npt, print_minmax=True, allow_clk_frozen=False):
+def collect(dev, npt, print_minmax=True, allow_clk_frozen=False, slow_chain=True):
     dev.reg_write([('rawadc_trig', 1)])
-    timestamp, minmax = slow_chain_readout(dev)
+
+    if slow_chain:
+        timestamp, minmax = slow_chain_readout(dev)
+    else:
+        timestamp, minmax = (0, 16*[0])
+
     if print_minmax:
         print(" ".join(["%d" % x for x in minmax]), "%.8f" % (timestamp*14/1320.0e6))
     while True:
@@ -122,8 +141,10 @@ def collect(dev, npt, print_minmax=True, allow_clk_frozen=False):
     # TODO: The I/O call here takes twice as long, as leep/raw.py is not aware of the banyan, dual
     #       read option. The old collect_prc takes advantage of that but not leep.
     full_buffer, = dev.reg_read([('banyan_data')])
-    # full_buffer = gen_test_data(npt)  # For debugging
-    return reshape_buffer(full_buffer, astep, npt), timestamp
+    value = []
+    for ix in range(0, 8, 2):
+        value.extend(pair_ram(full_buffer, ix*astep, npt))
+    return value, timestamp
 
 
 def collect_prc(prc, npt, print_minmax=True, allow_clk_frozen=False):
@@ -150,7 +171,7 @@ def collect_prc(prc, npt, print_minmax=True, allow_clk_frozen=False):
     value = []
     for ix in range(0, 8, 2):
         value.extend(pair_ram_prc(prc, addr_wave0+ix*astep, npt))
-    return (value, timestamp)
+    return value, timestamp
 
 
 def collect_adcs(dev, npt, nchans, print_minmax=True):
@@ -163,9 +184,13 @@ def collect_adcs(dev, npt, nchans, print_minmax=True):
     mult = 8//nchans
     block = []
     for ix in range(nchans):
-        ch_data = value[ix*mult:(ix+1)*mult].reshape(mult*npt)
-        block.append(ch_data)
-    return block, timestamp
+        aaa = [value[jx] for jx in range(int(ix*mult), int(ix*mult+mult))]
+        block.append(sum(aaa, []))
+    block2 = []
+    for bx in block:
+        bx2 = [x if x < 32768 else x-65536 for x in bx]
+        block2.append(bx2)
+    return block2, timestamp
 
 
 def process_adcs(dev, npt, mask_int):  # ,block,timestamp):
@@ -192,7 +217,7 @@ def slow_chain_unpack(readlist):
     nums = [x if x < 32768 else x-65536 for x in nums]
     timestamp = 0
     for ix in range(8):
-        timestamp = timestamp*256 + readlist[41-ix]
+        timestamp = timestamp*256 + int(readlist[41-ix])
     timestamp = timestamp/32  # integer number of 1320/14 MHz adc_clk cycles
     # ignore old_tag and new_tag for now
     return (timestamp, nums)  # nums is 16-long list of minmax values

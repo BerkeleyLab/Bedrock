@@ -104,9 +104,10 @@ a git commit ID (or similar) instead.
 
 PDF and object files often take extra effort to make reproducible.
 
-FPGA bitfiles are not typically shown to be reproducible, but it would
-be great if that can change.
-
+FPGA bitfiles are not typically shown to be reproducible, but Xilinx
+[acknowledges](https://support.xilinx.com/s/article/61599) that is a
+reasonable goal (they call it "repeatable").
+Our toolchain has demonstrated this working in at least couple of cases.
 
 ## Readability
 
@@ -220,7 +221,7 @@ strongly pipelined logic.
 ### Coding and style guidelines
 
 In addition to the general recommendations above, we strive for a uniform
-Verilog coding style that emphasizes readibility, reduces systematic errors and promotes
+Verilog coding style that emphasizes readability, reduces systematic errors and promotes
 code re-use. The [RTL Guidelines](rtl_guidelines.md) document, which is itself
 open to improvements and suggestions, attempts to formalize this process in the
 form of coding and style guidelines that apply to some of the most common facets of RTL coding.

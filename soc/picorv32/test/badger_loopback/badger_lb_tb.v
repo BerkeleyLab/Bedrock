@@ -1,5 +1,5 @@
 // Loopback test. Connect Ethernet out to input.
-// C-program generates test-data ethernet payload, sends it through the badger.h API,
+// C-program generates test-data Ethernet payload, sends it through the badger.h API,
 // immediately receives it back and check if the data is as expected.
 `timescale 1 ns / 1 ns
 

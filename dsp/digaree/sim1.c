@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>  /* memcmp */
 #include <string.h>  /* strdup */
 #include <stdlib.h>  /* exit */
 #ifndef M_PI
@@ -11,6 +12,7 @@
 #define SCE (1<<EXTRA)
 #define VMAX (1<<(PW-1+EXTRA))
 #define MUL_SHF (PW + EXTRA - MW)
+#define GIVEN_LEN (DATA_LEN+CONSTS_LEN)
 
 // The intent here is to be a bit-accurate representation
 // of the processing done on the FPGA.
@@ -26,11 +28,11 @@ int verbose = 1;
 // Valid shift values are 0, 1, 2, and 3.
 static int shifter(int a, int shift, const char *label)
 {
-	if (TRACE) printf("shifter in  %d (%+8.5f)\n", a, F(a));
-	a = a>>(3-shift);
-	if (a> (VMAX-1)) a=  VMAX-1;
-	if (a< (-VMAX )) a= -VMAX;
-	if (VERBOSE) printf("%s result %9d (%+8.5f)\n", label, a, F(a));
+	if (TRACE) printf("shifter in  %d (%+9.6f)\n", a, F(a));
+	a = a >> (3-shift);
+	if (a > (VMAX-1)) a =  VMAX-1;
+	if (a < (-VMAX )) a = -VMAX;
+	if (VERBOSE) printf("%s result %9d (%+9.6f)\n", label, a, F(a));
 	return a;
 }
 
@@ -38,7 +40,7 @@ static int mul(int a, int b, int shift)
 {
 	long long r = (long long)(a>>MUL_SHF)*(long long)(b>>MUL_SHF);
 	if (TRACE) printf("multiply %lld = %d * %d\n", r, a, b);
-	return shifter(r>>(2*MW-22-EXTRA), shift, "mul");
+	return shifter(r>>(2*MW-PW-2*EXTRA), shift, "mul");
 }
 
 static int add(int a, int b, int shift)
@@ -60,7 +62,7 @@ static int inv(int a, int shift)
 	// Lots of ugly special cases
 	const unsigned int iscale = 8;
 	unsigned int u = (a<0) ? -a : a;
-	u = u >> (18+EXTRA-2-iscale);
+	u = u >> (PW+EXTRA-2-iscale);
 	unsigned int u0 = u;  // almost just for printing
 	unsigned int ur;
 	for (ur = 512; u>3; ur = ur >> 1) u = u >> 1;
@@ -71,7 +73,7 @@ static int inv(int a, int shift)
 	if (u0==0) ur=1023;
 	// printf("LUT in %d out %d\n", u0, ur);
 	int r = (a<0) ? -ur : ur;
-	r = r << (18+4+EXTRA-3-iscale);
+	r = r << (PW+4+EXTRA-3-iscale);
 	if (TRACE) printf("inv %d (%.5f) [%u] %d (%.5f)\n", a, F(a), u, r, F(r));
 	return shifter(r, shift, "inv");
 }
@@ -124,7 +126,7 @@ unsigned persist_count = 0;
 static int persist_get(const char *name)
 {
 	for (unsigned u=0; u<persist_count; u++) {
-		if (strcmp(name, persist_list[u].name) == 0) {
+		if (0 == strcmp(name, persist_list[u].name)) {
 			return persist_list[u].value;
 		}
 	}
@@ -204,12 +206,17 @@ static int invsqrtcheck(void)
 	return fail;
 }
 
+/* Special for run2.dat */
 static void file_loop(const char *fname, int given[], unsigned given_size)
 {
 	char iline[80];
 	FILE *file2 = fopen(fname, "r");
 	long int r[8];
 	const int fs = 64;  // Input file is 16 bits, simulator is 22 bits
+	if (file2 == NULL) {
+		perror("fopen");
+		return;
+	}
 	while (fgets(iline, sizeof(iline), file2)) {
 		// printf("%s", iline);
 		char *ss = iline;
@@ -222,22 +229,96 @@ static void file_loop(const char *fname, int given[], unsigned given_size)
 		given[2] = r[4]*fs;  given[3] = r[5]*fs;  // reverse
 		given[4] = r[6]*fs;  given[5] = r[7]*fs;  // cavity
 		for (unsigned u=0; u<given_size; u++) {
-			printf("%3u: given %9d (%+8.5f)\n", u, given[u], (double)given[u]/(double)VMAX);
+			printf("%3u: given %9d (%+9.6f)\n", u, given[u], (double)given[u]/(double)VMAX);
 		}
 		cycle(given);
 	}
 }
 
+/* Special for output of dtracex.py */
+static int replay(const char *filename)
+{
+	char iline[140];
+	FILE *fd = fopen(filename, "r");
+	if (fd == NULL) {
+		perror("fopen");
+		return 1;
+	}
+	int given[16];
+	unsigned given_size=0;
+	unsigned acq_len=0;
+	int mask[128];
+	while (fgets(iline, sizeof(iline), fd)) {
+		size_t iline_len = strlen(iline);
+		if (iline_len > 0 && iline[iline_len-1] == '\n') iline[iline_len-1] = 0;
+		// printf("%s", iline);
+		unsigned int row;
+		int val;
+		if (0 == memcmp(iline, "digaree constants ", 18)) {
+			// digaree constants 19330 1934 2368 32768 0 0 0 0
+			unsigned jx=DATA_LEN;
+			char *p1 = iline + 18;
+			do {
+				long v = strtol(p1, &p1, 10) * SCE;
+				printf("given[%u] = %ld\n", jx, v);
+				given[jx++] = v;
+			} while (jx<GIVEN_LEN && p1 != NULL);
+			given_size = jx;
+			if (given_size != GIVEN_LEN) {
+				printf("argh\n");
+				return 1;
+			}
+		} else if (0 == memcmp(iline, "mask ", 5)) {
+			// mask 111111111111111...00000
+			// 128 bits
+			int ok=1;
+			for (unsigned jx=0; jx<128; jx++) {
+				int v = 0;
+				if (ok) {
+					char c = iline[jx+5];
+					v = c == '1';
+					if ((c & 0xfe) != '0') ok = 0;
+				}
+				mask[jx] = v;
+				if (v) ++acq_len;
+			}
+		} else if (2 == sscanf(iline, "%u %d", &row, &val)) {
+			// printf("OK %u %d\n", row, val);
+			unsigned int ix = row % acq_len;
+			if (ix < 6) {
+				if (!mask[ix]) {
+					printf("bad!\n");
+					return 1;
+				}
+				given[ix] = val;  // debug data width is 24, already matches PW+EXTRA
+				if (ix == 5) {
+					printf("--\n");
+					printf("given");
+					for (unsigned jx=0; jx<6; jx++) printf(" %d", given[jx]);
+					printf("\n");
+					cycle(given);
+				}
+			} else {
+				printf("acquired %u %s\n", ix, iline);
+			}
+		}
+	}
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
-	if ((argc > 1) && strcmp(argv[1], "invcheck")==0) {
+	if ((argc > 1) && 0 == strcmp(argv[1], "invcheck")) {
 		invcheck();
 		return 0;
 	}
-	if ((argc > 1) && strcmp(argv[1], "invsqrtcheck")==0) {
+	if ((argc > 1) && 0 == strcmp(argv[1], "invsqrtcheck")) {
 		int rc =invsqrtcheck();
 		printf(rc ? "FAIL\n" : "PASS\n");
 		return rc;
+	}
+	if ((argc > 2) && 0 == strcmp(argv[1], "replay")) {
+		return replay(argv[2]);
 	}
 	unsigned int u, given_size;
 	int given[16];
@@ -253,7 +334,9 @@ int main(int argc, char *argv[])
 	while (fgets(iline, sizeof(iline), stdin)) {
 		if (*iline == '#') {
 		} else if ((*iline == 's' || *iline == 'h') && 3 == sscanf(iline, "%c %u %d", &type, &dummy, &val)) {
-			given[u++] = SCE * val;
+			if (u < sizeof(given)/sizeof(given[0])) {
+				given[u++] = SCE * val;
+			}
 		} else if (*iline == 'p' && 3 == sscanf(iline, "%c %20s %d", &type, pname, &val)) {
 			persist_set(pname, SCE * val);
 		}
@@ -265,7 +348,7 @@ int main(int argc, char *argv[])
 		file_loop(argv[1], given, given_size);
 	} else {
 		for (u=0; u<given_size; u++) {
-			printf("%3u: given %9d (%+8.5f)\n", u, given[u], (double)given[u]/(double)VMAX);
+			printf("%3u: given %9d (%+9.6f)\n", u, given[u], (double)given[u]/(double)VMAX);
 		}
 		cycle(given);
 	}

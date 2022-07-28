@@ -68,11 +68,13 @@ class notch_setup:
             bw=300e3,  # Hz bandwidth of low-pass filter
             offset=0,  # Hz offset of low-pass filter
             notch=None,  # Hz offset of notch, sign flipped
+            ngain=0.0,   # gain at notch, default is 0, complex OK
             gain=1.0):
         self.f_clk = f_clk
         self.bw = bw
         self.offset = offset
         self.notch = notch
+        self.ngain = ngain
         self.gain = gain
         self.T = 2.0 / self.f_clk  # processing rate of IQ pairs
         # self.T = 4/102.143e6  # fake for lp_notch.m compatibility
@@ -95,7 +97,7 @@ class notch_setup:
             Abp_zn = cl0_bp.response(zn)
             # solve for the final gains
             mat = numpy.array([[Alp_dc, Abp_dc], [Alp_zn, Abp_zn]])
-            target_gains = numpy.array([[self.gain], [0]])
+            target_gains = numpy.array([[self.gain], [self.ngain]])
             raw_gains = numpy.linalg.inv(mat).dot(target_gains)
             # prevent the low-pass component from clipping
             if abs(raw_gains[0]) > 0.99:

@@ -94,7 +94,7 @@ initial begin
 	dp_dut_lim.mem[3] = -1000;  // lim Y lo
 	@(cc==244); verify(2500,1000);
 	dp_dut_lim.mem[1] = 500;  // lim Y hi
-	@(cc==268); verify(2500,500);
+	@(cc==267); verify(2500,500);
 	dp_dut_coeff.mem[1] =   -450;  // coeff Y I
 	@(cc==300); verify(2500,60);
 	@(cc==340); verify(2500,-1000);

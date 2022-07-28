@@ -38,5 +38,6 @@ clean:
 	$(MAKE) -C ./xadc      clean
 	$(MAKE) -C ./sram      clean
 	$(MAKE) -C ./memio     clean
+	$(MAKE) -C ./zest     clean
 	$(MAKE) -C ../project/cmod_a7/sim clean
 	rm -rf fv/f_pack_sfr_pack fv/f_pack_uart_pack fv/fifo/ fv/shortfifo/

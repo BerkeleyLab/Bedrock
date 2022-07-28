@@ -20,7 +20,7 @@ parameter count_period = 125000000;
 reg [3:0] config_r=0;
 always @(posedge clk) if (host_write_cr) config_r <= host_data;
 wire run_request = config_r[0];  // When this is 0, we get
-// 100% software compatiblity with simpler (non-lockable) previous behavior.
+// 100% software compatibility with simpler (non-lockable) previous behavior.
 wire err_sign = config_r[1];
 wire [1:0] lock_sel = config_r[3:2];
 

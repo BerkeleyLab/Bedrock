@@ -25,8 +25,8 @@
        | +-----+   +-^-+                |    |
        |             |                  |    |
        +-------------------------------------+
-                     |          |
-          cic_sample +          + cc_sample
+                     |                  |
+          cic_sample +                  + cc_sample
 */
 
 module cic_multichannel #(
@@ -138,7 +138,7 @@ module cic_multichannel #(
    assign di_sr_out  = sr_out_shift;
 
    // ------
-   // Cascaded diferentiator and post-filter
+   // Cascaded differentiator and post-filter
    // ------
 `ifdef SIMULATE
    // Enforces correct parameter settings

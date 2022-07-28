@@ -1,9 +1,10 @@
 #ifndef ZEST_H
 #define ZEST_H
 
+#include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "print.h"
+// #include "print.h"
 
 // BASE2_ADDR
 #define ZEST_BASE2_ADC   0x000000
@@ -24,6 +25,8 @@
 #define SFR_WST_BIT_BUFR_B_RST  30
 #define SFR_IN_BYTE_PCNT        0
 #define SFR_IN_BYTE_FCNT        2
+
+#define FCNT_WIDTH              15
 
 enum ZEST_DEV {
     ZEST_DEV_ILLEGAL   =  0xFF,

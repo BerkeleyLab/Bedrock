@@ -10,8 +10,10 @@ datadir = os.path.dirname(__file__)
 
 def getargs():
     from argparse import ArgumentParser
+
+    usage = 'Engineering screen (cs-studio/display builder) generator'
     P = ArgumentParser('%s -m leep.eng' % sys.executable,
-                       description='Engineering screen (cs-studio/display builder) generator')
+                       description=usage)
     P.add_argument('-d', '--debug', action='store_const',
                    const=logging.DEBUG, default=logging.INFO)
     P.add_argument('-q', '--quiet', action='store_const',
@@ -57,7 +59,8 @@ def main(args):
 
             NY = max(NY, int(W.find('height').text))
 
-            if W.find('name').text in ['Label', 'Readback', 'Setting', 'Slider']:
+            widget_types = ['Label', 'Readback', 'Setting', 'Slider']
+            if W.find('name').text in widget_types:
                 txt = W.find('text')
                 if txt is not None:
                     txt.text = name

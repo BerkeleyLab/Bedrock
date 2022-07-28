@@ -53,7 +53,7 @@ lp dut // auto
 	(.clk(clk), .iq(iq), .x(x), .y(y), `AUTOMATIC_dut);
 
 // Set control registers from command line
-// See also lp_setup in lp_notch_test.py
+// See also lp_setup in lp_notch_test.py or lp_2notch_test.py
 reg signed [17:0] kxr, kxi, kyr, kyi;
 initial begin
 	if (!$value$plusargs("kxr=%d", kxr)) kxr =  71000;
@@ -68,13 +68,17 @@ initial begin
 end
 // As further discussed in lp.v,
 // y*z = y + ky*z^{-1}*y + kx*x
-// k_X and k_Y are scaled by 2^{19} from their real values.
-// Thus a full-scale value of 131000 translates to 0.25.
+// k_X and k_Y are scaled by 2^{19} from their real values,
+// for default (and historical equivalent) parameter shift=2.
+// Thus a full-scale value of 131071 translates to 0.25.
+// shift = 0: 2^{17}-1/2^{17} = 1
+// shift = 2: 2^{17}-1/2^{19} = 0.25
+// shift = 4: 2^{17}-1/2^{21} = 0.0625
+// The new shift parameter is added to accommodate higher BWs.
 // At a typical 50 Msample/sec (remember this processes pairs),
-// that gives a bandwidth of 50 MHz * 0.25 = 12.5 MHz.
-// The "final" planned configuration (low-pass only, no phase shift)
-// of 300 kHz means k_X = 0.006, k_Y = -0.006
-// for a register value set of +/- 3146.
+// that gives a maximum bandwidth of 50 MS/s * 0.25 = 12.5e6 rad/s = 1.99 MHz
+// Configuring as a 300 kHz low-pass gives k_X = 0.0377, k_Y = -0.0377
+// for a register value set of approximately +/- 19760.
 
 // Write a comprehensible output file
 // One line per pair of clock cycles

@@ -3,7 +3,7 @@
 // dphase = initial value of d phase / dt (a.k.a. frequency) at reset
 // ddphase = d^2 phase / dt^2 (should be held constant during a chirp)
 //
-// If ddphase is not zero, you really should reset it frequently enouygh
+// If ddphase is not zero, you really should reset it frequently enough
 // that dphase_r (the instantaneous frequency) never overflows.
 // Such an overflow is detected (single-cycle) on the output error port.
 // Overflows on phase are normal, just represent wrapping around 2*pi.

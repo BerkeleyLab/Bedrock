@@ -41,7 +41,7 @@ generation is provided, with the Ethernet/Local Bus guaranteeing the interface w
 ## Ethernet and Local Bus
 
 `eth_gtx_bridge.v` combines packet Badger with PCS/PMA logic and a GTX interface. This module
-perfoms its own 8b/10b line coding and, as such, outputs 20-bits of raw data to the GTX.
+performs its own 8b/10b line coding and, as such, outputs 20-bits of raw data to the GTX.
 
 Packet Badger is clocked at 125 MHz, while the GTX interface is clocked at 62.5 MHz.
 Data width/rate conversion is performed within `eth_gtx_bridge.v`.

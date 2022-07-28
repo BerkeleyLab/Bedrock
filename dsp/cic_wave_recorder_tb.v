@@ -1,7 +1,7 @@
 `timescale 1ns / 1ns
 `include "constants.vams"
 
-/* Barebones testbench to facilitate compile checks on DUT and check connectivity.
+/* Bare-bones testbench to facilitate compile checks on DUT and check connectivity.
    Not intended to be comprehensive or do any self-checks. For more thorough testing see:
    - cic_multichannel_tb
    - circle_buf_serial_tb
@@ -47,6 +47,19 @@ module cic_wave_recorder_tb;
    // ---------------------
    // Generate stimulus
    // ---------------------
+
+   reg reset = 0, ext_trig = 0;
+   always @(posedge iclk) begin
+       @(cc==30) begin
+           reset <= 1;
+           ext_trig <= 0;
+       end
+
+       @(cc==50) begin
+            reset <= 0;
+            ext_trig <= 1;
+       end
+    end
 
    localparam den=33, logden=6;
    localparam ampi=10000.0;
@@ -134,7 +147,8 @@ module cic_wave_recorder_tb;
       .dsample2_wi(8))
    i_multi_sampler (
       .clk(iclk),
-      .ext_trig(1'b1),
+      .reset(reset),
+      .ext_trig(ext_trig),
       .sample_period(8'h2), // Sample input at half the line rate
       .dsample0_period(8'h1),
       .dsample1_period(8'h1),
@@ -174,8 +188,8 @@ module cic_wave_recorder_tb;
    dut
    (
       .iclk         (iclk),
-      .reset        (1'b0),
-      .stb_in       (1'b1),
+      .reset        (reset),
+      .stb_in       (ext_trig),
       .d_in         (d_in_flat),   // Flattened array of unprocessed data streams. CH0 in LSBs
       .cic_sample   (cic_sample),
 
