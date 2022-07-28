@@ -115,26 +115,20 @@ proc project_bd_design {library_dir project_name} {
 proc project_add_files {project_files} {
     add_files -norecurse -fileset sources_1 $project_files
     set ip_tcl_src [get_files *.tcl]
-    if {! [string match "" $ip_tcl_src]} {
-        foreach ip_tcl $ip_tcl_src {
-            source $ip_tcl
-        }
+    foreach ip_tcl $ip_tcl_src {
+        source $ip_tcl
     }
     remove_files -fileset sources_1 -quiet $ip_tcl_src
 
     # prevent tools from compiling verilog headers
     set verilog_header_src [get_files *.vh]
-    if {! [string match "" $verilog_header_src]} {
-        foreach verilog_header $verilog_header_src {
-            set_property file_type {Verilog Header} [get_files $verilog_header]
-        }
+    foreach verilog_header $verilog_header_src {
+        set_property file_type {Verilog Header} [get_files $verilog_header]
     }
 
     set imp_xdc_src [get_files *_imp.xdc]
-    if {! [string match "" $ip_tcl_src]} {
-        foreach xdc $imp_xdc_src {
-            set_property USED_IN_SYNTHESIS 0 [get_files $xdc]
-        }
+    foreach xdc $imp_xdc_src {
+        set_property USED_IN_SYNTHESIS 0 [get_files $xdc]
     }
     update_compile_order -fileset sources_1
 }
