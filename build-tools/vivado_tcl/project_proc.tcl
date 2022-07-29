@@ -35,13 +35,13 @@ proc project_create {platform_name project_name} {
         set project_part "xc7k160tffg676-2"
     }
     if [regexp "marble" $platform_name] {
-	if [regexp "marblemini" $platform_name] {
-	    set platform "marblemini"
-	    set project_part "xc7a100t-fgg484-2"
-	} else {
-	    set platform "marble"
-	    set project_part "xc7k160tffg676-2"
-	}
+        if [regexp "marblemini" $platform_name] {
+            set platform "marblemini"
+            set project_part "xc7a100t-fgg484-2"
+        } else {
+            set platform "marble"
+            set project_part "xc7k160tffg676-2"
+        }
     }
     if [regexp "qf2pre_*" $platform_name] {
         set platform "bmb7"
@@ -57,6 +57,16 @@ proc project_create {platform_name project_name} {
         set project_part "xc7vx485tffg1761-2"
         set project_board "xilinx.com:vc707:part0:1.2"
     }
+    if [regexp "zcu111" $platform_name] {
+        set platform "zcu111"
+        set project_part "xczu28dr-ffvg1517-2-e"
+        set project_board "xilinx.com:zcu111:part0:1.1"
+    }
+    if [regexp "zcu208" $platform_name] {
+        set platform "zcu208"
+        set project_part "xczu48dr-fsvg1517-2-e"
+        set project_board "xilinx.com:zcu208:part0:2.0"
+    }
     # planahead
     #
     if {$platform eq "ml605"} {
@@ -69,6 +79,19 @@ proc project_create {platform_name project_name} {
         set_property board_part $project_board [current_project]
     }
     set_property top $project_name [current_fileset]
+}
+
+proc project_add_syn_props {syn_prop_dict} {
+    set_property -dict $syn_prop_dict [get_runs synth_1]
+}
+
+proc project_add_impl_props {impl_prop_dict} {
+    set_property -dict $impl_prop_dict [get_runs impl_1]
+}
+
+proc project_add_ip_repos {ipcore_dirs} {
+    set_property ip_repo_paths $ipcore_dirs [current_fileset]
+    update_ip_catalog -rebuild
 }
 
 proc project_bd_design {library_dir project_name} {
@@ -92,19 +115,30 @@ proc project_bd_design {library_dir project_name} {
 proc project_add_files {project_files} {
     add_files -norecurse -fileset sources_1 $project_files
     set ip_tcl_src [get_files *.tcl]
-    if {! [string match "" $ip_tcl_src]} {
-        foreach ip_tcl $ip_tcl_src {
-            source $ip_tcl
-        }
+    foreach ip_tcl $ip_tcl_src {
+        source $ip_tcl
     }
     remove_files -fileset sources_1 -quiet $ip_tcl_src
+
+    # prevent tools from compiling verilog headers
+    set verilog_header_src [get_files *.vh]
+    foreach verilog_header $verilog_header_src {
+        set_property file_type {Verilog Header} [get_files $verilog_header]
+    }
+
     set imp_xdc_src [get_files *_imp.xdc]
-    if {! [string match "" $ip_tcl_src]} {
-        foreach xdc $imp_xdc_src {
-            set_property USED_IN_SYNTHESIS 0 [get_files $xdc]
-        }
+    foreach xdc $imp_xdc_src {
+        set_property USED_IN_SYNTHESIS 0 [get_files $xdc]
     }
     update_compile_order -fileset sources_1
+}
+
+proc project_move_xci_to_front {xci_files} {
+    # put .xci files on front as they need to be
+    # generated first.
+    update_compile_order -fileset sources_1
+    set_property source_mgmt_mode DisplayOnly [current_project]
+    reorder_files -fileset sources_1 -front $xci_files
 }
 
 # planAhead
@@ -173,11 +207,15 @@ proc project_rpt {project_name} {
 }
 
 proc project_write_bitstream {platform} {
-    if {$platform ne "vc707"} {
+    if {($platform ne "vc707" && $platform ne "zcu111" && $platform ne "zcu208")} {
         set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [get_designs impl_1]
     }
-    set_property BITSTREAM.CONFIG.CONFIGRATE 33 [get_designs impl_1]
+    if {$platform ne "zcu111" && $platform ne "zcu208"} {
+        set_property BITSTREAM.CONFIG.CONFIGRATE 33 [get_designs impl_1]
+    }
 
     write_bitstream -force [current_project].bit
-    write_cfgmem -force -format bin -interface spix4 -size 16 -loadbit "up 0x0 [current_project].bit" -file [current_project].bin
+    if {$platform ne "zcu111" && $platform ne "zcu208"} {
+        write_cfgmem -force -format bin -interface spix4 -size 16 -loadbit "up 0x0 [current_project].bit" -file [current_project].bin
+    }
 }
