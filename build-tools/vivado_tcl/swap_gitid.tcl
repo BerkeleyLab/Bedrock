@@ -27,7 +27,6 @@ variable RECORD_MARKER 800A
 # i.e., 64 hex digits describing 256 data bits, plus the Verilog-inspired
 # leading "256'h", for a total of 69 characters.
 
-
 # Checks if GIT ID has a proper length
 proc check_gitid {gitid} {
     if {[string length $gitid] != $::GITID_LENGTH } {
@@ -36,7 +35,6 @@ proc check_gitid {gitid} {
     }
 
 }
-
 
 # Checks if init files has a proper length and proper record markers at the correct place
 proc check_init {init0 init1 rowwidth} {
@@ -68,7 +66,6 @@ proc check_init {init0 init1 rowwidth} {
         }
     }
 }
-
 
 proc reorder_bits {gitid rowwidth} {
     if {!($rowwidth == 8 || $rowwidth == 16)} {
@@ -108,9 +105,7 @@ proc reorder_bits {gitid rowwidth} {
     }
 }
 
-
 proc gitid_proc {old_commit new_commit init0 init1 rowwidth} {
-
     # Security checks
     check_gitid $old_commit
     check_gitid $new_commit
@@ -120,7 +115,6 @@ proc gitid_proc {old_commit new_commit init0 init1 rowwidth} {
     lassign [reorder_bits $old_commit $rowwidth] old_msb old_lsb
 
     switch $rowwidth {
-
         8 {
             # Check that the existing INIT values match $old_commit -- this is key!
             if {[string range $init0 25 44] != $old_msb} {
@@ -164,14 +158,12 @@ proc gitid_proc {old_commit new_commit init0 init1 rowwidth} {
     puts "INFO: new 1 $new_init1"
     puts "INFO: --"
     return "$new_init0 $new_init1"
-
 }
 
 
 # Above this point are general string handling functions,
 # which can be tested by a vanilla tclsh.  See test_swap_gitid.tcl.
 # The functions below need Vivado and a routed design.
-
 
 # Checks if vivado has finished implementation
 proc check_impl {} {
@@ -180,7 +172,6 @@ proc check_impl {} {
         puts "ERROR: Did not find active Vivado implemenation run"
     }
 }
-
 
 proc check_bmem {pattern width} {
     set c [get_cells -hier -filter {PRIMITIVE_TYPE =~ BMEM.*.*} $pattern]
@@ -197,12 +188,10 @@ proc check_bmem {pattern width} {
 }
 
 proc swap_gitid {old_commit new_commit rowwidth dry_run} {
-
     # Checks if implementation stage is there
     check_impl
 
     switch $rowwidth {
-
         8 {
             set c0 [check_bmem "*dxx_reg_0" 9]
             set c1 [check_bmem "*dxx_reg_1" 9]

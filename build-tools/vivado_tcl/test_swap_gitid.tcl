@@ -33,10 +33,10 @@ set rowwidth 8
 lassign [gitid_proc $old_commit_8 $new_commit_8 $init0_8 $init1_8 $rowwidth] result_init0 result_init1
 
 if {$result_init0 != $golden_init0_8 || $result_init1 != $golden_init1_8} {
-  puts "Result of rowwidth=8 output is WRONG!"
-  set rc 1
+    puts "Result of rowwidth=8 output is WRONG!"
+    set rc 1
 } else {
-  puts "Results for rowwidth=8 output is CORRECT!"
+    puts "Results for rowwidth=8 output is CORRECT!"
 }
 
 
@@ -45,10 +45,10 @@ set rowwidth 16
 lassign [gitid_proc $old_commit_16 $new_commit_16 $init0_16 $init1_16 $rowwidth] result_init0 result_init1
 
 if {$result_init0 != $golden_init0_16 || $result_init1 != $golden_init1_16} {
-  puts "Result of rowwidth=16 output is WRONG!"
-  set rc 1
+    puts "Result of rowwidth=16 output is WRONG!"
+    set rc 1
 } else {
-  puts "Results for rowwidth=16 output is CORRECT!"
+    puts "Results for rowwidth=16 output is CORRECT!"
 }
 
 if {$rc == 0} {puts PASS}
