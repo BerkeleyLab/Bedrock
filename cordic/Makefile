@@ -75,7 +75,7 @@ perf.dat: perf_run.sh
 
 # perf_plot.py now checks for excess noise
 perf.png: perf_plot.py perf.dat
-	$(PYTHON) $<
+	$(PYTHON) $^
 
 CLEAN += cordicg_b[1-9]*.v cordicg_tb cordic_*.dat cordic_*.bit perf.png
 CLEAN_DIRS += _xilinx
