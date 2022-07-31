@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-# flake8: noqa: E221
-
 # ifconfig eth0 up 192.168.21.1
 # route add -net 192.168.8.0 netmask 255.255.255.0 dev eth0
 
@@ -16,7 +14,6 @@ import struct
 import time
 import logging
 import sys
-import getopt
 import os
 import binascii
 
@@ -31,6 +28,7 @@ def hexfromba(ba):
         return binascii.hexlify(ba)
     else:
         return ba.hex()
+
 
 # prefix
 MSG_PREFIX     = bafromhex(b'5201')            # 52 01
@@ -107,7 +105,7 @@ def do_message(s, p, verbose=False):
     retries = 0
     while r_status != 1:
         time.sleep(WAIT)
-        flusher = CHK_PREFIX + bytearray(len(p)*[0])
+        flusher = CHK_PREFIX + bytearray(len(p) * [0])
         s.send(flusher)
         rr, addr = s.recvfrom(1024)  # buffer size is 1024 bytes
         rr = bytearray(rr)
@@ -145,8 +143,8 @@ def read_status(s):
     p = READ_CONFIG_REG + 2 * READ_STATUS_1
     r, addr = do_message(s, p, verbose=False)
     status_reg = r[len(r) - 1]
-    config_reg = r[len(r) - 1 - 2*len(READ_STATUS_1)]
-    print("CONFIG_REG = %x" % config_reg)
+    config_reg = r[len(r) - 1 - 2 * len(READ_STATUS_1)]
+    print("CONFIG_REG (CR1) = %x" % config_reg)
     logging.debug('From: %s \n Tx length: %d\n Rx length: %d\n' % (addr, len(p), len(r)))
     logging.info('Check Status Reg: %02x' % status_reg)
     return status_reg
@@ -218,7 +216,7 @@ def page_read(s, ad, fast=False, otp=False):
     return block
 
 
-# Clifford's spiflash.v simulation of a W25Q128JV needs to hear this command
+# C. Wolf's spiflash.v simulation of a W25Q128JV needs to hear this command
 # before it will run normal commands
 def power_up(s):
     p = RELEASE_PD
@@ -285,11 +283,11 @@ def flash_dump(s, file_name, ad, page_count, otp=False):
 # Read local file and write to flash from FF to 00
 def remote_program(s, file_name, ad, size):
     start_p = ad >> 8
-    start_a = start_p << 8
+    # start_a = start_p << 8
     stop_p = ((ad + size - 1) >> 8) + 1
-    final_a = (stop_p << 8) - 1
+    final_a = (stop_p << 8) + 255
     logging.info('Programming file %s to %s from add 0x%x to add 0x%x, length = 0x%x...'
-                 % (file_name, IPADDR, ad, (((ad + size) >> 8) + 1) << 8, size))
+                 % (file_name, IPADDR, ad, final_a, size))
     f = open(file_name, 'rb')
     # assume that '.bin' file size is always less than whole pages
     for ba in reversed(range(start_p, stop_p)):
@@ -375,12 +373,12 @@ def main():
         description="Utility for working with SPI Flash chips attached to Packet Badger")
     parser.add_argument('--ip', default='192.168.19.8', help='IP address')
     parser.add_argument('--udp', type=int, default=804, help='UDP Port number')
-    parser.add_argument('-a', '--add', type=lambda x: int(x,0), help='Flash offset address')
+    parser.add_argument('-a', '--add', type=lambda x: int(x, 0), help='Flash offset address')
     parser.add_argument('--pages', type=int, help='Number of 256-byte pages')
     parser.add_argument('--mem_read', action='store_true', help='Read ROM info')
     parser.add_argument('--id', action='store_true',
                         help='Read SPI flash chip identification and status')
-    parser.add_argument('--erase', type=lambda x: int(x,0),
+    parser.add_argument('--erase', type=lambda x: int(x, 0),
                         help='Number of 256-byte sectors to erase')
     parser.add_argument('--power', action='store_true', help='power up the flash chip')
     parser.add_argument('--program', type=str, help='File to be stored in SPI Flash')
@@ -389,9 +387,9 @@ def main():
                         help='Wait time between consecutive writes (seconds)')
     parser.add_argument('--otp', action='store_true',
                         help='Access One Time Programmable area of S25FL chip')
-    parser.add_argument('--status_write', type=lambda x: int(x,0),
+    parser.add_argument('--status_write', type=lambda x: int(x, 0),
                         help='A value to be written to status register')
-    parser.add_argument('--config_write', type=lambda x: int(x,0),
+    parser.add_argument('--config_write', type=lambda x: int(x, 0),
                         help='A value to be written to the config register')
     # TODO: Does the user really need to know this? Can this just be queried from the chip?
     parser.add_argument('--reboot6', action='store_true',
@@ -417,7 +415,6 @@ def main():
     # 1814 for XC6SLX16, could also get this from JEDEC status?
     page_count = 1814
     page_count = 2
-    otp = args.otp
 
     if args.pages is not None:
         page_count = args.pages
@@ -458,6 +455,7 @@ def main():
 
     # close the socket
     sock.close()
+
 
 if __name__ == "__main__":
     main()
