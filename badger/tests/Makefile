@@ -291,7 +291,7 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 
 # =====
 # Verilator, slightly larger scope
-Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c crc8e_guts.vh crc_genguts.vh
+Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) spi_gate.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c crc8e_guts.vh crc_genguts.vh
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $(filter-out crc8e_guts.vh crc_genguts.vh, $^)
 	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
@@ -310,8 +310,8 @@ Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) mem
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmem_gateway_wrap.mk
 	mv obj_dir/$@ $@
-Vmem_gateway_check: Vmem_gateway_wrap
-	bash mem_gateway_check.sh
+Vmem_gateway_check: Vmem_gateway_wrap Vmg_check.sh badger_lb_io.py
+	bash $(word 2,$^) $(word 3,$^)
 
 # =====
 # Simple syntax check
