@@ -12,7 +12,10 @@ PYTHON = python3
 include i2cbridge_rules.mk
 
 # Only used to pick up dpram.v from LBNL's bedrock
-vpath %.v ../../dsp
+# Could just say DSP_DIR = ../.. , except in case of out-of-tree builds
+BEDROCK_DIR := $(dir $(lastword $(MAKEFILE_LIST)))../..
+DSP_DIR = $(BEDROCK_DIR)/dsp
+vpath %.v $(DSP_DIR)
 
 %_tb: %_tb.v
 	$(VERILOG) ${VFLAGS_$@} -o $@ $(filter %.v, $^)
