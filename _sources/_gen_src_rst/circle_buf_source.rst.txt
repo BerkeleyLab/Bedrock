@@ -124,7 +124,7 @@ circle_buf Source File
    assign buf_sync=eval_done_read;
 
    // data path is simply a dual-port RAM
-   dpram #(.aw(aw+1), .dw(dw)) mem(.clka(iclk), .clkb(oclk),
+   dpram #(.aw(aw+1), .dw(dw)) cbuf(.clka(iclk), .clkb(oclk),
    	.addra({wbank,write_addr}), .dina(d_in), .wena(write_en),
    	.addrb({~rbank,read0_addr}), .doutb(d_out)
    );

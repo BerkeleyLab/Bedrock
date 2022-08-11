@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>phase_diff Source File &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -111,7 +111,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">70</span><span class="w">             </span><span class="n">vernier_freq</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ph_sum</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ph_sum_old</span><span class="p">;</span><span class="w"></span>
 <span class="linenos">71</span><span class="w">     </span><span class="k">end</span><span class="w"></span>
 <span class="linenos">72</span><span class="k">end</span><span class="w"></span>
-<span class="linenos">73</span><span class="k">assign</span><span class="w"> </span><span class="n">locked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">err_r</span><span class="p">;</span><span class="w">  </span><span class="c1">// no fancy clock daomain crossing</span>
+<span class="linenos">73</span><span class="k">assign</span><span class="w"> </span><span class="n">locked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">err_r</span><span class="p">;</span><span class="w">  </span><span class="c1">// no fancy clock domain crossing</span>
 <span class="linenos">74</span>
 <span class="linenos">75</span><span class="c1">// Periodically pass the result to rclk domain</span>
 <span class="linenos">76</span><span class="kt">wire</span><span class="w"> </span><span class="n">din_stb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">cnt</span><span class="p">[</span><span class="mh">4</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">locked</span><span class="p">;</span><span class="w"></span>
@@ -143,6 +143,7 @@ Expect to see errors and unfinished things.</p>
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../general-docs.html">General Docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a></li>
 </ul>
 
@@ -179,7 +180,7 @@ Expect to see errors and unfinished things.</p>
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>circle_buf Source File &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -157,7 +157,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">116</span><span class="k">assign</span><span class="w"> </span><span class="n">buf_sync</span><span class="o">=</span><span class="n">eval_done_read</span><span class="p">;</span><span class="w"></span>
 <span class="linenos">117</span>
 <span class="linenos">118</span><span class="c1">// data path is simply a dual-port RAM</span>
-<span class="linenos">119</span><span class="n">dpram</span><span class="w"> </span><span class="p">#(.</span><span class="n">aw</span><span class="p">(</span><span class="n">aw</span><span class="o">+</span><span class="mh">1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">dw</span><span class="p">(</span><span class="n">dw</span><span class="p">))</span><span class="w"> </span><span class="n">mem</span><span class="p">(.</span><span class="n">clka</span><span class="p">(</span><span class="n">iclk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">clkb</span><span class="p">(</span><span class="n">oclk</span><span class="p">),</span><span class="w"></span>
+<span class="linenos">119</span><span class="n">dpram</span><span class="w"> </span><span class="p">#(.</span><span class="n">aw</span><span class="p">(</span><span class="n">aw</span><span class="o">+</span><span class="mh">1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">dw</span><span class="p">(</span><span class="n">dw</span><span class="p">))</span><span class="w"> </span><span class="n">cbuf</span><span class="p">(.</span><span class="n">clka</span><span class="p">(</span><span class="n">iclk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">clkb</span><span class="p">(</span><span class="n">oclk</span><span class="p">),</span><span class="w"></span>
 <span class="linenos">120</span><span class="w">     </span><span class="p">.</span><span class="n">addra</span><span class="p">({</span><span class="n">wbank</span><span class="p">,</span><span class="n">write_addr</span><span class="p">}),</span><span class="w"> </span><span class="p">.</span><span class="n">dina</span><span class="p">(</span><span class="n">d_in</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">wena</span><span class="p">(</span><span class="n">write_en</span><span class="p">),</span><span class="w"></span>
 <span class="linenos">121</span><span class="w">     </span><span class="p">.</span><span class="n">addrb</span><span class="p">({</span><span class="o">~</span><span class="n">rbank</span><span class="p">,</span><span class="n">read0_addr</span><span class="p">}),</span><span class="w"> </span><span class="p">.</span><span class="n">doutb</span><span class="p">(</span><span class="n">d_out</span><span class="p">)</span><span class="w"></span>
 <span class="linenos">122</span><span class="p">);</span><span class="w"></span>
@@ -186,6 +186,7 @@ Expect to see errors and unfinished things.</p>
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../general-docs.html">General Docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a></li>
 </ul>
 
@@ -222,7 +223,7 @@ Expect to see errors and unfinished things.</p>
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.1.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

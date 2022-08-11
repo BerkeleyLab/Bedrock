@@ -1,0 +1,8 @@
+.. _mem_gate:
+
+--------
+badger mem_gate
+--------
+
+.. mdinclude:: /home/runner/work/Bedrock/Bedrock/badger/mem_gate.md
+
