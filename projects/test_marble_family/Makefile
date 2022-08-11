@@ -169,4 +169,4 @@ clean:
 	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
 	rm -f read_sfp.dat Vmarble_base bit_stamp_mod udprtx
-	rm -rf _xilinx .Xil obj_dir
+	rm -rf _xilinx .Xil obj_dir __pycache__

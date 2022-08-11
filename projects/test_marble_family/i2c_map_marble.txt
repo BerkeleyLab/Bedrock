@@ -9,7 +9,7 @@ multiplexing via U5 (0xE0) TCA9548A
  bus 4: QSFP1
  bus 5: QSFP2
  bus 6: APP
- bus 7: 
+ bus 7: -
 
 bus 0 and 1 should have ID EEPROM, e.g., AT24C32D, at address 0xA0
 
