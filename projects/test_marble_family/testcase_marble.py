@@ -98,24 +98,24 @@ def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, 
     return result
 
 
-def print_sfp1(title, val):
+def print_qsfp1(title, val):
     ss = "".join([chr(x) for x in val])
     print("  %s \"%s\"" % (title, ss))
 
 
-def print_sfp(a):
+def print_qsfp(a):
     if all([x == 255 for x in a]):
         print("  hardware not present")
     else:
-        print_sfp1("Vendor", a[0:16])
-        print_sfp1("Part  ", a[16:32])
-        print_sfp1("Serial", a[32:48])
+        print_qsfp1("Vendor", a[0:16])
+        print_qsfp1("Part  ", a[16:32])
+        print_qsfp1("Serial", a[32:48])
         # see Table 3.8 of Finisar AN-2030
         suffix = "No internal cal; BAD!" if a[48] & 0x20 == 0 else "OK"
         print("  MonTyp  0x%2.2x  %s" % (a[48], suffix))
 
 
-def print_sfp_z(a):
+def print_qsfp_z(a):
     if all([x == 255 for x in a]):
         pass
     else:
@@ -124,9 +124,11 @@ def print_sfp_z(a):
             aa[0] -= 65536
         print("  Temp     %.1f C" % (aa[0]/256.0))
         print("  Vcc      %.3f V" % (aa[1]*1e-4))
-        print("  Tx bias  %.4f mA" % (aa[2]*2e-3))
-        print("  Tx pwr   %.4f mW" % (aa[3]*1e-4))
-        print("  Rx pwr   %.4f mW" % (aa[4]*1e-4))
+        print("  Lane      TX bias       Tx pwr        Rx pwr")
+        print("  0        %.4f mA     %.4f mW     %.4f mW" % (aa[2]*2e-3, aa[6]*1e-4, aa[10]*1e-4))
+        print("  1        %.4f mA     %.4f mW     %.4f mW" % (aa[3]*2e-3, aa[7]*1e-4, aa[11]*1e-4))
+        print("  2        %.4f mA     %.4f mW     %.4f mW" % (aa[4]*2e-3, aa[8]*1e-4, aa[12]*1e-4))
+        print("  3        %.4f mA     %.4f mW     %.4f mW" % (aa[5]*2e-3, aa[9]*1e-4, aa[13]*1e-4))
 
 
 def print_ina219(title, a):
@@ -173,12 +175,12 @@ def print_result(result, args, poll_only=False):
         print_ina219_config("FMC1", result[ib+1:ib+3])
         print_ina219_config("FMC2", result[ib+3:ib+5])
         print_ina219_config("MAIN", result[ib+5:ib+7])
-        if args.sfp:
-            for ix in range(4):
+        if args.qsfp:
+            for ix in range(2):
                 pitch = 50
                 hx = ib + 7 + pitch*ix
-                print("SFP%d:  busmux readback %x" % (ix+1, result[hx]))
-                print_sfp(result[1+hx:pitch+hx])
+                print("QSFP%d:  busmux readback 0x%2.2x" % (ix+1, result[hx]))
+                print_qsfp(result[1+hx:pitch+hx])
             for ix in range(n_fmc):
                 pitch = 28
                 hx = ib + 207 + pitch*ix
@@ -190,22 +192,23 @@ def print_result(result, args, poll_only=False):
             wp_bit = result[0] & 0x80
             ss = "Off" if wp_bit else "On"
             print("Write Protect switch is %s" % ss)
-            sfp_pp = result[2]*256 + result[3]  # parallel SFP status via U34
-            sfp_pp1 = [(sfp_pp >> ix*4) & 0xf for ix in [2, 1, 0, 3]]
+            # qsfp_pp = result[2]*256 + result[3]  # parallel QSFP status via U34
+            # qsfp_pp1 = [(qsfp_pp >> ix*4) & 0xf for ix in [2, 1, 0, 3]]
+            qsfp_pp1 = [result[2], result[3]]
             ina_base = 4
             print_ina219("FMC1", result[ina_base+0:ina_base+4])
             print_ina219("FMC2", result[ina_base+4:ina_base+8])
             print_ina219("MAIN", result[ina_base+8:ina_base+12])
-        if args.sfp:
-            for ix in range(4):
-                pitch = 10
+        if args.qsfp:
+            for ix in range(2):
+                pitch = 28
                 hx = 16 + pitch*ix
                 a1 = result[hx:hx+pitch]
-                print("Status pin monitor SFP%d:  0x%X" % (ix+1, sfp_pp1[ix]))
-                print_sfp_z(a1)
+                print("Status pin monitor QSFP%d:  0x%X" % (ix+1, qsfp_pp1[ix]))
+                print_qsfp_z(a1)
             for ix in range(n_fmc):
                 pitch = 10
-                hx = 16+40 + pitch*ix
+                hx = 16 + 40 + pitch*ix
                 fmc_dig = result[hx:hx+pitch]
                 fmc_decode(ix, fmc_dig, squelch=args.squelch)
             for ix in range(n_fmc):
@@ -249,7 +252,7 @@ if __name__ == "__main__":
     parser.add_argument('--udp', type=int, default=0, help='UDP Port number')
     parser.add_argument('--sim', action='store_true', help='simulation context')
     parser.add_argument('--ramtest', action='store_true', help='RAM test program')
-    parser.add_argument('--sfp', action='store_true', help='SFP test program')
+    parser.add_argument('--qsfp', action='store_true', help='QSFP test program')
     parser.add_argument('--stop', action='store_true', help='stop after run')
     parser.add_argument('--debug', action='store_true', help='print raw arrays')
     parser.add_argument('--poll', action='store_true', help='only poll for results')
@@ -277,9 +280,9 @@ if __name__ == "__main__":
     if args.ramtest:
         import ramtest
         prog = ramtest.ram_test_prog()
-    elif args.sfp:
-        import read_sfp
-        prog = read_sfp.hw_test_prog()
+    elif args.qsfp:
+        import read_qsfp
+        prog = read_qsfp.hw_test_prog()
     else:
         import poller
         prog = poller.hw_test_prog()

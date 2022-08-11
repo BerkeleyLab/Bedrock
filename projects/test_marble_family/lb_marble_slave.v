@@ -57,7 +57,7 @@ module lb_marble_slave #(
 );
 
 // Timing hooks, can be used to speed up simulation
-parameter twi_q0=6;  // 140 kbps with 125 MHz clock
+parameter twi_q0=8;  // 35 kbps with 125 MHz clock
 parameter twi_q1=2;
 parameter twi_q2=7;
 parameter led_cw=10;
