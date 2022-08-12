@@ -469,6 +469,8 @@ def main():
 
     if args.clear_status:
         clear_status(sock)
+        write_enable(sock, False)
+        clear_status(sock)
 
     if args.id:
         read_id(sock)
@@ -477,8 +479,8 @@ def main():
     # TODO: Ignoring test_tx since no codepath exists
 
     if args.config_init:
-        write_status(sock, 0x18, config=0x24)
-        write_status(sock, 0x18, config=0x25)
+        write_status(sock, 0x98, config=0x24)
+        write_status(sock, 0x98, config=0x25)
     elif args.status_write is not None:
         write_status(sock, args.status_write, config=args.config_write)
 
