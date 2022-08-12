@@ -61,7 +61,11 @@ parameter twi_q0=8;  // 35 kbps with 125 MHz clock
 parameter twi_q1=2;
 parameter twi_q2=7;
 parameter led_cw=10;
+`ifdef MARBLE_MINI
 parameter initial_twi_file="read_sfp.dat";
+`else
+parameter initial_twi_file="";
+`endif
 
 wire do_rd = control_strobe & control_rd;
 reg dbg_rst=0;
