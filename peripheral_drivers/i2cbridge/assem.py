@@ -33,14 +33,20 @@ class i2c_assem:
     def read(self, dadr, madr, dlen, addr_bytes=1):
         if dadr & 1:
             print("Address error 0x%2.2x" % dadr)
+            return []
         if dlen > 30:
             print("Read length error: %d" % dlen)
+            return []
         if addr_bytes == 0:
-            return [self.o_wx+1, dadr, self.o_rd+1+dlen, dadr+1]
-        if addr_bytes == 1:
+            # optimize away a useless [self.o_wx+1, dadr]
+            return [self.o_rd+1+dlen, dadr+1]
+        elif addr_bytes == 1:
             return [self.o_wx+2, dadr, madr, self.o_rd+1+dlen, dadr+1]
         elif addr_bytes == 2:
             return [self.o_wx+3, dadr, int(madr/256), madr & 256, self.o_rd+1+dlen, dadr+1]
+        else:
+            print("Unsupported addr_byes: %d" % addr_bytes)
+        return []
 
     # combine short and long pauses to get specified cycles
     # configured for production (q1=2, q2=7), tests will not conform
