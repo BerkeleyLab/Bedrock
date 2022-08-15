@@ -1,4 +1,4 @@
-## SPI Boot Flash programming support in Packet Badger
+# SPI Boot Flash programming support in Packet Badger
 
 Modern FPGAs typically have the ability to boot from SPI flash.
 Then when operating, those flash pins are available for the fabric
@@ -22,7 +22,7 @@ Python (host) code:
 
 * [spi_test.py](tests/spi_test.py)
 
-# Write protect
+## Write protect
 
 Modern SPI flash chips include write-protect features.  This can be messy
 and complicated.  Our goal is to make the system resistant to bricking,
@@ -37,13 +37,18 @@ don't have the hardware switch on the flash chip's WP# line that can
 guarantee protection of the golden image.
 
 This discussion and software revolves around the write-protect feature
-of a Cypress/Spansion S25FL128S,
-as documented in the Cypress S25FL128S/S25FL256S data sheet,
-128 Mb (16 MB)/256 Mb (32 MB) 3.0V SPI Flash Memory,
-Document Number: 001-98283 Rev. *Q Revised April 30, 2019
-```4cdc2a61d3d3125188d2840fbde574a1f41472a63febdda9698ce598af98817b  s25fl128s.pdf```
+of a Spansion/Cypress/Infineon S25FL128S
+(note that Spansion merged with Cypress in 2014,
+which was in turn acquired by Infineon in 2020).
+See the Inifineon [data sheet for S25FL128S, S25FL256S](https://www.infineon.com/dgdl/Infineon-S25FL128S_S25FL256S_128_Mb_%2816_MB%29_256_Mb_%2832_MB%29_3.0V_SPI_Flash_Memory-DataSheet-v18_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ecfb6a64a17),
+001-98283 Rev. *R, 2022-06-10.
+
+```
+fc4dff8ef4d8ebf6815c1e994812f8177c917b63c59a4913b7360eef01785af6  Infineon-S25FL128S_S25FL256S_128_Mb_(16_MB)_256_Mb_(32_MB)_3.0V_SPI_Flash_Memory-DataSheet-v19_00-EN.pdf
+```
+
 As a metric of the complexity of these chips, note that the data sheet
-is 145 pages long!  I think the features discussed here are likely to show up
+is 165 pages long!  I think the features discussed here are likely to show up
 on other flash chips, but I can't confirm they are JEDEC-standard.
 
 Use of the write-protect feature centers on two registers,
@@ -51,7 +56,7 @@ Status Register 1 (SR1) and Configuration Register 1 (CR1).
 We demand that TBPROT is set, so the protected blocks are at low addresses.
 This is important, because Xilinx FPGAs boot starting at address 0.
 
-# Operation
+## Operation
 
 Quoting p. 53 of that data sheet:
 "The desired state of TBPROT must be selected during the initial configuration
@@ -64,14 +69,14 @@ over JTAG.  Ethernet must be connected and routed to your workstation,
 so you can `ping $IP`.  Put your shell in the `badger/tests` directory
 for the steps below.
 
-```bash
+```sh
 python3 spi_test.py --ip $IP --id
 ```
 
 If this comes back CONFIG_REG (CR1) = 0x00, this chip is likely
 fresh-from-the-factory.  Make sure the Write Protect switch is off, then
 
-```bash
+```sh
 python3 spi_test.py --ip $IP --config_init
 python3 spi_test.py --ip $IP --id
 ```
@@ -81,7 +86,7 @@ Now it should report CONFIG_REG (CR1) = 0x20, with the TBPROT bit set.
 To program the golden image at address zero,
 make sure the Write Protect switch is off,
 
-```bash
+```sh
 python3 spi_test.py --ip $IP --add 0 --program $BITFILE --force_write_enable
 ```
 
@@ -90,20 +95,32 @@ and then turn the Write Protect switch on.
 To program an application image in the second half of the 16 MByte
 flash chip, leave the Write Protect switch on, and
 
-```bash
+```sh
 python3 spi_test.py --ip $IP --add 8388608 --program $BITFILE
 ```
 
 When running the golden bitfile after a power cycle or hardware reset,
 reboot to that second-half bitfile with
 
-```bash
+```sh
 python3 spi_test.py --ip $IP --reboot7 --add 8388608
 ```
 
 If you get in trouble, make liberal use of
 
-```bash
+```sh
 python3 spi_test.py --ip $IP --clear_status
 python3 spi_test.py --ip $IP --id
 ```
+
+## Performance
+
+Quick comment about timing, approximate of course.
+With a Kintex 7K160 and its 6693 kByte bitfile,
+
+* 1 second boot from flash (SPI_BUSWIDTH 2, CONFIGRATE 33)
+* 4 second program via USB JTAG (openocd adapter_khz 15000)
+* 146 second program flash via Ethernet and spi_flash.v
+
+So while flash is great for deploying production bitfiles, it's not
+the best choice for edit/synthesize/test development cycles.
