@@ -162,7 +162,7 @@ marble1_hwtest: udprtx
 	ping -c 2 ${RGMII_IP}
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py --ip=${RGMII_IP} --sfp
+	$(PYTHON) testcase.py --ip=${RGMII_IP} --trx --marble 0
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc

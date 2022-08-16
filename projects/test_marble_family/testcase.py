@@ -98,18 +98,18 @@ def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, 
     return result
 
 
-def print_sfp1(title, val):
+def print_qsfp1(title, val):
     ss = "".join([chr(x) for x in val])
     print("  %s \"%s\"" % (title, ss))
 
 
-def print_sfp(a):
+def print_qsfp(a):
     if all([x == 255 for x in a]):
         print("  hardware not present")
     else:
-        print_sfp1("Vendor", a[0:16])
-        print_sfp1("Part  ", a[16:32])
-        print_sfp1("Serial", a[32:48])
+        print_qsfp1("Vendor", a[0:16])
+        print_qsfp1("Part  ", a[16:32])
+        print_qsfp1("Serial", a[32:48])
         # see Table 3.8 of Finisar AN-2030
         suffix = "No internal cal; BAD!" if a[48] & 0x20 == 0 else "OK"
         print("  MonTyp  0x%2.2x  %s" % (a[48], suffix))
@@ -129,6 +129,22 @@ def print_sfp_z(a):
         print("  Rx pwr   %.4f mW" % (aa[4]*1e-4))
 
 
+def print_qsfp_z(a):
+    if all([x == 255 for x in a]):
+        pass
+    else:
+        aa = [float(x) for x in merge_16(a)]
+        if aa[0] >= 32768:  # Only temperature is signed
+            aa[0] -= 65536
+        print("  Temp     %.1f C" % (aa[0]/256.0))
+        print("  Vcc      %.3f V" % (aa[1]*1e-4))
+        print("  Lane      TX bias       Tx pwr        Rx pwr")
+        print("  0        %.4f mA     %.4f mW     %.4f mW" % (aa[2]*2e-3, aa[6]*1e-4, aa[10]*1e-4))
+        print("  1        %.4f mA     %.4f mW     %.4f mW" % (aa[3]*2e-3, aa[7]*1e-4, aa[11]*1e-4))
+        print("  2        %.4f mA     %.4f mW     %.4f mW" % (aa[4]*2e-3, aa[8]*1e-4, aa[12]*1e-4))
+        print("  3        %.4f mA     %.4f mW     %.4f mW" % (aa[5]*2e-3, aa[9]*1e-4, aa[13]*1e-4))
+
+
 def print_ina219(title, a):
     # hard-coded for default configuration 0x399F and 0.02 Ohm shunt
     shuntr = 0.02  # Ohm
@@ -146,7 +162,9 @@ def print_ina219_config(title, a):
 
 
 def print_result(result, args, poll_only=False):
-    n_fmc = 3 if args.fmc else 0
+    n_fmc = 2 if args.fmc else 0
+    tester = 2 if args.fmc_tester else 0
+    transceiver = 2 if args.marble else 4
     if args.debug:
         for jx in range(16):
             p = result[jx*16:(jx+1)*16]
@@ -173,42 +191,54 @@ def print_result(result, args, poll_only=False):
         print_ina219_config("FMC1", result[ib+1:ib+3])
         print_ina219_config("FMC2", result[ib+3:ib+5])
         print_ina219_config("MAIN", result[ib+5:ib+7])
-        if args.sfp:
-            for ix in range(4):
+        if args.trx:
+            for ix in range(transceiver):
+                print("########################################################################")
                 pitch = 50
                 hx = ib + 7 + pitch*ix
-                print("SFP%d:  busmux readback %x" % (ix+1, result[hx]))
-                print_sfp(result[1+hx:pitch+hx])
+                print("Transceiver%d:  busmux readback 0x%2.2x" % (ix+1, result[hx]))
+                print_qsfp(result[1+hx:pitch+hx])
             for ix in range(n_fmc):
-                pitch = 28
+                print("########################################################################")
+                pitch = 48
                 hx = ib + 207 + pitch*ix
                 a1 = result[hx:hx+pitch]
-                print("FMC%d: busmux 0x%2.2X" % (ix+1, a1[0]))
+                print("FMC%d: busmux readback 0x%2.2X" % (ix+1, a1[0]))
                 print(a1[1:])
     if True:  # polling block
         if True:
+            print("########################################################################")
             wp_bit = result[0] & 0x80
             ss = "Off" if wp_bit else "On"
             print("Write Protect switch is %s" % ss)
-            sfp_pp = result[2]*256 + result[3]  # parallel SFP status via U34
-            sfp_pp1 = [(sfp_pp >> ix*4) & 0xf for ix in [2, 1, 0, 3]]
+            if args.marble:
+                qsfp_pp1 = [result[2], result[3]]
+            else:
+                qsfp_pp = result[2]*256 + result[3]  # parallel SFP status via U34
+                qsfp_pp1 = [(qsfp_pp >> ix*4) & 0xf for ix in [2, 1, 0, 3]]
             ina_base = 4
             print_ina219("FMC1", result[ina_base+0:ina_base+4])
             print_ina219("FMC2", result[ina_base+4:ina_base+8])
             print_ina219("MAIN", result[ina_base+8:ina_base+12])
-        if args.sfp:
-            for ix in range(4):
-                pitch = 10
+        if args.trx:
+            for ix in range(transceiver):
+                print("########################################################################")
+                if args.marble:
+                    pitch = 28
+                else:
+                    pitch = 10
                 hx = 16 + pitch*ix
                 a1 = result[hx:hx+pitch]
-                print("Status pin monitor SFP%d:  0x%X" % (ix+1, sfp_pp1[ix]))
-                print_sfp_z(a1)
-            for ix in range(n_fmc):
+                print("Status pin monitor Transceiver%d:  0x%X" % (ix+1, qsfp_pp1[ix]))
+                print_qsfp_z(a1) if args.marble else print_sfp_z(a1)
+            for ix in range(tester):
+                print("########################################################################")
                 pitch = 10
-                hx = 16+40 + pitch*ix
+                hx = 16 + 40 + pitch*ix
                 fmc_dig = result[hx:hx+pitch]
                 fmc_decode(ix, fmc_dig, squelch=args.squelch)
-            for ix in range(n_fmc):
+            for ix in range(tester):
+                print("########################################################################")
                 pitch = 6
                 hx = 16+40+20 + pitch*ix
                 fmc_ana = merge_16(result[hx:hx+pitch])
@@ -247,14 +277,17 @@ if __name__ == "__main__":
         description="Utility for working with i2cbridge attached to Packet Badger")
     parser.add_argument('--ip', default='192.168.19.10', help='IP address')
     parser.add_argument('--udp', type=int, default=0, help='UDP Port number')
+    parser.add_argument('--marble', type=int, default=1, help='Select the carrier board, Marble or Marble-Mini')
     parser.add_argument('--sim', action='store_true', help='simulation context')
     parser.add_argument('--ramtest', action='store_true', help='RAM test program')
-    parser.add_argument('--sfp', action='store_true', help='SFP test program')
+    parser.add_argument('--trx', action='store_true',
+                        help='Transceiver test program, QSFP for Marble and SFP for Marble-Mini')
     parser.add_argument('--stop', action='store_true', help='stop after run')
     parser.add_argument('--debug', action='store_true', help='print raw arrays')
     parser.add_argument('--poll', action='store_true', help='only poll for results')
     parser.add_argument('--vcd', type=str, help='VCD file to capture')
-    parser.add_argument('--fmc', action='store_true', help='connect to FMC tester')
+    parser.add_argument('--fmc', action='store_true', help='connect to Zest')
+    parser.add_argument('--fmc_tester', action='store_true', help='connect to CERN FMC tester')
     parser.add_argument('--rlen', type=int, default=359, help='result array length')
     parser.add_argument('--squelch', action='store_true', help='squelch non-LA FMC pins')
 
@@ -277,9 +310,9 @@ if __name__ == "__main__":
     if args.ramtest:
         import ramtest
         prog = ramtest.ram_test_prog()
-    elif args.sfp:
-        import read_sfp
-        prog = read_sfp.hw_test_prog()
+    elif args.trx:
+        import read_trx
+        prog = read_trx.hw_test_prog(args.marble)
     else:
         import poller
         prog = poller.hw_test_prog()

@@ -11,6 +11,18 @@ def busmux_sel(s, port_n):
     return s.write(tca9548a_addr, 1 << port_n, [])
 
 
+# Read static info from lower bank
+def sfp_init(s, port_n):
+    a = busmux_sel(s, port_n)
+    a += s.read(0xe0, 0, 1, addr_bytes=0)
+    a += s.read(0xa0, 20, 16)  # Vendor
+    a += s.read(0xa0, 40, 16)  # Part
+    a += s.read(0xa0, 68, 16)  # Serial
+    a += s.read(0xa0, 92, 1)   # hope bit 5 is set for internal cal
+    # XXX pretty sure I want all the cal constants, too
+    return a
+
+
 # check datasheet for info:
 # https://www.mouser.com/pdfdocs/AN-2152100GQSFP28LR4EEPROMmapRevC.pdf
 # Read static info from lower bank
@@ -26,6 +38,12 @@ def qsfp_init(s, port_n):
 
 
 # Read dynamic component from upper bank
+def sfp_poll(s, port_n):
+    a = busmux_sel(s, port_n)
+    a += s.read(0xa2, 96, 10)  # 5 x 16-bit raw ADC values
+    return a
+
+
 def qsfp_poll(s, port_n):
     a = busmux_sel(s, port_n)
     a += s.read(0xa0, 22, 2)  # Temperature
@@ -47,10 +65,13 @@ def busmux_reset(s):
 
 
 # see i2c_map_marble.txt for more documentation on I2C addresses
-def hw_test_prog():
+def hw_test_prog(marble):
     s = assem.i2c_assem()
     ina_list = [0x80, 0x82, 0x84]  # U17, U32, U58
-    qsfp_list = [4, 5]  # QSFP modules 1 and 2
+    # SFP1 is closest to edge of board
+    # SFP4 is closest to center of board
+    sfp_list = [2, 5, 4, 3]  # SFP modules 1-4, for Marble-Mini
+    qsfp_list = [4, 5]  # QSFP modules 1 and 2, for Marble
     fmc_list = [0, 1]
     a = []
     a += s.pause(2)  # ignored?
@@ -59,25 +80,41 @@ def hw_test_prog():
     #
     a += busmux_sel(s, 6)  # App bus
     a += s.read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
-    a += s.write(0x42, 6, [0xff, 0x77])  # U39 Configuration registers
-    # pull down MOD_SEL, RESET and LPMODE, i.e set them as outputs
-    a += s.write(0x44, 6, [0x37, 0x37])  # U34 Configuration registers
-    a += s.write(0x44, 2, [0x48, 0x48])  # U34 Output registers
+
+    if marble:
+        a += s.write(0x42, 6, [0xff, 0x77])  # U39 Configuration registers
+        # pull down MOD_SEL, RESET and LPMODE, i.e set them as outputs
+        a += s.write(0x44, 6, [0x37, 0x37])  # U34 Configuration registers
+        a += s.write(0x44, 2, [0x48, 0x48])  # U34 Output registers
+    else:
+        a += s.write(0x42, 6, [0xff, 0xf3])  # U39 Configuration registers
+        # pull down all four TX_DIS pins
+        a += s.write(0x44, 6, [0xdd, 0xdd])  # U34 Configuration registers
+        a += s.write(0x44, 2, [0x00, 0x00])  # U34 Output registers
+
     for ax in ina_list:
         a += s.read(ax, 0, 2)  # config register0 with 2 bytes to read
-    for qsfp_port in qsfp_list:
-        a += qsfp_init(s, qsfp_port)
+
+    if marble:
+        for qsfp_port in qsfp_list:
+            a += qsfp_init(s, qsfp_port)
+    else:
+        for sfp_port in sfp_list:
+            a += sfp_init(s, sfp_port)
+
     a += s.trig_analyz()
     for fmc_port in fmc_list:
         a += busmux_sel(s, fmc_port)
         a += s.pause(10)
         a += s.read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
-        # += s.read(0xa0, 0, 27, addr_bytes=2)  # AT24C32D on Zest
-        # attempt to power-down the ADN4600 on the FMC Carrier Tester
-        # cuts total current at 10.5V from 0.58A to 0.43A, 1.6W reduction
-        # (can't see it on the 12V current, since IC7 is powered from P3V3)
-        for xppr in [0xE3, 0xEB, 0xF3, 0xFB, 0xDB, 0xD3, 0xCB, 0xC3]:
-            a += s.write(0x90, xppr, [0])
+        a += s.read(0xa0, 0, 27, addr_bytes=2)  # AT24C32D on Zest
+        fmc_tester = 0
+        if fmc_tester:
+            # attempt to power-down the ADN4600 on the FMC Carrier Tester
+            # cuts total current at 10.5V from 0.58A to 0.43A, 1.6W reduction
+            # (can't see it on the 12V current, since IC7 is powered from P3V3)
+            for xppr in [0xE3, 0xEB, 0xF3, 0xFB, 0xDB, 0xD3, 0xCB, 0xC3]:
+                a += s.write(0x90, xppr, [0])
     #
     jump_n = 9
     a += s.jump(jump_n)
@@ -94,22 +131,29 @@ def hw_test_prog():
         a += s.read(ax, 1, 2)  # shunt voltage
         a += s.read(ax, 2, 2)  # bus voltage
     #
-    for qsfp_port in qsfp_list:
-        a += qsfp_poll(s, qsfp_port)
-    # FMC carrier tester card possible on FMC1 and FMC2
-    # Set of six MCP23017 on application I2C bus (LA_02_P and LA_02_N)
-    for cfg in [2, 4]:
-        a += s.hw_config(cfg)
-        for mcp23017 in [0x4E, 0x48, 0x44, 0x4C, 0x42]:  # skip 0x4A
-            a += s.read(mcp23017, 0x12, 2)  # read pin values
-    a += s.hw_config(0)
-    for fmc_port in fmc_list:
-        a += busmux_sel(s, fmc_port)
-        # AD7997 on standard I2C bus
-        # ch6: P3V3,  ch7: P12V,  ch8: Vadj
-        for chan_7797 in [6, 7, 8]:
-            apb_7797 = (chan_7797+7) << 4
-            a += s.read(0x46, apb_7797, 2)  # convert and read specified channel
+    if marble:
+        for qsfp_port in qsfp_list:
+            a += qsfp_poll(s, qsfp_port)
+    else:
+        for sfp_port in sfp_list:
+            a += sfp_poll(s, sfp_port)
+
+    if fmc_tester:
+        # FMC carrier tester card possible on FMC1 and FMC2
+        # Set of six MCP23017 on application I2C bus (LA_02_P and LA_02_N)
+        for cfg in [2, 4]:
+            a += s.hw_config(cfg)
+            for mcp23017 in [0x4E, 0x48, 0x44, 0x4C, 0x42]:  # skip 0x4A
+                a += s.read(mcp23017, 0x12, 2)  # read pin values
+        a += s.hw_config(0)
+        for fmc_port in fmc_list:
+            a += busmux_sel(s, fmc_port)
+            # AD7997 on standard I2C bus
+            # ch6: P3V3,  ch7: P12V,  ch8: Vadj
+            for chan_7797 in [6, 7, 8]:
+                apb_7797 = (chan_7797+7) << 4
+                a += s.read(0x46, apb_7797, 2)  # convert and read specified channel
+
     a += s.buffer_flip()  # Flip right away, so most info is minimally stale
     # This does mean that the second readout of the PCA9555 will be extra-stale
     # or even (on the first trip through) invalid.
@@ -130,5 +174,5 @@ def hw_test_prog():
 
 
 if __name__ == "__main__":
-    a = hw_test_prog()
+    a = hw_test_prog(marble)
     print("\n".join(["%02x" % x for x in a]))
