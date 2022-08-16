@@ -174,5 +174,6 @@ def hw_test_prog(marble):
 
 
 if __name__ == "__main__":
+    marble = 1
     a = hw_test_prog(marble)
     print("\n".join(["%02x" % x for x in a]))
