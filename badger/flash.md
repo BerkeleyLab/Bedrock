@@ -40,7 +40,7 @@ This discussion and software revolves around the write-protect feature
 of a Spansion/Cypress/Infineon S25FL128S
 (note that Spansion merged with Cypress in 2014,
 which was in turn acquired by Infineon in 2020).
-See the Inifineon [data sheet for S25FL128S, S25FL256S](https://www.infineon.com/dgdl/Infineon-S25FL128S_S25FL256S_128_Mb_%2816_MB%29_256_Mb_%2832_MB%29_3.0V_SPI_Flash_Memory-DataSheet-v18_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ecfb6a64a17),
+See the Infineon [data sheet for S25FL128S, S25FL256S](https://www.infineon.com/dgdl/Infineon-S25FL128S_S25FL256S_128_Mb_%2816_MB%29_256_Mb_%2832_MB%29_3.0V_SPI_Flash_Memory-DataSheet-v18_00-EN.pdf?fileId=8ac78c8c7d0d8da4017d0ecfb6a64a17),
 001-98283 Rev. *R, 2022-06-10.
 
 ```
@@ -58,11 +58,15 @@ This is important, because Xilinx FPGAs boot starting at address 0.
 
 ## Operation
 
-Quoting p. 53 of that data sheet:
+Quoting p. 55 of that data sheet:
 "The desired state of TBPROT must be selected during the initial configuration
 of the device during system manufacture; before the first program or erase
 operation on the main flash array. TBPROT must not be programmed after
 programming or erasing is done in the main flash array."
+
+Other crucial paragraphs to read are p. 52 about the Status Register
+Write Disable (SRWD) bit SR1[7], and p. 56 about the Freeze Protection
+(FREEZE) bit CR1[0].
 
 The board first needs to have a Packet Badger-based bitfile loaded
 over JTAG.  Ethernet must be connected and routed to your workstation,
@@ -81,10 +85,13 @@ python3 spi_test.py --ip $IP --config_init
 python3 spi_test.py --ip $IP --id
 ```
 
-Now it should report CONFIG_REG (CR1) = 0x20, with the TBPROT bit set.
+Now it should report CONFIG_REG (CR1) = 0x21, with the TBPROT and FREEZE
+bits set.  Because of the OTP (one-time-programmable) nature of bits in CR1,
+this step has not been extensively tested.
 
 To program the golden image at address zero,
-make sure the Write Protect switch is off,
+make sure the Write Protect switch is off, use the --id feature
+to check that the FREEZE bit is off (may require a power-cycle), and
 
 ```sh
 python3 spi_test.py --ip $IP --add 0 --program $BITFILE --force_write_enable
