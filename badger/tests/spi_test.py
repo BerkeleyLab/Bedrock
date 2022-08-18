@@ -1,13 +1,31 @@
 #!/usr/bin/python
 
+# Runtime support for programming SPI boot flash over the network.
+# Also ties into the FPGA runtime-reboot mechanism.
+
+# The gateware that this python code communicates with has nothing
+# to do with the usual LBNL local bus!  Rather, spi_flash.v is its
+# own plugin to Packet Badger, with its own UDP port (typically 804).
+
+# Additional use-case documentation in ../flash.md.
+
+# Historical notes about network setup on Linux
 # ifconfig eth0 up 192.168.21.1
 # route add -net 192.168.8.0 netmask 255.255.255.0 dev eth0
-
 # also see ~/llrf/eth_2012/lantest
 # and ~/llrf/eth_2012/UDP_TxRx_test.lua
 
+# Typical flash chips:
 # Winbond W25X16, W25X32, W25X64
 # See w25x.pdf and spi_flash_engine.v
+# Cypress S25FL128S, S25FL256S
+# See s25fl128s.pdf
+
+# XC7A100T on Marble-Mini:  bitfile is 3727 kBytes
+# XC7K160T on Marble:  bitfile is 6536 kBytes
+# with 128 Mbit = 16 Mbyte flash chip,
+# use TBPROT=1 BP2=1 BP1=1 BP0=0 to protect the lower half (8192 kByte),
+# since Xilinx FPGAs SPI-boot from address zero.
 
 import socket
 import struct
@@ -30,6 +48,8 @@ def hexfromba(ba):
         return ba.hex()
 
 
+EXPERT = False  # not externally documented
+
 # prefix
 MSG_PREFIX     = bafromhex(b'5201')            # 52 01
 CHK_PREFIX     = bafromhex(b'5200')            # 52 00
@@ -38,7 +58,7 @@ CHK_PREFIX     = bafromhex(b'5200')            # 52 00
 RELEASE_PD     = bafromhex(b'01ab')            # 01 ab              Release Power Down
 READ_STATUS_1  = bafromhex(b'020500')          # 05 dd              Read Status Register
 READ_STATUS_2  = bafromhex(b'023500')
-READ_JEDEC_ID  = bafromhex(b'049f000000')      # 9F dd dd dd        Read JEDEC ID
+READ_JEDEC_ID  = bafromhex(b'049f000000')      # 9F dd dd dd        Read JEDEC ID (RDID)
 READ_DEVICE_ID = bafromhex(b'06900000000000')  # 90 00 00 00 dd dd  Read Device ID
 READ_CONFIG_REG = bafromhex(b'023500')         # 35 dd              Read Configuration Register
 CLEAR_STATUS   = bafromhex(b'0130')            # 30                 Clear Status Register
@@ -50,10 +70,10 @@ ERASE_BLOCK_64 = bafromhex(b'04d8')            # d8 nn nn nn        Erase Block 
 READ_FAST      = bafromhex(b'0d0b')            # 0b nn nn nn        Fast Read (261 bytes)
 READ_DATA      = bafromhex(b'0c03')            # 03 nn nn nn        Read Data (260 bytes)
 PAGE_PROG      = bafromhex(b'0c02')            # 02 nn nn nn dd     Page program (260 bytes)
-WRITE_DISABLE  = bafromhex(b'0104')            # 04                 Write Disaable
-WRITE_ENABLE   = bafromhex(b'0106')            # 06                 Write Enable
-WRITE_STATUS   = bafromhex(b'0201')            # 01 dd              Write Status Register
-WRITE_CONFIG   = bafromhex(b'0301')            # 01 dd dd           Write Status and Config
+WRITE_DISABLE  = bafromhex(b'0104')            # 04                 Write Disable
+WRITE_ENABLE   = bafromhex(b'0106')            # 06                 Write Enable (WREN)
+WRITE_STATUS   = bafromhex(b'0201')            # 01 dd              Write Status Register (WRR)
+WRITE_CONFIG   = bafromhex(b'0301')            # 01 dd dd           Write Status and Config (WRR)
 READ_OTP       = bafromhex(b'0d4b')            # 4b nn nn nn        Like Fast Read (261 bytes)
 
 # ICAP_SPARTAN6 commands
@@ -131,23 +151,32 @@ def read_id(s):
     capacity = r[len(r) - 8]
     mem_type = r[len(r) - 9]
     logging.debug('From: %s \n Tx length: %d\n Rx length: %d\n' % (addr, len(p), len(r)))
-    print('Manufacturer ID: %02x' % manu_id)
+    manu_list = {1: "Cypress"}
+    manu_name = manu_list[manu_id] if manu_id in manu_list else "Unknown"
+    cap_list = {0x18: "128 Mb", 0x19: "256 Mb"}
+    cap_name = cap_list[capacity] if capacity in cap_list else "Unknown"
+    print('Manufacturer ID: %02x (%s)' % (manu_id, manu_name))
     print('Device ID:       %02x' % dev_id)
     print('Memory Type:     %02x' % mem_type)
-    print('Capacity:        %02x' % capacity)
+    print('Capacity:        %02x (%s)' % (capacity, cap_name))
     return
 
 
 # Read status reg 1, twice for good measure
-def read_status(s):
+def read_status_config(s, verbose=False):
     p = READ_CONFIG_REG + 2 * READ_STATUS_1
     r, addr = do_message(s, p, verbose=False)
     status_reg = r[len(r) - 1]
     config_reg = r[len(r) - 1 - 2 * len(READ_STATUS_1)]
-    print("CONFIG_REG (CR1) = %x" % config_reg)
-    logging.debug('From: %s \n Tx length: %d\n Rx length: %d\n' % (addr, len(p), len(r)))
-    logging.info('Check Status Reg: %02x' % status_reg)
-    return status_reg
+    if verbose:
+        print("CONFIG_REG (CR1) = 0x%2.2x" % config_reg)
+        bits = ["LC1", "LC0", "TBPROT", "DNU", "BPNV", "TBPARM", "QUAD", "FREEZE"]
+        for ix, b in enumerate(bits):
+            v = (config_reg >> (7 - ix)) & 1
+            print("%8s %d" % (b, v))
+        logging.debug('From: %s \n Tx length: %d\n Rx length: %d\n' % (addr, len(p), len(r)))
+        logging.info('Check Status Reg: %02x' % status_reg)
+    return status_reg, config_reg
 
 
 #  20 nn nn nn   Sector Erase (4 kB)
@@ -239,7 +268,7 @@ def reset_chip(s):
 
 
 def page_program(s, ad, bd):
-    # 256 bytes of data 'bd' to be writen to page at address 'ad'
+    # 256 bytes of data 'bd' to be written to page at address 'ad'
     if len(bd) != PAGE:
         logging.warning('length of data %d not equal to 256' % (len(bd)))
         # pad with 0xff
@@ -387,10 +416,17 @@ def main():
                         help='Wait time between consecutive writes (seconds)')
     parser.add_argument('--otp', action='store_true',
                         help='Access One Time Programmable area of S25FL chip')
-    parser.add_argument('--status_write', type=lambda x: int(x, 0),
-                        help='A value to be written to status register')
-    parser.add_argument('--config_write', type=lambda x: int(x, 0),
-                        help='A value to be written to the config register')
+    parser.add_argument('--clear_status', action='store_true',
+                        help='Clear status (CLSR)')
+    parser.add_argument('--force_write_enable', action='store_true',
+                        help='Configure flash to write normally protected blocks; only works if WE# pin is high')
+    if EXPERT:
+        parser.add_argument('--status_write', type=lambda x: int(x, 0),
+                            help='A value to be written to status register (Experts only)')
+        parser.add_argument('--config_write', type=lambda x: int(x, 0),
+                            help='A value to be written to the config register (Experts only)')
+    parser.add_argument('--config_init', action='store_true',
+                        help='Set OTP bits to Marble default')
     # TODO: Does the user really need to know this? Can this just be queried from the chip?
     parser.add_argument('--reboot6', action='store_true',
                         help='Reboot chip using Xilinx Spartan6 ICAP primitive')
@@ -430,20 +466,58 @@ def main():
         fileinfo = os.stat(prog_file)
         size = fileinfo.st_size
         print("file size %d" % size)
+        if size > 7*1024*1024:
+            print("Too big!")
+            exit(1)
+        # XXX refactor this into a function
         clear_status(sock)
+        status, cnf = read_status_config(sock)
+        if (status & 0x3) != 0:
+            print("Status 0x%2.2x: clear errors first" % status)
+            exit(1)
+        # require TBPROT set, BPNV clear
+        # ignore DNU and TBPARM at least for now
+        if (cnf & 0x28) != 0x20:
+            print("CONFIG_REG 0x%2x OTP bits not good for programming!" % cnf)
+            exit(1)
+        if args.force_write_enable:
+            status1 = status & 0xE3  # attempt force all BP bits to zero
+            write_status(sock, status1)
+            time.sleep(0.3)  # empirically needed,
+            read_id(sock)  # otherwise status2 comes back not updated
+            status2, cnf = read_status_config(sock)
+            if status2 != status1:
+                print("Failed to set status from 0x%2.2x to 0x%2.2x, now 0x%2.2x" % (status, status1, status2))
+                print("Check Write-Protect switch")
+                exit(1)
         remote_erase(sock, ad, size)
         remote_program(sock, prog_file, ad, size)
+        if args.force_write_enable:
+            write_status(sock, status)  # back to what it was
 
     if args.erase:
         remote_erase(sock, ad, args.erase)
 
+    if args.clear_status:
+        clear_status(sock)
+        write_enable(sock, False)
+        clear_status(sock)
+
     if args.id:
         read_id(sock)
-        read_status(sock)
+        read_status_config(sock, verbose=True)
 
-    # TODO: Ignoring test_tx since no codepath exists
+    # TODO: Ignoring test_tx since no code path exists
 
-    if args.status_write is not None:
+    if args.config_init:
+        print("Before:")
+        status, cnf = read_status_config(sock, verbose=True)
+        if (cnf != 0) and not EXPERT:
+            print("Unexpected CONFIG, aborting")
+            exit(1)
+        write_status(sock, 0x98, config=0x24)
+        write_status(sock, 0x98, config=0x25)
+    elif EXPERT and args.status_write is not None:
         write_status(sock, args.status_write, config=args.config_write)
 
     if args.reboot6:
