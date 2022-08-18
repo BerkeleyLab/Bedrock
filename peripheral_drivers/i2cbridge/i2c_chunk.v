@@ -11,8 +11,11 @@ module i2c_chunk(
 	output [7:0] lb_dout,  // Data made available to local bus master
 	// Auxiliary control and status
 	input run_cmd,  // Command sequencer to run
+	input trace_cmd,  // Command analyzer to run
 	input freeze,  // Keep output buffer from changing
 	output run_stat,  // Reports if sequencer is running
+	output analyze_armed,
+	output analyze_run,  // reports if logic analyzer is tracing
 	output updated,  // New data is available in output buffer
 	output err_flag,  // Error condition detected
 	output [3:0] hw_config,  // Can be used to select between I2C busses
@@ -20,6 +23,8 @@ module i2c_chunk(
 	output scl,  // Direct drive of SCL pin
 	output sda_drive,  // Low value should operate pull-down of SDA pin
 	input  sda_sense,  // SDA pin
+	input  scl_sense,  // SCL pin
+	input  trig_mode,  // 0 = internal (ta op code), 1 = external (pins)
 	input  rst,  // not yet used
 	input  intp  // not yet used
 );
@@ -53,7 +58,7 @@ end
 wire bit_adv, sda_h;
 wire [1:0] bit_cmd;
 wire [9:0] p_addr;
-reg  [7:0] p_data;
+reg  [7:0] p_data=0;
 wire [7:0] result;
 wire result_stb;
 wire [9:0] result_p;
@@ -76,21 +81,30 @@ i2c_bit ibit (.clk(clk),
 
 // Then i2c_analyze observes the pin levels
 wire [7:0] trace;
-wire trace_push;
+wire trace_push, ext_trig;
 reg trace_run=0;
 i2c_analyze analyze(.clk(clk), .tick(tick),
-	.scl(scl), .sda(sda_h), .intp(intp), .rst(rst),
-	.bit_adv(bit_adv), .bit_cmd(bit_cmd),
+	.scl(scl_sense), .sda(sda_sense), .intp(intp), .rst(rst),
+	.bit_adv(bit_adv), .bit_cmd(bit_cmd), .trig_out(ext_trig),
 	.trace(trace), .trace_push(trace_push), .run(trace_run)
 );
 
 reg [9:0] trace_a=0;  // Trace buffer counter, might be OK to stay here
 reg [7:0] trace_h=0;  // analyze module doesn't buffer this
-reg trace_k=0;
+reg trace_k=0, trace_armed=0, trace_cmd_d=0;
+wire trigger = trig_mode ? ext_trig : trig_analyz;
+wire trace_done = &trace_a;
 always @(posedge clk) begin
-	if (trig_analyz) trace_run <= 1;
-	if (&trace_a) trace_run <= 0;
+	trace_cmd_d <= trace_cmd;
+	if (trace_cmd & ~trace_cmd_d & ~trace_run) trace_armed <= 1;
+	if (trace_armed & trigger) begin
+		trace_run <= 1;
+		trace_armed <= 0;
+	end
+	if (trace_done) trace_run <= 0;
 end
+assign analyze_run = trace_run;
+assign analyze_armed = trace_armed;
 
 // Logic governing ping-pong result buffer
 // Updated flag can be read along with data during a freeze

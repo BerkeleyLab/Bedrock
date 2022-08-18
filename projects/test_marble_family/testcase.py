@@ -32,38 +32,40 @@ def read_result(dev, i2c_base=0x040000, result_len=20, run=True):
     return result
 
 
-def wait_for_new(dev, timeout=120, sim=False):
+def wait_for_bit(dev, mask, equal, timeout=520, sim=False, progress="."):
     for ix in range(timeout):
         if sim:
             dev.exchange(125*[0])  # twiddle our thumbs for 1000 clock cycles
         else:
             sleep(0.02)
         updated = dev.exchange([9])
-        # print("%d updated? %d" % (ix, updated))
-        if updated & 1:
+        print("%d updated? %d" % (ix, updated))
+        if (updated & mask) == equal:
             sys.stdout.write("OK\n")
             break
         else:
-            sys.stdout.write(".")
+            sys.stdout.write(progress)
             sys.stdout.flush()
+    else:
+        sys.stdout.write("timeout\n")
+    return updated
 
 
-def wait_for_stop(dev, timeout=120, sim=False):
-    for ix in range(timeout):
-        if sim:
-            dev.exchange(125*[0])  # twiddle our thumbs for 1000 clock cycles
-        else:
-            sleep(0.02)
-        updated = dev.exchange([9])
-        # print("%d updated? %d" % (ix, updated))
-        if (updated & 4) == 0:
-            sys.stdout.write("OK\n")
-            if updated & 1:
-                read_result(dev, result_len=0, run=False)  # clear "new" bit
-            break
-        else:
-            sys.stdout.write("-")
-            sys.stdout.flush()
+def wait_for_new(dev, timeout=520, sim=False):
+    print("wait_for_new")
+    wait_for_bit(dev, 1, 1, timeout=timeout, sim=sim, progress=".")
+
+
+def wait_for_stop(dev, timeout=220, sim=False):
+    print("wait_for_stop")
+    updated = wait_for_bit(dev, 4, 0, timeout=timeout, sim=sim, progress="-")
+    if updated & 1:
+        read_result(dev, result_len=0, run=False)  # clear "new" bit
+
+
+def wait_for_trace(dev, timeout=520, sim=False):
+    print("wait_for_trace")
+    wait_for_bit(dev, 24, 0, timeout=timeout, sim=sim, progress="=")
 
 
 def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, debug=False):
@@ -73,7 +75,7 @@ def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, 
     i2c_base = 0x040000
     addr = range(i2c_base, i2c_base+len(prog))
     dev.exchange(addr, values=prog)
-    dev.exchange([327687], values=[2])  # run_cmd=1
+    dev.exchange([327687], values=[10])  # run_cmd=1, trig_run=1
     wait_for_new(dev, sim=sim)
     result = read_result(dev, result_len=result_len)
     if stop:
@@ -83,18 +85,19 @@ def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, 
     logic = dev.exchange(addr)
     if stop:
         wait_for_stop(dev, sim=sim)
-    if sim:
-        # stop simulation
-        dev.exchange([327686], values=[1])
     if debug:
         print(logic)
     if capture is not None:
+        wait_for_trace(dev, sim=sim)
         # corresponds to hard-coded 6, 2 in i2c_chunk_tb.v
         mtime = 1 << 6
         dw = 2
         with open(capture, "w") as ofile:
             # 125 MHz clock and twi_q0=8
             produce_vcd(ofile, logic, dw=dw, mtime=mtime, t_step=8*(2**8))
+    if sim:
+        # stop simulation
+        dev.exchange([327686], values=[1])
     return result
 
 
@@ -318,7 +321,7 @@ if __name__ == "__main__":
         prog = poller.hw_test_prog()
 
     # OK, setup is finished, start the actual work
-    dev = lbus_access.lbus_access(ip, port=udp, allow_burst=False)
+    dev = lbus_access.lbus_access(ip, port=udp, timeout=3.0, allow_burst=False)
     if args.poll:
         while True:
             wait_for_new(dev, sim=sim)
