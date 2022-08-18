@@ -68,6 +68,22 @@ def wait_for_trace(dev, timeout=520, sim=False):
     wait_for_bit(dev, 24, 0, timeout=timeout, sim=sim, progress="=")
 
 
+def acquire_vcd(dev, capture, i2c_base=0x040000, sim=False, timeout=None, debug=False):
+    wait_for_trace(dev, sim=sim)
+    # read out "logic analyzer" data
+    addr = range(i2c_base+0x400, i2c_base+0x400+1024)
+    logic = dev.exchange(addr)
+    if debug:
+        print(logic)
+    # corresponds to hard-coded 6, 2 in i2c_chunk_tb.v
+    mtime = 1 << 6
+    dw = 2
+    tq = 8
+    t_step = 8*(2**tq)  # 125 MHz clock
+    with open(capture, "w") as ofile:
+        produce_vcd(ofile, logic, dw=dw, mtime=mtime, t_step=t_step)
+
+
 def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, debug=False):
     dev.exchange([327687], values=[0])  # run_cmd=0
     wait_for_stop(dev, sim=sim)
@@ -80,21 +96,10 @@ def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, 
     result = read_result(dev, result_len=result_len)
     if stop:
         dev.exchange([327687], values=[0])  # run_cmd=0
-    # read out "logic analyzer" data
-    addr = range(i2c_base+0x400, i2c_base+0x400+1024)
-    logic = dev.exchange(addr)
     if stop:
         wait_for_stop(dev, sim=sim)
-    if debug:
-        print(logic)
     if capture is not None:
-        wait_for_trace(dev, sim=sim)
-        # corresponds to hard-coded 6, 2 in i2c_chunk_tb.v
-        mtime = 1 << 6
-        dw = 2
-        with open(capture, "w") as ofile:
-            # 125 MHz clock and twi_q0=8
-            produce_vcd(ofile, logic, dw=dw, mtime=mtime, t_step=8*(2**8))
+        acquire_vcd(dev, capture, sim=sim, timeout=500, debug=debug)
     if sim:
         # stop simulation
         dev.exchange([327686], values=[1])

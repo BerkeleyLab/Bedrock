@@ -35,7 +35,7 @@ module marble_base (
 	output cfg_d02,
 
 	// One I2C bus, everything gatewayed through a TCA9548
-	output [3:0] twi_scl,
+	inout  [3:0] twi_scl,
 	inout  [3:0] twi_sda,
 	inout  TWI_RST,
 	input  TWI_INT,
