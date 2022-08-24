@@ -208,3 +208,7 @@ generate for (c_n=0; c_n < 2; c_n=c_n+1) begin: cryomodule_cavity
     );
 end endgenerate
 ```
+
+
+### Additional Resources
+<https://gitlab.lbl.gov/hdl-libraries/bedrock/-/wikis/home/Newad-HOWTO>
