@@ -87,7 +87,7 @@ net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 # Actual regression test of the above; tricky!
 # Depends on UDP port 8030 not being tied up.
 # It would be nice to have a "quiet" option to udp-vpi.
-net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_sfp.dat
+net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_trx.dat
 	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py --sim --ramtest --stop --rlen=34
 
 # =====
@@ -113,7 +113,7 @@ marble2.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/m
 
 # =====
 # Initialization file for i2cbridge
-read_sfp.dat: read_sfp.py
+read_trx.dat: read_trx.py
 	$(PYTHON) $< > $@
 
 # Build a testbench with Verilator that can be put on the (simulated) network as 192.168.7.4
@@ -126,13 +126,13 @@ Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c 
 	MAKEFLAGS="" make -C obj_dir -f Vmarble_base.mk USER_CPPFLAGS="-I $(BADGER_DIR)/tests"
 	mv obj_dir/$@ $@
 # Recipe:
-#  make VLATOR_TIMESCALEMOD= Vmarble_base read_sfp.dat && ./Vmarble_base +trace
+#  make VLATOR_TIMESCALEMOD= Vmarble_base read_trx.dat && ./Vmarble_base +trace
 #  ping -c 2 192.168.7.4; python3 lbus_access.py -a 192.168.7.4 -t 3 mem 2097200:8; python3 lbus_access.py -a 192.168.7.4 -t 3 reg 327686=1
 #  gtkwave marble_base_sim.vcd marble_base_sim.gtkw
 
 # =====
 # bitfile
-MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_sfp.dat
+MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_trx.dat
 marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
 	echo $^ | tr ' ' '\n' > $@
 
@@ -168,5 +168,5 @@ clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
 	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
-	rm -f read_sfp.dat Vmarble_base bit_stamp_mod udprtx
+	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx
 	rm -rf _xilinx .Xil obj_dir __pycache__
