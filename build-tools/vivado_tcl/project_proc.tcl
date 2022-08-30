@@ -126,6 +126,15 @@ proc project_add_files {project_files} {
         set_property file_type {Verilog Header} [get_files $verilog_header]
     }
 
+    # prevent tools from compiling memory initialization files
+    set mem_init_src [get_files *.mem]
+    set hex_init_src [get_files *.hex]
+    set ram_init_src [get_files *.ram]
+    set init_src [list {*}$mem_init_src {*}$hex_init_src {*}$ram_init_src]
+    foreach init $init_src {
+        set_property file_type {Memory Initialization Files} [get_files $init]
+    }
+
     set imp_xdc_src [get_files *_imp.xdc]
     foreach xdc $imp_xdc_src {
         set_property USED_IN_SYNTHESIS 0 [get_files $xdc]
