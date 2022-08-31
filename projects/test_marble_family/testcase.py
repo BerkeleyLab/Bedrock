@@ -78,7 +78,7 @@ def acquire_vcd(dev, capture, i2c_base=0x040000, sim=False, timeout=None, debug=
     # corresponds to hard-coded 6, 2 in i2c_chunk_tb.v
     mtime = 1 << 6
     dw = 2
-    tq = 8
+    tq = 6  # should match twi_q0 in lb_marble_slave.v
     t_step = 8*(2**tq)  # 125 MHz clock
     with open(capture, "w") as ofile:
         produce_vcd(ofile, logic, dw=dw, mtime=mtime, t_step=t_step)
