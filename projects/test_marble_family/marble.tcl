@@ -36,9 +36,16 @@ set_property top "marble_top" [current_fileset]
 set_property verilog_define [list "CHIP_FAMILY_7SERIES"] [current_fileset]
 
 # Get git commit ID
-set gitid [exec git rev-parse --short=8 --verify HEAD]
-set gitid_v 32'h$gitid
-set new_defs [list "GIT_32BIT_ID=$gitid_v" "REVC_1W"]
+# Check for export-subst attribute applied by git archive
+if { {$Format:%%$} == {%} } {
+   set gitid_l {$Format:%H$}
+} else {
+   set gitid_l [exec git rev-parse --verify HEAD]
+}
+set gitid [string range $gitid_l 0 7]
+# set gitid_v 32'h$gitid
+# set new_defs [list "GIT_32BIT_ID=$gitid_v" "REVC_1W"]
+set new_defs [list "REVC_1W"]
 
 launch_runs synth_1
 wait_on_run synth_1
@@ -72,7 +79,7 @@ project_rpt $my_proj_name
 # experimental!
 # this old_commit value matches that in build_rom.py --placeholder_rev
 set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
-set new_commit [string toupper [exec git rev-parse HEAD]]
+set new_commit [string toupper $gitid_l]
 swap_gitid $old_commit $new_commit 16 0
 
 write_bitstream -force $build_id.$gitid.x.bit
