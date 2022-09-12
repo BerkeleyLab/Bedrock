@@ -199,7 +199,6 @@ generate if (USE_I2CBRIDGE) begin
 	);
 	assign twi_status = {twi_analyze_run, twi_analyze_armed, twi_run_stat, twi_err, twi_updated};
 	//
-	// Incomplete bus mux stuff
 	// twi_scl_l == pull pin low (dominates)
 	// twi_scl_h == pull pin high
 	// neither == let pin float
