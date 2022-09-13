@@ -387,27 +387,16 @@ class c_zest:
     def adc_test_reset(self):
         self.reset_pulse('adc_test_reset')
 
-    def digitizer_spi_init(self, dac_nm_mode=False):
-        self.leep.reg_write([('periph_config', 0xfffffffd)])
-        self.spi_flush()
+    def lmk_spi_init(self, divisors=["111", "000"]):
         sys.stdout.write("start lmk setup -")
         self.spi_write(self.lmk_spi, 15, self.lmk_spi.R15(uWireLock="0"))
         self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(RESET='1'))
-        if False:
-            # Check this if running on sliderule.dhcp with 377MHz input clock
-            self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
-                RESET='0',
-                CLKin0_DIV="010",  # div-by-2
-                CLKin1_DIV="000",  # div-by-8
-                CLKin1_MUX="01",
-                CLKin0_MUX="01"))
-        else:
-            self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
-                RESET='0',
-                CLKin0_DIV="111",  # div-by-7
-                CLKin1_DIV="000",  # div-by-8
-                CLKin1_MUX="01",
-                CLKin0_MUX="01"))
+        self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
+            RESET='0',
+            CLKin0_DIV=divisors[0],  # div-by-2 --> "010", # div-by-7 --> "111"
+            CLKin1_DIV=divisors[1],  # div-by-8 --> "000"
+            CLKin1_MUX="01",
+            CLKin0_MUX="01"))
         self.spi_write(self.lmk_spi, 1, self.lmk_spi.R1(
             CLKout7_TYPE="0000",   # Powerdown  unused
             CLKout4_TYPE="0000",   # Powerdown  P2-H4,H5 LMK_CLKout4_{P,N}
@@ -442,23 +431,27 @@ class c_zest:
         sys.stdout.write("done\n")
         sys.stdout.flush()
 
+    def various_resets(self):
         sys.stdout.write("various resets -")
         self.idelayctrl_reset()
+        self.U2_adc_iserdes_reset()
+        self.U3_adc_iserdes_reset()
         self.dac_reset()
         for adc in [self.U2_adc_spi, self.U3_adc_spi]:
-            self.spi_write(adc, 0x00, '00111100')
-            self.spi_write(adc, 0x08, '00000011')
-            self.spi_write(adc, 0x08, '00000000')
+            self.spi_write(adc, 0x00, '00111100')  # Soft reset
+            self.spi_write(adc, 0x08, '00000011')  # reset power
+            self.spi_write(adc, 0x08, '00000000')  # chip run
             # init
-            self.spi_write(adc, 0x100, '01000110')
-            self.spi_write(adc, 0xff, '00000001')
-            self.spi_write(adc, 0x14, '00000010')
+            self.spi_write(adc, 0x100, '01000110')  # sample rate 125 MSPS override XXX
+            self.spi_write(adc, 0xff, '00000001')  # transfer above command
+            self.spi_write(adc, 0x14, '00000010')  # offset binary
             # self.spi_write(adc, 0x16, '00000100')
-            self.spi_write(adc, 0x18, '00000100')
-            self.spi_write(adc, 0x09, '00000001')
+            self.spi_write(adc, 0x18, '00000100')  # 2.6Vp-p with Vref 1.3V
+            self.spi_write(adc, 0x09, '00000001')  # Duty cycle stabilizer off
         sys.stdout.write("done\n")
         sys.stdout.flush()
 
+    def initialization(self, dac_nm_mode=False):
         print("AD9653 initialization")
         aok = self.ad9653_spi_dump([self.U2_adc_spi, self.U3_adc_spi])
         if not aok:
@@ -514,6 +507,14 @@ class c_zest:
         self.amc_write(1, 0xd, 0xffff)
         print("done")
         sys.stdout.flush()
+
+    def digitizer_spi_init(self, dac_nm_mode=False):
+        self.leep.reg_write([('periph_config', 0xfffffffd)])
+        self.spi_flush()
+        self.lmk_spi_init(divisors=["111", "000"])
+        self.various_resets()
+
+        self.initialization(dac_nm_mode)
         return True
 
     def mmcm_status(self, verbose=False):
