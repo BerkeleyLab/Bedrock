@@ -30,7 +30,7 @@ import argparse
 from migen import Signal, Module, ClockDomain
 
 import sys
-sys.path.append("..")
+sys.path.append("../..")
 from trigger_capture.platforms import marble
 
 # from litex.soc.cores.clock import *
