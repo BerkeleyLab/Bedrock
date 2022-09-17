@@ -12,15 +12,15 @@ puts "Building for $build_id"
 
 # Read in optional TCL script
 if { $argc == 3 } {
-   set aux_tcl [lindex $argv 2]
-   puts "Sourcing $aux_tcl"
-   source $aux_tcl
+    set aux_tcl [lindex $argv 2]
+    puts "Sourcing $aux_tcl"
+    source $aux_tcl
 }
 
 if { $build_id == "marble1" } {
-   set part "xc7a100t-fgg484-2"
+    set part "xc7a100t-fgg484-2"
 } else {
-   set part "xc7k160t-ffg676-2"
+    set part "xc7k160t-ffg676-2"
 }
 puts "Synthesizing for part $part"
 
@@ -36,11 +36,12 @@ set_property top "marble_top" [current_fileset]
 set_property verilog_define [list "CHIP_FAMILY_7SERIES"] [current_fileset]
 
 # Get git commit ID
-# Check for export-subst attribute applied by git archive
+# This file has features used if processed by git archive, and ignored
+# otherwise; see the export-subst paragraph in man gitattributes.
 if { {$Format:%%$} == {%} } {
-   set gitid_l {$Format:%H$}
+    set gitid_l {$Format:%H$}
 } else {
-   set gitid_l [exec git rev-parse --verify HEAD]
+    set gitid_l [exec git rev-parse --verify HEAD]
 }
 set gitid [string range $gitid_l 0 7]
 # set gitid_v 32'h$gitid
