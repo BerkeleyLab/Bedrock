@@ -56,7 +56,7 @@ bool i2c_write_regmap_word(uint8_t i2c_addr, t_reg16 *regmap, size_t len) {
     return ret;
 }
 
-bool init_i2c_app_devices(void) {
+bool init_i2c_app_devices(uint8_t *ina219_addr, size_t len) {
     bool ret = true;
     ret &= i2c_mux_set(I2C_SEL_APP);
 
@@ -89,20 +89,20 @@ bool init_i2c_app_devices(void) {
         {0, 0x399f},
         {5, 0xc31e}  // cal
     };
-    ret &= i2c_write_regmap_word(
-            I2C_ADR_INA219_FMC1, ina219_regmap,
-            sizeof(ina219_regmap) / sizeof(ina219_regmap[0]));
-    ret &= i2c_write_regmap_word(
-            I2C_ADR_INA219_FMC2, ina219_regmap,
-            sizeof(ina219_regmap) / sizeof(ina219_regmap[0]));
+    for (size_t ix=0; ix<len; ix++) {
+        ret &= i2c_write_regmap_word(
+                ina219_addr[ix], ina219_regmap,
+                sizeof(ina219_regmap) / sizeof(ina219_regmap[0]));
+    }
     ina219_conf.current_lsb_uA = 10;
     ina219_conf.power_lsb_uW = 200;
 
-    // XXX 0x42 address not present on hardware
-    // ret &= i2c_write_regmap_word(
-    //         I2C_ADR_INA219_12V, ina219_regmap,
-    //         sizeof(ina219_regmap) / sizeof(ina219_regmap[0]));
+    return ret;
+}
 
+bool init_i2c_marblemini_sfp(void) {
+    bool ret = true;
+    ret &= i2c_mux_set(I2C_SEL_APP);
     // ----------------------------- PCA9555 -----------------------------
     // U34
     // P0[7:0] = [[LOS, DEF0, TX_DIS, TX_FAULT] for SFP_4,1]
@@ -213,6 +213,7 @@ void get_xadc_data(void) {
 
 void print_marble_status(void) {
     t_ina219_data ina219[2];
+    i2c_mux_set(I2C_SEL_APP);
     get_ina219_data(I2C_ADR_INA219_FMC1, &ina219[0]);
     get_ina219_data(I2C_ADR_INA219_FMC2, &ina219[1]);
 
@@ -223,7 +224,7 @@ void print_marble_status(void) {
     for (size_t i=0; i<2; i++) {
         printf("INA219 FMC%1d:\n", i+1);
         // printf("Vshunt:  %6d uV\n", ina219[i].vshunt_uV);
-        // printf("power:   %6d mW\n", ina219[i].power_uW / 1000);
+        printf("power:   %6d mW\n", ina219[i].power_uW / 1000);
         printf("Vbus:    %6d mV\n", ina219[i].vbus_mV);
         printf("current: %6d mA\n", ina219[i].curr_uA / 1000);
 
@@ -231,12 +232,26 @@ void print_marble_status(void) {
         printf("P0:      %#09b\n", pca9555[i].p0_val);
         printf("P1:      %#09b\n", pca9555[i].p1_val);
     }
-    get_xadc_data();
+    // get_xadc_data();
+}
+
+bool init_marblemini(void) {
+    bool ret = true;
+    // XXX 0x42 address not present on marblemini
+    uint8_t ina219_addr [] = {
+        I2C_ADR_INA219_FMC1,
+        I2C_ADR_INA219_FMC2};
+    ret &= init_i2c_app_devices(ina219_addr, 2);
+    ret &= init_i2c_marblemini_sfp();
+    return ret;
 }
 
 bool init_marble(void) {
     bool ret = true;
-    ret &= init_i2c_app_devices();
+    // XXX 0x40 address not present on marble
+    uint8_t ina219_addr [] = {
+        I2C_ADR_INA219_12V,
+        I2C_ADR_INA219_FMC2};
+    ret &= init_i2c_app_devices(ina219_addr, 2);
     return ret;
 }
-

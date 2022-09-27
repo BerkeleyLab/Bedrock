@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "zest.h"
 #include "settings.h"
+#include "zest.h"
 #include "gpio.h"
 #include "timer.h"
 #include "spi.h"
