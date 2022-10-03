@@ -469,9 +469,10 @@ class c_zest:
         self.spi_write(self.dac_spi, 3, '00000000')
         self.spi_write(self.dac_spi, 4, '11011111')
         if not dac_nm_mode:
-            # Pick mix mode when driving on second Nyquist band.
+            # Pick RZ mode when driving on second Nyquist band.
             # E.g. LCLS2 145 MHz IF output at 188.57 MSPS
-            print("AD9781: Selecting Mix mode")
+            # If anyone ever wants mix mode, use 00000101.
+            print("AD9781: Selecting RZ mode")
             self.spi_write(self.dac_spi, 10, '00001111')
         else:
             print("AD9781: Selecting Normal mode")
@@ -545,6 +546,8 @@ class c_zest:
         if abs(adc_freq - (self.clk_freq/1e6)) > 0.01:
             print("#### WARNING #### Unexpected ADC frequency")
             print("#### (not close to %.3f MHz)" % (self.clk_freq/1e6))
+            if self.strict:
+                return False
         if self.mmcm_status(verbose=True) != 1:
             return False
         self.U2_adc_iserdes_reset()
