@@ -68,6 +68,7 @@ def busmux_reset(s):
 def hw_test_prog(marble):
     s = assem.i2c_assem()
     ina_list = [0x80, 0x82, 0x84]  # U17, U32, U58
+    si570_list = [0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c]
     # SFP1 is closest to edge of board
     # SFP4 is closest to center of board
     sfp_list = [2, 5, 4, 3]  # SFP modules 1-4, for Marble-Mini
@@ -82,8 +83,8 @@ def hw_test_prog(marble):
     a += s.read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
 
     if marble:
-        a += s.write(0x42, 6, [0xff, 0x77])  # U39 Configuration registers
-        a += s.write(0x42, 2, [0, 0x80])     # U39 output register for clkmux_reset
+        a += s.write(0x42, 6, [0xfe, 0x77])  # U39 Configuration registers
+        a += s.write(0x42, 2, [0x01, 0x88])     # U39 output register for clkmux_reset
         # pull down MOD_SEL, RESET and LPMODE, i.e set them as outputs
         a += s.write(0x44, 6, [0x37, 0x37])  # U34 Configuration registers
         a += s.write(0x44, 2, [0x48, 0x48])  # U34 Output registers
@@ -95,6 +96,9 @@ def hw_test_prog(marble):
 
     for ax in ina_list:
         a += s.read(ax, 0, 2)  # config register0 with 2 bytes to read
+
+    for ax in si570_list:
+        a += s.read(0xee, ax, 1)  # config register0 with 2 bytes to read
 
     if marble:
         for qsfp_port in qsfp_list:
@@ -125,7 +129,7 @@ def hw_test_prog(marble):
     a += s.set_resx(0)
     a += busmux_sel(s, 6)  # App bus
     # keep clkmux_reset high always
-    a += s.write(0x42, 2, [0, 0x84])  # Output registers
+    a += s.write(0x42, 2, [0x01, 0x84])  # Output registers
     a += s.pause(2)
     a += s.read(0x42, 0, 2)  # Physical pin logic levels
     a += s.read(0x44, 0, 2)  # Physical pin logic levels
@@ -162,14 +166,14 @@ def hw_test_prog(marble):
     a += s.pause(3470)
     #
     a += busmux_sel(s, 6)  # App bus
-    a += s.write(0x42, 2, [0, 0x88])  # Output registers
+    a += s.write(0x42, 2, [0x01, 0x88])  # Output registers
     a += s.pause(2)
     a += s.read(0x42, 0, 2)  # Physical pin logic levels
     a += s.pause(3470)
     if False:  # extra weird little flicker
-        a += s.write(0x42, 2, [0, 0x84])  # Output registers, LD12
+        a += s.write(0x42, 2, [0x01, 0x84])  # Output registers, LD12
         a += s.pause(1056)
-        a += s.write(0x42, 2, [0, 0x88])  # Output registers, LD11
+        a += s.write(0x42, 2, [0x01, 0x88])  # Output registers, LD11
         a += s.pause(1056)
     a += s.jump(jump_n)
     return a

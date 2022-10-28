@@ -1,5 +1,6 @@
 from time import sleep
 import sys
+import numpy as np
 bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
@@ -169,6 +170,27 @@ def print_ina219_config(title, a):
     print("%s INA219 config: 0x%4.4X %s" % (title, x, suffix))
 
 
+def compute_si570(a):
+    print(a)
+    # DCO frequency range: 4850 - 5670MHz
+    # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
+    # N1 values: 1, 2, 4, 6, 8...128
+    hs_div = a[0] >> 5
+    n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6))
+    rfreq = np.uint64((((a[1] & 0x3f) << 32) | (a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5])) / (2**28)
+
+    # fxtal = (args.default * (r['N1']+1) * (r['HSDIV']+4)) / (float(r['RFREQ']) / 2**28)
+    # fdco = args.default * (r['N1']+1) * (r['HSDIV']+4)
+    if args.debug:
+        print('Default SI570 register settings:')
+        print('RFREQ:\t'+str(rfreq))
+        print('N1:\t'+str(n1))
+        print('HSDIV:\t'+str(hs_div))
+        # print('=> Crystal frequency: '+str(fxtal)+'MHz')
+        # print('=> DCO frequency: '+str(fdco)+'MHz')
+        print('')
+
+
 def print_result(result, args, poll_only=False):
     n_fmc = 2 if args.fmc else 0
     tester = 2 if args.fmc_tester else 0
@@ -199,17 +221,22 @@ def print_result(result, args, poll_only=False):
         print_ina219_config("FMC1", result[ib+1:ib+3])
         print_ina219_config("FMC2", result[ib+3:ib+5])
         print_ina219_config("MAIN", result[ib+5:ib+7])
+        if args.si570:
+            print("########################################################################")
+            pitch = 6
+            hx = ib + 1 + pitch
+            compute_si570(result[hx:hx+pitch])
         if args.trx:
             for ix in range(transceiver):
                 print("########################################################################")
                 pitch = 50
-                hx = ib + 7 + pitch*ix
+                hx = ib + 6 + 7 + pitch*ix
                 print("Transceiver%d:  busmux readback 0x%2.2x" % (ix+1, result[hx]))
                 print_qsfp(result[1+hx:pitch+hx])
             for ix in range(n_fmc):
                 print("########################################################################")
                 pitch = 48
-                hx = ib + 207 + pitch*ix
+                hx = ib + 207 + 6 + pitch*ix
                 a1 = result[hx:hx+pitch]
                 print("FMC%d: busmux readback 0x%2.2X" % (ix+1, a1[0]))
                 print(a1[1:])
@@ -290,6 +317,8 @@ if __name__ == "__main__":
     parser.add_argument('--ramtest', action='store_true', help='RAM test program')
     parser.add_argument('--trx', action='store_true',
                         help='Transceiver test program, QSFP for Marble and SFP for Marble-Mini')
+    parser.add_argument('--si570', action='store_true',
+                        help='Read current status fo SI570')
     parser.add_argument('--stop', action='store_true', help='stop after run')
     parser.add_argument('--debug', action='store_true', help='print raw arrays')
     parser.add_argument('--poll', action='store_true', help='only poll for results')
