@@ -44,7 +44,7 @@ proc add_aux_ip {ipname config_file module_name} {
    gen_ip $ipname $module_name $config_dict
 }
 
-proc add_gt_protocol {gt_type config_file quad_num gt_num en8b10b pll_type} {
+proc add_gt_protocol {gt_type config_file quad_num gt_num en8b10b endrp pll_type} {
 
    set module_name "q${quad_num}_gt${gt_num}"
 

@@ -38,7 +38,7 @@
                           .gt0_drpen_in                (gt``GTi``_drpen_in),\
                           .gt0_drprdy_out              (gt``GTi``_drprdy_out),\
                           .gt0_drpwe_in                (gt``GTi``_drpwe_in),\
-                          `else
+                          `else\
                           .gt0_drpaddr_in              (9'b0),\
                           .gt0_drpclk_in               (drpclk_in),\
                           .gt0_drpdi_in                (16'b0),\
