@@ -37,6 +37,10 @@
                        `undef GT1_8B10B_EN\
                        `undef GT2_8B10B_EN\
                        `undef GT3_8B10B_EN\
+                       `undef GT0_DRP_EN\
+                       `undef GT1_DRP_EN\
+                       `undef GT2_DRP_EN\
+                       `undef GT3_DRP_EN\
                        `undef GT0_PLL0\
                        `undef GT1_PLL0\
                        `undef GT2_PLL0\
@@ -65,6 +69,14 @@
                        `ifdef Q``Qi``_GT2_8B10B_EN `define GT2_8B10B_EN\
                        `endif\
                        `ifdef Q``Qi``_GT3_8B10B_EN `define GT3_8B10B_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT0_DRP_EN `define GT0_DRP_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT1_DRP_EN `define GT1_DRP_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT2_DRP_EN `define GT2_DRP_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT3_DRP_EN `define GT3_DRP_EN\
                        `endif\
                        `ifdef Q``Qi``_GT0_PLL0 `define GT0_PLL0\
                        `endif\

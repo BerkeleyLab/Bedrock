@@ -64,6 +64,7 @@ proc add_gt_protocol {gt_type config_file quad_num gt_num en8b10b pll_type} {
 
    # Set defines to include required ports in GT instance
    if {$en8b10b == 1}     { add_define "Q${quad_num}_GT${gt_num}_8B10B_EN" }
+   if {$endrp == 1}       { add_define "Q${quad_num}_GT${gt_num}_DRP_EN" }
 
    set gt_type [string toupper $gt_type]
    switch $gt_type {
