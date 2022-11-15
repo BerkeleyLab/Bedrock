@@ -66,6 +66,28 @@ RUN git clone https://github.com/cliffordwolf/yosys.git && \
 
 RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4
 
+# we need a version of verilator with more than 20000, issue #1574,
+# any version > v4.110 should have this limit increased to 40000
+RUN apt-get update && \
+    apt-get install -y \
+    libfl2 \
+    libfl-dev \
+    zlibc \
+    zlib1g \
+    zlib1g-dev \
+    autoconf && \
+	rm -rf /var/lib/apt/lists/* && \
+    git clone https://github.com/verilator/verilator && \
+    cd verilator && \
+    git checkout v4.228 && \
+    autoconf && \
+    ./configure && \
+    make -j4 && \
+    make install && \
+    cd ../ && \
+    rm -rf verilator && \
+    verilator -V
+
 # SymbiYosys formal verification tool + Yices 2 solver (`sby` command)
 RUN apt-get update && \
 	apt-get install -y \
