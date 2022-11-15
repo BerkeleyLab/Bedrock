@@ -1,12 +1,10 @@
 FROM debian:bullseye-slim as testing_base_bullseye
 
 # Vivado needs libtinfo5, at least for Artix?
-# libz-dev required for Verilator FST support
 RUN apt-get update && \
 	apt-get install -y \
 	git \
 	iverilog \
-	libz-dev \
 	libbsd-dev \
 	xc3sprog \
 	build-essential \
@@ -28,14 +26,13 @@ RUN apt-get update && \
 	bison \
 	libftdi1-dev \
 	libusb-dev \
-	verilator \
 	openocd \
 	pkg-config && \
 	rm -rf /var/lib/apt/lists/* && \
 	python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
 	pip3 --version
 # Note that flex, bison, and iverilog (above) required for building vhd2vl.
-# gcc-riscv64-unknown-elf and verilator above replace our previous
+# gcc-riscv64-unknown-elf above replace our previous
 #   approach, used in Buster, of building from source
 
 # vhd2vl
@@ -67,11 +64,13 @@ RUN git clone https://github.com/cliffordwolf/yosys.git && \
 RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4
 
 # we need a version of verilator with more than 20000, issue #1574,
-# any version > v4.110 should have this limit increased to 40000
+# any version > v4.110 should have this limit increased to 40000.
+# libz-dev required for Verilator FST support
 RUN apt-get update && \
     apt-get install -y \
     libfl2 \
     libfl-dev \
+	libz-dev \
     zlibc \
     zlib1g \
     zlib1g-dev \
