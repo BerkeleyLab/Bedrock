@@ -6,7 +6,6 @@ build:
     - cat /etc/resolv.conf
     - docker info
     - echo $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
-    - echo $CONTAINER_IM_IMAGE:$CI_COMMIT_REF_NAME
   script:
     - docker pull $CONTAINER_IMAGE:latest || true
     - docker build --cache-from $CONTAINER_IMAGE:latest -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME -t $CONTAINER_IMAGE:latest .
