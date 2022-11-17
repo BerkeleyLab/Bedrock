@@ -6,11 +6,18 @@ build:
     - cat /etc/resolv.conf
     - docker info
     - echo $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
-  script:
-    - docker pull $CONTAINER_IMAGE:latest || true
-    - docker build --cache-from $CONTAINER_IMAGE:latest -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME -t $CONTAINER_IMAGE:latest .
-    - docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
-    - docker push $CONTAINER_IMAGE:latest
+    - echo $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
+    - echo $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+  script: |
+    docker pull $CONTAINER_IMAGE:latest || true
+    docker build --cache-from $CONTAINER_IMAGE:latest \
+        -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME \
+        -t $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA \
+        -t $CONTAINER_IMAGE:latest \
+        .
+    docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
+    docker push $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+    docker push $CONTAINER_IMAGE:latest
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: $CI_COMMIT_BRANCH
