@@ -22,6 +22,7 @@ module lb_marble_slave #(
 	input obadge_stb,
 	input [7:0] obadge_data,
 	input xdomain_fault,
+	input [27:0] frequency_si570,
 	// More debugging hooks
 	input [3:0] mmc_pins,
 	// Features
@@ -282,6 +283,7 @@ always @(posedge clk) if (do_rd) begin
 		4'hc: reg_bank_0 <= gps_stat;
 		4'hd: reg_bank_0 <= gps_pps_data;
 		4'he: reg_bank_0 <= pps_dsp_status;
+		4'hf: reg_bank_0 <= frequency_si570;
 		default: reg_bank_0 <= "zzzz";
 	endcase
 end

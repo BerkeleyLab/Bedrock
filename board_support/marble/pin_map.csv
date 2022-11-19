@@ -94,6 +94,10 @@ LD17       LD17
 set_property -dict {PACKAGE_PIN D6} [get_ports GTPREFCLK_P]
 set_property -dict {PACKAGE_PIN D5} [get_ports GTPREFCLK_N]
 
+# for SI570
+set_property PACKAGE_PIN H6 [get_ports GTREFCLK_P]
+set_property PACKAGE_PIN H5 [get_ports GTREFCLK_N]
+
 # Special pin properties for RGMII
 # Invalid to flag RGMII_RX_CLK as IOB TRUE
 set_property IOB TRUE [get_ports {RGMII_RX_CTRL}]
@@ -109,6 +113,7 @@ set_property CONFIG_VOLTAGE 2.5 [current_design]
 create_clock -name sys_clk -period 50.00 [get_ports SYSCLK_P]
 create_clock -period 8.00 -name tx_clk [get_ports GTPREFCLK_P]
 create_clock -period 8.00 -name rx_clk [get_ports RGMII_RX_CLK]
+create_clock -period 5.385 -name "SI57X_A" [get_ports GTREFCLK_P]
 # you need to set clock groups as asynchronous in some other file
 
 # This is a frequency source, not a phase source,

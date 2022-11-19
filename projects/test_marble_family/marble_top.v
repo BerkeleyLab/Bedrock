@@ -8,6 +8,10 @@ module marble_top(
 	input GTPREFCLK_N,
 	input SYSCLK_P,
 
+	// SI570 clock inputs
+	input GTREFCLK_P,
+	input GTREFCLK_N,
+
 	// RGMII Tx port
 	output [3:0] RGMII_TXD,
 	output RGMII_TX_CTRL,
@@ -85,6 +89,16 @@ IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0)
 // Vivado fails, with egregiously useless error messages,
 // if you don't put this BUFG in the chain to the MMCM.
 BUFG passg_125(.I(gtpclk0), .O(gtpclk));
+
+wire si570;
+// Single-ended clock derived from programmable xtal oscillator
+ds_clk_buf #(
+   .GTX (1))
+i_ds_gtrefclk1 (
+   .clk_p   (GTREFCLK_P),
+   .clk_n   (GTREFCLK_N),
+   .clk_out (si570)
+);
 
 parameter in_phase_tx_clk = 1;
 // Standardized interface, hardware-dependent implementation
@@ -176,7 +190,7 @@ marble_base #(
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
 	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
 	.vgmii_rx_dv(vgmii_rx_dv), .vgmii_rx_er(vgmii_rx_er),
-	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked),
+	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked), .si570(si570),
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
