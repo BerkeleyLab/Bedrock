@@ -9,8 +9,10 @@ module marble_top(
 	input SYSCLK_P,
 
 	// SI570 clock inputs
+	`ifdef USE_SI570
 	input GTREFCLK_P,
 	input GTREFCLK_N,
+	`endif
 
 	// RGMII Tx port
 	output [3:0] RGMII_TXD,
@@ -91,6 +93,7 @@ IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0)
 BUFG passg_125(.I(gtpclk0), .O(gtpclk));
 
 wire si570;
+`ifdef USE_SI570
 // Single-ended clock derived from programmable xtal oscillator
 ds_clk_buf #(
    .GTX (1))
@@ -99,7 +102,7 @@ i_ds_gtrefclk1 (
    .clk_n   (GTREFCLK_N),
    .clk_out (si570)
 );
-
+`endif
 parameter in_phase_tx_clk = 1;
 // Standardized interface, hardware-dependent implementation
 wire tx_clk, tx_clk90;
