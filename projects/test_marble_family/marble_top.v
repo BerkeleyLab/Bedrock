@@ -102,7 +102,10 @@ i_ds_gtrefclk1 (
    .clk_n   (GTREFCLK_N),
    .clk_out (si570)
 );
+`else
+assign si570 = 0;
 `endif
+
 parameter in_phase_tx_clk = 1;
 // Standardized interface, hardware-dependent implementation
 wire tx_clk, tx_clk90;

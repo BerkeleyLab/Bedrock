@@ -179,7 +179,7 @@ wire [31:0] lb_slave_data_read;
 
 // for looking at start-up frequency of SI570
 wire [27:0] frequency_si570;
-freq_count gt_freq_count185(.f_in(si570), .sysclk(lb_clk), .frequency(frequency_si670));
+freq_count freq_cnt_si570(.f_in(si570), .sysclk(lb_clk), .frequency(frequency_si570));
 
 //
 lb_marble_slave #(
