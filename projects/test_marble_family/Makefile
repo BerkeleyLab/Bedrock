@@ -33,7 +33,7 @@ vpath %.c $(BADGER_DIR)/tests $(BUILD_DIR)
 include $(HOMELESS_DIR)/freq_demo/freq_demo_rules.mk
 
 # This must go in front of include $(BADGER_DIR)/rules.mk
-all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check
+all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check marble_base_lint
 
 # =====
 # gps_test, too simple to need testing ... right
@@ -100,6 +100,9 @@ VFLAGS_marble_base_tb =
 no_multiple_drivers_check: marble_base_tb
 	$(AWK) '$$NF=="drivers" && $$(NF-1)>1 {print $$0; code=1}BEGIN{code=0}END{exit(code)}' $<
 	@echo PASS
+
+marble_base_lint: $(MARBLE_BASE_V)
+	$(VERILATOR) --lint-only -Wno-WIDTH -Wno-TIMESCALEMOD -Wno-PINMISSING -Wno-UNUSED -Wno-DECLFILENAME -Wno-PINCONNECTEMPTY $^
 
 # =====
 # constraint
