@@ -4,6 +4,7 @@ import numpy as np
 bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
+sys.path.append(bedrock_dir + "projects/common")
 import lbus_access
 from c2vcd import produce_vcd
 from fmc_test_l import fmc_decode
@@ -171,7 +172,6 @@ def print_ina219_config(title, a):
 
 
 def compute_si570(a):
-    print(a)
     # DCO frequency range: 4850 - 5670MHz
     # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
     # N1 values: 1, 2, 4, 6, 8...128
@@ -179,16 +179,25 @@ def compute_si570(a):
     n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6))
     rfreq = np.uint64((((a[1] & 0x3f) << 32) | (a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5])) / (2**28)
 
-    # fxtal = (args.default * (r['N1']+1) * (r['HSDIV']+4)) / (float(r['RFREQ']) / 2**28)
-    # fdco = args.default * (r['N1']+1) * (r['HSDIV']+4)
+    import leep
+    leep_addr = "leep://" + str(args.ip) + str(":") + str(args.port)
+    print(leep_addr)
+
+    addr = leep.open(leep_addr, instance=[])
+    freq_default = addr.reg_read(["frequency_si570"])
+    default = (freq_default[0]/2**24.0)*125
+    fxtal = default * hs_div * n1 / rfreq
+    fdco = default * n1 * hs_div
     if args.debug:
-        print('Default SI570 register settings:')
-        print('RFREQ:\t'+str(rfreq))
-        print('N1:\t'+str(n1))
-        print('HSDIV:\t'+str(hs_div))
-        # print('=> Crystal frequency: '+str(fxtal)+'MHz')
-        # print('=> DCO frequency: '+str(fdco)+'MHz')
-        print('')
+        print('Default SI570 settings:')
+        print('REFREQ: %4.3f MHz' % rfreq)
+        print('N1: %3d' % n1)
+        print('HSDIV: %2d' % hs_div)
+        print('Start-up frequency: %4.3f MHz' % default)
+        print('Crystal frequency: %4.3f MHz' % fxtal)
+        print('DCO frequency: %4.3f MHz' % fdco)
+    else:
+        print('SI570 start-up frequency: %4.3f MHz' % default)
 
 
 def print_result(result, args, poll_only=False):
@@ -312,6 +321,7 @@ if __name__ == "__main__":
         description="Utility for working with i2cbridge attached to Packet Badger")
     parser.add_argument('--ip', default='192.168.19.10', help='IP address')
     parser.add_argument('--udp', type=int, default=0, help='UDP Port number')
+    parser.add_argument('--port', type=int, default=803, help='Port number')
     parser.add_argument('--marble', type=int, default=1, help='Select the carrier board, Marble or Marble-Mini')
     parser.add_argument('--sim', action='store_true', help='simulation context')
     parser.add_argument('--ramtest', action='store_true', help='RAM test program')
