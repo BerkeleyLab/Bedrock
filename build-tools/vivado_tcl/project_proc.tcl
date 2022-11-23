@@ -1,6 +1,6 @@
 proc project_create {platform_name project_name} {
-    global platform
-    global project_part
+    variable platform
+    variable project_part
 
     set platform "none"
     set project_part "none"
