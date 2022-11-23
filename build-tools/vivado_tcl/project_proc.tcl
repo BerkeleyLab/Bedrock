@@ -1,10 +1,18 @@
 proc project_create {platform_name project_name} {
     variable platform
     variable project_part
+    variable project_spi_buswidth
+    variable project_cfgmem_interface
+    variable project_cfgmem_size
+    variable project_cfgrate
 
     set platform "none"
     set project_part "none"
     set project_board "none"
+    set project_spi_buswidth "4"
+    set project_cfgmem_interface "spix4"
+    set project_cfgmem_size "16"
+    set project_cfgrate "33"
 
     if [regexp "ac701" $platform_name] {
         set platform "ac701"
@@ -35,6 +43,9 @@ proc project_create {platform_name project_name} {
         set project_part "xc7k160tffg676-2"
     }
     if [regexp "marble" $platform_name] {
+        # For marble/marblemini we can only use up to x2
+        set project_spi_buswidth "2"
+        set project_cfgmem_interface "spix2"
         if [regexp "marblemini" $platform_name] {
             set platform "marblemini"
             set project_part "xc7a100t-fgg484-2"
@@ -52,20 +63,33 @@ proc project_create {platform_name project_name} {
         set project_part "xc6vlx240tff1156-1"
         set project_board "ml605"
     }
+    # For evaluation kits we can't change spi bus width or cfgmem interface
     if [regexp "vc707" $platform_name] {
         set platform "vc707"
         set project_part "xc7vx485tffg1761-2"
         set project_board "xilinx.com:vc707:part0:1.2"
+        set project_spi_buswidth "none"
+        set project_cfgmem_interface "none"
+        set project_cfgmem_size "none"
+        set project_cfgrate "none"
     }
     if [regexp "zcu111" $platform_name] {
         set platform "zcu111"
         set project_part "xczu28dr-ffvg1517-2-e"
         set project_board "xilinx.com:zcu111:part0:1.1"
+        set project_spi_buswidth "none"
+        set project_cfgmem_interface "none"
+        set project_cfgmem_size "none"
+        set project_cfgrate "none"
     }
     if [regexp "zcu208" $platform_name] {
         set platform "zcu208"
         set project_part "xczu48dr-fsvg1517-2-e"
         set project_board "xilinx.com:zcu208:part0:2.0"
+        set project_spi_buswidth "none"
+        set project_cfgmem_interface "none"
+        set project_cfgmem_size "none"
+        set project_cfgrate "none"
     }
     # planahead
     #
@@ -207,15 +231,17 @@ proc project_rpt {project_name} {
 }
 
 proc project_write_bitstream {platform} {
-    if {($platform ne "vc707" && $platform ne "zcu111" && $platform ne "zcu208")} {
-        set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [get_designs impl_1]
+    if {($::project_spi_buswidth ne "none")} {
+        set_property BITSTREAM.CONFIG.SPI_BUSWIDTH $::project_spi_buswidth [get_designs impl_1]
     }
-    if {$platform ne "zcu111" && $platform ne "zcu208"} {
-        set_property BITSTREAM.CONFIG.CONFIGRATE 33 [get_designs impl_1]
+
+    if {($::project_cfgrate ne "none")} {
+        set_property BITSTREAM.CONFIG.CONFIGRATE $::project_cfgrate [get_designs impl_1]
     }
 
     write_bitstream -force [current_project].bit
-    if {$platform ne "zcu111" && $platform ne "zcu208"} {
-        write_cfgmem -force -format bin -interface spix4 -size 16 -loadbit "up 0x0 [current_project].bit" -file [current_project].bin
+
+    if {($::project_cfgmem_interface ne "none" && $::project_cfgmem_size ne "none")} {
+        write_cfgmem -force -format bin -interface $::project_cfgmem_interface -size $::project_cfgmem_size -loadbit "up 0x0 [current_project].bit" -file [current_project].bin
     }
 }
