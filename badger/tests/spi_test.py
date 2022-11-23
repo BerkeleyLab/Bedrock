@@ -7,6 +7,8 @@
 # to do with the usual LBNL local bus!  Rather, spi_flash.v is its
 # own plugin to Packet Badger, with its own UDP port (typically 804).
 
+# Additional use-case documentation in ../flash.md.
+
 # Historical notes about network setup on Linux
 # ifconfig eth0 up 192.168.21.1
 # route add -net 192.168.8.0 netmask 255.255.255.0 dev eth0

@@ -26,7 +26,9 @@
 #define SFR_IN_BYTE_PCNT        0
 #define SFR_IN_BYTE_FCNT        2
 
-#define FCNT_WIDTH              15
+#ifndef FCNT_WIDTH
+    #define FCNT_WIDTH              15
+#endif
 
 enum ZEST_DEV {
     ZEST_DEV_ILLEGAL   =  0xFF,

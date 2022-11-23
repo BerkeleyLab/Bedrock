@@ -28,9 +28,9 @@ def readwrite(args, dev):
         else:
             value, = dev.reg_read((name,))
             if isinstance(value, (list, numpy.ndarray)):
-                value = ' '.join(['%x' % v for v in value])
-
-            print("%s \t%08x" % (name, value))
+                print("%s \t%s" % (name, ' '.join(['%x' % v for v in value])))
+            else:
+                print("%s \t%08x" % (name, value))
 
 
 def listreg(args, dev):
