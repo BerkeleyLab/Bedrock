@@ -81,4 +81,4 @@ blocks.svg: blocks.eps
 
 clean:
 	rm -f *_tb *.vcd *.dat *.bit *.pdf *.pyc init.in
-	rm -rf _xilinx
+	rm -rf _xilinx __pycache__

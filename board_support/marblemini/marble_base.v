@@ -19,6 +19,7 @@ module marble_base (
 	input aux_clk,
 	output phy_rstn,
 	input clk_locked,
+	input si570,
 
 	// SPI pins, can give access to configuration
 	input SCLK,
@@ -35,7 +36,7 @@ module marble_base (
 	output cfg_d02,
 
 	// One I2C bus, everything gatewayed through a TCA9548
-	output [3:0] twi_scl,
+	inout  [3:0] twi_scl,
 	inout  [3:0] twi_sda,
 	inout  TWI_RST,
 	input  TWI_INT,
@@ -176,6 +177,10 @@ wire [1:0] rx_mac_buf_status;
 wire allow_mmc_eth_config;
 wire [31:0] lb_slave_data_read;
 
+// for looking at start-up frequency of SI570
+wire [27:0] frequency_si570;
+freq_count freq_cnt_si570(.f_in(si570), .sysclk(lb_clk), .frequency(frequency_si570));
+
 //
 lb_marble_slave #(
 	.USE_I2CBRIDGE(USE_I2CBRIDGE),
@@ -201,7 +206,7 @@ lb_marble_slave #(
 	.zest_pwr_en(ZEST_PWR_EN),
 	.allow_mmc_eth_config(allow_mmc_eth_config),
 	.fmc_test(fmc_test),
-	.gps(GPS), .ext_config(ext_config),
+	.gps(GPS), .ext_config(ext_config), .frequency_si570(frequency_si570),
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
 );
 
@@ -319,7 +324,7 @@ assign vgmii_tx_er=1'b0;
 assign in_use = blob_in_use | boot_busy;
 
 // Frequency counter demo to UART
-wire [3:0] unk_clk = {1'b0, 1'b0, aux_clk, rx_clk};
+wire [3:0] unk_clk = {1'b0, si570, aux_clk, rx_clk};
 freq_demo freq_demo(
 	.refclk(tx_clk), .unk_clk(unk_clk),
 	.uart_tx(FPGA_RxD), .uart_rx(FPGA_TxD)

@@ -3,5 +3,4 @@
 set_clock_groups -name async_clks -asynchronous \
   -group [get_clocks -include_generated_clocks sys_clk] \
   -group [get_clocks -include_generated_clocks tx_clk] \
-  -group [get_clocks -include_generated_clocks rx_clk] \
-  -group [get_clocks -include_generated_clocks SI57X_A]
+  -group [get_clocks -include_generated_clocks rx_clk]
