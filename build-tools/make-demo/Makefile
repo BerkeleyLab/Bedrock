@@ -1,4 +1,5 @@
 PANDOC = pandoc
+PYTHON = python3
 
 %.pdf: %.md
 	$(PANDOC) $< -o $@
@@ -14,7 +15,7 @@ check: make_check Makefile1 Makefile2 Makefile3
 	sh $< $(word 4, $^)
 
 makefile.md: subs.py makefile.md.in Makefile1 Makefile2 Makefile3 top_rules.mk make.log
-	python $< < $(word 2, $^) > $@
+	$(PYTHON) $< < $(word 2, $^) > $@
 
 clean:
 	rm -f *.pdf *.html
