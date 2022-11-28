@@ -28,7 +28,7 @@ def busmux_reset(s):
 
 def hw_test_prog():
     s = assem.i2c_assem()
-    si570_list = [0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c]
+    si570_list = [0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12]
     a = []
     a += s.pause(2)  # ignored?
     a += s.set_resx(3)  # avoid any confusion
@@ -90,20 +90,25 @@ def hw_write_prog(reg):
     a += busmux_sel(s, 6)  # App bus
     a += s.read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
 
-    print(reg)
+    a += s.write(0x42, 2, [0x01, 0x88])  # disable SI570_OE while writing new values
     # Freeze the DCO by setting Freeze DCO=1 (bit 4 of register 137).
-    a += s.write(0xee, 0x87, [0x10])
+    a += s.write(0xee, 0x89, [0x10])
     # Write the new frequency configuration (RFREQ, HS_DIV, and N1)
-    a += s.write(0xee, 0x07, [reg[0]])
-    a += s.write(0xee, 0x08, [reg[1]])
-    a += s.write(0xee, 0x09, [reg[2]])
-    a += s.write(0xee, 0x0a, [reg[3]])
-    a += s.write(0xee, 0x0b, [reg[4]])
-    a += s.write(0xee, 0x0c, [reg[5]])
+    a += s.write(0xee, 0x0d, [reg[0]])
+    a += s.write(0xee, 0x0e, [reg[1]])
+    a += s.write(0xee, 0x0f, [reg[2]])
+    a += s.write(0xee, 0x10, [reg[3]])
+    a += s.write(0xee, 0x11, [reg[4]])
+    a += s.write(0xee, 0x12, [reg[5]])
     # Unfreeze the DCO by setting Freeze DCO=0 (register 137 bit 4)
     a += s.write(0xee, 0x89, [0x00])
     # assert the NewFreq bit (bit 6 of register 135) within 10 ms.
     a += s.write(0xee, 0x87, [0x40])
+    a += s.write(0x42, 2, [0x00, 0x88])  # enable SI570_OE
+
+    si570_list = [0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12]
+    for ax in si570_list:
+        a += s.read(0xee, ax, 1)  # config register0 with 2 bytes to read
     a += s.trig_analyz()
     #
     jump_n = 9
@@ -123,8 +128,9 @@ def compute_si570(dev, addr):
             print("%x " % jx + " ".join(["%2.2x" % r for r in p]))
 
     ib = 3*32  # init result memory base, derived from set_resx(3)
-    hx = ib + 1 + 6
-    a = result[hx:hx+6]
+    a = result[ib+1:ib+7]
+    print("############ READBACK #######")
+    print(a)
 
     hs_div = a[0] >> 5
     n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6))
@@ -132,8 +138,9 @@ def compute_si570(dev, addr):
 
     freq_default = addr.reg_read(["frequency_si570"])
     default = (freq_default[0]/2**24.0)*125
-    fxtal = default * hs_div * n1 / rfreq
+    # keep everything in MHz
     fdco = default * n1 * hs_div
+    fxtal = fdco / rfreq
     if args.debug:
         print('Default SI570 settings:')
         print('REFREQ: %4.3f' % rfreq)
@@ -150,6 +157,8 @@ def compute_si570(dev, addr):
 def config_si570(dev, addr):
     if args.new_freq:
         fxtal = compute_si570(dev, addr)
+        print("#######################################")
+        print("Changing output frequency...............")
         # DCO frequency range: 4850 - 5670MHz
         # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
         # N1 values: 1, 2, 4, 6, 8...128
@@ -169,7 +178,7 @@ def config_si570(dev, addr):
             raise Exception('Could not find appropriate settings for your target frequency')
 
         if args.debug:
-            print('\n New best option is:')
+            print('New best option is:')
             print(best[0]-1, best[1]-4, best[2])
 
         rfreq = int(best[2] * float(2**28) / fxtal)
@@ -177,20 +186,24 @@ def config_si570(dev, addr):
         n1 = best[0]-1
         hs_div = best[1]-4
         if args.debug:
-            print('\n New SI570 register settings:')
+            print('New SI570 register settings:')
             print('REFREQ: %4.3f' % rfreq_i)
             print('N1: %3d' % n1)
             print('HSDIV: %2d' % hs_div)
+            print('DCO frequency: %4.3f MHz' % best[2])
             print('')
         reg = []
         # build registers
-        reg7 = (hs_div << 5) | ((n1 & 0x1f) << 2)  # reg 7: hs_div[2:0], n1[6:2]
-        reg8 = (n1 & 3) | (rfreq >> 32)  # reg 8: n1[1:0] rfreq[37:32]
+        print(rfreq)
+        reg7 = (hs_div << 5) | ((n1 & 0x7C) >> 2)  # reg 7: hs_div[2:0], n1[6:2]
+        reg8 = ((n1 & 3) << 6) | (rfreq >> 32)  # reg 8: n1[1:0] rfreq[37:32]
         reg9 = (rfreq >> 24) & 0xff  # reg 9: rfreq[31:24]
         reg10 = (rfreq >> 16) & 0xff  # reg 10: rfreq[23:16]
         reg11 = (rfreq >> 8) & 0xff  # reg 11: rfreq[15:8]
         reg12 = rfreq & 0xff  # reg 12: rfreq[7:0]
         reg = [reg7, reg8, reg9, reg10, reg11, reg12]
+        print("################# New Registers ############")
+        print(reg)
         # write new registers
         chg = hw_write_prog(reg)
         # maybe this is wrong??
@@ -213,7 +226,7 @@ if __name__ == "__main__":
         description="Utility for configuring SI570 with i2cbridge attached to Packet Badger")
     parser.add_argument('--ip', default='192.168.19.10', help='IP address')
     parser.add_argument('--port', type=int, default=803, help='Port number')
-    parser.add_argument('-f', '--new_freq', type=float, default=None, help='Enter new SI570 output frequency')
+    parser.add_argument('-f', '--new_freq', type=float, default=None, help='Enter new SI570 output frequency in MHz')
     parser.add_argument('--debug', action='store_true', help='print raw arrays')
 
     args = parser.parse_args()
