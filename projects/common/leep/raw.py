@@ -452,7 +452,7 @@ class LEEPDevice(DeviceBase):
             msg[2 * i] = A
             msg[2 * i + 1] = V or 0
 
-        tosend = msg.tostring()
+        tosend = msg.tobytes()
         _spam.debug("%s Send (%d) %s", self.dest, len(tosend), repr(tosend))
         self.sock.sendto(tosend, self.dest)
 
@@ -467,7 +467,7 @@ class LEEPDevice(DeviceBase):
                 _log.error("Reply truncated %d %d", len(tosend), len(reply))
                 continue
 
-            reply = numpy.fromstring(reply, be32)
+            reply = numpy.frombuffer(reply, be32)
             if (msg[:2] != reply[:2]).any():
                 _log.error('Ignore reply w/o matching nonce %s %s',
                            msg[:2], reply[:2])
@@ -547,7 +547,7 @@ class LEEPDevice(DeviceBase):
                 raise RomError("Truncated ROM Descriptor")
 
             if type == 1:
-                blob = blob.tostring()
+                blob = blob.tobytes()
                 self.size_desc = size
                 if self.descript is None:
                     self.descript = blob
@@ -569,7 +569,7 @@ class LEEPDevice(DeviceBase):
                 else:
                     _log.debug("Found JSON blob in ROM")
                     self.regmap = json.loads(zlib.decompress(
-                        blob.tostring()).decode('ascii'))
+                        blob.tobytes()).decode('ascii'))
 
             elif type == 3:
                 self.size_rom = size
