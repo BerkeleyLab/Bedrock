@@ -1,3 +1,5 @@
+# Measures the current output frequency from SI570
+# also one can configure it to a different frequency
 import sys
 import numpy as np
 bedrock_dir = "../../"
@@ -9,8 +11,6 @@ import assem
 import testcase
 from time import sleep
 
-
-# TODO: use recall? so we go to default settings? power-cycle as the same effect
 
 # select one port of an I2C bus multiplexer
 # port_n must be between 0 and 7
@@ -155,22 +155,22 @@ def compute_si570(dev, addr, key):
     fxtal = fdco / rfreq
     if args.verbose:
         print('%s SI570 settings:' % key)
-        print('REFREQ: %4.3f' % rfreq)
+        print('REFREQ: %4.4f' % rfreq)
         print('N1: %3d' % n1)
         print('HSDIV: %2d' % hs_div)
-        print('Internal crystal frequency: %4.3f MHz' % fxtal)
-        print('DCO frequency: %4.3f MHz' % fdco)
-        print('Output frequency: %4.3f MHz' % default)
+        print('Internal crystal frequency: %4.4f MHz' % fxtal)
+        print('DCO frequency: %4.4f MHz' % fdco)
+        print('Output frequency: %4.4f MHz' % default)
     else:
-        print('%s SI570 output frequency: %4.3f MHz' % (key, default))
+        print('%s SI570 output frequency: %4.4f MHz' % (key, default))
     return fxtal, default
 
 
 def config_si570(dev, addr):
     if args.new_freq:
-        fxtal, _ = compute_si570(dev, addr, "Default")
+        fxtal, _ = compute_si570(dev, addr, "Measured")
         print("#######################################")
-        print("Changing output frequency to %4.5f MHz" % args.new_freq)
+        print("Changing output frequency to %4.4f MHz" % args.new_freq)
         # DCO frequency range: 4850 - 5670MHz
         # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
         # N1 values: 1, 2, 4, 6, 8...128
@@ -199,11 +199,11 @@ def config_si570(dev, addr):
         n1 = best[0]-1
         hs_div = best[1]-4
         if args.verbose:
-            print('New SI570 settings:')
-            print('REFREQ: %4.3f' % rfreq_i)
+            print('Expected SI570 settings:')
+            print('REFREQ: %4.4f' % rfreq_i)
             print('N1: %3d' % best[0])
             print('HSDIV: %2d' % best[1])
-            print('DCO frequency: %4.3f MHz' % best[2])
+            print('DCO frequency: %4.4f MHz' % best[2])
         reg = []
         # build registers
         reg7 = (hs_div << 5) | ((n1 & 0x7C) >> 2)  # reg 7: hs_div[2:0], n1[6:2]
@@ -230,7 +230,7 @@ def config_si570(dev, addr):
         check(freq)
     else:  # read only current settings if you don't want to change anything
         print("#######################################")
-        compute_si570(dev, addr, "Default")
+        compute_si570(dev, addr, "Measured")
 
 
 if __name__ == "__main__":
