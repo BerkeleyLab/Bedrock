@@ -17,6 +17,10 @@ check: make_check Makefile1 Makefile2 Makefile3
 makefile.md: subs.py makefile.md.in Makefile1 Makefile2 Makefile3 top_rules.mk make.log
 	$(PYTHON) $< < $(word 2, $^) > $@
 
+consistency: makefile.md
+	cmp $< ../makefile.md
+	@echo "OK"
+
 clean:
 	rm -f *.pdf *.html
 	make -f Makefile3 clean

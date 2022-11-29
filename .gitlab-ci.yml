@@ -52,7 +52,7 @@ make_docs:
     - cd build-tools/make-demo && make clean
   stage: test
   script:
-    - make check && make makefile.md && cmp ../makefile.md makefile.md
+    - make check consistency
 
 flake8:
   stage: synthesis
