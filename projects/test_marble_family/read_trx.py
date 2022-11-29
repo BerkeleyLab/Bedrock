@@ -68,7 +68,9 @@ def busmux_reset(s):
 def hw_test_prog(marble):
     s = assem.i2c_assem()
     ina_list = [0x80, 0x82, 0x84]  # U17, U32, U58
-    si570_list = [0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c]
+    # from the part number: 570_N_C_ --> C denotes temperature stability of 7ppm
+    # so the registers change
+    si570_list = [0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12]
     # SFP1 is closest to edge of board
     # SFP4 is closest to center of board
     sfp_list = [2, 5, 4, 3]  # SFP modules 1-4, for Marble-Mini
