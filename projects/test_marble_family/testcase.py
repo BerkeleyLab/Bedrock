@@ -175,8 +175,8 @@ def compute_si570(a):
     # DCO frequency range: 4850 - 5670MHz
     # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
     # N1 values: 1, 2, 4, 6, 8...128
-    hs_div = a[0] >> 5
-    n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6))
+    hs_div = (a[0] >> 5) + 4
+    n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6)) + 1
     rfreq = np.uint64((((a[1] & 0x3f) << 32) | (a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5])) / (2**28)
 
     import leep
