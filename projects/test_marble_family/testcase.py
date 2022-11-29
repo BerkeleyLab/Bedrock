@@ -175,8 +175,8 @@ def compute_si570(a):
     # DCO frequency range: 4850 - 5670MHz
     # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
     # N1 values: 1, 2, 4, 6, 8...128
-    hs_div = a[0] >> 5
-    n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6))
+    hs_div = (a[0] >> 5) + 4
+    n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6)) + 1
     rfreq = np.uint64((((a[1] & 0x3f) << 32) | (a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5])) / (2**28)
 
     import leep
@@ -190,14 +190,14 @@ def compute_si570(a):
     fdco = default * n1 * hs_div
     if args.debug:
         print('Default SI570 settings:')
-        print('REFREQ: %4.3f MHz' % rfreq)
+        print('REFREQ: %4.3f' % rfreq)
         print('N1: %3d' % n1)
         print('HSDIV: %2d' % hs_div)
-        print('Start-up frequency: %4.3f MHz' % default)
-        print('Crystal frequency: %4.3f MHz' % fxtal)
+        print('Internal crystal frequency: %4.3f MHz' % fxtal)
         print('DCO frequency: %4.3f MHz' % fdco)
+        print('Output frequency: %4.3f MHz' % default)
     else:
-        print('SI570 start-up frequency: %4.3f MHz' % default)
+        print('SI570 output frequency: %4.3f MHz' % default)
 
 
 def print_result(result, args, poll_only=False):
