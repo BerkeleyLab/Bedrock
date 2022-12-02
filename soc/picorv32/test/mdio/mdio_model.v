@@ -1,5 +1,5 @@
 // from 88E111 datasheet
-`timescale 1ns / 1ns
+`timescale 1 ns / 1 ns
 module mdio_model #(
     parameter [4:0] ADDR=5'h10
 ) (

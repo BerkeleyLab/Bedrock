@@ -17,7 +17,7 @@ initial begin
                 clk=0; #4;
                 clk=1; #4;
         end
-        $display("WARNING: Not a self checking TB, will always PASS. Relies on external post-processing.");
+        $display("WARNING: Not a self-checking testbench. Will always PASS. Relies on external post-processing.");
         $display("PASS");
 end
 

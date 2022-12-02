@@ -101,6 +101,7 @@ module circle_buf_serial_tb;
                        .buf_stat_w(16),
                        .buf_auto_flip(1))
    dut(.iclk      (iclk),
+      .reset     (1'b0),
       .sr_in     (d_in),
       .sr_stb    (stb_in),
       .chan_mask (chan_mask),

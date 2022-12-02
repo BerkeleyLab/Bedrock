@@ -1,5 +1,5 @@
 // GT transceiver wrapper tested on VC707
-`timescale 1ns / 1ps
+`timescale 1ns / 1ns
 
 module gtx_wrap(
     input soft_reset,

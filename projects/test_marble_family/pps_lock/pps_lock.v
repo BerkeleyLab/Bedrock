@@ -1,4 +1,4 @@
-`timescale 1 ns / 1 ns
+`timescale 1ns / 1ns
 
 module pps_lock(
 	input clk,  // assumed 125 MHz

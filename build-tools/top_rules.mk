@@ -7,7 +7,7 @@ LF_ALL = -lm ${LDFLAGS_$@}
 
 ICARUS_SUFFIX =
 VERILOG_VPI = iverilog-vpi$(ICARUS_SUFFIX)
-VERILOG = iverilog$(ICARUS_SUFFIX) -Wall
+VERILOG = iverilog$(ICARUS_SUFFIX) -Wall -Wno-macro-redefinition
 VG_ALL = -DSIMULATE
 V_TB = -Wno-timescale
 VFLAGS = ${VFLAGS_$@} -I$(AUTOGEN_DIR)

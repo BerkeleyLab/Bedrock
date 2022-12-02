@@ -22,7 +22,7 @@
 // -------------------------------------------------------------------------------
 
 
-`timescale 1ns / 1ps
+`timescale 1ns / 1ns
 // Bypass 8B/10B encoding and decoding, maximum compatibility with gtp_wrap2
 
 module s6_gtp_wrap(

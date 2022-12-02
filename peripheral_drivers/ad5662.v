@@ -1,3 +1,4 @@
+`timescale 1ns / 1ns
 module ad5662 #(
 	parameter nch=1  // number of channels (chips)
 ) (

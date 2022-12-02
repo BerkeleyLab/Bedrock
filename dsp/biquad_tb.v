@@ -1,4 +1,4 @@
-`timescale 1 ns / 1ns
+`timescale 1ns / 1ns
 
 module biquad_tb;
 

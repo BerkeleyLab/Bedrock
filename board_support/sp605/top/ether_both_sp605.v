@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+`timescale 1ns / 1ns
 
 module ether_both_sp605(
 		       // Stupid non-general-purpose FPGA pins
