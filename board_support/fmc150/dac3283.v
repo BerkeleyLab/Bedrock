@@ -166,7 +166,7 @@ OSERDESE2 #(
     .SHIFTOUT2         ( ),
     .CLK               ( txclkmul2 ),
     .CLKDIV            ( txclk     ),
-    // place the bits in the right order for the serialisers
+    // place the bits in the right order for the serializers
     // the DAC expects: ch0 MSByte, ch0 LSB, ch1 MSB, ch1 LSB, ....
     // see page 21 [1]
     .D1                ( odata[ 8+i] ),

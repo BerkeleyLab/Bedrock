@@ -95,7 +95,7 @@ module iserdes_tb;
 
     // --------------------------------------------------------------
     // Simulate adc dco clock
-    // LTC2175: Max sampling rate 125MHz, 2-lanes 16-bit serialzation
+    // LTC2175: Max sampling rate 125MHz, 2-lanes 16-bit serialization
     // t_ser = 1/(8*fs) = 1ns
     // Operation fs = 114.574MHz
     // t_ser = 1.091ns

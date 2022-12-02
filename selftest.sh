@@ -2,7 +2,7 @@
 # Mostly covers the test stage of bedrock gitlab CI, plus flake8.
 # Collected and cleaned up from scattered .gitlab* .yml files.
 # Running this script is possibly easier than fussing with Docker,
-# and defintely gives more test coverage than typing "make" in whatever
+# and definitely gives more test coverage than typing "make" in whatever
 # directory you're developing in.  Measured execution time is under
 # two minutes on decent hardware (Ryzen 5 PRO 5650GE).
 

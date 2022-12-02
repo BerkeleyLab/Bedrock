@@ -1,8 +1,8 @@
-// GT tranceiver wrapper tested on KC705 and BMB7
+// GT transceiver wrapper tested on KC705 and BMB7
 `timescale 1ns / 1ps
 
 module gtx_wrap(
-	input soft_reset,
+    input soft_reset,
     input gtrefclk_p,
     input gtrefclk_n,
     input drpclk_in,
@@ -20,8 +20,8 @@ module gtx_wrap(
     output gt_txp_out,
     output gt_rxresetdone,
     output gt_txresetdone,
-	output gt_txfsm_resetdone_out,
-	output gt_rxfsm_resetdone_out,
+    output gt_txfsm_resetdone_out,
+    output gt_rxfsm_resetdone_out,
     output [2:0] gt_rxbufstatus,
     output [1:0] gt_txbufstatus,
     output gt_txusrclk_out,
