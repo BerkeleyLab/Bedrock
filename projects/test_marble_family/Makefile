@@ -125,7 +125,7 @@ read_trx.dat: read_trx.py
 VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -cc --exe $^
+	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -DSIMULATE -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmarble_base.mk USER_CPPFLAGS="-I $(BADGER_DIR)/tests"
 	mv obj_dir/$@ $@
 # Recipe:
