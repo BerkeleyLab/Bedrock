@@ -34,32 +34,37 @@ def read_result(dev, i2c_base=0x040000, result_len=20, run=True):
     return result
 
 
-def wait_for_bit(dev, mask, equal, timeout=520, sim=False, progress="."):
+def wait_for_bit(dev, mask, equal, timeout=520, sim=False, progress=".", verbose=False):
     for ix in range(timeout):
         if sim:
             dev.exchange(125*[0])  # twiddle our thumbs for 1000 clock cycles
         else:
             sleep(0.02)
         updated = dev.exchange([9])
-        print("%d updated? %d" % (ix, updated))
+        if verbose:
+            print("%d updated? %d" % (ix, updated))
         if (updated & mask) == equal:
-            sys.stdout.write("OK\n")
+            if verbose:
+                sys.stdout.write("OK\n")
             break
         else:
-            sys.stdout.write(progress)
-            sys.stdout.flush()
+            if verbose:
+                sys.stdout.write(progress)
+                sys.stdout.flush()
     else:
         sys.stdout.write("timeout\n")
     return updated
 
 
-def wait_for_new(dev, timeout=520, sim=False):
-    print("wait_for_new")
-    wait_for_bit(dev, 1, 1, timeout=timeout, sim=sim, progress=".")
+def wait_for_new(dev, timeout=520, sim=False, verbose=False):
+    if verbose:
+        print("wait_for_new")
+    wait_for_bit(dev, 1, 1, timeout=timeout, sim=sim, progress=".", verbose=verbose)
 
 
-def wait_for_stop(dev, timeout=220, sim=False):
-    print("wait_for_stop")
+def wait_for_stop(dev, timeout=220, sim=False, verbose=False):
+    if verbose:
+        print("wait_for_stop")
     updated = wait_for_bit(dev, 4, 0, timeout=timeout, sim=sim, progress="-")
     if updated & 1:
         read_result(dev, result_len=0, run=False)  # clear "new" bit
@@ -86,15 +91,15 @@ def acquire_vcd(dev, capture, i2c_base=0x040000, sim=False, timeout=None, debug=
         produce_vcd(ofile, logic, dw=dw, mtime=mtime, t_step=t_step)
 
 
-def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, debug=False):
+def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, debug=False, verbose=True):
     dev.exchange([327687], values=[0])  # run_cmd=0
-    wait_for_stop(dev, sim=sim)
+    wait_for_stop(dev, sim=sim, verbose=verbose)
     # Upload program to i2c_chunk dpram
     i2c_base = 0x040000
     addr = range(i2c_base, i2c_base+len(prog))
     dev.exchange(addr, values=prog)
     dev.exchange([327687], values=[10])  # run_cmd=1, trig_run=1
-    wait_for_new(dev, sim=sim)
+    wait_for_new(dev, sim=sim, verbose=verbose)
     result = read_result(dev, result_len=result_len)
     if stop:
         dev.exchange([327687], values=[0])  # run_cmd=0
