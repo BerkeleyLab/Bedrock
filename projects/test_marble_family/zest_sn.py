@@ -66,11 +66,11 @@ def hw_test_prog(rom_addr=0, new_sn=None):
 
 
 # returns previous serial number
-def run_eeprom(dev, new_sn, verbose=False):
+def run_eeprom(dev, new_sn, verbose=False, debug=False):
     # using keyword just to keep print consistent
     prog = hw_test_prog(new_sn=new_sn)
-    result = testcase.run_testcase(dev, prog, result_len=359, debug=args.debug, verbose=verbose)
-    if args.debug:
+    result = testcase.run_testcase(dev, prog, result_len=359, debug=debug, verbose=verbose)
+    if debug:
         print(" ".join(["%2.2x" % p for p in prog]))
         print("")
         for jx in range(16):
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
 
-    sn = run_eeprom(dev, args.new_sn, verbose=args.verbose)
+    sn = run_eeprom(dev, args.new_sn, verbose=args.verbose, debug=args.debug)
     print(sn)
 
 # usage:
