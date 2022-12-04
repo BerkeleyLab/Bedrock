@@ -68,9 +68,10 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(
         description="Utility for auto-configuring Zest serial number")
-    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
+    parser.add_argument('-a', '--addr', default=None, help='IP address')
     parser.add_argument('-p', '--port', type=int, default=803, help='Port number')
     parser.add_argument('-c', '--camera', type=str, default='/dev/video0', help='Camera device')
+    parser.add_argument('-w', '--write', action='store_true', help='Write to eeprom')
     args = parser.parse_args()
 
     # maybe add command-line option to set visible flag?
@@ -80,11 +81,23 @@ if __name__ == "__main__":
         print("Aborting")
         exit(1)
     sn, ss = qrcode
-    print("OK: %d %s" % (sn, ss))
+    print("QR code SN  : %s" % ss)
 
+    if args.addr is None:
+        exit(0)
     ldev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
-    old_sn = run_eeprom(ldev, ss)
-    print("Previous SN : %s" % old_sn)
-    time.sleep(0.05)
-    cnf_sn = run_eeprom(ldev, None)
-    print("Confirm SN  : %s" % cnf_sn)
+    if args.write:
+        old_sn = run_eeprom(ldev, ss)
+        print("Previous SN : %s" % old_sn)
+        time.sleep(0.05)
+        cnf_sn = run_eeprom(ldev, None)
+        print("Confirm SN  : %s" % cnf_sn)
+        if cnf_sn == ss:
+            print("OK")
+            exit(0)
+        else:
+            print("FAIL")
+            exit(1)
+    else:
+        now_sn = run_eeprom(ldev, None)
+        print("Extant SN   : %s" % now_sn)
