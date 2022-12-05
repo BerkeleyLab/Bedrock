@@ -125,7 +125,7 @@ read_trx.dat: read_trx.py
 VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -DSIMULATE -cc --exe $^
+	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmarble_base.mk USER_CPPFLAGS="-I $(BADGER_DIR)/tests"
 	mv obj_dir/$@ $@
 # Recipe:
@@ -166,6 +166,26 @@ marble1_hwtest: udprtx
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
 	$(PYTHON) testcase.py --ip=${RGMII_IP} --trx --marble 0
+
+
+# =====
+# Marble bitfile loading and testing; bitfile specified by doing 'make BIT=marble2.bit marble2_hwload'
+
+# Default IP address set from microcontroller
+MARBLE_IP = 192.168.19.34
+BIT2 = marble2.bit
+# Stored in the Zest board installed on mohs CI test stand; here, we just check that we can read it
+ZEST_SN = "LBNL DIGITIZER V1.1 SN 299"
+
+marble2_hwload:
+	openocd -f marble_serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT2}; exit"
+
+marble2_hwtest: udprtx
+	ping -c 2 ${MARBLE_IP}
+	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${MARBLE_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
+	./udprtx ${MARBLE_IP} 100000 8  # should take under 3 seconds
+	$(PYTHON) testcase.py --ip=${MARBLE_IP} --trx --si570
+	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = ${ZEST_SN}
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
