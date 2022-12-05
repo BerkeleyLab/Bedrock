@@ -44,22 +44,26 @@ Periodic output from that last step is something like:
     SFP3:  0xF
     SFP4:  0xF
 
-Two [Easter eggs](https://en.wikipedia.org/wiki/Easter eggs (media)):
+Also see [testcase.py](testcase.py) for other I2C feature support,
+some of which is specific to either Marble or Marble-Mini.
 
-1. connect up a user terminal to the third FTDI USB UART port, typically /dev/ttyUSB2,
+Two [Easter eggs](https://en.wikipedia.org/wiki/Easter%20eggs%20(media)):
+
+1. Connect up a user terminal to the third FTDI USB UART port, typically /dev/ttyUSB2,
 and you'll get a continuous readout of on-board frequencies:
-
+```
     Channel 0:  124.99998 MHz
     Channel 1:  019.99654 MHz
     Channel 2:  125.00003 MHz
     Channel 3:  000.00000 MHz
-
+```
     Channel 0 is the Ethernet Rx clock from the switch,
     Channel 1 is the on-board 20 MHz VCXO,
     Channel 2 is the on-board Si570 (Marble-only), and
     Channel 3 is not used.
 
-2. Attach a Digilent Pmod GPS to the top half of J13 (a.k.a. Pmod2[3:0]),
+2. Attach a [Digilent Pmod](https://digilent.com/reference/pmod/start) GPS
+to the top half of J13 (a.k.a. Pmod2[3:0]),
 and you can read out NMEA position and time, use the pps signal
 to calibrate the on-board crystals, and even phase-lock the
 125 MHz source to GPS time with a jitter of under 100 ns.
