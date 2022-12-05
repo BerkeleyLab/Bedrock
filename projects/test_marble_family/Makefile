@@ -185,7 +185,7 @@ marble2_hwtest: udprtx
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${MARBLE_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${MARBLE_IP} 100000 8  # should take under 3 seconds
 	$(PYTHON) testcase.py --ip=${MARBLE_IP} --trx --si570
-	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = "${ZEST_SN}"
+	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = ${ZEST_SN}
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
