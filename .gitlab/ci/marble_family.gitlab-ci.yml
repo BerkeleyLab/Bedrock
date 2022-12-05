@@ -41,3 +41,15 @@ marble_v2_synth:
       - projects/test_marble_family/marble*.bit
       - projects/test_marble_family/vivado.log
       - projects/test_marble_family/_xilinx/marble2.runs/impl_1/marble_top_utilization_placed.rpt
+
+marble_run:
+  stage: program
+  tags:
+    - deploy
+  dependencies:
+    - marble_v2_synth
+  before_script:
+    - cd projects/test_marble_family && ln -s marble2.*.bit marble2.bit
+  script:
+    - make marble2_hwload && sleep 8 && make marble2_hwtest
+
