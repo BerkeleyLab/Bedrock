@@ -174,8 +174,9 @@ marble1_hwtest: udprtx
 # Default IP address set from microcontroller
 MARBLE_IP = 192.168.19.34
 BIT2 = marble2.bit
+# Stored in the Zest board installed on mohs CI test stand; here, we just check that we can read it
+ZEST_SN = "LBNL DIGITIZER V1.1 SN 299"
 
-# add the Marble serial number
 marble2_hwload:
 	openocd -f marble_serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT2}; exit"
 
@@ -184,6 +185,7 @@ marble2_hwtest: udprtx
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${MARBLE_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${MARBLE_IP} 100000 8  # should take under 3 seconds
 	$(PYTHON) testcase.py --ip=${MARBLE_IP} --trx --si570
+	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = "${ZEST_SN}"
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
