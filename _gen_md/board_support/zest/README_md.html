@@ -41,14 +41,13 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="zest-readme">
 <span id="readme"></span><h1>zest README<a class="headerlink" href="#zest-readme" title="Permalink to this heading">¶</a></h1>
-<p>Official repository for the hardware setup will be at: <a class="reference external" href="https://github.com/BerkeleyLab/zest">https://github.com/BerkeleyLab/zest</a></p>
-<p>This directory will hold the FMC pin map. Zest is a dual FMC mezzanine board with 8 ADCs and 2 DACs.</p>
+<p>Zest is a dual LPC FMC mezzanine board with 8 ADCs and 2 DACs.</p>
+<p>Full information about the Zest hardware is at: <a class="reference external" href="https://github.com/BerkeleyLab/zest">https://github.com/BerkeleyLab/zest</a></p>
 <section id="using-zest-setup-py">
 <h2>Using zest_setup.py<a class="headerlink" href="#using-zest-setup-py" title="Permalink to this heading">¶</a></h2>
-<p>This unfortunately still depends on path to bmb7 software for some reason. Needs to be cleaned up.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">PYTHONPATH</span><span class="o">=../../</span><span class="n">dsp</span><span class="o">/</span><span class="p">:</span><span class="o">../../</span><span class="n">projects</span><span class="o">/</span><span class="n">common</span><span class="o">/</span><span class="n">leep</span><span class="p">:</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">lcls2_llrf</span><span class="o">/</span><span class="n">software</span><span class="o">/</span><span class="n">bmb7</span>
-<span class="c1"># -r resets the board, -f sets the local bus clock frequency</span>
-<span class="n">python</span> <span class="n">zest_setup</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">a</span> <span class="o">&lt;</span><span class="n">Marblemini</span><span class="o">/</span><span class="n">QF2</span><span class="o">/</span><span class="n">BMB7</span> <span class="n">ip</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">r</span> <span class="o">-</span><span class="n">f</span> <span class="mf">125.</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export PYTHONPATH=../../dsp/:../../projects/common/leep
+# -r resets the board, -f sets the local bus clock frequency
+python zest_setup.py -a $IP -r -f 125.
 </pre></div>
 </div>
 </section>
