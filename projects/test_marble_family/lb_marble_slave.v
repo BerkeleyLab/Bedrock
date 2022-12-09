@@ -72,6 +72,11 @@ wire do_rd = control_strobe & control_rd;
 reg dbg_rst=0;
 wire [7:0] ibadge_out, obadge_out;
 
+// XADC Internal Temperature Monitor
+wire [15:0] xadc_temp_dout;
+wire [31:0] xadc_internal_temperature;
+assign xadc_internal_temperature = {16'h0000, xadc_temp_dout};
+
 //`define BADGE_TRACE
 `ifdef BADGE_TRACE
 // Trace of input badges
@@ -288,6 +293,29 @@ always @(posedge clk) if (do_rd) begin
 	endcase
 end
 
+reg [31:0] reg_bank_8=0;
+always @(posedge clk) if (do_rd) begin
+	case (addr[3:0])
+		4'h0: reg_bank_8 <= xadc_internal_temperature;
+		//  xxxx81  unused
+		//  xxxx82  unused
+		//  xxxx83  unused
+		//  xxxx84  unused
+		//  xxxx85  unused
+		//  xxxx86  unused
+		//  xxxx87  unused
+		//  xxxx88  unused
+		//  xxxx89  unused
+		//  xxxx8a  unused
+		//  xxxx8b  unused
+		//  xxxx8c  unused
+		//  xxxx8d  unused
+		//  xxxx8e  unused
+		//  xxxx8f  unused
+		default: reg_bank_8 <= "zzzz";
+	endcase
+end
+
 // Second read cycle
 // reverse_json.py doesn't have an address-offset feature, so put
 // (read-only) reg_bank_0 at 0.  That bumps (non-newad) direct writes
@@ -307,6 +335,7 @@ always @(posedge clk) if (do_rd_r) begin
 		24'h05????: lb_data_in <= mirror_out_0;
 		24'h06????: lb_data_in <= ctrace_out;
 		24'h07????: lb_data_in <= gps_buf_out;
+		24'h08????: lb_data_in <= reg_bank_8;
 		default: lb_data_in <= 32'hdeadbeef;
 	endcase
 end
@@ -390,5 +419,19 @@ always @(posedge clk) begin
 		$display("Localbus read  r[%x] = %x", addr_rr, data_in);
 end
 `endif
+
+// ----------------------------------
+// XADC Internal Temperature Monitor
+// ----------------------------------
+xadc_tempmon #(
+  .SYSCLK_FREQ_HZ(125000000),
+  .UPDATE_FREQ_HZ(2000)  // Update freq doesn't matter much; higher freq means smaller counter.
+  ) xadc_tempmon_inst0 (
+  .clk                                (clk),
+  .rst                                (1'b0),            // High-true reset to XADC core
+  .dout                               (xadc_temp_dout),  // Data out
+  .read                               (),                // High pulse on read
+  .otemp                              ()                 // Over-temp alarm
+  );
 
 endmodule
