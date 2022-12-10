@@ -293,10 +293,10 @@ always @(posedge clk) if (do_rd) begin
 	endcase
 end
 
-reg [31:0] reg_bank_8=0;
+reg [31:0] reg_bank_1=0;
 always @(posedge clk) if (do_rd) begin
 	case (addr[3:0])
-		4'h0: reg_bank_8 <= xadc_internal_temperature;
+		4'h0: reg_bank_1 <= xadc_internal_temperature;
 		//  xxxx81  unused
 		//  xxxx82  unused
 		//  xxxx83  unused
@@ -312,7 +312,7 @@ always @(posedge clk) if (do_rd) begin
 		//  xxxx8d  unused
 		//  xxxx8e  unused
 		//  xxxx8f  unused
-		default: reg_bank_8 <= "zzzz";
+		default: reg_bank_1 <= "zzzz";
 	endcase
 end
 
@@ -327,7 +327,8 @@ always @(posedge clk) if (do_rd_r) begin
 		// Semi-standard address for 2K x 16 configuration ROM
 		// xxx800 through xxxfff
 		24'b0000_0000_????_1???_????_????: lb_data_in <= config_rom_out;
-		24'h00????: lb_data_in <= reg_bank_0;
+		24'h00??0?: lb_data_in <= reg_bank_0;
+		24'h00??1?: lb_data_in <= reg_bank_1;
 		24'h01????: lb_data_in <= ibadge_out;
 		24'h02????: lb_data_in <= obadge_out;
 		24'h03????: lb_data_in <= rx_mac_data;
@@ -335,7 +336,6 @@ always @(posedge clk) if (do_rd_r) begin
 		24'h05????: lb_data_in <= mirror_out_0;
 		24'h06????: lb_data_in <= ctrace_out;
 		24'h07????: lb_data_in <= gps_buf_out;
-		24'h08????: lb_data_in <= reg_bank_8;
 		default: lb_data_in <= 32'hdeadbeef;
 	endcase
 end

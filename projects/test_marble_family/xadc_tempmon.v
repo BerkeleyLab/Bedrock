@@ -82,9 +82,9 @@ module xadc_tempmon #(
   end
 
 `ifdef SIMULATE
-  always @(posedge clk) begin
-    data_out <= 16'h9773; // ~25degC
-  end
+  assign data_out = 16'h9773; // ~25degC
+  assign otemp = 1'b0;
+  assign drdy = 1'b1;
 `else
 
   XADC #(
