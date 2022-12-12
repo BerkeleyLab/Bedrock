@@ -172,7 +172,7 @@ marble1_hwtest: udprtx
 # Marble bitfile loading and testing; bitfile specified by doing 'make BIT=marble2.bit marble2_hwload'
 
 # Default IP address set from microcontroller
-MARBLE_IP = 192.168.19.34
+MARBLE_IP = 192.168.19.39
 BIT2 = marble2.bit
 # Stored in the Zest board installed on mohs CI test stand; here, we just check that we can read it
 ZEST_SN = "LBNL DIGITIZER V1.1 SN 299"
