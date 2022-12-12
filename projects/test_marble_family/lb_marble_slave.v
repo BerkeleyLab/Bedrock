@@ -77,6 +77,9 @@ wire [15:0] xadc_temp_dout;
 wire [31:0] xadc_internal_temperature;
 assign xadc_internal_temperature = {16'h0000, xadc_temp_dout};
 
+// Device DNA
+wire [31:0] dna_high, dna_low;
+
 //`define BADGE_TRACE
 `ifdef BADGE_TRACE
 // Trace of input badges
@@ -297,8 +300,8 @@ reg [31:0] reg_bank_1=0;
 always @(posedge clk) if (do_rd) begin
 	case (addr[3:0])
 		4'h0: reg_bank_1 <= xadc_internal_temperature;
-		//  xxxx81  unused
-		//  xxxx82  unused
+		4'h1: reg_bank_1 <= dna_high;
+		4'h2: reg_bank_1 <= dna_low;
 		//  xxxx83  unused
 		//  xxxx84  unused
 		//  xxxx85  unused
@@ -433,5 +436,18 @@ xadc_tempmon #(
   .read                               (),                // High pulse on read
   .otemp                              ()                 // Over-temp alarm
   );
+
+// ----------------------------------
+// 7-Series Device DNA Readout
+// ----------------------------------
+dna dna_inst0 (
+  .clk                                (clk),
+  .rst                                (1'b0),
+  .start                              (1'b1),
+  .done                               (),
+  .dna_msb                            (dna_high),
+  .dna_lsb                            (dna_low)
+  );
+
 
 endmodule
