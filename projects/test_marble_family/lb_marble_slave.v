@@ -15,6 +15,7 @@ module lb_marble_slave #(
 	input control_rd,
 	input [31:0] data_out,
 	output [31:0] data_in,
+  input aux_clk,
 	// Debugging
 	input ibadge_clk,
 	input ibadge_stb,
@@ -441,7 +442,7 @@ xadc_tempmon #(
 // 7-Series Device DNA Readout
 // ----------------------------------
 dna dna_inst0 (
-  .clk                                (clk),
+  .clk                                (aux_clk),
   .rst                                (1'b0),
   .start                              (1'b1),
   .done                               (),

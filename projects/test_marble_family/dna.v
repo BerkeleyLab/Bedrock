@@ -20,16 +20,8 @@ module dna (
   wire read = (bcnt == 7'h0) ? 1'b1 : 1'b0;
   wire start_re = (r_start_0 == 1'b1) && (r_start_1 == 1'b0) ? 1'b1 : 1'b0;
   wire din, dout;
+  wire dclk = clk;    // Alias to modify in case clk is >100MHz
   assign done = r_done;
-
-  // HACK! This is a fake "clock", i.e. does not use clock routing resources
-  // and has no constraints associated with it.  It will trigger warnings in
-  // the timing report.  To avoid, use 'clk' directly and ensure it is
-  // <100MHz.
-  reg dclk;
-  always @(posedge clk) begin
-    dclk <= ~dclk;
-  end
 
 `ifdef SIMULATE
   assign dna_msb = r_dna[63:32];
