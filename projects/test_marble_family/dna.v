@@ -34,7 +34,6 @@ module dna (
                                 // Shifts out MSb-first
 
   initial begin
-    dclk <= 1'b0;
     r_dout <= 64'h0;
     r_dna <= 64'h0;
   end

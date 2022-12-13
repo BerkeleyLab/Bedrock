@@ -42,6 +42,7 @@ lb_marble_slave #(.USE_I2CBRIDGE(1), .twi_q0(4), .twi_q1(0), .twi_q2(2), .led_cw
 	.clk(clk), .addr(addr),
 	.control_strobe(control_strobe), .control_rd(control_rd),
 	.data_out(data_out), .data_in(data_in),
+	.aux_clk(clk),
 	.ibadge_clk(1'b0),
 	.ibadge_stb(1'b0), .ibadge_data(8'b0),
 	.obadge_stb(1'b0), .obadge_data(8'b0),
