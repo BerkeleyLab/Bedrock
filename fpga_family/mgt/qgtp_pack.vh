@@ -27,6 +27,7 @@
                           .gt0_rxdisperr_out           (),\
                           .gt0_rxnotintable_out        (),\
                           .gt0_rxbyteisaligned_out     (gt``GTi``_rxbyteisaligned),\
+                          .gt0_rxslide_in              (gt``GTi``_rxslide_in),\
                           `endif\
                           .gt0_data_valid_in           (1'b1),\
                           .gt0_drpclk_in               (drpclk_in),\
@@ -51,7 +52,6 @@
                           .gt0_rxdata_out              (gt``GTi``_rxdata_out),\
                           .gt0_gtprxp_in               (gt``GTi``_rxp_in),\
                           .gt0_gtprxn_in               (gt``GTi``_rxn_in),\
-                          .gt0_rxslide_in              (gt``GTi``_rxslide_in),\
                           .gt0_rxbufstatus_out         (gt``GTi``_rxbufstatus),\
                           .gt0_rxoutclk_out            (gt``GTi``_rxoutclk_out_l),\
                           .gt0_rxoutclkfabric_out      (),\
