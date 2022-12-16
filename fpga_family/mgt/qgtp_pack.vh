@@ -22,30 +22,21 @@
                           .gt0_rx_fsm_reset_done_out   (gt``GTi``_rxfsm_resetdone_out),\
                           `ifdef GT``GTi``_8B10B_EN\
                           .gt0_rxcharisk_out           (gt``GTi``_rxcharisk_out),\
+                          .gt0_rxchariscomma_out       (gt``GTi``_rxchariscomma_out),\
                           .gt0_txcharisk_in            (gt``GTi``_txcharisk_in),\
                           .gt0_rxdisperr_out           (),\
                           .gt0_rxnotintable_out        (),\
-                          .gt0_rxmcommaalignen_in      (1'b1),\
-                          .gt0_rxpcommaalignen_in      (1'b1),\
                           .gt0_rxbyteisaligned_out     (gt``GTi``_rxbyteisaligned),\
                           `endif\
                           .gt0_data_valid_in           (1'b1),\
+                          .gt0_drpclk_in               (drpclk_in),\
                           `ifdef GT``GTi``_DRP_EN\
                           .gt0_drpaddr_in              (gt``GTi``_drpaddr_in),\
-                          .gt0_drpclk_in               (drpclk_in),\
                           .gt0_drpdi_in                (gt``GTi``_drpdi_in),\
                           .gt0_drpdo_out               (gt``GTi``_drpdo_out),\
                           .gt0_drpen_in                (gt``GTi``_drpen_in),\
                           .gt0_drprdy_out              (gt``GTi``_drprdy_out),\
                           .gt0_drpwe_in                (gt``GTi``_drpwe_in),\
-                          `else\
-                          .gt0_drpaddr_in              (9'b0),\
-                          .gt0_drpclk_in               (drpclk_in),\
-                          .gt0_drpdi_in                (16'b0),\
-                          .gt0_drpdo_out               (),\
-                          .gt0_drpen_in                (1'b0),\
-                          .gt0_drprdy_out              (),\
-                          .gt0_drpwe_in                (1'b0),\
                           `endif\
                           .gt0_dmonitorout_out         (),\
                           .gt0_rxlpmlfhold_in          (1'b0),\
@@ -60,6 +51,7 @@
                           .gt0_rxdata_out              (gt``GTi``_rxdata_out),\
                           .gt0_gtprxp_in               (gt``GTi``_rxp_in),\
                           .gt0_gtprxn_in               (gt``GTi``_rxn_in),\
+                          .gt0_rxslide_in              (gt``GTi``_rxslide_in),\
                           .gt0_rxbufstatus_out         (gt``GTi``_rxbufstatus),\
                           .gt0_rxoutclk_out            (gt``GTi``_rxoutclk_out_l),\
                           .gt0_rxoutclkfabric_out      (),\

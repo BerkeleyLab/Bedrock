@@ -21,10 +21,21 @@
                             output               gt``GTi``_txp_out,\
                             output               gt``GTi``_rxfsm_resetdone_out,\
                             output               gt``GTi``_txfsm_resetdone_out,\
+                            input                gt``GTi``_rxslide_in,\
                             `ifdef GT``GTi``_8B10B_EN\
                             output [(DWI/8)-1:0] gt``GTi``_rxcharisk_out,\
+                            output [(DWI/8)-1:0] gt``GTi``_rxchariscomma_out,\
                             input  [(DWI/8)-1:0] gt``GTi``_txcharisk_in,\
                             output               gt``GTi``_rxbyteisaligned,\
+                            `endif\
+                            `ifdef GT``GTi``_DRP_EN\
+                            input                gt``GTi``_drpclk_in,\
+                            input  [(DWI-13):0]  gt``GTi``_drpaddr_in,\
+                            input  [(DWI-14):0]  gt``GTi``_drpdi_in,\
+                            output [(DWI-14):0]  gt``GTi``_drpdo_out,\
+                            input                gt``GTi``_drpen_in,\
+                            output               gt``GTi``_drprdy_out,\
+                            input                gt``GTi``_drpwe_in,\
                             `endif\
                             output [2:0]         gt``GTi``_rxbufstatus,\
                             output [1:0]         gt``GTi``_txbufstatus,
