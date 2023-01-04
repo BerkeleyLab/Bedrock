@@ -108,7 +108,7 @@ assign si570 = 0;
 
 parameter in_phase_tx_clk = 1;
 // Standardized interface, hardware-dependent implementation
-wire tx_clk, tx_clk90;
+wire tx_clk, tx_clk90, clk62;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
 wire test_clk;
@@ -124,6 +124,7 @@ xilinx7_clocks #(
 	.sysclk_n (1'b0),
 	.reset    (pll_reset),
 	.clk_out0 (tx_clk),
+	.clk_out1 (clk62),
 	.clk_out2 (tx_clk90),
 	.clk_out3f(test_clk),  // not buffered, straight from MMCM
 	.locked   (clk_locked)
@@ -200,7 +201,7 @@ marble_base #(
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
-	.aux_clk(SYSCLK_P),
+	.aux_clk(SYSCLK_P), .clk62(clk62),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
 	.twi_scl({dum_scl, FMC2_LA_P[2], FMC1_LA_P[2], TWI_SCL}),
