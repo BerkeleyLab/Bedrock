@@ -89,7 +89,7 @@ def acquire_vcd(dev, capture, i2c_base=0x040000, sim=False, timeout=None, debug=
         produce_vcd(ofile, logic, dw=dw, mtime=mtime, t_step=t_step)
 
 
-def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, debug=False, verbose=True):
+def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, debug=False, verbose=False):
     dev.reg_write([("twi_ctl", 0)])  # run_cmd=0
     wait_for_stop(dev, sim=sim, verbose=verbose)
     # Upload program to i2c_chunk dpram

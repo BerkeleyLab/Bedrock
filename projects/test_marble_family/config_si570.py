@@ -6,7 +6,7 @@ bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 sys.path.append(bedrock_dir + "projects/common")
-import lbus_access
+import leep
 import assem
 import testcase
 from time import sleep
@@ -130,10 +130,10 @@ def check(fin):
         print('SI570 final frequency measurement is not correct, out of spec by %i ppm' % ppm)
 
 
-def compute_si570(dev, addr, key):
+def compute_si570(addr, key):
     # using keyword just to keep print consistent
     prog = hw_test_prog()
-    result = testcase.run_testcase(dev, prog, result_len=359, debug=args.debug)
+    result = testcase.run_testcase(addr, prog, result_len=359, debug=args.debug, verbose=args.verbose)
     if args.debug:
         print(" ".join(["%2.2x" % p for p in prog]))
         print("")
@@ -166,9 +166,9 @@ def compute_si570(dev, addr, key):
     return fxtal, default
 
 
-def config_si570(dev, addr):
+def config_si570(addr):
     if args.new_freq:
-        fxtal, _ = compute_si570(dev, addr, "Measured")
+        fxtal, _ = compute_si570(addr, "Measured")
         print("#######################################")
         print("Changing output frequency to %4.4f MHz" % args.new_freq)
         # DCO frequency range: 4850 - 5670MHz
@@ -215,7 +215,7 @@ def config_si570(dev, addr):
         reg = [reg7, reg8, reg9, reg10, reg11, reg12]
         # write new registers
         chg = hw_write_prog(reg)
-        result1 = testcase.run_testcase(dev, chg, result_len=359, debug=args.debug)
+        result1 = testcase.run_testcase(addr, chg, result_len=359, debug=args.debug, verbose=args.verbose)
         if args.debug:
             print(" ".join(["%2.2x" % p for p in chg]))
             print("")
@@ -226,11 +226,11 @@ def config_si570(dev, addr):
         sleep(1)
         # read final values and output frequency?
         print("#######################################")
-        _, freq = compute_si570(dev, addr, "Final")
+        _, freq = compute_si570(addr, "Final")
         check(freq)
     else:  # read only current settings if you don't want to change anything
         print("#######################################")
-        compute_si570(dev, addr, "Measured")
+        compute_si570(addr, "Measured")
 
 
 if __name__ == "__main__":
@@ -244,15 +244,14 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--debug', action='store_true', help='print raw arrays')
 
     args = parser.parse_args()
-    import leep
     leep_addr = "leep://" + str(args.addr) + str(":") + str(args.port)
     print(leep_addr)
 
     addr = leep.open(leep_addr, instance=[])
 
-    dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
+    # dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
 
-    config_si570(dev, addr)
+    config_si570(addr)
 
 # usage:
 # To read current output frequency:
