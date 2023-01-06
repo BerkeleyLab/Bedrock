@@ -106,9 +106,12 @@ def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, 
         wait_for_stop(dev, sim=sim)
     if capture is not None:
         acquire_vcd(dev, capture, sim=sim, timeout=500, debug=debug)
-    if sim and False:
+    if sim:
         # stop simulation
-        dev.reg_write([("stop_sim", 1)])  # stop_sim not yet in leep
+        try:
+            dev.reg_write([("stop_sim", 1)])
+        except Exception:
+            print("configuration or timeout error during stop; OK?")
     return result
 
 

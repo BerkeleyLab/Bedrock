@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     # dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
     leep_addr = "leep://" + args.addr + ":" + str(args.port)
-    print(leep_addr)
+    # print(leep_addr)
     dev = leep.open(leep_addr)
 
     sn = run_eeprom(dev, args.new_sn, verbose=args.verbose, debug=args.debug)

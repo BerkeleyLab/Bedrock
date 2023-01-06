@@ -20,6 +20,13 @@
         "base_addr": 327683,
         "data_width": 8
     },
+    "stop_sim": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327686,
+        "data_width": 1
+    },
     "twi_ctl": {
         "access": "rw",
         "addr_width": 0,
