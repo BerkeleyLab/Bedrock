@@ -49,18 +49,18 @@ Verilator is used to build an emulator which connects to the real world through 
 <section id="instructions">
 <h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this heading">¶</a></h2>
 <p>Clone the master branch of lwIP …</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://git.savannah.nongnu.org/git/lwip.git
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://git.savannah.nongnu.org/git/lwip.git
 </pre></div>
 </div>
 <p>Set <code class="docutils literal notranslate"><span class="pre">LWIPDIR</span></code> in the Makefile to the src sub-directory of lwIP …</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">LWIPDIR</span> <span class="o">=</span> &lt;xxx&gt;/lwip/src
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">LWIPDIR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>&lt;xxx&gt;/lwip/src
 </pre></div>
 </div>
 <section id="setup-the-tap-interface">
 <h3>Setup the tap interface<a class="headerlink" href="#setup-the-tap-interface" title="Permalink to this heading">¶</a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo tunctl -u <span class="nv">$USER</span>
-sudo ip addr add dev tap0 <span class="m">192</span>.168.7.1/24
-sudo ip link <span class="nb">set</span> dev tap0 up
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>tunctl<span class="w"> </span>-u<span class="w"> </span><span class="nv">$USER</span>
+sudo<span class="w"> </span>ip<span class="w"> </span>addr<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>tap0<span class="w"> </span><span class="m">192</span>.168.7.1/24
+sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>dev<span class="w"> </span>tap0<span class="w"> </span>up
 </pre></div>
 </div>
 </section>
@@ -79,10 +79,10 @@ on the local TAP0 network</p></li>
 <section id="bridging-https-wiki-archlinux-org-index-php-network-bridge-tap0">
 <h3>(Bridging)[<a class="reference external" href="https://wiki.archlinux.org/index.php/Network_bridge">https://wiki.archlinux.org/index.php/Network_bridge</a>] tap0<a class="headerlink" href="#bridging-https-wiki-archlinux-org-index-php-network-bridge-tap0" title="Permalink to this heading">¶</a></h3>
 <p>A bridge is like a virtual network switch, connecting two or more links together (here tap0 and eth0). This allows the Verilog simulation to access the Internet.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo ip link add name br0 <span class="nb">type</span> bridge
-sudo ip link <span class="nb">set</span> br0 up
-sudo ip link <span class="nb">set</span> tap0 master br0
-sudo ip link <span class="nb">set</span> eth0 master br0
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span>add<span class="w"> </span>name<span class="w"> </span>br0<span class="w"> </span><span class="nb">type</span><span class="w"> </span>bridge
+sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>br0<span class="w"> </span>up
+sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>tap0<span class="w"> </span>master<span class="w"> </span>br0
+sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>eth0<span class="w"> </span>master<span class="w"> </span>br0
 </pre></div>
 </div>
 </section>

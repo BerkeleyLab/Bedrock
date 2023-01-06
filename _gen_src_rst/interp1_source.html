@@ -39,12 +39,12 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="interp1-source-file">
 <span id="interp1-source"></span><h1>interp1 Source File<a class="headerlink" href="#interp1-source-file" title="Permalink to this heading">¶</a></h1>
-<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"></span>
-<span class="linenos"> 2</span><span class="k">module</span><span class="w"> </span><span class="n">interp1</span><span class="p">(</span><span class="w"></span>
-<span class="linenos"> 3</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span><span class="w"></span>
-<span class="linenos"> 4</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"></span>
-<span class="linenos"> 5</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">y</span><span class="w"></span>
-<span class="linenos"> 6</span><span class="p">);</span><span class="w"></span>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
+<span class="linenos"> 2</span><span class="k">module</span><span class="w"> </span><span class="n">interp1</span><span class="p">(</span>
+<span class="linenos"> 3</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">x</span><span class="p">,</span>
+<span class="linenos"> 5</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">y</span>
+<span class="linenos"> 6</span><span class="p">);</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="c1">// y is double-integrated value of x</span>
 <span class="linenos"> 9</span><span class="c1">// x is assumed to be doubly-differentiated from the signal of interest,</span>
@@ -53,14 +53,14 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">12</span><span class="c1">// and limited in amplitude a little:</span>
 <span class="linenos">13</span><span class="c1">// 47^2 = 2209, but keep output &lt; 2047</span>
 <span class="linenos">14</span>
-<span class="linenos">15</span><span class="kt">reg</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">29</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">i1</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">i2</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">16</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<span class="linenos">17</span><span class="w">     </span><span class="n">i1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">i1</span><span class="o">+</span><span class="n">x</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">18</span><span class="w">     </span><span class="n">i2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">i2</span><span class="o">+</span><span class="n">i1</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">19</span><span class="k">end</span><span class="w"></span>
-<span class="linenos">20</span><span class="k">assign</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i2</span><span class="p">[</span><span class="mh">27</span><span class="o">:</span><span class="mh">12</span><span class="p">];</span><span class="w"></span>
+<span class="linenos">15</span><span class="kt">reg</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">29</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">i1</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">i2</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">16</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">17</span><span class="w">     </span><span class="n">i1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">i1</span><span class="o">+</span><span class="n">x</span><span class="p">;</span>
+<span class="linenos">18</span><span class="w">     </span><span class="n">i2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">i2</span><span class="o">+</span><span class="n">i1</span><span class="p">;</span>
+<span class="linenos">19</span><span class="k">end</span>
+<span class="linenos">20</span><span class="k">assign</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">i2</span><span class="p">[</span><span class="mh">27</span><span class="o">:</span><span class="mh">12</span><span class="p">];</span>
 <span class="linenos">21</span>
-<span class="linenos">22</span><span class="k">endmodule</span><span class="w"></span>
+<span class="linenos">22</span><span class="k">endmodule</span>
 </pre></div>
 </div>
 </section>

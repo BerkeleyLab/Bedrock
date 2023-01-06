@@ -161,36 +161,36 @@ This gets passed to the linker (to print memory utilization), assembler (to set 
 <section id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading">¶</a></h2>
 <p>running all the testbenches</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nb">test</span>
-make clean all
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nb">test</span>
+make<span class="w"> </span>clean<span class="w"> </span>all
 </pre></div>
 </div>
 <p>the demo project</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> project/cmod_a7
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>project/cmod_a7
 </pre></div>
 </div>
 <p>Simulate it (needs iverilog). Note that the Makefile will compile the C program automatically and generate a 32 bit .hex file which is loaded by system.v in memory. The testbench contains a virtual UART, which receives serial data from system.v and prints it to the console.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make clean system.vcd
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean<span class="w"> </span>system.vcd
 </pre></div>
 </div>
 <p>Show waveforms</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make clean system_view
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean<span class="w"> </span>system_view
 </pre></div>
 </div>
 <p>Synthesize</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make clean system_synth.bit
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean<span class="w"> </span>system_synth.bit
 </pre></div>
 </div>
 <p>Configure FPGA with bit-file (needs xc3sprog).</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make system_config
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>system_config
 </pre></div>
 </div>
 <p>At this point the demo-program should run and it should be possible to interact with it through serial at 115200 baud/s. For example through miniterm.py, assuming the usb serial port appears at /dev/ttyUSB0</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>miniterm.py /dev/ttyUSB0 <span class="m">115200</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>miniterm.py<span class="w"> </span>/dev/ttyUSB0<span class="w"> </span><span class="m">115200</span>
 </pre></div>
 </div>
 <p>The serial bootloader can be used to change the program (stored in ram) quickly without the need to re-synthesize.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make clean system_load
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean<span class="w"> </span>system_load
 </pre></div>
 </div>
 </section>

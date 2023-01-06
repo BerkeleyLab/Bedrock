@@ -39,7 +39,7 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="double-inte-smp-source-file">
 <span id="double-inte-smp-source"></span><h1>double_inte_smp Source File<a class="headerlink" href="#double-inte-smp-source-file" title="Permalink to this heading">¶</a></h1>
-<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"></span>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="cm">/** DOUBLE_INTE_SMP</span>
 <span class="linenos"> 4</span><span class="cm">    Variant of double_inte that can operate below the line rate by using an</span>
@@ -47,41 +47,41 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="cm">    *** INCOMPATIBLE WITH OLD double_inte BECAUSE THIS ONE NO LONGER HAS AN</span>
 <span class="linenos"> 8</span><span class="cm">        UNDOCUMENTED IMPLIED DIVIDE-BY-TWO</span>
-<span class="linenos"> 9</span><span class="cm">**/</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="cm">**/</span>
 <span class="linenos">10</span>
-<span class="linenos">11</span><span class="k">module</span><span class="w"> </span><span class="n">double_inte_smp</span><span class="w"> </span><span class="p">#(</span><span class="w"></span>
+<span class="linenos">11</span><span class="k">module</span><span class="w"> </span><span class="n">double_inte_smp</span><span class="w"> </span><span class="p">#(</span>
 <span class="linenos">12</span><span class="w">  </span><span class="k">parameter</span><span class="w"> </span><span class="n">dwi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">16</span><span class="p">,</span><span class="w"> </span><span class="c1">// data width in</span>
 <span class="linenos">13</span><span class="w">  </span><span class="k">parameter</span><span class="w"> </span><span class="n">dwo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">28</span><span class="p">)</span><span class="w"> </span><span class="c1">// data width out. When used for decimation, output width should</span>
 <span class="linenos">14</span><span class="w">                      </span><span class="c1">// be dwi + N*log2(decimation rate), where N=2 is the order of this</span>
 <span class="linenos">15</span><span class="w">                      </span><span class="c1">// double integrator.</span>
-<span class="linenos">16</span><span class="p">(</span><span class="w"></span>
-<span class="linenos">17</span><span class="w">   </span><span class="k">input</span><span class="w">                   </span><span class="n">clk</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">18</span><span class="w">   </span><span class="k">input</span><span class="w">                   </span><span class="n">reset</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">19</span><span class="w">   </span><span class="k">input</span><span class="w">                   </span><span class="n">stb_in</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">20</span><span class="w">   </span><span class="k">input</span><span class="w">  </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">dwi</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">in</span><span class="p">,</span><span class="w"></span>
-<span class="linenos">21</span><span class="w">   </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">dwo</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">out</span><span class="w"></span>
-<span class="linenos">22</span><span class="p">);</span><span class="w"></span>
+<span class="linenos">16</span><span class="p">(</span>
+<span class="linenos">17</span><span class="w">   </span><span class="k">input</span><span class="w">                   </span><span class="n">clk</span><span class="p">,</span>
+<span class="linenos">18</span><span class="w">   </span><span class="k">input</span><span class="w">                   </span><span class="n">reset</span><span class="p">,</span>
+<span class="linenos">19</span><span class="w">   </span><span class="k">input</span><span class="w">                   </span><span class="n">stb_in</span><span class="p">,</span>
+<span class="linenos">20</span><span class="w">   </span><span class="k">input</span><span class="w">  </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">dwi</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">in</span><span class="p">,</span>
+<span class="linenos">21</span><span class="w">   </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">dwo</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">out</span>
+<span class="linenos">22</span><span class="p">);</span>
 <span class="linenos">23</span>
-<span class="linenos">24</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">reset_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">25</span><span class="kt">reg</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">dwo</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">int1</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">int2</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">24</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">reset_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">25</span><span class="kt">reg</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">dwo</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">int1</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">int2</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">26</span>
-<span class="linenos">27</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<span class="linenos">28</span><span class="w">   </span><span class="n">reset_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">reset_r</span><span class="p">[</span><span class="mh">0</span><span class="p">],</span><span class="n">reset</span><span class="p">};</span><span class="w"></span>
-<span class="linenos">29</span><span class="k">end</span><span class="w"></span>
+<span class="linenos">27</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">28</span><span class="w">   </span><span class="n">reset_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">reset_r</span><span class="p">[</span><span class="mh">0</span><span class="p">],</span><span class="n">reset</span><span class="p">};</span>
+<span class="linenos">29</span><span class="k">end</span>
 <span class="linenos">30</span>
-<span class="linenos">31</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<span class="linenos">32</span><span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">|</span><span class="n">reset_r</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<span class="linenos">33</span><span class="w">      </span><span class="n">int1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">34</span><span class="w">      </span><span class="n">int2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">35</span><span class="w">   </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stb_in</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<span class="linenos">36</span><span class="w">      </span><span class="n">int1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">int1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">37</span><span class="w">      </span><span class="n">int2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">int2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">int1</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">38</span><span class="w">   </span><span class="k">end</span><span class="w"></span>
-<span class="linenos">39</span><span class="k">end</span><span class="w"></span>
+<span class="linenos">31</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">32</span><span class="w">   </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">|</span><span class="n">reset_r</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">33</span><span class="w">      </span><span class="n">int1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">34</span><span class="w">      </span><span class="n">int2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">35</span><span class="w">   </span><span class="k">end</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stb_in</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">36</span><span class="w">      </span><span class="n">int1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">int1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">in</span><span class="p">;</span>
+<span class="linenos">37</span><span class="w">      </span><span class="n">int2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">int2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">int1</span><span class="p">;</span>
+<span class="linenos">38</span><span class="w">   </span><span class="k">end</span>
+<span class="linenos">39</span><span class="k">end</span>
 <span class="linenos">40</span>
-<span class="linenos">41</span><span class="k">assign</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">int2</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">41</span><span class="k">assign</span><span class="w"> </span><span class="n">out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">int2</span><span class="p">;</span>
 <span class="linenos">42</span>
-<span class="linenos">43</span><span class="k">endmodule</span><span class="w"></span>
+<span class="linenos">43</span><span class="k">endmodule</span>
 </pre></div>
 </div>
 </section>

@@ -106,11 +106,11 @@ is found, newad recurses to look deeper into the hierarchy.</p>
 <p>The following Verilog snippet shows how an instantiated Verilog module is
 marked <code class="docutils literal notranslate"><span class="pre">auto</span></code> by a developer:</p>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="n">pair_couple</span><span class="w"> </span><span class="n">drive_couple</span><span class="w"> </span><span class="c1">// auto</span>
-<span class="w">        </span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">iq</span><span class="p">(</span><span class="n">iq</span><span class="p">),</span><span class="w"></span>
-<span class="w">        </span><span class="p">.</span><span class="n">drive</span><span class="p">(</span><span class="n">prompt_drive</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">lo_phase</span><span class="p">(</span><span class="n">lo_phase_d</span><span class="p">),</span><span class="w"></span>
-<span class="w">        </span><span class="p">.</span><span class="n">pair</span><span class="p">(</span><span class="n">fwd_ref</span><span class="p">),</span><span class="w"></span>
-<span class="w">        </span><span class="no">`AUTOMATIC_drive_couple</span><span class="w"></span>
-<span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">iq</span><span class="p">(</span><span class="n">iq</span><span class="p">),</span>
+<span class="w">        </span><span class="p">.</span><span class="n">drive</span><span class="p">(</span><span class="n">prompt_drive</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">lo_phase</span><span class="p">(</span><span class="n">lo_phase_d</span><span class="p">),</span>
+<span class="w">        </span><span class="p">.</span><span class="n">pair</span><span class="p">(</span><span class="n">fwd_ref</span><span class="p">),</span>
+<span class="w">        </span><span class="no">`AUTOMATIC_drive_couple</span>
+<span class="p">);</span>
 </pre></div>
 </div>
 <p>In this example, software-settable ports found within drive_couple will
@@ -153,11 +153,11 @@ controller module.  There are two provisions to override that.</p>
 <p>1) In an instantiation, the default clock domain for ports for that instance
 can be set.  Example:</p>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="n">prc_dsp</span><span class="w"> </span><span class="n">prc_dsp</span><span class="w"> </span><span class="c1">// auto clk1x</span>
-<span class="w">        </span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">adc_clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">qmode</span><span class="p">(</span><span class="n">qmode</span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]),</span><span class="w"> </span><span class="p">.</span><span class="n">adc_data</span><span class="p">(</span><span class="n">adc_data</span><span class="p">),</span><span class="w"></span>
-<span class="w">        </span><span class="p">.</span><span class="n">iq_result1</span><span class="p">(</span><span class="n">iq_cav01</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">iq_result2</span><span class="p">(</span><span class="n">iq_cav23</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">qmode_out</span><span class="p">(</span><span class="n">qmode_out</span><span class="p">),</span><span class="w"></span>
-<span class="w">        </span><span class="p">.</span><span class="n">cosd</span><span class="p">(</span><span class="n">cosa</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">sind</span><span class="p">(</span><span class="n">sina</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">phase_zero</span><span class="p">(</span><span class="n">phase_zero</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">fwd_in</span><span class="p">(</span><span class="n">fwd_in</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">rev_in</span><span class="p">(</span><span class="n">rev_in</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">phs_avg_sum</span><span class="p">(</span><span class="n">phs_avg_sum</span><span class="p">),</span><span class="w"></span>
-<span class="w">        </span><span class="no">`AUTOMATIC_prc_dsp</span><span class="w"></span>
-<span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">adc_clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">qmode</span><span class="p">(</span><span class="n">qmode</span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]),</span><span class="w"> </span><span class="p">.</span><span class="n">adc_data</span><span class="p">(</span><span class="n">adc_data</span><span class="p">),</span>
+<span class="w">        </span><span class="p">.</span><span class="n">iq_result1</span><span class="p">(</span><span class="n">iq_cav01</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">iq_result2</span><span class="p">(</span><span class="n">iq_cav23</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">qmode_out</span><span class="p">(</span><span class="n">qmode_out</span><span class="p">),</span>
+<span class="w">        </span><span class="p">.</span><span class="n">cosd</span><span class="p">(</span><span class="n">cosa</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">sind</span><span class="p">(</span><span class="n">sina</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">phase_zero</span><span class="p">(</span><span class="n">phase_zero</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">fwd_in</span><span class="p">(</span><span class="n">fwd_in</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">rev_in</span><span class="p">(</span><span class="n">rev_in</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">phs_avg_sum</span><span class="p">(</span><span class="n">phs_avg_sum</span><span class="p">),</span>
+<span class="w">        </span><span class="no">`AUTOMATIC_prc_dsp</span>
+<span class="p">);</span>
 </pre></div>
 </div>
 <p>Registers in the prc_dsp module will be created in the clk1x_clk domain
@@ -209,14 +209,14 @@ the instance name hierarchy is <code class="docutils literal notranslate"><span 
 register name is <code class="docutils literal notranslate"><span class="pre">sel_thresh</span></code>, and the extra <code class="docutils literal notranslate"><span class="pre">1</span></code> comes from <code class="docutils literal notranslate"><span class="pre">shell</span></code> being
 created in a Verilog generate loop.  The (abbreviated) syntax for that example
 is</p>
-<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="k">genvar</span><span class="w"> </span><span class="n">c_n</span><span class="p">;</span><span class="w"></span>
-<span class="k">generate</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">c_n</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"> </span><span class="n">c_n</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mh">2</span><span class="p">;</span><span class="w"> </span><span class="n">c_n</span><span class="o">=</span><span class="n">c_n</span><span class="o">+</span><span class="mh">1</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="o">:</span><span class="w"> </span><span class="n">cryomodule_cavity</span><span class="w"></span>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="k">genvar</span><span class="w"> </span><span class="n">c_n</span><span class="p">;</span>
+<span class="k">generate</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">c_n</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"> </span><span class="n">c_n</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mh">2</span><span class="p">;</span><span class="w"> </span><span class="n">c_n</span><span class="o">=</span><span class="n">c_n</span><span class="o">+</span><span class="mh">1</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="o">:</span><span class="w"> </span><span class="n">cryomodule_cavity</span>
 <span class="w">    </span><span class="n">llrf_shell</span><span class="w"> </span><span class="n">shell</span><span class="w"> </span><span class="c1">// auto(c_n,2) lb4[c_n]</span>
-<span class="w">        </span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">adc_clk</span><span class="p">),</span><span class="w"></span>
-<span class="w">        </span><span class="p">...</span><span class="w"></span>
-<span class="w">        </span><span class="no">`AUTOMATIC_shell</span><span class="w"></span>
-<span class="w">    </span><span class="p">);</span><span class="w"></span>
-<span class="k">end</span><span class="w"> </span><span class="k">endgenerate</span><span class="w"></span>
+<span class="w">        </span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">adc_clk</span><span class="p">),</span>
+<span class="w">        </span><span class="p">...</span>
+<span class="w">        </span><span class="no">`AUTOMATIC_shell</span>
+<span class="w">    </span><span class="p">);</span>
+<span class="k">end</span><span class="w"> </span><span class="k">endgenerate</span>
 </pre></div>
 </div>
 </section>

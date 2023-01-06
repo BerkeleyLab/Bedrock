@@ -39,30 +39,30 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="demand-gpt-source-file">
 <span id="demand-gpt-source"></span><h1>demand_gpt Source File<a class="headerlink" href="#demand-gpt-source-file" title="Permalink to this heading">¶</a></h1>
-<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"></span>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="c1">// timing error logic for simple single-input module that</span>
 <span class="linenos"> 4</span><span class="c1">// requires a fixed gates-per-trig (gpt).</span>
-<span class="linenos"> 5</span><span class="k">module</span><span class="w"> </span><span class="n">demand_gpt</span><span class="p">(</span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span><span class="w"> </span><span class="k">input</span><span class="w"> </span><span class="n">gate</span><span class="p">,</span><span class="w"> </span><span class="k">input</span><span class="w"> </span><span class="n">trig</span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="n">time_err</span><span class="p">);</span><span class="w"></span>
+<span class="linenos"> 5</span><span class="k">module</span><span class="w"> </span><span class="n">demand_gpt</span><span class="p">(</span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span><span class="w"> </span><span class="k">input</span><span class="w"> </span><span class="n">gate</span><span class="p">,</span><span class="w"> </span><span class="k">input</span><span class="w"> </span><span class="n">trig</span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="n">time_err</span><span class="p">);</span>
 <span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="k">parameter</span><span class="w"> </span><span class="n">gpt</span><span class="o">=</span><span class="mh">16</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 7</span><span class="k">parameter</span><span class="w"> </span><span class="n">gpt</span><span class="o">=</span><span class="mh">16</span><span class="p">;</span>
 <span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="kt">reg</span><span class="w"> </span><span class="n">time_err_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">10</span><span class="kt">reg</span><span class="w"> </span><span class="n">gate_check</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
+<span class="linenos"> 9</span><span class="kt">reg</span><span class="w"> </span><span class="n">time_err_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">10</span><span class="kt">reg</span><span class="w"> </span><span class="n">gate_check</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">11</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">8</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">count</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// XXX generous, but not general</span>
 <span class="linenos">12</span>
-<span class="linenos">13</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<span class="linenos">14</span><span class="w">        </span><span class="n">gate_check</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">gate</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">15</span><span class="w">     </span><span class="n">count</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">gate</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">16</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">gate_check</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
-<span class="linenos">17</span><span class="w">             </span><span class="n">time_err_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">(</span><span class="n">count</span><span class="o">+</span><span class="n">gate</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">gpt</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">18</span><span class="w">             </span><span class="n">count</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"></span>
-<span class="linenos">19</span><span class="w">     </span><span class="k">end</span><span class="w"></span>
-<span class="linenos">20</span><span class="k">end</span><span class="w"></span>
+<span class="linenos">13</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">14</span><span class="w">        </span><span class="n">gate_check</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">gate</span><span class="p">;</span>
+<span class="linenos">15</span><span class="w">     </span><span class="n">count</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">gate</span><span class="p">;</span>
+<span class="linenos">16</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">gate_check</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">17</span><span class="w">             </span><span class="n">time_err_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">(</span><span class="n">count</span><span class="o">+</span><span class="n">gate</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">gpt</span><span class="p">;</span>
+<span class="linenos">18</span><span class="w">             </span><span class="n">count</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">19</span><span class="w">     </span><span class="k">end</span>
+<span class="linenos">20</span><span class="k">end</span>
 <span class="linenos">21</span>
-<span class="linenos">22</span><span class="k">assign</span><span class="w"> </span><span class="n">time_err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time_err_r</span><span class="p">;</span><span class="w"></span>
+<span class="linenos">22</span><span class="k">assign</span><span class="w"> </span><span class="n">time_err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time_err_r</span><span class="p">;</span>
 <span class="linenos">23</span>
-<span class="linenos">24</span><span class="k">endmodule</span><span class="w"></span>
+<span class="linenos">24</span><span class="k">endmodule</span>
 </pre></div>
 </div>
 </section>
