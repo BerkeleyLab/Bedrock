@@ -5,7 +5,7 @@ bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 sys.path.append(bedrock_dir + "projects/common")
-import lbus_access
+import leep
 from c2vcd import produce_vcd
 from fmc_test_l import fmc_decode
 
@@ -21,26 +21,25 @@ def merge_16(a):
 def read_result(dev, i2c_base=0x040000, result_len=20, run=True):
     # freeze result buffer, usually keep running
     cmd = 3 if run else 1
-    dev.exchange([327687], values=[cmd])
+    dev.reg_write([("twi_ctl", cmd)])  # twi_ctl
     # read out "results"
     if result_len > 0:
-        addr = range(i2c_base+0x800, i2c_base+0x800+result_len)
-        result = dev.exchange(addr)
+        result = dev.reg_read(["twi_data"])[0]
     else:
         result = None
     # thaw result buffer, still keep running
     cmd = 2 if run else 0
-    dev.exchange([327687], values=[cmd])
+    dev.reg_write([("twi_ctl", cmd)])
     return result
 
 
 def wait_for_bit(dev, mask, equal, timeout=520, sim=False, progress=".", verbose=False):
     for ix in range(timeout):
         if sim:
-            dev.exchange(125*[0])  # twiddle our thumbs for 1000 clock cycles
+            dev.reg_read(125*["hello_0"])  # twiddle our thumbs for 1000 clock cycles
         else:
             sleep(0.02)
-        updated = dev.exchange([9])
+        updated = dev.reg_read(["twi_status"])[0]
         if verbose:
             print("%d updated? %d" % (ix, updated))
         if (updated & mask) == equal:
@@ -78,8 +77,7 @@ def wait_for_trace(dev, timeout=520, sim=False):
 def acquire_vcd(dev, capture, i2c_base=0x040000, sim=False, timeout=None, debug=False):
     wait_for_trace(dev, sim=sim)
     # read out "logic analyzer" data
-    addr = range(i2c_base+0x400, i2c_base+0x400+1024)
-    logic = dev.exchange(addr)
+    logic = dev.reg_read(["twi_analyz"])[0]
     if debug:
         print(logic)
     # corresponds to hard-coded 6, 2 in i2c_chunk_tb.v
@@ -92,24 +90,25 @@ def acquire_vcd(dev, capture, i2c_base=0x040000, sim=False, timeout=None, debug=
 
 
 def run_testcase(dev, prog, result_len=20, sim=False, capture=None, stop=False, debug=False, verbose=True):
-    dev.exchange([327687], values=[0])  # run_cmd=0
+    dev.reg_write([("twi_ctl", 0)])  # run_cmd=0
     wait_for_stop(dev, sim=sim, verbose=verbose)
     # Upload program to i2c_chunk dpram
-    i2c_base = 0x040000
-    addr = range(i2c_base, i2c_base+len(prog))
-    dev.exchange(addr, values=prog)
-    dev.exchange([327687], values=[10])  # run_cmd=1, trig_run=1
+    # leep can't write an incomplete memory block
+    if len(prog) < 1024:
+        prog += (1024-len(prog))*[0]
+    dev.reg_write([("twi_prog", prog)])
+    dev.reg_write([("twi_ctl", 10)])  # run_cmd=1, trig_run=1
     wait_for_new(dev, sim=sim, verbose=verbose)
     result = read_result(dev, result_len=result_len)
     if stop:
-        dev.exchange([327687], values=[0])  # run_cmd=0
+        dev.reg_write([("twi_ctl", 0)])  # run_cmd=0
     if stop:
         wait_for_stop(dev, sim=sim)
     if capture is not None:
         acquire_vcd(dev, capture, sim=sim, timeout=500, debug=debug)
-    if sim:
+    if sim and False:
         # stop simulation
-        dev.exchange([327686], values=[1])
+        dev.reg_write([("stop_sim", 1)])  # stop_sim not yet in leep
     return result
 
 
@@ -370,7 +369,10 @@ if __name__ == "__main__":
         prog = poller.hw_test_prog()
 
     # OK, setup is finished, start the actual work
-    dev = lbus_access.lbus_access(ip, port=udp, timeout=3.0, allow_burst=False)
+    # dev = lbus_access.lbus_access(ip, port=udp, timeout=3.0, allow_burst=False)
+    leep_addr = "leep://" + ip + ":" + str(udp)
+    print(leep_addr)
+    dev = leep.open(leep_addr, timeout=5.0)
     if args.poll:
         while True:
             wait_for_new(dev, sim=sim)
