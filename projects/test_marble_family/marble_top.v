@@ -118,7 +118,8 @@ xilinx7_clocks #(
 	.DIFF_CLKIN("BYPASS"),
 	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
 	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
-	.DIV0     (8)       // 1 GHz / 8 = 125 MHz
+	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
+	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
 ) clocks_i(
 	.sysclk_p (gtpclk),
 	.sysclk_n (1'b0),

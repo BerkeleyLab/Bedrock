@@ -15,8 +15,7 @@ module lb_marble_slave #(
 	input control_rd,
 	input [31:0] data_out,
 	output [31:0] data_in,
-  input aux_clk,
-  input clk62,
+	input clk62,
 	// Debugging
 	input ibadge_clk,
 	input ibadge_stb,
