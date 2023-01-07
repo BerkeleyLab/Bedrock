@@ -7,9 +7,9 @@ import os
 bedrock_dir = os.path.dirname(__file__) + "/../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
-import lbus_access
 import assem
 import testcase
+import leep
 
 
 # select one port of an I2C bus multiplexer
@@ -96,7 +96,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
+    # dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
+    leep_addr = "leep://" + args.addr + ":" + str(args.port)
+    # print(leep_addr)
+    dev = leep.open(leep_addr)
 
     sn = run_eeprom(dev, args.new_sn, verbose=args.verbose, debug=args.debug)
     print(sn)

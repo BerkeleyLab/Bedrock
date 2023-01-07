@@ -18,7 +18,7 @@ sys.path.append(bedrock_dir + "badger")
 import re
 import zbar
 from zest_sn import run_eeprom
-import lbus_access
+import leep
 import time
 
 
@@ -85,12 +85,14 @@ if __name__ == "__main__":
 
     if args.addr is None:
         exit(0)
-    ldev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
+    leep_addr = "leep://" + args.addr + ":" + str(args.port)
+    # print(leep_addr)
+    dev = leep.open(leep_addr)
     if args.write:
-        old_sn = run_eeprom(ldev, ss)
+        old_sn = run_eeprom(dev, ss)
         print("Previous SN : %s" % old_sn)
         time.sleep(0.05)
-        cnf_sn = run_eeprom(ldev, None)
+        cnf_sn = run_eeprom(dev, None)
         print("Confirm SN  : %s" % cnf_sn)
         if cnf_sn == ss:
             print("OK")
@@ -99,5 +101,5 @@ if __name__ == "__main__":
             print("FAIL")
             exit(1)
     else:
-        now_sn = run_eeprom(ldev, None)
+        now_sn = run_eeprom(dev, None)
         print("Extant SN   : %s" % now_sn)
