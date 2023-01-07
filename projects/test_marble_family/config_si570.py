@@ -6,7 +6,7 @@ bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 sys.path.append(bedrock_dir + "projects/common")
-import lbus_access
+import leep
 import assem
 import testcase
 from time import sleep
@@ -130,10 +130,10 @@ def check(fin):
         print('SI570 final frequency measurement is not correct, out of spec by %i ppm' % ppm)
 
 
-def compute_si570(dev, addr, key):
+def compute_si570(addr, key):
     # using keyword just to keep print consistent
     prog = hw_test_prog()
-    result = testcase.run_testcase(dev, prog, result_len=359, debug=args.debug)
+    result = testcase.run_testcase(addr, prog, result_len=359, debug=args.debug, verbose=args.verbose)
     if args.debug:
         print(" ".join(["%2.2x" % p for p in prog]))
         print("")
@@ -166,71 +166,75 @@ def compute_si570(dev, addr, key):
     return fxtal, default
 
 
-def config_si570(dev, addr):
+def config_si570(addr):
     if args.new_freq:
-        fxtal, _ = compute_si570(dev, addr, "Measured")
-        print("#######################################")
-        print("Changing output frequency to %4.4f MHz" % args.new_freq)
-        # DCO frequency range: 4850 - 5670MHz
-        # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
-        # N1 values: 1, 2, 4, 6, 8...128
-        # Find the lowest acceptable DCO value (lowest power) see page 15 from datasheet
-        best = [0, 0, 6000.0]
-        for i in range(0, 65):
-            n1_i = i*2
-            if i == 0:
-                n1_i = 1
-            for hsdiv_i in [4, 5, 6, 7, 9, 11]:
-                fdco_i = args.new_freq * n1_i * hsdiv_i
-                if (fdco_i > 4850.0) and (fdco_i < 5670.0):
-                    # print(n1_i-1, hsdiv_i-4, fdco_i)
-                    if fdco_i < best[2]:
-                        best = [n1_i, hsdiv_i, fdco_i]
+        fxtal, default = compute_si570(addr, "Measured")
+        # if first measured frequency and new output frequency are < 10 ppm don't change/update
+        if (abs(((default)*(1/args.new_freq) - 1.0)*1e6) < 10):
+            sys.exit(0)
+        else:
+            print("#######################################")
+            print("Changing output frequency to %4.4f MHz" % args.new_freq)
+            # DCO frequency range: 4850 - 5670MHz
+            # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
+            # N1 values: 1, 2, 4, 6, 8...128
+            # Find the lowest acceptable DCO value (lowest power) see page 15 from datasheet
+            best = [0, 0, 6000.0]
+            for i in range(0, 65):
+                n1_i = i*2
+                if i == 0:
+                    n1_i = 1
+                for hsdiv_i in [4, 5, 6, 7, 9, 11]:
+                    fdco_i = args.new_freq * n1_i * hsdiv_i
+                    if (fdco_i > 4850.0) and (fdco_i < 5670.0):
+                        # print(n1_i-1, hsdiv_i-4, fdco_i)
+                        if fdco_i < best[2]:
+                            best = [n1_i, hsdiv_i, fdco_i]
 
-        if best[2] > 5700.0:
-            raise Exception('Could not find appropriate settings for your new target frequency')
+            if best[2] > 5700.0:
+                raise Exception('Could not find appropriate settings for your new target frequency')
 
-        if args.debug:
-            print('New best option is:')
-            print(best[0]-1, best[1]-4, best[2])
+            if args.debug:
+                print('New best option is:')
+                print(best[0]-1, best[1]-4, best[2])
 
-        rfreq = int(best[2] * float(2**28) / fxtal)
-        rfreq_i = int(best[2] / fxtal)
-        n1 = best[0]-1
-        hs_div = best[1]-4
-        if args.verbose:
-            print('Expected SI570 settings:')
-            print('REFREQ: %4.4f' % rfreq_i)
-            print('N1: %3d' % best[0])
-            print('HSDIV: %2d' % best[1])
-            print('DCO frequency: %4.4f MHz' % best[2])
-        reg = []
-        # build registers
-        reg7 = (hs_div << 5) | ((n1 & 0x7C) >> 2)  # reg 7: hs_div[2:0], n1[6:2]
-        reg8 = ((n1 & 3) << 6) | (rfreq >> 32)  # reg 8: n1[1:0] rfreq[37:32]
-        reg9 = (rfreq >> 24) & 0xff  # reg 9: rfreq[31:24]
-        reg10 = (rfreq >> 16) & 0xff  # reg 10: rfreq[23:16]
-        reg11 = (rfreq >> 8) & 0xff  # reg 11: rfreq[15:8]
-        reg12 = rfreq & 0xff  # reg 12: rfreq[7:0]
-        reg = [reg7, reg8, reg9, reg10, reg11, reg12]
-        # write new registers
-        chg = hw_write_prog(reg)
-        result1 = testcase.run_testcase(dev, chg, result_len=359, debug=args.debug)
-        if args.debug:
-            print(" ".join(["%2.2x" % p for p in chg]))
-            print("")
-            for jx in range(16):
-                p = result1[jx*16:(jx+1)*16]
-                print("%x " % jx + " ".join(["%2.2x" % r for r in p]))
-        # sleep for a second, so we can read the final frequency
-        sleep(1)
-        # read final values and output frequency?
-        print("#######################################")
-        _, freq = compute_si570(dev, addr, "Final")
-        check(freq)
+            rfreq = int(best[2] * float(2**28) / fxtal)
+            rfreq_i = int(best[2] / fxtal)
+            n1 = best[0]-1
+            hs_div = best[1]-4
+            if args.verbose:
+                print('Expected SI570 settings:')
+                print('REFREQ: %4.4f' % rfreq_i)
+                print('N1: %3d' % best[0])
+                print('HSDIV: %2d' % best[1])
+                print('DCO frequency: %4.4f MHz' % best[2])
+            reg = []
+            # build registers
+            reg7 = (hs_div << 5) | ((n1 & 0x7C) >> 2)  # reg 7: hs_div[2:0], n1[6:2]
+            reg8 = ((n1 & 3) << 6) | (rfreq >> 32)  # reg 8: n1[1:0] rfreq[37:32]
+            reg9 = (rfreq >> 24) & 0xff  # reg 9: rfreq[31:24]
+            reg10 = (rfreq >> 16) & 0xff  # reg 10: rfreq[23:16]
+            reg11 = (rfreq >> 8) & 0xff  # reg 11: rfreq[15:8]
+            reg12 = rfreq & 0xff  # reg 12: rfreq[7:0]
+            reg = [reg7, reg8, reg9, reg10, reg11, reg12]
+            # write new registers
+            chg = hw_write_prog(reg)
+            result1 = testcase.run_testcase(addr, chg, result_len=359, debug=args.debug, verbose=args.verbose)
+            if args.debug:
+                print(" ".join(["%2.2x" % p for p in chg]))
+                print("")
+                for jx in range(16):
+                    p = result1[jx*16:(jx+1)*16]
+                    print("%x " % jx + " ".join(["%2.2x" % r for r in p]))
+            # sleep for a second, so we can read the final frequency
+            sleep(1)
+            # read final values and output frequency?
+            print("#######################################")
+            _, freq = compute_si570(addr, "Final")
+            check(freq)
     else:  # read only current settings if you don't want to change anything
         print("#######################################")
-        compute_si570(dev, addr, "Measured")
+        compute_si570(addr, "Measured")
 
 
 if __name__ == "__main__":
@@ -244,15 +248,14 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--debug', action='store_true', help='print raw arrays')
 
     args = parser.parse_args()
-    import leep
     leep_addr = "leep://" + str(args.addr) + str(":") + str(args.port)
     print(leep_addr)
 
     addr = leep.open(leep_addr, instance=[])
 
-    dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
+    # dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
 
-    config_si570(dev, addr)
+    config_si570(addr)
 
 # usage:
 # To read current output frequency:
