@@ -55,12 +55,12 @@ and you'll get a continuous readout of on-board frequencies:
     Channel 0:  124.99998 MHz
     Channel 1:  019.99654 MHz
     Channel 2:  125.00003 MHz
-    Channel 3:  000.00000 MHz
+    Channel 3:  068.54776 MHz
 ```
     Channel 0 is the Ethernet Rx clock from the switch,
     Channel 1 is the on-board 20 MHz VCXO,
     Channel 2 is the on-board Si570 (Marble-only), and
-    Channel 3 is not used.
+    Channel 3 is the FPGA's internal configuration oscillator
 
 2. Attach a [Digilent Pmod](https://digilent.com/reference/pmod/start) GPS
 to the top half of J13 (a.k.a. Pmod2[3:0]),
