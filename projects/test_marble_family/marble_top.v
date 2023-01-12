@@ -118,7 +118,8 @@ xilinx7_clocks #(
 	.DIFF_CLKIN("BYPASS"),
 	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
 	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
-	.DIV0     (8)       // 1 GHz / 8 = 125 MHz
+	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
+	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
 ) clocks_i(
 	.sysclk_p (gtpclk),
 	.sysclk_n (1'b0),
@@ -166,7 +167,8 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 );
 
 wire BOOT_CCLK;
-STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0));
+wire cfg_clk;  // Just for fun, so we can measure its frequency
+STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
 
 // Placeholders
 wire ZEST_PWR_EN;
@@ -201,7 +203,7 @@ marble_base #(
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
-	.aux_clk(SYSCLK_P), .clk62(clk62),
+	.aux_clk(SYSCLK_P), .clk62(clk62), .cfg_clk(cfg_clk),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
 	.twi_scl({dum_scl, FMC2_LA_P[2], FMC1_LA_P[2], TWI_SCL}),

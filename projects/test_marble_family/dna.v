@@ -34,8 +34,8 @@ module dna (
                                 // Shifts out MSb-first
 
   initial begin
-    r_dout <= 64'h0;
-    r_dna <= 64'h0;
+    r_dout = 64'h0;
+    r_dna = 64'h0;
   end
 
   always @(posedge dclk) begin
@@ -62,11 +62,11 @@ module dna (
 `endif
 
   initial begin
-    r_done <= 1'b1;
-    shift <= 1'b0;
-    bcnt <= 7'h0;
-    r_start_0 <= 1'b0;
-    r_start_1 <= 1'b0;
+    r_done = 1'b1;
+    shift = 1'b0;
+    bcnt = 7'h0;
+    r_start_0 = 1'b0;
+    r_start_1 = 1'b0;
   end
 
   always @(posedge dclk) begin
