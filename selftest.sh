@@ -12,7 +12,7 @@
 # plus verilator v4.220 or later, built from source, since that's not (yet) in Debian
 
 # Suggest (but don't mandate) running with flags set:
-# sh -ex testcase.sh
+# sh -ex selftest.sh
 
 # XXX consider adding -Wno-macro-redefinition to build-tools/top_rules.mk
 # XXX should we do a git clean -fdx before each make?

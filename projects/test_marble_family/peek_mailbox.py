@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+
+# DEPRECATED. Use marble_mmc/scripts/decodembox.py for current mailbox compatibility
 from sys import argv
 import leep
 
@@ -28,8 +30,9 @@ def peek_mailbox(addr):
 
 if __name__ == "__main__":
     if len(argv) < 2:
+        print("DEPRECATED. Use marble_mmc/scripts/decodembox.py for current mailbox compatibility")
         print("usage: peek_mailbox leep://$host:803")
         exit(1)
     leep_addr = argv[1]
-    addr = leep.open(leep_addr)
+    addr = leep.open(leep_addr, timeout=5.0)
     peek_mailbox(addr)

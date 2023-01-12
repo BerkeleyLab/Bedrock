@@ -15,6 +15,7 @@ module lb_marble_slave #(
 	input control_rd,
 	input [31:0] data_out,
 	output [31:0] data_in,
+	input clk62,
 	// Debugging
 	input ibadge_clk,
 	input ibadge_stb,
@@ -72,6 +73,14 @@ wire do_rd = control_strobe & control_rd;
 reg dbg_rst=0;
 wire [7:0] ibadge_out, obadge_out;
 
+// XADC Internal Temperature Monitor
+wire [15:0] xadc_temp_dout;
+wire [31:0] xadc_internal_temperature;
+assign xadc_internal_temperature = {16'h0000, xadc_temp_dout};
+
+// Device DNA
+wire [31:0] dna_high, dna_low;
+
 //`define BADGE_TRACE
 `ifdef BADGE_TRACE
 // Trace of input badges
@@ -98,7 +107,7 @@ wire [0:0] ctrace_running;
 reg csb_r=0, csb_toggle;
 reg arm=1;
 always @(posedge clk) begin
-   csb_r <= mmc_pins[0];
+   csb_r <= mmc_pins[0];  // Note! from spi_gate.v; spi_pins_debug = {MISO, din, sclk_d1, csb_d1};
    csb_toggle <= (~mmc_pins[0] & csb_r);
    if (csb_toggle) arm <= 0;
    if (ctrace_start) arm <= 1;
@@ -288,6 +297,29 @@ always @(posedge clk) if (do_rd) begin
 	endcase
 end
 
+reg [31:0] reg_bank_1=0;
+always @(posedge clk) if (do_rd) begin
+	case (addr[3:0])
+		4'h0: reg_bank_1 <= xadc_internal_temperature;
+		4'h1: reg_bank_1 <= dna_high;
+		4'h2: reg_bank_1 <= dna_low;
+		//  xxxx83  unused
+		//  xxxx84  unused
+		//  xxxx85  unused
+		//  xxxx86  unused
+		//  xxxx87  unused
+		//  xxxx88  unused
+		//  xxxx89  unused
+		//  xxxx8a  unused
+		//  xxxx8b  unused
+		//  xxxx8c  unused
+		//  xxxx8d  unused
+		//  xxxx8e  unused
+		//  xxxx8f  unused
+		default: reg_bank_1 <= "zzzz";
+	endcase
+end
+
 // Second read cycle
 // reverse_json.py doesn't have an address-offset feature, so put
 // (read-only) reg_bank_0 at 0.  That bumps (non-newad) direct writes
@@ -299,7 +331,8 @@ always @(posedge clk) if (do_rd_r) begin
 		// Semi-standard address for 2K x 16 configuration ROM
 		// xxx800 through xxxfff
 		24'b0000_0000_????_1???_????_????: lb_data_in <= config_rom_out;
-		24'h00????: lb_data_in <= reg_bank_0;
+		24'h00??0?: lb_data_in <= reg_bank_0;
+		24'h00??1?: lb_data_in <= reg_bank_1;
 		24'h01????: lb_data_in <= ibadge_out;
 		24'h02????: lb_data_in <= obadge_out;
 		24'h03????: lb_data_in <= rx_mac_data;
@@ -390,5 +423,32 @@ always @(posedge clk) begin
 		$display("Localbus read  r[%x] = %x", addr_rr, data_in);
 end
 `endif
+
+// ----------------------------------
+// XADC Internal Temperature Monitor
+// ----------------------------------
+xadc_tempmon #(
+  .SYSCLK_FREQ_HZ(125000000),
+  .UPDATE_FREQ_HZ(2000)  // Update freq doesn't matter much; higher freq means smaller counter.
+  ) xadc_tempmon_inst0 (
+  .clk                                (clk),
+  .rst                                (1'b0),            // High-true reset to XADC core
+  .dout                               (xadc_temp_dout),  // Data out
+  .read                               (),                // High pulse on read
+  .otemp                              ()                 // Over-temp alarm
+  );
+
+// ----------------------------------
+// 7-Series Device DNA Readout
+// ----------------------------------
+dna dna_inst0 (
+  .clk                                (clk62),
+  .rst                                (1'b0),
+  .start                              (1'b1),
+  .done                               (),
+  .dna_msb                            (dna_high),
+  .dna_lsb                            (dna_low)
+  );
+
 
 endmodule

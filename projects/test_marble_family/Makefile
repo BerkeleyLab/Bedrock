@@ -4,8 +4,14 @@ include $(I2CBRIDGE_DIR)/i2cbridge_rules.mk
 # Unisims not provided
 UNISIMS_DIR = broken
 
+# It seems like the variable VERILOG_TB from $(BUILD_DIR)/top_rules.mk is intended to be
+# used for this exact recipe.  But other local additions to variables like "VERILOG" cause
+# its expansion to now include multiple copies of the same flag/arg so it looks a little
+# funny at the command line (doesn't seem to cause trouble).  This should be cleaned up.
+# For now, redundantly inserting another "-DSIMULATE" here.
+#$(VERILOG_TB)
 %_tb: %_tb.v
-	$(VERILOG) $(VFLAGS_$@) -o $@ $(filter %.v, $^)
+	$(VERILOG) $(VFLAGS_$@) -DSIMULATE -o $@ $(filter %.v, $^)
 %_check: %_tb
 	$(VVP) $< $(VVP_FLAGS)
 
@@ -77,7 +83,8 @@ udp-vpi.vpi: udp_model.o
 # =====
 # subset that is interesting to test live on network
 AD5662_V = ad5662_lock.v pps_lock.v pps_loop_filter.v ad5662.v
-LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) gps_test.v simpleuart.v fake_dpram.v
+LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
+										gps_test.v simpleuart.v fake_dpram.v xadc_tempmon.v dna.v
 lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v udp-vpi.vpi
 VFLAGS_lb_marble_slave_tb = -m ./udp-vpi
 net_slave_run: lb_marble_slave_tb udp-vpi.vpi
@@ -102,7 +109,7 @@ no_multiple_drivers_check: marble_base_tb
 	@echo PASS
 
 marble_base_lint: $(MARBLE_BASE_V)
-	$(VERILATOR) --lint-only -Wno-WIDTH -Wno-TIMESCALEMOD -Wno-PINMISSING -Wno-UNUSED -Wno-DECLFILENAME -Wno-PINCONNECTEMPTY $^
+	$(VERILATOR) --lint-only -DSIMULATE -Wno-WIDTH -Wno-TIMESCALEMOD -Wno-PINMISSING -Wno-UNUSED -Wno-DECLFILENAME -Wno-PINCONNECTEMPTY $^
 
 # =====
 # constraint
@@ -125,7 +132,7 @@ read_trx.dat: read_trx.py
 VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -cc --exe $^
+	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -DSIMULATE -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmarble_base.mk USER_CPPFLAGS="-I $(BADGER_DIR)/tests"
 	mv obj_dir/$@ $@
 # Recipe:

@@ -17,6 +17,8 @@ module marble_base (
 
 	// Auxiliary I/O and status
 	input aux_clk,
+	input clk62,
+	input cfg_clk,
 	output phy_rstn,
 	input clk_locked,
 	input si570,
@@ -190,6 +192,7 @@ lb_marble_slave #(
 	.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
 	.data_out(lb_data_out), .data_in(lb_slave_data_read),
+	.clk62(clk62),
 	.ibadge_clk(rx_clk),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
@@ -324,7 +327,7 @@ assign vgmii_tx_er=1'b0;
 assign in_use = blob_in_use | boot_busy;
 
 // Frequency counter demo to UART
-wire [3:0] unk_clk = {1'b0, si570, aux_clk, rx_clk};
+wire [3:0] unk_clk = {cfg_clk, si570, aux_clk, rx_clk};
 freq_demo freq_demo(
 	.refclk(tx_clk), .unk_clk(unk_clk),
 	.uart_tx(FPGA_RxD), .uart_rx(FPGA_TxD)
