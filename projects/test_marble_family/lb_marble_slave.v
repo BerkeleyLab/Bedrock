@@ -108,7 +108,7 @@ wire [0:0] ctrace_running;
 reg csb_r=0, csb_toggle;
 reg arm=1;
 always @(posedge clk) begin
-   csb_r <= mmc_pins[0];
+   csb_r <= mmc_pins[0];  // Note! from spi_gate.v; spi_pins_debug = {MISO, din, sclk_d1, csb_d1};
    csb_toggle <= (~mmc_pins[0] & csb_r);
    if (csb_toggle) arm <= 0;
    if (ctrace_start) arm <= 1;
