@@ -133,6 +133,7 @@ reg result_k=0;
 reg [7:0] lb_wbufd=0, xbd=0;
 reg [11:0] lb_wbufa=0, xba=0;
 reg lb_wpend=0, err=0, xbs=0;
+wire [7:0] xbo;  // local read data
 wire [11:0] result_addr = {1'b1, pingpong, result_p};
 always @(posedge clk) begin
 	// Write bus multiplex
@@ -164,7 +165,6 @@ end
 wire lb_flip = lb_addr[11] & ~pingpong;
 wire [11:0] lb_addr1 = lb_addr ^ {1'b0, lb_flip, 10'b0};
 
-wire [7:0] xbo;  // local read data
 wire [7:0] lb_dout0;
 dpram #(.aw(12), .dw(8),
 	.initial_file(initial_file)) dpram(

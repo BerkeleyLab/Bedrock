@@ -7,7 +7,17 @@
 module lb_marble_slave #(
 	parameter USE_I2CBRIDGE = 0,
 	parameter MMC_CTRACE = 0,
-	parameter misc_config_default = 0
+	parameter misc_config_default = 0,
+	// Timing hooks, can be used to speed up simulation
+	parameter twi_q0=6,  // 145 kbps with 125 MHz clock
+	parameter twi_q1=2,
+	parameter twi_q2=7,
+	parameter led_cw=10,
+	`ifdef MARBLE_MINI
+	parameter initial_twi_file="read_trx.dat"
+	`else
+	parameter initial_twi_file=""
+	`endif
 )(
 	input clk,
 	input [23:0] addr,
@@ -57,17 +67,6 @@ module lb_marble_slave #(
 	output led1,  // PWM
 	output led2  // PWM
 );
-
-// Timing hooks, can be used to speed up simulation
-parameter twi_q0=6;  // 145 kbps with 125 MHz clock
-parameter twi_q1=2;
-parameter twi_q2=7;
-parameter led_cw=10;
-`ifdef MARBLE_MINI
-parameter initial_twi_file="read_trx.dat";
-`else
-parameter initial_twi_file="";
-`endif
 
 wire do_rd = control_strobe & control_rd;
 reg dbg_rst=0;
@@ -183,7 +182,7 @@ wire [4:0] twi_status;
 reg [3:0] twi_ctl;
 initial twi_ctl = (initial_twi_file != "") ? 4'b0010 : 4'b0000;
 
-parameter scl_act_high = 3;  // cycles of active pull-up following rising edge
+localparam scl_act_high = 3;  // cycles of active pull-up following rising edge
 generate if (USE_I2CBRIDGE) begin
 	wire twi_run_stat, twi_analyze_run, twi_analyze_armed, twi_updated, twi_err;
 	wire twi_freeze = twi_ctl[0];
@@ -243,6 +242,7 @@ end endgenerate
 
 // White Rabbit DAC - with EXPERIMENTAL internal GPS pps lock
 // wr_dac_tick is 31.2 MHz, wr_dac_sclk is 15.6 MHz when operating
+reg [led_cw-1:0] led_cc=0;
 reg wr_dac_tick;  always @(posedge clk) wr_dac_tick <= &led_cc[1:0];
 reg wr_dac_send=0;
 reg pps_config_write=0;
@@ -382,14 +382,13 @@ always @(posedge clk) begin
 end
 
 // Mirror memory
-parameter mirror_aw=5;
+localparam mirror_aw=5;
 dpram #(.aw(mirror_aw),.dw(32)) mirror_0(
 	.clka(clk), .addra(addr[mirror_aw-1:0]), .dina(data_out), .wena(local_write),
 	.clkb(clk), .addrb(addr[mirror_aw-1:0]), .doutb(mirror_out_0));
 
 // Blink the LEDs with the specified duty factor
 // (your eyes won't notice the blink, because it's at 122 kHz)
-reg [led_cw-1:0] led_cc=0;
 reg l1=0, l2=0;
 always @(posedge clk) begin
 	{led_tick, led_cc} <= led_cc+1;  // free-running, no reset

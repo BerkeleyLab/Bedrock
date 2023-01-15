@@ -36,7 +36,11 @@
 // At the moment, there is no check that they complete, so any pipelining
 // that takes place is outside the purview of this module.
 
-module mem_gateway(
+module mem_gateway #(
+	parameter read_pipe_len=3,  // minimum allowed value is 1
+	parameter n_lat=8,  // minimum allowed value is 5 + read_pipe_len
+	parameter enable_bursts=0
+) (
 	input clk,   // timespec 6.8 ns
 	// client interface with RTEFI, see doc/clients.eps
 	input [10:0] len_c,
@@ -55,10 +59,6 @@ module mem_gateway(
 	output [31:0] data_out,
 	input [31:0] data_in
 );
-
-parameter read_pipe_len=3;  // minimum allowed value is 1
-parameter n_lat=8;  // minimum allowed value is 5 + read_pipe_len
-parameter enable_bursts=0;
 
 // Pipeline match
 wire [7:0] pdata;
