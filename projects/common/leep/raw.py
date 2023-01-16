@@ -250,7 +250,7 @@ class LEEPDevice(DeviceBase):
         nch = info['data_width']
         # list of channel numbers to mask
         if isinstance(chans, list):
-            chans = reduce(lambda l, r: l | r,
+            chans = reduce(lambda ll, r: ll | r,
                            [2**(nch - 1 - n) for n in chans], 0)
         self.reg_write([('chan_keep', chans)], instance=instance)
 
@@ -339,7 +339,7 @@ class LEEPDevice(DeviceBase):
         """
         info = self.get_reg_info('chan_keep', instance=instance)
         nch = info['data_width']
-        interested = reduce(lambda l, r: l | r,
+        interested = reduce(lambda ll, r: ll | r,
                             [2**(nch - 1 - n) for n in chans], 0)
 
         if self.rfs:
