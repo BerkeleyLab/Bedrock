@@ -61,7 +61,7 @@ RUN git clone https://github.com/cliffordwolf/yosys.git && \
 	cd .. && rm -rf yosys && \
 	rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4
+RUN pip3 install pyyaml==5.1.2 nmigen==0.2 pyserial==3.4 setuptools-scm==7.1.0
 
 # we need a version of verilator with more than 20000, issue #1574,
 # any version > v4.110 should have this limit increased to 40000.
