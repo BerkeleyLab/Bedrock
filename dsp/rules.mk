@@ -46,7 +46,7 @@ fdbk_core.vcd: $(AUTOGEN_DIR)/regmap_fdbk_core_tb.json
 fdbk_core.vcd: fdbk_core_tb fdbk_core_test.py
 	$(PYTHON) fdbk_core_test.py
 fdbk_core_check: fdbk_core.vcd
-	echo DONE
+	@ echo DONE
 
 VFLAGS_rx_buffer_tb = -DTARGET_s3
 

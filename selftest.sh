@@ -6,10 +6,13 @@
 # directory you're developing in.  Measured execution time is under
 # two minutes on decent hardware (Ryzen 5 PRO 5650GE).
 
-# Can be run as an unprivileged user on a pretty basic Debian Bullseye or Bookworm system.
-# apt-get install -y build-essential git iverilog tcl
+# Can be run as an unprivileged user on a pretty basic Debian Bullseye
+# or Bookworm system, or recent related distributions like Ubuntu.
+# apt-get install -y build-essential git iverilog tcl flake8
 # apt-get install -y python3-yaml python3-scipy python3-matplotlib
-# plus verilator v4.220 or later, built from source, since that's not (yet) in Debian
+# On most systems you'll also have to build verilator v4.220 or later
+# from source, since distribution's published versions are too old and buggy.
+# Debian Bookworm users can simply apt-get install -y verilator.  :-)
 
 # Suggest (but don't mandate) running with flags set:
 # sh -ex selftest.sh
