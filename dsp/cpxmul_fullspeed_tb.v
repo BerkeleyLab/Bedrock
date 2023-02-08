@@ -23,8 +23,8 @@ module cpxmul_fullspeed_tb;
          clk=0; #(CLKP/2);
          clk=1; #(CLKP/2);
          if ($time > SIM_TIME) begin
-            $display("%s",errors==0 ? "PASS":"FAIL");
-            $finish();
+            if (errors == 0) $finish("PASS");
+            else $stop("FAIL");
          end
       end
 

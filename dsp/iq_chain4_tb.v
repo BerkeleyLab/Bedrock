@@ -17,7 +17,8 @@ initial begin
 		clk=1; #5;
 	end
 	$display("%s", fail ? "FAIL" : "PASS");
-	$finish();
+	if (fail) $stop("FAIL");
+	else $finish("PASS");
 end
 
 reg [2:0] state=0;

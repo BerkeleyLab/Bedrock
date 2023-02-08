@@ -14,8 +14,8 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("%s", fail ? "FAIL" : "PASS");
-	$finish();
+	if (fail) $stop("FAIL");
+	else $finish("PASS");
 end
 
 reg signed [17:0] x_I=0, x_Q=0, y_I=0, y_Q=0;

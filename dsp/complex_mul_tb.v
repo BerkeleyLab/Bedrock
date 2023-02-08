@@ -14,8 +14,8 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("%s", fail ? "FAIL" : "PASS");
-	$finish();
+	if (fail) $stop("FAIL");
+	else $finish("PASS");
 end
 parameter dw = 16;
 reg signed [(dw-1):0] x=0, y=0, xo=0, yo=0, zo=0;

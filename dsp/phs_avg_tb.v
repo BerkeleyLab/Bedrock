@@ -23,12 +23,12 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-    $display("Validation: %s.", fail ? "FAIL":"PASS");
-    if (~fail) $finish();
+    $display("Validation: %s.", fail ? "FAIL":"PASS"); // Redundant PASS/FAIL
+    if (~fail) $finish("PASS");
     else begin
 	    $display("### Check code for bit-width incompatibility ###");
         $display("##################################################");
-        $stop();
+        $stop("FAIL");
     end
 end
 

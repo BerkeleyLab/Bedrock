@@ -74,8 +74,8 @@ initial begin
     check(        0,-19175000);
 
     #100;
-    $display("%s",  pass ? "PASS" : "FAIL");
-    $finish;
+    if (pass) $finish("PASS");
+    else $stop("FAIL");
 end
 
 task setCoefficients;

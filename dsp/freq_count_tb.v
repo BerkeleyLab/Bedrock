@@ -16,9 +16,8 @@ initial begin
 	end
 	// Simulated accumulation interval is 20*64 = 1280 ns
 	// Should catch an average of 1280/6 = 213.33 f_in edges in that time
-	if (frequency>212 && frequency < 215) $display("PASS");
-	else $display("FAIL");
-	$finish();
+	if (frequency>212 && frequency < 215) $finish("PASS");
+	else $stop("FAIL");
 end
 
 always begin

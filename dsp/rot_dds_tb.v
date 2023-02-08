@@ -16,7 +16,6 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$finish();
 end
 
 // Values for Argonne RIA test documented in rot_dds.v
@@ -47,7 +46,8 @@ always @(negedge clk) if (cc>30) begin
 	if (cc==43) begin
 		$display("rms error = %.3f bits", $sqrt(variance/26.0));
 		fault = (variance/26 > 0.7);
-		$display("%s", fault ? "FAIL" : "PASS");
+		if (fault) $stop("FAIL");
+		else $finish("PASS");
 	end
 end
 

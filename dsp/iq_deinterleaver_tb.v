@@ -64,8 +64,8 @@ module iq_deinterleaver_tb;
          $display("ERROR: No transactions, nothing was tested.");
          errors = errors + 1;
       end
-      $display("%s",errors==0?"PASS":"FAIL");
-      $finish();
+      if (errors == 0) $finish("PASS");
+      else $stop("FAIL");
    end
 
    // ---------------------

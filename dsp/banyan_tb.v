@@ -18,7 +18,7 @@ initial begin
 		clk=1; #5;
 	end
 	// 1*1 + 70*2 + 28*4 + 8*8 = 317
-	if (pass_count == 317) $display("PASS"); else $display("FAIL %d", pass_count);
+	if (pass_count == 317) $finish("PASS"); else $stop("FAIL %d", pass_count);
 end
 
 // Create input test data that is easy to understand

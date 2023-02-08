@@ -15,12 +15,11 @@ initial begin
 		clk=1; #5;
 	end
 	if (fail) begin
-		$display("FAIL");
-		$stop();  // When run from Icarus vvp -N,
+		$stop("FAIL");
+		// When run from Icarus vvp -N,
 		// at least, this results in an exit code of 1
 		// that can be detected as a failure by make(1).
-	end else $display("PASS");
-	$finish();
+	end else $finish("PASS");
 end
 
 // White-noise generator
