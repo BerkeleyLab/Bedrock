@@ -10,8 +10,12 @@ demand_gpt Source File
 
    // timing error logic for simple single-input module that
    // requires a fixed gates-per-trig (gpt).
-   module demand_gpt(input clk, input gate, input trig, output time_err);
-
+   module demand_gpt(
+   	input clk,
+   	input gate,
+   	input trig,
+   	output time_err
+   );
    parameter gpt=16;
 
    reg time_err_r=0;
