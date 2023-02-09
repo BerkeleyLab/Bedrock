@@ -1,6 +1,8 @@
 `timescale 1ns / 1ns
 
-module iq_modulator (
+module iq_modulator #(
+	WIDTH=16
+) (
 	input clk,
 	input signed [WIDTH-1:0] sin,
 	input signed [WIDTH-1:0] cos,
@@ -13,7 +15,6 @@ module iq_modulator (
 
 // Universal definition; note: old and new are msb numbers, not bit widths.
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
-parameter WIDTH=16;
 // TODO: Add testbench - possibly based on phshift
 reg signed [2*WIDTH-1:0] p1=0, p2=0;  // product registers
 wire signed [WIDTH:0] p1s = p1[2*WIDTH-2:WIDTH-2];

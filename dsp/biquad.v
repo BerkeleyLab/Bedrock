@@ -186,7 +186,7 @@ endmodule
 ///////////////////////////////////////////////////////////////////////////////
 // Multiply-accumulate unit
 // Template from Vivado
-module macc  # (
+module macc #(
     parameter SIZEA   = 25,
               SIZEB   = 28,
               SIZEOUT = 55

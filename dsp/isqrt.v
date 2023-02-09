@@ -12,16 +12,16 @@
 // LBNL
 //
 
-module isqrt(clk, x, en, y, dav);
-
-parameter X_WIDTH     = 32;
-parameter Y_WIDTH    = X_WIDTH / 2;
-
-input                 clk;
-input  [X_WIDTH-1:0]  x;
-input                 en;
-output [Y_WIDTH-1:0]  y;
-output                dav;
+module isqrt #(
+	parameter X_WIDTH     = 32,
+	parameter Y_WIDTH     = X_WIDTH / 2
+) (
+	input                 clk,
+	input  [X_WIDTH-1:0]  x,
+	input                 en,
+	output [Y_WIDTH-1:0]  y,
+	output                dav
+);
 
 wire [Y_WIDTH-1:0]  y;
 reg  [X_WIDTH-1:0]  op = 0, pw4 = 0, res = 0;

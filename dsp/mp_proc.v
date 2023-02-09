@@ -31,7 +31,7 @@
 // drv_p = (sel_en ? in_mp : 0) + ph_offset
 // set_p and gain_p
 
-module mp_proc # (
+module mp_proc #(
 	parameter thresh_shift = 9, // Threshold shift; typically 9 for SRF use
 	parameter ff_dshift = 0     // Deferred ff_ddrive downshift
 )(
