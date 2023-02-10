@@ -9,8 +9,8 @@ module circle_buf #(
 	// and read cycles need the stb_out signal set high to register.
 	// Set this parameter to 0 to disable that feature, in which case you
 	// need to construct the stb_out signal as a simple explicit flip command.
-	parameter auto_flip = 1)
-(
+	parameter auto_flip = 1
+) (
 	// source side
 	input          iclk,
 	input [dw-1:0] d_in,

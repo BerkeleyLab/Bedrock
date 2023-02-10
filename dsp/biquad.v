@@ -15,7 +15,7 @@ module biquad #(
     parameter DATA_COUNT        = 1,
     parameter COEFFICIENT_WIDTH = 25,
     parameter DEBUG             = "false"
-    ) (
+) (
     input                         sysClk,
     input                         sysCoefficientStrobe,
     input                   [2:0] sysCoefficientAddress,
@@ -27,7 +27,8 @@ module biquad #(
     (*mark_debug=DEBUG*) output reg                               S_TREADY,
     (*mark_debug=DEBUG*) output reg [(DATA_COUNT*DATA_WIDTH)-1:0] M_TDATA,
     (*mark_debug=DEBUG*) output reg                               M_TVALID,
-    (*mark_debug=DEBUG*) input                                    M_TREADY);
+    (*mark_debug=DEBUG*) input                                    M_TREADY
+);
 
 localparam MAC_WIDEN = 4;
 localparam MAC_WIDTH = DATA_WIDTH + COEFFICIENT_WIDTH + MAC_WIDEN;
@@ -190,14 +191,14 @@ module macc #(
     parameter SIZEA   = 25,
               SIZEB   = 28,
               SIZEOUT = 55
-   ) (
+) (
     input clk,
     input ce,
     input sload,
     input signed    [SIZEA-1:0] a,
     input signed    [SIZEB-1:0] b,
     output signed [SIZEOUT-1:0] accum_out
-   );
+);
 
 // Declare registers for intermediate values
 reg signed       [SIZEA-1:0] a_reg;

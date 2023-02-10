@@ -46,8 +46,8 @@ module cic_multichannel #(
    parameter cc_halfband=1,
    parameter cc_use_delay=0,  // Match pipeline length of filt_halfband=1
    parameter cc_shift_base=0, // Bits to discard from previous acc step
-   parameter cc_shift_wi=4)
-(
+   parameter cc_shift_wi=4
+) (
    // Incoming stream
    input                       clk,
    input                       reset,

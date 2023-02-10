@@ -34,7 +34,7 @@
 module mp_proc #(
 	parameter thresh_shift = 9, // Threshold shift; typically 9 for SRF use
 	parameter ff_dshift = 0     // Deferred ff_ddrive downshift
-)(
+) (
 	input clk,
 	input sync,
 	// Input from cordic_mux

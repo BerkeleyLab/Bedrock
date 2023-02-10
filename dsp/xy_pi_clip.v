@@ -37,7 +37,7 @@
 //  .     .      .       .      .       out_y
 module xy_pi_clip #(
 	parameter ff_dshift = 0 // Deferred ff_ddrive downshift
-)(
+) (
 	input clk,  // timespec 6.8 ns
 	input sync,  // high for the first of the xy pair
 	input signed [17:0] in_xy,
