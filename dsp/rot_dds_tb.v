@@ -46,8 +46,13 @@ always @(negedge clk) if (cc>30) begin
 	if (cc==43) begin
 		$display("rms error = %.3f bits", $sqrt(variance/26.0));
 		fault = (variance/26 > 0.7);
-		if (fault) $stop("FAIL");
-		else $finish("PASS");
+		if (fault) begin
+			$display("FAIL");
+			$stop();
+		end else begin
+			$display("PASS");
+			$finish();
+		end
 	end
 end
 

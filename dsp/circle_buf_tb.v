@@ -15,8 +15,13 @@ initial begin
 		iclk=1; #5;
 	end
 	$display("%d errors", errors);
-	if (errors > 0) $stop("FAIL");
-	else $finish("PASS");
+	if (errors == 0) begin
+		$display("PASS");
+		$finish();
+	end else begin
+		$display("FAIL");
+		$stop();
+	end
 end
 
 reg oclk=0;

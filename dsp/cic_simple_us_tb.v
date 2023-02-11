@@ -18,8 +18,13 @@ initial begin
 	end
 	$display("%d outputs recorded, want 5", outs);
 	if (outs != 5) fail=1;
-	if (fail) $stop("FAIL");
-	else $finish("PASS");
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 // Construct stimulus

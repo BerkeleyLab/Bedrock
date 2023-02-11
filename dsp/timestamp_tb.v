@@ -16,8 +16,13 @@ initial begin
 		#10; clk=1;
 		#11; clk=0;
 	end
-	if (errors==0) $finish("PASS");
-	else $stop("FAIL");
+	if (errors==0) begin
+		$display("PASS");
+		$finish();
+	end else begin
+		$display("FAIL");
+		$stop();
+	end
 end
 
 reg slow_op=0, slow_snap=0, aux_trig=0;

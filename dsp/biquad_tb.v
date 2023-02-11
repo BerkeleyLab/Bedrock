@@ -125,8 +125,13 @@ initial begin
     end
 
     #100;
-    if (pass) $finish("PASS");
-    else $stop("FAIL");
+    if (pass) begin
+      $display("PASS");
+      $finish();
+    end else begin
+      $display("FAIL");
+      $stop();
+    end
 end
 
 task setCoefficients;

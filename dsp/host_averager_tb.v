@@ -17,8 +17,13 @@ initial begin
 		clk=1; #4;
 	end
 	if (tx_cnt < 10) fail=1;
-	if (fail) $stop("FAIL");
-	else $finish("PASS");
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 // Construct stimulus

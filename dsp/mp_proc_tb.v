@@ -24,8 +24,13 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	if (fail) $stop("FAIL");
-	else $finish("PASS");
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 reg [2:0] state=0;

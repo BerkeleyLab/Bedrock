@@ -36,8 +36,13 @@ initial begin
     $display("ADV: %d", ADV);
     $display("Expected phase: %d, Calculated phase: %d",
         phase_expect, phase_diff);
-    if (errors == 0) $finish("PASS");
-    else $stop("FAIL");
+    if (errors == 0) begin
+        $display("PASS");
+        $finish();
+    end else begin
+        $display("FAIL");
+        $stop();
+    end
 end
 
 reg uclk1=0, uclk2=0, sclk=0;

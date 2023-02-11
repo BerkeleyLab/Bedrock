@@ -15,20 +15,23 @@ reg clk;
 reg fail=0;
 integer cc;
 initial begin
-	if ($test$plusargs("vcd")) begin
-		$dumpfile("phs_avg.vcd");
-		$dumpvars(5,phs_avg_tb);
-	end
-	for (cc=0; cc<450; cc=cc+1) begin
-		clk=0; #5;
-		clk=1; #5;
-	end
+  if ($test$plusargs("vcd")) begin
+    $dumpfile("phs_avg.vcd");
+    $dumpvars(5,phs_avg_tb);
+  end
+  for (cc=0; cc<450; cc=cc+1) begin
+    clk=0; #5;
+    clk=1; #5;
+  end
     $display("Validation: %s.", fail ? "FAIL":"PASS"); // Redundant PASS/FAIL
-    if (~fail) $finish("PASS");
-    else begin
-	    $display("### Check code for bit-width incompatibility ###");
-        $display("##################################################");
-        $stop("FAIL");
+    if (~fail) begin
+      $display("PASS");
+      $finish();
+    end else begin
+      $display("### Check code for bit-width incompatibility ###");
+      $display("##################################################");
+      $display("FAIL");
+      $stop();
     end
 end
 

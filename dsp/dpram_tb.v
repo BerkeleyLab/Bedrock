@@ -29,9 +29,11 @@ module dpram_tb;
       while ($time < SIM_TIME) @(posedge clk_rw);
 
       if (~fail) begin
-         $finish("PASS");
+         $display("PASS");
+         $finish();
       end else begin
-         $stop("FAIL");
+         $display("FAIL");
+         $stop();
       end
    end
 

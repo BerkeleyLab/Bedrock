@@ -34,7 +34,8 @@ module cic_wave_recorder_tb;
       end
 
       $display("WARNING: Not a self-checking testbench. Will always pass.");
-      $finish("PASS");
+      $display("PASS");
+      $finish();
    end
 
    reg oclk=0;

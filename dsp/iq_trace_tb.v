@@ -17,7 +17,8 @@ initial begin
 		clk=1; #5;
 	end
 	$display("WARNING: Not a self-checking testbench. Will always pass.");
-	$finish("PASS");
+	$display("PASS");
+	$finish();
 end
 
 integer num=7;
