@@ -50,8 +50,8 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">  9</span><span class="w">     </span><span class="c1">// and read cycles need the stb_out signal set high to register.</span>
 <span class="linenos"> 10</span><span class="w">     </span><span class="c1">// Set this parameter to 0 to disable that feature, in which case you</span>
 <span class="linenos"> 11</span><span class="w">     </span><span class="c1">// need to construct the stb_out signal as a simple explicit flip command.</span>
-<span class="linenos"> 12</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">auto_flip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span>
-<span class="linenos"> 13</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos"> 12</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">auto_flip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="p">)</span>
+<span class="linenos"> 13</span><span class="p">(</span>
 <span class="linenos"> 14</span><span class="w">     </span><span class="c1">// source side</span>
 <span class="linenos"> 15</span><span class="w">     </span><span class="k">input</span><span class="w">          </span><span class="n">iclk</span><span class="p">,</span>
 <span class="linenos"> 16</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">d_in</span><span class="p">,</span>

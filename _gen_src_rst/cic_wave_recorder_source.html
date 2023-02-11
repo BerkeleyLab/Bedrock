@@ -85,11 +85,11 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 44</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">buf_aw</span><span class="o">=</span><span class="mh">13</span><span class="p">,</span>
 <span class="linenos"> 45</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">lsb_mask</span><span class="o">=</span><span class="mh">1</span><span class="p">,</span><span class="w">      </span><span class="c1">// LSB of channel mask is CH0</span>
 <span class="linenos"> 46</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">buf_stat_w</span><span class="o">=</span><span class="mh">16</span><span class="p">,</span>
-<span class="linenos"> 47</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">buf_auto_flip</span><span class="o">=</span><span class="mh">1</span><span class="w">  </span><span class="c1">// auto_flip=1: Double buffers will be flipped when</span>
+<span class="linenos"> 47</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">buf_auto_flip</span><span class="o">=</span><span class="mh">1</span><span class="p">)</span><span class="w"> </span><span class="c1">// auto_flip=1: Double buffers will be flipped when</span>
 <span class="linenos"> 48</span><span class="w">                              </span><span class="c1">//              last read address is reached</span>
 <span class="linenos"> 49</span><span class="w">                              </span><span class="c1">// auto_flip=0: Buffers must be explicitly flipped by</span>
 <span class="linenos"> 50</span><span class="w">                              </span><span class="c1">//              using stb_out as a pulse and not a strobe</span>
-<span class="linenos"> 51</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos"> 51</span><span class="p">(</span>
 <span class="linenos"> 52</span><span class="w">   </span><span class="k">input</span><span class="w">                      </span><span class="n">iclk</span><span class="p">,</span>
 <span class="linenos"> 53</span><span class="w">   </span><span class="k">input</span><span class="w">                      </span><span class="n">reset</span><span class="p">,</span>
 <span class="linenos"> 54</span><span class="w">   </span><span class="k">input</span><span class="w">                      </span><span class="n">stb_in</span><span class="p">,</span><span class="w">          </span><span class="c1">// Strobe signal for input samples</span>
