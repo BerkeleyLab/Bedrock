@@ -18,8 +18,8 @@ mixer Source File
       parameter davr      = 4,  // Guard bits to keep at output. E.g. if downstream
                                 // CIC averaging is 64, the useful data increase is sqrt(64),
                                 // so add 3 bits; 4 bits to account for rounding error
-      parameter dwlo      = 18) // Width of local-oscillator input
-   (
+      parameter dwlo      = 18  // Width of local-oscillator input
+   ) (
       input                        clk,
       input  signed [dwi-1:0]      adcf,
       input  signed [dwlo-1:0]     mult,
