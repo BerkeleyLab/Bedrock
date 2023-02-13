@@ -17,10 +17,15 @@ module multi_sampler_tb;
          clk=1; #5;
       end
 
-      $display("Validation: %s.", fail ? "FAIL":"PASS");
+      $display("Validation: %s.", fail ? "FAIL":"PASS"); // Redundant PASS/FAIL
       $display("##################################################");
-      if (~fail) $finish();
-      else $stop();
+      if (~fail) begin
+        $display("PASS");
+        $finish();
+      end else begin
+        $display("FAIL");
+        $stop();
+      end
 
    end
 

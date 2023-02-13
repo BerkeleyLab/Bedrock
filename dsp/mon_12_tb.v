@@ -43,8 +43,13 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("%s",errors==0?"PASS":"FAIL");
-	$finish();
+	if (errors == 0) begin
+		$display("PASS");
+		$finish();
+	end else begin
+		$display("FAIL");
+		$stop();
+	end
 end
 
 reg signed [15:0] adc=0;

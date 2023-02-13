@@ -14,9 +14,14 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("%s", fail ? "FAIL" : "PASS");
 	$display("WARNING: Not a self-checking testbench. Will always pass.");
-	$finish();
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 reg [2:0] state=0, state1=0, state2=0;
