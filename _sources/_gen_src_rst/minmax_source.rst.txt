@@ -11,16 +11,14 @@ minmax Source File
    // Simple always-on minmax finder, designed to be applied to ADC inputs.
    // reset is single-cycle, designed such that you can capture the outputs
    // on the same cycle as you apply the reset, resulting in no blind cycles.
-   module minmax #(
-   	parameter width=14
-   ) (
-   	input clk,
-   	input signed [width-1:0] xin,
-   	input reset,
-   	output signed [width-1:0] xmin,
-   	output signed [width-1:0] xmax
-   );
+   module minmax(clk,xin,reset,xmin,xmax);
+   parameter width=14;
 
+   	input clk;
+   	input signed [width-1:0] xin;
+   	input reset;
+   	output signed [width-1:0] xmin;
+   	output signed [width-1:0] xmax;
    reg signed [width-1:0] xin_d=0;
    reg signed [width-1:0] xmin_r={width{1'b1}};
    reg signed [width-1:0] xmax_r={width{1'b0}};

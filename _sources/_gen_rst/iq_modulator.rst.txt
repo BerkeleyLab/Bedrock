@@ -15,6 +15,23 @@ Pinout
 .. figure:: iq_modulator_block.png
     :alt: Schematic symbol
 
+Parameters
+''''''''''
+
+.. list-table:: iq_modulator_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - WIDTH
+     - ?
+     - ?
+     - 16
+     - 
+
 Ports
 '''''
 

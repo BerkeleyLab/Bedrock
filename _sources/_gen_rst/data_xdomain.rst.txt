@@ -44,19 +44,13 @@ Ports
    * - clk_in
      - Input
      - 
-   * - gate_in
-     - Input
-     - 
    * - data_in[size-1:0]
      - Input
      - 
-   * - clk_out
-     - Input
-     - 
-   * - gate_out
+   * - data_out[size-1:0]
      - Output
      - 
-   * - data_out[size-1:0]
+   * - gate_out
      - Output
      - 
 
