@@ -15,23 +15,22 @@ reg clk;
 reg fail=0;
 integer cc;
 initial begin
-  if ($test$plusargs("vcd")) begin
-    $dumpfile("phs_avg.vcd");
-    $dumpvars(5,phs_avg_tb);
-  end
-  for (cc=0; cc<450; cc=cc+1) begin
-    clk=0; #5;
-    clk=1; #5;
-  end
-    $display("Validation: %s.", fail ? "FAIL":"PASS"); // Redundant PASS/FAIL
+    if ($test$plusargs("vcd")) begin
+        $dumpfile("phs_avg.vcd");
+        $dumpvars(5,phs_avg_tb);
+    end
+    for (cc=0; cc<450; cc=cc+1) begin
+        clk=0; #5;
+        clk=1; #5;
+    end
     if (~fail) begin
-      $display("PASS");
-      $finish();
+        $display("PASS");
+        $finish();
     end else begin
-      $display("### Check code for bit-width incompatibility ###");
-      $display("##################################################");
-      $display("FAIL");
-      $stop();
+        $display("### Check code for bit-width incompatibility ###");
+        $display("##################################################");
+        $display("FAIL");
+        $stop();
     end
 end
 
@@ -39,9 +38,9 @@ end
 integer out_file;
 reg [255:0] out_file_name;
 initial begin
-	out_file = 0;
-	if ($value$plusargs("out_file=%s", out_file_name))
-		out_file = $fopen(out_file_name,"w");
+    out_file = 0;
+    if ($value$plusargs("out_file=%s", out_file_name))
+        out_file = $fopen(out_file_name,"w");
 end
 
 reg signed [dwi-1:0] x=0;
@@ -73,21 +72,21 @@ reg lb_write=0;
 wire signed [dwi+1:0] z;
 wire signed [dwi+7:0] sum_filt;
 phs_avg dut // auto
-	(.clk(clk), .reset(reset), .iq(iq), .x(x), .y(y), .sum_filt(sum_filt), .z(z), `AUTOMATIC_dut);
+    (.clk(clk), .reset(reset), .iq(iq), .x(x), .y(y), .sum_filt(sum_filt), .z(z), `AUTOMATIC_dut);
 
 // Set control registers from command line
 // See also lp_setup in lp_notch_test.py
 reg signed [dwj-1:0] kxr, kxi, kyr, kyi;
 initial begin
-	if (!$value$plusargs("kxr=%d", kxr)) kxr = 1000;
-	if (!$value$plusargs("kxi=%d", kxi)) kxi = 100;
-	if (!$value$plusargs("kyr=%d", kyr)) kyr = -1000;
-	if (!$value$plusargs("kyi=%d", kyi)) kyi = 200;
-	#1;
-	dp_dut_kx.mem[0] = kxr;  // k_X  real part
-	dp_dut_kx.mem[1] = kxi;  // k_X  imag part
-	dp_dut_ky.mem[0] = kyr;  // k_Y  real part
-	dp_dut_ky.mem[1] = kyi;  // k_Y  imag part
+    if (!$value$plusargs("kxr=%d", kxr)) kxr = 1000;
+    if (!$value$plusargs("kxi=%d", kxi)) kxi = 100;
+    if (!$value$plusargs("kyr=%d", kyr)) kyr = -1000;
+    if (!$value$plusargs("kyi=%d", kyi)) kyi = 200;
+    #1;
+    dp_dut_kx.mem[0] = kxr;  // k_X  real part
+    dp_dut_kx.mem[1] = kxi;  // k_X  imag part
+    dp_dut_ky.mem[0] = kyr;  // k_Y  real part
+    dp_dut_ky.mem[1] = kyi;  // k_Y  imag part
 end
 
 // Write a comprehensible output file
@@ -97,14 +96,14 @@ reg signed [dwi+1:0] z1=0;
 reg signed [dwi-1:0] y1=0, y_i=0, y_q=0;
 reg signed [dwi-1:0] x1=0, x_i=0, x_q=0;
 always @(posedge clk) begin
-	x1 <= x;
-	y1 <= y;
-	z1 <= z;  // only imag number
-	if (~iq) y_i <= y1;
-	if (~iq) y_q <= y;
-	if (~iq) x_i <= x1;
-	if (~iq) x_q <= x;
-	if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d %d\n", x_i, x_q, y_i, y_q, z1);
+    x1 <= x;
+    y1 <= y;
+    z1 <= z;  // only imag number
+    if (~iq) y_i <= y1;
+    if (~iq) y_q <= y;
+    if (~iq) x_i <= x1;
+    if (~iq) x_q <= x;
+    if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d %d\n", x_i, x_q, y_i, y_q, z1);
 end
 
 // to check the bit-width
