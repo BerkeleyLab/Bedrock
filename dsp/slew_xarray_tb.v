@@ -13,9 +13,13 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("%s", fail?"FAIL":"PASS");
-	if (fail) $stop();  // tell Makefile that we broke
-	$finish();
+	if (fail) begin
+		$display("FAIL");  // tell Makefile that we broke
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 // Configure for 5-bit values, range 0 to 31.
