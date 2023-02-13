@@ -51,5 +51,5 @@ marble_run:
   before_script:
     - cd projects/test_marble_family && ln -s marble2.*.bit marble2.bit
   script:
-    - make marble2_hwload && sleep 8 && make marble2_hwtest
+    - make marble2_hwload SERIAL=39  && sleep 8 && make marble2_hwtest
 
