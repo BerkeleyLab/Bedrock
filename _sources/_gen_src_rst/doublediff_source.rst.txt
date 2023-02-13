@@ -8,16 +8,15 @@ doublediff Source File
 
    `timescale 1ns / 1ns
    // Differentiate when the gate is HIGH
-   module doublediff #(
-   	parameter dw=28,
-   	parameter dsr_len=4
-   ) (
+   module doublediff(
    	input clk,
    	input [dw-1:0] d_in, // Input data
    	input g_in, // A gate when set to high differentiates input data
    	output [dw-1:0] d_out,
    	output g_out
    );
+   parameter dw=28;
+   parameter dsr_len=4;
 
    reg signed [dw-1:0] d1=0, d2=0;
    reg valid1=0, valid2=0;

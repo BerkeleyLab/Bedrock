@@ -40,7 +40,7 @@ Parameters
      - ?
      - ?
      - 4
-     - Guard bits to keep at output of scale multiplication
+     - 
 
 Ports
 '''''

@@ -40,7 +40,7 @@ Parameters
      - ?
      - ?
      - 1
-     - l_to_r=1: Channel shifting starts with CH0 (default)
+     - 
 
 Ports
 '''''

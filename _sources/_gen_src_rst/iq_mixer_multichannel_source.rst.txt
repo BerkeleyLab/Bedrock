@@ -20,8 +20,8 @@ iq_mixer_multichannel Source File
       parameter NCHAN     = 2,  // Number of input channels
       parameter DWI       = 16, // Width of ADC input
       parameter DAVR      = 4,  // Guard bits to keep in the output
-      parameter DWLO      = 18  // Width of sin/cos input
-   ) (
+      parameter DWLO      = 18) // Width of sin/cos input
+   (
       input                                clk,
       input  signed [NCHAN*DWI-1:0]        adc,
       input  signed [DWLO-1:0]             cos,
