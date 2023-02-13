@@ -179,13 +179,15 @@ marble1_hwtest: udprtx
 # Marble bitfile loading and testing; bitfile specified by doing 'make BIT=marble2.bit marble2_hwload'
 
 # Default IP address set from microcontroller
+SERIAL = "" 
 MARBLE_IP = 192.168.19.${SERIAL}
 BIT2 = marble2.bit
 # Stored in the Zest board installed on mohs CI test stand; here, we just check that we can read it
 ZEST_SN = "LBNL DIGITIZER V1.1 SN 299"
 
 marble2_hwload:
-	openocd -c "adapter driver ftdi; ftdi_serial 0000${SERIAL};" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BITFILE2}; exit"
+	echo "Using Marble with serial number ${SERIAL}"
+	openocd -c "adapter driver ftdi; ftdi_serial 0000${SERIAL};" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT2}; exit"
 
 marble2_hwtest: udprtx
 	ping -c 2 ${MARBLE_IP}
