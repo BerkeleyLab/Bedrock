@@ -39,29 +39,30 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="async-to-sync-reset-shift-source-file">
 <span id="async-to-sync-reset-shift-source"></span><h1>async_to_sync_reset_shift Source File<a class="headerlink" href="#async-to-sync-reset-shift-source-file" title="Permalink to this heading">¶</a></h1>
-<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">module</span><span class="w"> </span><span class="n">async_to_sync_reset_shift</span><span class="p">(</span><span class="n">clk</span><span class="p">,</span><span class="n">Pinput</span><span class="p">,</span><span class="n">Poutput</span><span class="p">);</span>
-<span class="linenos"> 2</span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">;</span>
-<span class="linenos"> 3</span><span class="k">input</span><span class="w"> </span><span class="n">Pinput</span><span class="p">;</span>
-<span class="linenos"> 4</span><span class="k">output</span><span class="w"> </span><span class="n">Poutput</span><span class="p">;</span>
-<span class="linenos"> 5</span><span class="k">parameter</span><span class="w"> </span><span class="n">LENGTH</span><span class="w"> </span><span class="o">=</span><span class="mh">8</span><span class="p">;</span>
-<span class="linenos"> 6</span><span class="k">parameter</span><span class="w"> </span><span class="n">INPUT_POLARITY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">;</span>
-<span class="linenos"> 7</span><span class="k">parameter</span><span class="w"> </span><span class="n">OUTPUT_POLARITY</span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">;</span>
-<span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">LENGTH</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">shift</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">10</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="n">Pinput</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="p">(</span><span class="n">clk</span><span class="p">))</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">11</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">Pinput</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">INPUT_POLARITY</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">12</span><span class="w">             </span><span class="n">shift</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">LENGTH</span><span class="p">{</span><span class="n">OUTPUT_POLARITY</span><span class="p">}};</span>
-<span class="linenos">13</span><span class="w">     </span><span class="k">end</span>
-<span class="linenos">14</span><span class="w">     </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">15</span><span class="w">             </span><span class="n">shift</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">shift</span><span class="p">[</span><span class="n">LENGTH</span><span class="o">-</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">],</span><span class="w"> </span><span class="o">~</span><span class="n">OUTPUT_POLARITY</span><span class="p">};</span>
-<span class="linenos">16</span><span class="w">     </span><span class="k">end</span>
-<span class="linenos">17</span><span class="k">end</span>
-<span class="linenos">18</span><span class="c1">// Output the result on edge - helps to meet timing</span>
-<span class="linenos">19</span><span class="c1">//always @(posedge clk) begin</span>
-<span class="linenos">20</span><span class="c1">//  Poutput &lt;= shift[LENGTH-1];</span>
-<span class="linenos">21</span><span class="c1">//end</span>
-<span class="linenos">22</span><span class="k">assign</span><span class="w"> </span><span class="n">Poutput</span><span class="o">=</span><span class="n">shift</span><span class="p">[</span><span class="n">LENGTH</span><span class="o">-</span><span class="mh">1</span><span class="p">];</span>
-<span class="linenos">23</span><span class="k">endmodule</span>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="k">module</span><span class="w"> </span><span class="n">async_to_sync_reset_shift</span><span class="p">(</span>
+<span class="linenos"> 2</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span>
+<span class="linenos"> 3</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">Pinput</span><span class="p">,</span>
+<span class="linenos"> 4</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="n">Poutput</span>
+<span class="linenos"> 5</span><span class="p">);</span>
+<span class="linenos"> 6</span><span class="k">parameter</span><span class="w"> </span><span class="n">LENGTH</span><span class="w"> </span><span class="o">=</span><span class="mh">8</span><span class="p">;</span>
+<span class="linenos"> 7</span><span class="k">parameter</span><span class="w"> </span><span class="n">INPUT_POLARITY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">;</span>
+<span class="linenos"> 8</span><span class="k">parameter</span><span class="w"> </span><span class="n">OUTPUT_POLARITY</span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">;</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">LENGTH</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">shift</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">11</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="n">Pinput</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="p">(</span><span class="n">clk</span><span class="p">))</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">12</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">Pinput</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">INPUT_POLARITY</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">13</span><span class="w">             </span><span class="n">shift</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">LENGTH</span><span class="p">{</span><span class="n">OUTPUT_POLARITY</span><span class="p">}};</span>
+<span class="linenos">14</span><span class="w">     </span><span class="k">end</span>
+<span class="linenos">15</span><span class="w">     </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">16</span><span class="w">             </span><span class="n">shift</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">shift</span><span class="p">[</span><span class="n">LENGTH</span><span class="o">-</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">],</span><span class="w"> </span><span class="o">~</span><span class="n">OUTPUT_POLARITY</span><span class="p">};</span>
+<span class="linenos">17</span><span class="w">     </span><span class="k">end</span>
+<span class="linenos">18</span><span class="k">end</span>
+<span class="linenos">19</span><span class="c1">// Output the result on edge - helps to meet timing</span>
+<span class="linenos">20</span><span class="c1">//always @(posedge clk) begin</span>
+<span class="linenos">21</span><span class="c1">//  Poutput &lt;= shift[LENGTH-1];</span>
+<span class="linenos">22</span><span class="c1">//end</span>
+<span class="linenos">23</span><span class="k">assign</span><span class="w"> </span><span class="n">Poutput</span><span class="o">=</span><span class="n">shift</span><span class="p">[</span><span class="n">LENGTH</span><span class="o">-</span><span class="mh">1</span><span class="p">];</span>
+<span class="linenos">24</span><span class="k">endmodule</span>
 </pre></div>
 </div>
 </section>

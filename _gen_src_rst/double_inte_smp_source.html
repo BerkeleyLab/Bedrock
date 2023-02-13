@@ -51,10 +51,10 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">10</span>
 <span class="linenos">11</span><span class="k">module</span><span class="w"> </span><span class="n">double_inte_smp</span><span class="w"> </span><span class="p">#(</span>
 <span class="linenos">12</span><span class="w">  </span><span class="k">parameter</span><span class="w"> </span><span class="n">dwi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">16</span><span class="p">,</span><span class="w"> </span><span class="c1">// data width in</span>
-<span class="linenos">13</span><span class="w">  </span><span class="k">parameter</span><span class="w"> </span><span class="n">dwo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">28</span><span class="p">)</span><span class="w"> </span><span class="c1">// data width out. When used for decimation, output width should</span>
+<span class="linenos">13</span><span class="w">  </span><span class="k">parameter</span><span class="w"> </span><span class="n">dwo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">28</span><span class="w">  </span><span class="c1">// data width out. When used for decimation, output width should</span>
 <span class="linenos">14</span><span class="w">                      </span><span class="c1">// be dwi + N*log2(decimation rate), where N=2 is the order of this</span>
 <span class="linenos">15</span><span class="w">                      </span><span class="c1">// double integrator.</span>
-<span class="linenos">16</span><span class="p">(</span>
+<span class="linenos">16</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
 <span class="linenos">17</span><span class="w">   </span><span class="k">input</span><span class="w">                   </span><span class="n">clk</span><span class="p">,</span>
 <span class="linenos">18</span><span class="w">   </span><span class="k">input</span><span class="w">                   </span><span class="n">reset</span><span class="p">,</span>
 <span class="linenos">19</span><span class="w">   </span><span class="k">input</span><span class="w">                   </span><span class="n">stb_in</span><span class="p">,</span>

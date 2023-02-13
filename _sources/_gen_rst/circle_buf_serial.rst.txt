@@ -55,7 +55,7 @@ Parameters
      - ?
      - ?
      - 1
-     - 
+     - auto_flip=1: Double buffers will be flipped when
 
 Ports
 '''''

@@ -63,10 +63,10 @@ Ports
      - Description
    * - clk
      - Input
-     - 
+     - timespec 8.4 ns
    * - adc[NCHAN*DWI-1:0]
      - Input
-     - 
+     - possibly muxed
    * - mlo[NCHAN*DWLO-1:0]
      - Input
      - 

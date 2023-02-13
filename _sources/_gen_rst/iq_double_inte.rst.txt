@@ -51,10 +51,10 @@ Ports
      - Description
    * - clk
      - Input
-     - 
+     - timespec 8.4 ns
    * - in[dwi-1:0]
      - Input
-     - 
+     - IQ muxed
    * - out[dwo-1:0]
      - Output
      - 
