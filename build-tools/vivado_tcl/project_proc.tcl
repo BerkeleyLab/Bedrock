@@ -54,6 +54,10 @@ proc project_create {platform_name project_name} {
             set project_part "xc7k160tffg676-2"
         }
     }
+    if [regexp "rfsoc_marble" $platform_name] {
+        set platform "rfsoc_marble"
+        set project_part "xczu48dr-ffvg1517-1-e"
+    }
     if [regexp "qf2pre_*" $platform_name] {
         set platform "bmb7"
         set project_part "xc7k160tffg676-2"
