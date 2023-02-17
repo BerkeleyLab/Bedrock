@@ -183,7 +183,7 @@ SERIAL = ""
 MARBLE_IP = 192.168.19.${SERIAL}
 BIT2 = marble2.bit
 # Stored in the Zest board installed on mohs CI test stand; here, we just check that we can read it
-ZEST_SN = "LBNL DIGITIZER V1.1 SN 299"
+ZEST_SN = "LBNL DIGITIZER V1.1 SN 024"
 
 marble2_hwload:
 	echo "Using Marble with serial number ${SERIAL}"
