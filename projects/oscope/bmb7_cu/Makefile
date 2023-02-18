@@ -26,8 +26,6 @@ VFLAGS_DEP += -y$(DSP_DIR) -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR) -y$(ISERDES
 
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
 
-VLATOR_LINT_IGNORE += -Wno-TIMESCALEMOD
-
 CLEAN += *.bit $(APP_NAME)_regmap*.json scalar_$(APP_NAME)_regmap.json
 CLEAN_DIRS += _xilinx
 CLEAN_DIRS += ./.Xil

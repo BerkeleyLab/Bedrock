@@ -24,6 +24,7 @@ VERILOG += -Wno-timescale
 # VERILOG += -g2005-sv
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
+VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 
 # XXX consider converting this to something more compatible with Bedrock's VIVADO_SYNTH.
 VIVADOEXEC = vivado
@@ -106,10 +107,10 @@ VFLAGS_marble_base_tb =
 .PHONY: no_multiple_drivers_check
 no_multiple_drivers_check: marble_base_tb
 	$(AWK) '$$NF=="drivers" && $$(NF-1)>1 {print $$0; code=1}BEGIN{code=0}END{exit(code)}' $<
-	@echo PASS
+	@echo "PASS"
 
 marble_base_lint: $(MARBLE_BASE_V)
-	$(VERILATOR) --lint-only -DSIMULATE -Wno-WIDTH -Wno-TIMESCALEMOD -Wno-PINMISSING -Wno-UNUSED -Wno-DECLFILENAME -Wno-PINCONNECTEMPTY $^
+	$(VERILATOR) --lint-only -DSIMULATE $(VLATOR_LINT_IGNORE) $^
 
 # =====
 # constraint
@@ -129,14 +130,13 @@ read_trx.dat: read_trx.py
 # Build a testbench with Verilator that can be put on the (simulated) network as 192.168.7.4
 # marble_base.v is over in board_support/marblemini, but most of the infrastructure,
 # including lb_marble_slave.v, is here.
-VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -DSIMULATE -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmarble_base.mk USER_CPPFLAGS="-I $(BADGER_DIR)/tests"
 	mv obj_dir/$@ $@
 # Recipe:
-#  make VLATOR_TIMESCALEMOD= Vmarble_base read_trx.dat && ./Vmarble_base +trace
+#  make Vmarble_base read_trx.dat && ./Vmarble_base +trace
 #  ping -c 2 192.168.7.4; python3 lbus_access.py -a 192.168.7.4 -t 3 mem 2097200:8; python3 lbus_access.py -a 192.168.7.4 -t 3 reg 327686=1
 #  gtkwave marble_base_sim.vcd marble_base_sim.gtkw
 
@@ -179,14 +179,14 @@ marble1_hwtest: udprtx
 # Marble bitfile loading and testing; bitfile specified by doing 'make BIT=marble2.bit marble2_hwload'
 
 # Default IP address set from microcontroller
-SERIAL = "" 
+SERIAL = ""
 MARBLE_IP = 192.168.19.${SERIAL}
 BIT2 = marble2.bit
 # Stored in the Zest board installed on mohs CI test stand; here, we just check that we can read it
 ZEST_SN = "LBNL DIGITIZER V1.0 SN  024"
 
 marble2_hwload:
-	echo "Using Marble with serial number ${SERIAL}"
+	@echo "Using Marble with serial number ${SERIAL}"
 	openocd -c "adapter driver ftdi; ftdi_serial 0000${SERIAL};" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT2}; exit"
 
 marble2_hwtest: udprtx

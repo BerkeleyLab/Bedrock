@@ -2,8 +2,8 @@
 GCC_FLAGS = -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
 	-Wshadow -Waggregate-return -Wmissing-prototypes -Wnested-externs \
 	-Wall -W -Wno-unused -Winline -Wwrite-strings -Wundef -pedantic
-CF_ALL = -Wall -O2 -W -fPIC -g -std=c99 -D_GNU_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
-LF_ALL = -lm ${LDFLAGS_$@}
+CF_ALL = -Wall -O2 -fPIC -g -std=c99 -D_GNU_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
+LF_ALL = ${LDFLAGS_$@}
 
 ICARUS_SUFFIX =
 VERILOG_VPI = iverilog-vpi$(ICARUS_SUFFIX)
@@ -86,10 +86,10 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 	$(VERILOG_TB)
 
 %_tb_auto: $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh %_auto
-	@echo .
+	@echo "."
 
 %_auto: $(AUTOGEN_DIR)/addr_map_%.vh $(AUTOGEN_DIR)/%_auto.vh
-	@echo .
+	@echo "."
 
 %_live: %_tb.v
 	$(VERILOG_TB)

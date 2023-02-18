@@ -17,7 +17,7 @@ SERIAL_IO_DIR = local
 # These overrides go _before_ top_rules.mk
 %_check: %.out %.gold
 	cmp $^
-	@echo PASS
+	@echo "PASS"
 %_check: %_tb
 	$(VVP) $< $(VCD_ARGS_$@)
 %_tb: %_tb.v
@@ -104,7 +104,7 @@ crc8e_guts_y.v: crc8e_guts_x.v crc8e_guts.vh
 
 crc8e_guts_check: crc8e_guts_y.v crc8e_guts.v
 	cmp $^
-	@echo PASS
+	@echo "PASS"
 
 # =====
 # pcap2v for using pcap files; not part of the main testing path,
@@ -178,7 +178,7 @@ spi_flash.grab: spi_flash_check.sh udp-vpi.vpi spi_flash_tb lorem_ipsum.hex spi_
 	bash $< $(filter %spi_test.py, $^)
 spi_flash_check: spi_flash.grab lorem_ipsum.txt
 	cmp $^
-	@echo PASS
+	@echo "PASS"
 
 # =====
 # scanner off-line test

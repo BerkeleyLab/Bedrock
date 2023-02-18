@@ -167,7 +167,7 @@ class LEEPDevice(DeviceBase):
             if L > 1:
                 _log.debug('reg_write %s <- %s ...', name, value[:10])
                 assert value.ndim == 1 and value.shape[0] == L, \
-                       ('must write whole register', value.shape, L)
+                    ('must write whole register', value.shape, L)
                 # array register
                 for A, V in enumerate(value, base_addr):
                     addrs.append(A)
