@@ -61,7 +61,7 @@ for documentation purposes.  Each such file demands some note as to
 how it was generated.
 
 All checked-in files should be permissively licensed, consistent with
-the [LICENSE.md](../LICENSE.md) file.
+the [LICENSE.md](LICENSE.md) file.
 
 Sometimes files are needed that can be legally downloaded from the public Internet,
 but we either don't have permission to redistribute them, or we have other reasons to
@@ -71,8 +71,8 @@ download of these files; please include a check that the result has the expected
 [SHA256](https://en.wikipedia.org/wiki/SHA-2). Do NOT redistribute or embed
 any files within Bedrock unless they have a suitably permissive license.
 Any download steps should be visibly documented, and users are encouraged to take that step
-once per repository checkout. An example in our current codebase is found in
-[riscv_prep.sh](../build-tools/riscv_prep.sh), which downloads source files needed to build
+once per repository checkout. An example (not currently in use -- that's another story) is found in
+[riscv_prep.sh](build-tools/riscv_prep.sh), which downloads source files needed to build
 a riscv toolchain (binutils, gcc, newlib), and is used in building our CI Docker image.
 
 Please do NOT check-in machine generated code. If unavoidable, document it explicitly,
@@ -90,7 +90,7 @@ Automatic generation of documentation is a topic of current discussion. Suggesti
 
 ## Makefiles
 
-We have an [explanation](../build-tools/makefile.md) about how
+We have an [explanation](build-tools/makefile.md) about how
 our existing Makefiles are put together.
 
 
@@ -173,7 +173,7 @@ Special case for Makefiles:
   Semantic tabs
 
 Special case for Xcircuit PostScript files:
-  See [hack_xcirc](hack_xcirc); consider creating and submitting a patch to
+  See [hack_xcirc](build-tools/hack_xcirc); consider creating and submitting a patch to
 avoid this in the distant future.
 
 ### Verilog
@@ -222,7 +222,7 @@ strongly pipelined logic.
 
 In addition to the general recommendations above, we strive for a uniform
 Verilog coding style that emphasizes readability, reduces systematic errors and promotes
-code re-use. The [RTL Guidelines](rtl_guidelines.md) document, which is itself
+code re-use. The [RTL Guidelines](guidelines/rtl_guidelines.md) document, which is itself
 open to improvements and suggestions, attempts to formalize this process in the
 form of coding and style guidelines that apply to some of the most common facets of RTL coding.
 
