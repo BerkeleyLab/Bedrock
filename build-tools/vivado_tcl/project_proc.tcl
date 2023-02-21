@@ -57,6 +57,10 @@ proc project_create {platform_name project_name} {
     if [regexp "rfsoc_marble" $platform_name] {
         set platform "rfsoc_marble"
         set project_part "xczu47dr-ffvg1517-1-e"
+        set project_spi_buswidth "none"
+        set project_cfgmem_interface "none"
+        set project_cfgmem_size "none"
+        set project_cfgrate "none"
     }
     if [regexp "qf2pre_*" $platform_name] {
         set platform "bmb7"
