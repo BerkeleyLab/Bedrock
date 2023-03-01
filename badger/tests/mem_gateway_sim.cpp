@@ -52,9 +52,14 @@ int main(int argc, char** argv, char** env) {
 	udp_port = 3010;  // default
 	badger_client = 1;  // only configuration used here
 	const char* flag2 = Verilated::commandArgsPlusMatch("udp_port=");
-	if (flag2) {
-		udp_port = atoi(flag2+10);
-		// VL_PRINTF("Found udp_port %d? (%s)\n", udp_port, flag2);
+	if (strlen(flag2) > 1) {
+		for (int n = 0; n < strlen(flag2); n++) {
+			if (*(flag2+n) == '=') {
+				flag2 += n + 1;
+				break;
+				}
+			}
+			udp_port = strtol(flag2, NULL, 10);
 	}
 
 	// Set some inputs
