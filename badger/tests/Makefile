@@ -304,7 +304,6 @@ Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) spi
 # See tftp_test.sh
 
 # =====
-# WIP
 Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) mem_gateway_sim.cpp udp_model.c
 	rm -f udp_model.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
@@ -312,6 +311,14 @@ Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) mem
 	mv obj_dir/$@ $@
 Vmem_gateway_check: Vmem_gateway_wrap Vmg_check.sh badger_lb_io.py
 	bash $(word 2,$^) $(word 3,$^)
+
+# =====
+# WIP
+Vcluster: cluster_wrap.v mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) cluster_sim.cpp udp_model.c
+	rm -f udp_model.o  # can't leave C version around for C++ to find
+	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
+	MAKEFLAGS="" make -C obj_dir -f Vcluster_wrap.mk USER_CPPFLAGS="-DVL_DEBUG"
+	mv obj_dir/Vcluster_wrap $@
 
 # =====
 # Simple syntax check
@@ -386,7 +393,7 @@ locc:
 .PHONY: spellme loc locc
 
 CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck
-CLEAN += crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test
+CLEAN += crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test Vcluster
 CLEAN += stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen
 CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab udprtx
 CLEAN += $(RTEFI_CLEAN)

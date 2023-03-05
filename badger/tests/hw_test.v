@@ -98,6 +98,7 @@ lb_demo_slave slave(.clk(lb_clk), .addr(lb_addr),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
+	.scratch_in(32'b0),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
