@@ -1,3 +1,5 @@
+`timescale 1ns / 1ns
+
 // permute np ports, each dw bits wide, using rl levels of 2-way mux
 //  np must be 2**rl
 //

@@ -1,3 +1,5 @@
+`timescale 1ns / 1ns
+
 // One more try to package up the LBNL conveyor belt in a usable and
 // comprehensible form.
 

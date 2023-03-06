@@ -1,3 +1,5 @@
+`timescale 1ns / 1ns
+
 //
 // Simple-minded integer square root
 //
@@ -20,12 +22,11 @@ module isqrt #(
 	input  [X_WIDTH-1:0]  x,
 	input                 en,
 	output [Y_WIDTH-1:0]  y,
-	output                dav
+	output reg            dav
 );
 
-wire [Y_WIDTH-1:0]  y;
 reg  [X_WIDTH-1:0]  op = 0, pw4 = 0, res = 0;
-reg                 dav = 0;
+initial  dav = 0;
 
 assign y = res[Y_WIDTH-1:0];
 
