@@ -14,12 +14,14 @@ APP_DIR = $(TOP_DIR)/cmoc
 DSP_DIR = $(TOP_DIR)/dsp
 BS_HARDWARE_DIR = $(BOARD_SUPPORT_DIR)/$(HARDWARE)
 
-vpath %.v $(APP_DIR) $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
+vpath %.v $(APP_DIR) $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BADGER_DIR)
 
 CLEAN_DIRS += ./.Xil
 system_top.xdc: prc.xdc
 
+NO_DEFAULT_TB_RULE := 1
 include $(BUILD_DIR)/top_rules.mk
+include $(BUILD_DIR)/newad_rules.mk
 include $(BS_HARDWARE_DIR)/rules.mk
 include $(BOARD_SUPPORT_DIR)/rules.mk
 include $(APP_DIR)/rules.mk
