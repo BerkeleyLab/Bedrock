@@ -1,6 +1,6 @@
 %_tb: %_tb.v %_tb_auto
 	$(VERILOG_TB)
- 
+
 %_tb_auto: $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh %_auto
 	@echo "."
 
