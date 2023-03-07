@@ -51,15 +51,10 @@ int main(int argc, char** argv, char** env) {
 	// Determine UDP port number from command line options
 	udp_port = 3010;  // default
 	badger_client = 1;  // only configuration used here
-	const char* flag2 = Verilated::commandArgsPlusMatch("udp_port=");
-	if (strlen(flag2) > 1) {
-		for (int n = 0; n < strlen(flag2); n++) {
-			if (*(flag2+n) == '=') {
-				flag2 += n + 1;
-				break;
-				}
-			}
-			udp_port = strtol(flag2, NULL, 10);
+	const char* udp_arg = Verilated::commandArgsPlusMatch("udp_port=");
+	if (udp_arg && strlen(udp_arg) > 1) {
+		const char* udp_int = strchr(udp_arg, '=');
+		if (udp_int) udp_port = strtol(udp_int+1, NULL, 10);
 	}
 
 	// Set some inputs

@@ -84,6 +84,15 @@ reg led_tick=0;
 reg [31:0] uptime=0;
 always @(posedge clk) if (led_tick) uptime <= uptime+1;
 
+// ==========================================
+// |          Localbus Decoding             |
+// |See Makefile rule for fake_config_romx.v|
+// |        with fake_config_romx.v         |
+// ==========================================
+
+// NOTE: The next line is parsed by bedrock/build-tools/reverse_json.py
+// reverse_json_offset: 1114112
+
 // Very basic pipelining of two-cycle read process
 reg [23:0] addr_r=0;
 reg do_rd_r=0, do_rd_r2=0, do_rd_r3=0;
@@ -100,6 +109,11 @@ wire [31:0] hello_2 = "rld!";
 wire [31:0] hello_3 = "(::)";
 wire [31:0] mirror_out_0;
 
+// =====================================
+// |          Localbus Reads           |
+// |   NOTE: the reg_bank_X mapping    |
+// |    is done by reverse_json.py     |
+// =====================================
 // First read cycle
 reg [31:0] reg_bank_0=0, dbg_mem_out=0;
 always @(posedge clk) if (do_rd) begin
@@ -133,7 +147,11 @@ always @(posedge clk) if (do_rd_r) begin
 	endcase
 end
 
-// Direct writes
+// =====================================
+// |      Direct Localbus Writes       |
+// |   NOTE: these must be included    |
+// |      in static_regmap.json        |
+// =====================================
 reg led_user_r=0;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
