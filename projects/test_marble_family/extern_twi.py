@@ -15,14 +15,14 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(
         description="Capture vcd file from Marble")
-    parser.add_argument('--ip', default='192.168.19.10', help='IP address')
-    parser.add_argument('--udp', type=int, default=0, help='UDP Port number')
-    parser.add_argument('--vcd', type=str, help='VCD file to capture')
+    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
+    parser.add_argument('-p', '--port', type=int, default=0, help='Port number')
+    parser.add_argument('-V', '--vcd', type=str, help='VCD file to capture')
 
     args = parser.parse_args()
-    ip = args.ip
-    udp = args.udp
-    if args.udp == 0:
-        udp = 803
-    dev = lbus_access.lbus_access(ip, port=udp, timeout=3.0, allow_burst=False)
+    addr = args.addr
+    port = args.port
+    if args.port == 0:
+        port = 803
+    dev = lbus_access.lbus_access(addr, port=port, timeout=3.0, allow_burst=False)
     grab_vcd(dev, args.vcd)

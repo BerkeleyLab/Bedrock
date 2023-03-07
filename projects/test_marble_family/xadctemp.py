@@ -1,14 +1,7 @@
 #!/usr/bin/python3
 # Convert xadc internal temperature register value (leep xadc_internal_temperature)
 # to degrees Celsius.
-
-
 import re
-try:
-    from leep.raw import LEEPDevice
-    _useLeep = True
-except Exception:
-    _useLeep = False
 
 
 def _allhex(s):
@@ -52,35 +45,13 @@ def doConvert(argv):
     return 0
 
 
-def doLeep(argv):
-    USAGE = "USAGE: python3 {} [ip_address|reg_value]".format(argv[0])
-    if len(argv) < 2:
-        # Read from pipe if no command line args
-        argv = sys.stdin.readline().strip('\n').split()
-    else:
-        argv = argv[1:]
-    ipaddr = None
+def doLeep(ipaddr, port):
+    USAGE = "USAGE: python3 xadctemp.py -a {} -p {}".format(ipaddr, port)
     rval = None
-    for arg in argv:
-        if _isip(arg):
-            ipaddr = arg.strip()
-        if _allhex(arg):
-            try:
-                rval = _int(arg.strip())
-            except Exception as e:
-                print(e)
-                return -1
     if ipaddr is not None:
-        if _useLeep:
-            dev = LEEPDevice(ipaddr+":803")
-            try:
-                rval = dev.reg_read(("xadc_internal_temperature",))[0]
-            except Exception as e:
-                print(e)
-                return -1
-        else:
-            print("Set PYTHONPATH to include 'leep' directory.")
-            return -1
+        addr = "leep://" + ipaddr + ":" + str(port)
+        dev = leep.open(addr, timeout=5.0)
+        rval = dev.reg_read(("xadc_internal_temperature",))[0]
     if rval is None:
         print(USAGE)
         return -1
@@ -91,5 +62,12 @@ def doLeep(argv):
 
 if __name__ == "__main__":
     import sys
-    # sys.exit(doConvert(sys.argv))
-    sys.exit(doLeep(sys.argv))
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Utility to read internal temperature of ")
+    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
+    parser.add_argument('-p', '--port', type=int, default=0, help='Port number')
+
+    import leep
+    args = parser.parse_args()
+    sys.exit(doLeep(args.addr, args.port))
