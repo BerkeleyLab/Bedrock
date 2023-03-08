@@ -1,7 +1,9 @@
 #include <signal.h>
 #include <verilated.h>
 
-// Include model header, generated from Verilating "cluster_wrap.v"
+// Include model header, generated from Verilating "cluster_wrap.sv"
+// See cluster_wrap.sv for more comments about the scope and purpose
+// of this simulation.
 #include "Vcluster_wrap.h"
 #include <verilated_vcd_c.h>
 
@@ -46,7 +48,7 @@ int main(int argc, char** argv, char** env) {
 		tfp->open("Vatb.vcd");
 	}
 
-	const int CLIENT_N = 2;  // XXX must match parameter in cluster_wrap.sv
+	const int CLIENT_N = 3;  // XXX must match parameter in cluster_wrap.sv
 
 	// Determine UDP port numbers from command line options
 	struct udp_state *udp_states[CLIENT_N];
@@ -66,11 +68,12 @@ int main(int argc, char** argv, char** env) {
 		udp_states[jx] = udp_setup_r(udp_port_, badger_client_);
 	}
 
-	// Set some inputs
-	// not used yet
-	int thinking = 1;
+	// persistent storage
+	int n_lat = 0;  // disable first iteration
+	int thinking = 1;  // not used yet
 	int txg_shifts[CLIENT_N];
 	for (unsigned jx=0; jx<CLIENT_N; jx++) txg_shifts[jx] = 0;
+	top->cluster_in = 0;
 
 	while (/* main_time < 1100 && */ !Verilated::gotFinish() && !interrupt_pending) {
 		main_time += 4;  // Time passes in ticks of 8ns
@@ -83,7 +86,7 @@ int main(int argc, char** argv, char** env) {
 			// Pretty ugly work around for verilator issue #860
 			// Still not as bad as hand-unrolling the loop
 			uint64_t client_xx=0;
-			for (unsigned jx=0; jx<CLIENT_N; jx++) {
+			if (n_lat != 0) for (unsigned jx=0; jx<CLIENT_N; jx++) {
 				// channel 0: data from network -> simulation
 				int udp_idata, udp_iflag, udp_count;
 				udp_receiver_r(udp_states[jx],
@@ -94,7 +97,7 @@ int main(int argc, char** argv, char** env) {
 				unsigned int client_raw_s = udp_iflag && udp_count>0;
 				unsigned int client_len_c = udp_count+8;
 				// hope this matches systemverilog struct packed client_in
-				unsigned int client_x =
+				uint64_t client_x =
 					(client_len_c << 10) |
 					(client_idata << 2) |
 					(client_raw_l << 1) |
@@ -102,8 +105,6 @@ int main(int argc, char** argv, char** env) {
 				client_xx = (client_x << (21*jx)) | client_xx;
 				//
 				// Delay raw_s by n_lat cycles to get output strobe
-				// XXX not correct first time through
-				int n_lat =  top->n_lat_expose;
 				txg_shifts[jx] = (txg_shifts[jx] << 1) + client_raw_s;
 				int txgg = txg_shifts[jx] >> (n_lat-1);
 				// falling edge
@@ -120,6 +121,8 @@ int main(int argc, char** argv, char** env) {
 
 		// Evaluate model
 		top->eval();
+		n_lat = top->n_lat_expose;
+		assert(n_lat > 0);
 
 		// Dump trace data for this cycle
 		if (tfp) tfp->dump (main_time);
@@ -130,7 +133,7 @@ int main(int argc, char** argv, char** env) {
 	top->final();
 	if (tfp) { tfp->close(); tfp = NULL; }
 
-	//  Coverage analysis (since test passed)
+	// Coverage analysis (since test passed)
 #if VM_COVERAGE
 	Verilated::mkdir("logs");
 	VerilatedCov::write("logs/coverage.dat");

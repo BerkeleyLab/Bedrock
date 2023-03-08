@@ -229,6 +229,10 @@ void udp_sender_r(struct udp_state *ust, int out_octet, int out_end)
 	}
 	if (out_end) {
 		/* write output packet */
+		outbuf->len = outbuf->cur;
+		if (udp_model_debug) {
+			printf("Tx:");  print_buf(stdout, outbuf);
+		}
 		int rc = sendto(ust->udpfd, outbuf->buf, outbuf->cur, 0, (struct sockaddr *) &(ust->src_addr), ust->src_addrlen);
 		if (rc < 0) perror("sendto");
 		fprintf(stderr, "udp_model: Tx len %d, write rc=%d\n", outbuf->cur, rc);
