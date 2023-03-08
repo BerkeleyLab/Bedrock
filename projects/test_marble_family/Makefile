@@ -172,7 +172,7 @@ marble1_hwtest: udprtx
 	ping -c 2 ${RGMII_IP}
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py --ip=${RGMII_IP} --trx --marble 0
+	$(PYTHON) testcase.py -a ${RGMII_IP} -p 803 --trx --marble 0
 
 
 # =====
@@ -193,7 +193,7 @@ marble2_hwtest: udprtx
 	ping -c 2 ${MARBLE_IP}
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${MARBLE_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${MARBLE_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py --ip=${MARBLE_IP} --trx --si570
+	$(PYTHON) testcase.py -a ${MARBLE_IP} -p 803 --trx --si570
 	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = ${ZEST_SN}
 
 clean:
