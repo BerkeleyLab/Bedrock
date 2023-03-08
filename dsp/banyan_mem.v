@@ -1,3 +1,5 @@
+`timescale 1ns / 1ns
+
 // Single-buffered capture of raw ADC data
 // Hard-code number of ADCs at 8, at least for now
 

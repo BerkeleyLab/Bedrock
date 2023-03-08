@@ -26,6 +26,7 @@ def _print(fd, *args, **kwargs):
 try:
     _print(fd, '// CORDIC processor, machine generated from cordicgx.py')
     _print(fd, '// %d is the internal data path width' % dpw)
+    _print(fd, '`timescale 1ns / 1ns')
     _print(fd, 'module cordicg_b%d #(' % dpw)
 
     _print(fd, '    parameter width=19,')

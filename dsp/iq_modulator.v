@@ -1,7 +1,7 @@
 `timescale 1ns / 1ns
 
 module iq_modulator #(
-	WIDTH=16
+	parameter WIDTH=16
 ) (
 	input clk,
 	input signed [WIDTH-1:0] sin,
