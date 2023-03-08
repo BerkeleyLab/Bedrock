@@ -313,8 +313,12 @@ Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) mem
 Vmem_gateway_check: Vmem_gateway_wrap Vmg_check.sh badger_lb_io.py
 	bash $(word 2,$^) $(word 3,$^)
 
-# ===== Fake ROM generator
-# TODO - There has to be a better way to reference the bedrock/build-tools directory
+# ===== ROM generator
+# Normally we leave fake_config_romx.v static, even though it's machine-generated.
+# That's why it's considered "fake":  the embedded gitid is not correct.
+# Enable these rules -- that depend on tools in bedrock! -- if you need to update it.
+# That shouldn't happen very often.
+ifdef FAKE_CONFIG_MAINT
 BEDROCK_BUILD_TOOLS=../../build-tools
 LB_DEMO_FLWR=lb_demo_slave.v
 LB_STATIC_JSON=static_regmap.json
@@ -332,6 +336,7 @@ fake_config_romx.v: $(LB_DEMO_JSON)
 
 CLEAN += $(LB_DEMO_JSON)
 CLEAN += $(LB_SCALAR_JSON)
+endif
 
 # =====
 # Simple syntax check

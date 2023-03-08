@@ -86,8 +86,9 @@ always @(posedge clk) if (led_tick) uptime <= uptime+1;
 
 // ==========================================
 // |          Localbus Decoding             |
-// |See Makefile rule for fake_config_romx.v|
-// |        with fake_config_romx.v         |
+// | Supposedly consistent with address map |
+// | embedded in fake_config_romx.v.        |
+// | See the Makefile for more comments.    |
 // ==========================================
 
 // NOTE: The next line is parsed by bedrock/build-tools/reverse_json.py
@@ -109,11 +110,12 @@ wire [31:0] hello_2 = "rld!";
 wire [31:0] hello_3 = "(::)";
 wire [31:0] mirror_out_0;
 
-// =====================================
-// |          Localbus Reads           |
-// |   NOTE: the reg_bank_X mapping    |
-// |    is done by reverse_json.py     |
-// =====================================
+// ==========================================
+// |          Localbus Reads                |
+// | NOTE: reverse_json.py reads this code  |
+// | to create the json describing the      |
+// | address map.                           |
+// ==========================================
 // First read cycle
 reg [31:0] reg_bank_0=0, dbg_mem_out=0;
 always @(posedge clk) if (do_rd) begin
@@ -147,11 +149,14 @@ always @(posedge clk) if (do_rd_r) begin
 	endcase
 end
 
-// =====================================
-// |      Direct Localbus Writes       |
-// |   NOTE: these must be included    |
-// |      in static_regmap.json        |
-// =====================================
+// ==========================================
+// |          Direct Localbus Writes        |
+// | NOTE: this write logic is not          |
+// | automatically transcribed to json.     |
+// | If you want to see these in the json   |
+// | register description, list them in     |
+// | static_regmap.json.                    |
+// ==========================================
 reg led_user_r=0;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
