@@ -46,10 +46,12 @@ int main(int argc, char** argv, char** env) {
 		tfp->open("Vatb.vcd");
 	}
 
+	const int CLIENT_N = 2;  // XXX must match parameter in cluster_wrap.sv
+
 	// Determine UDP port numbers from command line options
-	struct udp_state *udp_states[2];
+	struct udp_state *udp_states[CLIENT_N];
 	int badger_client_ = 1;  // only configuration used here
-	for (unsigned jx=0; jx<2; jx++) {
+	for (unsigned jx=0; jx<CLIENT_N; jx++) {
 		unsigned short udp_port_ = 3010 + jx;
 		char *plus_name = strdup("udp_port0=");
 		plus_name[8] += jx;
@@ -65,21 +67,10 @@ int main(int argc, char** argv, char** env) {
 	}
 
 	// Set some inputs
-	// Brain-dead handling of two instances
-	top->clk = 0;
-	top->len_c_0 = 0;
-	top->idata_0 = 0;
-	top->raw_l_0 = 0;
-	top->raw_s_0 = 0;
-	top->len_c_1 = 0;
-	top->idata_1 = 0;
-	top->raw_l_1 = 0;
-	top->raw_s_1 = 0;
 	// not used yet
 	int thinking = 1;
-	// local state variables
-	int txg_shift_0 = 0;
-	int txg_shift_1 = 0;
+	int txg_shifts[CLIENT_N];
+	for (unsigned jx=0; jx<CLIENT_N; jx++) txg_shifts[jx] = 0;
 
 	while (/* main_time < 1100 && */ !Verilated::gotFinish() && !interrupt_pending) {
 		main_time += 4;  // Time passes in ticks of 8ns
@@ -89,50 +80,42 @@ int main(int argc, char** argv, char** env) {
 		// Run UDP at falling edge of clk
 		// variable names match client_sub.v
 		if (top->clk==0) {
-			{
+			// Pretty ugly work around for verilator issue #860
+			// Still not as bad as hand-unrolling the loop
+			uint64_t client_xx=0;
+			for (unsigned jx=0; jx<CLIENT_N; jx++) {
 				// channel 0: data from network -> simulation
 				int udp_idata, udp_iflag, udp_count;
-				udp_receiver_r(udp_states[0],
+				udp_receiver_r(udp_states[jx],
 						&udp_idata, &udp_iflag, &udp_count,
 						thinking);
-				top->idata_0 = udp_idata;
-				top->raw_l_0 = udp_iflag;
-				top->raw_s_0 = udp_iflag && udp_count>0;
-				top->len_c_0 = udp_count+8;
+				unsigned int client_idata = udp_idata;
+				unsigned int client_raw_l = udp_iflag;
+				unsigned int client_raw_s = udp_iflag && udp_count>0;
+				unsigned int client_len_c = udp_count+8;
+				// hope this matches systemverilog struct packed client_in
+				unsigned int client_x =
+					(client_len_c << 10) |
+					(client_idata << 2) |
+					(client_raw_l << 1) |
+					(client_raw_s << 0);
+				client_xx = (client_x << (21*jx)) | client_xx;
+				//
 				// Delay raw_s by n_lat cycles to get output strobe
+				// XXX not correct first time through
 				int n_lat =  top->n_lat_expose;
-				txg_shift_0 = (txg_shift_0 << 1) + top->raw_s_0;
-				int txgg = txg_shift_0 >> (n_lat-1);
+				txg_shifts[jx] = (txg_shifts[jx] << 1) + client_raw_s;
+				int txgg = txg_shifts[jx] >> (n_lat-1);
 				// falling edge
 				int opack_complete = (txgg & 3) == 2;
 				int udp_oflag = (txgg & 2) == 2;
 				// channel 0: data from simulation -> network
+				int odata = (top->cluster_out >> (jx*8)) & 0xff;
 				if (udp_oflag) {
-					udp_sender_r(udp_states[0], top->odata_0, opack_complete);
+					udp_sender_r(udp_states[jx], odata, opack_complete);
 				}
 			}
-			{
-				// channel 1: data from network -> simulation
-				int udp_idata, udp_iflag, udp_count;
-				udp_receiver_r(udp_states[1],
-						&udp_idata, &udp_iflag, &udp_count,
-						thinking);
-				top->idata_1 = udp_idata;
-				top->raw_l_1 = udp_iflag;
-				top->raw_s_1 = udp_iflag && udp_count>0;
-				top->len_c_1 = udp_count+8;
-				// Delay raw_s by n_lat cycles to get output strobe
-				int n_lat =  top->n_lat_expose;
-				txg_shift_1 = (txg_shift_1 << 1) + top->raw_s_1;
-				int txgg = txg_shift_1 >> (n_lat-1);
-				// falling edge
-				int opack_complete = (txgg & 3) == 2;
-				int udp_oflag = (txgg & 2) == 2;
-				// channel 1: data from simulation -> network
-				if (udp_oflag) {
-					udp_sender_r(udp_states[1], top->odata_1, opack_complete);
-				}
-			}
+			top->cluster_in = client_xx;
 		}
 
 		// Evaluate model

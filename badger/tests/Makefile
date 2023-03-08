@@ -314,7 +314,7 @@ Vmem_gateway_check: Vmem_gateway_wrap Vmg_check.sh badger_lb_io.py
 
 # =====
 # WIP
-Vcluster: cluster_wrap.v mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) cluster_sim.cpp udp_model.c
+Vcluster: cluster_wrap.sv mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) cluster_sim.cpp udp_model.c
 	rm -f udp_model.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vcluster_wrap.mk USER_CPPFLAGS="-DVL_DEBUG"
