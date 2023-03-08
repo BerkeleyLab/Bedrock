@@ -38,4 +38,13 @@ lb_demo_slave slave(.clk(clk), .addr(addr),
 	.xdomain_fault(1'b0)
 );
 
+// One weird hack, even works in Verilator!
+always @(posedge clk) begin
+	if (slave.stop_sim) begin
+		$display("mem_gateway_wrap:  stopping based on localbus request");
+		$finish();
+	end
+end
+
+
 endmodule
