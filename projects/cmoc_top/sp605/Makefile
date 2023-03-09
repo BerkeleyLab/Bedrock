@@ -26,9 +26,7 @@ endif
 
 vpath %.v $(APP_DIR) $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BADGER_DIR)
 
-NO_DEFAULT_TB_RULE := 1
-include $(BUILD_DIR)/top_rules.mk
-include $(BUILD_DIR)/newad_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 include $(BADGER_DIR)/rules.mk
 include $(BS_HARDWARE_DIR)/rules.mk
 include $(FPGA_FAMILY_DIR)/$(FPGA_FAMILY)/rules.mk

@@ -19,9 +19,7 @@ VERILOG_DEFINE_FLAGS = ""
 
 SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
 
-NO_DEFAULT_TB_RULE := 1
-include $(BUILD_DIR)/top_rules.mk
-include $(BUILD_DIR)/newad_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 include $(OSCOPE_COMMON_DIR)/rules.mk
 
 VFLAGS_DEP += -y$(DSP_DIR) -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR) -y$(ISERDES_DIR) -y$(XILINX_DIR) -y$(SERIAL_IO_DIR) -y. -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/idelay_scanner -y$(OSCOPE_COMMON_DIR) -y$(BOARD_SUPPORT_DIR)/zest

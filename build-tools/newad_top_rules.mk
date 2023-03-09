@@ -1,3 +1,6 @@
+NO_DEFAULT_TB_RULE := 1
+include $(BUILD_DIR)/top_rules.mk
+
 %_tb: %_tb.v %_tb_auto
 	$(VERILOG_TB)
 

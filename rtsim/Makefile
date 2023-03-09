@@ -5,9 +5,7 @@ DSP_DIR = ../dsp
 .PHONY: all
 all: targets
 
-NO_DEFAULT_TB_RULE := 1
-include $(BUILD_DIR)/top_rules.mk
-include $(BUILD_DIR)/newad_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 
 ifneq (clean,$(MAKECMDGOALS))
 	-include $(DEPDIR)/resonator.bit.d
