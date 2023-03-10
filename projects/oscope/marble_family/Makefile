@@ -12,7 +12,7 @@ APP_NAME = oscope
 
 vpath %.v $(DSP_DIR)
 
-include $(BUILD_DIR)/top_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 include $(OSCOPE_COMMON_DIR)/rules.mk
 
 
