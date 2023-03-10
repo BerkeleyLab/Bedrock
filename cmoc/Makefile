@@ -1,10 +1,10 @@
 include ../dir_list.mk
 
-vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
+vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BADGER_DIR)
 
 .PHONY: all
 all: targets
-include $(BUILD_DIR)/top_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include $(BADGER_DIR)/rules.mk
 
