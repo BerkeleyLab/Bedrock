@@ -4,6 +4,7 @@ make -C dsp/chirp clean
 PYTHONPATH=$PWD/build-tools make -C cmoc clean
 make -C cordic clean
 make -C dsp/digaree clean
+make -C dsp/hosted clean
 make -C dsp clean
 make -C dsp/feedforward clean
 make -C homeless/freq_demo clean
@@ -17,7 +18,3 @@ make -C rtsim clean
 make -C serial_io clean
 make -C serial_io/chitchat clean
 make -C serial_io/EVG_EVR clean
-
-
-
-

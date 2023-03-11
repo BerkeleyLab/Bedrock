@@ -36,6 +36,9 @@ make -C cordic clean all
 ## digaree_test
 make -C dsp/digaree
 
+## dsp_hosted_test
+make -C dsp/hosted all checks
+
 ## dsp_test
 make -C dsp all checks
 

@@ -25,7 +25,7 @@ $PYTHON -m leep.cli leep://localhost:3012 reg scratch_out=7777 scratch_out
 $PYTHON -m leep.cli leep://localhost:3011 reg scratch_in_r scratch_out=8888 scratch_out
 $PYTHON -m leep.cli leep://localhost:3010 reg scratch_in_r scratch_out=9999 scratch_out
 $PYTHON -m leep.cli leep://localhost:3012 reg scratch_in_r
-) > cluster_run.out
+) | tr '\t' ' ' > cluster_run.out
 # $PYTHON -m leep.cli leep://localhost:3010 reg stop_sim=1
 $PYTHON -m badger_lb_io --ip localhost --port 3010 stop_sim
 
