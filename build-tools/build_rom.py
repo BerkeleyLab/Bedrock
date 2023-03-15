@@ -112,7 +112,8 @@ def verilog_rom(a, suffix="", prefix=""):
         config_case,
         "\tdefault: dxx <= 0;",
         "endcase",
-        "endmodule"
+        "endmodule",
+        ""
         )
     return '\n'.join(outputMessage)
 
