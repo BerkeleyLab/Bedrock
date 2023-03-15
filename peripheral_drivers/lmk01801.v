@@ -34,4 +34,3 @@ IBUFDS #(.DIFF_TERM("TRUE")) ibuf_clk (
 BUFG bufg_i (.I(clk_ibufgds), .O(clkout));
 `endif
 endmodule
-

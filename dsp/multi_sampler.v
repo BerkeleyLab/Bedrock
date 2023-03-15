@@ -94,4 +94,3 @@ module multi_sampler #(
    end endgenerate
 
 endmodule
-

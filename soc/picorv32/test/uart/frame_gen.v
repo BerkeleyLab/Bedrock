@@ -55,4 +55,3 @@ stream_fifo #(
 );
 
 endmodule
-

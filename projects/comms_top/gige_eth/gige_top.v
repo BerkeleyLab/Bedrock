@@ -260,4 +260,3 @@ wire [31:0] ctr_mem_out;
                  an_status[0]};
 
 endmodule
-

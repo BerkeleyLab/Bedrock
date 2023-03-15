@@ -30,4 +30,3 @@ void AD56x8_Init() {
     AD56x8_SetReg(CMD_LD_LDAC,  0, 0xff);
     AD56x8_SetReg(CMD_LD_CLR,   0, 0x3);
 }
-

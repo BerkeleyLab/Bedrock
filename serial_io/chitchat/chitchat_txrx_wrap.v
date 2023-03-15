@@ -264,4 +264,3 @@ module chitchat_txrx_wrap #(
    assign txrx_latency     = txrx_latency_r_lb;
 
 endmodule
-

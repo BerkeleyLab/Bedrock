@@ -104,4 +104,3 @@ module chirp_driver #(
    );
 
 endmodule
-
