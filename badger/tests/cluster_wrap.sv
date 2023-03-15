@@ -21,17 +21,19 @@ typedef struct packed {
 
 // 21 bits in client_in, 3 x 21 = 63, so the C++ in cluster_sim.cpp
 // works better (can use uint64_t) when CLUSTER_N < 4
-localparam CLUSTER_N = 3;  // XXX must match parameter in cluster_sim.cpp_
+localparam CLUSTER_N = 3;  // cluster_sim.cpp determines this via cluster_n_expose
 
 module cluster_wrap(
 	input clk,
 	input client_in [CLUSTER_N-1:0] cluster_in,
 	output client_out [CLUSTER_N-1:0] cluster_out,
+	output [7:0] cluster_n_expose,  // work around a limitation in Verilator
 	output [7:0] n_lat_expose  // work around a limitation in Verilator
 );
 
 parameter n_lat=10;
 assign n_lat_expose = n_lat;
+assign cluster_n_expose = CLUSTER_N;
 
 wire [31:0] scratch_x[CLUSTER_N-1:0];
 genvar jx;

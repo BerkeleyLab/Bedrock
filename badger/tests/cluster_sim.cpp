@@ -48,31 +48,25 @@ int main(int argc, char** argv, char** env) {
 		tfp->open("Vatb.vcd");
 	}
 
-	const int CLIENT_N = 3;  // XXX must match parameter in cluster_wrap.sv
-
-	// Determine UDP port numbers from command line options
-	struct udp_state *udp_states[CLIENT_N];
+	int cluster_n = 0;  // will be filled in from cluster_n_expose port
 	int badger_client_ = 1;  // only configuration used here
-	for (unsigned jx=0; jx<CLIENT_N; jx++) {
-		unsigned short udp_port_ = 3010 + jx;
-		char *plus_name = strdup("udp_port0=");
-		plus_name[8] += jx;
-		const char* udp_arg = Verilated::commandArgsPlusMatch(plus_name);
-		if (udp_arg && strlen(udp_arg) > 1) {
-			const char* udp_int = strchr(udp_arg, '=');
-			if (udp_int) {
-				udp_port_ = strtol(udp_int+1, NULL, 10);
-			}
-		}
-		free(plus_name);
-		udp_states[jx] = udp_setup_r(udp_port_, badger_client_);
+	// Determine UDP port base from command line option
+	int udp_port_base = 3010;
+	const char* udp_arg = Verilated::commandArgsPlusMatch("udp_port_base=");
+	if (udp_arg && strlen(udp_arg) > 1) {
+		const char* udp_int = strchr(udp_arg, '=');
+		if (udp_int) udp_port_base = strtol(udp_int+1, NULL, 10);
 	}
 
 	// persistent storage
 	int n_lat = 0;  // disable first iteration
 	int thinking = 1;  // not used yet
-	int txg_shifts[CLIENT_N];
-	for (unsigned jx=0; jx<CLIENT_N; jx++) txg_shifts[jx] = 0;
+	// following two need a malloc to get arrays of length cluster_n;
+	int *txg_shifts=NULL;
+	// udp_states is the result of a malloc.  *udp_states is the first
+	// element of an array of pointers to udp_state.
+	struct udp_state **udp_states=NULL;
+	//
 	top->cluster_in = 0;
 
 	while (/* main_time < 1100 && */ !Verilated::gotFinish() && !interrupt_pending) {
@@ -86,7 +80,7 @@ int main(int argc, char** argv, char** env) {
 			// Pretty ugly work around for verilator issue #860
 			// Still not as bad as hand-unrolling the loop
 			uint64_t client_xx=0;
-			if (n_lat != 0) for (unsigned jx=0; jx<CLIENT_N; jx++) {
+			if (n_lat != 0) for (unsigned jx=0; jx<cluster_n; jx++) {
 				// channel 0: data from network -> simulation
 				int udp_idata, udp_iflag, udp_count;
 				udp_receiver_r(udp_states[jx],
@@ -121,8 +115,31 @@ int main(int argc, char** argv, char** env) {
 
 		// Evaluate model
 		top->eval();
+
+		// Process two special results
 		n_lat = top->n_lat_expose;
 		assert(n_lat > 0);
+		cluster_n = top->cluster_n_expose;
+		assert(cluster_n > 0);
+		// Initialization
+		if (udp_states == NULL) {
+			udp_states = (udp_state**) malloc(cluster_n * sizeof(udp_state*));
+			printf("udp_states %p\n", udp_states);
+			assert(udp_states);
+			for (unsigned jx=0; jx<cluster_n; jx++) {
+				printf("udp init %u\n", jx);
+				udp_states[jx] = udp_setup_r(udp_port_base + jx, badger_client_);
+			}
+		}
+		// Initialization
+		if (txg_shifts == NULL) {
+			txg_shifts = (int *) malloc(cluster_n * sizeof(int));
+			assert(txg_shifts);
+			for (unsigned jx=0; jx<cluster_n; jx++) {
+				printf("txg_shift init %u\n", jx);
+				txg_shifts[jx] = 0;
+			}
+		}
 
 		// Dump trace data for this cycle
 		if (tfp) tfp->dump (main_time);
