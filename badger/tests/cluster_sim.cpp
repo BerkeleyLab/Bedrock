@@ -124,11 +124,11 @@ int main(int argc, char** argv, char** env) {
 		// Initialization
 		if (udp_states == NULL) {
 			udp_states = (udp_state**) malloc(cluster_n * sizeof(udp_state*));
-			printf("udp_states %p\n", udp_states);
 			assert(udp_states);
 			for (unsigned jx=0; jx<cluster_n; jx++) {
-				printf("udp init %u\n", jx);
-				udp_states[jx] = udp_setup_r(udp_port_base + jx, badger_client_);
+				int udp_port_ = udp_port_base + jx;
+				printf("udp init %u udp_port %d\n", jx, udp_port_);
+				udp_states[jx] = udp_setup_r(udp_port_, badger_client_);
 			}
 		}
 		// Initialization
@@ -136,7 +136,6 @@ int main(int argc, char** argv, char** env) {
 			txg_shifts = (int *) malloc(cluster_n * sizeof(int));
 			assert(txg_shifts);
 			for (unsigned jx=0; jx<cluster_n; jx++) {
-				printf("txg_shift init %u\n", jx);
 				txg_shifts[jx] = 0;
 			}
 		}
