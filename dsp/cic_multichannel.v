@@ -170,4 +170,3 @@ module cic_multichannel #(
    );
 
 endmodule
-

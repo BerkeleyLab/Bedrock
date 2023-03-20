@@ -194,4 +194,3 @@ module cic_wave_recorder #(
    );
 
 endmodule
-

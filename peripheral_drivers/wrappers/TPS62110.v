@@ -7,4 +7,3 @@ module TPS62110 (inout EN,inout SYNC
 assign SYNC=pwr_sync;
 assign EN=pwr_en;
 endmodule
-

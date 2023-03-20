@@ -15,4 +15,3 @@ qgtx_template : qgtx_wrap.v qgtx_wrap_stub.vh qgtx_wrap_pack.vh
 
 
 CLEAN += $(REMOTE_TGTS) $(GTX_DIR)/*.out
-

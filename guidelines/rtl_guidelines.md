@@ -84,4 +84,3 @@ In addition to being useful, clear and concise, comments should not include ques
 
 #### E.3 - Precedence rules
 Non-obvious operator precedence rules should be avoided. Whenever precedences are not completely clear, parentheses should be used.
-

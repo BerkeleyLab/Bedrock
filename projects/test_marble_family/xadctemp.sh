@@ -12,4 +12,3 @@ fi
 # So without the '-i' the script would hang waiting for input.  At that point,
 # you could input an IP address followed by a line break and it would attempt
 # the read there.  So many ways to skin cats.
-
