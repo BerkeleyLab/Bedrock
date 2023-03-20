@@ -352,5 +352,3 @@ module i2c_slave_model (scl, sda);
 	endspecify
 
 endmodule
-
-

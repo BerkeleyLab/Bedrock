@@ -470,4 +470,3 @@ wire [31:0] ctr_mem_out;
    assign LEDS = {lbus_led, an_status[0]};
 
 endmodule
-

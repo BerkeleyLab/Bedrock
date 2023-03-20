@@ -12,4 +12,3 @@ fib_tb: fib.v
 
 clean:
 	rm -f *_tb *.vcd *.out
-

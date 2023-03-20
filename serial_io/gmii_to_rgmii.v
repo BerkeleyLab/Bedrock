@@ -236,4 +236,3 @@ endgenerate
 `endif // `ifdef RXDELAY
 `endif // `ifndef SIMULATE
 endmodule
-

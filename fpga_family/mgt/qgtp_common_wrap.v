@@ -85,4 +85,3 @@ module qgtp_common_wrap (
 endmodule
 
 `endif // SIMULATE
-

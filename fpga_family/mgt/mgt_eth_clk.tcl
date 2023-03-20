@@ -11,4 +11,3 @@ set cfg_dict {
    CONFIG.MMCM_DIVCLK_DIVIDE         {1}
    CONFIG.NUM_OUT_CLKS               {2}
 }
-

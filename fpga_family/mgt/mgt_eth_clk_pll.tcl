@@ -14,4 +14,3 @@ set cfg_dict {
    CONFIG.MMCM_COMPENSATION          {BUF_IN}
    CONFIG.NUM_OUT_CLKS               {2}
 }
-
