@@ -13,12 +13,10 @@ initial begin
 		$dumpfile("a_compress.vcd");
 		$dumpvars(5,a_compress_tb);
 	end
-	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<660; cc=cc+1) begin
 		clk=0; #3;
 		clk=1; #3;
 	end
-	$display("PASS");
 	$finish();
 end
 

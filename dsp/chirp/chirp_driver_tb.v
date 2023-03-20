@@ -15,12 +15,10 @@ module chirp_driver_tb;
       if (!$value$plusargs("n_chirp=%d", n_chirp)) n_chirp=1;
       if ($test$plusargs("full")) full_sim=1;
       trace = $test$plusargs("trace");
-      $display("WARNING: Not a self-checking testbench. Will always pass.");
       for (cc=0; cc<SIM_TIME*n_chirp*(1+full_sim*3); cc=cc+1) begin
          clk=0; #5;
          clk=1; #5;
       end
-      $display("PASS");
       $finish();
    end
 

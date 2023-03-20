@@ -7,13 +7,10 @@ module mem_gateway_tb;
 parameter n_lat=10;
 
 initial begin
-	$display("Non-checking testbench.  Will always PASS");
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("mem_gateway.vcd");
 		$dumpvars(5, mem_gateway_tb);
 	end
-	$display("PASS");
-	$finish();
 end
 
 // Gateway to UDP, client interface test generator

@@ -11,13 +11,11 @@ initial begin
 	end
 	trace = $test$plusargs("trace");
 	errors=0;
-	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<16000; cc=cc+1) begin
 		clk=0; #3;
 		clk=1; #3;
 	end
 	//$display("%s",errors==0?"PASS":"FAIL");
-	$display("PASS");
 	$finish();
 end
 

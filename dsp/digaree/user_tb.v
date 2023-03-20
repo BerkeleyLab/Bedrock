@@ -17,12 +17,10 @@ initial begin
 		else $dumpfile("user_reg.vcd");
 		$dumpvars(7,user_tb);
 	end
-	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<300; cc=cc+1) begin
 		host_clk=0; #(HOST_CLK_PERIOD/2);
 		host_clk=1; #(HOST_CLK_PERIOD/2);
 	end
-	$display("PASS");
 	$finish();
 end
 

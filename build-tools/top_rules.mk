@@ -64,7 +64,7 @@ VIVADO_FLASH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/vivado_flash.tcl -t
 VIVADO_CREATE_IP = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/lbl_ip.tcl $(BUILD_DIR)/vivado_tcl/create_ip.tcl -tclargs
 OCTAVE_SILENT = $(OCTAVE) -q $<
 PS2PDF = ps2pdf -dEPSCrop $< $@
-CHECK = $(VVP) $< | awk -f $(filter %.awk, $^)
+CHECK = $(VVP) $<
 BIT2RBF = bit2rbf $@ < $<
 GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 

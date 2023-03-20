@@ -7,13 +7,10 @@ module speed_test_tb;
 parameter n_lat=12;
 
 initial begin
-	$display("Non-checking testbench.  Will always PASS");
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("speed_test.vcd");
 		$dumpvars(5, speed_test_tb);
 	end
-	$display("PASS");
-	$finish();
 end
 
 // Gateway to UDP, client interface test generator

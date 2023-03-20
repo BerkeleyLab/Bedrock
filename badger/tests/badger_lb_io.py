@@ -399,11 +399,7 @@ if __name__ == "__main__":
         addrs, values = process_fd(fd)
         foo.exchange(addrs, values)
     elif args.command == "stop_sim":
-        try:
-            # One weird hack
-            foo.exchange([6], [1], drop_reply=True)
-            print("finished stop_sim transaction - did it fail?")
-        except Exception:
-            print("incomplete stop_sim transaction - success?")
+        # One weird hack
+        foo.exchange([6], [1], drop_reply=True)
     else:
         print("unknown command %s: try python3 badger_lb_io.py --help" % args.command)

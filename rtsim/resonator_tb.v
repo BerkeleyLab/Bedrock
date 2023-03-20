@@ -17,12 +17,10 @@ initial begin
 		$dumpfile("resonator.vcd");
 		$dumpvars(5,resonator_tb);
 	end
-	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<3000; cc=cc+1) begin
 		clk=0; #3;
 		clk=1; #3;
 	end
-	$display("PASS");
 	$finish();
 end
 

@@ -27,7 +27,6 @@ initial begin
 		$dumpfile("cordic.vcd");
 		$dumpvars(5,main);
 	end
-	$display("Non-checking testbench.  Will always PASS");
 	$display("xxx width %d", width);
 	if (!$value$plusargs("rmix=%d", rmix)) rmix=0;
 	if (!$value$plusargs("op=%d", op)) op=0;
@@ -42,7 +41,6 @@ initial begin
 		clk=0; #10;
 		clk=1; #10;
 	end
-	$display("PASS");
 	$finish();
 end
 

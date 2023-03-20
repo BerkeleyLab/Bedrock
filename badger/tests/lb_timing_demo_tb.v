@@ -13,13 +13,11 @@ localparam [19:0] TEST_REG2 = 20'h00200;
 
 reg lb_clk = 0;
 initial begin
-    $display("Non-checking testbench.  Will always PASS");
     if ($test$plusargs("vcd")) begin
         $dumpfile("lb_timing_demo.vcd");
         $dumpvars(6, lb_timing_demo_tb);
     end
     #MAX_SIM;
-    $display("PASS");
     $finish();
 end
 
@@ -72,7 +70,6 @@ always @(posedge lb_clk) begin
     $display("---- Read Cycle ----\n");
     lb_read_task(TEST_REG2);
     #20;
-    $display("PASS");
     $finish();
 end
 

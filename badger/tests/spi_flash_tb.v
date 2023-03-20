@@ -7,13 +7,10 @@ module spi_flash_tb;
 parameter n_lat=12;
 
 initial begin
-	$display("Non-checking testbench.  Will always PASS");
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("spi_flash.vcd");
 		$dumpvars(5, spi_flash_tb);
 	end
-	$display("PASS");
-	$finish();
 end
 
 // Gateway to UDP, client interface test generator
