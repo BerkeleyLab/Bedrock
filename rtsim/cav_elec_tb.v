@@ -17,10 +17,13 @@ initial begin
 		$dumpfile("cav_elec.vcd");
 		$dumpvars(5,cav_elec_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<4600; cc=cc+1) begin
 		clk=0; #3;
 		clk=1; #3;
 	end
+	$display("PASS");
+	$finish();
 end
 
 // Local bus

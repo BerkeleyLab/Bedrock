@@ -17,10 +17,13 @@ initial begin
 		$dumpfile("outer_prod.vcd");
 		$dumpvars(5,outer_prod_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<300; cc=cc+1) begin
 		clk=0; #3;
 		clk=1; #3;
 	end
+	$display("PASS");
+	$finish();
 end
 
 // Local bus

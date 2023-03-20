@@ -39,10 +39,12 @@ initial begin
 		$dumpfile("fdbk_core.vcd");
 		$dumpvars(5,fdbk_core_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<350; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
 	$finish();
 end
 

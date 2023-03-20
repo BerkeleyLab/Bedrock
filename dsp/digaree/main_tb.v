@@ -9,10 +9,13 @@ initial begin
 		$dumpfile("main.vcd");
 		$dumpvars(5,main_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<300; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish();
 end
 
 reg [20:0] inst=0;

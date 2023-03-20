@@ -26,7 +26,7 @@ module spi_mon_tb;
          maddr = ix;
          rc = $fscanf(fd, "%x\n", mdat);
          if (rc != 1) begin
-            $display("parse error, aborting");
+            $display("FAIL: parse error, aborting");
             $stop();
          end
       end
@@ -35,7 +35,8 @@ module spi_mon_tb;
 
       while ($time<SIM_TIME) @(posedge clk);
       $display("WARNING: Not a self-checking testbench. Will always pass.");
-      $finish;
+      $display("PASS");
+      $finish();
    end
 
    always #5 clk=~clk;

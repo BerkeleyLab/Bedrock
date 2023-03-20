@@ -9,10 +9,13 @@ initial begin
 		$dumpfile("inverse.vcd");
 		$dumpvars(5,inverse_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<307; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish();
 end
 
 parameter dw=22;

@@ -12,10 +12,12 @@ initial begin
 		$dumpfile("half_filt.vcd");
 		$dumpvars(5,half_filt_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<per*500; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
 	$finish();
 end
 

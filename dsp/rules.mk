@@ -49,11 +49,11 @@ half_filt_check: half_filt.py half_filt.dat
 
 # scattershot approach
 # limited to den>=12
-mon_12_check: mon_12_tb $(BUILD_DIR)/testcode.awk
-	$(VVP) $< +amp=20000 +den=16  +phs=3.14 | $(AWK) -f $(filter %.awk, $^)
-	$(VVP) $< +amp=32763 +den=128 +phs=-0.2 | $(AWK) -f $(filter %.awk, $^)
-	$(VVP) $< +amp=99999 +den=28  +phs=1.57 | $(AWK) -f $(filter %.awk, $^)
-	$(VVP) $< +amp=200   +den=12  +phs=0.70 | $(AWK) -f $(filter %.awk, $^)
+mon_12_check: mon_12_tb
+	$(VVP) $< +amp=20000 +den=16  +phs=3.14
+	$(VVP) $< +amp=32763 +den=128 +phs=-0.2
+	$(VVP) $< +amp=99999 +den=28  +phs=1.57
+	$(VVP) $< +amp=200   +den=12  +phs=0.70
 
 tt800_ref.dat: tt800_ref
 	./tt800_ref > $@
@@ -64,7 +64,7 @@ tt800_check: tt800_tb tt800.dat tt800_ref.dat
 biquad_tb: saturateMath.v
 iirFilter_tb: saturateMath.v
 
-banyan_check: banyan_tb banyan_ch_find.py $(BUILD_DIR)/testcode.awk
+banyan_check: banyan_tb banyan_ch_find.py
 	$(VERILOG_CHECK)
 	$(VVP) banyan_tb +trace +squelch | $(PYTHON) $(filter %banyan_ch_find.py, $^)
 

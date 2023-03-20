@@ -22,10 +22,13 @@ initial begin
 		$dumpfile("rtefi_pipe.vcd");
 		$dumpvars(6,rtefi_pipe_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; continue_sim; cc=cc+1) begin
 		clk=0; #4;  // 125 MHz * 8bits/cycle -> 1 Gbit/sec
 		clk=1; #4;
 	end
+	$display("PASS");
+	$finish();
 end
 
 // Create flow of packets

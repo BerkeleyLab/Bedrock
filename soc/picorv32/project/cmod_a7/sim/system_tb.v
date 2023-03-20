@@ -193,8 +193,10 @@ module system_tb;
             #10000
             $display("TRAP,  return %08x;", retVal);
             if (retVal == 32'h1234)
-                $finish;
+                $display("PASS");
+                $finish();
             else
+                $display("FAIL");
                 $stop;
         end
         $fflush();

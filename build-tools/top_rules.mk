@@ -38,7 +38,7 @@ VERILOG_TB = $(VERILOG) $(VG_ALL) $(V_TB) ${VFLAGS} -o $@ $(filter %v, $^)
 VERILOG_TB_VPI = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} -o $@ $(filter %.v, $^)
 VERILOG_SIM = cd `dirname $@` && $(VVP) `basename $<` $(VVP_FLAGS)
 VERILOG_VIEW = $(GTKWAVE) $(GTKW_OPT) $^
-VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS) | $(AWK) -f $(filter %.awk, $^)
+VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS)
 VERILOG_RUN = $(VVP) $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
@@ -106,7 +106,7 @@ endif
 %_view: %.vcd %.gtkw
 	$(VERILOG_VIEW)
 
-%_check: %_tb $(BUILD_DIR)/testcode.awk
+%_check: %_tb
 	$(VERILOG_CHECK)
 
 %_lint: %.v %_auto

@@ -30,8 +30,13 @@ initial begin
 	worked = worked + (chunk.dpram.mem[12'h802] === 8'h5a);
 	worked = worked + (chunk.dpram.mem[12'h820] === 8'ha5);
 	$display("%d worked, %s", worked, (worked==4) ? "PASS" : "FAIL");
-	if (worked != 4) $stop();
-	$finish();
+	if (worked != 4) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 parameter SADR = 7'b0010_000;

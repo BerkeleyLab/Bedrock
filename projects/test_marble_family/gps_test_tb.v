@@ -9,12 +9,18 @@ initial begin
 		$dumpfile("gps_test.vcd");
 		$dumpvars(5,gps_test_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<800; cc=cc+1) begin
 		clk=0; #4;
 		clk=1; #4;
 	end
-	if (fail) $stop();
-	$finish();
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 reg pps=0;

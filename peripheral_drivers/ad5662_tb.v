@@ -16,8 +16,13 @@ initial begin
 		clk=0; #4;
 		clk=1; #4;
 	end
-	$display("%s", |faults ? "FAIL" : "PASS");
-	if (|faults) $stop();
+	if (|faults) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 // Pacing counter for bit engine

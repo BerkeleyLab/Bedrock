@@ -13,6 +13,7 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
 	$finish();
 end
 

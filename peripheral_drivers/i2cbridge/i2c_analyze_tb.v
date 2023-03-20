@@ -9,10 +9,13 @@ initial begin
 		$dumpfile("i2c_analyze.vcd");
 		$dumpvars(5,i2c_analyze_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<2000; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish();
 end
 
 // Probably shouldn't change these
