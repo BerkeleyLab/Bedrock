@@ -187,7 +187,7 @@ def compute_si570(a):
     rfreq = np.uint64((((a[1] & 0x3f) << 32) | (a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5])) / (2**28)
 
     import leep
-    leep_addr = "leep://" + str(args.ip) + str(":") + str(args.port)
+    leep_addr = "leep://" + str(args.addr) + str(":") + str(args.port)
     print(leep_addr)
 
     addr = leep.open(leep_addr, instance=[])
@@ -326,10 +326,9 @@ if __name__ == "__main__":
     # import importlib
     parser = argparse.ArgumentParser(
         description="Utility for working with i2cbridge attached to Packet Badger")
-    parser.add_argument('--ip', default='192.168.19.10', help='IP address')
-    parser.add_argument('--udp', type=int, default=0, help='UDP Port number')
-    parser.add_argument('--port', type=int, default=803, help='Port number')
-    parser.add_argument('--marble', type=int, default=1, help='Select the carrier board, Marble or Marble-Mini')
+    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
+    parser.add_argument('-p', '--port', type=int, default=0, help='UDP Port number')
+    parser.add_argument('-m', '--marble', type=int, default=1, help='Select the carrier board, Marble or Marble-Mini')
     parser.add_argument('--sim', action='store_true', help='simulation context')
     parser.add_argument('--ramtest', action='store_true', help='RAM test program')
     parser.add_argument('--trx', action='store_true',
@@ -346,16 +345,16 @@ if __name__ == "__main__":
     parser.add_argument('--squelch', action='store_true', help='squelch non-LA FMC pins')
 
     args = parser.parse_args()
-    ip = args.ip
-    udp = args.udp
+    addr = args.addr
+    port = args.port
     sim = args.sim
     if sim:
-        ip = 'localhost'
-        if args.udp == 0:
-            udp = 8030
+        addr = 'localhost'
+        if args.port == 0:
+            port = 8030
     else:
-        if args.udp == 0:
-            udp = 803
+        if args.port == 0:
+            port = 803
 
     # Consider importlib instead to give more flexibility at runtime
     # will require turning ramtest and poller into actual classes
@@ -372,8 +371,8 @@ if __name__ == "__main__":
         prog = poller.hw_test_prog()
 
     # OK, setup is finished, start the actual work
-    # dev = lbus_access.lbus_access(ip, port=udp, timeout=3.0, allow_burst=False)
-    leep_addr = "leep://" + ip + ":" + str(udp)
+    # dev = lbus_access.lbus_access(addr, port=port, timeout=3.0, allow_burst=False)
+    leep_addr = "leep://" + addr + ":" + str(port)
     print(leep_addr)
     dev = leep.open(leep_addr, timeout=5.0)
     if args.poll:

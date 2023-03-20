@@ -47,9 +47,9 @@ def measure_1(chip, v, dac=2, pause=1.1, repeat=1, gps=False, verbose=False):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--ip', default="192.168.19.10",
+    p.add_argument('-a', '--addr', default="192.168.19.10",
                    help="IP address of FPGA")
-    p.add_argument('--port', default=803,
+    p.add_argument('-p', '--port', default=803,
                    help="UDP port for I/O")
     p.add_argument('--dac', default=1,
                    help="DAC (1 or 2), 1 tunes precision 25 MHz")
@@ -57,13 +57,13 @@ if __name__ == "__main__":
                    help="Plot data")
     p.add_argument('--gps', action='store_true',
                    help="Use GPS-pps-based measurement")
-    p.add_argument('--verbose', action='store_true',
+    p.add_argument('-v', '--verbose', action='store_true',
                    help="Produce extra chatter")
     args = p.parse_args()
     if args.plot:
         from matplotlib import pyplot
 
-    chip = lbus_access(args.ip, port=args.port)
+    chip = lbus_access(args.addr, port=args.port)
     print("Design run rate is 4.4 seconds per line, 75 s total")
     plx = []
     plot1 = []
