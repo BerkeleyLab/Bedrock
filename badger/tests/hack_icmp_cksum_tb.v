@@ -14,7 +14,6 @@ initial begin
 		clk=0; #4;
 		clk=1; #4;
 	end
-	$display("%s", fail ? "FAIL" : "PASS");
 	if (fail) begin
 		$display("FAIL");
 		$stop();

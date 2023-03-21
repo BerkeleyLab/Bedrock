@@ -192,12 +192,13 @@ module system_tb;
         if (~reset && trap && !uart_debug_rx.busy) begin
             #10000
             $display("TRAP,  return %08x;", retVal);
-            if (retVal == 32'h1234)
+            if (retVal == 32'h1234) begin
                 $display("PASS");
                 $finish();
-            else
+            end else begin
                 $display("FAIL");
                 $stop;
+            end
         end
         $fflush();
     end
