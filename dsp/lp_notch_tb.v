@@ -22,6 +22,8 @@ integer cc;
 integer drive_en=1;
 wire y_zero;
 reg big=0;
+real dth = 0.0;
+
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("lp_notch.vcd");
@@ -40,7 +42,6 @@ initial begin
 		$stop;
 	end
 end
-`endif //  `ifdef SIMULATE
 
 always @(clk) begin
 	if (cc == DRIVE_TIME) begin
@@ -135,6 +136,7 @@ always @(posedge clk) begin
 	if (drive_en)
 		if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d\n", x_i, x_q, y_i, y_q);
 	big = y > DECAY_THRES || y1 > DECAY_THRES || y < -DECAY_THRES || y1 < -DECAY_THRES;
+`endif
 end
 
 endmodule
