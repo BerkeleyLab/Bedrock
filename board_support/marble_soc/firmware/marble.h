@@ -2,7 +2,6 @@
 #define _MARBLE_H_
 
 #include "settings.h"
-#include <stdio.h>
 #include <stdbool.h>
 
 typedef union _DataDword {

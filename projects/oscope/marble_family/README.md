@@ -35,9 +35,9 @@ example column output:
   bus_digitizer_U3[16]  LVDS_25          H23       FMC1_LA22_P  ADC_D0A_N_1
 
 
-## Build FW and program Marble-Mini
+## Build FW and program Marble
 ```
-cd $BEDROCK/projects/oscope/marblemini
+cd $BEDROCK/projects/oscope/marble_family
 make clean && make oscope_top.bit
 openocd -f ../../../board_support/marblemini/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 oscope_top.bit; exit"
 ```
@@ -71,6 +71,6 @@ export PYTHONPATH=../../../dsp/:../../common:../../../board_support/zest:/home/w
 ### Configure zest and run oscope
 Setup idelays etc on zest with zest_setup.py
 ```
-python ../../../board_support/zest/zest_setup.py -a 192.168.19.8 -p 803 -r -f 125
-python main.py -a 192.168.19.8 -p 803
+python ../../../board_support/zest/zest_setup.py -a 192.168.19.8:803 -r -f 125
+python ../software/main.py -a 192.168.19.8:803
 ```

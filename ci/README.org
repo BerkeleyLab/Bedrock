@@ -145,6 +145,8 @@ sudo cp certs/domain.crt /etc/docker/certs.d/mohs.dhcp.lbl.gov/ca.crt
 # Below adds .crt to system (mohs's) certificates and updates the system
 sudo cp certs/domain.crt /usr/local/share/ca-certificates/mohs.dhcp.lbl.gov.crt
 sudo update-ca-certificates
+# restart docker and its registry
+sh scripts/restart_registry.sh
 
 #+END_SRC
 

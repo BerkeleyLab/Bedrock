@@ -26,10 +26,10 @@
  * udp_receiver() supports two interface modes,
  * as selected by badger_client global variable:
  *    0: Raw bytes+strobe interface
- *    1: Badger-client interface, as defined in badger/clients.pes
+ *    1: Badger-client interface, as defined in badger/clients.eps
  *
  * Written according to standards, but so far only tested on
- * Linux with Icarus Verilog.
+ * Linux with Icarus Verilog and Verilator.
  */
 
 #define ETH_MAXLEN 1500   /* maximum line length */

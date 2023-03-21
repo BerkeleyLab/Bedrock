@@ -21,7 +21,7 @@ always @(posedge clk) bcnt <= bdone ? dw-1 : bcnt-1;
 
 // Actual work
 // Get the basics working using 10
-// can optimize to 5*2 later if the synthesizer can't optimze sufficiently
+// can optimize to 5*2 later if the synthesizer can't optimize sufficiently
 reg [3:0] accum;
 wire [4:0] accum5 = {accum, shiftout};
 wire got_one = accum5 >= 10;

@@ -9,4 +9,4 @@ CLEAN_DIRS += $(DEPDIR) $(IPX_DIR) $(AUTOGEN_DIR) __pycache__
 clean::
 	rm -f $(CLEAN)
 	rm -rf $(CLEAN_DIRS)
-	sh $(BUILD_DIR)/check_clean
+	$(CHECK_CLEAN)

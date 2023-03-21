@@ -142,8 +142,10 @@ file "%s"
             self.out['feed_logic_decim.template'].append(ent)
             decim = ent['BASE']+'DECIM_RBV CP MSI'
 
-        # we append template blocks in reverse order to simplify accounting of next record.
-        # start with the last link in the chain, which then re-arms
+        ''' We append template blocks in reverse order to simplify
+            accounting of next record.
+            Start with the last link in the chain, which then re-arms.
+        '''
         nextrec = '$(PREF)%sREARM' % gname
 
         stats = []
@@ -196,7 +198,8 @@ file "%s"
                 ent['FLNK'] = ent['BASE']+'ASE_'
                 self.out['feed_logic_pair.template'].append(ent)
                 stats.append((ent['BASE']+'A', ent['BASE']+'AWF',
-                              ent['BASE']+'TWF', ent['SIZE'], ent['BASE']+'PSE_'))
+                              ent['BASE']+'TWF', ent['SIZE'],
+                              ent['BASE']+'PSE_'))
                 stats.append((ent['BASE']+'P', ent['BASE'] +
                               'PWF', ent['BASE']+'TWF', ent['SIZE'], None))
 

@@ -70,7 +70,7 @@ always @(posedge sclk) begin
 		vernier_freq <= ph_sum - ph_sum_old;
 	end
 end
-assign locked = ~err_r;  // no fancy clock daomain crossing
+assign locked = ~err_r;  // no fancy clock domain crossing
 
 // Periodically pass the result to rclk domain
 wire din_stb = &cnt[4:0] && locked;

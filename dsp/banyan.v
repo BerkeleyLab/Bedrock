@@ -27,14 +27,15 @@
 // The implementation is done with recursive instantiation of itself.
 // The capability of doing recursion in Verilog is explicitly acknowledged
 // and blessed by the Verilog-2005 standard, and it works without problem
-// for me in Icarus Verilog, Xilinx XST, and Xilinx Vivado.
+// for me in Icarus Verilog, Verilator, Xilinx XST, and Xilinx Vivado.
 //
 // An N=8 dw=16 instantiation in Kintex speed grade 2 seems capable of
 // running at ridiculous clock rates (over 550 MHz?), consuming on the
 // order of 430 LUT.  The data muxes alone ought to use 384 LUT outputs.
 // Even a lowly Spartan-6 should manage 160 MHz, using about 226 LUT
 // (437 LUT outputs).
-// Not yet tested on hardware.
+//
+// Used successfully on hardware since 2016.
 
 module banyan #(
 	parameter dw=16,  // data width

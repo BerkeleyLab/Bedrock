@@ -1,6 +1,6 @@
 // ctrace is a stripped-down logic analyzer/recorder
-// along the lines of Xilinx's ChipScope or Altera's Signaltap.
-// Of course it doen't have the tools integration that those
+// along the lines of Xilinx's ChipScope or Altera's SignalTap.
+// Of course it doesn't have the tools integration that those
 //  proprietary things do.  Maybe it could get hooks in yosys?
 
 // Right now I use it with the barest of start/status/dump interaction with the
@@ -8,7 +8,7 @@
 // left for the user to synthesize, but it would be nice to add some configurable
 // support for pre-trigger buffer management.  There are also fancier ways to
 // compress the time axis, and I personally want an enable input that can give
-// more flexiblity to time stretching and event capturing.
+// more flexibility to time stretching and event capturing.
 
 // "make ctrace_view" will show you the internals of its logic.
 // "make ctrace_test1_view" will show the test bench stimulus waveform,

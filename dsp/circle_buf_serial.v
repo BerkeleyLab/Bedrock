@@ -33,11 +33,16 @@ module circle_buf_serial #(
 (
    // Incoming stream
    input                    iclk,
+   input                    reset,
    input [buf_dw-1:0]       sr_in, // Conveyor belt carrying n_chan channels
    input                    sr_stb,
 
    // Channel selector controls
    input [n_chan-1:0]       chan_mask, // Bitmask of channels to record. See lsb_mask parameter
+   // Selected waveform data in iclk domain
+   output                   wave_gate,
+   output                   wave_dval,
+   output                   [buf_dw-1:0] wave_data,
 
    // Circular Buffer control and statistics
    // all of these signals are also in the iclk domain
@@ -62,10 +67,9 @@ module circle_buf_serial #(
    // ------
    // Interleaved channel selector
    // ------
-   wire              wave_gate, wave_trig;
-   wire [buf_dw-1:0] wave_data;
    wire              fchan_time_error; // For debug only - will pulse if gate-per-trigger ratio is broken
-
+   wire              wave_trig;
+   assign            wave_dval = ~wave_trig;
 
    fchan_subset #(
       .KEEP_OLD (lsb_mask),
@@ -74,6 +78,7 @@ module circle_buf_serial #(
       .len      (n_chan))
    i_fchan_subset (
       .clk      (iclk),
+      .reset    (reset),
       .keep     (chan_mask),
       .a_data   (sr_in),
       .a_gate   (sr_stb),
@@ -88,6 +93,27 @@ module circle_buf_serial #(
    always @(negedge iclk) if (fchan_time_error) begin
       $display("ERROR: Gate-per-Trigger ratio violated in fchan_selector.");
       $finish;
+   end
+   // Output file (if any) for dumping the results
+   integer out_file;
+   reg [255:0] out_file_name;
+   wire signed [buf_dw/2-1:0] wave_i = wave_data[buf_dw-1:buf_dw/2];
+   wire signed [buf_dw/2-1:0] wave_q = wave_data[buf_dw/2-1:0];
+   reg needs_cr=0;
+   initial begin
+      out_file = 0;
+      if ($value$plusargs("conveyor_file=%s", out_file_name))
+         out_file = $fopen(out_file_name,"w");
+   end
+   always @(negedge iclk) if (out_file != 0) begin
+      if (wave_trig && needs_cr) begin
+         $fwrite(out_file, "\n");
+         needs_cr <= 0;
+      end
+      if (wave_gate) begin
+         $fwrite(out_file, " %d %d", wave_i, wave_q);
+         needs_cr <= 1;
+      end
    end
 `endif
 

@@ -59,7 +59,7 @@ always @(posedge clk) begin
 	npt_prev <= npt;
 	avg_prev <= average;
 
-	// Barebones model that computes expected npt. Average output currently not modeled
+	// Bare-bones model that computes expected npt. Average output currently not modeled
 	npt_v = npt_model;
 	if (read_s) npt_v = 0;
 	if (data_s) npt_v = (npt_v<255) ? npt_v + 1 : 255;

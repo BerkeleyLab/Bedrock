@@ -3,7 +3,7 @@
 [pos] -1 -1
 *-16.943096 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] dpram_tb.
-[sst_width] 310
+[sst_width] 210
 [signals_width] 209
 [sst_expanded] 1
 [sst_vpaned_height] 118

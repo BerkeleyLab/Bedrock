@@ -3,7 +3,16 @@
 // ------------------------------------
 // eth_gtx_bridge.v
 //
-// Wrapper around rtefi_blob and gmii_link with a TX/RX path width conversion for GTX compatibility
+// DEPRECATED
+// Wrapper around rtefi_blob and eth_gtx_hook with a TX/RX path width conversion for GTX compatibility
+// Note that this module "just" instantiates two others:
+// eth_gtx_hook and rtefi_blob.
+// If you keep them separate, that gives you a valuable opportunity
+// to put your simulated design on a test network.
+// Look in the badger/tests directory for examples and tools to support
+// this technique, using GMII ports of rtefi_blob.
+// Similar capabilities don't exist for the 20-bit ports coming out of this
+// module, that is meant for attachment to the Xilinx GTX/GTP interface.
 // ------------------------------------
 
 module eth_gtx_bridge #(
@@ -18,9 +27,8 @@ module eth_gtx_bridge #(
    input  [GTX_DW-1:0] gtx_rxd,
    output [GTX_DW-1:0] gtx_txd,
 
-   // Auto-Negotiation
    input               an_disable,
-   output [6:0]        an_status, // cfg_clk domain
+   output [8:0]        an_status, // cfg_clk domain
 
    // Status signals
    output              rx_mon,
@@ -46,75 +54,28 @@ module eth_gtx_bridge #(
    output              lb_renable,
    input  [31:0]       lb_rdata
 );
+
+   reg  [8:0] an_status_x_cfg_clk;
+   wire [8:0] an_status_l;
    wire [7:0] gmii_rxd, gmii_txd;
-   wire [9:0] gtx_txd_10;
-   wire gmii_tx_en, gmii_rx_er, gmii_rx_dv;
+   wire gmii_tx_en, gmii_rx_dv;
 
-   // ----------------------------------
-   // Data width and rate conversion
-   // ---------------------------------
+   eth_gtx_hook #(.JUMBO_DW(14), .GTX_DW(20)) hook(
+       .gtx_tx_clk   (gtx_tx_clk),
+       .gmii_tx_clk  (gmii_tx_clk),
+       .gmii_rx_clk  (gmii_rx_clk),
+       .gtx_rxd      (gtx_rxd),
+       .gtx_txd      (gtx_txd),
 
-   wire [9:0] gtx_rxd_10;
+       .an_disable   (an_disable),
+       .rx_err_los   (1'b0),
+       .an_status_l  (an_status_l),
 
-   generate if (GTX_DW==20) begin: G_GTX_DATA_CONV
-
-      reg  [9:0] gtx_rxd_10_r;
-      reg  [9:0] gtx_txd_r;
-      wire [9:0] gtp_rxd_l = gtx_rxd[9:0];
-      wire [9:0] gtp_rxd_h = gtx_rxd[19:10];
-      reg  [19:0] gtx_txd_l;
-      reg even=0;
-
-      always @(posedge gmii_tx_clk) begin
-          gtx_txd_r <= gtx_txd_10;
-      end
-
-      always @(posedge gmii_rx_clk) begin
-          even         <= ~even;
-          gtx_rxd_10_r <= even ? gtp_rxd_l : gtp_rxd_h;
-      end
-
-      always @(posedge gtx_tx_clk) begin
-          gtx_txd_l <= {gtx_txd_10, gtx_txd_r};
-      end
-
-      assign gtx_txd = gtx_txd_l;
-      assign gtx_rxd_10 = gtx_rxd_10_r;
-
-   end else begin
-
-      assign gtx_txd    = gtx_txd_10;
-      assign gtx_rxd_10 = gtx_rxd;
-
-   end endgenerate
-
-
-   // ----------------------------------
-   // PCS/PMA and GMII Bridge
-   // ---------------------------------
-
-   wire [15:0] lacr_rx;
-   wire [6:0] an_status_l;
-   reg  [6:0] an_status_x_cfg_clk;
-
-   gmii_link i_gmii_link(
-        // GMII to MAC
-        .RX_CLK       (gmii_rx_clk),
-        .RXD          (gmii_rxd),
-        .RX_DV        (gmii_rx_dv),
-        // MAC to GMII
-        .GTX_CLK      (gmii_tx_clk),
-        .TXD          (gmii_txd),
-        .TX_EN        (gmii_tx_en),
-        .TX_ER        (1'b0),
-        // To Transceiver
-        .txdata       (gtx_txd_10),
-        .rxdata       (gtx_rxd_10),
-        .rx_err_los   (1'b0),
-        .an_bypass    (an_disable), // Disable auto-negotiation
-        .lacr_rx      (lacr_rx),
-        .an_status    (an_status_l)
-   );
+       .gmii_rxd     (gmii_rxd),
+       .gmii_rx_dv   (gmii_rx_dv),
+       .gmii_txd     (gmii_txd),
+       .gmii_tx_en   (gmii_tx_en)
+       );
 
    // Cross quasi-static an_status to cfg_clk so it can be read out by Host
    always @(posedge cfg_clk) an_status_x_cfg_clk <= an_status_l;

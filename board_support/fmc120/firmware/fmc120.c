@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdbool.h>
 #include "print.h"
 #include "sfr.h"

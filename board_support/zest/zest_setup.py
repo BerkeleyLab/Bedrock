@@ -1,9 +1,9 @@
-import re
 import struct
 import sys
 import time
+import os
 
-from llrf_bmb7 import c_llrf_bmb7
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../projects/common"))
 
 from llspi_lmk01801 import c_llspi_lmk01801
 from llspi_ad9653 import c_llspi_ad9653
@@ -13,29 +13,43 @@ from amc7823 import c_amc7823
 from prnd import prnd
 
 
-class c_prc(c_llrf_bmb7):
+class c_zest:
 
-    def __init__(self, ip, port=50006, leep_addr=None,
-                 bitfilepath=None, reset=False,
-                 clk_freq=1320e6/14.0, use_spartan=False,
-                 ref_freq=50.):
+    def __init__(self, ip, leep_addr=None,
+                 reset=False,
+                 dac_nm_mode=False,
+                 timeout=0.1, strict=False,
+                 clk_freq=1320e6/14.0, ref_freq=50.):
 
         import leep
+        from leep import RomError
 
         self.pn9 = prnd(0x92, 16)  # static class variable
 
-        self.ip = ip
-        self.bitfilepath = bitfilepath
+        self.test_mode_now = None
+
         self.ref_freq = ref_freq
         self.clk_freq = clk_freq
+        self.dac_nm_mode = dac_nm_mode
+        self.strict = strict
+
         if leep_addr is None:
-            leep_addr = "leep://" + str(self.ip) + ':' + str(port)
+            leep_addr = "leep://" + str(ip)
+
+        # Open communication with the carrier board
+        print('Carrier board address %s' % leep_addr)
+
+        try:
+            self.leep = leep.open(leep_addr, timeout=timeout, instance=[])
+        except RomError as e:
+            print('zest_setup.py: %s, %s. Quitting.' % (leep_addr, str(e)))
+            raise
 
         self.lmk_spi = c_llspi_lmk01801(1)
         self.U2_adc_spi = c_llspi_ad9653(2)
         self.U3_adc_spi = c_llspi_ad9653(3)
         self.dac_spi = c_llspi_ad9781(4)
-        self.ad7794 = c_ad7794()
+        self.ad7794 = c_ad7794(REFSEL=0)
         self.amc7823 = c_amc7823()
 
         # Used in top2idelay; makes things (more?) specific to
@@ -50,62 +64,42 @@ class c_prc(c_llrf_bmb7):
         }
         self.chan_list = [self.channels[ix] for ix in range(8)]
         self.ad9653_regname = {  # XXX please move this to a class!
-            0x00: 'SPI port configuration',
-            0x01: 'Chip ID',
-            0x02: 'Chip Grade',
-            0x05: 'Device Index',
-            0x08: 'Power Modes (global)',
-            0x09: 'Clock (global)',
-            0x0b: 'Clock divide (global)',
-            0x0c: 'Enhancement control',
-            0x0d: 'Test mode',
-            0x10: 'Offset adjust (local)',
-            0x14: 'Output mode',
-            0x15: 'Output adjust',
-            0x16: 'Output phase',
-            0x18: 'V_REF',
-            0x19: 'USER_PATT1_LSB (global)',
-            0x1a: 'USER_PATT1_MSB (global)',
-            0x1b: 'USER_PATT2_LSB (global)',
-            0x1c: 'USER_PATT2_MSB (global)',
-            0x21: 'Serial output data control (global)',
-            0x22: 'Serial channel status (local)',
-            0x100: 'Sample rate override',
-            0x101: 'User I/O Control 2',
-            0x102: 'User I/O Control 3',
-            0x109: 'Sync'
+            0x00: '18  SPI port configuration',
+            0x01: 'b5  Chip ID',
+            0x02: '61  Chip Grade',
+            0x05: '3f  Device Index',
+            0x08: '00  Power Modes (global)',
+            0x09: '01  Clock (global)',
+            0x0b: '00  Clock divide (global)',
+            0x0c: '00  Enhancement control',
+            0x0d: '00  Test mode',
+            0x10: '00  Offset adjust (local)',
+            0x14: '02  Output mode',
+            0x15: '00  Output adjust',
+            0x16: '03  Output phase',
+            0x18: '04  V_REF',
+            0x19: '00  USER_PATT1_LSB (global)',
+            0x1a: '00  USER_PATT1_MSB (global)',
+            0x1b: '00  USER_PATT2_LSB (global)',
+            0x1c: '00  USER_PATT2_MSB (global)',
+            0x21: '30  Serial output data control (global)',
+            0x22: '00  Serial channel status (local)',
+            0x100: '46  Sample rate override',
+            0x101: '00  User I/O Control 2',
+            0x102: '00  User I/O Control 3',
+            0x109: '00  Sync'
         }
 
-        # Open communication with the carrier board
-        print('Carrier board address %s' % leep_addr)
-
-        self.leep = leep.open(leep_addr, instance=[])
-        c_llrf_bmb7.__init__(self, ip, port, bitfilepath=bitfilepath, reset=reset,
-                             use_spartan=use_spartan)
-
-        if self.spartan_interface:
-            if not self.sn_init():
-                print("ERROR: Couldn't find serial number")
+        # This must come after peripheral classes above are initialized
+        if reset:
+            if type(self.leep.codehash) is str:
+                print("FPGA source git ID: " + self.leep.codehash)
+            # Perform hardware reset
+            if not self.hardware_reset():
+                print("Initialization Error!")
                 exit(2)
-            pass
-        else:
-            print("Digitizer serial number read disabled")
-            self.sn = "Unknown"
-
-    def reset(self):
-        print('Starting reset')
-
-        if self.bitfilepath:
-            if (self.carrier_rev == 2) != ('sesqui' in self.bitfilepath):
-                print("Bitfile name interlock failed")
-                exit(2)
-            print('Trying to program')
-            self.carrier.program_kintex_7(bitfilepath=self.bitfilepath)
-
-        if not self.hardware_reset():
-            print("Initialization Error!")
-            exit(2)
-        sys.stdout.flush()
+            print("Reset sequence complete in %s: board address %s" % (sys.argv[0], leep_addr))
+            sys.stdout.flush()
 
     def _freq_get_convert(self, reg_name):
         freq_count = self.leep.reg_read([(reg_name)])[0]
@@ -116,28 +110,51 @@ class c_prc(c_llrf_bmb7):
         print('clkout3 Frequency %.3f MHz' % self._freq_get_convert("frequency_clkout3"))
         print('DCO Frequency     %.3f MHz' % self._freq_get_convert("frequency_dco"))
 
-    def hardware_reset(self):
+    def hardware_reset(self, injector=False):
         print("Entering hardware_reset")
-        self.digitizer_spi_init()
+        aok = self.digitizer_spi_init(dac_nm_mode=self.dac_nm_mode)
+        if not aok:
+            return False
 
         self.clock_check()
 
+        self.ad7794_calibrate()
+        if not self.ad7794_print():
+            print("ad7794_print failed")
+            return False
         if not self.amc7823_print(check_channels=[3, 5, 7]):
             print("amc7823_print failed")
             return False
+        sys.stdout.flush()
         if not self.adc_reset_clk():
             print("adc_reset_clk failed")
             return False
-        if not self.adc_idelay1(0):
-            print("adc_idelay1 failed")
+        sys.stdout.flush()
+        # if not self.adc_idelay0():
+        if not self.adc_idelay1():
+            print("idelay scan failed")
             return False
-        # self.adc_idelay0()
         sys.stdout.flush()
         if not self.adc_bufr_reset():
             return False
-        self.adc_bitslip()
-        # self.dac_smp(SET=None, HLD=None, SMP=None)
-        # self.dac_smp(SET=15, HLD=4, SMP=4)
+        if not self.adc_bitslip() and self.strict:
+            return False
+        sys.stdout.flush()
+
+        # DAC timing parameter search
+        vwin_tup = self.dac_timing()
+        # If window available, set to middle value
+        if vwin_tup:
+            # Pick middle of the valid window and apply empirically determined bias
+            # to allow for more falling-edge margin
+            val = int(len(vwin_tup)/2 + 0.5) - 2
+            val = max(val, 2)
+            SMP, SEEK, SET, HLD = vwin_tup[val]
+            self.dac_timing(SET=SET, HLD=HLD, SMP=SMP)
+        else:
+            self.dac_timing(SET=13, HLD=15, SMP=19)
+        sys.stdout.flush()
+
         if False:
             if self.pntest2() == []:
                 self.pntest()
@@ -148,33 +165,6 @@ class c_prc(c_llrf_bmb7):
         print('test pattern %s' % self.set_test_mode('00000000'))
         if not self.amc7823_print(check_channels=[1, 2, 3, 4, 5, 6, 7]):
             return False
-        return True
-
-    def sn_init(self):
-        if self.use_spartan:
-            snread = self.sn_read()
-            if snread is False:
-                print("sn_read() failed")
-                return False
-            print('Read SN: "%s"' % snread)
-            self.sn = snread
-            m = re.match(r'LBNL DIGITIZER V1.\d SN +(\d+)', snread)
-            if not m:
-                try:
-                    if True:
-                        import qrtools
-                        a = qrtools.QR()
-                        a.decode_webcam()
-                        adata = a.data
-                    else:
-                        # Emergency use only
-                        adata = 'LBNL DIGITIZER V1.0 SN 006'
-                    print('Writing new SN: "%s"' % adata)
-                    self.sn_write(adata)
-                except Exception:
-                    pass
-                    print("Error: Failed to get QR code or write to EEPROM")
-                    return False
         return True
 
     def read_buffer_to_end(self, chan):
@@ -215,36 +205,21 @@ class c_prc(c_llrf_bmb7):
             print(vlist)
         self.leep.reg_write(vlist)
 
-    def sn_write(self, write_string):
-        for ix in range(len(write_string)):
-            if self.spartan_interface:
-                self.spartan_interface.write_at24c32d_prom(
-                    self.fmc_prom_address, ix, ord(write_string[ix]))
-        pass
-
-    def sn_read(self, count=27, start_ix=0):
-        r_ascii = ""
-        for i in range(count):
-            if self.spartan_interface:
-                try:
-                    v = self.spartan_interface.read_at24c32d_prom(start_ix+i, False)
-                    if v >= 32 and v < 127:
-                        r_ascii += chr(v)
-                except Exception:
-                    print("Error: Failure reading FMC EEPROM")
-                    return False
-        return r_ascii
-
     def ad9653_spi_dump(self, adc_list):
-        print(hex(self.leep.reg_read([('hello_3')])[0]))
         print("addr  U2  U3")
+        aok = True
         for addr in sorted(self.ad9653_regname.keys()):
             foo = self.spi_readn(adc_list, addr)
+            rn = self.ad9653_regname[addr]
+            goal = rn.split()[0]
             x = ['{:02x}'.format(v[2]) for v in foo]
-            print("%3.3x  " % addr + "  ".join(x) + "  " + self.ad9653_regname[addr])
+            ok = all([v == goal for v in x])
+            aok &= ok
+            ss = "  OK  " if ok else "  BAD "
+            print("%3.3x   " % addr + "  ".join(x) + ss + rn)
+        return aok
 
     def amc_write(self, pg, saddr, val):
-        # print 'amc write pg', pg, 'saddr', hex(saddr), 'val', hex(val)
         print('amc write pg %d saddr 0x%x val 0x%x' % (pg, saddr, val))
         da = self.amc7823.dataaddr(val, self.amc7823.cmd(rw=0, pg=pg, saddr=saddr, eaddr=0x00))
         self.leep.reg_write([
@@ -252,8 +227,6 @@ class c_prc(c_llrf_bmb7):
             ("U15_spi_read_and_start_r", 2),
             ("U15_spi_read_and_start_r", 3)
         ])
-        # print 'after write',
-        # , "U15_spi_ready, U15_sdio_as_sdo", "U15_spi_start, U15_spi_read_r", "U15_spi_data_r, U15_spi_addr_r"])
         time.sleep(0.2)
 
     def amc_read(self, pg, saddr):
@@ -271,7 +244,6 @@ class c_prc(c_llrf_bmb7):
         return [rw, pg, saddr, eaddr, data]
 
     def ad7794_write(self, addr, val):
-        # print 'ad7794 write ', 'addr', hex(addr), 'val', hex(val)
         da = self.ad7794.dataaddr(val, self.ad7794.cmd(read=0, addr=addr))
         self.leep.reg_write([
             ("U18_spi_data_addr_r", da),
@@ -295,7 +267,7 @@ class c_prc(c_llrf_bmb7):
             ("U18_spi_read_and_start_r", 3)
         ])
         time.sleep(0.2)
-        result = self.reg_read_value(["U18_spi_rdbk"])
+        result = self.leep.reg_read(["U18_spi_rdbk"])
         result = result[0]
         [read, addr, cread] = self.ad7794.cmddecode(result >> 24)
         data = result & 0xffffff
@@ -353,7 +325,7 @@ class c_prc(c_llrf_bmb7):
             result1 = self.leep.reg_read([('llspi_result')]*please_read)
             return [(None, None, x) for x in result1]
 
-    def adc_reg(self):
+    def adc_reg(self, verbose=False):
         adc = self.leep.reg_read([('U3dout_msb'), ('U3dout_lsb'), ('U2dout_msb'), ('U2dout_lsb')])
         # print 'adc_reg U3DAU3DB U3DCU3DD U2DAU2DB U2DCU2DD', [(d[2].encode('hex')) for d in adc]
         U3DA = adc[0] >> 16 & 0xffff
@@ -364,11 +336,13 @@ class c_prc(c_llrf_bmb7):
         U2DB = adc[2] & 0xffff
         U2DC = adc[3] >> 16 & 0xffff
         U2DD = adc[3] & 0xffff
+        adc_values = [U3DA, U3DB, U3DC, U3DD, U2DA, U2DB, U2DC, U2DD]
+        if verbose:
+            print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
+        return adc_values
 
-        return [U3DA, U3DB, U3DC, U3DD, U2DA, U2DB, U2DC, U2DD]
-
-    def adc_reg_hilo(self):
-        adcvalue = self.adc_reg()
+    def adc_reg_hilo(self, verbose=False):
+        adcvalue = self.adc_reg(verbose=verbose)
         hilo = []
         for value in adcvalue:
             hilo.append(value >> 8)
@@ -379,8 +353,8 @@ class c_prc(c_llrf_bmb7):
         if tp != self.test_mode_now:
             for adc in self.U2_adc_spi, self.U3_adc_spi:
                 self.spi_write(adc, 0xd, tp)
-            self.test_mode_now = tp
-        return tp  # self.spi_read(adc, 0xd)[0][2].encode('hex')
+        self.test_mode_now = tp
+        return tp
 
     def bitslip_calc(self, value=0xa19c):
         value_hi = value >> 8
@@ -392,78 +366,59 @@ class c_prc(c_llrf_bmb7):
         bitslip = (eval('0b' + ''.join([str(int(i)) for i in bitsliplist])))
         return bitslip
 
+    # at least 128 ns assertion of a reset line
+    def reset_pulse(self, reset_r):
+        self.leep.reg_write([(reset_r, 0), (reset_r, 1), (reset_r, 1), (reset_r, 0)])
+
+    # Reset for the single IDELAYCTRL primitive on the chip;
+    # it's clocked by clk_200, nothing to do with ADC clocks.
     def idelayctrl_reset(self):
-        self.leep.reg_write([
-            ('idelayctrl_reset_r', 0),
-            ('idelayctrl_reset_r', 1),
-            ('idelayctrl_reset_r', 0)
-        ])
+        self.reset_pulse('idelayctrl_reset_r')
 
     def U2_adc_iserdes_reset(self):
-        self.leep.reg_write([
-            ('U2_iserdes_reset_r', 0),
-            ('U2_iserdes_reset_r', 1),
-            ('U2_iserdes_reset_r', 1),
-            ('U2_iserdes_reset_r', 0)
-        ])
+        self.reset_pulse('U2_iserdes_reset_r')
 
     def U3_adc_iserdes_reset(self):
-        self.leep.reg_write([
-            ('U3_iserdes_reset_r', 0),
-            ('U3_iserdes_reset_r', 1),
-            ('U3_iserdes_reset_r', 1),
-            ('U3_iserdes_reset_r', 0)
-        ])
+        self.reset_pulse('U3_iserdes_reset_r')
 
-    def hw_reset(self):
-        self.leep.reg_write([
-            ('U4_reset_r', 0),
-            ('U4_reset_r', 1),
-            ('U4_reset_r', 0),
-            ('U4_reset_r', 0)
-        ])
+    def dac_reset(self):
+        self.reset_pulse('U4_reset_r')
 
     def adc_test_reset(self):
-        self.leep.reg_write([
-            ('adc_test_reset', 0),
-            ('adc_test_reset', 1),
-            ('adc_test_reset', 1),
-            ('adc_test_reset', 0)
-        ])
+        self.reset_pulse('adc_test_reset')
 
-    def digitizer_spi_init(self):
+    def digitizer_spi_init(self, dac_nm_mode=False):
         self.leep.reg_write([('periph_config', 0xfffffffd)])
         self.spi_flush()
         sys.stdout.write("start lmk setup -")
         self.spi_write(self.lmk_spi, 15, self.lmk_spi.R15(uWireLock="0"))
         self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(RESET='1'))
-        if True:
+        if False:
             # Check this if running on sliderule.dhcp with 377MHz input clock
             self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
                 RESET='0',
-                CLKin0_DIV="111",
-                CLKin1_DIV="000",
+                CLKin0_DIV="010",  # div-by-2
+                CLKin1_DIV="000",  # div-by-8
                 CLKin1_MUX="01",
                 CLKin0_MUX="01"))
         else:
             self.spi_write(self.lmk_spi, 0, self.lmk_spi.R0(
                 RESET='0',
-                CLKin0_DIV="111",
-                CLKin1_DIV="000",
+                CLKin0_DIV="111",  # div-by-7
+                CLKin1_DIV="000",  # div-by-8
                 CLKin1_MUX="01",
                 CLKin0_MUX="01"))
-        # , CLKout4_7_PD='1', CLKout0_3_PD='0'))#, CLKin0_DIV='011'))
         self.spi_write(self.lmk_spi, 1, self.lmk_spi.R1(
-            CLKout7_TYPE="0000",  # Powerdown
-            CLKout4_TYPE="0000",  # Powerdown
-            CLKout2_TYPE="001"))  # LVCMOS
+            CLKout7_TYPE="0000",   # Powerdown  unused
+            CLKout4_TYPE="0000",   # Powerdown  P2-H4,H5 LMK_CLKout4_{P,N}
+            CLKout2_TYPE="001"))   # LVDS  J13 test point
         self.spi_write(self.lmk_spi, 2, self.lmk_spi.R2(
-            CLKout13_TYPE="0000",  # Powerdown
-            CLKout12_TYPE="0000",  # Powerdown
-            CLKout11_TYPE="0110",  # CMOS J24 test point
-            CLKout10_TYPE="0001",  # LVDS J20
-            CLKout9_TYPE="0000",   # Powerdown
-            CLKout8_TYPE="0000"))  # Powerdown
+            CLKout13_TYPE="0000",  # Powerdown  unused
+            CLKout12_TYPE="0000",  # Powerdown  unused
+            CLKout11_TYPE="0110",  # CMOS  J24 test point
+            CLKout10_TYPE="0001",  # LVDS  J20 SMA
+            CLKout9_TYPE="0000",   # Powerdown  unused
+            CLKout8_TYPE="0000"))  # Powerdown  unused
         sys.stdout.write("done\n")
         sys.stdout.flush()
         time.sleep(0.3)
@@ -489,9 +444,7 @@ class c_prc(c_llrf_bmb7):
 
         sys.stdout.write("various resets -")
         self.idelayctrl_reset()
-        self.U2_adc_iserdes_reset()
-        self.U3_adc_iserdes_reset()
-        self.hw_reset()
+        self.dac_reset()
         for adc in [self.U2_adc_spi, self.U3_adc_spi]:
             self.spi_write(adc, 0x00, '00111100')
             self.spi_write(adc, 0x08, '00000011')
@@ -507,8 +460,13 @@ class c_prc(c_llrf_bmb7):
         sys.stdout.flush()
 
         print("AD9653 initialization")
-        self.ad9653_spi_dump([self.U2_adc_spi, self.U3_adc_spi])
-        print("done")
+        aok = self.ad9653_spi_dump([self.U2_adc_spi, self.U3_adc_spi])
+        if not aok:
+            print("FAIL")
+            if self.strict:
+                return False
+        else:
+            print("done")
         sys.stdout.flush()
 
         print("AD9781 initialization")
@@ -517,10 +475,14 @@ class c_prc(c_llrf_bmb7):
         self.spi_write(self.dac_spi, 2, '00000000')
         self.spi_write(self.dac_spi, 3, '00000000')
         self.spi_write(self.dac_spi, 4, '11011111')
-        if True:
-            self.spi_write(self.dac_spi, 10, '00001111')  # mix mode for SCLLRF
+        if not dac_nm_mode:
+            # Pick mix mode when driving on second Nyquist band.
+            # E.g. LCLS2 145 MHz IF output at 188.57 MSPS
+            print("AD9781: Selecting Mix mode")
+            self.spi_write(self.dac_spi, 10, '00001111')
         else:
-            self.spi_write(self.dac_spi, 10, '00000000')  # normal mode for gun
+            print("AD9781: Selecting Normal mode")
+            self.spi_write(self.dac_spi, 10, '00000000')
         # self.spi_write(self.dac_spi, 0xb, '11111111')
         # self.spi_write(self.dac_spi, 0xc, '11111111')
         # self.spi_write(self.dac_spi, 0xf, '11111111')
@@ -529,8 +491,8 @@ class c_prc(c_llrf_bmb7):
             0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
             0x0f, 0x10, 0x11, 0x12, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f]
         for addr in alist:
-            bb = ['{:08x}'.format(d[2]) for d in self.spi_readn([self.dac_spi], addr)]
-            print('dac spi addr 0x%x ' % addr + repr(bb))
+            bb = self.spi_readn([self.dac_spi], addr)[0]
+            print('dac spi addr 0x%02x  0x%02x' % (addr, bb[2]))
         print("done")
         sys.stdout.flush()
 
@@ -552,22 +514,26 @@ class c_prc(c_llrf_bmb7):
         self.amc_write(1, 0xd, 0xffff)
         print("done")
         sys.stdout.flush()
+        return True
+
+    def mmcm_status(self, verbose=False):
+        c_status = self.leep.reg_read(["clk_status_out"])[0]
+        if verbose:
+            print("Clock status %d" % c_status)
+        return c_status
 
     def adc_reset_clk(self):
         '''
         Ref Freq in MHz
         '''
         print('adc_reset_clk')
-        regs = []
-        regs.extend(1*[('U2_clk_reset_r', 0)])
-        regs.extend(1*[('U2_clk_reset_r', 1)])
-        regs.extend(1*[('U2_clk_reset_r', 0)])
-        regs.extend(1*[('U3_clk_reset_r', 0)])
-        regs.extend(1*[('U3_clk_reset_r', 1)])
-        regs.extend(1*[('U3_clk_reset_r', 0)])
-        self.leep.reg_write(regs)
-
-        print('test pattern %s' % self.set_test_mode('00001100'))
+        # Need to reset the BUFR before the MMCM, and reset the MMCM before
+        # asking idelay_scanner to use the Banyan fabric.
+        self.reset_pulse('U2_clk_reset_r')  # BUFR
+        self.reset_pulse('U3_clk_reset_r')  # BUFR
+        self.reset_pulse('mmcm_reset_r')  # both U2 and U3; U3's MMCM not used?
+        time.sleep(0.01)  # how long does this take?
+        self.leep.reg_write([("clk_status_we", 1)])  # arm clock fault detector
         time.sleep(0.34)  # Frequency counter reference 24 bits at 50 MHz
         adc_freq = self.leep.reg_read([("frequency_adc")])[0]
         adc_freq = adc_freq * self.ref_freq * 0.5**24
@@ -577,9 +543,11 @@ class c_prc(c_llrf_bmb7):
             return False
         if abs(adc_freq - (self.clk_freq/1e6)) > 0.01:
             print("#### WARNING #### Unexpected ADC frequency")
-        adc_values = self.adc_reg()
-        # print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
-        print('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339, adc_values[0] != 0xa19c))
+            print("#### (not close to %.3f MHz)" % (self.clk_freq/1e6))
+        if self.mmcm_status(verbose=True) != 1:
+            return False
+        self.U2_adc_iserdes_reset()
+        self.U3_adc_iserdes_reset()
         return True
 
     def top2idelay(self, listin, LH):
@@ -597,20 +565,19 @@ class c_prc(c_llrf_bmb7):
         top2 = sorted(out)[-2]
         return ((out.index(top1)) - int(top1/2)) & 0x1f, ((out.index(top2)) - int(top2/2)) & 0x1f
 
+    # set every lane's idelay according to 16-long list v
     def set_idelays(self, v):
-        idelay_base = self.get_write_address('idelay_base')
-        return [(idelay_base + ix, v[ix]) for ix in range(len(v))]
+        self.leep.reg_write([('idelay_base', v)])
 
     def find_best_idelay(self, ix, idelay_dict):
         lane = [idelay_dict[jx][ix] for jx in range(32)]  # loop over delays
-        return ix if 0 else self.top2idelay(lane, ix % 2)[0]
+        return ix if False else self.top2idelay(lane, ix % 2)[0]
 
-    def adc_idelay1(self, dbg1):
+    def adc_idelay1(self, dbg1=0):
         print('test pattern %s' % self.set_test_mode('00001100'))
+        print('Type 1 (firmware) idelay scan')
         if True:  # not needed after powerup, but will clear old values if re-scanning
-            # Note hard-coded 0x70 here and for lb_idelay_write in digitizer_config.v
-            self.leep.reg_write([('idelay_base', 16*[0])])
-            self.leep.reg_write([('idelay_base', 16*[0])])
+            self.set_idelays(16*[0])
 
         self.leep.reg_write([('scanner_debug', dbg1), ('scan_trigger_we', 3)])
         banyan_status = self.leep.reg_read([('banyan_status')])
@@ -623,55 +590,57 @@ class c_prc(c_llrf_bmb7):
         scanner_result = self.leep.reg_read([("scanner_result")])[0]
         print("idelay  scan   " + "  ".join(self.chan_list))
         for jx in range(32):
-            bb = " ".join(["%2.2x" % scanner_result[lx*128 + jx*4 + 3] for lx in range(16)])
-            print("idelay %2.2d  Rx %s" % (jx, bb))
+            for kx in [3]:  # or range(4) for debug
+                bb = " ".join(["%2.2x" % scanner_result[lx*128 + jx*4 + kx] for lx in range(16)])
+                print("idelay %2.2d  Rx %s" % (jx, bb))
         print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in idelay_mirror]))
         print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in idelay_mirror]))
+        # Check this one last time before we start resetting BUFRs
+        if self.mmcm_status(verbose=True) != 1:
+            return False
+        for i in range(4):
+            self.adc_reg(verbose=True)
+            time.sleep(0.002)
         return all([2 == (x >> 5) for x in idelay_mirror])  # all channels scan success!
 
     def adc_idelay0(self):
         print('test pattern %s' % self.set_test_mode('00001100'))
+        print('Type 0 (software) idelay scan')
         print("idelay  scan   " + "  ".join(self.chan_list))
         idelay_dict = {}
         for idelay in range(33):
-            test = ['U3dout_msb', 'U3dout_lsb', 'U2dout_msb', 'U2dout_lsb']
-            test += self.set_idelays([idelay % 32] * 16)
-            list_resp = self.query_resp_list(test)
-            if 0:
-                list_resp = [0x12345678, 0x24681357, 0xdeadbeef, 0xfeedface]
+            rx_pats = self.adc_reg_hilo()
+            self.set_idelays(16*[idelay % 32])
             if idelay == 0:
                 continue
-            # subdivide four 32-bit values to 16 x 8-bit values
-            rx_pats = sum([[x >> 24, (x >> 16) & 0xff, (x >> 8) & 0xff, x & 0xff]
-                           for x in list_resp], [])
             bb = " ".join(["%2.2x" % x for x in rx_pats])
             print("idelay %2.2d  Rx %s" % ((idelay - 1), bb))
             idelay_dict[idelay - 1] = rx_pats
         idelay_bests = [self.find_best_idelay(ix, idelay_dict) for ix in range(16)]
         print("idelay  best  " + " ".join(['%2d' % v for v in idelay_bests]))
-        self.query_resp_list(self.set_idelays(idelay_bests))
-        if 1:
-            idelay_base = self.get_read_address('idelay_base')
-            glist1 = ["banyan_status"] + list(range(idelay_base, idelay_base + 16))
-            rlist1 = self.query_resp_list(glist1)
-            print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in rlist1[1:17]]))
-            print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in rlist1[1:17]]))
-        for i in range(0):
-            adc = self.adc_reg()
-            print(" ".join([hex(i) for i in adc]))
+        self.set_idelays(idelay_bests)
+        if True:
+            bstat, rlist1 = self.leep.reg_read([('banyan_status'), ('idelay_base')])
+            print("idelay mirror " + " ".join(["%2d" % (x & 0x1f) for x in rlist1]))
+            print("idelay mflags " + " ".join(["%2d" % (x >> 5) for x in rlist1]))
+            print("banyan_status 0 0x%x" % bstat)
+        # Check this one last time before we start resetting BUFRs
+        if self.mmcm_status(verbose=True) != 1:
+            return False
+        for i in range(4):
+            self.adc_reg(verbose=True)
             time.sleep(0.002)
         return True  # ???
 
     def adc_bufr_reset1(self, adc_values, name, adc, ic_reset, iserdes_reset):
         success = False
-        for ix in range(24):
+        for ix in range(40):  # 0.75 ** 40 = 1e-5 expected failure rate
             if adc_values[adc] == 0x4339 or adc_values[adc] == 0xa19c:
                 success = True
                 break
-            self.leep.reg_write([(ic_reset, 0), (ic_reset, 1), (ic_reset, 0)])
+            self.reset_pulse(ic_reset)
             iserdes_reset()
-            adc_values = self.adc_reg()
-            print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
+            adc_values = self.adc_reg(verbose=True)
             if adc_values[adc] == 0x4339 or adc_values[adc] == 0xa19c:
                 success = True
                 break
@@ -682,8 +651,7 @@ class c_prc(c_llrf_bmb7):
 
     def adc_bufr_reset(self):
         print('test pattern %s' % self.set_test_mode('00001100'))
-        adc_values = self.adc_reg()
-        print('adc_value ' + ' '.join(['%4.4x' % i for i in adc_values]))
+        adc_values = self.adc_reg(verbose=True)
         print('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339, adc_values[0] != 0xa19c))
         s1, adc_values = self.adc_bufr_reset1(
             adc_values, 'BUFR 1', 0, 'U3_clk_reset_r', self.U3_adc_iserdes_reset)
@@ -706,9 +674,9 @@ class c_prc(c_llrf_bmb7):
             index = index+1
         print("bitslip %s after %d iteration(s)" % ("success" if bitslip == 0 else "failure", index))
         for i in range(10):
-            adc = self.adc_reg()
-            print(" ".join([hex(i) for i in adc]))
+            self.adc_reg(verbose=True)
             time.sleep(0.002)
+        return bitslip == 0 and index == 1
 
     def adc_twos_comp(self, twoscomp):
         for adc in [self.U2_adc_spi, self.U3_adc_spi]:
@@ -716,71 +684,126 @@ class c_prc(c_llrf_bmb7):
             self.spi_write(adc, 0x14, value)
             # print 'reg0x14', value
 
-    def reg4(self, SET, HLD):
+    def dac_sethld_reg(self, SET, HLD):
         return format(((SET & 0xf) << 4) + (HLD & 0xf), '08b')
 
-    def reg5(self, SMP):
+    def dac_smp_reg(self, SMP):
         return format(SMP, '08b')
 
     def seeksethldsmp(self, SET, HLD, SMP, display=0):
-        self.spi_write(self.dac_spi, 4, self.reg4(SET, HLD))
-        self.spi_write(self.dac_spi, 5, self.reg5(SMP))
-        reg6 = self.spi_readn([self.dac_spi], 6)
-        SEEK = struct.unpack('!I', reg6[0][2])[0] & 0x1
+        self.spi_write(self.dac_spi, 0x4, self.dac_sethld_reg(SET, HLD))
+        self.spi_write(self.dac_spi, 0x5, self.dac_smp_reg(SMP))
+        seek_reg = self.spi_readn([self.dac_spi], 0x6)
+        SEEK = seek_reg[0][2] & 0x1
         if display:
-            print('working SMP %d SET %d HLD %d SEEK %d' % (SMP, SET, HLD, SEEK))
+            print('working SMP %02d SET %02d HLD %02d SEEK %d' % (SMP, SET, HLD, SEEK))
         return SEEK
 
-    def dac_smp(self, SET=None, HLD=None, SMP=None):
+    def dac_timing(self, SET=None, HLD=None, SMP=None):
+        def log_step(_s, _smp, _seek, _set, _hld):
+            print('Step %d: SMP %02d  SEEK %d  SET %02d  HLD %02d' % (_s, SMP, SEEK, SET, HLD))
+
         if SET and HLD and SMP:
+            print("DAC Timing: Skipping timing search and pushing default values")
             self.seeksethldsmp(SET=SET, HLD=HLD, SMP=SMP, display=1)
-        else:
-            # step 1
-            SMP = 0
-            SET = 0
-            HLD = 0
+            return
+
+        # step 1 - Record SEEK for SMP=SET=HLD=0
+        SMP = 0
+        SET = 0
+        HLD = 0
+        SEEK = self.seeksethldsmp(SET, HLD, SMP)
+        log_step(1, SMP, SEEK, SET, HLD)
+        SEEK_000 = SEEK
+
+        # step 2 - Sweep HLD until SEEK toggles; Hold time
+        SEEK = SEEK_000
+        HLD_TIME = 15  # Default if not found
+        HLD += 1
+        while HLD < 16:
             SEEK = self.seeksethldsmp(SET, HLD, SMP)
-            print('step 1 %d %d %d %d' % (SMP, SEEK, SET, HLD))
-            SEEK_000 = SEEK
-            # step 2
-            SMP = 0
-            SET = 0
-            HLD = 0
-            SEEK = SEEK_000
-            while HLD < 16 and SEEK == SEEK_000:
-                HLD = HLD + 1
+            if (SEEK != SEEK_000):
+                HLD_TIME = HLD
+                break
+            HLD += 1
+        log_step(2, SMP, SEEK, SET, HLD)
+        print("AD9781 Hold time: %d" % HLD_TIME)
+
+        # step 3 - Sweep SET until SEEK toggles; Setup time
+        SMP = 0
+        SET = 0
+        HLD = 0
+        SEEK = SEEK_000
+        SET_TIME = 15
+        SET += 1
+        while SET < 16:
+            SEEK = self.seeksethldsmp(SET, HLD, SMP)
+            if (SEEK != SEEK_000):
+                SET_TIME = SET
+                break
+            SET += 1
+        log_step(3, SMP, SEEK, SET, HLD)
+        print("AD9781 Setup time: %d" % SET_TIME)
+
+        # step 4 - Find HLD and SET for each SMP
+        SET = 0
+        HLD = 0
+        SMP = 0
+        SEEK_ARR = [0]*32
+        SET_ARR = [0]*32
+        HLD_ARR = [0]*32
+        while SMP < 32:
+            SEEK_SMP = self.seeksethldsmp(SET, HLD, SMP)
+            SEEK_ARR[SMP] = SEEK_SMP
+
+            # Find ideal Hold for this SMP
+            HLD_OK = 15  # Default if not found
+            HLD += 1
+            while HLD < 16:
                 SEEK = self.seeksethldsmp(SET, HLD, SMP)
-            print('step 2 %d %d %d %d' % (SMP, SEEK, SET, HLD))
-            # step 3
-            SMP = 0
-            SET = 0
+                if (SEEK != SEEK_SMP):
+                    HLD_OK = HLD
+                    break
+                HLD += 1
+            HLD_ARR[SMP] = HLD_OK
+
+            # Find ideal Setup for this SMP
             HLD = 0
-            SEEK = SEEK_000
-            while SET < 16 and SEEK == SEEK_000:
-                SET = SET + 1
+            SET_OK = 15  # Default if not found
+            SET += 1
+            while SET < 16:
                 SEEK = self.seeksethldsmp(SET, HLD, SMP)
-            # print 'set', SET, 'seek', SEEK
-            print('step 3 %d %d %d %d' % (SMP, SEEK, SET, HLD))
-            # step 4
-            SET = 0
-            HLD = 0
-            SMP = 0
-            SEEK = SEEK_000
-            while SMP < 32:
-                SMP = SMP + 1
-                SEEK = self.seeksethldsmp(SET, HLD, SMP)
-                SEEK_SMP = SEEK
-                while HLD < 16 and SEEK == SEEK_SMP:
-                    HLD = HLD + 1
-                    SEEK = self.seeksethldsmp(SET, HLD, SMP)
-                HLD_SMP = HLD
-                HLD = 0
-                while SET < 16 and SEEK == SEEK_SMP:
-                    SET = SET + 1
-                    SEEK = self.seeksethldsmp(SET, HLD, SMP)
-                SET_SMP = SET
-                SET = 0
-                print('step 3 %d %d %d %d' % (SMP, SEEK_SMP, SET_SMP, HLD_SMP))
+                if (SEEK != SEEK_SMP):
+                    SET_OK = SET
+                    break
+                SET += 1
+            SET_ARR[SMP] = SET_OK  # Save ideal Setup for this SMP
+
+            # Print timing table
+            print("SMP %02d  SEEK %d  SET %02d  HLD %02d" % (SMP, SEEK_ARR[SMP], SET_ARR[SMP], HLD_ARR[SMP]))
+            SMP += 1
+
+        # Identify first valid window
+        p_seek = SEEK_ARR[0]
+        vstart = vstop = None
+        for _smp, _seek in enumerate(SEEK_ARR):
+            if not vstart and (_seek == 1 and p_seek == 0):
+                vstart = _smp
+            if vstart and (_seek == 0 and p_seek == 1) or _smp == 31:
+                vstop = _smp
+                break
+        p_seek = _seek
+
+        if not vstart or not vstop:
+            print("DAC Timing: No valid window found")
+            return
+
+        # Build valid window tuple: SMP, SEEK, SET, HLD
+        print("Valid window: %d : %d" % (vstart, vstop))
+        vwin_tup = list(zip(list(range(vstart, vstop)), SEEK_ARR[vstart:vstop],
+                        SET_ARR[vstart:vstop], HLD_ARR[vstart:vstop]))
+        # print("DAC Timing: First valid window ", vwin_tup)
+        return vwin_tup
 
     # def raw_buf(self, adc_ch):  unused, bit-rotten, deleted; see all_adcs.py instead.
 
@@ -797,6 +820,18 @@ class c_prc(c_llrf_bmb7):
                 print("%d %04x %04x %d" % (i, d, p, p-d))
             # print('chan', chan, 'error:', cnt)
         return cnt
+
+    def buf_read_raw(self, addr, count=None, debug=None):
+        if not count:
+            count = 2**self.cirbuf_aw
+        waveaddr = {1: 0x16, 2: 0x17}
+        if addr in waveaddr:
+            addr = waveaddr[addr]
+        if addr in self.read_regmap:
+            addr = self.read_regmap[addr]
+        alist = count*[addr]
+        result = self.reg_read(alist)
+        return [r[2] for r in result]
 
     def pntest(self):
         print("pntest using circular buffer wave0")
@@ -821,7 +856,7 @@ class c_prc(c_llrf_bmb7):
             sys.stdout.flush()
         return cntlist
 
-    def pntest2(self, quiet=False):
+    def pntest2(self, quiet=False, slow_chain=True):
         # first check the configuration to see if banyan_mem is in this FPGA build
         b_status = self.leep.reg_read(["banyan_status"])[0]
         npt = 1 << ((b_status >> 24) & 0x3f)
@@ -836,7 +871,8 @@ class c_prc(c_llrf_bmb7):
         self.adc_twos_comp(twoscomp=False)
         self.leep.reg_write([('banyan_mask', 0xff)])
         from get_raw_adcs import collect
-        (dataset, timestamp) = collect(self.leep, npt, print_minmax=False, allow_clk_frozen=True)
+        (dataset, timestamp) = collect(self.leep, npt, print_minmax=False,
+                                       allow_clk_frozen=True, slow_chain=slow_chain)
         cntlist = []
         for chan in range(8):
             if not quiet:
@@ -857,7 +893,7 @@ class c_prc(c_llrf_bmb7):
         self.leep.reg_write(abs(count) * pstep_one)
 
     def pntest3(self, pstep):
-        for kx in range(56 * 10 / pstep):
+        for kx in range(int(56 * 10 / pstep)):
             r = self.pntest2(quiet=True)
             print("%3d " % (kx*pstep) + "  ".join(["%5d" % x for x in r]))
             self.mmcm_step(pstep)
@@ -866,12 +902,7 @@ class c_prc(c_llrf_bmb7):
         pstep = 5
         ok = 0
         print("Scanning adc_clk mmcm phase")
-        try:
-            self.leep.reg_write([("clk_status_we", 1)])
-            clk_status_present = 1
-        except KeyError:
-            print("Please upgrade to post-commit-5a098b92 bitfile")
-            clk_status_present = 0
+        self.leep.reg_write([("clk_status_we", 1)])  # arm clock fault detector
         for kx in range(15):  # range(56*10/pstep):
             r = self.pntest2(quiet=True)
             print("%2d " % (kx*pstep) + "  ".join(["%5d" % x for x in r]))
@@ -882,29 +913,45 @@ class c_prc(c_llrf_bmb7):
             if ok == 5:
                 self.mmcm_step(-2 * pstep)
                 print("Found safe mmcm phase %d" % ((kx - 2) * pstep))
-                if clk_status_present:
-                    self.leep.reg_write([("clk_status_we", 2)])
-                    c_status = self.leep.reg_read(["clk_status_out"])[0]
-                    print("Clock status %d" % c_status)
-                return True
+                self.leep.reg_write([("clk_status_we", 2)])  # mark clock as good
+                c_status = self.mmcm_status(verbose=True)
+                return c_status == 2
             self.mmcm_step(pstep)
         print("Error: Finished full mmcm phase scan without finding eye")
         return False
 
-    def ad7794_read_channel(self, chan, G=0):
-        config = self.ad7794.configuration_register(chan=chan, G=G, REFSEL=2)  # should this in the init?
-        # print 'chan', chan, 'config', format(config, '06x'), 'reading'
+    def ad7794_read_channel(self, chan):
+        config = self.ad7794.configuration_register(chan)
+        # print('chan', chan, 'config', format(config, '06x'), 'reading')
         self.ad7794_write(0x2, config)
         self.ad7794_write(0x1, 0x200aff)
         time.sleep(0.3)
-        # read0 = self.ad7794_read(0x0)
-        # print [format(i, '06x') for i in read0]
-        read3 = self.ad7794_read(0x3)
-        # print [format(i, '06x') for i in read3],
-        return read3[3]
+        return self.ad7794_read(0x3)[3]
+
+    def ad7794_calibrate(self):
+        # Internal temp sensor; assume datasheet sensitivity for now
+        # TODO: Properly calibrate temp sensor
+        self.ad7794.calibrate(chan=6, v1=0, v2=0, t1=0, t2=0, override=(1/(0.81e-3), -273.15))
+
+        # TODO: Calibrate thermistor bridges
+        for c in [0, 1, 2, 5]:
+            self.ad7794.calibrate(chan=c, v1=0, v2=0, t1=0, t2=0, override=(1/(0.81e-3), -273.15))
 
     def ad7794_value(self):
         return [self.ad7794_read_channel(i) for i in [0, 1, 2, 5, 6, 7]]
+
+    def ad7794_print(self):
+        sys.stdout.write("AD7794 Zest temperatures\n")
+        for c in [0, 1, 2, 5, 6]:
+            counts = self.ad7794_read_channel(c)
+            if c == 6:
+                v = self.ad7794.conv_deg(counts, c)
+                sys.stdout.write("IntT: %5.3f C\n" % (v))
+            else:
+                v = self.ad7794.conv_volt(counts, c)
+                sys.stdout.write("CH %d: %5.3f V\n" % (c+1, v))
+            sys.stdout.flush()
+        return True
 
     def amc7823_read(self, addr):
         return self.amc_read(pg=0, saddr=addr)[4] & 0xfff
@@ -935,7 +982,7 @@ class c_prc(c_llrf_bmb7):
         }
         v = self.amc7823_adcread_volt_all()
         amc_minmax = [(0, 3.3), (1.0, 1.2), (1.66, 2.04), (0.85, 2.24),
-                      (0.5, 2.7), (0.7, 1.4), (0.3, 0.9), (1.5, 1.8),
+                      (0.5, 2.7), (0.7, 1.4), (0.28, 0.9), (1.5, 1.8),
                       (0.1, 0.2)]
         rv = True
         for addr in range(9):
@@ -952,7 +999,7 @@ class c_prc(c_llrf_bmb7):
     def amc7823_print(self, check_channels=[]):
         (ss, rv) = self.amc7823_string(check_channels)
         sys.stdout.write(ss)
-        return True
+        return rv
 
     # def read_health_status(leep):
     #     fnames = ["adc", "4xout", "clkout3", "dco", "gtx_tx", "gtx_rx"]
@@ -973,10 +1020,6 @@ class c_prc(c_llrf_bmb7):
     #         print("%s %d" % (onames[ix], foo[8+ix]))
 
 
-def usage():
-    print("python zest_setup.py -a $IP [-r [-b bitfile] ]")
-
-
 if __name__ == "__main__":
 
     from argparse import ArgumentParser
@@ -985,23 +1028,28 @@ if __name__ == "__main__":
 
     parser.add_argument('-a', '--address', dest="dev_addr", default=None,
                         help='FPGA carrier URL (leep://<IP> or ca://<PREFIX>)')
-    parser.add_argument('-p', '--port', default=803, type=int,
-                        help='Application port number in badger')
     parser.add_argument('-r', '--reset', action='store_true', dest='reset', default=False,
                         help='Run HW reset routines')
-    parser.add_argument('-b', '--bitfile', dest="bitfilepath", default=None,
-                        help='FPGA carrier bitstream file')
+    parser.add_argument('-dn', '--dac_normal_mode', action='store_true', dest='dac_normal_mode', default=False,
+                        help='Select DAC Normal output mode. Default is Mix mode.')
     parser.add_argument('-s', '--scan', dest='scan', default=None, type=int,
                         help='Run MMCM scan')
+    parser.add_argument('--strict', action='store_true', dest='strict', default=False,
+                        help='Strict checks on test results')
+    parser.add_argument('-t', '--timeout', type=float, default=0.1,
+                        help='LEEP network timeout')
     parser.add_argument('-f', '--ref_freq', dest='ref_freq', default=50., type=float,
                         help='Reference oscillator (in MHz)')
-    parser.add_argument('-u', '--usespartan', action='store_true', dest='use_spartan', default=False,
-                        help='Use Spartan interface')
+    parser.add_argument('-c', '--clk_freq', dest='clk_freq', default=100., type=float,
+                        help='Intended ADC clock frequency (in MHz)')
 
     args = parser.parse_args()
 
-    prc = c_prc(args.dev_addr, port=args.port, bitfilepath=args.bitfilepath, reset=args.reset,
-                use_spartan=args.use_spartan, ref_freq=args.ref_freq, clk_freq=100e6)
+    prc = c_zest(
+        args.dev_addr, reset=args.reset,
+        dac_nm_mode=args.dac_normal_mode,
+        timeout=args.timeout, strict=args.strict,
+        ref_freq=args.ref_freq, clk_freq=args.clk_freq*1e6)
 
     if args.scan:
         prc.pntest3(args.scan)

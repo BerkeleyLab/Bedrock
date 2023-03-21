@@ -13,6 +13,13 @@
 // All of x, kx, ky, and y are complex-valued, interleaved,
 // real when iq==1 and imaginary when iq==0.
 
+// More precisely
+// y*z = y + ky*z^{-1}*y*2^(-19) + kx*x*2^(-19)
+// where z^{-1} represents two clock cycles (21.2 ns in LCLS-II) delay,
+// matching the two-cycle update rate of complex numbers flowing in and out;
+// this formulation takes kx and ky as signed 18-bit integers.
+// Also see scaling comments in lp_tb.v.
+
 // Do not use negative full-scale values for kx or ky.
 // Needs evaluation for round-off error and possible resulting bias.
 
@@ -36,6 +43,8 @@ assign ky_addr = iq;
 
 reg signed [20:0] yr=0;
 wire signed [19:0] xmr, ymr;
+// x and y inputs to sub_mul are 18-bits, for efficient multiplier setup in Xilinx
+// output is 20-bits, with one lsb guard bit added, and one msb carry bit
 sub_mul xmul(.clk(clk), .iq(iq), .x(x),  .y(kx), .z(xmr));
 sub_mul ymul(.clk(clk), .iq(iq), .x(yr[20:3]), .y(ky), .z(ymr));
 

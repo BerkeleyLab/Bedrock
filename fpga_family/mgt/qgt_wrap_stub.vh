@@ -139,19 +139,17 @@
       end endgenerate
    `endif
 
-   assign gt_cpll_locked = &{1'b1,
-           `ifdef GT0_ENABLE gt0_pll_locked, `endif
-           `ifdef GT1_ENABLE gt1_pll_locked, `endif
-           `ifdef GT2_ENABLE gt2_pll_locked, `endif
-           `ifdef GT3_ENABLE gt3_pll_locked, `endif
-                             1'b1};
+   assign gt_cpll_locked = {
+           `ifdef GT3_ENABLE gt3_pll_locked, `else 1'b0, `endif
+           `ifdef GT2_ENABLE gt2_pll_locked, `else 1'b0, `endif
+           `ifdef GT1_ENABLE gt1_pll_locked, `else 1'b0, `endif
+           `ifdef GT0_ENABLE gt0_pll_locked `else 1'b0 `endif };
 
-   assign gt_txrx_resetdone = &{1'b1,
-              `ifdef GT0_ENABLE gt0_txresetdone, gt0_rxresetdone, `endif
-              `ifdef GT1_ENABLE gt1_txresetdone, gt1_rxresetdone, `endif
-              `ifdef GT2_ENABLE gt2_txresetdone, gt2_rxresetdone, `endif
-              `ifdef GT3_ENABLE gt3_txresetdone, gt3_rxresetdone, `endif
-                                1'b1};
+   assign gt_txrx_resetdone = {
+              `ifdef GT3_ENABLE gt3_txresetdone & gt3_rxresetdone, `else 1'b0, `endif
+              `ifdef GT2_ENABLE gt2_txresetdone & gt2_rxresetdone, `else 1'b0, `endif
+              `ifdef GT1_ENABLE gt1_txresetdone & gt1_rxresetdone, `else 1'b0, `endif
+              `ifdef GT0_ENABLE gt0_txresetdone & gt0_rxresetdone `else 1'b0 `endif };
 
 `else // SIMULATE
 

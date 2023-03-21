@@ -1,6 +1,6 @@
 [timestart] 121
 [size] 1183 678
-[pos] 244 32
+[pos] -1 -1
 *-5.317206 198 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] xy_pi_clip_tb.
 [sst_width] 210
@@ -41,7 +41,7 @@ xy_pi_clip_tb.dut.sat1
 @22
 xy_pi_clip_tb.dut.clipped[3:0]
 @420
-xy_pi_clip_tb.dut.lim1[29:0]
+xy_pi_clip_tb.dut.lim1[30:0]
 xy_pi_clip_tb.dut.accum2[30:0]
 @200
 -

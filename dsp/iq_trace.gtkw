@@ -1,6 +1,6 @@
 [timestart] 4992
 [size] 1000 600
-[pos] 387 29
+[pos] -1 -1
 *-6.914145 5005 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] iq_trace_tb.
 [treeopen] iq_trace_tb.dut.
@@ -32,7 +32,7 @@ iq_trace_tb.trig
 iq_trace_tb.dut.cosa[17:0]
 iq_trace_tb.dut.sina[17:0]
 @28
-iq_trace_tb.dut.samp
+iq_trace_tb.dut.cic_sample
 @22
 iq_trace_tb.dut.result_i[19:0]
 iq_trace_tb.dut.result_q[19:0]
@@ -43,21 +43,15 @@ iq_trace_tb.dut.run
 iq_trace_tb.dut.circle_stb
 @200
 -fchan_subset out
-@22
-iq_trace_tb.dut.result_z[39:0]
-@28
-iq_trace_tb.dut.result_g
-iq_trace_tb.dut.result_t
-@200
 -circle_buf
 @28
 iq_trace_tb.dut.ro_enable
 iq_trace_tb.dut.buf_sync
-iq_trace_tb.dut.buffer.boundary
+iq_trace_tb.dut.i_circle_buf_serial.i_circle_buf.boundary
 @22
-iq_trace_tb.dut.buffer.write_addr[3:0]
+iq_trace_tb.dut.i_circle_buf_serial.i_circle_buf.write_addr[3:0]
 @28
-iq_trace_tb.dut.buffer.change_req
+iq_trace_tb.dut.i_circle_buf_serial.i_circle_buf.change_req
 iq_trace_tb.dut.ro_ack
 [pattern_trace] 1
 [pattern_trace] 0

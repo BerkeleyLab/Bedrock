@@ -1,6 +1,6 @@
 [timestart] 54
 [size] 1024 489
-[pos] 97 120
+[pos] -1 -1
 *-6.601351 320 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tt800_tb.
 [sst_width] 210
@@ -17,7 +17,7 @@ tt800_tb.y[31:0]
 @200
 -insides
 @22
-tt800_tb.tt800.new[31:0]
+tt800_tb.tt800.newv[31:0]
 tt800_tb.tt800.tap1[31:0]
 tt800_tb.tt800.tap2[31:0]
 [pattern_trace] 1

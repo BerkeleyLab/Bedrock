@@ -98,7 +98,7 @@ module zest_wrap #(parameter u15_u18_spi_mode="passthrough") (
    ad9653 #(.FLIP_D(8'b11111111),.FLIP_DCO(1'b1),.FLIP_FRAME(1'b1),.BANK_CNT(2),
             .BANK_SEL({2'b0,2'b0,2'b0,2'b0,2'b1,2'b1,2'b1,2'b1}),
             .INFER_IOBUF(1))
-   U3_ad9635 (
+   U3_ad9653 (
       .D0NA (zif.U3_D0NA), .D0NB (zif.U3_D0NB),
       .D0NC (zif.U3_D0NC), .D0ND (zif.U3_D0ND),
       .D0PA (zif.U3_D0PA), .D0PB (zif.U3_D0PB),

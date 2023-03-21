@@ -121,7 +121,7 @@ generate for (ix=0; ix < DWIDTH; ix=ix+1) begin: in_cell
 `ifndef VERILATOR
 	assign clk_div[ix] = clk_div_in[BANK_SEL[(ix+1)*BANK_CNT_WIDTH-1:ix*BANK_CNT_WIDTH]];
 	assign dco_clk[ix] = dco_clk_in[BANK_SEL[(ix+1)*BANK_CNT_WIDTH-1:ix*BANK_CNT_WIDTH]];
-	assign reset[ix]=iserdes_reset[BANK_SEL[(ix+1)*BANK_CNT_WIDTH-1:ix*BANK_CNT_WIDTH]];
+	assign reset[ix] = iserdes_reset[BANK_SEL[(ix+1)*BANK_CNT_WIDTH-1:ix*BANK_CNT_WIDTH]];
 	always @(negedge clk_div[ix]) begin
 		idelay_ld_div_0[ix] <= idelay_ld[ix];
 		idelay_ld_div_1[ix] <= idelay_ld_div_0[ix];

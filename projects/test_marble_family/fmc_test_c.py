@@ -76,7 +76,7 @@ def run_set(xchip, fmc_bus_sel):
             fmc_decode(fmc_bus_sel, result, squelch=True)
             fault = True
     if len(gas) == 1:
-        ga = gas.keys()[0]
+        ga = list(gas.keys())[0]
         ok = fmc_bus_sel == ga
         ok_msg = "OK" if ok else "BAD"
         print("FMC%d:  GA value %d  %s" % (fmc_bus_sel, ga, ok_msg))

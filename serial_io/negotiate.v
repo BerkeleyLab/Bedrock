@@ -1,5 +1,5 @@
 // Ethernet PCS autonegotiation
-// http://www.iol.unh.edu/services/testing/ge/training/1000BASE-X/Clause%2037%20Auto-Negotiation.pdf
+// https://www.iol.unh.edu/sites/default/files/knowledgebase/ge/Clause_37_Auto-Negotiation.pdf
 
 // lacr == Link Autonegotiation Configuration Register
 // module can clock over 180 MHz (need 125 MHz)
@@ -20,7 +20,7 @@ module negotiate(
    output reg        lacr_send,
    // mode control
    output reg        operate,
-   output reg [6:0]  an_status
+   output reg [8:0]  an_status
 );
    // 10 ms link_timer = 10e6/8
    parameter TIMER_TICKS = 1250000;
@@ -229,7 +229,8 @@ module negotiate(
 
    assign wdog_timeout = (wdog_cnt==WATCHDOG_TIME);
 
-   wire [6:0] an_status_l = {wdog_an_disable, remote_fault, abl_mismatch,
+   wire [8:0] an_status_l = {an_state==AN_ABORT, an_state==AN_ABILITY,
+                             wdog_an_disable, remote_fault, abl_mismatch,
                              an_state==AN_ACK, an_state==AN_IDLE, an_state==AN_LINK_OK};
 
    // Register comb signals in rx_clk before transferring to tx_clk
@@ -237,7 +238,7 @@ module negotiate(
    reg send_ack_r;
    reg send_breaklink_r;
    reg operate_r=0;
-   reg [6:0] an_status_r=0;
+   reg [8:0] an_status_r=0;
    always @(posedge rx_clk) begin
        operate_r        <= n_operate;
        lacr_send_r      <= n_lacr_send;
@@ -255,7 +256,7 @@ module negotiate(
       an_status      <= an_status_r;
    end
 
-   // 16-bit ethernet configuration register as documented in
+   // 16-bit Ethernet configuration register as documented in
    // Networking Protocol Fundamentals, by James Long
    // and http://grouper.ieee.org/groups/802/3/z/public/presentations/nov1996/RTpcs8b_sum5.pdf
    reg  FD=1;   // Full Duplex capable

@@ -1,3 +1,5 @@
+`include "oscope_features_defs.vh"
+
 module oscope_top(
 	input        GTPREFCLK_P,
 	input        GTPREFCLK_N,
@@ -48,7 +50,13 @@ module oscope_top(
 
 	output       VCXO_EN,
 
-	output [7:0] LED,
+	// Directly attached LEDs
+	output LD16,
+	output LD17,
+
+	// Physical Pmod
+	output [7:0] Pmod1,
+	inout [7:0] Pmod2,
 
 	inout [0:0]  bus_bmb7_J28,
 	inout [0:0]  bus_bmb7_J4,
@@ -65,6 +73,7 @@ module oscope_top(
 	inout [1:0]  bus_digitizer_U33U1
 );
 
+`include "oscope_features_params.vh"
 
 assign VCXO_EN = 1;
 wire gtpclk0, gtpclk;
@@ -155,9 +164,18 @@ wire [33:0] FMC1_LA_N;
 wire [33:0] FMC2_LA_P;
 wire [33:0] FMC2_LA_N;
 
+wire [7:0] LED;
+assign Pmod1 = LED;
+assign LD16 = 1;
+assign LD17 = 1;
+
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
-marble_base #(.USE_I2CBRIDGE(1)) base(
+marble_base #(
+	.USE_I2CBRIDGE(1),
+	.default_enable_rx(C_DEFAULT_ENABLE_RX),
+	.misc_config_default(C_MISC_CONFIG_DEFAULT)
+) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
 	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
@@ -243,7 +261,7 @@ application_top application_top(
 	.lb_addr(lb_addr),
 	.lb_data(lb_data_out),
 	.lb_din(lb_din),
-	.clk200(clk200),
+	.clk200(SYSCLK_P),  // looks weird, but not wrong; must be incoherent with ADC clock(s)
 	.zif_cfg(zif_cfg.master)
 );
 

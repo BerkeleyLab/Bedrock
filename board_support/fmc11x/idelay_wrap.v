@@ -44,6 +44,7 @@ module idelay_wrap #(
     );
 
     // IDELAYE2 Variable Delay Element
+    // (* IODELAY_GROUP="in_delay_adc_grp" *)
     IDELAYE2 #(
         .CINVCTRL_SEL         ("FALSE"    ),// Enable dynamic clock inversion ("TRUE"/"FALSE")
         .DELAY_SRC            ("IDATAIN"  ),// Delay input ("IDATAIN" or "DATAIN")

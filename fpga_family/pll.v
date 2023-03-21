@@ -70,7 +70,7 @@ if (DEVICE == "SPARTAN 6") begin
 		.CLKOUT5_DIVIDE (c5div),  // division factor for clkout5 (1 to 128)
 		.CLKOUT5_DUTY_CYCLE (0.5),    // duty cycle for clkout5 (0.01 to 0.99)
 		.CLKOUT5_PHASE (c5phase),  // phase shift (degrees) for clkout5 (0.0 to 360.01)
-		.COMPENSATION ("SYSTEM_SYNCHRONOUS"),  // "system_synchrnous" // "source_synchrnous"), "internal"),// "external"), "dcm2pll"), "pll2dcm"
+		.COMPENSATION ("SYSTEM_SYNCHRONOUS"),  // "system_synchronous" // "source_synchronous"), "internal"),// "external"), "dcm2pll"), "pll2dcm"
 		.DIVCLK_DIVIDE (1),  // division factor for all clocks (1 to 52)
 			.REF_JITTER (0.100)  // input reference jitter (0.000 to 0.999 ui%)
 		)
@@ -113,7 +113,7 @@ if (DEVICE == "SPARTAN 6") begin
 			.CLKOUT5_DIVIDE     (c5div),  // division factor for clkout5 (1 to 128)
 			.CLKOUT5_DUTY_CYCLE (0.5),    // duty cycle for clkout5 (0.01 to 0.99)
 			.CLKOUT5_PHASE      (c5phase),  // phase shift (degrees) for clkout5 (0.0 to 360.01)
-			.COMPENSATION       ("ZHOLD"),  // "system_synchrnous"),// "source_synchrnous"), "internal"),// "external"), "dcm2pll"), "pll2dcm"
+			.COMPENSATION       ("ZHOLD"),  // "system_synchronous"),// "source_synchronous"), "internal"),// "external"), "dcm2pll"), "pll2dcm"
 			.DIVCLK_DIVIDE      (1),  // division factor for all clocks (1 to 52)
 			.REF_JITTER1        (0.100)
 		)  // input reference jitter (0.000 to 0.999 ui%)

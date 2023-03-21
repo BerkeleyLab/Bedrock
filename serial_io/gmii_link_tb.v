@@ -39,7 +39,7 @@ module gmii_link_tb;
 
    // Debug/diagnostics
    wire [15:0] lacr_rx;
-   wire [6:0] an_status;
+   wire [8:0] an_status;
 
    // ----------------------
    // Stimulus

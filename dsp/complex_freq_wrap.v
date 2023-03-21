@@ -81,6 +81,7 @@ module complex_freq_wrap #(
       .len      (n_chan))
    i_fchan_subset (
       .clk      (clk),
+      .reset    (1'b0),
       .keep     (fchan_mask_r),
       .a_data   (cfreq_data),
       .a_gate   (cc_strobe),

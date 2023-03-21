@@ -117,7 +117,6 @@ set_property CONFIG_VOLTAGE 3.3 [current_design]
 
 # Clocks
 create_clock -name sys_clk -period 50.00 [get_ports SYSCLK_P]
+create_clock -period 8.00 -name tx_clk [get_ports GTPREFCLK_P]
 create_clock -period 8.00 -name rx_clk [get_ports RGMII_RX_CLK]
-set_clock_groups -name async_clks -asynchronous \
-  -group [get_clocks -include_generated_clocks sys_clk] \
-  -group [get_clocks -include_generated_clocks rx_clk]
+# you need to set clock groups as asynchronous in some other file

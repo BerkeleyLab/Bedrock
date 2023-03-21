@@ -60,7 +60,7 @@ lp dut // auto
 	(.clk(clk), .iq(iq), .x(x), .y(y), `AUTOMATIC_dut);
 
 // Set control registers from command line
-// See also notch_setup.py
+// See also lp_setup in lp_notch_test.py
 reg signed [17:0] kxr, kxi, kyr, kyi;
 `ifdef SIMULATE
 initial begin

@@ -41,7 +41,7 @@ If you then run `python cav_mode_check.py`, you'll see a couple of plots of the 
 
 The nested decoding of host-writable registers is messy, as always. Note that the four configuration registers implemented in pair_couple will themselves get replicated three times: once in each of two `cav_mode` instantiations, and once more directly in `cav_elec`.
 
-A mechanical resonance (state-space) processor is shown in `resonator.v`.  The regression test exercises a single mode's response to a step function, and a plot of that reponse can be seen from *Octave* by running `res_check` interactively.  This processor is instantiated in `cav_elec_tb`, but not `cav_elec`, for two reasons:
+A mechanical resonance (state-space) processor is shown in `resonator.v`.  The regression test exercises a single mode's response to a step function, and a plot of that response can be seen from *Octave* by running `res_check` interactively.  This processor is instantiated in `cav_elec_tb`, but not `cav_elec`, for two reasons:
 
 1. I don't categorize the mechanical resonator as an electromagnetic element, and
 2. I'd like to be able to instantiate multiple `cav_elec` modules sharing a single resonator computation.

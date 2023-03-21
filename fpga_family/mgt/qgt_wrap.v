@@ -4,7 +4,7 @@
 // QGT_WRAP.v
 // Module declaration of 4 quad wrappers, q{0,1,2,3}_gt_wrap
 // The body for each module is `included from qgt_wrap_stub.vh, which
-// uses globaly set defines (redefined for each quad by `Q_REDEFINE)
+// uses globally set defines (redefined for each quad by `Q_REDEFINE)
 // to generate the correct per-quad configuration
 // ------------------------------------
 `include "qgt_wrap_pack.vh"
@@ -77,8 +77,8 @@ module q1_gt_wrap # (
    `ifdef GT3_ENABLE
    `GTi_PORTS(3, GT3_WI)
    `endif
-   output        gt_cpll_locked,
-   output        gt_txrx_resetdone
+   output [3:0]   gt_cpll_locked,
+   output [3:0]   gt_txrx_resetdone
 );
 `include "qgt_wrap_stub.vh"
 
@@ -114,8 +114,8 @@ module q2_gt_wrap # (
    `ifdef GT3_ENABLE
    `GTi_PORTS(3, GT3_WI)
    `endif
-   output        gt_cpll_locked,
-   output        gt_txrx_resetdone
+   output [3:0]  gt_cpll_locked,
+   output [3:0]  gt_txrx_resetdone
 );
 `include "qgt_wrap_stub.vh"
 
@@ -151,8 +151,8 @@ module q3_gt_wrap # (
    `ifdef GT3_ENABLE
    `GTi_PORTS(3, GT3_WI)
    `endif
-   output        gt_cpll_locked,
-   output        gt_txrx_resetdone
+   output  [3:0]   gt_cpll_locked,
+   output  [3:0]   gt_txrx_resetdone
 );
 `include "qgt_wrap_stub.vh"
 
@@ -176,8 +176,8 @@ module qgt_wrap # (
    input         soft_reset,
    input         gtrefclk0,
    input         gtrefclk1,
-   output        gt_cpll_locked,
-   output        gt_txrx_resetdone
+   output [3:0]  gt_cpll_locked,
+   output [3:0]  gt_txrx_resetdone
 );
 `include "qgt_wrap_stub.vh"
 

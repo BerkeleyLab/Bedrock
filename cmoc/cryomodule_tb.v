@@ -1,6 +1,6 @@
 `timescale 1ns / 1ns
 
-// compatiblity with the flag in cryomodule.v
+// compatibility with the flag in cryomodule.v
 //`define SIMPLE_DEMO  // Used to get a 5-minute bitfile build
 
 module cryomodule_tb;

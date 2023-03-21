@@ -23,7 +23,7 @@ wire signed [17:0] m1;
 reg_delay #(.dw(18), .len(9))
 	match(.clk(clk), .reset(1'b0), .gate(1'b1), .din(d_in), .dout(m1));
 
-// Mangnitude-square of the input
+// Magnitude-square of the input
 wire signed [18:0] mag2;
 mag_square square(.clk(clk), .iq(iq), .d_in(d_in), .mag2_out(mag2));
 // mag2 is guaranteed positive!

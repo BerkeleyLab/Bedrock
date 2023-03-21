@@ -1,14 +1,14 @@
 [dumpfile_size] 2781
 [savefile] "iirFilter_tb.gtkw"
 [timestart] 0
-[size] 2376 785
+[size] 1436 785
 [pos] -1 -1
 *-4.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] iirFilter_tb.
 [treeopen] iirFilter_tb.iirFilter.
 [treeopen] iirFilter_tb.iirFilter.genblk1[0].
 [treeopen] iirFilter_tb.iirFilter.genblk1[0].biquad_i.
-[sst_width] 193
+[sst_width] 210
 [signals_width] 279
 [sst_expanded] 1
 [sst_vpaned_height] 329

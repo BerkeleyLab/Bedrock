@@ -1,0 +1,29 @@
+[timestart] 0
+[size] 989 395
+[pos] 578 30
+*-11.642094 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] spi_master_tb.
+[sst_width] 228
+[signals_width] 205
+[sst_expanded] 1
+[sst_vpaned_height] 69
+@28
+spi_master_tb.clk
+spi_master_tb.start
+spi_master_tb.spi_busy
+@23
+spi_master_tb.spi_addr[15:0]
+@22
+spi_master_tb.spi_data[7:0]
+@28
+spi_master_tb.spi_rw
+@22
+spi_master_tb.spi_rdbk[7:0]
+spi_master_tb.sdo_addr[15:0]
+@28
+spi_master_tb.sck
+spi_master_tb.sdi
+spi_master_tb.cs
+spi_master_tb.sdo
+[pattern_trace] 1
+[pattern_trace] 0

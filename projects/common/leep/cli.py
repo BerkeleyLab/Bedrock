@@ -1,15 +1,21 @@
-
 from __future__ import print_function
-from . import open
-import numpy
-from collections import defaultdict
-import ast
-import shutil
-import tempfile
-import sys
-import json
 
 import logging
+
+import json
+import sys
+import tempfile
+import shutil
+import ast
+
+from collections import defaultdict
+
+import numpy
+
+from . import open
+from . import RomError
+
+
 _log = logging.getLogger(__name__)
 
 
@@ -22,10 +28,9 @@ def readwrite(args, dev):
         else:
             value, = dev.reg_read((name,))
             if isinstance(value, (list, numpy.ndarray)):
-                print("%s \t%08s" %
-                      (name, ' '.join(['%x' % v for v in value])))
-            else:
-                print("%s \t%08x" % (name, value))
+                value = ' '.join(['%x' % v for v in value])
+
+            print("%s \t%08x" % (name, value))
 
 
 def listreg(args, dev):
@@ -93,6 +98,10 @@ def dumpjson(args, dev):
     sys.stdout.write('\n')
 
 
+def dumpgitid(args, dev):
+    print(dev.codehash)
+
+
 def dumpdrv(args, dev):
     if dev.backend != 'ca':
         _log.error("Only 'ca' backend supports, not '%s'", dev.backend)
@@ -104,7 +113,7 @@ def dumpdrv(args, dev):
 class MapDirect(object):
 
     def __call__(self, name):
-        return 'reg_'+name
+        return 'reg_' + name
 
 
 class MapPlain(object):
@@ -119,7 +128,7 @@ class MapShort(object):
         self._next = 0
 
     def __call__(self, name):
-        N, self._next = self._next, self._next+1
+        N, self._next = self._next, self._next + 1
         return 'REG%x' % N
 
 
@@ -173,8 +182,10 @@ def gentemplate(args, dev):
         infos.sort(key=lambda i: i['pv'])
 
         for info in infos:
-            out.write(
-                '{PREF="$(CHAS):%(pv)s",\tREG="%(name)s",\tSIZE="%(size)s"}\n' % info)
+            s = '{PREF="$(CHAS):%(pv)s",'
+            s += '\tREG="%(name)s",'
+            s += '\tSIZE="%(size)s"}\n'
+            out.write(s % info)
 
         out.write('}\n\n')
 
@@ -229,6 +240,9 @@ def getargs():
     S = SP.add_parser('json', help='print json')
     S.set_defaults(func=dumpjson)
 
+    S = SP.add_parser('gitid', help='print gitid')
+    S.set_defaults(func=dumpgitid)
+
     S = SP.add_parser('drvinfo', help='print drive info json (ca:// only)')
     S.set_defaults(func=dumpdrv)
 
@@ -246,7 +260,12 @@ def getargs():
 def main():
     args = getargs()
     logging.basicConfig(level=args.debug)
-    dev = open(args.dest, timeout=args.timeout, instance=args.inst)
+    try:
+        dev = open(args.dest, timeout=args.timeout, instance=args.inst)
+    except RomError as e:
+        _log.error("cli.py: %s, %s. Quitting." % (args.dest, str(e)))
+        return
+
     args.func(args, dev)
 
 

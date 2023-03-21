@@ -1,10 +1,11 @@
-[timestart] 17980
+[timestart] 8124
 [size] 1084 770
-[pos] 93 24
-*-13.100048 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] 2331 102
+*-6.930161 8128 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] idelay_scanner_tb.
 [treeopen] idelay_scanner_tb.dut.
-[sst_width] 210
+[treeopen] idelay_scanner_tb.dut.decider_yes.
+[sst_width] 213
 [signals_width] 204
 [sst_expanded] 1
 [sst_vpaned_height] 276
@@ -34,10 +35,12 @@ idelay_scanner_tb.dut.state_micro[5:0]
 idelay_scanner_tb.dut.state_idelay[4:0]
 idelay_scanner_tb.dut.state_lane[3:0]
 @28
-idelay_scanner_tb.dut.lane_grab
 idelay_scanner_tb.dut.lane_half
+idelay_scanner_tb.dut.lane_grab
+idelay_scanner_tb.dut.result_write
 idelay_scanner_tb.dut.idelay_push
 @22
+idelay_scanner_tb.dut.result_addr[10:0]
 idelay_scanner_tb.dut.lane_data[7:0]
 @c00200
 -result RAM
@@ -66,18 +69,18 @@ idelay_scanner_tb.showme_d
 @c00200
 -decider
 @22
-idelay_scanner_tb.dut.decider.lane_data[7:0]
+idelay_scanner_tb.dut.decider_yes.decider.lane_data[7:0]
 @28
-idelay_scanner_tb.dut.decider.odd
-idelay_scanner_tb.dut.decider.valid
-idelay_scanner_tb.dut.decider.strobe
+idelay_scanner_tb.dut.decider_yes.decider.odd
+idelay_scanner_tb.dut.decider_yes.decider.valid
+idelay_scanner_tb.dut.decider_yes.decider.strobe
 @8024
-idelay_scanner_tb.dut.decider.goodness[7:0]
-idelay_scanner_tb.dut.decider.idelay[4:0]
+idelay_scanner_tb.dut.decider_yes.decider.goodness[7:0]
+idelay_scanner_tb.dut.decider_yes.decider.idelay[4:0]
 @24
-idelay_scanner_tb.dut.decider.center[7:0]
+idelay_scanner_tb.dut.decider_yes.decider.center[7:0]
 @28
-idelay_scanner_tb.dut.decider.good_enough
+idelay_scanner_tb.dut.decider_yes.decider.good_enough
 @1401200
 -decider
 [pattern_trace] 1

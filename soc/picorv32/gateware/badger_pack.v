@@ -13,7 +13,7 @@ module badger_pack #(
     input  [68:0]    mem_packed_fwd,
     output [32:0]    mem_packed_ret,
 
-    // Connect to pads of ethernet PHY chip
+    // Connect to pads of Ethernet PHY chip
     // https://en.wikipedia.org/wiki/Media-independent_interface#Gigabit_media-independent_interface
     input eth_clocks_rx,       // clock recovered from wire
     input eth_rx_dv,
@@ -31,7 +31,7 @@ module badger_pack #(
     inout eth_mdio             // Management data in / out
 );
 
-// Address width of the ethernet mac [16 bit words]
+// Address width of the Ethernet mac [16 bit words]
 localparam MAC_AW = 10;
 
 // Size of the RX / TX buffers mapped into the picorv memory [32 bit words]
@@ -203,7 +203,7 @@ munpack mu (
 // tx mac does
 //   * read buf_tx at offset buf_start_addr
 //   * get the packet length from the first word in [bytes]
-//   * transmit the ethernet preamble + SOF (55 55 55 55 55 55 55 D5)
+//   * transmit the Ethernet preamble + SOF (55 55 55 55 55 55 55 D5)
 //   * put the buffer content on the wire
 //   * transmit the 4 byte CRC
 // host does

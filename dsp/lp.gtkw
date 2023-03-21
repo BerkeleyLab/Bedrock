@@ -1,6 +1,6 @@
 [timestart] 0
 [size] 1192 571
-[pos] 129 258
+[pos] -1 -1
 *-8.755493 965 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] lp1_tb.
 [treeopen] lp1_tb.dut.
@@ -9,29 +9,29 @@
 [sst_expanded] 1
 [sst_vpaned_height] 144
 @24
-lp1_tb.cc
+lp_tb.cc
 @28
-lp1_tb.iq
+lp_tb.iq
 @420
-lp1_tb.x[17:0]
-lp1_tb.y[19:0]
+lp_tb.x[17:0]
+lp_tb.y[19:0]
 @8420
-lp1_tb.y_i[17:0]
+lp_tb.y_i[17:0]
 @20000
 -
 @8420
-lp1_tb.y_q[17:0]
+lp_tb.y_q[17:0]
 @20000
 -
 @200
 -dut
 @28
-lp1_tb.dut.iq
+lp_tb.dut.iq
 @420
-lp1_tb.dut.xmr[19:0]
-lp1_tb.dut.ymr[19:0]
-lp1_tb.dut.sum[21:0]
-lp1_tb.dut.yr[20:0]
-lp1_tb.dut.ky[17:0]
+lp_tb.dut.xmr[19:0]
+lp_tb.dut.ymr[19:0]
+lp_tb.dut.sum[21:0]
+lp_tb.dut.yr[20:0]
+lp_tb.dut.ky[17:0]
 [pattern_trace] 1
 [pattern_trace] 0

@@ -26,7 +26,7 @@ SYNTH_VIVADO = $(VIVADOEXEC) -mode batch -source
 # =====
 # Attention!!!!
 vpath %.v $(BADGER_DIR)/tests $(HOMELESS_DIR) $(DSP_DIR) $(SERIAL_IO_DIR) $(I2CBRIDGE_DIR) $(PERIPH_DRIVERS_DIR) $(BOARD_SUPPORT_DIR)/marblemini $(HOMELESS_DIR)/freq_demo ./pps_lock
-vpath %.c $(BADGER_DIR)/tests
+vpath %.c $(BADGER_DIR)/tests $(BUILD_DIR)
 
 # =====
 # gets us $(FREQ_DEMO_V)
@@ -78,7 +78,7 @@ udp-vpi.vpi: udp_model.o
 # subset that is interesting to test live on network
 AD5662_V = ad5662_lock.v pps_lock.v pps_loop_filter.v ad5662.v
 LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) gps_test.v simpleuart.v fake_dpram.v
-lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v
+lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v udp-vpi.vpi
 VFLAGS_lb_marble_slave_tb = -m ./udp-vpi
 net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=8030 +vcd
@@ -105,10 +105,10 @@ no_multiple_drivers_check: marble_base_tb
 # constraint
 pin_map_fmc.csv: pin_map_fmc.py
 	$(PYTHON) $< > $@
-marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marblemini/%, Marble.xdc pin_map.csv) pin_map_fmc.csv
+marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marblemini/%, Marble.xdc pin_map.csv) pin_map_fmc.csv marble_top.csv
 	$(PYTHON) $^ > $@
 
-marble2.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marble/%, Marble.xdc pin_map.csv) pin_map_fmc.csv
+marble2.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marble/%, Marble.xdc pin_map.csv) pin_map_fmc.csv marble_top.csv
 	$(PYTHON) $^ > $@
 
 # =====
@@ -136,32 +136,36 @@ MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA
 marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
 	echo $^ | tr ' ' '\n' > $@
 
-marble1.bit: marble.tcl marble1.d marble1_features
+marble1.bit: marble.tcl marble1.d marble1_features bit_stamp_mod
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1
+	G=$$(git rev-parse --short=8 --verify HEAD) && ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) marble1.$$G.bit < marble1.$$G.x.bit && rm marble1.$$G.x.bit
 
 marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
 	echo $^ | tr ' ' '\n' > $@
 
-marble2.bit: marble.tcl marble2.d marble2_features
+marble2.bit: marble.tcl marble2.d marble2_features bit_stamp_mod
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2
+	G=$$(git rev-parse --short=8 --verify HEAD) && ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) marble2.$$G.bit < marble2.$$G.x.bit && rm marble2.$$G.x.bit
 
 # =====
 # bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'
 
-# IP address must match that configured in board_support/marblemini/marble_base.v
-RGMII_IP = 192.168.19.10
+# Default IP address set from microcontroller
+RGMII_IP = 192.168.19.31
 BIT = marble1.bit
 
 marble1_hwload:
 	openocd -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT}; exit"
 
-# TODO: Add udprtx stress test
-marble1_hwtest:
-	ping -c 2 ${RGMII_IP} && $(PYTHON) testcase.py --ip=${RGMII_IP} --sfp
+marble1_hwtest: udprtx
+	ping -c 2 ${RGMII_IP}
+	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD)
+	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
+	$(PYTHON) testcase.py --ip=${RGMII_IP} --sfp
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
 	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
-	rm -f read_sfp.dat Vmarble_base
+	rm -f read_sfp.dat Vmarble_base bit_stamp_mod udprtx
 	rm -rf _xilinx .Xil obj_dir

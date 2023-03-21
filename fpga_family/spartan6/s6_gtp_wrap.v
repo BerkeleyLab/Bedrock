@@ -213,8 +213,8 @@ GTPA1_DUAL #(
 	.REFCLKOUT1           (refclkout1_i),
 	.RESETDONE0           (resetdone0_i),
 	.RESETDONE1           (resetdone1_i),
-        .REFCLKPWRDNB0        (1'b1), // shut down IBUGDS if no ref
-        .REFCLKPWRDNB1        (1'b1), // shut down IBUGDS if no ref
+        .REFCLKPWRDNB0        (1'b1), // shut down IBUFDS if no ref
+        .REFCLKPWRDNB1        (1'b1), // shut down IBUFDS if no ref
         .REFSELDYPLL0         (2'b0), // select CLK00 as ref for PLL0
         .REFSELDYPLL1         (2'b0), // select CLK01 as ref for PLL1
 	//------------- Receive Ports - Comma Detection and Alignment --------------
@@ -249,7 +249,7 @@ GTPA1_DUAL #(
 	.RXUSRCLK20            (rxusrclk0_i),
 	.RXUSRCLK21            (rxusrclk1_i),
 	//------------- Physical Rx pins -------------------------------------------
-        .RXEQMIX0              (2'b11), // 8.4dB gain of RX Equalizaiton Ctrl
+        .RXEQMIX0              (2'b11), // 8.4dB gain of RX Equalization Ctrl
         .RXEQMIX1              (2'b11),
 	.RXN0                  (rxn0),
 	.RXN1                  (rxn1),

@@ -123,7 +123,7 @@ end
 wire lane_half = ~state_lane[0];
 
 // Grab one lane of data from the ADC
-// lane_grab crosses clock domains, and that's OK.
+// lane_grab and lane_half cross clock domains, and that's probably OK.
 // lane_data guaranteed not to change near active (result_write) lb_clk edge.
 reg [7:0] lane_data=0;
 always @(posedge adc_clk) if (lane_grab) lane_data <=

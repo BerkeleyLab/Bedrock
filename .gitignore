@@ -16,4 +16,11 @@
 _autogen/
 _dep/
 _xilinx/
+*.bin
 # system_top.xdc
+*.jou
+*.log
+# sphinx files
+_build/
+_static/
+_templates/

@@ -27,6 +27,7 @@ endif
 vpath %.v $(APP_DIR) $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
 
 include $(BUILD_DIR)/top_rules.mk
+include $(BADGER_DIR)/rules.mk
 include $(BS_HARDWARE_DIR)/rules.mk
 include $(FPGA_FAMILY_DIR)/$(FPGA_FAMILY)/rules.mk
 include $(BS_HARDWARE_DIR)/rules.mk
@@ -36,7 +37,7 @@ include _dep/larger_shell_gmii_sp605.bit.d
 
 system_top.ucf: larger_extra.ucf
 
-$(DEPDIR)/$(TARGET).d: $(AUTOGEN_DIR)/config_romx.v
+$(DEPDIR)/$(TARGET).d: $(AUTOGEN_DIR)/config_romx.v rtefi_blob.v
 larger_shell_gmii_sp605.v: cryomodule_badger_auto
 
 SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
@@ -46,7 +47,7 @@ VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(FPGA_FAMILY_DIR)/$(FPGA_FAMILY) -y$(FPGA_
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
 
 CLEAN += $(TARGET)
-CLEAN_DIRS += _xilinx
+CLEAN_DIRS += _xilinx _autogen _dsp
 
 $(AUTOGEN_DIR)/config_romx.v:
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/config_crunch.py --HARDWARE=$(HARDWARE) --DSP_FLAVOR=$(DSP_FLAVOR) --OUTPUT=$@

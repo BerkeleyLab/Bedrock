@@ -1,0 +1,42 @@
+[timestart] 0
+[size] 1308 513
+[pos] -1 -1
+*-12.309580 5981 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] spi_mon_tb.
+[sst_width] 276
+[signals_width] 193
+[sst_expanded] 1
+[sst_vpaned_height] 113
+@200
+-SPI_MON
+@28
+spi_mon_tb.i_dut.clk
+@22
+spi_mon_tb.i_dut.sleep[7:0]
+@28
+spi_mon_tb.i_dut.sleep_on
+spi_mon_tb.i_dut.en
+spi_mon_tb.i_dut.end_stream
+@23
+spi_mon_tb.i_dut.spi_hw_sel[3:0]
+@28
+spi_mon_tb.i_dut.spi_start
+spi_mon_tb.i_dut.spi_busy
+@22
+spi_mon_tb.i_dut.spi_cmd[31:0]
+@28
+spi_mon_tb.i_dut.spi_rvalid
+@22
+spi_mon_tb.i_dut.spi_rdata[31:0]
+@24
+spi_mon_tb.i_dut.rd_addr[6:0]
+@22
+spi_mon_tb.i_dut.rd_data[31:0]
+@200
+-SPI_MASTER
+@28
+spi_mon_tb.i_spi_master.cs
+spi_mon_tb.i_spi_master.sdi
+spi_mon_tb.i_spi_master.sdo
+[pattern_trace] 1
+[pattern_trace] 0

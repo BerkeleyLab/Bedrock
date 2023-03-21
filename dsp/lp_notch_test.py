@@ -47,6 +47,13 @@ class lp_setup:
             return None
         return [kxr, kxi], [kyr, kyi]
 
+    def poles(self):
+        kx, ky = self.dsp()
+        b = [1, -1, -ky]
+        rr = numpy.roots(b)
+        ok = all(abs(rr) < 1.0)
+        return ok, rr
+
     def dict(self, base):
         ivals = self.integers()
         return {base + 'kx': ivals[0], base + 'ky': ivals[1]}
@@ -61,11 +68,13 @@ class notch_setup:
             bw=300e3,  # Hz bandwidth of low-pass filter
             offset=0,  # Hz offset of low-pass filter
             notch=None,  # Hz offset of notch, sign flipped
+            ngain=0.0,   # gain at notch, default is 0, complex OK
             gain=1.0):
         self.f_clk = f_clk
         self.bw = bw
         self.offset = offset
         self.notch = notch
+        self.ngain = ngain
         self.gain = gain
         self.T = 2.0 / self.f_clk  # processing rate of IQ pairs
         # self.T = 4/102.143e6  # fake for lp_notch.m compatibility
@@ -88,7 +97,7 @@ class notch_setup:
             Abp_zn = cl0_bp.response(zn)
             # solve for the final gains
             mat = numpy.array([[Alp_dc, Abp_dc], [Alp_zn, Abp_zn]])
-            target_gains = numpy.array([[self.gain], [0]])
+            target_gains = numpy.array([[self.gain], [self.ngain]])
             raw_gains = numpy.linalg.inv(mat).dot(target_gains)
             # prevent the low-pass component from clipping
             if abs(raw_gains[0]) > 0.99:
@@ -104,6 +113,15 @@ class notch_setup:
             Afz = self.cl_bp.response(z)
             A = A + Afz
         return A
+
+    def check(self):
+        ok = True
+        if self.notch is not None:
+            ok1, ps = self.cl_bp.poles()
+            if not ok1:
+                print("pole positions: ", ps)
+            ok &= ok1
+        return ok
 
     # confidence-building
     def plot(self, f):  # f should be numpy array in MHz
@@ -146,7 +164,7 @@ def lp_run(ns):
     return a
 
 
-def notch_run(ns, dth=0.0):
+def notch_run(ns, dth=0.0, force=False):
     regs = ns.integers()
     command = 'vvp -N lp_notch_tb +out_file=notch_test.dat'
     command += ' +dth=%f' % dth
@@ -158,7 +176,7 @@ def notch_run(ns, dth=0.0):
     command += ' +kbyr=%d +kbyi=%d' % (lpb[1][0], lpb[1][1])
     print(command)
     return_code = call(command, shell=True)
-    if return_code != 0:
+    if return_code != 0 and not force:
         print("vvp return_code %d" % return_code)
         print("FAIL")
         exit(1)
@@ -223,12 +241,12 @@ if __name__ == "__main__":
         me = sys.argv[0]
         print(me + " testing for regressions only; plot option is available")
     dt = 2 * 14 / 1320e6
-    bw = 300e3
+    bw = 240e3
     if True:
         offset1 = 0
         ns = notch_setup(bw=bw, offset=offset1)
         dth = offset1 * 2 * pi * dt
-        a = notch_run(ns, dth=dth)
+        a = notch_run(ns, dth=dth, force=plot)
         lp_ok = check_lp(
             a=a,
             bw=bw,
@@ -239,6 +257,8 @@ if __name__ == "__main__":
     notchf = -800e3
     print("Testing notch filter setup for %.1f kHz offset" % (notchf * 0.001))
     ns = notch_setup(bw=bw, notch=notchf)
+    stab_ok = ns.check()
+    print("Stability check: " + ("OK" if stab_ok else "FAIL"))
     dc_gain = ns.response(1.0)
     gain_ok = 0.9 < dc_gain.real < 1.0 and abs(dc_gain.imag) < 0.0002
     print("DC gain %.4f%+.4fj" % (dc_gain.real, dc_gain.imag))
@@ -258,13 +278,13 @@ if __name__ == "__main__":
     else:
         print(ns.dict("shell_0_dsp_lp_notch_"))
     dth = -notchf * 2 * pi * dt
-    a = notch_run(ns, dth=dth)
+    a = notch_run(ns, dth=dth, force=plot)
     dt = 2 * 14 / 1320e6
     t = numpy.arange(len(a[2])) * dt
     resp_z = numpy.array(a[2]) + 1j * numpy.array(a[3])
     p1 = max(abs(resp_z[6:106]))
-    p2 = max(abs(resp_z[256:306]))
-    notch_ok = p1 > 25000 and p2 < 40
+    p2 = max(abs(resp_z[-51:-1]))
+    notch_ok = p1 > 23000 and p2 < 40
     msg = "" if notch_ok else "  FAULT"
     print("Transient max %.0f  Settled max %.0f%s" % (p1, p2, msg))
     if plot:
@@ -278,6 +298,6 @@ if __name__ == "__main__":
         msg = 'PASS' if notch_ok else 'FAIL'
         pyplot.title('Notch filter time-domain check: ' + msg)
         pyplot.show()
-    tests_pass = lp_ok and gain_ok and notch_ok
+    tests_pass = lp_ok and gain_ok and notch_ok and stab_ok
     print("PASS" if tests_pass else "FAIL")
     exit(0 if tests_pass else 1)

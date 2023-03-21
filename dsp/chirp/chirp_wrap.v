@@ -18,7 +18,7 @@ module chirp_wrap # (
    parameter AMP_WI = 20,
    parameter PH_WI = 20,
    parameter LEN_WI = 32,
-   parameter CORDIC_WI = 21 // Must be at least AMP_WI+1 due to accomodate sign;
+   parameter CORDIC_WI = 21 // Must be at least AMP_WI+1 due to accommodate sign;
                             // cordic_phase port is always one bit wider
 ) (
    input clk,

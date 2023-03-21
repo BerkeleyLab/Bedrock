@@ -1,44 +1,39 @@
-[dumpfile_size] 3077
-[savefile] "biquad_tb.gtkw"
 [timestart] 109
-[size] 2064 1011
+[size] 1436 896
 [pos] -1 -1
 *-3.802966 42 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] biquad_tb.
 [treeopen] biquad_tb.biquad.
 [treeopen] biquad_tb.biquad.genblk1[0].
-[sst_width] 193
+[sst_width] 210
 [signals_width] 326
 [sst_expanded] 1
 [sst_vpaned_height] 650
 @28
-biquad_tb.sysClk[0]
-biquad_tb.sysCoefficientStrobe[0]
+biquad_tb.sysClk
+biquad_tb.sysCoefficientStrobe
+biquad_tb.dataClk
+biquad_tb.S_TREADY
+biquad_tb.S_TVALID
 @22
-biquad_tb.gpioOut[31:0]
+biquad_tb.S_TDATA[111:0]
 @28
-biquad_tb.dataClk[0]
-biquad_tb.S_TREADY[0]
-biquad_tb.S_TVALID[0]
+biquad_tb.M_TVALID
 @22
-biquad_tb.S_TDATA[27:0]
+biquad_tb.M_TDATA[111:0]
 @28
-biquad_tb.M_TVALID[0]
+biquad_tb.biquad.M_TREADY
 @22
-biquad_tb.M_TDATA[27:0]
-@28
-biquad_tb.biquad.M_TREADY[0]
-@22
-biquad_tb.check.dIn[27:0]
-biquad_tb.check.dOutGood[27:0]
-biquad_tb.check.i[31:0]
+biquad_tb.check.dIn[111:0]
+biquad_tb.check.dOutGood[111:0]
+biquad_tb.check.i
 biquad_tb.check.u[27:0]
 biquad_tb.check.yGood[27:0]
 @28
-biquad_tb.biquad.reset[0]
-biquad_tb.biquad.reset[0]
-biquad_tb.biquad.enMAC[0]
-biquad_tb.biquad.ldMAC[0]
+biquad_tb.biquad.reset
+biquad_tb.biquad.reset
+biquad_tb.biquad.enMAC
+biquad_tb.biquad.ldMAC
 @22
 biquad_tb.biquad.genblk1[0].macc_i.a[27:0]
 biquad_tb.biquad.genblk1[0].macc_i.b[24:0]
@@ -47,11 +42,11 @@ biquad_tb.biquad.genblk1[0].macc_i.b_reg[24:0]
 biquad_tb.biquad.genblk1[0].macc_i.mult_reg[52:0]
 biquad_tb.biquad.genblk1[0].macc_i.accum_out[56:0]
 @28
-biquad_tb.biquad.genblk1[0].macc_i.sload[0]
-biquad_tb.biquad.genblk1[0].macc_i.sload_reg[0]
+biquad_tb.biquad.genblk1[0].macc_i.sload
+biquad_tb.biquad.genblk1[0].macc_i.sload_reg
 @22
-biquad_tb.biquad.uOld[27:0]
-biquad_tb.biquad.u[27:0]
-biquad_tb.biquad.yOld[27:0]
+biquad_tb.biquad.uOld[111:0]
+biquad_tb.biquad.u[111:0]
+biquad_tb.biquad.yOld[111:0]
 [pattern_trace] 1
 [pattern_trace] 0

@@ -12,7 +12,7 @@
 
 module lp_notch_tb;
 
-localparam DRIVE_TIME = 606;
+localparam DRIVE_TIME = 1206;
 localparam DECAY_TIME = 800;
 localparam DECAY_THRES = 10;
 
@@ -21,8 +21,7 @@ integer cc;
 
 integer drive_en=1;
 wire y_zero;
-`ifdef SIMULATE
-real dth;  // delta theta, angle per pair of time steps
+reg big=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("lp_notch.vcd");
@@ -35,7 +34,8 @@ initial begin
 	end
 
 	// Basic end-of-drive sanity-check
-	if (y > DECAY_THRES) begin
+	if (big) begin
+		$display(y, y1);
 		$display("ERROR: Non-zero filter output at the end of the test");
 		$stop;
 	end
@@ -134,7 +134,7 @@ always @(posedge clk) begin
 `ifdef SIMULATE
 	if (drive_en)
 		if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d\n", x_i, x_q, y_i, y_q);
-`endif
+	big = y > DECAY_THRES || y1 > DECAY_THRES || y < -DECAY_THRES || y1 < -DECAY_THRES;
 end
 
 endmodule

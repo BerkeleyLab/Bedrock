@@ -2,7 +2,7 @@
 
 // Outer Product
 // Takes a single value x, and multiplies it by a constant vector stored
-// in local-bus-writable memory.  The rsult is time-multiplexed x*B.
+// in local-bus-writable memory.  The result is time-multiplexed x*B.
 
 // The input x can be continually varying; this module will take a snapshot
 // of it at the right time so that the whole output vector comes from a

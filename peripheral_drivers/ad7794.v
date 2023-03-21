@@ -1,4 +1,4 @@
-module ad7794 #(parameter DEBUG="true",parameter ADDR_WIDTH=8,parameter DATA_WIDTH=24,parameter SPIMODE="passthrough") (
+module ad7794 #(parameter ADDR_WIDTH=8,parameter DATA_WIDTH=24,parameter SPIMODE="passthrough") (
 	output                  CLK,
 	output                  CS,
 	output                  DIN,
@@ -6,6 +6,7 @@ module ad7794 #(parameter DEBUG="true",parameter ADDR_WIDTH=8,parameter DATA_WID
 	output                  SCLK,
 	input                   clkin,
 	input                   spi_start,
+	output                  spi_busy,  // For handshaking; can be ignored
 	input [ADDR_WIDTH-1:0]  spi_addr,
 	input                   spi_read,
 	input [DATA_WIDTH-1:0]  spi_data,
@@ -55,10 +56,10 @@ endgenerate
 
 wire start_7794 = spi_start;
 assign spi_ssb_out = spi_ssb_in & CS;
-spi_master #(.TSCKHALF(16), .ADDR_WIDTH(8), .DATA_WIDTH(24), .SCK_RISING_SHIFT(0), .DEBUG(DEBUG))
+spi_master #(.TSCKHALF(16), .ADDR_WIDTH(8), .DATA_WIDTH(24), .SCK_RISING_SHIFT(0))
 ad7794_spi (
 	.cs(ss_7794), .sck(sclk_7794), .sdi(mosi_7794), .sdo(miso_7794),
-	.clk(clkin), .spi_start(start_7794), .spi_read(spi_read),
+	.clk(clkin), .spi_start(start_7794), .spi_busy(spi_busy), .spi_read(spi_read),
 	.spi_addr(spi_addr), .spi_data(spi_data), .sdo_addr(sdo_addr),
 	.spi_rdbk(spi_rdbk), .spi_ready(spi_ready), .sdio_as_sdo(sdio_as_sdo)
 );
