@@ -14,15 +14,13 @@ iq_inter Source File
    // Well, this is only the integration half of the CIC filter, someone
    // else (e.g., iq_intrp4) needs to do the differentiation.
 
-   module iq_inter #(
-   	parameter dwi=22,  // data width in
-   	parameter dwo=18   // data width out
-   ) (
-   	input clk,  // timespec 8.4 ns
-   	input samp,
-   	input signed [dwi-1:0] in,
-   	output signed [dwo-1:0] out
-   );
+   module iq_inter(clk,samp,in,out);
+   parameter dwi=22;  // data width in
+   parameter dwo=18;  // data width out
+   	input clk;  // timespec 8.4 ns
+   	input samp;
+   	input signed [dwi-1:0] in;
+   	output signed [dwo-1:0] out;
 
    reg signed [dwi-1:0] sreg=0, sreg_d=0, int1=0, int1_d=0, int2=0, int2_d=0;
    always @(posedge clk) begin
