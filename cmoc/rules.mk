@@ -2,11 +2,11 @@ include $(CORDIC_DIR)/rules.mk
 include $(DSP_DIR)/lo_lut/rules.mk
 
 # be lazy about dependencies
-VFLAGS += -y. -I. -y$(RTSIM_DIR) -y$(DSP_DIR) -y$(CORDIC_DIR) -y$(BADGER_DIR) -y_autogen
+VFLAGS += -y. -I. -y$(RTSIM_DIR) -y$(DSP_DIR) -y$(DSP_DIR)/hosted -y$(CORDIC_DIR) -y$(BADGER_DIR) -y_autogen
 
 LB_AW = 15
 NEWAD_ARGS += -m -l
-NEWAD_DIRS += $(DSP_DIR) $(RTSIM_DIR) $(CMOC_DIR)
+NEWAD_DIRS += $(DSP_DIR) $(DSP_DIR)/hosted $(RTSIM_DIR) $(CMOC_DIR)
 
 VERILOG_AUTOGEN += "cordicg_b22.v"
 

@@ -17,7 +17,7 @@ SERIAL_IO_DIR = local
 # These overrides go _before_ top_rules.mk
 %_check: %.out %.gold
 	cmp $^
-	@echo PASS
+	@echo "PASS"
 %_check: %_tb
 	$(VVP) $< $(VCD_ARGS_$@)
 %_tb: %_tb.v
@@ -104,7 +104,7 @@ crc8e_guts_y.v: crc8e_guts_x.v crc8e_guts.vh
 
 crc8e_guts_check: crc8e_guts_y.v crc8e_guts.v
 	cmp $^
-	@echo PASS
+	@echo "PASS"
 
 # =====
 # pcap2v for using pcap files; not part of the main testing path,
@@ -178,7 +178,7 @@ spi_flash.grab: spi_flash_check.sh udp-vpi.vpi spi_flash_tb lorem_ipsum.hex spi_
 	bash $< $(filter %spi_test.py, $^)
 spi_flash_check: spi_flash.grab lorem_ipsum.txt
 	cmp $^
-	@echo PASS
+	@echo "PASS"
 
 # =====
 # scanner off-line test
@@ -291,7 +291,7 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 
 # =====
 # Verilator, slightly larger scope
-Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c crc8e_guts.vh crc_genguts.vh
+Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) spi_gate.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c crc8e_guts.vh crc_genguts.vh
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $(filter-out crc8e_guts.vh crc_genguts.vh, $^)
 	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
@@ -310,8 +310,33 @@ Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) mem
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmem_gateway_wrap.mk
 	mv obj_dir/$@ $@
-Vmem_gateway_check: Vmem_gateway_wrap
-	bash mem_gateway_check.sh
+Vmem_gateway_check: Vmem_gateway_wrap Vmg_check.sh badger_lb_io.py
+	bash $(word 2,$^) $(word 3,$^)
+
+# ===== ROM generator
+# Normally we leave fake_config_romx.v static, even though it's machine-generated.
+# That's why it's considered "fake":  the embedded gitid is not correct.
+# Enable these rules -- that depend on tools in bedrock! -- if you need to update it.
+# That shouldn't happen very often.
+ifdef FAKE_CONFIG_MAINT
+BEDROCK_BUILD_TOOLS=../../build-tools
+LB_DEMO_FLWR=lb_demo_slave.v
+LB_STATIC_JSON=static_regmap.json
+LB_SCALAR_JSON=scalar_lb_demo_map.json
+LB_DEMO_JSON=lb_demo_map.json
+
+$(LB_SCALAR_JSON): $(LB_DEMO_FLWR)
+	$(PYTHON) $(BEDROCK_BUILD_TOOLS)/reverse_json.py $^ > $@
+
+$(LB_DEMO_JSON): $(LB_STATIC_JSON) $(LB_SCALAR_JSON)
+	$(PYTHON) $(BEDROCK_BUILD_TOOLS)/merge_json.py -o $@ -i $^
+
+fake_config_romx.v: $(LB_DEMO_JSON)
+	$(PYTHON) $(BEDROCK_BUILD_TOOLS)/build_rom.py --mod_prefix fake_ -j $^ -v $@
+
+CLEAN += $(LB_DEMO_JSON)
+CLEAN += $(LB_SCALAR_JSON)
+endif
 
 # =====
 # Simple syntax check

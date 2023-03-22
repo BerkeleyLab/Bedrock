@@ -12,7 +12,7 @@ APP_NAME = oscope
 
 vpath %.v $(DSP_DIR)
 
-include $(BUILD_DIR)/top_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 include $(OSCOPE_COMMON_DIR)/rules.mk
 
 
@@ -23,7 +23,6 @@ NEWAD_DIRS += $(OSCOPE_COMMON_DIR)
 NEWAD_ARGS += -b8388608 -y
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v spi_flash.v
 RTEFI_EXTRA_V = spi_flash_engine.v
-VLATOR_LINT_IGNORE += $(VLATOR_TIMESCALEMOD)
 include $(BADGER_DIR)/rules.mk
 
 $(AUTOGEN_DIR)/moving_average.v: $(DSP_DIR)/moving_average/moving_average.py

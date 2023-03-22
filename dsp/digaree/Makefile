@@ -113,7 +113,7 @@ bits: main_s6.bit main_s3.bit user_s6.bit user_s3.bit
 
 # init.dat will be read by both Verilog (user_tb.v) and C (sim1.c),
 # so it has to be kept very simple.
-init.dat: initgen$(STYLE).py
+init.dat: initgen$(OPS_STYLE).py
 	$(PYTHON) $< > $@
 
 init2.dat: init_xindex.py init.dat ops.vh
@@ -150,14 +150,14 @@ ilookup_check: ilookup_check.sh inverse.dat inverse.out
 
 match_%: sim1.results user_%.results
 	cmp $^
-	@echo PASS
+	@echo "PASS"
 
 # inverse-sqrt() finder WIP
 sqrt_check1: sqrt1.py
 	$(PYTHON) $<
 sqrt_check2: sim1
 	./sim1 invsqrtcheck > /dev/null
-	@echo PASS
+	@echo "PASS"
 
 match_mem:
 match_reg:

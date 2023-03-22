@@ -33,4 +33,3 @@ module cstageg(clk, opin, xin, yin, zin, ain, opout, xout, yout, zout);
 		control_h <= control_l;
 	end
 endmodule
-

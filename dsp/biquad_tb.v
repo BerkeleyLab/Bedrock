@@ -1,4 +1,4 @@
-`timescale 1 ns / 1ns
+`timescale 1ns / 1ns
 
 module biquad_tb;
 
@@ -125,8 +125,13 @@ initial begin
     end
 
     #100;
-    $display("%s",  pass ? "PASS" : "FAIL");
-    $finish;
+    if (pass) begin
+      $display("PASS");
+      $finish();
+    end else begin
+      $display("FAIL");
+      $stop();
+    end
 end
 
 task setCoefficients;

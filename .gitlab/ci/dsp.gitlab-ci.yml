@@ -1,6 +1,13 @@
 dsp_test:
   before_script:
-    - cd dsp && export PYTHONPATH=../build-tools/
+    - cd dsp
+  stage: test
+  script:
+    - make && make checks
+
+dsp_hosted_test:
+  before_script:
+    - cd dsp/hosted
   stage: test
   script:
     - make && make checks

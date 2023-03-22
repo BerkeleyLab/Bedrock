@@ -5,5 +5,3 @@
 
 localparam GTX_ETH_WIDTH   = 20;
 localparam GTX_CC_WIDTH    = 16;
-
-

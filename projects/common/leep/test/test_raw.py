@@ -168,7 +168,8 @@ class TestRaw(unittest.TestCase):
             assert_equal(dev.reg_read(['sarr'])[0],
                          [0x12345678, -559038737])
 
-            self.serv.data[100] = self.serv.data[102] = self.serv.data[101] = self.serv.data[103] = 0
+            self.serv.data[100] = self.serv.data[102] = 0
+            self.serv.data[101] = self.serv.data[103] = 0
 
             dev.reg_write([('uarr', [0x12345679, 0xdeadbeef]),
                            ('sarr', [0x12345679, 0xdeadbeef])])
@@ -178,7 +179,8 @@ class TestRaw(unittest.TestCase):
             self.assertEqual(self.serv.data[102], 0x12345679)
             self.assertEqual(self.serv.data[103], 0xdeadbeef)
 
-            self.serv.data[100] = self.serv.data[102] = self.serv.data[101] = self.serv.data[103] = 0
+            self.serv.data[100] = self.serv.data[102] = 0
+            self.serv.data[101] = self.serv.data[103] = 0
 
             dev.reg_write([('uarr', [0x12345679, -559038737]),
                            ('sarr', [0x12345679, -559038737])])

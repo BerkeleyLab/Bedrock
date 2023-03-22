@@ -69,4 +69,3 @@ WAIT 1
 
 PRINT "Check for LOS==1"
 CMP :6 0x1
-

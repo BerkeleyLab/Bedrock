@@ -1,7 +1,8 @@
 from matplotlib import pyplot
 import numpy
+from sys import argv
 
-d = numpy.loadtxt('perf.dat').transpose()
+d = numpy.loadtxt(argv[1]).transpose()
 
 bw = d[2]
 pyplot.plot(bw, d[3], '-o', label='P to R peak')

@@ -3,6 +3,8 @@
 `define AUTOMATIC_resonator
 `define AUTOMATIC_dot
 
+`timescale 1ns / 1ns
+
 `include "afilter_siso_auto.vh"
 
 // afilter_siso: single-input single-output audio filter

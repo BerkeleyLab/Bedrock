@@ -24,3 +24,6 @@ _xilinx/
 _build/
 _static/
 _templates/
+.*.swp
+**/.*.swp
+**/**/.*.swp

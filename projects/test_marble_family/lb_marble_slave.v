@@ -7,7 +7,17 @@
 module lb_marble_slave #(
 	parameter USE_I2CBRIDGE = 0,
 	parameter MMC_CTRACE = 0,
-	parameter misc_config_default = 0
+	parameter misc_config_default = 0,
+	// Timing hooks, can be used to speed up simulation
+	parameter twi_q0=6,  // 145 kbps with 125 MHz clock
+	parameter twi_q1=2,
+	parameter twi_q2=7,
+	parameter led_cw=10,
+	`ifdef MARBLE_MINI
+	parameter initial_twi_file="read_trx.dat"
+	`else
+	parameter initial_twi_file=""
+	`endif
 )(
 	input clk,
 	input [23:0] addr,
@@ -15,6 +25,7 @@ module lb_marble_slave #(
 	input control_rd,
 	input [31:0] data_out,
 	output [31:0] data_in,
+	input clk62,
 	// Debugging
 	input ibadge_clk,
 	input ibadge_stb,
@@ -22,6 +33,7 @@ module lb_marble_slave #(
 	input obadge_stb,
 	input [7:0] obadge_data,
 	input xdomain_fault,
+	input [27:0] frequency_si570,
 	// More debugging hooks
 	input [3:0] mmc_pins,
 	// Features
@@ -39,7 +51,7 @@ module lb_marble_slave #(
 	//   0 is main I2C, routes to Marble I2C bus multiplexer
 	//   1 and 2 route to FMC User I/O
 	//   3 is unused so far
-	output [3:0] twi_scl,
+	inout [3:0] twi_scl,
 	inout [3:0] twi_sda,
 	input twi_int,
 	inout twi_rst,
@@ -56,16 +68,17 @@ module lb_marble_slave #(
 	output led2  // PWM
 );
 
-// Timing hooks, can be used to speed up simulation
-parameter twi_q0=6;  // 140 kbps with 125 MHz clock
-parameter twi_q1=2;
-parameter twi_q2=7;
-parameter led_cw=10;
-parameter initial_twi_file="read_sfp.dat";
-
 wire do_rd = control_strobe & control_rd;
 reg dbg_rst=0;
 wire [7:0] ibadge_out, obadge_out;
+
+// XADC Internal Temperature Monitor
+wire [15:0] xadc_temp_dout;
+wire [31:0] xadc_internal_temperature;
+assign xadc_internal_temperature = {16'h0000, xadc_temp_dout};
+
+// Device DNA
+wire [31:0] dna_high, dna_low;
 
 //`define BADGE_TRACE
 `ifdef BADGE_TRACE
@@ -93,7 +106,7 @@ wire [0:0] ctrace_running;
 reg csb_r=0, csb_toggle;
 reg arm=1;
 always @(posedge clk) begin
-   csb_r <= mmc_pins[0];
+   csb_r <= mmc_pins[0];  // Note! from spi_gate.v; spi_pins_debug = {MISO, din, sclk_d1, csb_d1};
    csb_toggle <= (~mmc_pins[0] & csb_r);
    if (csb_toggle) arm <= 0;
    if (ctrace_start) arm <= 1;
@@ -164,34 +177,37 @@ always @(posedge clk) if (led_tick) uptime <= uptime+1;
 
 // Optional I2C bridge instance
 wire [7:0] twi_dout;
-wire [2:0] twi_status;
+wire [4:0] twi_status;
 
-reg [1:0] twi_ctl;
-initial twi_ctl = (initial_twi_file != "") ? 2'b10 : 2'b00;
+reg [3:0] twi_ctl;
+initial twi_ctl = (initial_twi_file != "") ? 4'b0010 : 4'b0000;
 
-parameter scl_act_high = 3;  // cycles of active pull-up following rising edge
+localparam scl_act_high = 3;  // cycles of active pull-up following rising edge
 generate if (USE_I2CBRIDGE) begin
-	wire twi_run_stat, twi_updated, twi_err;
+	wire twi_run_stat, twi_analyze_run, twi_analyze_armed, twi_updated, twi_err;
 	wire twi_freeze = twi_ctl[0];
 	wire twi_run_cmd = twi_ctl[1];
+	wire twi_trig_mode = twi_ctl[2];
+	wire twi_trace_cmd = twi_ctl[3];
 	// Contrast with local_write, below, and
 	// align with read decoding for twi_dout.
 	wire twi_write = control_strobe & ~control_rd & (addr[23:16]==8'h04);
 	wire [3:0] hw_config;
-	wire twi0_scl, twi_sda_drive, twi_sda_sense;
+	wire twi0_scl, twi_sda_drive, twi_sda_sense, twi_scl_sense;
 	i2c_chunk #(.tick_scale(twi_q0), .q1(twi_q1), .q2(twi_q2),
 		.initial_file(initial_twi_file)) i2c(
 		.clk(clk), .lb_addr(addr[11:0]), .lb_din(data_out[7:0]),
 		.lb_write(twi_write), .lb_dout(twi_dout),
-		.run_cmd(twi_run_cmd), .freeze(twi_freeze),
+		.run_cmd(twi_run_cmd), .freeze(twi_freeze), .trace_cmd(twi_trace_cmd),
+		.analyze_run(twi_analyze_run), .analyze_armed(twi_analyze_armed),
 		.run_stat(twi_run_stat), .updated(twi_updated), .err_flag(twi_err),
-		.hw_config(hw_config),
-		.scl(twi0_scl), .sda_drive(twi_sda_drive), .sda_sense(twi_sda_sense),
+		.hw_config(hw_config), .trig_mode(twi_trig_mode),
+		.scl(twi0_scl), .sda_drive(twi_sda_drive),
+		.sda_sense(twi_sda_sense), .scl_sense(twi_scl_sense),
 		.intp(twi_int), .rst(twi_rst)
 	);
-	assign twi_status = {twi_run_stat, twi_err, twi_updated};
+	assign twi_status = {twi_analyze_run, twi_analyze_armed, twi_run_stat, twi_err, twi_updated};
 	//
-	// Incomplete bus mux stuff
 	// twi_scl_l == pull pin low (dominates)
 	// twi_scl_h == pull pin high
 	// neither == let pin float
@@ -216,6 +232,7 @@ generate if (USE_I2CBRIDGE) begin
 	assign twi_sda[2] = twi_sda_r[2] ? 1'bz : 1'b0;
 	assign twi_sda[3] = twi_sda_r[3] ? 1'bz : 1'b0;
 	assign twi_sda_sense = twi_sda[twi_bus_sel];
+	assign twi_scl_sense = twi_scl[twi_bus_sel];
 	assign twi_rst = hw_config[0] ? 1'b0 : 1'bz;  // three-state
 end else begin
 	assign twi_dout=0;
@@ -225,6 +242,7 @@ end endgenerate
 
 // White Rabbit DAC - with EXPERIMENTAL internal GPS pps lock
 // wr_dac_tick is 31.2 MHz, wr_dac_sclk is 15.6 MHz when operating
+reg [led_cw-1:0] led_cc=0;
 reg wr_dac_tick;  always @(posedge clk) wr_dac_tick <= &led_cc[1:0];
 reg wr_dac_send=0;
 reg pps_config_write=0;
@@ -274,7 +292,31 @@ always @(posedge clk) if (do_rd) begin
 		4'hc: reg_bank_0 <= gps_stat;
 		4'hd: reg_bank_0 <= gps_pps_data;
 		4'he: reg_bank_0 <= pps_dsp_status;
+		4'hf: reg_bank_0 <= frequency_si570;
 		default: reg_bank_0 <= "zzzz";
+	endcase
+end
+
+reg [31:0] reg_bank_1=0;
+always @(posedge clk) if (do_rd) begin
+	case (addr[3:0])
+		4'h0: reg_bank_1 <= xadc_internal_temperature;
+		4'h1: reg_bank_1 <= dna_high;
+		4'h2: reg_bank_1 <= dna_low;
+		//  xxxx83  unused
+		//  xxxx84  unused
+		//  xxxx85  unused
+		//  xxxx86  unused
+		//  xxxx87  unused
+		//  xxxx88  unused
+		//  xxxx89  unused
+		//  xxxx8a  unused
+		//  xxxx8b  unused
+		//  xxxx8c  unused
+		//  xxxx8d  unused
+		//  xxxx8e  unused
+		//  xxxx8f  unused
+		default: reg_bank_1 <= "zzzz";
 	endcase
 end
 
@@ -289,7 +331,8 @@ always @(posedge clk) if (do_rd_r) begin
 		// Semi-standard address for 2K x 16 configuration ROM
 		// xxx800 through xxxfff
 		24'b0000_0000_????_1???_????_????: lb_data_in <= config_rom_out;
-		24'h00????: lb_data_in <= reg_bank_0;
+		24'h00??0?: lb_data_in <= reg_bank_0;
+		24'h00??1?: lb_data_in <= reg_bank_1;
 		24'h01????: lb_data_in <= ibadge_out;
 		24'h02????: lb_data_in <= obadge_out;
 		24'h03????: lb_data_in <= rx_mac_data;
@@ -339,14 +382,13 @@ always @(posedge clk) begin
 end
 
 // Mirror memory
-parameter mirror_aw=5;
+localparam mirror_aw=5;
 dpram #(.aw(mirror_aw),.dw(32)) mirror_0(
 	.clka(clk), .addra(addr[mirror_aw-1:0]), .dina(data_out), .wena(local_write),
 	.clkb(clk), .addrb(addr[mirror_aw-1:0]), .doutb(mirror_out_0));
 
 // Blink the LEDs with the specified duty factor
 // (your eyes won't notice the blink, because it's at 122 kHz)
-reg [led_cw-1:0] led_cc=0;
 reg l1=0, l2=0;
 always @(posedge clk) begin
 	{led_tick, led_cc} <= led_cc+1;  // free-running, no reset
@@ -380,5 +422,32 @@ always @(posedge clk) begin
 		$display("Localbus read  r[%x] = %x", addr_rr, data_in);
 end
 `endif
+
+// ----------------------------------
+// XADC Internal Temperature Monitor
+// ----------------------------------
+xadc_tempmon #(
+  .SYSCLK_FREQ_HZ(125000000),
+  .UPDATE_FREQ_HZ(2000)  // Update freq doesn't matter much; higher freq means smaller counter.
+  ) xadc_tempmon_inst0 (
+  .clk                                (clk),
+  .rst                                (1'b0),            // High-true reset to XADC core
+  .dout                               (xadc_temp_dout),  // Data out
+  .read                               (),                // High pulse on read
+  .otemp                              ()                 // Over-temp alarm
+  );
+
+// ----------------------------------
+// 7-Series Device DNA Readout
+// ----------------------------------
+dna dna_inst0 (
+  .clk                                (clk62),
+  .rst                                (1'b0),
+  .start                              (1'b1),
+  .done                               (),
+  .dna_msb                            (dna_high),
+  .dna_lsb                            (dna_low)
+  );
+
 
 endmodule

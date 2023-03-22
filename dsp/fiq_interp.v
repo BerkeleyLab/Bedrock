@@ -3,7 +3,11 @@
 // Name: IQ interpolator
 //% Takes interleaved I-Q, produces interpolated,
 //% separate streams ready for upconversion
-module fiq_interp(
+module fiq_interp #(
+	parameter a_dw=16,
+	parameter i_dw=17,
+	parameter q_dw=17
+) (
 	input clk,
 	input [a_dw-1:0] a_data,  // Interleaved I-Q Data
 	input a_gate,  // Data valid gate
@@ -16,10 +20,6 @@ module fiq_interp(
 	output q_trig,
 	output time_err
 );
-
-parameter a_dw=16;
-parameter i_dw=17;
-parameter q_dw=17;
 
 wire iq_sync = a_trig;
 reg signed [a_dw-1:0] iq_in1=0, iq_in2=0;

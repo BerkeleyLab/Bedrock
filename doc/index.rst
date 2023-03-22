@@ -18,6 +18,7 @@ mirror is the `Bedrock Github Repository`_.
    :maxdepth: 4
    :caption: Contents:
 
+   general-docs
    bedrock-modules
 
 

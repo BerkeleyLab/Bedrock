@@ -228,7 +228,7 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    wire [7:0] slow_out;
    // 0x2000 to 0x21ff for cavity 0
    // 0x2200 to 0x23ff for cavity 1
-   // Should be good upto 16 cavities
+   // Should be good up to 16 cavities
    wire lb_slow_read = lb_read & (lb_addr[16:9] == 'b10010000 + cavity_n);
    slow_bridge slow_bridge(.lb_clk(lb_clk), .lb_addr(lb_addr[14:0]),
 			   .lb_read(lb_slow_read), .lb_out(slow_bridge_out[cavity_n]),

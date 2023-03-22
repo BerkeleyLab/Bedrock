@@ -167,7 +167,7 @@ class LEEPDevice(DeviceBase):
             if L > 1:
                 _log.debug('reg_write %s <- %s ...', name, value[:10])
                 assert value.ndim == 1 and value.shape[0] == L, \
-                       ('must write whole register', value.shape, L)
+                    ('must write whole register', value.shape, L)
                 # array register
                 for A, V in enumerate(value, base_addr):
                     addrs.append(A)
@@ -250,7 +250,7 @@ class LEEPDevice(DeviceBase):
         nch = info['data_width']
         # list of channel numbers to mask
         if isinstance(chans, list):
-            chans = reduce(lambda l, r: l | r,
+            chans = reduce(lambda ll, r: ll | r,
                            [2**(nch - 1 - n) for n in chans], 0)
         self.reg_write([('chan_keep', chans)], instance=instance)
 
@@ -339,7 +339,7 @@ class LEEPDevice(DeviceBase):
         """
         info = self.get_reg_info('chan_keep', instance=instance)
         nch = info['data_width']
-        interested = reduce(lambda l, r: l | r,
+        interested = reduce(lambda ll, r: ll | r,
                             [2**(nch - 1 - n) for n in chans], 0)
 
         if self.rfs:
@@ -452,7 +452,7 @@ class LEEPDevice(DeviceBase):
             msg[2 * i] = A
             msg[2 * i + 1] = V or 0
 
-        tosend = msg.tostring()
+        tosend = msg.tobytes()
         _spam.debug("%s Send (%d) %s", self.dest, len(tosend), repr(tosend))
         self.sock.sendto(tosend, self.dest)
 
@@ -467,7 +467,7 @@ class LEEPDevice(DeviceBase):
                 _log.error("Reply truncated %d %d", len(tosend), len(reply))
                 continue
 
-            reply = numpy.fromstring(reply, be32)
+            reply = numpy.frombuffer(reply, be32)
             if (msg[:2] != reply[:2]).any():
                 _log.error('Ignore reply w/o matching nonce %s %s',
                            msg[:2], reply[:2])
@@ -547,7 +547,7 @@ class LEEPDevice(DeviceBase):
                 raise RomError("Truncated ROM Descriptor")
 
             if type == 1:
-                blob = blob.tostring()
+                blob = blob.tobytes()
                 self.size_desc = size
                 if self.descript is None:
                     self.descript = blob
@@ -569,7 +569,7 @@ class LEEPDevice(DeviceBase):
                 else:
                     _log.debug("Found JSON blob in ROM")
                     self.regmap = json.loads(zlib.decompress(
-                        blob.tostring()).decode('ascii'))
+                        blob.tobytes()).decode('ascii'))
 
             elif type == 3:
                 self.size_rom = size

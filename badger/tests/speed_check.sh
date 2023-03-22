@@ -31,6 +31,6 @@ python3 badger_lb_io.py --ip $IP stop_sim
 echo "ok"
 sleep 1
 jobs
-kill %1 || echo "simulation already stopped, as requsted"
+kill %1 || echo "simulation already stopped, as requested"
 sleep 0.2
 echo "Success!"

@@ -67,5 +67,3 @@ spi_master #(.TSCKHALF(TSCKHALF),.ADDR_WIDTH(ADDR_WIDTH),.DATA_WIDTH(DATA_WIDTH)
 
 
 endmodule
-
-

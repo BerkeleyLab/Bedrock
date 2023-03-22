@@ -21,7 +21,7 @@ construct_tx_table.v: tx_gen.py $(ITABLES)
 rtefi_preblob.vh: collect_clients.py $(RTEFI_CLIENT_LIST)
 	$(PYTHON) $^ > $@
 rtefi_blob.v: rtefi_preblob.v rtefi_preblob.vh
-	$(VERILOG) -E $< -o $@
+	$(VERILOG) -E -o $@ $<
 
 # =====
 # Just lists of files

@@ -88,24 +88,24 @@ class i2c_live:
 
 
 def i2c_live_pre_args(parser):
-    parser.add_argument('--ip', default='192.168.19.10', help='IP address')
-    parser.add_argument('--udp', type=int, default=0, help='UDP Port number')
-    parser.add_argument('--sim', action='store_true', help='simulation context')
-    parser.add_argument('--stop', action='store_true', help='stop after run')
-    parser.add_argument('--vcd', type=str, help='VCD file to capture')
+    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
+    parser.add_argument('-p', '--port', type=int, default=0, help='Port number')
+    parser.add_argument('-s', '--sim', action='store_true', help='simulation context')
+    parser.add_argument('-S', '--stop', action='store_true', help='stop after run')
+    parser.add_argument('-V', '--vcd', type=str, help='VCD file to capture')
 
 
 def i2c_live_post_args(args):
-    ip = args.ip
-    udp = args.udp
+    addr = args.addr
+    port = args.port
     if args.sim:
-        ip = 'localhost'
-        if args.udp == 0:
-            udp = 8030
+        addr = 'localhost'
+        if args.port == 0:
+            port = 8030
     else:
-        if args.udp == 0:
-            udp = 803
+        if args.port == 0:
+            port = 803
 
     # OK, setup is finished, start the actual work
-    dev = i2c_live(ip, port=udp, allow_burst=False)
+    dev = i2c_live(addr, port=port, allow_burst=False)
     return dev

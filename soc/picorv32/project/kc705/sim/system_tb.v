@@ -57,7 +57,7 @@ module system_tb;
     // ------------------------------------------------------------------------
     //  Instantiate the virtual UART which receives debug data from UART0
     // ------------------------------------------------------------------------
-    //  its purpose is to print debug characers to the console
+    //  its purpose is to print debug characters to the console
     wire [7:0] urx_tdata0;
     wire       urx_tvalid0;
     reg        urx_tready0;

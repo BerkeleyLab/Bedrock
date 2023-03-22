@@ -1,10 +1,10 @@
 include ../dir_list.mk
 
-vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
+vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BADGER_DIR)
 
 .PHONY: all
 all: targets
-include $(BUILD_DIR)/top_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include $(BADGER_DIR)/rules.mk
 
@@ -38,7 +38,7 @@ fdbk_core.vcd: $(AUTOGEN_DIR)/regmap_fdbk_core_tb.json
 fdbk_core.vcd: fdbk_core_tb fdbk_core_test.py
 	$(PYTHON) fdbk_core_test.py
 fdbk_core_check: fdbk_core.vcd
-	echo DONE
+	@ echo DONE
 
 cryomodule_in.dat: cryomodule_test_setup.py $(AUTOGEN_DIR)/regmap_cryomodule.json
 	$(PYTHON) cryomodule_test_setup.py | sed -e 's/ *#.*//' | grep . > $@

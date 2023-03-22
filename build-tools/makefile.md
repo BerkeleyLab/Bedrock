@@ -167,7 +167,6 @@ fib_tb: fib.v
 clean:
 	rm -f *_tb *.vcd *.out
 
-
 ```
 Here we have added two new features: rules to create and display
 timing diagrams using gtkwave, and the traditional "clean" rule to

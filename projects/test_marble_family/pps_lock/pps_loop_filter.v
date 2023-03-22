@@ -1,4 +1,4 @@
-`timescale 1 ns / 1 ns
+`timescale 1ns / 1ns
 // DSP component for GPS pps discipline of VCTCXO
 // input phase is assumed static for several cycles after istrobe
 module pps_loop_filter(

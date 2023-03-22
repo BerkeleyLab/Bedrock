@@ -46,6 +46,7 @@ wire [7:0] lb_dout;
 wire scl, sda_drive;
 tri1 sda = sda_drive ? 1'bz : 1'b0;
 wire sda_sense = sda;
+wire scl_sense = scl;
 
 reg trig=0, run=0, freeze=0;
 integer file1, rc=1;
@@ -79,9 +80,10 @@ wire [3:0] hw_config;
 i2c_chunk #(.tick_scale(4), .q1(0), .q2(2)) chunk (.clk(clk),
 	.lb_addr(lb_addr), .lb_din(lb_din), .lb_write(lb_write),
 	.lb_dout(lb_dout),
-	.run_cmd(run), .freeze(freeze), .hw_config(hw_config),
-	.scl(scl), .sda_drive(sda_drive), .sda_sense(sda_sense),
-	.intp(1'b0), .rst(1'b1)
+	.run_cmd(run), .trace_cmd(1'b0), .freeze(freeze), .hw_config(hw_config),
+	.scl(scl), .sda_drive(sda_drive),
+	.sda_sense(sda_sense), .scl_sense(scl_sense),
+	.trig_mode(1'b0), .intp(1'b0), .rst(1'b1)
 );
 
 // One device on the bus

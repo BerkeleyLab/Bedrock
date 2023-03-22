@@ -4,37 +4,38 @@ set -e
 IP=${IP:-192.168.19.10}
 PYTHON=${PYTHON:-python3}
 BITFILE=${BITFILE:-marble1.bit}
+THISDIR=$(dirname "$0")
 case "$1" in
   usb)
     # start here; without a bitfile loaded, the rest of the commands won't work
-    if test -r $BITFILE; then
-      openocd -s "../../board_support/marblemini/" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $BITFILE; exit"
+    if test -r "$BITFILE"; then
+      openocd -s "$THISDIR" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $BITFILE; exit"
     else
       echo "$BITFILE not found"
     fi
     ;;
   show)
-    $PYTHON bedrock/badger/tests/badger_lb_io.py --ip $IP --port 803 show
+    $PYTHON bedrock/badger/tests/badger_lb_io.py --ip "$IP" --port 803 show
     ;;
   prod)
     # copy $BITFILE to production location in flash
-    if test -r $BITFILE; then
-      $PYTHON bedrock/badger/tests/spi_test.py --ip $IP --udp 804 --wait 0.001 --add 0x400000 --program $BITFILE
+    if test -r "$BITFILE"; then
+      $PYTHON bedrock/badger/tests/spi_test.py --ip "$IP" --udp 804 --wait 0.001 --add 0x400000 --program "$BITFILE"
     else
       echo "$BITFILE not found"
     fi
     ;;
   gold)
     # copy $BITFILE to gold location in flash
-    if test -r $BITFILE; then
-      $PYTHON bedrock/badger/tests/spi_test.py --ip $IP --udp 804 --wait 0.001 --add 0 --program $BITFILE
+    if test -r "$BITFILE"; then
+      $PYTHON bedrock/badger/tests/spi_test.py --ip "$IP" --udp 804 --wait 0.001 --add 0 --program "$BITFILE"
     else
       echo "$BITFILE not found"
     fi
     ;;
   reboot)
     # reboot to production bitfile
-    $PYTHON bedrock/badger/tests/spi_test.py --ip $IP --udp 804 --add 0x400000 --id --reboot7
+    $PYTHON bedrock/badger/tests/spi_test.py --ip "$IP" --udp 804 --add 0x400000 --id --reboot7
     ;;
   *)
     echo "Unknown command ($1)"

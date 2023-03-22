@@ -2,12 +2,12 @@
 GCC_FLAGS = -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
 	-Wshadow -Waggregate-return -Wmissing-prototypes -Wnested-externs \
 	-Wall -W -Wno-unused -Winline -Wwrite-strings -Wundef -pedantic
-CF_ALL = -Wall -O2 -W -fPIC -g -std=c99 -D_GNU_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
-LF_ALL = -lm ${LDFLAGS_$@}
+CF_ALL = -Wall -O2 -fPIC -g -std=c99 -D_GNU_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
+LF_ALL = ${LDFLAGS_$@}
 
 ICARUS_SUFFIX =
 VERILOG_VPI = iverilog-vpi$(ICARUS_SUFFIX)
-VERILOG = iverilog$(ICARUS_SUFFIX) -Wall
+VERILOG = iverilog$(ICARUS_SUFFIX) -Wall -Wno-macro-redefinition
 VG_ALL = -DSIMULATE
 V_TB = -Wno-timescale
 VFLAGS = ${VFLAGS_$@} -I$(AUTOGEN_DIR)
@@ -82,14 +82,11 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 %.a: %.o
 	$(ARCH)
 
-%_tb: %_tb.v %_tb_auto
+# Sorry about the conditional; I couldn't find any other way to make newad work.
+ifndef NO_DEFAULT_TB_RULE
+%_tb: %_tb.v
 	$(VERILOG_TB)
-
-%_tb_auto: $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh %_auto
-	@echo .
-
-%_auto: $(AUTOGEN_DIR)/addr_map_%.vh $(AUTOGEN_DIR)/%_auto.vh
-	@echo .
+endif
 
 %_live: %_tb.v
 	$(VERILOG_TB)
@@ -175,7 +172,7 @@ else
 	promgen -w -spi -p mcs -o $@ -s 16384 -u 0 $<
 endif
 
-UNISIM_CRAP = 'BUFGCE|IOBUF|BUFG|IBUF|IBUFDS_GTE2|ICAPE2|IOBUF|STARTUPE2|MMCME2_BASE'
+UNISIM_CRAP = 'BUFG|BUFGCE|BUFG_GT|BUFH|FD|IBUF|IBUFDS|IBUFDS_GTE2|IBUFDS_GTE4|IBUFGDS|IDDR|IDELAYE2|IOBUF|MMCME2_BASE|MMCME4_ADV|OBUF|OBUFDS'
 
 # Auto-generated verilog entities shall be set by globally appending to this variable
 $(DEPDIR)/%.bit.d: %.v $(VERILOG_AUTOGEN)
@@ -194,41 +191,6 @@ LB_AW = 10
 EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
 COMMA := ,
-NEWAD_DIRS = .
-NEWAD_ARGS = -d $(subst $(SPACE),$(COMMA),$(NEWAD_DIRS)) -i $< -w $(LB_AW)
-
-define NEWAD_O
-mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -o $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
-endef
-define NEWAD_A
-mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -a $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
-endef
-define NEWAD_L
-mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
-endef
-define REV_JSON
-$(PYTHON) $(BUILD_DIR)/reverse_json.py $< > $@
-endef
-
-$(AUTOGEN_DIR)/%_auto.vh: %.sv
-	$(NEWAD_O)
-$(AUTOGEN_DIR)/%_auto.vh: %.v
-	$(NEWAD_O)
-
-$(AUTOGEN_DIR)/addr_map_%.vh: %.sv
-	$(NEWAD_A)
-$(AUTOGEN_DIR)/addr_map_%.vh: %.v
-	$(NEWAD_A)
-
-$(AUTOGEN_DIR)/regmap_%.json: %.sv
-	$(NEWAD_L)
-$(AUTOGEN_DIR)/regmap_%.json: %.v
-	$(NEWAD_L)
-
-$(AUTOGEN_DIR)/scalar_%_regmap.json: %.sv
-	$(REV_JSON)
-$(AUTOGEN_DIR)/scalar_%_regmap.json: %.v
-	$(REV_JSON)
 
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz

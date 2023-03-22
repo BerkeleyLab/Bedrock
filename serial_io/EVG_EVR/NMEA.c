@@ -229,4 +229,3 @@ NMEAsatellitesInView(void)
 {
     return satellitesInView;
 }
-

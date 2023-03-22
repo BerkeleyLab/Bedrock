@@ -44,11 +44,11 @@ module cic_wave_recorder #(
    parameter buf_aw=13,
    parameter lsb_mask=1,      // LSB of channel mask is CH0
    parameter buf_stat_w=16,
-   parameter buf_auto_flip=1) // auto_flip=1: Double buffers will be flipped when
+   parameter buf_auto_flip=1  // auto_flip=1: Double buffers will be flipped when
                               //              last read address is reached
                               // auto_flip=0: Buffers must be explicitly flipped by
                               //              using stb_out as a pulse and not a strobe
-(
+) (
    input                      iclk,
    input                      reset,
    input                      stb_in,          // Strobe signal for input samples
@@ -194,4 +194,3 @@ module cic_wave_recorder #(
    );
 
 endmodule
-

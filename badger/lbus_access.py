@@ -46,7 +46,7 @@ class lbus_access:
         msg[12] = 0x10000002  # pad / read 2
         msg[13] = 0xa5a5a5a5  # pad
 
-        tosend = msg.tostring()
+        tosend = msg.tobytes()
         # print("%s Send (%d) %s", self.dest, len(tosend), binascii.hexlify(tosend))
         self.sock.sendto(tosend, self.dest)
         if True:
@@ -102,7 +102,7 @@ class lbus_access:
             for i, V in enumerate(values, 4):
                 msg[i] = V or 0
 
-        tosend = msg.tostring()
+        tosend = msg.tobytes()
         if False:
             mm = ".".join(["%8.8x" % x for x in msg])
             print("%s Send (%d) %s" % (self.dest, len(tosend), mm))

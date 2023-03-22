@@ -31,10 +31,10 @@
 // drv_p = (sel_en ? in_mp : 0) + ph_offset
 // set_p and gain_p
 
-module mp_proc # (
+module mp_proc #(
 	parameter thresh_shift = 9, // Threshold shift; typically 9 for SRF use
 	parameter ff_dshift = 0     // Deferred ff_ddrive downshift
-)(
+) (
 	input clk,
 	input sync,
 	// Input from cordic_mux
@@ -48,6 +48,7 @@ module mp_proc # (
 	input signed [17:0] sel_thresh,  // external
 	// Host-settable channel-multiplexed controls
 	(* external *)
+	input [0:0] set_slew,  // external
 	input signed [17:0] setmp,  // external
 	(* external *)
 	input signed [17:0] coeff,  // external
@@ -123,13 +124,27 @@ always @(posedge clk) begin
 	end
 end
 
+// Optional slew-rate limiting on setpoint
+wire signed [17:0] setmp2;
+wire [1:0] motion;
+`define SLEW_RATE_LIMIT
+`ifdef SLEW_RATE_LIMIT
+wire slew_step = &state[2:1];
+slew_xarray srl(.clk(clk), .enable(set_slew),
+	.setmp(setmp), .setmp_addr(setmp_addr[0]), .step(slew_step),
+	.setmp_l(setmp2), .motion(motion));
+`else
+assign setmp2 = setmp;
+assign motion = 0;
+`endif
+
 // Setpoint muxing - pipelined to ease timing
 reg signed [17:0] ff_setmp=0;
 always @(posedge clk) begin
 	ff_setmp <= state[0] ? ff_setm : ff_setp;
 end
 
-wire signed [17:0] setmp_mux = ffd_en ? ff_setmp : setmp;
+wire signed [17:0] setmp_mux = ffd_en ? ff_setmp : setmp2;
 
 // Subtract setpoint, add offset
 reg signed [17:0] mp_err=0, phout=0;

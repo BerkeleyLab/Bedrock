@@ -1,4 +1,4 @@
-`timescale 1ps/1ps
+`timescale 1ns / 1ns
 module tx_8b9b(clk,data_out,word_in,word_available, frame_complete,word_read);
 parameter WORD_WIDTH=8;
 input clk;

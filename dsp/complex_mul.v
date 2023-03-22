@@ -25,8 +25,8 @@
 // the data paths inside this module.
 
 module complex_mul #(
-    parameter dw = 18)
-(
+	parameter dw = 18
+) (
 	input clk,  // Rising edge clock input; all logic is synchronous in this domain
 	input gate_in,  // Flag marking input data valid
 	input signed [dw-1:0] x,  // Multiplicand, signed, time-interleaved real and imaginary

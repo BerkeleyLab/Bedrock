@@ -28,9 +28,8 @@
 // real when iq==1 and imaginary when iq==0.
 
 module phs_avg #(
-    parameter dwi = 17,
-    parameter dwj = 16)
-(
+    parameter dwi = 17
+) (
 	input clk,  // timespec 6.66 ns
 	input reset,
 	input iq,
@@ -39,16 +38,14 @@ module phs_avg #(
 	output [0:0] kx_addr,    // external address for kx
 	input signed [dwi-1:0] y,
 	input signed [15:0] ky,  // external
-	output [0:0] ky_addr,    // external address for kx
+	output [0:0] ky_addr,    // external address for ky
 	output signed [dwi+7:0] sum_filt, // debug
 	output signed [dwi+1:0] z
 );
-
+localparam dwj = 16;  // coefficient width (hard-coded due to limitations in newad)
+localparam intg_scale = 11;  // integrator width
 assign kx_addr = iq;
 assign ky_addr = iq;
-
-wire signed [dwi+5:0] xmr = prod_x[(dwi+dwj)-2:dwi-8];
-wire signed [dwi+5:0] ymr = prod_y[(dwi+dwj)-2:dwi-8];
 
 reg signed [dwj-1:0] kx1 = 0, ky1 = 0;
 reg signed [(dwi+dwj)-1:0] prod_x = 0, prod_y = 0;
@@ -60,9 +57,12 @@ always @(posedge clk) begin
         prod_y <= y * ky1;
 end
 
+wire signed [dwi+5:0] xmr = prod_x[(dwi+dwj)-2:dwj-7];
+wire signed [dwi+5:0] ymr = prod_y[(dwi+dwj)-2:dwj-7];
+
 reg signed [dwi+6:0] sum = 0, sum1 = 0;
 reg signed [dwi+7:0] sum_f = 0;
-reg signed [dwi+7:0] intg = 0;
+reg signed [dwi+intg_scale:0] intg = 0;
 always @(posedge clk) begin
         sum <= xmr + ymr;
         sum1 <= sum;
@@ -71,6 +71,6 @@ always @(posedge clk) begin
         else intg <= (sum_f >>> 1) + intg; // Integrator
 end
 assign sum_filt = sum_f;
-assign z = intg[dwi+6:5];
+assign z = intg[dwi+intg_scale:intg_scale-1];
 
 endmodule

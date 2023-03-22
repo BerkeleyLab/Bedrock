@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+`timescale 1ns / 1ns
 
 module ether_both_sp605(
 		       // Stupid non-general-purpose FPGA pins
@@ -238,7 +238,7 @@ module ether_both_sp605(
 
    // gate_in must be & ~control2_rd
    // mem_gateway generate control_strobe at every R/W cycle
-   // So just delay lb_control_strobe for a certian time. see below
+   // So just delay lb_control_strobe for a certain time. see below
    data_xdomain #(.size(57))
    x_eth2dsp(.clk_in(tx_clk), .gate_in(control2_strobe), .data_in(lb_word_out_eth),
 	     .clk_out(dsp_clk), .gate_out(lb_control_strobe), .data_out(lb_word_out_dsp)

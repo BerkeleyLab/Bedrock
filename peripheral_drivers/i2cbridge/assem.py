@@ -21,26 +21,38 @@ class i2c_assem:
         # post results to the result bus, but don't consume instruction bytes.
 
     # write data words to specified dadr
-    def write(self, dadr, madr, data):
+    def write(self, dadr, madr, data, addr_bytes=1):
         if dadr & 1:
             print("Address error 0x%2.2x" % dadr)
-        if len(data) > 29:
-            print("Write length error: %d" % len(data))
-        n = 2 + len(data)
-        return [self.o_wr+n, dadr, madr] + data
+        n = 1 + addr_bytes + len(data)
+        if n > 31:
+            print("Write length error: %d" % n)
+        if addr_bytes == 0:
+            m1 = []
+        elif addr_bytes == 1:
+            m1 = [madr]
+        elif addr_bytes == 2:
+            m1 = [madr//256, madr & 255]
+        return [self.o_wr+n, dadr] + m1 + data
 
     # sets the read address, then repeated start, then reads data
     def read(self, dadr, madr, dlen, addr_bytes=1):
         if dadr & 1:
             print("Address error 0x%2.2x" % dadr)
+            return []
         if dlen > 30:
             print("Read length error: %d" % dlen)
+            return []
         if addr_bytes == 0:
-            return [self.o_wx+1, dadr, self.o_rd+1+dlen, dadr+1]
-        if addr_bytes == 1:
+            # optimize away a useless [self.o_wx+1, dadr]
+            return [self.o_rd+1+dlen, dadr+1]
+        elif addr_bytes == 1:
             return [self.o_wx+2, dadr, madr, self.o_rd+1+dlen, dadr+1]
         elif addr_bytes == 2:
-            return [self.o_wx+3, dadr, int(madr/256), madr & 256, self.o_rd+1+dlen, dadr+1]
+            return [self.o_wx+3, dadr, int(madr/256), madr & 255, self.o_rd+1+dlen, dadr+1]
+        else:
+            print("Unsupported addr_byes: %d" % addr_bytes)
+        return []
 
     # combine short and long pauses to get specified cycles
     # configured for production (q1=2, q2=7), tests will not conform

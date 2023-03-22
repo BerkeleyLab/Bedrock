@@ -8,6 +8,12 @@ module marble_top(
 	input GTPREFCLK_N,
 	input SYSCLK_P,
 
+	// SI570 clock inputs
+	`ifdef USE_SI570
+	input GTREFCLK_P,
+	input GTREFCLK_N,
+	`endif
+
 	// RGMII Tx port
 	output [3:0] RGMII_TXD,
 	output RGMII_TX_CTRL,
@@ -36,7 +42,7 @@ module marble_top(
 	output CFG_D02,  // hope R209 is DNF
 
 	// One I2C bus, everything gatewayed through a TCA9548
-	output TWI_SCL,
+	inout  TWI_SCL,
 	inout  TWI_SDA,
 	inout  TWI_RST,
 	input  TWI_INT,
@@ -86,9 +92,23 @@ IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0)
 // if you don't put this BUFG in the chain to the MMCM.
 BUFG passg_125(.I(gtpclk0), .O(gtpclk));
 
+wire si570;
+`ifdef USE_SI570
+// Single-ended clock derived from programmable xtal oscillator
+ds_clk_buf #(
+   .GTX (1))
+i_ds_gtrefclk1 (
+   .clk_p   (GTREFCLK_P),
+   .clk_n   (GTREFCLK_N),
+   .clk_out (si570)
+);
+`else
+assign si570 = 0;
+`endif
+
 parameter in_phase_tx_clk = 1;
 // Standardized interface, hardware-dependent implementation
-wire tx_clk, tx_clk90;
+wire tx_clk, tx_clk90, clk62;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
 wire test_clk;
@@ -98,12 +118,14 @@ xilinx7_clocks #(
 	.DIFF_CLKIN("BYPASS"),
 	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
 	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
-	.DIV0     (8)       // 1 GHz / 8 = 125 MHz
+	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
+	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
 ) clocks_i(
 	.sysclk_p (gtpclk),
 	.sysclk_n (1'b0),
 	.reset    (pll_reset),
 	.clk_out0 (tx_clk),
+	.clk_out1 (clk62),
 	.clk_out2 (tx_clk90),
 	.clk_out3f(test_clk),  // not buffered, straight from MMCM
 	.locked   (clk_locked)
@@ -145,7 +167,8 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 );
 
 wire BOOT_CCLK;
-STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0));
+wire cfg_clk;  // Just for fun, so we can measure its frequency
+STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
 
 // Placeholders
 wire ZEST_PWR_EN;
@@ -176,11 +199,11 @@ marble_base #(
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
 	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
 	.vgmii_rx_dv(vgmii_rx_dv), .vgmii_rx_er(vgmii_rx_er),
-	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked),
+	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked), .si570(si570),
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
-	.aux_clk(SYSCLK_P),
+	.aux_clk(SYSCLK_P), .clk62(clk62), .cfg_clk(cfg_clk),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
 	.twi_scl({dum_scl, FMC2_LA_P[2], FMC1_LA_P[2], TWI_SCL}),

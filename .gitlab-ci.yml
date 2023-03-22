@@ -29,6 +29,7 @@ include:
   - local: .gitlab/ci/comms_top.gitlab-ci.yml
   - local: .gitlab/ci/dsp.gitlab-ci.yml
   - local: .gitlab/ci/marble_family.gitlab-ci.yml
+  - local: .gitlab/ci/swap_gitid.gitlab-ci.yml
 
 leep_test:
   script:
@@ -44,19 +45,19 @@ cordic_test:
 freq_demo:
   stage: test
   script:
-    - cd homeless/freq_demo && make
+    - make -C homeless/freq_demo
 
 make_docs:
   before_script:
     - cd build-tools/make-demo && make clean
   stage: test
   script:
-    - make check && make makefile.md && cmp ../makefile.md makefile.md
+    - make check consistency
 
 flake8:
   stage: synthesis
   script:
-   - find . -name "*.py" | xargs flake8
+    - find . -name "*.py" -exec flake8 {} +
 
 badger_test:
   before_script:
@@ -67,13 +68,12 @@ badger_test:
 
 peripheral_test:
   before_script:
-    - cd peripheral_drivers
   stage: test
   script:
-    - make
-    - cd idelay_scanner && make ; cd -
-    - cd ds1822 && make ; cd -
-    - cd i2cbridge && make
+    - make -C peripheral_drivers
+    - make -C peripheral_drivers/idelay_scanner
+    - make -C peripheral_drivers/ds1822
+    - make -C peripheral_drivers/i2cbridge
 
 badger_ac701:
   stage: synthesis
