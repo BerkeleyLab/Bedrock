@@ -56,11 +56,11 @@ wire signed [17:0] coeff, lim;
 quad_ireg s0(.clk(clk), .rd_addr(s0_addr), .lb_data(lb_data), .lb_write(lb_write[0]), .lb_addr(lb_addr), .d(coeff));
 quad_ireg s1(.clk(clk), .rd_addr(s1_addr), .lb_data(lb_data), .lb_write(lb_write[1]), .lb_addr(lb_addr), .d(lim));
 
-`ifdef SIMULATE
 reg signed [17:0] ff_ddrive, ff_dphase;
 reg signed [17:0] ff_drive, ff_phase;
 reg ffd_en=0, ffp_en=0;
 
+`ifdef SIMULATE
 initial begin
 	s0.store[0] =  10000;  // coeff X I
 	s0.store[1] = -12000;  // coeff Y I

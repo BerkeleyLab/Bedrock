@@ -87,6 +87,7 @@ rf_controller dut // auto
 	.mon_result(mon_result), .mon_strobe(mon_strobe), .mon_boundary(mon_boundary),
 	`AUTOMATIC_dut);
 
+`ifdef SIMULATE
 initial begin
 	#1; // lose race with t=0
 	// Set up 7/33 LO
@@ -121,6 +122,7 @@ always @(posedge clk) begin
 	arm <= dut.fdbk_core.sync3;
 	if (arm) display_phase <= dut.fdbk_core.out_mp;
 end
+`endif  // SIMULATE
 
 // always @(negedge clk) $display(a_field);
 

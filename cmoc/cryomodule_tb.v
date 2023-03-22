@@ -49,6 +49,7 @@ wire control_clk=clk;
 reg [31:0] control_data, cd;
 reg [16:0] control_addr, control_addr_d0, control_addr_d, ca;
 reg control_write=0, control_read=0, control_read_d0=0, control_read_d=0;
+`ifdef SIMULATE
 integer control_cnt=0;
 integer start_read=11300;
 integer len_read=1024;
@@ -113,6 +114,7 @@ always @(posedge control_clk) begin
 	control_addr_d  <= control_addr_d0;
 	control_read_d  <= control_read_d0;
 end
+`endif //  `ifdef SIMULATE
 
 
 // set buffer size to 1024 (fills in 128*33*2 clock cycles)
@@ -139,7 +141,6 @@ always @(posedge control_clk) if (control_read_d && control_cnt>2000) begin
 		$fwrite(file2,"\n");
 	end
 end
-`endif //  `ifdef SIMULATE
 
 initial begin
 	#1; // lose races
@@ -148,5 +149,6 @@ initial begin
 	l.cryomodule_cavity[1].llrf.controller.wave_cnt=10;  // hack to avoid wasting time
 `endif
 end
+`endif //  `ifdef SIMULATE
 
 endmodule

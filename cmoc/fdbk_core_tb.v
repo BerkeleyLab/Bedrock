@@ -176,6 +176,7 @@ fdbk_core #(.use_mp_proc(1), .use_ll_prop(0)) dut // auto
 	.sync(sync1), .iq(iq), .in_xy(in1), .out_xy(out_xy),
 	`AUTOMATIC_dut);
 
+`ifdef SIMULATE
 // Used for tests where analyzed is based on inputs and outputs in Cartesian coordinates
 reg signed [17:0] out_xy_d, in1_d;
 // Grab the input, set-point and error signals from the controller
@@ -220,15 +221,14 @@ always @(posedge clk) begin
 	sync_d <= sync3;
 	sync_d2 <= sync_d;
 
-`ifdef SIMULATE
 	// Write aligned input, set-point and error signals onto file (set-point scaling test)
 	if (out_file != 0 && sync_d2 && (test_type==0 || test_type==1)) $fwrite(out_file," %d %d %d %d %d %d\n", setmp_d2, setmp_d, in_mp_d2, in_mp_d, mp_err_d, mp_err);
 
 	// Write aligned input and output signals onto file (feedback gain scaling test)
 	if (out_file != 0 && ~iq && (test_type==2 || test_type==3)) $fwrite(out_file," %d %d %d %d %d %d\n", setmp_d, setmp, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
 	if (out_file != 0 && ~iq && test_type==4) $fwrite(out_file," %d %d %d %d %d %d\n", in1_d, in1, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
-`endif
 	if (sync_d) count_syncs <= count_syncs + 1'b1;
 end
+`endif
 
 endmodule
