@@ -49,6 +49,7 @@ module mp_proc #(
 	// Host-settable channel-multiplexed controls
 	(* external *)
 	input [0:0] set_slew,  // external
+	(* external *)
 	input signed [17:0] setmp,  // external
 	(* external *)
 	input signed [17:0] coeff,  // external
