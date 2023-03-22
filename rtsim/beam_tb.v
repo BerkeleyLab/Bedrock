@@ -32,6 +32,7 @@ beam dut(.clk(clk), .ena(1'b1), .reset(reset),
 	.phase_step(phase_step), .modulo(modulo),
 	.phase_init(12'b0));
 
+`ifdef SIMULATE
 always @(posedge clk) begin
 	#1;
 	if (trace && (pulse!=0)) $display(cc,pulse);
@@ -40,5 +41,6 @@ end
 // Keep from having to look at 3000 boring cycles at the beginning
 // of a simulation
 initial begin #1; dut.phase=-26; end
+`endif
 
 endmodule

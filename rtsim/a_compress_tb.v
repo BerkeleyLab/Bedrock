@@ -45,8 +45,10 @@ a_compress a_compress(.clk(clk), .sat_ctl(sat_ctl),
 reg_delay #(.dw(18), .len(10))
 	match(.clk(clk), .reset(1'b0), .gate(1'b1), .din(d_in), .dout(d_check));
 
+`ifdef SIMULATE
 always @(posedge clk) if (trace) begin
 	if (cc>60 && ~iq) $display("%d %d", d_check, d_out);
 end
+`endif
 
 endmodule

@@ -80,6 +80,7 @@ resonator resonator // auto
 	`AUTOMATIC_resonator
 );
 
+`ifdef SIMULATE
 always @(negedge clk) if (trace && iq && (cc>30)) $display("%d %d %d %d",
 	forward,reflect,field,cav_elec.cav_mode[0].m_freq);
 
@@ -128,5 +129,6 @@ initial begin
 	cav_elec.dp_dot_0_k_out.mem[5]=90000;
 	cav_elec.dp_outer_prod_0_k_out.mem[4]=88000;
 end
+`endif
 
 endmodule

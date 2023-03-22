@@ -51,15 +51,14 @@ afilter_siso afilter_siso // auto
 	`AUTOMATIC_afilter_siso
 );
 
+`ifdef SIMULATE
 // Read localbus commands from external file
 reg [255:0] file1_name;
 integer file1;
-`ifdef SIMULATE
 initial begin
 	if (!$value$plusargs("dfile=%s", file1_name)) file1_name="afilter_siso_in.dat";
 	file1 = $fopen(file1_name,"r");
 end
-`endif
 
 integer rc=2;
 integer ca, cd;
@@ -90,5 +89,6 @@ always @(posedge clk) begin
 end
 
 always @(negedge clk) if (filter_done) $display("output %d %d", $time, y_out);
+`endif
 
 endmodule

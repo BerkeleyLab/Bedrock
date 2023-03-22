@@ -15,6 +15,7 @@ def v2j(vfile):
     yfile = '/tmp/yosys_v2j.ys'
     with open(yfile, "w") as f:
         f.write('read_verilog -sv -I/tmp {0}\n'
+                'proc\n'
                 'write_json {1}'.format(vfile, jfile))
     os.system('yosys -q {}'.format(yfile))
     with open(jfile, 'r') as f:

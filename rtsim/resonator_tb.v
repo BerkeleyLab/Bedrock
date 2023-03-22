@@ -58,6 +58,7 @@ resonator resonator  // auto
 	`AUTOMATIC_resonator
 );
 
+`ifdef SIMULATE
 integer ix;
 integer scale=7;
 initial begin
@@ -73,5 +74,6 @@ always @(posedge clk) if (trace) begin
 	last <= position;
 	if (cc>16 && cc%n_cycles == 4) $display("%d %d", last, position);
 end
+`endif
 
 endmodule

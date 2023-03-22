@@ -54,6 +54,7 @@ outer_prod outer_prod  // auto
 	`AUTOMATIC_outer_prod
 );
 
+`ifdef SIMULATE
 integer ix;
 initial begin
 	#1;  // lose time zero races
@@ -65,5 +66,6 @@ end
 always @(posedge clk) if (trace) begin
 	if (cc>16 && cc%n_cycles == 4) $display("%d", result);
 end
+`endif
 
 endmodule
