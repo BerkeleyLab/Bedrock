@@ -39,7 +39,8 @@ VERILOG_TB_VPI = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} -o $@ $(filter %.v, $
 VERILOG_SIM = cd `dirname $@` && $(VVP) `basename $<` $(VVP_FLAGS)
 VERILOG_VIEW = $(GTKWAVE) $(GTKW_OPT) $^
 VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS)
-VERILOG_TBLINT = $(PYTHON) $(BUILD_DIR)/tblint.py $<
+# HACK ALERT! The Verilog file gets precedence over the SystemVerilog file of same stem
+VERILOG_TBLINT = $(PYTHON) $(BUILD_DIR)/tblint.py $(if $(realpath $<.v),$<.v,$<.sv)
 VERILOG_RUN = $(VVP) $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
@@ -108,6 +109,7 @@ endif
 	$(VERILOG_VIEW)
 
 %_check: %_tb
+	$(VERILOG_TBLINT)
 	$(VERILOG_CHECK)
 
 %_lint: %.v %_auto

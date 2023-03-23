@@ -256,10 +256,10 @@ def doLint(argv):
     filename = argv[1]
     linter = TBLinter(filename)
     if linter.lint():
-        print(f"{filename}: PASS")
+        print(f"Lint PASS: {filename}")
         return 0
     else:
-        print(f"{filename}: FAIL")
+        print(f"Lint FAIL: {filename}")
         return 1
 
 
