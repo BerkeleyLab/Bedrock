@@ -72,7 +72,7 @@ reg_delay #(.dw(1), .len(0))
 
 wire clip;
 wire res_write = lb_write & (lb_addr[12:10]==1);
-(*lb_automatic*)
+(* lb_automatic *)
 resonator resonator // auto
 	(.clk(clk), .start(start_eig),
 	.drive(eig_drive),

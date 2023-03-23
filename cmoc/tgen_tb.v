@@ -18,7 +18,7 @@ initial begin
 	//$display("%s",errors==0?"PASS":"FAIL");
 	$finish();
 end
-`endif //  `ifdef SIMULATE
+`endif  // `ifdef SIMULATE
 integer file1;
 reg [255:0] file1_name;
 `ifdef SIMULATE
@@ -26,7 +26,7 @@ initial begin
 	if (!$value$plusargs("tgen_seq=%s", file1_name)) file1_name="tgen_seq.dat";
 	file1 = $fopen(file1_name,"r");
 end
-`endif //  `ifdef SIMULATE
+`endif  // `ifdef SIMULATE
 
 integer rc=2;
 reg [31:0] control_data, cd;
@@ -56,7 +56,7 @@ always @(posedge clk) begin
 		control_strobe <= 0;
 	end
 end // always @ (posedge clk)
-`endif //  `ifdef SIMULATE
+`endif  // `ifdef SIMULATE
 
 wire dests_write = control_addr[16:12] == 1;  // matches addresses 4096-8191; see tgen_seq.dat
 
@@ -80,8 +80,10 @@ tgen dut(.clk(clk), .trig(trig), .collision(collision),
 	.lbo_data(lbo_data), .lbo_write(lbo_write), .lbo_addr(lbo_addr)
 );
 
+`ifdef SIMULATE
 always @(negedge clk) begin
 	if (lbo_write) $display("slave bus[%d] = 0x%x (%d)",lbo_addr,lbo_data,lbo_data);
 end
+`endif  // `ifdef SIMULATE
 
 endmodule

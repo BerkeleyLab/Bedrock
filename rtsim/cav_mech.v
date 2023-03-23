@@ -25,14 +25,14 @@ parameter n_cycles = n_mech_modes * 2;
 
 // Couple randomness to mechanical drive
 wire signed [17:0] environment;  // filled in later
-(*lb_automatic*)
+(* lb_automatic *)
 outer_prod noise_couple  // auto
 	(.clk(clk), .start(start_outer), .x(environment), .result(noise_eig_drive),
 	 `AUTOMATIC_noise_couple
 );
 
 // Instantiate the mechanical resonance computer
-(*lb_automatic*)
+(* lb_automatic *)
 resonator resonator // auto
   (.clk(clk), .start(start_eig),
 	 .drive(eig_drive),
@@ -42,7 +42,7 @@ resonator resonator // auto
 // Pseudorandom number subsystem
 wire [31:0] rnda, rndb;
 
-(*lb_automatic*)
+(* lb_automatic *)
 prng prng  // auto
   (.clk(clk), .rnda(rnda), .rndb(rndb),
    `AUTOMATIC_prng);

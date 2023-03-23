@@ -7,7 +7,7 @@ import os
 def v2j(vfile):
     basename = os.path.basename(vfile)
     base = os.path.splitext(basename)[0]
-    assert(basename.endswith('.v') or basename.endswith('.sv'))
+    assert (basename.endswith('.v') or basename.endswith('.sv'))
     autofile = '/tmp/{}_auto.vh'.format(base)
     with open(autofile, 'w') as f:
         f.write('')
@@ -24,5 +24,5 @@ def v2j(vfile):
 
 if __name__ == "__main__":
     import sys
-    assert(len(sys.argv) == 2)
+    assert (len(sys.argv) == 2)
     v2j(sys.argv[1])

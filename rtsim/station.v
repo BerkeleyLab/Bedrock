@@ -103,7 +103,7 @@ parameter df_scale=0;     // see cav_freq.v
 
 // Instantiate one cavity
 wire signed [17:0] field, forward, reflect;
-(*lb_automatic*)
+(* lb_automatic *)
 cav_elec #(.mode_shift(mode_shift), .interp_span(interp_span), .df_scale(df_scale), .mode_count(mode_count)) cav_elec // auto
 	(.clk(clk),
 	.iq(iq), .drive(amp_out1), .beam_timing(beam_timing),
@@ -114,20 +114,20 @@ cav_elec #(.mode_shift(mode_shift), .interp_span(interp_span), .df_scale(df_scal
 
 // Pseudorandom number subsystem
 wire [31:0] rnda, rndb;
-(*lb_automatic*)
+(* lb_automatic *)
 prng prng  // auto
 	(.clk(clk), .rnda(rnda), .rndb(rndb),
 	`AUTOMATIC_prng);
 
 // ADCs themselves
 // Offsets could be allowed to drift
-(*lb_automatic*)
+(* lb_automatic *)
 adc_em #(.del(1)) a_cav // auto
 	(.clk(clk), .strobe(iq), .in(field),   .rnd(rnda[12: 0]), .adc(a_field), `AUTOMATIC_a_cav);
-(*lb_automatic*)
+(* lb_automatic *)
 adc_em #(.del(1)) a_for // auto
 	(.clk(clk), .strobe(iq), .in(forward), .rnd(rnda[25:13]), .adc(a_forward), `AUTOMATIC_a_for);
-(*lb_automatic*)
+(* lb_automatic *)
 adc_em #(.del(1)) a_rfl // auto
 	(.clk(clk), .strobe(iq), .in(reflect), .rnd(rndb[12: 0]), .adc(a_reflect), `AUTOMATIC_a_rfl);
 
