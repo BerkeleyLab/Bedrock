@@ -82,9 +82,13 @@ initial begin
 	repeat (100) @(posedge clk);
 	scanner_busy <= 1;
 	repeat (10) @(posedge clk);
-	$display("%s", fail ? "FAIL" : "PASS");
-	if (fail) $stop();
-	$finish();
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 endmodule

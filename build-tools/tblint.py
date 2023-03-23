@@ -11,11 +11,11 @@ DISPLAYFAIL = '$display("FAIL");'
 FINISH = '$finish();'
 STOP = '$stop();'
 
-SYNTAX_RULES = """
+SYNTAX_RULES = f"""
 Syntax Rules for checking test benches:
 0.  All test benches must have file names that end with "_tb.v" or "_tb.sv"
-1.  All test benches must pass with $display("PASS"); $finish(); and fail with
-    $display("FAIL"); $stop();
+1.  All test benches must pass with {DISPLAYPASS} {FINISH} and fail with
+    {DISPLAYFAIL} {STOP}
     The exit strings must begin with "PASS" or "FAIL" which can be followed by
     explanatory text.
 """
@@ -248,12 +248,15 @@ def testMatch(argv):
 
 
 def doLint(argv):
-    USAGE = "python3 {} filename".format(argv[0])
+    USAGE = ("python3 {0} filename\n" +
+            "  Use python3 {0} --selftest to run regex syntax tests").format(argv[0])
     if len(argv) < 2:
         print(USAGE)
         print(SYNTAX_RULES)
         return 1
     filename = argv[1]
+    if filename == "--selftest":
+        return doTests()
     linter = TBLinter(filename)
     if linter.lint():
         print(f"Lint PASS: {filename}")
@@ -266,5 +269,4 @@ def doLint(argv):
 if __name__ == "__main__":
     import sys
     # sys.exit(testMatch(sys.argv))
-    # sys.exit(doTests(sys.argv))
     sys.exit(doLint(sys.argv))
