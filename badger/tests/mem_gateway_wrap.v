@@ -9,6 +9,8 @@ module mem_gateway_wrap(
 	input raw_l,
 	input raw_s,
 	output [7:0] odata,
+	output [31:0] scratch_out,
+	input [31:0] scratch_in,
 	output [7:0] n_lat_expose  // work around a limitation in Verilator
 );
 
@@ -34,6 +36,7 @@ lb_demo_slave slave(.clk(clk), .addr(addr),
 	.ibadge_clk(1'b0),
 	.ibadge_stb(1'b0), .ibadge_data(8'b0),
 	.obadge_stb(1'b0), .obadge_data(8'b0),
+	.scratch_out(scratch_out), .scratch_in(scratch_in),
 	.tx_mac_done(1'b0),
 	.xdomain_fault(1'b0)
 );

@@ -26,5 +26,12 @@
         "sign": "unsigned",
         "base_addr": 6,
         "data_width": 1
+    },
+    "scratch_out": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 7,
+        "data_width": 32
     }
 }
