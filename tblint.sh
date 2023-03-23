@@ -4,7 +4,7 @@
 # USAGE: sh tblint.sh [-r] [TEST_PATH]
 #        -r: Recursive mode.  By default, only the top of TEST_PATH is searched.
 
-# Convetions:
+# Conventions:
 #   0.  All test benches must have file names that end with "_tb.v"
 #   1.  All test benches must pass with $display("PASS"); $finish(); and fail with
 #       $display("FAIL"); $stop();

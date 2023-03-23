@@ -24,7 +24,7 @@ Syntax Rules for checking test benches:
 class TBLinter():
     @staticmethod
     def _getDisplay(s):
-        match = re.match("[^/$\"\']*\$display\(([^\)]*)", s)  # Should not trigger when commented-out or within string
+        match = re.match(r"[^/$\"']*\$display\(([^\)]*)", s)  # Should not trigger when commented-out or within string
         if match:
             innerText = match.group(1)
             return True, innerText
@@ -34,7 +34,7 @@ class TBLinter():
     def _isDisplayPass(cls, s):
         isDisplay, innerText = cls._getDisplay(s)
         if isDisplay:
-            match = re.search("PASS|Pass|pass", innerText)   # TODO Should we be this permissive?
+            match = re.match(r"[\"']+(PASS|Pass|pass)", innerText)   # TODO Should we be this permissive?
             if match:
                 return True
             return False
@@ -44,7 +44,7 @@ class TBLinter():
     def _isDisplayFail(cls, s):
         isDisplay, innerText = cls._getDisplay(s)
         if isDisplay:
-            match = re.search("FAIL|Fail|fail", innerText)   # TODO Should we be this permissive?
+            match = re.match(r"[\"']+(FAIL|Fail|fail)", innerText)   # TODO Should we be this permissive?
             if match:
                 return True
             return False
@@ -52,14 +52,14 @@ class TBLinter():
 
     @staticmethod
     def _isFinish(s):
-        match = re.match("[^/$\"\']*\$finish[(;]", s)  # Should not trigger when commented-out or within string
+        match = re.match(r"[^/$\"']*\$finish[(;]", s)  # Should not trigger when commented-out or within string
         if match:
             return True
         return False
 
     @staticmethod
     def _isStop(s):
-        match = re.match("[^/$\"\']*\$stop[(;]", s)  # Should not trigger when commented-out or within string
+        match = re.match(r"[^/$\"']*\$stop[(;]", s)  # Should not trigger when commented-out or within string
         if match:
             return True
         return False
@@ -185,6 +185,7 @@ def test_isDisplayPass():
         '\t\t$display("PASS");': True,
         'if (foo) $display("PASS");': True,
         '$display("PASS:Explanatory text");': True,
+        '$display("YOU SHALL NOT PASS!");': False,
         '$display("PAST");': False,
         '//$display("PASS");': False,
         '"$display("PASS");"': False,
@@ -205,6 +206,7 @@ def test_isDisplayFail():
         '\t\t$display("FAIL");': True,
         'if (foo) $display("FAIL");': True,
         '$display("FAIL:Explanatory text");': True,
+        '$display("Too big to FAIL");': False,
         '$display("FALL");': False,
         '//$display("FAIL");': False,
         '"$display("FAIL");"': False,
