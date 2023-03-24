@@ -29,9 +29,13 @@ module jxj_gate_tb;
          clk=0; #10;
          clk=1; #10;
       end
-      $display("%s", fail ? "FAIL" : "PASS");
-      if (fail) $stop;
-      $finish();
+      if (fail) begin
+        $display("FAIL");
+        $stop;
+      end else begin
+        $display("PASS");
+        $finish();
+      end
    end
 
    // Simple test data that reads registers 0 through 3

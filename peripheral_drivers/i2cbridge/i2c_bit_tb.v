@@ -10,11 +10,14 @@ initial begin
 		$dumpfile("i2c_bit.vcd");
 		$dumpvars(5,i2c_bit_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<7000; cc=cc+1) begin
 		clk=0; #10;
 		clk=1; #10;
 	end
 	// $display("%s", fail ? "FAIL" : "PASS");
+	$display("PASS");
+	$finish();
 end
 
 // Pacing counter for bit engine

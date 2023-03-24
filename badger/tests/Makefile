@@ -37,6 +37,7 @@ VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
+VVP_FLAGS = ${VVP_FLAGS_$@} ${VCD_ARGS_$@}
 YOSYS = yosys
 PERL = perl
 XCIRCUIT = xcircuit

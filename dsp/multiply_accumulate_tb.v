@@ -10,6 +10,7 @@ initial begin
 		 $dumpfile("multiply_accumulate.vcd");
 		 $dumpvars(5, multiply_accumulate_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	trace = $test$plusargs("trace");
 	out_fd = $fopen("multiply_accumulate.out", "w");
 	$fwrite(out_fd, "# cc signal constant correction downscale enable reset accumulated\n");
@@ -17,6 +18,8 @@ initial begin
 		clk=0; #4;
 		clk=1; #4;
 	end
+	$display("PASS");
+	$finish();
 end
 
 reg signed [17:0] signal = 10000, constant = 200;

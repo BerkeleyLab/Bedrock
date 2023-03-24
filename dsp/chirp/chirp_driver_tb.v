@@ -19,6 +19,7 @@ module chirp_driver_tb;
          clk=0; #5;
          clk=1; #5;
       end
+      $finish();
    end
 
    reg chirp_start=0;

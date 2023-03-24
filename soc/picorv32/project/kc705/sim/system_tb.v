@@ -10,6 +10,7 @@ module system_tb;
     localparam UART_CLK_DIV = F_CLK / `BOOTLOADER_BAUDRATE / 8;
     reg clk=1, clk_n=0;
     integer pass=0;
+    $display("Non-checking testbench.  Will always PASS");
     always #(CLK_PERIOD_NS / 2) begin
         clk = ~clk;
     end
@@ -31,7 +32,8 @@ module system_tb;
         reset <= 0;
         #500000 $display("Simulation finish.");
         //$display("\n%8s", pass ? "PASS" : "FAIL" );
-        $finish;
+        $display("PASS");
+        $finish();
     end
 
     // ------------------------------------------------------------------------
@@ -92,7 +94,7 @@ module system_tb;
         if (!reset && trap && !uart_debug0.busy) begin
             #10000
             $display("TRAP");
-            $stop;
+            $stop();
         end
     end
 

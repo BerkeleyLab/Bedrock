@@ -5,10 +5,13 @@ module activity_tb;
 reg clk;
 integer cc=0;
 initial begin
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<400; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish();
 end
 
 reg trigger=0;

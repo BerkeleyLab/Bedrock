@@ -14,10 +14,13 @@ initial begin
 	end
 	$readmemh("host_mem", host_mem);
 	out_file = $fopen("test_tx.out", "w");
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<200; cc=cc+1) begin
 		clk=0; #4;  // 125 MHz
 		clk=1; #4;
 	end
+	$display("PASS");
+	$finish();
 end
 
 wire strobe;  // will be xformer.v or precog?

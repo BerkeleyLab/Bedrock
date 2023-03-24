@@ -35,8 +35,11 @@ initial begin
 	// Basic end-of-drive sanity-check
 	if (big) begin
 		$display(y, y1);
-		$display("ERROR: Non-zero filter output at the end of the test");
-		$stop;
+		$display("FAIL: ERROR: Non-zero filter output at the end of the test");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
 	end
 end
 
