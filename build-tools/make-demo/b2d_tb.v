@@ -15,9 +15,13 @@ initial begin
 		clk=1; #4;
 	end
 	$display("%d tests passed", passed);
-	$display("%s", fail ? "FAIL" : "PASS");
-	if (fail) $stop();
-	$finish();
+  if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 reg [15:0] bdata, new_bdata, old_bdata;

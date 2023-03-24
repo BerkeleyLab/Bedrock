@@ -15,10 +15,13 @@ initial begin
 		$dumpfile("lp.vcd");
 		$dumpvars(5,lp_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<450; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish();
 end
 
 // Output file (if any) for dumping the results

@@ -10,11 +10,14 @@ initial begin
 		$dumpfile("llspi.vcd");
 		$dumpvars(5,llspi_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<4000; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
 	//$display("%s", fail ? "FAIL" : "PASS");
+	$display("PASS");
+	$finish();
 end
 
 reg [8:0] host_din;

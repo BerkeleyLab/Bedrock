@@ -21,6 +21,7 @@ initial begin
 		clk=0; #3;
 		clk=1; #3;
 	end
+	$finish();
 end
 
 // Local bus, not really used in this test bench

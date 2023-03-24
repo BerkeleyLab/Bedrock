@@ -17,6 +17,7 @@ initial begin
 		clk=0; #3;
 		clk=1; #3;
 	end
+	$finish();
 end
 
 // Fake the drive signals
