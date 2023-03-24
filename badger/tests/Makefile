@@ -345,8 +345,8 @@ Vcluster: cluster_wrap.sv mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vcluster_wrap.mk USER_CPPFLAGS="-DVL_DEBUG"
 	mv obj_dir/Vcluster_wrap $@
-cluster_run.out: Vcluster
-	bash cluster_run.sh
+cluster_run.out: cluster_run.sh Vcluster
+	bash $<
 
 # =====
 # Simple syntax check
