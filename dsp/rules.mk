@@ -47,6 +47,9 @@ timestamp.bit: timestamp.v reg_delay.v
 half_filt_check: half_filt.py half_filt.dat
 	$(PYTHON) $< -c
 
+iq_modulator.dat: iq_modulator_tb
+	$(VVP) $< +trace
+
 # scattershot approach
 # limited to den>=12
 mon_12_check: mon_12_tb
@@ -93,7 +96,7 @@ lpass1_check: $(FTEST_PY) lpass1_tb
 CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd *.lxt *~
 CLEAN += half_filt.dat pdetect.dat tt800_ref tt800.dat tt800_ref.dat tt800_ref.d
 CLEAN += cordicg_b22.v second_if_out.dat ssb_*.dat multiply_accumulate.out
-CLEAN += fwashout.dat lpass1.dat
+CLEAN += fwashout.dat lpass1.dat iq_modulator.dat
 
 CLEAN_DIRS += tt800_ref.dSYM
 CLEAN_DIRS += _xilinx __pycache__
