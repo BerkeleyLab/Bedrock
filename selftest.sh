@@ -20,6 +20,15 @@
 # XXX consider adding -Wno-macro-redefinition to build-tools/top_rules.mk
 # XXX should we do a git clean -fdx before each make?
 
+# Print some system status and tool versions
+# When run with -e, will cause early failure if something is missing
+uname -s -r
+gcc --version | awk 'FNR==1{print $0}'
+python3 --version
+iverilog -V | awk 'FNR==1{print $0}'
+verilator --version
+# yosys --version
+
 ## badger_test
 make -C badger/tests clean all
 # XXX skip bash tftp_test.sh && bash speed_check.sh, which need help from root
