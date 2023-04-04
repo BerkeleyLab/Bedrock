@@ -40,7 +40,8 @@ VERILOG_SIM = cd `dirname $@` && $(VVP) `basename $<` $(VVP_FLAGS)
 VERILOG_VIEW = $(GTKWAVE) $(GTKW_OPT) $^
 VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS)
 # FIXME This hack does not work with vpath
-VERILOG_TBLINT = $(PYTHON) $(BUILD_DIR)/tblint.py $(if $(realpath $<.v),$<.v,$<.sv)
+#VERILOG_TBLINT = $(PYTHON) $(BUILD_DIR)/tblint.py $(if $(realpath $<.v),$<.v,$<.sv)
+VERILOG_TBLINT = $(PYTHON) $(BUILD_DIR)/tblint.py $(if $(wildcard $(addsuffix .v,$<)),$(wildcard $(addsuffix .v,$<)),$(wildcard $(addsuffix .sv,$<)))
 VERILOG_RUN = $(VVP) $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
@@ -109,6 +110,7 @@ endif
 	$(VERILOG_VIEW)
 
 %_check: %_tb
+	$(VERILOG_TBLINT)
 	$(VERILOG_CHECK)
 
 %_lint: %.v %_auto
