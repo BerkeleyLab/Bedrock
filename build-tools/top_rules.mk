@@ -38,7 +38,9 @@ VERILOG_TB = $(VERILOG) $(VG_ALL) $(V_TB) ${VFLAGS} -o $@ $(filter %v, $^)
 VERILOG_TB_VPI = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} -o $@ $(filter %.v, $^)
 VERILOG_SIM = cd `dirname $@` && $(VVP) `basename $<` $(VVP_FLAGS)
 VERILOG_VIEW = $(GTKWAVE) $(GTKW_OPT) $^
-VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS) | $(AWK) -f $(filter %.awk, $^)
+VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS)
+# FIXME This hack does not work with vpath
+VERILOG_TBLINT = $(PYTHON) $(BUILD_DIR)/tblint.py $(if $(realpath $<.v),$<.v,$<.sv)
 VERILOG_RUN = $(VVP) $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
@@ -64,7 +66,7 @@ VIVADO_FLASH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/vivado_flash.tcl -t
 VIVADO_CREATE_IP = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/lbl_ip.tcl $(BUILD_DIR)/vivado_tcl/create_ip.tcl -tclargs
 OCTAVE_SILENT = $(OCTAVE) -q $<
 PS2PDF = ps2pdf -dEPSCrop $< $@
-CHECK = $(VVP) $< | awk -f $(filter %.awk, $^)
+CHECK = $(VVP) $<
 BIT2RBF = bit2rbf $@ < $<
 GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 
@@ -106,7 +108,7 @@ endif
 %_view: %.vcd %.gtkw
 	$(VERILOG_VIEW)
 
-%_check: %_tb $(BUILD_DIR)/testcode.awk
+%_check: %_tb
 	$(VERILOG_CHECK)
 
 %_lint: %.v %_auto

@@ -26,10 +26,13 @@ initial begin
 		$dumpfile("cryomodule_badger.vcd");
 		$dumpvars(5,cryomodule_badger_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; (cc<1800) | use_tap ; cc=cc+1) begin
 		clk=0; #4;  // 125 MHz * 8bits/cycle -> 1 Gbit/sec
 		clk=1; #4;
 	end
+	$display("PASS");
+	$finish();
 end
 `endif //  `ifdef SIMULATE
 

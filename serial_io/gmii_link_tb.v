@@ -20,14 +20,14 @@ module gmii_link_tb;
       if (operate)
          if (an_status[6]) begin
             $display("FAIL: Link is up but auto-negotiation timed out.");
-            $stop;
+            $stop();
          end else begin
             $display("PASS: Link is up and auto-negotiation completed successfully.");
-            $finish;
+            $finish();
          end
 
       $display("FAIL: Link is not up at the end of the test.");
-      $stop;
+      $stop();
    end
 
    wire operate;  // from link negotiator

@@ -37,6 +37,7 @@ VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
+VVP_FLAGS = ${VVP_FLAGS_$@} ${VCD_ARGS_$@}
 YOSYS = yosys
 PERL = perl
 XCIRCUIT = xcircuit
@@ -61,10 +62,10 @@ vpath %.eps ..
 all: crc_selfcheck_check derive_check crc8e_guts_check udp_port_cam_check
 all: scanner_check hack_icmp_cksum_check rtefi_pipe_check hw_test_tb
 all: hello_check speed_test_check mem_gateway_check spi_flash_check
-all: Vrtefi_blob Vhw_test Vmem_gateway_check udprtx
+all: Vrtefi_blob Vhw_test Vmem_gateway_check Vcluster udprtx
 all: test_tx_check precog_check mac_subset_check
-all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb rtefi_live
-all: lb_timing_demo.vcd
+all: sp605_gmii_test_tb kc705_gmii_test_tb ac701_rgmii_test_tb badge_trace_tb
+all: rtefi_live lb_timing_demo.vcd cluster_run_check
 # all: lb_timing_demo.pdf
 
 # Packet Badger synthesizable code
@@ -304,7 +305,6 @@ Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) spi
 # See tftp_test.sh
 
 # =====
-# WIP
 Vmem_gateway_wrap: mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) mem_gateway_sim.cpp udp_model.c
 	rm -f udp_model.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
@@ -337,6 +337,16 @@ fake_config_romx.v: $(LB_DEMO_JSON)
 CLEAN += $(LB_DEMO_JSON)
 CLEAN += $(LB_SCALAR_JSON)
 endif
+
+# =====
+# WIP
+Vcluster: cluster_wrap.sv mem_gateway_wrap.v mem_gateway.v reg_delay.v $(LB_DEMO_V) cluster_sim.cpp udp_model.c
+	rm -f udp_model.o  # can't leave C version around for C++ to find
+	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
+	MAKEFLAGS="" make -C obj_dir -f Vcluster_wrap.mk USER_CPPFLAGS="-DVL_DEBUG"
+	mv obj_dir/Vcluster_wrap $@
+cluster_run.out: cluster_run.sh Vcluster
+	bash $<
 
 # =====
 # Simple syntax check
@@ -411,9 +421,10 @@ locc:
 .PHONY: spellme loc locc
 
 CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_derive crc_selfcheck
-CLEAN += crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test
+CLEAN += crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test Vcluster
 CLEAN += stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen
 CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab udprtx
+CLEAN += cluster_run.out
 CLEAN += $(RTEFI_CLEAN)
 CLEAN += *.html *.pdf
 CLEAN_DIRS += obj_dir _xilinx

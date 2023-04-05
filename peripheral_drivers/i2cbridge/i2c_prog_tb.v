@@ -15,8 +15,13 @@ initial begin
 		clk=1; #10;
 	end
 	$display("%s", worked==3 ? "PASS" : "FAIL");
-	if (worked != 3) $stop();
-	$finish();
+	if (worked != 3) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 // Pacing counter for bit engine

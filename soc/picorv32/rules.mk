@@ -42,7 +42,7 @@ LDFLAGS = $(CLFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map
 	$(PYTHON) $(COMMON_DIR)/boot_load.py $< $(BOOTLOADER_SERIAL) --baud_rate $(BOOTLOADER_BAUDRATE)
 
 # All testbenches use $stop, eliminating the `awk` dependency
-%_check: %_tb $(BUILD_DIR)/testcode.awk
+%_check: %_tb
 %_check: %_tb
 	$(VERILOG_SIM)
 

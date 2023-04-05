@@ -14,9 +14,13 @@ initial begin
 		clk=0; #4;
 		clk=1; #4;
 	end
-	$display("%s", fail ? "FAIL" : "PASS");
-	if (fail) $stop();
-	$finish();
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 // Stimulus

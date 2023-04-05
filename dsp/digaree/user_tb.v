@@ -21,7 +21,7 @@ initial begin
 		host_clk=0; #(HOST_CLK_PERIOD/2);
 		host_clk=1; #(HOST_CLK_PERIOD/2);
 	end
-	$finish;
+	$finish();
 end
 
 always begin sf_clk = ~sf_clk; #(SF_CLK_PERIOD/2); end

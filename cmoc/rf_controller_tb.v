@@ -41,10 +41,13 @@ initial begin
 	if (!$value$plusargs("phase=%f", phase)) phase = 0.0;
 	fiber_i = 3000.0 * $cos(phase);
 	fiber_q = 3000.0 * $sin(phase);
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc < 990; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish();
 end
 `endif //  `ifdef SIMULATE
 

@@ -26,6 +26,7 @@ initial begin
 		clk=0; #4;  // 125 MHz * 8bits/cycle -> 1 Gbit/sec
 		clk=1; #4;
 	end
+	$finish();
 end
 
 // Create flow of packets

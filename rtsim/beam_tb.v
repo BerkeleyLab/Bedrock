@@ -14,10 +14,13 @@ initial begin
 	end
 	trace = $test$plusargs("trace");
 	reset=0;
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<1500; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish();
 end
 `endif //  `ifdef SIMULATE
 

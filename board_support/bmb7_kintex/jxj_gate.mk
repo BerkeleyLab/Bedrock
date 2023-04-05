@@ -19,8 +19,8 @@ COMMON_HDL_DIR = submodules/common-hdl
 %_view: %.vcd %.gtkw
 	$(GTKWAVE) $^
 
-%_check: %_tb ../digit/testcode.awk
-	$(VVP) $< $(VFLAGS) | $(AWK) -f $(filter %.awk, $^)
+%_check: %_tb
+	$(VVP) $< $(VFLAGS)
 
 %.dat: %_tb
 	vvp $< > $@
