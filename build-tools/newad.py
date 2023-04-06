@@ -6,7 +6,7 @@
 # * Mirror read and write clk is currently hard-coded to lb_clk
 # * Remove hierarchy from address_allocation
 # * Currently we-strobe is being abused to generate registers of width > 1
-# * Can we do a quick search in the string before a full re match in parse_vfile?
+# * Remove AUTOMATIC_map, still seems to be used in cryomodule.v
 
 import argparse
 import json
@@ -43,6 +43,7 @@ class Port:
         signal_type,
         clk_domain="lb",
         cd_indexed=False,
+        needs_declaration=True,
         description="",
     ):
         self.name = name
@@ -54,6 +55,7 @@ class Port:
         self.clk_domain = clk_domain
         self.cd_indexed = cd_indexed
         self.cd_index = None
+        self.needs_declaration = needs_declaration
         self.description = description
 
     def port_prefix_set(self, prefix):
@@ -72,9 +74,9 @@ class Port:
 
 
 def consider_port(p, fd):
-    # Consider what to do with a port
     # 5-element list is (input/output) (signed/None) lsb msb name
     if p.direction == "output":
+        # TODO: Another idiosyncracy, moved to an attribute as per new spec
         bp = re.sub("_addr$", "", p.name)
         fd.write("// found output address in module %s, base=%s\n" % (p.module, bp))
         use_ram[p.module + ":" + bp] = "[%s:%s]" % p.downto
@@ -98,6 +100,7 @@ def make_decoder_inner(inst, mod, p):
     """
     Constructs a decoder for a port p.
     p: is an instance of Port
+    # TODO: clarify what different signal_types are exactly
     """
     # print '// make_decoder',inst,mod,a
     if p.direction != "output":
@@ -171,23 +174,14 @@ def make_decoder_inner(inst, mod, p):
                 p.description,
             )
         elif p.signal_type == "single-cycle":
-            reg_def = (
-                "reg [%d:%d] %s=0; always @(posedge %s_clk) "
-                "%s <= we_%s ? %s_data%s[%d:%d] : %d'b0;\\\n"
-                % (
-                    msb,
-                    lsb,
-                    sig_name,
-                    clk_prefix,
-                    sig_name,
-                    sig_name,
-                    clk_prefix,
-                    cd_index_str,
-                    msb,
-                    lsb,
-                    data_width,
-                )
-            )
+            if p.needs_declaration:
+                reg_decl = 'reg [{}:{}] {}=0;'.format(msb, lsb, sig_name)
+            else:
+                reg_decl = ''
+            reg_def = '%s always @(posedge %s_clk) '\
+                      '%s <= we_%s ? %s_data%s[%d:%d] : %d\'b0;\\\n' %\
+                      (reg_decl, clk_prefix, sig_name, sig_name,
+                       clk_prefix, cd_index_str, msb, lsb, data_width)
             decodes.append(decode_def + reg_def)
             gch[sig_name] = (
                 0,
@@ -233,20 +227,14 @@ def make_decoder_inner(inst, mod, p):
                 we_def = "wire %s_we = we_%s;\\\n" % (sig_name, sig_name)
             else:
                 we_def = ""
-            reg_def = (
-                "reg [%d:%d] %s=0; always @(posedge %s_clk) "
-                "if (we_%s) %s <= %s_data%s;\\\n"
-                % (
-                    msb,
-                    lsb,
-                    sig_name,
-                    clk_prefix,
-                    sig_name,
-                    sig_name,
-                    clk_prefix,
-                    cd_index_str,
-                )
-            )
+            if p.needs_declaration:
+                reg_decl = 'reg [{}:{}] {}=0;'.format(msb, lsb, sig_name)
+            else:
+                reg_decl = ''
+            reg_def = '%s always @(posedge %s_clk) '\
+                      'if (we_%s) %s <= %s_data%s;\\\n' %\
+                      (reg_decl, clk_prefix, sig_name, sig_name,
+                       clk_prefix, cd_index_str)
             decodes.append(decode_def + we_def + reg_def)
             gch[sig_name] = (
                 0,
@@ -350,20 +338,158 @@ def construct_map(inst, p, gcnt, mod):
             self_map[mod].append("assign %s = %s;\\\n" % (expanded, array_el))
 
 
-INSTANTIATION_SITE = (
-    r"^\s*(\w+)\s+(#\(.*\) *)?(\w+)\s*//\s*auto(\(\w+,\d+\))?\s+((\w+)(\[(\w+)\])?)?"
-)
+from v2j import v2j
+from read_attributes import read_attributes
+
+
+def search_verilog_files(dlist, fin, stack):
+    '''
+    Find a .v, and .sv files in that order
+    '''
+    if isfile(fin):
+        return fin
+    fname = basename(fin)
+    fname_sv = splitext(fname)[0] + '.sv'
+    for d in dlist:
+        vfile = d + '/' + fname
+        if isfile(vfile):
+            return vfile
+        else:
+            vfile = d + '/' + fname_sv
+            if isfile(vfile):
+                return vfile
+    print("File not found:", fin)
+    print("(from hierarchy %s)" % stack)
+    global file_not_found
+    file_not_found += 1
+    return False
+
+
+def parse_vfile_yosys(stack, fin, fd, dlist, clk_domain, cd_indexed):
+    '''
+    Given a filename, parse Verilog:
+    (a) looking for module instantiations marked automatic,
+    for which we need to generate port assignments.
+    When such an instantiation is found, recurse.
+    (b) looking for input/output ports labeled 'external'.
+    Record them in the port_lists dictionary for this module.
+    '''
+    # TODO: Old newad doesn't really take care of the case where
+    #       there are multiple modules in a single file, as there is no check
+    #       for module declaration per se, also doesn't support other fancy
+    #       declarations like "input [15:0] a, b,".
+    searchpath = dirname(fin)
+    file_found = search_verilog_files(dlist, fin, stack)
+
+    if not file_found:
+        return
+    else:
+        fin = file_found
+
+    fd.write('// parse_vfile_yosys %s %s\n' % (stack, fin))
+    if searchpath == '':
+        searchpath = '.'
+    this_mod = fin.split('/')[-1].split('.')[0]
+
+    parsed_mod = read_attributes(v2j(fin))
+    this_port_list = []
+    attributes = {}
+    for inst, mod_info in parsed_mod['automatic_cells'].items():
+        # print(inst, mod_info)
+        mod_attrs = mod_info['attributes']
+        mod = mod_info['type']
+        clk_domain_l = mod_attrs['cd'] if 'cd' in mod_attrs else clk_domain  # Assume same cd unless specified
+        cd_indexed_l = True if 'cd_indexed' in mod_attrs else cd_indexed
+        gvar = mod_attrs['gvar'] if 'gvar' in mod_attrs else None
+        gcnt = int(mod_attrs['gcnt'], 2) if 'gcnt' in mod_attrs else None
+
+        if gvar is not None:
+            # When the instantiation is inside a genvar, yosys_json already unrolls the loop and creates
+            # a cell per iteration
+            inst_name_info = inst.split('.')
+            inst = inst_name_info[1]
+            ig = int(inst_name_info[0].split('[')[1][0])  # TODO: This is a total hack to maintain old newad API
+
+        # TODO: Look for CD attribute
+        fd.write('// module=%s instance=%s gvar=%s gcnt=%s\n' %
+                 (mod, inst, gvar, str(gcnt)))
+        if mod not in port_lists:
+            # recurse
+            parse_vfile_yosys(stack + ':' + fin,
+                              searchpath + '/' + mod + '.v',
+                              fd, dlist, clk_domain_l, cd_indexed_l)
+        if not stack:
+            if gvar is None or ig == 0:
+                print_instance_ports(inst, mod, gvar, gcnt, fd)
+
+        # add this instance's external ports to our own port list
+        for p in port_lists[mod] if mod in port_lists else []:
+            if gcnt is None:
+                p_p = deepcopy(p)  # p_prime
+                this_port_list.append(p_p.port_prefix_set(inst + ':'))
+            else:
+                p_p = deepcopy(p)  # p_prime
+                p_p = p_p.port_prefix_set('{}_{}:'.format(inst, ig))
+                if cd_indexed_l:
+                    p_p.cd_index = ig  # TODO: to be fixed
+                this_port_list.append(p_p)
+                if ig == 0:
+                    if this_mod not in self_map:
+                        self_map[this_mod] = []
+                    construct_map(inst, p, gcnt, this_mod)
+
+    for port, (net_info, port_info) in parsed_mod['external_nets'].items():
+        signal_type = net_info['attributes']['signal_type'] if 'signal_type' in net_info['attributes'] else None
+        signed = 'signed' if 'signed' in net_info else None
+        direction = port_info['direction'] if 'direction' in port_info else None
+        p = Port(port,
+                 # TODO: This is a hack needs to be fixed
+                 (len(net_info['bits']) - 1, 0),
+                 direction,
+                 signed,
+                 this_mod,
+                 signal_type,
+                 clk_domain,
+                 cd_indexed,
+                 port_info != {},
+                 **attributes)
+        this_port_list.append(p)
+        if not stack and port_info == {}:
+            make_decoder(None, this_mod, p, None)
+        else:
+            consider_port(p, fd)
+        if signal_type == 'plus-we':
+            p = Port(port + '_we',
+                     (0, 0),
+                     direction,
+                     None,
+                     this_mod,
+                     'plus-we-VOID',
+                     clk_domain,
+                     cd_indexed,
+                     port_info != {},
+                     **attributes)
+            this_port_list.append(p)
+            if not stack:
+                make_decoder(None, this_mod, p, None)
+            else:
+                consider_port(p, fd)
+        attributes = {}
+
+    port_lists[this_mod] = this_port_list
+
+
+INSTANTIATION_SITE = r"^\s*(\w+)\s+(#\(.*\) *)?(\w+)\s*//\s*auto(\(\w+,\d+\))?\s+((\w+)(\[(\w+)\])?)?"
 # Search for port with register width defined 'input (signed)? [%d:%d] name // <...>'
 PORT_WIDTH_MULTI = r"^\s*,?(input|output)\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+),?\s*"
 PORT_WIDTH_MULTI += r"//\s*external\s*(single-cycle|strobe|we-strobe|plus-we)?"
 # Search for port with register width 1 'input (signed)? name // <...>'
 PORT_WIDTH_SINGLE = r"^\s*,?(input|output)\s+(signed)?\s*(\w+),?\s*//\s*external\s*(single-cycle|strobe|we-strobe)?"
 TOP_LEVEL_REG = r"^\s*//\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*top-level\s*(single-cycle|strobe|we-strobe)?"
-
 DESCRIPTION_ATTRIBUTE = r"^\s*\(\*\s*BIDS_description\s*=\s*\"(.+?)\"\s*\*\)\s*$"
 
 
-def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
+def parse_vfile_comments(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
     """
     Given a filename, parse Verilog:
     (a) looking for module instantiations marked automatic,
@@ -372,32 +498,15 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
     (b) looking for input/output ports labeled 'external'.
     Record them in the port_lists dictionary for this module.
     """
-    fin_sv = splitext(fin)[0] + ".sv"
     searchpath = dirname(fin)
-    fname = basename(fin)
-    fname_sv = basename(fin_sv)
-    fsearch = [fname, fname_sv] if try_sv else [fname]
-    found = False
-    for fn in fsearch:
-        if isfile(fn):
-            fin = fn
-            break
-        for d in dlist:
-            x = d + "/" + fn
-            if isfile(x):
-                fin = x
-                found = True
-                break
-        if found:
-            break
+    file_found = search_verilog_files(dlist, fin, stack)
 
-    if not isfile(fin):
-        print("File not found:", fin)
-        print("(from hierarchy %s)" % stack)
-        global file_not_found
-        file_not_found += 1
+    if not file_found:
         return
-    fd.write("// parse_vfile %s %s\n" % (stack, fin))
+    else:
+        fin = file_found
+
+    fd.write("// parse_vfile_comments %s %s\n" % (stack, fin))
     if searchpath == "":
         searchpath = "."
     this_mod = fin.split("/")[-1].split(".")[0]
@@ -443,13 +552,13 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
             )
             if mod not in port_lists:
                 # recurse
-                parse_vfile(
+                parse_vfile_comments(
                     stack + ":" + fin,
                     searchpath + "/" + mod + ".v",
                     fd,
                     dlist,
                     clk_domain_l,
-                    cd_indexed_l,
+                    cd_indexed_l
                 )
             if not stack:
                 print_instance_ports(inst, mod, gvar, gcnt, fd)
@@ -540,8 +649,9 @@ def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
                     info[1],
                     this_mod,
                     info[5],
-                    port_clock,
+                    clk_domain,
                     cd_indexed,
+                    False,
                     **attributes
                 )
                 this_port_list.append(p)
@@ -748,9 +858,12 @@ def address_allocation(
     return generate_addresses(fd, out_mod, address, low_res, gen_mirror, plot_map)
 
 
-def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror):
+def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror, use_yosys):
     obuf = StringIO()
-    parse_vfile("", fi, obuf, dir_list, "lb", False)
+    if use_yosys:
+        parse_vfile_yosys("", fi, obuf, dir_list, "lb", False)
+    else:
+        parse_vfile_comments("", fi, obuf, dir_list, "lb", False)
     obuf.write("// machine-generated by newad.py\n")
     obuf.write("`ifdef LB_DECODE_%s\n" % modname)
     obuf.write('`include "addr_map_%s.vh"\n' % modname)
@@ -829,6 +942,12 @@ def main(argv):
         "-o", "--output", default="", help="Outputs generated header file"
     )
     parser.add_argument(
+        "-y",
+        "--yosys",
+        action="store_true",
+        help="Use yosys for backend, as opposed to poor mans parsing"
+    )
+    parser.add_argument(
         "-d",
         "--dir_list",
         default=".",
@@ -898,7 +1017,7 @@ def main(argv):
     regmap_fname = args.regmap
 
     print_decode_header(
-        input_fname, modname, args.output, dir_list, args.lb_width, args.gen_mirror
+        input_fname, modname, args.output, dir_list, args.lb_width, args.gen_mirror, args.yosys
     )
 
     if addr_header_fname:
