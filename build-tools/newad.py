@@ -651,7 +651,7 @@ def parse_vfile_comments(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=T
                     info[5],
                     clk_domain,
                     cd_indexed,
-                    False,
+                    True,
                     **attributes
                 )
                 this_port_list.append(p)
