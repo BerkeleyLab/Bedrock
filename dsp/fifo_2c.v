@@ -44,11 +44,13 @@ module fifo_2c #(
     input wr_clk,
     input we,
     input [dw-1:0] din,
+    output reg [aw:0] wr_count,
     output reg full,
 
     input rd_clk,
     input re,
     output[dw-1:0] dout,
+    output reg [aw:0] rd_count,
     output reg empty
 );
 
@@ -90,5 +92,11 @@ always @(posedge rd_clk) empty <=
 always @(posedge wr_clk) full <=
 	(wp_bin == (rp_bin_x ^ block)) |
 	(we & (wp_bin_next == (rp_bin_x ^ block)));
+
+// Calculate number of words in both domains
+always @(posedge rd_clk) rd_count <=
+    wp_bin_x - rp_bin;
+always @(posedge wr_clk) wr_count <=
+    wp_bin - rp_bin_x;
 
 endmodule
