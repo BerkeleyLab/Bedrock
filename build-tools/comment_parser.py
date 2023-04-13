@@ -12,6 +12,7 @@ PORT_WIDTH_MULTI += r"//\s*external\s*(single-cycle|strobe|we-strobe|plus-we)?"
 # Search for port with register width 1 'input (signed)? name // <...>'
 PORT_WIDTH_SINGLE = r"^\s*,?(input|output)\s+(signed)?\s*(\w+),?\s*//\s*external\s*(single-cycle|strobe|we-strobe)?"
 TOP_LEVEL_REG = r"^\s*//\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*top-level\s*(single-cycle|strobe|we-strobe)?"
+TOP_LEVEL_NEW = r"^\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*//\s*top-level\s*(single-cycle|strobe|we-strobe)?"
 DESCRIPTION_ATTRIBUTE = r"^\s*\(\*\s*BIDS_description\s*=\s*\"(.+?)\"\s*\*\)\s*$"
 
 
@@ -182,6 +183,29 @@ class CommentParser(Parser):
                         clk_domain,
                         cd_indexed,
                         True,
+                        **attributes
+                    )
+                    this_port_list.append(p)
+                    # Since these are top level registers, decoders can be generated here
+                    self.make_decoder(None, this_mod, p, None)
+                    attributes = {}
+                line_no_attributes = re.sub(r"\(\*[^\*]*\*\)", "", line)
+                m = re.search(TOP_LEVEL_NEW, line_no_attributes)
+                if m:
+                    info = [m.group(i) for i in range(6)]
+                    # Look carefully at the "False" in slot 9 vs. "True" above.
+                    # That clears the needs_declaration flag such that we don't
+                    # duplicate the register declaration.
+                    p = Port(
+                        info[4],
+                        (info[2], info[3]),
+                        "top_level",
+                        info[1],
+                        this_mod,
+                        info[5],
+                        clk_domain,
+                        cd_indexed,
+                        False,
                         **attributes
                     )
                     this_port_list.append(p)
