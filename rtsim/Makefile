@@ -11,7 +11,11 @@ ifneq (clean,$(MAKECMDGOALS))
 	-include $(DEPDIR)/resonator.bit.d
 endif
 
+VFLAGS += -Wno-macro-redefinition
 VVP_FLAGS += +trace
+
+# -y for yosys
+NEWAD_ARGS += -y
 
 TEST_BENCH = beam_tb outer_prod_tb resonator_tb a_compress_tb cav_mode_tb cav_elec_tb rtsim_tb afilter_siso_tb
 

@@ -3,6 +3,8 @@
 `define ADDR_HIT_dut_kx 0
 `define ADDR_HIT_dut_ky 0
 
+`define AUTOMATIC_decode
+`define AUTOMATIC_dut
 `define LB_DECODE_lp_tb
 `include "lp_tb_auto.vh"
 
@@ -10,6 +12,7 @@ module lp_tb;
 
 reg clk;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("lp.vcd");
@@ -23,15 +26,18 @@ initial begin
 	$display("PASS");
 	$finish();
 end
+`endif //  `ifdef SIMULATE
 
 // Output file (if any) for dumping the results
 integer out_file;
 reg [255:0] out_file_name;
+`ifdef SIMULATE
 initial begin
 	out_file = 0;
 	if ($value$plusargs("out_file=%s", out_file_name))
 		out_file = $fopen(out_file_name,"w");
 end
+`endif //  `ifdef SIMULATE
 
 reg signed [17:0] x=0;
 reg [2:0] state=0;
@@ -52,12 +58,14 @@ reg lb_write=0;
 `AUTOMATIC_decode
 
 wire signed [19:0] y;
+(* lb_automatic *)
 lp dut // auto
 	(.clk(clk), .iq(iq), .x(x), .y(y), `AUTOMATIC_dut);
 
 // Set control registers from command line
 // See also lp_setup in lp_notch_test.py or lp_2notch_test.py
 reg signed [17:0] kxr, kxi, kyr, kyi;
+`ifdef SIMULATE
 initial begin
 	if (!$value$plusargs("kxr=%d", kxr)) kxr =  71000;
 	if (!$value$plusargs("kxi=%d", kxi)) kxi =      0;
@@ -69,6 +77,8 @@ initial begin
 	dp_dut_ky.mem[0] = kyr;  // k_Y  real part
 	dp_dut_ky.mem[1] = kyi;  // k_Y  imag part
 end
+`endif //  `ifdef SIMULATE
+
 // As further discussed in lp.v,
 // y*z = y + ky*z^{-1}*y + kx*x
 // k_X and k_Y are scaled by 2^{19} from their real values,
@@ -95,7 +105,9 @@ always @(posedge clk) begin
 	if (~iq) y_q <= y;
 	if (~iq) x_i <= x1;
 	if (~iq) x_q <= x;
+`ifdef SIMULATE
 	if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d\n", x_i, x_q, y_i, y_q);
+`endif
 end
 
 endmodule

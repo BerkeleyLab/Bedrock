@@ -6,8 +6,11 @@ module prng(
 	input clk,
 	output [31:0] rnda,
 	output [31:0] rndb,
+	(* external *)
 	input [0:0] random_run,  // external
+	(* external, signal_type="plus-we" *)
 	input [31:0] iva,  // external plus-we
+	(* external, signal_type="plus-we" *)
 	input [31:0] ivb,  // external plus-we
 	// Everything else above is robust and pretty good.
 	// Minor loss in efficiency from having two 32-bit registers when zero would do.

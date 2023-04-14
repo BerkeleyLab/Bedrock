@@ -8,6 +8,9 @@ include $(BUILD_DIR)/newad_top_rules.mk
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include $(BADGER_DIR)/rules.mk
 
+NEWAD_ARGS += -y
+
+VFLAGS += -Wno-macro-redefinition
 TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb rf_controller_tb
 
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
@@ -45,7 +48,7 @@ VVP_FLAGS_cryomodule.dat = +pfile=cryomodule_p.dat
 cryomodule.out: cryomodule_tb cryomodule_in.dat
 cryomodule.dat: cryomodule.out
 cryomodule.vcd: cryomodule_in.dat
-cryomodule_tb: $(AUTOGEN_DIR)/config_romx.v $(AUTOGEN_DIR)/cryomodule_auto.vh
+cryomodule_tb: $(AUTOGEN_DIR)/config_romx.v cryomodule_auto
 cryomodule_check: cryomodule.dat
 	$(PYTHON) verify_cryomodule.py
 
