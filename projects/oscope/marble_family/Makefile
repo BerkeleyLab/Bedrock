@@ -20,7 +20,7 @@ VFLAGS_DEP += -y$(DSP_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(BOARD_SUPPORT_D
 
 LB_AW = 23
 NEWAD_DIRS += $(OSCOPE_COMMON_DIR)
-NEWAD_ARGS += -b8388608
+NEWAD_ARGS += -b8388608 -y
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v spi_flash.v
 RTEFI_EXTRA_V = spi_flash_engine.v
 include $(BADGER_DIR)/rules.mk

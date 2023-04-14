@@ -7,6 +7,7 @@ module cryomodule_tb;
 
 reg clk, trace;
 integer cc, errors;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("cryomodule.vcd");
@@ -23,6 +24,7 @@ initial begin
 	$display("PASS");
 	$finish();
 end
+`endif //  `ifdef SIMULATE
 
 reg clk1x=0, clk2x=0;
 always begin
@@ -34,12 +36,14 @@ end
 integer file1, file2;
 reg [255:0] file1_name;
 reg [255:0] file2_name;
+`ifdef SIMULATE
 initial begin
 	if (!$value$plusargs("dfile=%s", file1_name)) file1_name="cryomodule_in.dat";
 	file1 = $fopen(file1_name,"r");
 	file2 = 0;
 	if ($value$plusargs("pfile=%s", file2_name)) file2 = $fopen(file2_name,"w");
 end
+`endif //  `ifdef SIMULATE
 
 integer rc=2;
 wire control_clk=clk;
@@ -47,6 +51,7 @@ wire control_clk=clk;
 reg [31:0] control_data, cd;
 reg [16:0] control_addr, control_addr_d0, control_addr_d, ca;
 reg control_write=0, control_read=0, control_read_d0=0, control_read_d=0;
+`ifdef SIMULATE
 integer control_cnt=0;
 integer start_read=11300;
 integer len_read=1024;
@@ -54,7 +59,9 @@ integer wait_horizon=5;
 always @(posedge control_clk) begin
 	control_cnt <= control_cnt+1;
 	if (control_cnt > wait_horizon && control_cnt%3==1 && rc==2) begin
+		`ifdef SIMULATE
 		rc=$fscanf(file1,"%d %d\n",ca,cd);
+		`endif
 		if (rc==2) begin
 			if (ca == 555) begin
 				$display("stall %d cycles",cd);
@@ -109,6 +116,7 @@ always @(posedge control_clk) begin
 	control_addr_d  <= control_addr_d0;
 	control_read_d  <= control_read_d0;
 end
+`endif //  `ifdef SIMULATE
 
 
 // set buffer size to 1024 (fills in 128*33*2 clock cycles)
@@ -121,6 +129,7 @@ cryomodule #(.circle_aw(10), .cavity_count(2)) l(.clk1x(clk1x), .clk2x(clk2x),
 
 wire signed [15:0] mem_val = read_result;  // unsigned -> signed
 integer dptr0, ix, drow[0:7];
+`ifdef SIMULATE
 always @(posedge control_clk) if (control_read_d && control_cnt>2000) begin
 	if (trace) begin
 	   $display("read value[%d] = %d",control_addr_d-24576,mem_val);
@@ -142,5 +151,6 @@ initial begin
 	l.cryomodule_cavity[1].llrf.controller.wave_cnt=10;  // hack to avoid wasting time
 `endif
 end
+`endif //  `ifdef SIMULATE
 
 endmodule

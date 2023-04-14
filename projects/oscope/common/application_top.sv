@@ -1,5 +1,9 @@
 `define LB_DECODE_application_top
 
+`define AUTOMATIC_decode
+`define AUTOMATIC_digitizer_config
+`define AUTOMATIC_digitizer_slowread
+
 `include "application_top_auto.vh"
 
 module application_top(
@@ -50,8 +54,14 @@ module application_top(
 // Magic
 // Needs placing before usage of any top-level registers
 wire clk1x_clk, clk2x_clk, lb4_clk;
+
+(* external, signal_type="single-cycle" *) reg [0:0] lamp_test_trig = 0;  // top-level single-cycle
+(* external, signal_type="single-cycle" *) reg [0:0] ctrace_start = 0;    // top-level single-cycle
+(* external *) reg [31:0] icc_cfg = 0;             // top-level
+(* external *) reg [7:0] tag_now = 0;              // top-level
+(* external *) reg [1:0] domain_jump_realign = 0;  // top-level
+
 `AUTOMATIC_decode
-//`AUTOMATIC_map
 
 wire buf_trig_out;  // sourced later by digitizer_dsp
 wire trig_ext;  // used by digitizer_dsp
@@ -60,7 +70,6 @@ wire [1:0] cav0_state, cav1_state;  // for LEDs
 wire [1:0] clk_status;
 wire clock_ok = clk_status==2;
 wire gtx_crc_fault_x;  // sourced much later
-// reg [0:0] lamp_test_trig; top-level single-cycle
 
 // PMOD_PATTERN from visible.v
 assign ow_up_conv = 0;
@@ -121,12 +130,6 @@ data_xdomain #(.size(32+24)) lb_to_adc(
 reg scan_trigger=0; always @(posedge lb_clk) scan_trigger <= we_digitizer_config_scan_trigger_we & lb_data[0:0];
 reg autoset_enable=0; always @(posedge lb_clk) if (we_digitizer_config_scan_trigger_we) autoset_enable <= lb_data[1:1];
 
-
-// reg [0:0] ctrace_start; top-level single-cycle
-
-// reg [31:0] icc_cfg; top-level
-// reg [7:0] tag_now; top-level
-// reg [1:0] domain_jump_realign; top-level
 
 // Most reads are passive; these are not
 // TODO: There is no real way to automate this before we start automating the read address space
@@ -367,6 +370,7 @@ always @(posedge lb_clk) begin
 end
 
 wire rawadc_trig_x;
+(* lb_automatic *)
 digitizer_config digitizer_config // auto
   (
    .lb_clk(lb_clk),
@@ -402,6 +406,7 @@ digitizer_config digitizer_config // auto
    );
 
 wire slow_snap = rawadc_trig_x;
+(* lb_automatic *)
 digitizer_slowread digitizer_slowread // auto
 (
 	.lb_clk(lb_clk),

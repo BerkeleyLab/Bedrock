@@ -4,6 +4,7 @@ module adc_em(
 	input strobe,
 	input signed [17:0] in,
 	input [12:0] rnd,  // randomness
+	(* external *)
 	input signed [9:0] offset,  // external
 	output signed [15:0] adc
 );

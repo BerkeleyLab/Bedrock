@@ -48,11 +48,14 @@ module tgen #(
 	input [aw-1:0] lb_addr,
 	input dests_write,
 	input [aw-17:0] addr_padding,
+	(* external *)
 	input bank_next,  // external
 	// optional monitoring
 	output [3:0] status,
 	// These two are not actually used, but they trigger magic from newad
+	(* external *)
 	input [31:0] delay_pc_XXX, // external
+	(* external *)
 	output [9:0] delay_pc_XXX_addr, // external
 	// Controlled bus
 	output [31:0] lbo_data,

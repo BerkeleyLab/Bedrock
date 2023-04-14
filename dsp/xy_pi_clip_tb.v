@@ -5,6 +5,7 @@ module xy_pi_clip_tb;
 reg clk;
 integer cc;
 reg fail=0;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("xy_pi_clip.vcd");
@@ -23,6 +24,7 @@ initial begin
 		$finish();
 	end
 end
+`endif //  `ifdef SIMULATE
 
 reg [2:0] state=0, state1=0, state2=0;
 wire iq=state[0];
@@ -58,6 +60,7 @@ reg signed [17:0] ff_ddrive, ff_dphase;
 reg signed [17:0] ff_drive, ff_phase;
 reg ffd_en=0, ffp_en=0;
 
+`ifdef SIMULATE
 initial begin
 	s0.store[0] =  10000;  // coeff X I
 	s0.store[1] = -12000;  // coeff Y I
@@ -88,6 +91,7 @@ initial begin
 	ff_phase    = 0;
 	ff_ddrive   = 10;
 end
+`endif //  `ifdef SIMULATE
 
 wire signed [17:0] out_xy;
 xy_pi_clip dut(.clk(clk), .sync(sync), .in_xy(in_xy),

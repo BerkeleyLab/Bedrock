@@ -4,6 +4,7 @@ module circle_buf_tb;
 
 reg iclk;
 integer cc, errors;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("circle_buf.vcd");
@@ -23,7 +24,7 @@ initial begin
 		$stop();
 	end
 end
-
+`endif
 reg oclk=0;
 always begin
 	oclk=0; #3;

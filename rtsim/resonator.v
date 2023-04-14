@@ -39,7 +39,9 @@ module resonator(
 	input signed [17:0] drive,
 	output signed [17:0] position,
 	output clip,
+	(* external *)
 	input [20:0] prop_const,  // external
+	(* external *)
 	output [9:0] prop_const_addr  // external
 );
 

@@ -8,7 +8,7 @@ from numpy import ceil
 # Since I don't want to modify shell variables
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))) +
-    "/submodules/build")
+    "/../build-tools")
 from read_regmap import get_map, get_reg_info
 
 cav_num = 0
