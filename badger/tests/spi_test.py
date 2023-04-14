@@ -57,7 +57,7 @@ CHK_PREFIX     = bafromhex(b'5200')            # 52 00
 # instruction set
 RELEASE_PD     = bafromhex(b'01ab')            # 01 ab              Release Power Down
 READ_STATUS_1  = bafromhex(b'020500')          # 05 dd              Read Status Register
-READ_STATUS_2  = bafromhex(b'023500')
+READ_STATUS_2  = bafromhex(b'020700')
 READ_JEDEC_ID  = bafromhex(b'049f000000')      # 9F dd dd dd        Read JEDEC ID (RDID)
 READ_DEVICE_ID = bafromhex(b'06900000000000')  # 90 00 00 00 dd dd  Read Device ID
 READ_CONFIG_REG = bafromhex(b'023500')         # 35 dd              Read Configuration Register
@@ -144,12 +144,14 @@ def do_message(s, p, verbose=False):
 # Read Manufacturer ID, JEDEC ID and Device ID
 def read_id(s):
     logging.info('Reading ID...')
-    p = READ_STATUS_1 + READ_STATUS_2 + READ_STATUS_1 + READ_JEDEC_ID + READ_DEVICE_ID
+    p = READ_STATUS_1 + READ_STATUS_2 + READ_JEDEC_ID + READ_DEVICE_ID
     r, addr = do_message(s, p, verbose=False)
-    manu_id = r[len(r) - 2]
-    dev_id = r[len(r) - 1]
-    capacity = r[len(r) - 8]
-    mem_type = r[len(r) - 9]
+    print('SR1:           0x%02x' % r[2])
+    print('SR2:           0x%02x' % r[5])
+    manu_id = r[-2]
+    dev_id = r[-1]
+    capacity = r[-8]
+    mem_type = r[-9]
     logging.debug('From: %s \n Tx length: %d\n Rx length: %d\n' % (addr, len(p), len(r)))
     manu_list = {1: "Cypress"}
     manu_name = manu_list[manu_id] if manu_id in manu_list else "Unknown"
@@ -162,12 +164,11 @@ def read_id(s):
     return
 
 
-# Read status reg 1, twice for good measure
 def read_status_config(s, verbose=False):
-    p = READ_CONFIG_REG + 2 * READ_STATUS_1
+    p = READ_CONFIG_REG + READ_STATUS_1
     r, addr = do_message(s, p, verbose=False)
-    status_reg = r[len(r) - 1]
-    config_reg = r[len(r) - 1 - 2 * len(READ_STATUS_1)]
+    status_reg = r[-1]
+    config_reg = r[2]
     if verbose:
         print("CONFIG_REG (CR1) = 0x%2.2x" % config_reg)
         bits = ["LC1", "LC0", "TBPROT", "DNU", "BPNV", "TBPARM", "QUAD", "FREEZE"]
@@ -400,7 +401,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(
         description="Utility for working with SPI Flash chips attached to Packet Badger")
-    parser.add_argument('--ip', default='192.168.19.8', help='IP address')
+    parser.add_argument('--ip', default='192.168.19.36', help='IP address, default 192.168.19.36')
     parser.add_argument('--udp', type=int, default=804, help='UDP Port number')
     parser.add_argument('-a', '--add', type=lambda x: int(x, 0), help='Flash offset address')
     parser.add_argument('--pages', type=int, help='Number of 256-byte pages')
@@ -420,6 +421,8 @@ def main():
                         help='Clear status (CLSR)')
     parser.add_argument('--force_write_enable', action='store_true',
                         help='Configure flash to write normally protected blocks; only works if WE# pin is high')
+    parser.add_argument('--reset_status', action='store_true',
+                        help='Reset SR1 to factory default 0')
     if EXPERT:
         parser.add_argument('--status_write', type=lambda x: int(x, 0),
                             help='A value to be written to status register (Experts only)')
@@ -433,9 +436,6 @@ def main():
     parser.add_argument('--reboot7', action='store_true',
                         help='Reboot chip using Xilinx 7-Series ICAPE2 primitive')
     args = parser.parse_args()
-
-    # numeric_level = getattr(logging, "DEBUG", None)
-    # logging.basicConfig(level=numeric_level)
 
     global IPADDR, PORTNUM, WAIT
     IPADDR, PORTNUM, WAIT = args.ip, args.udp, args.wait
@@ -502,6 +502,10 @@ def main():
         clear_status(sock)
         write_enable(sock, False)
         clear_status(sock)
+
+    if args.reset_status:
+        write_status(sock, 0x00)  # SRWD=0, clear BP2-0
+        read_status_config(sock, verbose=True)
 
     if args.id:
         read_id(sock)

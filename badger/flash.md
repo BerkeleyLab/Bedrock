@@ -120,6 +120,14 @@ python3 spi_test.py --ip $IP --clear_status
 python3 spi_test.py --ip $IP --id
 ```
 
+## Reset to factory default
+
+The following commands reset SR1 to factory default,
+disabling block protections ((BP[2:0] at SR1[4:2]) is 0).
+```sh
+python3 spi_test.py --ip $IP --reset_status
+```
+
 ## Performance
 
 Quick comment about timing, approximate of course.
