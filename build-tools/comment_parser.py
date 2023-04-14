@@ -37,7 +37,7 @@ class CommentParser(Parser):
         else:
             fin = file_found
 
-        fd.write("// parse_vfile_comments %s %s\n" % (stack, fin))
+        fd.write("// parse_vfile %s %s\n" % (stack, fin))
         if searchpath == "":
             searchpath = "."
         this_mod = fin.split("/")[-1].split(".")[0]
