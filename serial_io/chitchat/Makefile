@@ -6,6 +6,8 @@ vpath %.v $(SERIAL_IO_DIR) $(DSP_DIR)
 TGT_ := chitchat_tb chitchat_txrx_wrap_tb
 CHK_ = $(TGT_:%_tb=%_check)
 
+all: targets
+
 .PHONY: checks
 targets: $(TGT_)
 checks: $(CHK_)

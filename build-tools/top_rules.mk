@@ -2,12 +2,12 @@
 GCC_FLAGS = -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
 	-Wshadow -Waggregate-return -Wmissing-prototypes -Wnested-externs \
 	-Wall -W -Wno-unused -Winline -Wwrite-strings -Wundef -pedantic
-CF_ALL = -Wall -O2 -W -fPIC -g -std=c99 -D_GNU_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
-LF_ALL = -lm ${LDFLAGS_$@}
+CF_ALL = -Wall -O2 -fPIC -g -std=c99 -D_GNU_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
+LF_ALL = ${LDFLAGS_$@}
 
 ICARUS_SUFFIX =
 VERILOG_VPI = iverilog-vpi$(ICARUS_SUFFIX)
-VERILOG = iverilog$(ICARUS_SUFFIX) -Wall
+VERILOG = iverilog$(ICARUS_SUFFIX) -Wall -Wno-macro-redefinition
 VG_ALL = -DSIMULATE
 V_TB = -Wno-timescale
 VFLAGS = ${VFLAGS_$@} -I$(AUTOGEN_DIR)
@@ -38,7 +38,9 @@ VERILOG_TB = $(VERILOG) $(VG_ALL) $(V_TB) ${VFLAGS} -o $@ $(filter %v, $^)
 VERILOG_TB_VPI = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} -o $@ $(filter %.v, $^)
 VERILOG_SIM = cd `dirname $@` && $(VVP) `basename $<` $(VVP_FLAGS)
 VERILOG_VIEW = $(GTKWAVE) $(GTKW_OPT) $^
-VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS) | $(AWK) -f $(filter %.awk, $^)
+VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS)
+# FIXME This hack does not work with vpath
+VERILOG_TBLINT = $(PYTHON) $(BUILD_DIR)/tblint.py $(if $(realpath $<.v),$<.v,$<.sv)
 VERILOG_RUN = $(VVP) $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
@@ -64,7 +66,7 @@ VIVADO_FLASH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/vivado_flash.tcl -t
 VIVADO_CREATE_IP = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/lbl_ip.tcl $(BUILD_DIR)/vivado_tcl/create_ip.tcl -tclargs
 OCTAVE_SILENT = $(OCTAVE) -q $<
 PS2PDF = ps2pdf -dEPSCrop $< $@
-CHECK = $(VVP) $< | awk -f $(filter %.awk, $^)
+CHECK = $(VVP) $<
 BIT2RBF = bit2rbf $@ < $<
 GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 
@@ -82,14 +84,11 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 %.a: %.o
 	$(ARCH)
 
-%_tb: %_tb.v %_tb_auto
+# Sorry about the conditional; I couldn't find any other way to make newad work.
+ifndef NO_DEFAULT_TB_RULE
+%_tb: %_tb.v
 	$(VERILOG_TB)
-
-%_tb_auto: $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh %_auto
-	@echo .
-
-%_auto: $(AUTOGEN_DIR)/addr_map_%.vh $(AUTOGEN_DIR)/%_auto.vh
-	@echo .
+endif
 
 %_live: %_tb.v
 	$(VERILOG_TB)
@@ -109,7 +108,7 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 %_view: %.vcd %.gtkw
 	$(VERILOG_VIEW)
 
-%_check: %_tb $(BUILD_DIR)/testcode.awk
+%_check: %_tb
 	$(VERILOG_CHECK)
 
 %_lint: %.v %_auto
@@ -194,41 +193,6 @@ LB_AW = 10
 EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
 COMMA := ,
-NEWAD_DIRS = .
-NEWAD_ARGS = -d $(subst $(SPACE),$(COMMA),$(NEWAD_DIRS)) -i $< -w $(LB_AW)
-
-define NEWAD_O
-mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -o $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
-endef
-define NEWAD_A
-mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -a $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
-endef
-define NEWAD_L
-mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
-endef
-define REV_JSON
-$(PYTHON) $(BUILD_DIR)/reverse_json.py $< > $@
-endef
-
-$(AUTOGEN_DIR)/%_auto.vh: %.sv
-	$(NEWAD_O)
-$(AUTOGEN_DIR)/%_auto.vh: %.v
-	$(NEWAD_O)
-
-$(AUTOGEN_DIR)/addr_map_%.vh: %.sv
-	$(NEWAD_A)
-$(AUTOGEN_DIR)/addr_map_%.vh: %.v
-	$(NEWAD_A)
-
-$(AUTOGEN_DIR)/regmap_%.json: %.sv
-	$(NEWAD_L)
-$(AUTOGEN_DIR)/regmap_%.json: %.v
-	$(NEWAD_L)
-
-$(AUTOGEN_DIR)/scalar_%_regmap.json: %.sv
-	$(REV_JSON)
-$(AUTOGEN_DIR)/scalar_%_regmap.json: %.v
-	$(REV_JSON)
 
 # http://www.graphviz.org/content/dot-language
 # apt-get install graphviz

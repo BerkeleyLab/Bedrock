@@ -42,9 +42,13 @@ initial begin
 		fail=1;
 	end
 	$display("# Fourier %d %f %s",fourier_n,fourier_v,fourier_fault?"FAULT":"    .");
-	if (fail) $display("FAIL");
-	else      $display("PASS");
-	$finish();
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 integer wave;

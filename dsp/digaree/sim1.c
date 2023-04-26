@@ -198,7 +198,7 @@ static int invsqrtcheck(void)
 		int s_r2_d = sub(three, s_r2_p, 1);
 		int s = mul(s_r2, s_r2_d, 2);
 		//
-		double check = ((long int)s*(long int)s)/2097152*x/68719476736.0;
+		double check = ((double)s*(double)s)/2097152.0*x/68719476736.0;
 		int fault = (x > 32768) && ((check > 1.0005 || check < 0.9999));
 		if (fault) fail = 1;
 		printf("plot %7d %7d %7d %7d %7d %.6f %s\n", x, s_r0, s_r1, s_r2, s, check, fault ? "BAD" : ".");

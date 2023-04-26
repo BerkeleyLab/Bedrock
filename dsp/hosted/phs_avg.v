@@ -28,8 +28,8 @@
 // real when iq==1 and imaginary when iq==0.
 
 module phs_avg #(
-    parameter dwi = 17)
-(
+    parameter dwi = 17
+) (
 	input clk,  // timespec 6.66 ns
 	input reset,
 	input iq,

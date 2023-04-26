@@ -17,4 +17,3 @@ module via (.a(w), .b(w));
 inout w;
 wire w;
 endmodule
-

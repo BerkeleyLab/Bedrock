@@ -12,6 +12,8 @@ vpath %.v $(SERIAL_IO_DIR) $(DSP_DIR)
 TGT_ := dec_8b10b_tb patt_gen_tb gmii_link_tb
 CHK_ = $(TGT_:%_tb=%_check)
 
+all: targets
+
 .PHONY: checks
 targets: $(TGT_)
 checks: $(CHK_)

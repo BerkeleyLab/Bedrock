@@ -41,6 +41,7 @@ initial begin
 		clk=0; #10;
 		clk=1; #10;
 	end
+	$finish();
 end
 
 reg [6:0] pstate=0;
@@ -64,6 +65,19 @@ end else if (op==3) begin
 		yin <= 0;
 	end
 end else if (op==1) begin
+	// consider the following transformations:
+	// honest rotation matrix
+	//  yin <=  yin*cos(theta) + xin*sin(theta);
+	//  xin <= -yin*sin(theta) + xin*cos(theta);
+	// small-angle approximation of that for theta = 2^(-9) radians
+	//  yin <= yin - (yin>>>19) + (xin>>>9);
+	//  xin <= xin - (xin>>>19) - (yin>>>9);
+	// corresponding CORDIC stage, gain \approx 1+2^(-19)
+	//  yin <= yin + (xin>>>9);
+	//  xin <= xin - (yin>>>9);
+	// what we actually use, gain \approx 1-2^(-15), so it
+	// spirals in slowly and exercises a meaningful span of
+	// radial output without risking overflow
 	yin <= yin + (xin>>>9) - (yin>>>15);
 	xin <= xin - (yin>>>9) - (xin>>>15);
 end else begin

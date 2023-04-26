@@ -25,7 +25,7 @@ module i2c_bit(
 // 14 phases within one bit
 // 9/14 of 2.5 us is 1.6 us:  SCL low  time, 0.3 us larger than min. spec.
 // 5/14 of 2.5 us is 0.9 us:  SCL high time, 0.3 us larger than min. spec.
-// SDA transition at 2/14 = 0.36 us after falling edge of SCL.
+// SDA transition at 3/14 of 2.5 us = 0.54 us after falling edge of SCL.
 reg [3:0] cnt=0;  // count to 14
 reg last_tick=0;
 always @(posedge clk) begin
@@ -42,8 +42,11 @@ always @(posedge clk) if (advance) cmd <= command;
 reg scl_o_r=1, sda_o_r=1, old_bit=1, sda_h_r=1;
 wire new_bit = cmd[0];
 always @(posedge clk) begin
-	sda_o_r <= (cnt<2) ? old_bit : new_bit;
+	// 3/14 of 2.5 us
+	sda_o_r <= (cnt<3) ? old_bit : new_bit;
 	if (advance) old_bit <= new_bit;
+	// scl is high for 50 clock cycles or 5 of 14 cnt
+	// scl is low for 90 clock cycles or 9 of 14 cnt
 	scl_o_r <= cmd[1] ? 1 : cnt>=9;
 	if (cnt == 8) sda_h_r <= sda_v;
 end

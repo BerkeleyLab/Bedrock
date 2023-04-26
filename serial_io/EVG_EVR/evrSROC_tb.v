@@ -16,9 +16,13 @@ module evrSROC_tb;
          $dumpvars(5, evrSROC_tb);
       end
       while ($time < SIM_TIME) @(posedge sysClk);
-      $display("%s", fail ? "FAIL" : "PASS");
-      if (fail)$stop();
-      else $finish();
+      if (fail) begin
+        $display("FAIL");
+        $stop();
+      end else begin
+        $display("PASS");
+        $finish();
+      end
    end
 
    reg sysClk = 0;

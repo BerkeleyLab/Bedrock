@@ -1,4 +1,11 @@
 {
+    "led_user_mode": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327681,
+        "data_width": 1
+    },
     "led_1_df": {
         "access": "rw",
         "addr_width": 0,
@@ -13,12 +20,19 @@
         "base_addr": 327683,
         "data_width": 8
     },
-    "twi_freeze": {
+    "stop_sim": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327686,
+        "data_width": 1
+    },
+    "twi_ctl": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327687,
-        "data_width": 1
+        "data_width": 4
     },
     "misc_config": {
         "access": "rw",
@@ -96,6 +110,27 @@
         "sign": "unsigned",
         "base_addr": 327701,
         "data_width": 22
+    },
+    "twi_prog": {
+        "access": "rw",
+        "addr_width": 10,
+        "sign": "unsigned",
+        "base_addr": 262144,
+        "data_width": 8
+    },
+    "twi_analyz": {
+        "access": "r",
+        "addr_width": 10,
+        "sign": "unsigned",
+        "base_addr": 263168,
+        "data_width": 8
+    },
+    "twi_data": {
+        "access": "r",
+        "addr_width": 10,
+        "sign": "unsigned",
+        "base_addr": 264192,
+        "data_width": 8
     },
     "ctrace_out": {
         "access": "r",

@@ -92,4 +92,3 @@ void printEye( unsigned evenOddBits )
         _putchar('\n');
     }
 }
-

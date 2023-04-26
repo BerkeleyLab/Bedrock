@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+`timescale 1ns / 1ns
 
 // ------------------------------------
 // QGT_WRAP.v
@@ -184,4 +184,3 @@ module qgt_wrap # (
 endmodule
 
 `endif // SIMULATE
-

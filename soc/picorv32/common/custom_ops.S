@@ -99,4 +99,3 @@ r_type_insn(0b0000100, 0, 0, 0b100, regnum_ ## _rd, 0b0001011)
 
 #define picorv32_timer_insn(_rd, _rs) \
 r_type_insn(0b0000101, 0, regnum_ ## _rs, 0b110, regnum_ ## _rd, 0b0001011)
-

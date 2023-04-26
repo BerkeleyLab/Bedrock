@@ -1,5 +1,6 @@
 `timescale 1ns / 1ns
-
+`define AUTOMATIC_decode
+`define AUTOMATIC_resonator
 `define LB_DECODE_cav_elec_tb
 `include "cav_elec_tb_auto.vh"
 
@@ -11,6 +12,7 @@ reg clk;
 reg lb_clk;
 reg trace;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	trace = $test$plusargs("trace");
 	if ($test$plusargs("vcd")) begin
@@ -21,7 +23,9 @@ initial begin
 		clk=0; #3;
 		clk=1; #3;
 	end
+	$finish();
 end
+`endif //  `ifdef SIMULATE
 
 // Local bus
 reg [31:0] lb_data=0;
@@ -69,6 +73,7 @@ reg_delay #(.dw(1), .len(0))
 
 wire clip;
 wire res_write = lb_write & (lb_addr[12:10]==1);
+(* lb_automatic *)
 resonator resonator // auto
 	(.clk(clk), .start(start_eig),
 	.drive(eig_drive),
@@ -76,6 +81,7 @@ resonator resonator // auto
 	`AUTOMATIC_resonator
 );
 
+`ifdef SIMULATE
 always @(negedge clk) if (trace && iq && (cc>30)) $display("%d %d %d %d",
 	forward,reflect,field,cav_elec.cav_mode[0].m_freq);
 
@@ -124,5 +130,6 @@ initial begin
 	cav_elec.dp_dot_0_k_out.mem[5]=90000;
 	cav_elec.dp_outer_prod_0_k_out.mem[4]=88000;
 end
+`endif
 
 endmodule

@@ -64,9 +64,9 @@ reg [4:0] reg_addr = 0, reg_outr=0;
 reg [5:0] rvd_reg_01=6'b0;   // Reserved bits in register 0 (control) page 1 (fiber link)
 reg rvd_reg_01_read_done=1'b0;
 
-wire [15:0] send_read  = {2'b01, 2'b10, phy_addr, reg_addr, 2'b00};       // Read configuratuion register @ (reg_addr)
+wire [15:0] send_read  = {2'b01, 2'b10, phy_addr, reg_addr, 2'b00};       // Read configuration register @ (reg_addr)
 wire [15:0] config_reg_22 = 16'b0001;                                     // Configuration word for register 22 (1=set control to fiber link)
-wire [15:0] config_reg_01 =  {1'b0, 6'b0, 1'b1, 1'b0, 1'b1, rvd_reg_01};  // Disable fiber Auto-Negotiaion (write 0 on bit 20.3)
+wire [15:0] config_reg_01 =  {1'b0, 6'b0, 1'b1, 1'b0, 1'b1, rvd_reg_01};  // Disable fiber Auto-Negotiation (write 0 on bit 20.3)
 
 wire [31:0] send_write1 = {2'b01, 2'b01, phy_addr, config_reg_addr_22, 2'b10,config_reg_22};
 wire [31:0] send_write2 = {2'b01, 2'b01, phy_addr, config_reg_addr_01, 2'b10,config_reg_01};

@@ -10,10 +10,10 @@
 
 module double_inte_smp #(
   parameter dwi = 16, // data width in
-  parameter dwo = 28) // data width out. When used for decimation, output width should
+  parameter dwo = 28  // data width out. When used for decimation, output width should
                       // be dwi + N*log2(decimation rate), where N=2 is the order of this
                       // double integrator.
-(
+) (
    input                   clk,
    input                   reset,
    input                   stb_in,

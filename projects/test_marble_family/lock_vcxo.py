@@ -49,24 +49,24 @@ def poll_lock(chip, verbose=False):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--ip', default="192.168.19.8",
+    p.add_argument('-a', '--addr', default="192.168.19.8",
                    help="IP address of FPGA")
-    p.add_argument('--port', default=803,
+    p.add_argument('-p', '--port', default=803,
                    help="UDP port for I/O")
-    p.add_argument('--dac', default=1,
+    p.add_argument('-d', '--dac', default=1,
                    help="DAC (1 or 2), 1 tunes precision 25 MHz")
-    p.add_argument('--val', default=0,
+    p.add_argument('-i', '--val', default=0,
                    help="Initial DAC value")
-    p.add_argument('--verbose', action='store_true',
+    p.add_argument('-v', '--verbose', action='store_true',
                    help="Produce extra chatter")
-    p.add_argument('--npt', default=60,
+    p.add_argument('-n', '--npt', default=60,
                    help="Number of time steps to collect")
-    p.add_argument('--cont', action='store_true',
+    p.add_argument('-c', '--cont', action='store_true',
                    help="Monitor only, don't initialize")
 
     args = p.parse_args()
 
-    chip = lbus_access(args.ip, port=args.port)
+    chip = lbus_access(args.addr, port=args.port)
     if not args.cont:
         set_lock(chip, int(args.val), dac=int(args.dac), verbose=args.verbose)
     for ix in range(int(args.npt)):

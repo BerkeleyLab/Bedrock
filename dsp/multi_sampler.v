@@ -16,8 +16,8 @@ module multi_sampler #(
    parameter dsample1_en=0,
    parameter dsample1_wi=8,
    parameter dsample2_en=0,
-   parameter dsample2_wi=8)
-(
+   parameter dsample2_wi=8
+) (
    input                        clk,
    input                        reset,
    input                        ext_trig,
@@ -94,4 +94,3 @@ module multi_sampler #(
    end endgenerate
 
 endmodule
-

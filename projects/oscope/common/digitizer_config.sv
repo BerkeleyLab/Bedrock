@@ -12,7 +12,8 @@ module digitizer_config(
 	input         lb_rd,
 	input [23:0]  lb_addr,
 	input [31:0]  lb_dout,
-		      zest_cfg_if.master zif_cfg,
+
+	zest_cfg_if.master zif_cfg,
 
 	// clocks for frequency and phase measurement
 	input         clk200,
@@ -44,40 +45,65 @@ module digitizer_config(
 	output [1:0]  clk_status,
 
 	// software-settable
-	input [31:0]  periph_config, // external
-	input [15:0]  bitslip, // external
-	input [1:0]   U15_spi_read_and_start_r, // external
-	//input       U15_spi_read_r,   // external
-	input [31:0]  U15_spi_data_addr_r, // external
+	(* external *)
+	input [31:0] periph_config,    // external
+	(* external *)
+	input [15:0] bitslip,          // external
+	(* external *)
+	input [1:0] U15_spi_read_and_start_r,  // external
+	//input        U15_spi_read_r,   // external
+	(* external *)
+	input [31:0] U15_spi_data_addr_r,   // external
 	//input [15:0] U15_spi_addr_r,   // external
-	input [1:0]   U18_spi_read_and_start_r, // external
-	//input       U18_spi_read_r,   // external
-	input [31:0]  U18_spi_data_addr_r, // external
+	(* external *)
+	input [1:0] U18_spi_read_and_start_r,  // external
+	//input        U18_spi_read_r,   // external
+	(* external *)
+	input [31:0] U18_spi_data_addr_r,   // external
 	//input  [7:0] U18_spi_addr_r,   // external
-	input         U2_clk_reset_r, // external
-	input         U3_clk_reset_r, // external
+	(* external *)
+	input        U2_clk_reset_r,   // external
+	(* external *)
+	input        U3_clk_reset_r,   // external
+	(* external, signal_type="single-cycle" *)
 	input [1:0]   adc_mmcm, // external single-cycle
-	input         U2_iserdes_reset_r, // external
-	input         U3_iserdes_reset_r, // external
-	input         U4_reset_r, // external
-	input         mmcm_reset_r, // external
-	input         idelayctrl_reset_r, // external
+	(* external *)
+	input        U2_iserdes_reset_r, // external
+	(* external *)
+	input        U3_iserdes_reset_r, // external
+	(* external *)
+	input        U4_reset_r,         // external
+	(* external *)
+	input        mmcm_reset_r,       // external
+	(* external *)
+	input        idelayctrl_reset_r, // external
 	// lb_clk domain
-	input [7:0]   banyan_mask, // external
-	input         phasex_trig, // external single-cycle
-	input         llspi_we, // external we-strobe
-	input         llspi_re, // -- external strobe
-	input         clk_status_we, // external we-strobe
-	input [4:0]   scanner_debug, // external
-	input         autoset_enable, // -- external
-	input         scan_trigger, // -- external single-cycle
-	input         scan_trigger_we, // external we-strobe
+	(* external *)
+	input [7:0] banyan_mask, // external
+	(* external, signal_type="single-cycle" *)
+	input phasex_trig, // external single-cycle
+	(* external, signal_type="we-strobe" *)
+	input llspi_we,  // external we-strobe
+	input llspi_re,  // -- external strobe
+	(* external, signal_type="we-strobe" *)
+	input clk_status_we,  // external we-strobe
+	(* external *)
+	input [4:0] scanner_debug, // external
+	input autoset_enable,  // -- external
+	input scan_trigger,  // -- external single-cycle
+	(* external, signal_type="we-strobe" *)
+	input scan_trigger_we,  // external we-strobe
 	// lb_clk domain, but only because I flag_xdomain to adc_clk
-	input         rawadc_trig, // external single-cycle
-	input [9:0]   adc_downsample_ratio, // external
+	(* external, signal_type="single-cycle" *)
+	input rawadc_trig,  // external single-cycle
+	(* external *)
+	input [9:0] adc_downsample_ratio,  // external
+
 	// adc_clk domain
-	input [9:0]   sync_ad7794_cset, // external
-	input [5:0]   sync_tps62210_cset  // external
+	(* external *)
+	input [9:0] sync_ad7794_cset,  // external
+	(* external *)
+	input [5:0] sync_tps62210_cset  // external
 );
 
 assign zif_cfg.U15_sclk_in    = 1'b0;

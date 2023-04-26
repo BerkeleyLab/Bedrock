@@ -11,7 +11,9 @@ module sf_user #(
 	input signed [pw-1:0] meas,  // measurements from radio
 	input trigger,   // high for one cycle, just before meas stream starts
 	// Interface to external parameter storage
+	(* external *)
 	output [const_aw-1:0] h_addr, // external address for param memory
+	(* external *)
 	input signed [pw-1:0] h_data, // external
 	// Results
 	output                 ab_update,

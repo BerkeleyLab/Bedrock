@@ -150,14 +150,14 @@ ilookup_check: ilookup_check.sh inverse.dat inverse.out
 
 match_%: sim1.results user_%.results
 	cmp $^
-	@echo PASS
+	@echo "PASS"
 
 # inverse-sqrt() finder WIP
 sqrt_check1: sqrt1.py
 	$(PYTHON) $<
 sqrt_check2: sim1
 	./sim1 invsqrtcheck > /dev/null
-	@echo PASS
+	@echo "PASS"
 
 match_mem:
 match_reg:

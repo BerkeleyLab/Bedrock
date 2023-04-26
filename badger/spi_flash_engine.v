@@ -50,6 +50,7 @@ reg [8:0] block_len=0;
 reg [8:0] bytes_remaining=0;
 reg word=0;
 reg icap_en=0;
+reg word2=0, word3=0, word4=0;
 always @(posedge clk) begin
 	if (pack_write_ack & word & ~running) begin
 		running<=1;
@@ -68,7 +69,7 @@ end
 
 reg [6:0] subtick=0;
 reg [7:0] sr=0;
-reg tick=0, tick2=0, tick3=0, tick4=0, word2=0, word3=0, word4=0;
+reg tick=0, tick2=0, tick3=0, tick4=0;
 reg spi_clk_r=0, spi_clk_rr=0, spi_miso_r=0, spi_cs_pre=0, spi_cs_r=0, in_bit=0;
 wire [7:0] sr_next = {sr[6:0], in_bit};
 always @(posedge clk) begin
@@ -123,9 +124,10 @@ generate if (xc6slx == 1) begin: ICAP6
 end else if (seven == 1) begin: ICAP7
     // see UG953 and
     // https://opencores.org/projects/wbicapetwo by Dan Gisselquist
+    wire [15:0] o_padding;  // half of the O port not used, since we configure width as X16
     ICAPE2 #(.ICAP_WIDTH("X16")) reconfig(.CLK(icap_clk),
 	.CSIB(~icap_en), .RDWRB(1'b0),
-	.I(icap_wdata), .O(icap_result));
+	.I(icap_wdata), .O({o_padding, icap_result}));
     assign icap_busy=0;
 end else begin
     assign icap_result=0;

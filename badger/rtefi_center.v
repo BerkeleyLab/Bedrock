@@ -12,7 +12,32 @@
 // The several steps have instance names starting with a through e
 // (a_scan through e_crc).
 //
-module rtefi_center(
+module rtefi_center #(
+	parameter paw = 11,  // packet (memory) address width, nominal 11
+	parameter n_lat = 3,  // latency of client pipeline
+	parameter mac_aw = 10,  // sets size (in 16-bit words) of DPRAM in Tx MAC
+	parameter handle_arp = 1,
+	parameter handle_icmp = 1,
+	// The following parameters set the synthesis-time default, but all
+	// can be overridden at run-time using the configuration port.
+	// UDP ports 0 through 7 represent the index given in udp_sel.
+	// While udp_port_cam.v is written parameterized, we limit it to
+	// three bits and 8 ports for timing reasons.  Port 0 is internally
+	// implemented as echo; the rest will be user-defined via synthesis-time
+	// plug-ins.  Generally the UDP port numbers should be "well known",
+	// but the case can be made to have them run-time override-able (without
+	// resynthesizing) to help cope with unexpected network issues.
+	parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4},  // 192.168.7.4
+	parameter [47:0] mac = 48'h12555500012d,
+	parameter udp_port0 = 7,
+	parameter udp_port1 = 801,
+	parameter udp_port2 = 802,
+	parameter udp_port3 = 803,
+	parameter udp_port4 = 0,
+	parameter udp_port5 = 0,
+	parameter udp_port6 = 0,
+	parameter udp_port7 = 0
+) (
 	// GMII Input (Rx)
 	input rx_clk,
 	input [7:0] rxd,
@@ -68,31 +93,6 @@ module rtefi_center(
 	// Simulation-only
 	output in_use
 );
-
-parameter paw = 11;  // packet (memory) address width, nominal 11
-parameter n_lat = 3;  // latency of client pipeline
-parameter mac_aw = 10;  // sets size (in 16-bit words) of DPRAM in Tx MAC
-parameter handle_arp = 1;
-parameter handle_icmp = 1;
-// The following parameters set the synthesis-time default, but all
-// can be overridden at run-time using the configuration port.
-// UDP ports 0 through 7 represent the index given in udp_sel.
-// While udp_port_cam.v is written parameterized, we limit it to
-// three bits and 8 ports for timing reasons.  Port 0 is internally
-// implemented as echo; the rest will be user-defined via synthesis-time
-// plug-ins.  Generally the UDP port numbers should be "well known",
-// but the case can be made to have them run-time override-able (without
-// resynthesizing) to help cope with unexpected network issues.
-parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4};  // 192.168.7.4
-parameter [47:0] mac = 48'h12555500012d;
-parameter udp_port0 = 7;
-parameter udp_port1 = 801;
-parameter udp_port2 = 802;
-parameter udp_port3 = 803;
-parameter udp_port4 = 0;
-parameter udp_port5 = 0;
-parameter udp_port6 = 0;
-parameter udp_port7 = 0;
 
 // Overhead: make sure the tools can create an IOB on all GMII inputs
 reg [7:0] eth_in_r=0;

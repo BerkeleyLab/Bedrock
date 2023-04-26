@@ -10,11 +10,14 @@ initial begin
 		$dumpfile("precog.vcd");
 		$dumpvars(5,precog_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	while (1) begin
 		cc = cc + 1;
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish();
 end
 
 wire clear_to_send;
@@ -79,9 +82,13 @@ initial begin
 	repeat (100) @(posedge clk);
 	scanner_busy <= 1;
 	repeat (10) @(posedge clk);
-	$display("%s", fail ? "FAIL" : "PASS");
-	if (fail) $stop();
-	$finish();
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 endmodule

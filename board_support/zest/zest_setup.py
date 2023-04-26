@@ -437,6 +437,7 @@ class c_zest:
         self.U2_adc_iserdes_reset()
         self.U3_adc_iserdes_reset()
         self.dac_reset()
+        # AD9653 manipulation
         for adc in [self.U2_adc_spi, self.U3_adc_spi]:
             self.spi_write(adc, 0x00, '00111100')  # Soft reset
             self.spi_write(adc, 0x08, '00000011')  # reset power

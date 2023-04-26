@@ -6,6 +6,7 @@
 `define ADDR_HIT_dut_coeff 0
 `define ADDR_HIT_dut_lim 0
 
+`define AUTOMATIC_decode
 `define LB_DECODE_mp_proc_tb
 `include "mp_proc_tb_auto.vh"
 
@@ -15,6 +16,8 @@ reg clk;
 wire lb_clk = clk;
 integer cc;
 reg fail=0;
+
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("mp_proc.vcd");
@@ -24,9 +27,15 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("%s", fail ? "FAIL" : "PASS");
-	$finish();
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
+`endif //  `ifdef SIMULATE
 
 reg [2:0] state=0;
 reg signed [17:0] in_mp=0;
@@ -126,6 +135,7 @@ end
 wire signed [17:0] out_xy;
 wire signed [18:0] out_ph;
 wire out_sync;
+(* lb_automatic *)
 mp_proc dut  // auto
 	(.clk(clk), .sync(sync), .in_mp(in_mp),
 	.out_xy(out_xy), .out_ph(out_ph), .out_sync(out_sync),

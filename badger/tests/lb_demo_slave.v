@@ -22,6 +22,9 @@ module lb_demo_slave(
 	input [15:0] rx_mac_data,
 	input [1:0] rx_mac_buf_status,
 	output rx_mac_hbank,
+	// See cluster_wrap.v
+	output [31:0] scratch_out,
+	input [31:0] scratch_in,
 	// Output to hardware
 	output led_user_mode,
 	output led1,  // PWM
@@ -84,6 +87,21 @@ reg led_tick=0;
 reg [31:0] uptime=0;
 always @(posedge clk) if (led_tick) uptime <= uptime+1;
 
+// See cluster_wrap.v
+// Make sure synthesis knows this signal is in right clock domain
+reg [31:0] scratch_in_r=0;
+always @(posedge clk) scratch_in_r <= scratch_in;
+
+// ==========================================
+// |          Localbus Decoding             |
+// | Supposedly consistent with address map |
+// | embedded in fake_config_romx.v.        |
+// | See the Makefile for more comments.    |
+// ==========================================
+
+// NOTE: The next line is parsed by bedrock/build-tools/reverse_json.py
+// reverse_json_offset: 1114112
+
 // Very basic pipelining of two-cycle read process
 reg [23:0] addr_r=0;
 reg do_rd_r=0, do_rd_r2=0, do_rd_r3=0;
@@ -100,6 +118,12 @@ wire [31:0] hello_2 = "rld!";
 wire [31:0] hello_3 = "(::)";
 wire [31:0] mirror_out_0;
 
+// ==========================================
+// |          Localbus Reads                |
+// | NOTE: reverse_json.py reads this code  |
+// | to create the json describing the      |
+// | address map.                           |
+// ==========================================
 // First read cycle
 reg [31:0] reg_bank_0=0, dbg_mem_out=0;
 always @(posedge clk) if (do_rd) begin
@@ -113,6 +137,7 @@ always @(posedge clk) if (do_rd) begin
 		4'h6: reg_bank_0 <= tx_mac_done_r;
 		4'h7: reg_bank_0 <= rx_mac_buf_status_r;
 		4'h8: reg_bank_0 <= uptime;
+		4'h9: reg_bank_0 <= scratch_in_r;
 		default: reg_bank_0 <= "zzzz";
 	endcase
 end
@@ -133,12 +158,20 @@ always @(posedge clk) if (do_rd_r) begin
 	endcase
 end
 
-// Direct writes
+// ==========================================
+// |          Direct Localbus Writes        |
+// | NOTE: this write logic is not          |
+// | automatically transcribed to json.     |
+// | If you want to see these in the json   |
+// | register description, list them in     |
+// | static_regmap.json.                    |
+// ==========================================
 reg led_user_r=0;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
 wire local_write = control_strobe & ~control_rd & (addr[23:16]==0);
 reg stop_sim=0;  // clearly only useful in simulation
+reg [31:0] scratch_out_r=0;  // see cluster_wrap.v
 always @(posedge clk) if (local_write) case (addr[3:0])
 	1: led_user_r <= data_out;
 	2: led_1_df <= data_out;
@@ -146,6 +179,7 @@ always @(posedge clk) if (local_write) case (addr[3:0])
 	4: dbg_rst <= data_out;
 	5: rx_mac_hbank_r <= data_out;
 	6: stop_sim <= data_out;
+	7: scratch_out_r <= data_out;
 endcase
 
 // Mirror
@@ -165,6 +199,7 @@ always @(posedge clk) begin
 end
 
 // Output signal routing
+assign scratch_out = scratch_out_r;
 assign led_user_mode = led_user_r;
 assign led1 = l1;
 assign led2 = l2;

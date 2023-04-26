@@ -31,25 +31,35 @@
 // drv_p = (sel_en ? in_mp : 0) + ph_offset
 // set_p and gain_p
 
-module mp_proc # (
+module mp_proc #(
 	parameter thresh_shift = 9, // Threshold shift; typically 9 for SRF use
 	parameter ff_dshift = 0     // Deferred ff_ddrive downshift
-)(
+) (
 	input clk,
 	input sync,
 	// Input from cordic_mux
 	input signed [17:0] in_mp,
 	// Host-writable simple controls
+	(* external *)
 	input [0:0] sel_en,  // external
+	(* external *)
 	input signed [17:0] ph_offset,  // external
+	(* external *)
 	input signed [17:0] sel_thresh,  // external
 	// Host-settable channel-multiplexed controls
+	(* external *)
 	input [0:0] set_slew,  // external
+	(* external *)
 	input signed [17:0] setmp,  // external
+	(* external *)
 	input signed [17:0] coeff,  // external
+	(* external *)
 	input signed [17:0] lim,  // external
+	(* external *)
 	output [1:0] setmp_addr,  // external address for setmp
+	(* external *)
 	output [1:0] coeff_addr,  // external address for coeff
+	(* external *)
 	output [1:0] lim_addr,  // external address for lim
 	// Feedforward integral hooks and setpoints
 	input               ffd_en,

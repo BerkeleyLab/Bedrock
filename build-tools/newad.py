@@ -6,13 +6,10 @@
 # * Mirror read and write clk is currently hard-coded to lb_clk
 # * Remove hierarchy from address_allocation
 # * Currently we-strobe is being abused to generate registers of width > 1
-# * Can we do a quick search in the string before a full re match in parse_vfile?
+# * Remove AUTOMATIC_map, still seems to be used in cryomodule.v
 
 import argparse
 import json
-import re
-from os.path import dirname, basename, isfile, splitext
-from copy import deepcopy
 
 try:
     from StringIO import StringIO
@@ -21,535 +18,10 @@ except ImportError:
 
 MIN_MIRROR_AW = 5
 MIN_MIRROR_ARRAY_SIZE = 1 << MIN_MIRROR_AW  # Minimum size of an array to be mirrored
-port_lists = {}  # module_name: [list of ports]
-self_ports = []
-decodes = []
-use_ram = {}  # module_name : variable
-self_map = {}
+
 gch = {}
 g_flat_addr_map = {}
-g_clk_domains = {}
-file_not_found = 0
-
-
-class Port:
-    def __init__(
-        self,
-        name,
-        downto,
-        direction,
-        sign,
-        module,
-        signal_type,
-        clk_domain="lb",
-        cd_indexed=False,
-        description="",
-    ):
-        self.name = name
-        self.downto = downto
-        self.direction = direction
-        self.sign = sign
-        self.module = module
-        self.signal_type = signal_type
-        self.clk_domain = clk_domain
-        self.cd_indexed = cd_indexed
-        self.cd_index = None
-        self.description = description
-
-    def port_prefix_set(self, prefix):
-        self.name = prefix + self.name
-        return self
-
-    def __repr__(self):
-        s = self.direction
-        s += " signed" if self.sign else " unsigned"
-        s += " [{}:{}]".format(*self.downto)
-        s += " " + self.name
-        s += " //module:{}; clk_domain:{}; index:{}".format(
-            self.module, self.clk_domain, self.cd_index
-        )
-        return s
-
-
-def consider_port(p, fd):
-    # Consider what to do with a port
-    # 5-element list is (input/output) (signed/None) lsb msb name
-    if p.direction == "output":
-        bp = re.sub("_addr$", "", p.name)
-        fd.write("// found output address in module %s, base=%s\n" % (p.module, bp))
-        use_ram[p.module + ":" + bp] = "[%s:%s]" % p.downto
-
-
-def range_width(r):
-    """
-    A utility function: string [a:b] => integer a-b+1
-    """
-    r2 = re.sub(r"\]", "", re.sub(r"\[", "", r))
-    nums = r2.split(":")
-    return int(nums[0]) - int(nums[1]) + 1
-
-
-def use_ram_key(mod, name):
-    var = name.split(":")[-1]
-    return mod + ":" + var
-
-
-def make_decoder_inner(inst, mod, p):
-    """
-    Constructs a decoder for a port p.
-    p: is an instance of Port
-    """
-    # print '// make_decoder',inst,mod,a
-    if p.direction != "output":
-        # print '// make_decoder instance=%s name=%s'%(inst,a[5])
-        clk_prefix = p.clk_domain
-        cd_index_str = ""
-        if p.cd_indexed and p.cd_index is not None:
-            cd_index_str = "[%d]" % p.cd_index
-        key = use_ram_key(p.module, p.name)
-        # print '// checking use_ram for key '+key
-        if inst is None:
-            sig_name = re.sub(":", "_", p.name)
-        else:
-            sig_name = "%s_%s" % (inst, re.sub(":", "_", p.name))
-        decode_def = "wire we_%s = %s_write%s&(`ADDR_HIT_%s);\\\n" % (
-            sig_name,
-            clk_prefix,
-            cd_index_str,
-            sig_name,
-        )
-        msb = int(p.downto[0])
-        lsb = int(p.downto[1])
-        data_width = msb - lsb + 1
-        sign = p.sign if p.sign else "unsigned"
-        if key in use_ram:
-            addr_range = use_ram[key]
-            data_range = "[%d:%d]" % (msb, lsb)
-            addr_width = range_width(addr_range)
-            # print '// ***** use_ram %s %s'%(key,use_ram[key]), addr_range,
-            # addr_width, data_range, data_width
-            wire_def = "wire %s %s_addr;\\\nwire %s %s;\\\n" % (
-                addr_range,
-                sig_name,
-                data_range,
-                sig_name,
-            )
-            dpram_a = (
-                ".clka(%s_clk), .addra(%s_addr%s%s), .dina(%s_data%s%s),"
-                " .wena(we_%s)"
-                % (
-                    clk_prefix,
-                    clk_prefix,
-                    cd_index_str,
-                    addr_range,
-                    clk_prefix,
-                    cd_index_str,
-                    data_range,
-                    sig_name,
-                )
-            )
-            dpram_b = ".clkb(%s_clk), .addrb(%s_addr), .doutb(%s)" % (
-                clk_prefix,
-                sig_name,
-                sig_name,
-            )
-            dpram_def = "dpram #(.aw(%d),.dw(%d)) dp_%s(\\\n\t%s,\\\n\t%s);\\\n" % (
-                addr_width,
-                data_width,
-                sig_name,
-                dpram_a,
-                dpram_b,
-            )
-            decodes.append(wire_def + decode_def + dpram_def)
-            gch[sig_name] = (
-                addr_width,
-                mod,
-                sign,
-                data_width,
-                clk_prefix,
-                cd_index_str,
-                p.description,
-            )
-        elif p.signal_type == "single-cycle":
-            reg_def = (
-                "reg [%d:%d] %s=0; always @(posedge %s_clk) "
-                "%s <= we_%s ? %s_data%s[%d:%d] : %d'b0;\\\n"
-                % (
-                    msb,
-                    lsb,
-                    sig_name,
-                    clk_prefix,
-                    sig_name,
-                    sig_name,
-                    clk_prefix,
-                    cd_index_str,
-                    msb,
-                    lsb,
-                    data_width,
-                )
-            )
-            decodes.append(decode_def + reg_def)
-            gch[sig_name] = (
-                0,
-                mod,
-                sign,
-                data_width,
-                clk_prefix,
-                cd_index_str,
-                p.description,
-            )
-        elif p.signal_type == "strobe":
-            read_strobe = "wire %s = %s_read & (`ADDR_HIT_%s);\\\n" % (
-                sig_name,
-                clk_prefix,
-                sig_name,
-            )
-            decodes.append(read_strobe)
-            gch[sig_name] = (
-                0,
-                mod,
-                sign,
-                data_width,
-                clk_prefix,
-                cd_index_str,
-                p.description,
-            )
-        elif p.signal_type == "we-strobe":
-            reg_def = "wire %s = we_%s;\\\n" % (sig_name, sig_name)
-            decodes.append(decode_def + reg_def)
-            gch[sig_name] = (
-                0,
-                mod,
-                sign,
-                data_width,
-                clk_prefix,
-                cd_index_str,
-                p.description,
-            )
-        elif p.signal_type == "plus-we-VOID":
-            pass
-        else:
-            if p.signal_type == "plus-we":
-                we_def = "wire %s_we = we_%s;\\\n" % (sig_name, sig_name)
-            else:
-                we_def = ""
-            reg_def = (
-                "reg [%d:%d] %s=0; always @(posedge %s_clk) "
-                "if (we_%s) %s <= %s_data%s;\\\n"
-                % (
-                    msb,
-                    lsb,
-                    sig_name,
-                    clk_prefix,
-                    sig_name,
-                    sig_name,
-                    clk_prefix,
-                    cd_index_str,
-                )
-            )
-            decodes.append(decode_def + we_def + reg_def)
-            gch[sig_name] = (
-                0,
-                mod,
-                sign,
-                data_width,
-                clk_prefix,
-                cd_index_str,
-                p.description,
-            )
-
-
-def make_decoder(inst, mod, a, gcnt):
-    if gcnt is None:
-        make_decoder_inner(inst, mod, a)
-    else:
-        for ig in range(gcnt):
-            # HACK: side effect; Benign
-            # This helps figure out the instantiation in the case of gvar
-            if a.cd_indexed:
-                a.cd_index = ig
-            # print '// make_decoder iteration %d'%ig
-            make_decoder_inner("%s_%d" % (inst, ig), mod, a)
-
-
-def one_port(inst, name, gvar):
-    # names are stored in port_lists with : as hierarchy separator
-    s = re.sub(":", "_", name)
-    # wid = int(msb) - int(lsb) + 1
-    # suffix = '' if (gvar is None) else '[%s*%d+%s:%s*%d+%s]'%(gvar, wid, msb, gvar, wid, lsb);
-    if gvar is None:
-        return ".%s(%s_%s)" % (s, inst, s)
-    else:
-        return ".%s(%s_array_%s[%s])" % (s, inst, s, gvar)
-
-
-def print_instance_ports(inst, mod, gvar, gcnt, fd):
-    """
-    Print the port assignments for the instantiation of a module.
-    At the same time, append to the self_ports and decodes strings,
-    so the variables mapped to the ports can get adequately defined.
-    """
-    instance_ports = port_lists[mod]
-    if fd:
-        # 'list comprehension' for the port list itself
-        this_list = [one_port(inst, p.name, gvar) for p in instance_ports]
-        if this_list:
-            tail = " " + ",\\\n\t".join(this_list)
-        else:
-            tail = ""
-        fd.write("`define AUTOMATIC_" + inst + tail)
-        fd.write("\n")
-    #  now construct the self_ports and decoders (if any)
-    for p in instance_ports:
-        sig = "" if (p.sign is None) else p.sign  # signed flag
-        if gvar is None:
-            self_ports.append(
-                "%s %s [%s:%s] %s_%s"
-                % (
-                    p.direction,
-                    sig,
-                    p.downto[0],
-                    p.downto[1],
-                    inst,
-                    re.sub(":", "_", p.name),
-                )
-            )
-        else:
-            for ig in range(gcnt):
-                self_ports.append(
-                    "%s %s [%s:%s] %s_%d_%s"
-                    % (
-                        p.direction,
-                        sig,
-                        p.downto[0],
-                        p.downto[1],
-                        inst,
-                        ig,
-                        re.sub(":", "_", p.name),
-                    )
-                )
-        make_decoder(inst, mod, p, gcnt)
-
-
-def construct_map(inst, p, gcnt, mod):
-    sig = "" if (p.sign is None) else p.sign
-    msb = int(p.downto[0])
-    lsb = int(p.downto[1])
-    # wid = msb-lsb+1
-    name = re.sub(":", "_", p.name)
-    # print '// construct_map',sig,msb,lsb,inst,name,gcnt, mod
-    self_map[mod].append(
-        "wire %s [%d:%d] %s_array_%s [0:%d];" % (sig, msb, lsb, inst, name, gcnt - 1)
-    )
-    for ig in range(gcnt):
-        array_el = "%s_array_%s[%d]" % (inst, name, ig)
-        expanded = "%s_%d_%s" % (inst, ig, name)
-        if p.direction == "input":
-            self_map[mod].append("assign %s = %s;\\\n" % (array_el, expanded))
-        elif p.direction == "output":
-            self_map[mod].append("assign %s = %s;\\\n" % (expanded, array_el))
-
-
-INSTANTIATION_SITE = (
-    r"^\s*(\w+)\s+(#\(.*\) *)?(\w+)\s*//\s*auto(\(\w+,\d+\))?\s+((\w+)(\[(\w+)\])?)?"
-)
-# Search for port with register width defined 'input (signed)? [%d:%d] name // <...>'
-PORT_WIDTH_MULTI = r"^\s*,?(input|output)\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+),?\s*"
-PORT_WIDTH_MULTI += r"//\s*external\s*(single-cycle|strobe|we-strobe|plus-we)?"
-# Search for port with register width 1 'input (signed)? name // <...>'
-PORT_WIDTH_SINGLE = r"^\s*,?(input|output)\s+(signed)?\s*(\w+),?\s*//\s*external\s*(single-cycle|strobe|we-strobe)?"
-TOP_LEVEL_REG = r"^\s*//\s*reg\s+(signed)?\s*\[(\d+):(\d+)\]\s*(\w+)\s*;\s*top-level\s*(single-cycle|strobe|we-strobe)?"
-
-DESCRIPTION_ATTRIBUTE = r"^\s*\(\*\s*BIDS_description\s*=\s*\"(.+?)\"\s*\*\)\s*$"
-
-
-def parse_vfile(stack, fin, fd, dlist, clk_domain, cd_indexed, try_sv=True):
-    """
-    Given a filename, parse Verilog:
-    (a) looking for module instantiations marked automatic,
-    for which we need to generate port assignments.
-    When such an instantiation is found, recurse.
-    (b) looking for input/output ports labeled 'external'.
-    Record them in the port_lists dictionary for this module.
-    """
-    fin_sv = splitext(fin)[0] + ".sv"
-    searchpath = dirname(fin)
-    fname = basename(fin)
-    fname_sv = basename(fin_sv)
-    fsearch = [fname, fname_sv] if try_sv else [fname]
-    found = False
-    for fn in fsearch:
-        if isfile(fn):
-            fin = fn
-            break
-        for d in dlist:
-            x = d + "/" + fn
-            if isfile(x):
-                fin = x
-                found = True
-                break
-        if found:
-            break
-
-    if not isfile(fin):
-        print("File not found:", fin)
-        print("(from hierarchy %s)" % stack)
-        global file_not_found
-        file_not_found += 1
-        return
-    fd.write("// parse_vfile %s %s\n" % (stack, fin))
-    if searchpath == "":
-        searchpath = "."
-    this_mod = fin.split("/")[-1].split(".")[0]
-    verilog_file_lines = []
-    port_clock = clk_domain
-    # Looks like the reason we read the whole file is to avoid opening
-    # several files at the same time
-    with open(fin, "r") as f:
-        verilog_file_lines = f.readlines()
-    this_port_list = []
-    attributes = {}
-    for line in verilog_file_lines:
-        # Search for attributes
-        m = re.search(DESCRIPTION_ATTRIBUTE, line)
-        if m:
-            value = m.group(1)
-            attributes["description"] = value
-        # (a) instantiations
-        m = re.search(INSTANTIATION_SITE, line)
-        if m:
-            mod = m.group(1)
-            inst = m.group(3)
-            gspec = m.group(4)
-            clk_domain_l = clk_domain
-            cd_indexed_l = cd_indexed
-            if m.group(6) is not None:
-                clk_domain_l = m.group(6)
-                fd.write(
-                    "// instance %s: clk_domain override %s\n" % (inst, clk_domain_l)
-                )
-                if m.group(8) is not None:
-                    cd_indexed_l = True
-            if gspec is not None:
-                mm = re.search(r"\((\w+),(\d+)\)", gspec)
-                gvar = mm.group(1)
-                gcnt = int(mm.group(2))
-            else:
-                gvar = None
-                gcnt = None
-            fd.write(
-                "// module=%s instance=%s gvar=%s gcnt=%s clk=%s\n"
-                % (mod, inst, gvar, str(gcnt), clk_domain_l)
-            )
-            if mod not in port_lists:
-                # recurse
-                parse_vfile(
-                    stack + ":" + fin,
-                    searchpath + "/" + mod + ".v",
-                    fd,
-                    dlist,
-                    clk_domain_l,
-                    cd_indexed_l,
-                )
-            if not stack:
-                print_instance_ports(inst, mod, gvar, gcnt, fd)
-            # add this instance's ports to our own port list
-            for p in port_lists[mod] if mod in port_lists else []:
-                if gcnt is None:
-                    p_p = deepcopy(p)  # p_prime
-                    this_port_list.append(p_p.port_prefix_set(inst + ":"))
-                else:
-                    for ig in range(gcnt):
-                        p_p = deepcopy(p)  # p_prime
-                        p_p = p_p.port_prefix_set("%s_%d:" % (inst, ig))
-                        if cd_indexed_l and m.group(6) is not None:
-                            p_p.cd_index = ig
-                        this_port_list.append(p_p)
-                    if this_mod not in self_map:
-                        self_map[this_mod] = []
-                    construct_map(inst, p, gcnt, this_mod)
-        # (b) ports
-        # Search for port with register width defined 'input (signed)? [%d:%d] name // <...>'
-        m = re.search(PORT_WIDTH_MULTI, line)
-        if m:
-            info = [m.group(i) for i in range(7)]
-            p = Port(
-                info[5],
-                (info[3], info[4]),
-                info[1],
-                info[2],
-                this_mod,
-                info[6],
-                port_clock,
-                cd_indexed,
-                **attributes
-            )
-            this_port_list.append(p)
-            consider_port(p, fd)
-            if info[6] == "plus-we":
-                p = Port(
-                    info[5] + "_we",
-                    (0, 0),
-                    info[1],
-                    None,
-                    this_mod,
-                    info[6] + "-VOID",
-                    port_clock,
-                    cd_indexed,
-                    **attributes
-                )
-                this_port_list.append(p)
-                consider_port(p, fd)
-            attributes = {}
-        else:
-            m = re.search(PORT_WIDTH_SINGLE, line)
-            if m:
-                info = [m.group(i) for i in range(5)]
-                p = Port(
-                    info[3],
-                    (0, 0),
-                    info[1],
-                    info[2],
-                    this_mod,
-                    info[4],
-                    port_clock,
-                    cd_indexed,
-                    **attributes
-                )
-                this_port_list.append(p)
-                consider_port(p, fd)
-                attributes = {}
-        # new feature:  local override of clock domain
-        # some modules have control inputs in multiple domains
-        # used in lcls2_llrf digitizer_config.v digitizer_dsp.v
-        m = re.search(r"^\s*//\s*newad-force\s+(\w+)\s+domain", line)
-        if m:
-            new_clock = m.group(1)
-            # print("clock domain local override: %s in %s" % (new_clock, fin))
-            port_clock = new_clock
-
-        # (c) registers in the top-level file
-        if not stack:
-            m = re.search(TOP_LEVEL_REG, line)
-            if m:
-                info = [m.group(i) for i in range(6)]
-                p = Port(
-                    info[4],
-                    (info[2], info[3]),
-                    "top_level",
-                    info[1],
-                    this_mod,
-                    info[5],
-                    port_clock,
-                    cd_indexed,
-                    **attributes
-                )
-                this_port_list.append(p)
-                # Since these are top level registers, decoders can be generated here
-                make_decoder(None, this_mod, p, None)
-                attributes = {}
-    # print '// debug',this_mod,this_port_list
-    port_lists[this_mod] = this_port_list
+g_file_not_found = 0
 
 
 def generate_mirror(dw, mirror_n):
@@ -748,34 +220,48 @@ def address_allocation(
     return generate_addresses(fd, out_mod, address, low_res, gen_mirror, plot_map)
 
 
-def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror):
+from parser import Parser
+from comment_parser import CommentParser
+
+
+def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror, use_yosys):
+    clk_prefix = "lb"
     obuf = StringIO()
-    parse_vfile("", fi, obuf, dir_list, "lb", False)
+    if use_yosys:
+        vfile_parser = Parser()
+        vfile_parser.parse_vfile_yosys("", fi, obuf, dir_list, clk_prefix, False)
+    else:
+        vfile_parser = CommentParser()
+        vfile_parser.parse_vfile_comments("", fi, obuf, dir_list, clk_prefix, False)
+
+    global gch, g_flat_addr_map, g_file_not_found
+    gch = vfile_parser.gch
+    g_flat_addr_map = vfile_parser.g_flat_addr_map
+    g_file_not_found = vfile_parser.file_not_found
     obuf.write("// machine-generated by newad.py\n")
     obuf.write("`ifdef LB_DECODE_%s\n" % modname)
     obuf.write('`include "addr_map_%s.vh"\n' % modname)
     # TODO: Merging clock domains: This doesn't need to be there?
     # needed for at least some test benches, like in rtsim
-    clk_prefix = "lb"
     obuf.write(
         "`define AUTOMATIC_self input %s_clk, input [31:0] %s_data,"
         " input %s_write, input [%d:0] %s_addr\n"
         % (clk_prefix, clk_prefix, clk_prefix, lb_width, clk_prefix)
     )
-    obuf.write("`define AUTOMATIC_decode\\\n" + "".join(decodes))
+    obuf.write("`define AUTOMATIC_decode\\\n" + "".join(vfile_parser.decodes))
     if gen_mirror:
         obuf.write(generate_mirror(32, 0))
     obuf.write("\n")
     obuf.write("`else\n")
-    obuf.write("`define AUTOMATIC_self" + " " + ",\\\n".join(self_ports))
+    obuf.write("`define AUTOMATIC_self" + " " + ",\\\n".join(vfile_parser.self_ports))
     obuf.write("\n")
     obuf.write("`define AUTOMATIC_decode\n")
     obuf.write("`endif\n")
     # Below only applies for modules with genvar constructions
-    if modname in self_map:
+    if modname in vfile_parser.self_map:
         obuf.write(
             "`define AUTOMATIC_map "
-            + " ".join(self_map[modname] if modname in self_map else [])
+            + " ".join(vfile_parser.self_map[modname] if modname in vfile_parser.self_map else [])
             + "\n"
         )
     if fo:
@@ -814,9 +300,6 @@ def write_regmap_file(output_file, low_res, gen_mirror, base_addr, plot_map):
 
 
 def main(argv):
-    def auto_int(x):
-        return int(x, 0)
-
     parser = argparse.ArgumentParser(
         description="Automatic address generator: Parses verilog lines "
         "and generates addresses and decoders for registers declared "
@@ -827,6 +310,12 @@ def main(argv):
     )
     parser.add_argument(
         "-o", "--output", default="", help="Outputs generated header file"
+    )
+    parser.add_argument(
+        "-y",
+        "--yosys",
+        action="store_true",
+        help="Use yosys for backend, as opposed to poor mans parsing"
     )
     parser.add_argument(
         "-d",
@@ -872,14 +361,14 @@ def main(argv):
     parser.add_argument(
         "-w",
         "--lb_width",
-        type=auto_int,
+        type=int,
         default=10,
         help="Set the address width of the local bus from which the generated registers are decoded",
     )
     parser.add_argument(
         "-b",
         "--base_addr",
-        type=auto_int,
+        type=int,
         default=0,
         help="Set the base address of the register map to be generated from here",
     )
@@ -898,7 +387,7 @@ def main(argv):
     regmap_fname = args.regmap
 
     print_decode_header(
-        input_fname, modname, args.output, dir_list, args.lb_width, args.gen_mirror
+        input_fname, modname, args.output, dir_list, args.lb_width, args.gen_mirror, args.yosys
     )
 
     if addr_header_fname:
@@ -924,6 +413,6 @@ if __name__ == "__main__":
     import sys
 
     main(sys.argv[1:])
-    if file_not_found > 0:
-        print(file_not_found, "files not found")
+    if g_file_not_found > 0:
+        print(g_file_not_found, "files not found")
         exit(1)

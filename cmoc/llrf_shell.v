@@ -11,6 +11,10 @@
 
 // always need this
 //`define LB_DECODE_llrf_shell
+`define AUTOMATIC_self
+`define AUTOMATIC_decode
+`define AUTOMATIC_controller
+
 `include "llrf_shell_auto.vh"
 
 module llrf_shell(
@@ -67,6 +71,7 @@ minmax #(16) mm3(.clk(clk), .xin(a_reflect), .reset(mm_snap), .xmin(adc3_min), .
 // Nest to get the real work
 wire [7:0] tag_now;
 wire [11:0] cmp_event;
+(* lb_automatic *)
 rf_controller controller // auto
 	(.clk(clk),
 	.a_field(a_field), .a_forward(a_forward), .a_reflect(a_reflect), .a_phref(16'b0),

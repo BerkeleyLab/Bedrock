@@ -1,22 +1,24 @@
 `timescale 1ns / 1ns
 
-module mon_chans(clk,adc,mlo,samp,s_in,s_out,g_in,g_out,reset);
-parameter NCHAN=1;
-parameter DWI=16;  // data width
-parameter RWI=28;  // result width
-parameter DWLO=18;  // Local Oscillator data width
-parameter DAVR=3;
-// Difference between above two widths should be N*log2 of the maximum number
-// of samples per CIC sample, where N=2 is the order of the CIC filter.
-input clk;  // timespec 8.4 ns
-input signed [NCHAN*DWI-1:0] adc;  // possibly muxed
-input signed [NCHAN*DWLO-1:0] mlo;
-input samp;
-input signed [RWI-1:0] s_in;
-output signed [RWI-1:0] s_out;
-input g_in;
-output g_out;
-input reset;
+module mon_chans #(
+	parameter NCHAN=1,
+	parameter DWI=16,  // data width
+	parameter RWI=28,  // result width
+	// Difference between above two widths should be N*log2 of the maximum number
+	// of samples per CIC sample, where N=2 is the order of the CIC filter.
+	parameter DWLO=18,  // Local Oscillator data width
+	parameter DAVR=3
+) (
+	input clk,  // timespec 8.4 ns
+	input signed [NCHAN*DWI-1:0] adc,  // possibly muxed
+	input signed [NCHAN*DWLO-1:0] mlo,
+	input samp,
+	input signed [RWI-1:0] s_in,
+	output signed [RWI-1:0] s_out,
+	input g_in,
+	output g_out,
+	input reset
+);
 
 reg [1:0] reset_r=0;
 always @(posedge clk) reset_r <= {reset_r[0],reset};

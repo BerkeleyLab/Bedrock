@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+`timescale 1ns / 1ns
 
 // ------------------------------------
 // QGTP_COMMON_WRAP.v
@@ -85,4 +85,3 @@ module qgtp_common_wrap (
 endmodule
 
 `endif // SIMULATE
-

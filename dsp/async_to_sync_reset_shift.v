@@ -1,7 +1,8 @@
-module async_to_sync_reset_shift(clk,Pinput,Poutput);
-input clk;
-input Pinput;
-output Poutput;
+module async_to_sync_reset_shift(
+	input clk,
+	input Pinput,
+	output Poutput
+);
 parameter LENGTH =8;
 parameter INPUT_POLARITY = 1'b1;
 parameter OUTPUT_POLARITY= 1'b1;

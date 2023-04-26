@@ -26,6 +26,14 @@
 // sized FPGA, allowing real-time simulation of a realistic module with
 // coupled mechanical modes.
 
+`define AUTOMATIC_self
+`define AUTOMATIC_decode
+`define AUTOMATIC_map
+`define AUTOMATIC_dot
+`define AUTOMATIC_mode
+`define AUTOMATIC_freq
+`define AUTOMATIC_outer_prod
+`define AUTOMATIC_drive_couple
 `include "cav_elec_auto.vh"
 
 module cav_elec(
@@ -47,7 +55,9 @@ module cav_elec(
 	// Coupling to mechanical system
 	output signed [17:0] eig_drive,
 	//
+	(*external*)
 	input [31:0] phase_step,  // external
+	(*external*)
 	input [11:0] modulo,  // external
 	`AUTOMATIC_self
 );
@@ -79,6 +89,7 @@ reg [18:0] beam_phs = 3000;
 
 // Generate prompt terms for forward and reflected waves
 wire signed [18:0] fwd_ref;
+(* lb_automatic *)
 pair_couple drive_couple // auto
 	(.clk(clk), .iq(iq),
 	.drive(prompt_drive), .lo_phase(lo_phase_d),
@@ -118,6 +129,7 @@ generate for (mode_n=0; mode_n<mode_count; mode_n=mode_n+1) begin: cav_mode
 	// to get frequency perturbation of this mode
 	wire signed [17:0] d_result;
 	wire d_strobe;
+	(* lb_automatic, gvar="mode_n", gcnt=3 *)
 	dot_prod dot  // auto(mode_n,3)
 		(.clk(clk), .start(start_dot), .x(mech_x),
 		.result(d_result), .strobe(d_strobe),
@@ -132,11 +144,13 @@ generate for (mode_n=0; mode_n<mode_count; mode_n=mode_n+1) begin: cav_mode
 	// m_freq step size is 94.3 MHz / 2^32 = 0.022 Hz,
 	// range is +/- 2^27 steps = +/- 2.94 MHz from nominal
 	wire signed [27:0] m_freq;
+	(* lb_automatic, gvar="mode_n", gcnt=3 *)
 	cav_freq #(.df_scale(df_scale)) freq  // auto(mode_n,3)
 		(.clk(clk), .fine(m_fine_freq), .out(m_freq), `AUTOMATIC_freq);
 	//
 	// Actual electrical mode
 	wire signed [17:0] v_squared;
+	(* lb_automatic, gvar="mode_n", gcnt=3 *)
 	cav_mode #(.shift(mode_shift)) mode  // auto(mode_n,3)
 		(.clk(clk),
 		.iq(iq), .drive(cav_drive), .lo_phase(lo_phase),
@@ -150,6 +164,7 @@ generate for (mode_n=0; mode_n<mode_count; mode_n=mode_n+1) begin: cav_mode
 	//
 	// Outer product of v^2 to get per-mechanical-eigenmode drive terms
 	wire signed [17:0] m_eig_drive;
+	(* lb_automatic, gvar="mode_n", gcnt=3 *)
 	outer_prod outer_prod  // auto(mode_n,3)
 		(.clk(clk), .start(start_outer),
 		.x(v_squared), .result(m_eig_drive),

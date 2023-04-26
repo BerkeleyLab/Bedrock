@@ -1,4 +1,4 @@
-`timescale 1ps / 1ps
+`timescale 1ns / 1ns
 
 module gmii_to_rgmii #(
    parameter in_phase_tx_clk=0
@@ -236,4 +236,3 @@ endgenerate
 `endif // `ifdef RXDELAY
 `endif // `ifndef SIMULATE
 endmodule
-

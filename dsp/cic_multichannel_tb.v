@@ -64,8 +64,13 @@ module cic_multichannel_tb;
          $display("ERROR: No transactions, nothing was tested.");
          errors = errors + 1;
       end
-      $display("%s",errors==0?"PASS":"FAIL");
-      $finish();
+      if (errors == 0) begin
+        $display("PASS");
+        $finish();
+      end else begin
+        $display("FAIL");
+        $stop();
+      end
    end
 
    integer cc_s;
@@ -167,6 +172,7 @@ module cic_multichannel_tb;
       .dsample2_wi(8))
    i_multi_sampler (
       .clk(clk),
+      .reset(1'b0),
       .ext_trig(1'b1),
       .sample_period({den[6:0],1'b0}),
       .dsample0_period(8'h1),
