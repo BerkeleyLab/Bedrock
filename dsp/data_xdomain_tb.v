@@ -15,8 +15,14 @@ initial begin
 		clk1=0; #4;
 		clk1=1; #4;
 	end
-	$display("%s after %d clk1 cycles: # of errors %d", fail ? "FAIL" : "PASS", cc1, err_cnt);
-	$finish();
+	$display("After %d clk1 cycles, # of errors: %d", cc1, err_cnt);
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 reg clk2;

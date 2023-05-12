@@ -1,3 +1,5 @@
+`timescale 1ns / 1ns
+
 // Simple first-order CIC filter and decimator
 // Note that this module is configured with unsigned input and output!
 module cic_simple_us(

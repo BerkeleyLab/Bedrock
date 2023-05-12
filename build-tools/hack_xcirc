@@ -1,0 +1,4 @@
+#!/bin/sh
+# xcircuit is sloppy about whitespace, and I can't put up with that.
+# Use this script to clean up xcircuit files.
+sed -i -e 's/ *$//' -e "`printf \"s/\t\+%%/ %%/\"`" -e "`printf "s/bop\t/bop    /\"`" $1

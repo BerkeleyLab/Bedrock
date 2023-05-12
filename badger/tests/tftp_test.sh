@@ -24,8 +24,8 @@ echo "background job setup complete?"
 jobs
 trap "echo aargh; kill %2 %1; sleep 0.2; echo FAULT" ERR
 ping -c 2 $IP
-A=`mktemp`
-curl -s tftp://$IP/testing123 > $A
+A=$(mktemp)
+curl -s tftp://$IP/testing123 > "$A"
 echo "8470d56547eea6236d7c81a644ce74670ca0bbda998e13c629ef6bb3f0d60b69  $A" | sha256sum -c
 echo "tftp succeeded, killing tftp server"
 kill %python || echo wtf1
@@ -36,6 +36,6 @@ python3 badger_lb_io.py --ip $IP stop_sim
 echo "ok"
 sleep 1
 jobs
-kill %1 || echo "simulation already stopped, as requsted"
+kill %1 || echo "simulation already stopped, as requested"
 sleep 0.2
 echo "Success!"

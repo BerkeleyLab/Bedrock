@@ -3,6 +3,8 @@
 `define ADDR_HIT_dut_kx 0
 `define ADDR_HIT_dut_ky 0
 
+`define AUTOMATIC_decode
+`define AUTOMATIC_dut
 `define LB_DECODE_lp_tb
 `include "lp_tb_auto.vh"
 
@@ -10,25 +12,32 @@ module lp_tb;
 
 reg clk;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("lp.vcd");
 		$dumpvars(5,lp_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<450; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish();
 end
+`endif //  `ifdef SIMULATE
 
 // Output file (if any) for dumping the results
 integer out_file;
 reg [255:0] out_file_name;
+`ifdef SIMULATE
 initial begin
 	out_file = 0;
 	if ($value$plusargs("out_file=%s", out_file_name))
 		out_file = $fopen(out_file_name,"w");
 end
+`endif //  `ifdef SIMULATE
 
 reg signed [17:0] x=0;
 reg [2:0] state=0;
@@ -49,12 +58,14 @@ reg lb_write=0;
 `AUTOMATIC_decode
 
 wire signed [19:0] y;
+(* lb_automatic *)
 lp dut // auto
 	(.clk(clk), .iq(iq), .x(x), .y(y), `AUTOMATIC_dut);
 
 // Set control registers from command line
-// See also lp_setup in lp_notch_test.py
+// See also lp_setup in lp_notch_test.py or lp_2notch_test.py
 reg signed [17:0] kxr, kxi, kyr, kyi;
+`ifdef SIMULATE
 initial begin
 	if (!$value$plusargs("kxr=%d", kxr)) kxr =  71000;
 	if (!$value$plusargs("kxi=%d", kxi)) kxi =      0;
@@ -66,15 +77,21 @@ initial begin
 	dp_dut_ky.mem[0] = kyr;  // k_Y  real part
 	dp_dut_ky.mem[1] = kyi;  // k_Y  imag part
 end
+`endif //  `ifdef SIMULATE
+
 // As further discussed in lp.v,
 // y*z = y + ky*z^{-1}*y + kx*x
-// k_X and k_Y are scaled by 2^{19} from their real values.
-// Thus a full-scale value of 131000 translates to 0.25.
+// k_X and k_Y are scaled by 2^{19} from their real values,
+// for default (and historical equivalent) parameter shift=2.
+// Thus a full-scale value of 131071 translates to 0.25.
+// shift = 0: 2^{17}-1/2^{17} = 1
+// shift = 2: 2^{17}-1/2^{19} = 0.25
+// shift = 4: 2^{17}-1/2^{21} = 0.0625
+// The new shift parameter is added to accommodate higher BWs.
 // At a typical 50 Msample/sec (remember this processes pairs),
-// that gives a bandwidth of 50 MHz * 0.25 = 12.5 MHz.
-// The "final" planned configuration (low-pass only, no phase shift)
-// of 300 kHz means k_X = 0.006, k_Y = -0.006
-// for a register value set of +/- 3146.
+// that gives a maximum bandwidth of 50 MS/s * 0.25 = 12.5e6 rad/s = 1.99 MHz
+// Configuring as a 300 kHz low-pass gives k_X = 0.0377, k_Y = -0.0377
+// for a register value set of approximately +/- 19760.
 
 // Write a comprehensible output file
 // One line per pair of clock cycles
@@ -88,7 +105,9 @@ always @(posedge clk) begin
 	if (~iq) y_q <= y;
 	if (~iq) x_i <= x1;
 	if (~iq) x_q <= x;
+`ifdef SIMULATE
 	if (out_file != 0 && ~iq) $fwrite(out_file," %d %d %d %d\n", x_i, x_q, y_i, y_q);
+`endif
 end
 
 endmodule

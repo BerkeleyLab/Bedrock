@@ -25,11 +25,12 @@ initial begin
 	//spi_rw=1;
 	spi_addr=16'h8002;
 	spi_data=8'h18;
+	$display("WARNING: Not a self-checking testbench. Will always pass.");
 	while ($time<40000) begin
 		#10;
 	end
-	$display("WARNING: Not a self-checking testbench. Will always pass.");
-	$finish;
+	$display("PASS");
+	$finish();
 end
 
 always #5 clk=~clk;  // 100 MHz clk
@@ -67,5 +68,3 @@ spi_master #(.TSCKHALF(TSCKHALF),.ADDR_WIDTH(ADDR_WIDTH),.DATA_WIDTH(DATA_WIDTH)
 
 
 endmodule
-
-

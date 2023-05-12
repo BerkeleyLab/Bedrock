@@ -1,3 +1,5 @@
+`timescale 1ns / 1ns
+
 /** COMPLEX_FREQ_WRAP **
     Wraps around complex_freq.v and adds COMB (CCFILT) portion
     of upstream CIC filter and conveyor belt channel selection.

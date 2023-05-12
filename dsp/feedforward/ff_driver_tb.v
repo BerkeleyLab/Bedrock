@@ -24,7 +24,7 @@ initial begin
 	for (ix=0; ix<(1<<memw); ix=ix+1) begin
 		rc = $fscanf(fd, "%d\n", mem[ix]);
 		if (rc != 1) begin
-			$display("parse error, aborting");
+			$display("FAIL: parse error, aborting");
 			$stop();
 		end
 	end
@@ -38,7 +38,7 @@ initial begin
 	if (!$value$plusargs("c1=%d", coeff_1)) coeff_1 = -83030;
 	if (!$value$plusargs("sim_expand=%d", sim_expand)) sim_expand = 2;
 	if (sim_expand != (1<<shift)) begin
-		$display("Misconfiguration!  shift=%d, sim_expand=%d", shift, sim_expand);
+		$display("FAIL: Misconfiguration!  shift=%d, sim_expand=%d", shift, sim_expand);
 		$stop();
 	end
 
@@ -46,8 +46,13 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("%s", fail ? "FAIL" : "PASS");
-	if (fail) $stop();
+	if (fail) begin
+		$display("FAIL");
+		$stop();
+	end else begin
+		$display("PASS");
+		$finish();
+	end
 end
 
 reg start=0;

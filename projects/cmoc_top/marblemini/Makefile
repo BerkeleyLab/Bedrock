@@ -14,11 +14,11 @@ DSP_DIR = $(TOP_DIR)/dsp
 OSCOPE_COMMON_DIR = $(TOP_DIR)/projects/oscope/common
 BS_HARDWARE_DIR = $(BOARD_SUPPORT_DIR)/$(HARDWARE)
 
-vpath %.v $(APP_DIR) $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
+vpath %.v $(APP_DIR) $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BADGER_DIR)
 
 CLEAN_DIRS += ./.Xil
 
-include $(BUILD_DIR)/top_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 include $(BS_HARDWARE_DIR)/rules.mk
 include $(APP_DIR)/rules.mk
 
@@ -29,7 +29,7 @@ VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(FPGA_FA
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
 
 system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)/$(HARDWARE)/pin_map.csv digilent_led_pmod.csv oscope_rules.csv
-	echo "Building for $(HARDWARE); Use make HARDWARE=marble(mini) otherwise"
+	@echo "Building for $(HARDWARE); Use make HARDWARE=marble(mini) otherwise"
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
 CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json $(RTEFI_CLEAN)

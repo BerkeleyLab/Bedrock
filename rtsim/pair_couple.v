@@ -15,9 +15,13 @@ module pair_couple(
 	input [18:0] lo_phase,  // should change every other cycle, see below
 	// lo_phase must also include the mech_phase component, if applicable
 	// Pair of output signals, interleaved, at 20 MHz IF
+	(* external *)
 	input signed [17:0] out_coupling,  // external
+	(* external *)
 	output [0:0] out_coupling_addr,    // external
+	(* external *)
 	input signed [18:0] out_phase_offset,  // external
+	(* external *)
 	output [0:0] out_phase_offset_addr,    // external
 	output signed [18:0] pair
 );

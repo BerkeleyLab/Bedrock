@@ -1,8 +1,5 @@
 `timescale 1ns / 1ns
 
-`define LB_DECODE_cav_mode_tb
-`include "cav_mode_tb_auto.vh"
-
 module cav_mode_tb;
 
 // Nominal clock is 188.6 MHz, corresponding to 94.3 MHz ADC clock.
@@ -11,6 +8,7 @@ reg clk;
 reg lb_clk;
 reg trace;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	trace = $test$plusargs("trace");
 	if ($test$plusargs("vcd")) begin
@@ -21,14 +19,15 @@ initial begin
 		clk=0; #3;
 		clk=1; #3;
 	end
+	$finish();
 end
+`endif //  `ifdef SIMULATE
 
 // Local bus, not really used in this test bench
 reg [31:0] lb_data=0;
 reg [14:0] lb_addr=0;
 reg lb_write=0;
 
-`AUTOMATIC_decode
 
 reg iq=0;
 reg signed [17:0] drive=0;
@@ -71,6 +70,7 @@ cav_mode #(.shift(7)) cav_mode(.clk(clk),
 	.lb_data(lb_data), .lb_addr(lb_addr), .lb_write(lb_write), .lb_clk(clk)
 );
 
+`ifdef SIMULATE
 initial begin
 	#1;  // lose time zero races
 	cav_mode.dp_out_couple_out_coupling.mem[0]=57000;  // field coupling
@@ -92,5 +92,6 @@ always @(posedge clk) if (trace) begin
 		probe_refl_d, probe_refl,
 		v_squared, lo_phase);
 end
+`endif
 
 endmodule

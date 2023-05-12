@@ -1,5 +1,7 @@
 `timescale 1ns / 1ns
 
+`define AUTOMATIC_decode
+`define AUTOMATIC_resonator
 `define LB_DECODE_resonator_tb
 `include "resonator_tb_auto.vh"
 
@@ -11,6 +13,7 @@ reg clk;
 wire lb_clk = clk;
 reg trace;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	trace = $test$plusargs("trace");
 	if ($test$plusargs("vcd")) begin
@@ -21,7 +24,9 @@ initial begin
 		clk=0; #3;
 		clk=1; #3;
 	end
+	$finish();
 end
+`endif //  `ifdef SIMULATE
 
 // Local bus, not really used here
 reg [31:0] lb_data=0;
@@ -46,6 +51,7 @@ end
 
 wire signed [17:0] position;
 wire clip;
+(* lb_automatic *)
 resonator resonator  // auto
 	(.clk(clk), .start(start),
 	.drive(drive),
@@ -53,6 +59,7 @@ resonator resonator  // auto
 	`AUTOMATIC_resonator
 );
 
+`ifdef SIMULATE
 integer ix;
 integer scale=7;
 initial begin
@@ -68,5 +75,6 @@ always @(posedge clk) if (trace) begin
 	last <= position;
 	if (cc>16 && cc%n_cycles == 4) $display("%d %d", last, position);
 end
+`endif
 
 endmodule

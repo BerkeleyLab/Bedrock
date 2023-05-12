@@ -79,7 +79,7 @@ def main(args):
 
     with open(args.output, 'wb') as F:
         F.write(b'<?xml version="1.0" encoding="UTF-8"?>\n')
-        F.write(ET.tostring(T))
+        F.write(ET.tobytes(T))
 
 
 if __name__ == '__main__':

@@ -1,0 +1,37 @@
+{
+    "led_user_mode": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 1,
+        "data_width": 1
+    },
+    "led_1_df": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 2,
+        "data_width": 8
+    },
+    "led_2_df": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 3,
+        "data_width": 8
+    },
+    "stop_sim": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 6,
+        "data_width": 1
+    },
+    "scratch_out": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 7,
+        "data_width": 32
+    }
+}

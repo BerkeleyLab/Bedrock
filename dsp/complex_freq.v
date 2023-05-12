@@ -1,3 +1,5 @@
+`timescale 1ns / 1ns
+
 module complex_freq #(
 	parameter refcnt_w = 17
 ) (

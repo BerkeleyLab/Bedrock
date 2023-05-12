@@ -26,7 +26,7 @@ wire [31:0] mem_addr;
 wire [21:0] word_addr = mem_addr[23:2];// [words] Addressing 4 byte words
 reg  [31:0] mem_rdata = 0;
 
-// mem_ready is a single cycle pulse to acknowledge data going to the picrov.
+// mem_ready is a single cycle pulse to acknowledge data going to the picorv.
 // ready_sum is a 2 cycle pulse, which is used internally to
 // wait an extra dummy cycle at the end of each request
 // this allows mem_ready to be (optionally) latched once more (in munpack.v)

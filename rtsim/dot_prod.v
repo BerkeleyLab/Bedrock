@@ -4,8 +4,10 @@ module dot_prod(
 	input clk,
 	input start,
 	input signed [17:0] x,  // positions from resonator.v
+	(*external*)
 	input signed [17:0] k_out,  // external
 	// 9 should be pcw-1
+	(*external*)
 	output [9:0] k_out_addr,  // external
 	output signed [17:0] result,
 	output strobe  // at time of res valid

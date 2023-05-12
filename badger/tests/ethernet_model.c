@@ -166,7 +166,7 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 		const unsigned char *p=outbuf.buf;
 		while (*p==0x55 && p<(outbuf.buf+outbuf.cur)) { p++; }
 		if (p-outbuf.buf < 3) {
-			fprintf(stderr, "preamble too short, only found %ld x 0x55\n", p-outbuf.buf);
+			fprintf(stderr, "preamble too short, only found %ld x 0x55\n", (long int)(p-outbuf.buf));
 		} else if ((*p & 0xff) != 0xd5) {
 			fprintf(stderr, "output packet len %d missing SFD (%2.2x %2.2x)\n",
 				outbuf.cur, outbuf.buf[0], *p);

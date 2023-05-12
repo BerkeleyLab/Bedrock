@@ -12,6 +12,7 @@ initial begin
 		$dumpfile("non_iq_interleaved_piloop.vcd");
 		$dumpvars(5, non_iq_interleaved_piloop_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	trace = $test$plusargs("trace");
 	out_fd = $fopen("non_iq_interleaved_piloop.out", "w");
 	$fwrite(out_fd, "# cc kp ki x_i x_q setpoint_i setpoint_q y_i y_q\n");
@@ -19,6 +20,7 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
 	$finish();
 end
 

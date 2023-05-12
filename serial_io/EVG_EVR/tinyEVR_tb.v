@@ -110,9 +110,13 @@ begin
     sendEvent(EVCODE_SECONDS_MARKER);
     check(32'h1234567A);
     #1000 ;
-    $display("%s", fail ? "FAIL" : "PASS");
-    if (fail)$stop();
-    else $finish();
+    if (fail) begin
+      $display("FAIL");
+      $stop();
+    end else begin
+      $display("PASS");
+      $finish();
+    end
 end
 
 task setAction;

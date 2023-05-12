@@ -189,7 +189,7 @@ generate for (ch=0; ch<N_CH; ch=ch+1) begin: ch_map
 	   dat_mon[ch] <= adc_out[ch];
 	end
 
-    // 2-Lane Output Mode, 16-Bit Serializaiton
+    // 2-Lane Output Mode, 16-Bit Serialization
     // Lane B
     assign adc_out[ch][ 0] = serdes_out[ch][0];
     assign adc_out[ch][ 2] = serdes_out[ch][1];

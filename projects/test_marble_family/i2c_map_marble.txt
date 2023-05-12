@@ -1,0 +1,49 @@
+see Marble marble_i2c.eps
+All I2C addresses shown in 8-bit form with lsb (R/W) set to 0
+
+multiplexing via U5 (0xE0) TCA9548A
+ bus 0: FMC1
+ bus 1: FMC2
+ bus 2: CLK(ADN4600)
+ bus 3: SO-DIMM
+ bus 4: QSFP1
+ bus 5: QSFP2
+ bus 6: APP
+ bus 7: -
+
+bus 0 and 1 should have ID EEPROM, e.g., AT24C32D, at address 0xA0
+
+bus 2: U2 (0x90) ADN4600
+
+bus 6:
+ U39 (0x42) PCA9555
+   P0_7  CFG_WP_B
+   P0_6  THERM
+   P0_5  FANFAIL
+   P0_4  ALERT
+   P0_3  EN_CON_JTAG
+   P0_2  EN_USB_JTAG
+   P0_0  SI570_OE
+   P1_7  CLKMUX_RST
+   P1_3  LD11 drive
+   P1_2  LD12 drive
+
+ U34 (0x44) PCA9555
+   P0_7  QSFP1_MOD_SEL
+   P0_6  QSFP1_RST
+   P0_5  QSFP1_MOD_PRS
+   P0_4  QSFP1_INT
+   P0_3  QSFP1_LPMODE
+   P1_7  QSFP2_MOD_SEL
+   P1_6  QSFP2_RST
+   P1_5  QSFP2_MOD_PRS
+   P1_4  QSFP2_INT
+   P1_3  QSFP2_LPMODE
+
+ U17 (0x80) INA219
+
+ U32 (0x82) INA219
+
+ U57 (0x84) INA219
+
+ Y6 (0xEE) SI570

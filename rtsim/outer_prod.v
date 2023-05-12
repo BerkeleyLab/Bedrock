@@ -15,8 +15,10 @@ module outer_prod(
 	input start,
 	input signed [17:0] x,
 	// Local Bus
+	(* external *)
 	input signed [17:0] k_out,  // external
 	// 9 should be pcw-1
+	(* external *)
 	output [9:0] k_out_addr,  // external
 	output signed [17:0] result
 );

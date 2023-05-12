@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include "zest.h"
 #include "settings.h"
+#include "zest.h"
 #include "gpio.h"
 #include "timer.h"
 #include "spi.h"
@@ -320,12 +320,6 @@ bool check_zest_regs(uint8_t dev, const t_init_data *p_data) {
 
 bool check_zest_freq(uint8_t ch, uint16_t fcnt_exp) {
     uint16_t fcnt;
-    // uint16_t fcnt_exp = 60074; // 500 * 11 / 48 / 125 * (1<<fcnt_width);
-#ifdef SIMULATION
-    fcnt_width = 8;
-    fcnt_exp = 235;
-#endif
-    // (1<<16)/125e6 = 0.52 ms
     DELAY_MS(2);
 
     fcnt = read_zest_fcnt(ch);

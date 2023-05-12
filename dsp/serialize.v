@@ -2,7 +2,9 @@
 
 // Encapsulation of the serialization step in LBNL's conveyor belt
 // Instantiated by e.g., serializer_multichannel.v
-module serialize(
+module serialize #(
+	parameter dwi=28  // result width
+) (
 	input clk,  // timespec 8.4 ns
 	input samp, // Snap signal for data_in
 	input signed [dwi-1:0] data_in,
@@ -12,9 +14,6 @@ module serialize(
 	output gate_out,
 	output strobe_out
 );
-parameter dwi=28;  // result width
-// Difference between above two widths should be N*log2 of the maximum number
-// of samples per CIC sample, where N=2 is the order of the CIC filter.
 
 reg signed [dwi-1:0] stream_reg=0;
 reg gate_reg=0;

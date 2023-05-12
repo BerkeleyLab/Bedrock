@@ -165,7 +165,7 @@ class Logic(BoxLayout):
         ldf = args[-1]
         ldf = ldf.text
         ldf = int(str(ldf))
-        assert(ldf < 32)
+        assert ldf < 32
         carrier.set_log_decimation_factor(ldf)
 
     def update_lim(self, axis, *args):

@@ -10,6 +10,7 @@ module lp_pair(
 	input clk,
 	input signed [17:0] drive,
 	input signed [23:0] drive2,
+	(* external *)
 	input signed [17:0] bw,  // external
 	output signed [17:0] res
 );

@@ -9,8 +9,8 @@ module circle_buf #(
 	// and read cycles need the stb_out signal set high to register.
 	// Set this parameter to 0 to disable that feature, in which case you
 	// need to construct the stb_out signal as a simple explicit flip command.
-	parameter auto_flip = 1)
-(
+	parameter auto_flip = 1
+) (
 	// source side
 	input          iclk,
 	input [dw-1:0] d_in,
@@ -116,7 +116,7 @@ assign buf_count=buf_count_r;
 assign buf_sync=eval_done_read;
 
 // data path is simply a dual-port RAM
-dpram #(.aw(aw+1), .dw(dw)) mem(.clka(iclk), .clkb(oclk),
+dpram #(.aw(aw+1), .dw(dw)) cbuf(.clka(iclk), .clkb(oclk),
 	.addra({wbank,write_addr}), .dina(d_in), .wena(write_en),
 	.addrb({~rbank,read0_addr}), .doutb(d_out)
 );

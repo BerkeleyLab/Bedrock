@@ -7,6 +7,14 @@
 #include "Voscope_top.h"
 #include <verilated_fst_c.h>
 
+// See Verilator issue #3343
+// https://github.com/verilator/verilator/issues/3343
+#if (defined(VERILATOR_VERSION_INTEGER) && VERILATOR_VERSION_INTEGER >= 4210000) || !defined(VL_CELL)
+#define INTERNAL(m) (m)->rootp
+#include "Voscope_top___024root.h"
+#else
+#define INTERNAL(m) (m)
+#endif
 
 #include "udp_model.h"
 unsigned short udp_port;  /* Global, set below */
@@ -58,8 +66,8 @@ int main(int argc, char** argv, char** env) {
 
    // Set initial state
    vluint32_t tick = 0;
-   CData * sim_adc_clk = &(top->oscope_top__DOT__application_top__DOT__sim_adc_clk);
-   CData * sim_sys_clk = &(top->oscope_top__DOT__sim_sys_clk);
+   CData * sim_adc_clk = &(INTERNAL(top)->oscope_top__DOT__application_top__DOT__sim_adc_clk);
+   CData * sim_sys_clk = &(INTERNAL(top)->oscope_top__DOT__sim_sys_clk);
    *sim_adc_clk = 0;
    *sim_sys_clk = 0;
 
@@ -82,22 +90,22 @@ int main(int argc, char** argv, char** env) {
          // Throttle TX so it works with all generations of jxj_gate
          if (tick % 9 == 0) {
             udp_receiver(&udp_idata, &udp_iflag, &udp_count, thinking);
-            top->oscope_top__DOT__p_50006_word_s6tok7_r = udp_idata;
-            top->oscope_top__DOT__p_50006_rx_available_r = udp_iflag;
-            top->oscope_top__DOT__p_50006_rx_complete_r = udp_count==1;
+            INTERNAL(top)->oscope_top__DOT__p_50006_word_s6tok7_r = udp_idata;
+            INTERNAL(top)->oscope_top__DOT__p_50006_rx_available_r = udp_iflag;
+            INTERNAL(top)->oscope_top__DOT__p_50006_rx_complete_r = udp_count==1;
 
          } else {
-            top->oscope_top__DOT__p_50006_rx_available_r = 0;
-            top->oscope_top__DOT__p_50006_rx_complete_r = 0;
+            INTERNAL(top)->oscope_top__DOT__p_50006_rx_available_r = 0;
+            INTERNAL(top)->oscope_top__DOT__p_50006_rx_complete_r = 0;
          }
 
          // Data from simulation -> network
-         top->oscope_top__DOT__p_50006_word_read_r = 0;
+         INTERNAL(top)->oscope_top__DOT__p_50006_word_read_r = 0;
          if ((tick+2) % 9 == 0) {
-            if (top->oscope_top__DOT__p_50006_tx_available_r) {
-                top->oscope_top__DOT__p_50006_word_read_r = 1;
-               udp_sender(top->oscope_top__DOT__p_50006_word_k7tos6_r,
-                          top->oscope_top__DOT__p_50006_tx_complete_r);
+            if (INTERNAL(top)->oscope_top__DOT__p_50006_tx_available_r) {
+                INTERNAL(top)->oscope_top__DOT__p_50006_word_read_r = 1;
+               udp_sender(INTERNAL(top)->oscope_top__DOT__p_50006_word_k7tos6_r,
+                          INTERNAL(top)->oscope_top__DOT__p_50006_tx_complete_r);
             }
          }
       }

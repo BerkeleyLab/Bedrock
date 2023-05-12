@@ -162,4 +162,3 @@
       .pll1_lock ());
 
 `endif // SIMULATE
-

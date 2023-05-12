@@ -17,7 +17,7 @@ initial begin
 		clk=1; #5;
 	end
 	$display("WARNING: Not a self-checking testbench. Will always pass.");
-	$display("%s","PASS");
+	$display("PASS");
 	$finish();
 end
 

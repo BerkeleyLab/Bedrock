@@ -1,6 +1,7 @@
 # See riscv_meta.sh for documentation
 # Should be run from an empty directory into which we have write privileges
 # Will create ref and src directories there
+# Pro tip: first apt-get install wget
 set -e
 
 # Get upstream stable sources
@@ -24,3 +25,4 @@ cd src
 tar -xaf ../ref/binutils-2.32.tar.xz
 tar -xaf ../ref/gcc-8.3.0.tar.xz
 tar -xaf ../ref/newlib-3.1.0.tar.gz
+echo DONE
