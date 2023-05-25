@@ -41,7 +41,10 @@ def doConvert(argv):
             print(USAGE)
             return 1
     tval = txadc(_int(rval))
-    print("{} = {:.2f}\u00b0C".format(rval, tval))
+    try:
+        print("{} = {:.2f}\u00b0C".format(hex(rval), tval))
+    except UnicodeEncodeError:
+        print("{} = {:.2f} degC".format(hex(rval), tval))
     return 0
 
 
@@ -56,13 +59,18 @@ def doLeep(ipaddr, port):
         print(USAGE)
         return -1
     tval = txadc(rval)
-    print("{} = {:.2f}\u00b0C".format(hex(rval), tval))
+    try:
+        print("{} = {:.2f}\u00b0C".format(hex(rval), tval))
+    except UnicodeEncodeError:
+        print("{} = {:.2f} degC".format(hex(rval), tval))
     return 0
 
 
 if __name__ == "__main__":
     import sys
     import argparse
+    doConvert(sys.argv)
+    sys.exit()
     parser = argparse.ArgumentParser(
         description="Utility to read internal temperature of ")
     parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
