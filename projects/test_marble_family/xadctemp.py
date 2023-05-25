@@ -43,7 +43,7 @@ def doConvert(argv):
     tval = txadc(_int(rval))
     try:
         print("{} = {:.2f}\u00b0C".format(hex(rval), tval))
-    except UnicodeEncodeError:
+    except:
         print("{} = {:.2f} degC".format(hex(rval), tval))
     return 0
 
@@ -61,7 +61,7 @@ def doLeep(ipaddr, port):
     tval = txadc(rval)
     try:
         print("{} = {:.2f}\u00b0C".format(hex(rval), tval))
-    except UnicodeEncodeError:
+    except:
         print("{} = {:.2f} degC".format(hex(rval), tval))
     return 0
 
