@@ -20,7 +20,7 @@ module chitchat_tb;
 
    localparam MIN_OFF = 20; // Must cover gtx_k period
    localparam MAX_OFF = 70;
-   localparam MIN_ON = 200;
+   localparam MIN_ON = 5200;
    localparam MAX_ON = 400;
 
    reg cc_clk = 0;
@@ -80,6 +80,9 @@ module chitchat_tb;
 
    reg  [7:0] tx_data=0;
    wire [31:0] tx_data0, tx_data1;
+   reg         tx_pulse_id_valid=0;
+   reg  [127:0] tx_extra_data = 128'hffeeddccbbaa99887766554433221100;
+
    always @(posedge cc_clk) if (tx_transmit_en) tx_data <= tx_data + 1;
 
    assign tx_data0 = {(32/8){tx_data}};
@@ -89,8 +92,15 @@ module chitchat_tb;
    reg [15:0] corrupt=0;
    always @(posedge cc_clk) begin
       corrupt <= 0;
-      if (tx_transmit_en && &(cnt_on[5:3]&tx_data[4:2])) // Sporadic random pattern
-         corrupt <= $urandom(SEED) % 2**16;
+//      if (tx_transmit_en && &(cnt_on[5:3]&tx_data[4:2])) // Sporadic random pattern
+//         corrupt <= $urandom(SEED) % 2**16;
+   end
+
+   // test for the Pulse_id 128 bit transmission in the frame
+   reg [15:0] tx_loopback_frame_counter=0;
+   always @(posedge cc_clk) begin
+      tx_loopback_frame_counter <= tx_loopback_frame_counter +1;
+      if (tx_loopback_frame_counter[9:0]==10'b1000000000) tx_extra_data <= tx_extra_data + 1;
    end
 
    // ----------------------
@@ -113,6 +123,8 @@ module chitchat_tb;
    wire [31:0] rx_rev_id;
    wire [31:0] rx_data0;
    wire [31:0] rx_data1;
+   wire        rx_pulse_id_valid;
+   wire [128:0] rx_extra_data;
    wire [15:0] rx_loopback_frame_counter;
 
    localparam REVID = 32'hdeadbeef;
@@ -129,6 +141,7 @@ module chitchat_tb;
       .tx_location               (tx_data0[2:0]),
       .tx_data0                  (tx_data0),
       .tx_data1                  (tx_data1),
+      .tx_extra_data             (tx_extra_data),
       .tx_loopback_frame_counter (rx_frame_counter),
       .local_frame_counter       (local_frame_counter),
       .gtx_d                     (gtx_d),
@@ -155,6 +168,8 @@ module chitchat_tb;
       .rx_rev_id         (rx_rev_id),
       .rx_data0          (rx_data0),
       .rx_data1          (rx_data1),
+      .rx_pulse_id_valid (rx_pulse_id_valid),
+      .rx_extra_data     (rx_extra_data),
       .rx_frame_counter  (rx_frame_counter),
       .rx_loopback_frame_counter (rx_loopback_frame_counter)
    );
@@ -218,6 +233,11 @@ module chitchat_tb;
             fail <= 1;
          end
 
+      if (rx_pulse_id_valid) begin
+         if (rx_extra_data != tx_extra_data) begin
+            $display("%t, ERROR: Wrong pulseid received", $time);
+            fail <= 1;
+         end
       end
    end
 

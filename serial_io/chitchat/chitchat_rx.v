@@ -37,6 +37,8 @@ module chitchat_rx #(
    output [31:0] rx_rev_id,
    output [31:0] rx_data0,
    output [31:0] rx_data1,
+   output         rx_extra_data_valid,
+   output [127:0] rx_extra_data,
    output [15:0] rx_frame_counter,
    output [15:0] rx_loopback_frame_counter
 );
@@ -77,7 +79,7 @@ module chitchat_rx #(
    wire    link_up_inc = (link_up_cnt < LINK_UP_CNT) ? 1 : 0;
 
    reg  wrong_frame = 0;
-   reg  wrong_prot;
+   reg  wrong_prot = 0;
    wire crc_fault = last & ~crc_zero;
 
    reg         los_r   = 0;
@@ -155,7 +157,27 @@ module chitchat_rx #(
       if (word_count==8) begin
          rx_loopback_frame_counter_r <= gtx_d;
       end
-      if (word_count==9) last <= 1; // Last word (CRC)
+      if (word_count==9) begin
+         case(rx_frame_counter_r[2:0])
+         // use the received farme_counter to rebuilt the 64 bit
+         // at count 7 the new value are registered to output
+         3'h0: rx_extra_data_tmp[15:0]   <= gtx_d;
+         3'h1: rx_extra_data_tmp[31:16]  <= gtx_d;
+         3'h2: rx_extra_data_tmp[47:32]  <= gtx_d;
+         3'h3: rx_extra_data_tmp[63:48]  <= gtx_d;
+         3'h4: rx_extra_data_tmp[79:64]  <= gtx_d;
+         3'h5: rx_extra_data_tmp[95:80]  <= gtx_d;
+         3'h6: rx_extra_data_tmp[111:96] <= gtx_d;
+         3'h7:
+         begin
+            rx_extra_data_valid_r <= 1;
+            rx_extra_data_tmp[127:112] <= gtx_d;
+         end
+         //default: tx_extra_word_r ;
+      endcase
+
+      end
+      if (word_count==10) last <= 1; // Last word (CRC)
    end
 
    // Drive output pins
@@ -174,4 +196,7 @@ module chitchat_rx #(
    assign rx_frame_counter = rx_frame_counter_r;
    assign rx_loopback_frame_counter = rx_loopback_frame_counter_r;
 
+   assign rx_extra_data_valid = rx_extra_data_valid_r;
+   assign rx_extra_data = rx_extra_data_tmp;
+   
 endmodule
