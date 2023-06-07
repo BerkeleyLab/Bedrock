@@ -37,7 +37,7 @@ module chitchat_rx #(
    output [31:0] rx_rev_id,
    output [31:0] rx_data0,
    output [31:0] rx_data1,
-   output         rx_extra_data_valid,
+   output        rx_extra_data_valid,
    output [127:0] rx_extra_data,
    output [15:0] rx_frame_counter,
    output [15:0] rx_loopback_frame_counter
@@ -123,11 +123,16 @@ module chitchat_rx #(
    reg [31:0] rx_data1_r;
    reg [15:0] rx_frame_counter_r = 0;
    reg [15:0] rx_loopback_frame_counter_r;
+   
+   reg [127:0] rx_extra_data_tmp = 0;
+   reg         rx_extra_data_valid_r = 0;
 
    always @(posedge clk) begin
       last               <= 0;
       gtx_dd             <= gtx_d;
       next_frame_counter <= rx_frame_counter_r + 1;
+      
+      rx_extra_data_valid_r <= 0;
 
       if (gtx_k_lo) begin
          wrong_frame <= 0;

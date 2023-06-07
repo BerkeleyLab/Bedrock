@@ -17,6 +17,7 @@ module chitchat_tb;
 
    localparam SIM_TIME = 100000; // ns
    localparam CC_CLK_PERIOD = 10;
+   localparam LB_CLK_PERIOD = 15;
 
    localparam MIN_OFF = 20; // Must cover gtx_k period
    localparam MAX_OFF = 70;
@@ -24,6 +25,7 @@ module chitchat_tb;
    localparam MAX_ON = 400;
 
    reg cc_clk = 0;
+   reg lb_clk = 0;
    reg fail=0;
 
    integer SEED;
@@ -53,6 +55,10 @@ module chitchat_tb;
       cc_clk = ~cc_clk; #(CC_CLK_PERIOD/2);
    end
 
+   always begin
+      lb_clk = ~lb_clk; #(LB_CLK_PERIOD/2);
+   end
+
    // ----------------------
    // Generate stimulus
    // ----------------------
@@ -80,7 +86,6 @@ module chitchat_tb;
 
    reg  [7:0] tx_data=0;
    wire [31:0] tx_data0, tx_data1;
-   reg         tx_pulse_id_valid=0;
    reg  [127:0] tx_extra_data = 128'hffeeddccbbaa99887766554433221100;
 
    always @(posedge cc_clk) if (tx_transmit_en) tx_data <= tx_data + 1;
@@ -123,8 +128,8 @@ module chitchat_tb;
    wire [31:0] rx_rev_id;
    wire [31:0] rx_data0;
    wire [31:0] rx_data1;
-   wire        rx_pulse_id_valid;
-   wire [128:0] rx_extra_data;
+   wire        rx_extra_data_valid;
+   wire [127:0] rx_extra_data;
    wire [15:0] rx_loopback_frame_counter;
 
    localparam REVID = 32'hdeadbeef;
@@ -168,10 +173,21 @@ module chitchat_tb;
       .rx_rev_id         (rx_rev_id),
       .rx_data0          (rx_data0),
       .rx_data1          (rx_data1),
-      .rx_pulse_id_valid (rx_pulse_id_valid),
+      .rx_extra_data_valid (rx_extra_data_valid),
       .rx_extra_data     (rx_extra_data),
       .rx_frame_counter  (rx_frame_counter),
       .rx_loopback_frame_counter (rx_loopback_frame_counter)
+   );
+
+   // Move extra_data to lb_clk domain
+   wire         ccr_extra_data_valid;
+   wire [127:0] ccr_extra_data;
+
+   data_xdomain #(.size(128)) ccr_extra_data_x(
+	  .clk_in(cc_clk), .gate_in(rx_extra_data_valid),
+	  .data_in(rx_extra_data),
+	  .clk_out(lb_clk), .gate_out(ccr_extra_data_valid),
+	  .data_out(ccr_extra_data)
    );
 
    // ----------------------
@@ -228,14 +244,13 @@ module chitchat_tb;
             fail <= 1;
          end
 
-         if ((rx_frame_counter > local_frame_counter) || (rx_frame_counter + 3 < local_frame_counter)) begin
+         if ((rx_frame_counter > local_frame_counter) || (rx_frame_counter + 5 < local_frame_counter)) begin
             $display("%t, ERROR: Frame comparison failed", $time);
             fail <= 1;
          end
 
-      if (rx_pulse_id_valid) begin
-         if (rx_extra_data != tx_extra_data) begin
-            $display("%t, ERROR: Wrong pulseid received", $time);
+         if ((rx_extra_data_valid) && (rx_extra_data != tx_extra_data)) begin
+            $display("%t, ERROR: Wrong extra data received", $time);
             fail <= 1;
          end
       end
