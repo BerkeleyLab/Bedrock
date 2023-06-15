@@ -46,18 +46,18 @@ module chitchat_tx #(
    wire increment = tx_transmit_en | (word_count!=0);
 
    always @(posedge clk) begin
-      word_count <= word_count == (WORD_FRAME_CNT-1) ? 0 : word_count + increment;
+      word_count <= word_count == WORD_FRAME_CNT ? 0 : word_count + increment;
       start      <= word_count == 1;
       sync       <= start;
       sync_r     <= sync;
-      last       <= word_count == (WORD_FRAME_CNT-1);
+      last       <= word_count == WORD_FRAME_CNT;
       last_r     <= last;
       crc_time   <= last_r;
    end
 
    // Frame creation
    reg  [15:0] frame_counter          = 0;
-   reg  [WORD_FRAME_CNT*16-1:0] frame = 0;  // parallel in, 16-bit words out
+   reg  [12*16-1:0] frame             = 0;  // parallel in, 16-bit words out
 
    // Fixed-bit-width form of input parameters
    wire [3:0]  protocol_cat      = CC_PROTOCOL_CAT;
@@ -88,42 +88,43 @@ module chitchat_tx #(
       // Note the big-endian treatment of 32-bit inputs
    end
 
+   // Extra data serialization in the frame
    always @(posedge clk) begin
-      // there are 8 word available and the frame counter 3 LSB are used to populatre them
-      case(frame_counter[2:0])
-        // memorize the pulseid at the beginning of the slot if is valid
-        3'h0: begin
-          tx_extra_word_r      <= tx_extra_data[15:0];
-          tx_extra_data_fix    <= tx_extra_data;
-         end
-         3'h1: tx_extra_word_r <= tx_extra_data_fix[31:16];
-         3'h2: tx_extra_word_r <= tx_extra_data_fix[47:32];
-         3'h3: tx_extra_word_r <= tx_extra_data_fix[63:48];
-         3'h4: tx_extra_word_r <= tx_extra_data_fix[79:64];
-         3'h5: tx_extra_word_r <= tx_extra_data_fix[95:80];
-         3'h6: tx_extra_word_r <= tx_extra_data_fix[111:96];
-         3'h7: tx_extra_word_r <= tx_extra_data_fix[127:112];
-         //default: tx_extra_word_r ;
-       endcase
-    end
- 
-    // CRC generation
-   wire [15:0] crc_tx;
-   wire [15:0] inner_data = frame[WORD_FRAME_CNT*16-1:(WORD_FRAME_CNT-1)*16];
-   reg  [15:0] outer_data = 0;
+	// there are 8 word available and the frame counter 3 LSB are used to populatre them
+	case(frame_counter[2:0])
+	  // memorize the pulseid at the beginning of the slot if is valid
+	  3'h0: begin
+		tx_extra_word_r      <= tx_extra_data[15:0];
+		tx_extra_data_fix    <= tx_extra_data;
+	   end
+	   3'h1: tx_extra_word_r <= tx_extra_data_fix[31:16];
+	   3'h2: tx_extra_word_r <= tx_extra_data_fix[47:32];
+	   3'h3: tx_extra_word_r <= tx_extra_data_fix[63:48];
+	   3'h4: tx_extra_word_r <= tx_extra_data_fix[79:64];
+	   3'h5: tx_extra_word_r <= tx_extra_data_fix[95:80];
+	   3'h6: tx_extra_word_r <= tx_extra_data_fix[111:96];
+	   3'h7: tx_extra_word_r <= tx_extra_data_fix[127:112];
+	   //default: tx_extra_word_r ;
+	 endcase
+  end
 
-   crc16 crc16_tx(
-      .clk  (clk),
-      .din  (inner_data),
-      .zero (sync),
-      .crc  (crc_tx)
-   );
+  // CRC generation
+  wire [15:0] crc_tx;
+  wire [15:0] inner_data = frame[(WORD_FRAME_CNT+1)*16-1:WORD_FRAME_CNT*16];
+  reg  [15:0] outer_data = 0;
 
-   always @(posedge clk) begin
-      outer_data <= crc_time ? crc_tx : inner_data;
-   end
+  crc16 crc16_tx(
+     .clk  (clk),
+     .din  (inner_data),
+     .zero (sync),
+     .crc  (crc_tx)
+  );
 
-   // Assign output ports
+  always @(posedge clk) begin
+     outer_data <= crc_time ? crc_tx : inner_data;
+  end
+
+  // Assign output ports
    assign tx_send   = start;
    assign gtx_d     = outer_data;
    assign gtx_k     = {1'b0, sync_r}; // No comma in upper byte

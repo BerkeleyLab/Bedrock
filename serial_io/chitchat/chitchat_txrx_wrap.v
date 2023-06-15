@@ -28,12 +28,16 @@ module chitchat_txrx_wrap #(
    input         tx_valid1,
    input  [31:0] tx_data0,
    input  [31:0] tx_data1,
+   input         tx_extra_data_valid,
+   input  [127:0] tx_extra_data,
 
    input         rx_clk,
 
    output        rx_valid,
    output [31:0] rx_data0,
    output [31:0] rx_data1,
+   output        rx_extra_data_valid,
+   output [127:0] rx_extra_data,
    output        ccrx_frame_drop, // Debug output
 
    // -------------------
@@ -66,7 +70,8 @@ module chitchat_txrx_wrap #(
 
    // TX CDC signals
    wire [31:0]           tx_data0_x_tgtx, tx_data1_x_tgtx;
-   wire                  tx_valid0_x_tgtx, tx_valid1_x_tgtx;
+   wire [127:0]          tx_extra_data_x_tgtx;
+   wire                  tx_valid0_x_tgtx, tx_valid1_x_tgtx, tx_extra_data_valid_x_tgtx;
    wire                  tx_send_x_tgtx;
    reg                   tx_transmit_en_tgtx = 0;
    reg  [2:0]            tx_location_tgtx;
@@ -77,10 +82,11 @@ module chitchat_txrx_wrap #(
 
 
    // RX CDC signals
-   localparam RX_PACK_WI = 32*2 + 1;
+   localparam RX_PACK_WI = 32*2 + 1 + 128;
    wire [RX_PACK_WI-1:0] rx_pack, rx_pack_x_rgtx;
    wire [31:0]           rx_data0_x_rgtx, rx_data1_x_rgtx;
-   wire                  rx_valid_x_rgtx, rx_valid_l_rx;
+   wire [127:0]          rx_extra_data_rx, rx_extra_data_x_rgtx;
+   wire                  rx_valid_x_rgtx, rx_valid_l_rx, rx_extra_data_valid_x_rgtx, rx_extra_data_valid_rx;
    wire                  ccrx_frame_drop_x_rgtx;
    reg                   ccrx_los_r_lb;
    reg  [15:0]           ccrx_fault_cnt_r_lb;
@@ -127,6 +133,15 @@ module chitchat_txrx_wrap #(
          .data_out (tx_data1_x_tgtx)
       );
 
+      data_xdomain # (.size(128)) i_xtx_sync (
+         .clk_in   (tx_clk),
+         .gate_in  (tx_extra_data_valid),
+         .data_in  (tx_extra_data),
+         .clk_out  (gtx_tx_clk),
+         .gate_out (tx_extra_data_valid_x_tgtx), // Unused
+         .data_out (tx_extra_data_x_tgtx)
+      );
+
       // Synchronize rx_frame_counter for loopback latency calc
       data_xdomain # (.size(16*2)) i_tx_latency_sync (
          .clk_in   (gtx_rx_clk),
@@ -138,9 +153,11 @@ module chitchat_txrx_wrap #(
       );
    end else begin
       reg [31:0] tx_data0_r, tx_data1_r;
+      reg [127:0] tx_extra_data_r;
       // Latch input data on tx_valid{0,1}
       always @(tx_clk) if (tx_valid0) tx_data0_r <= tx_data0;
       always @(tx_clk) if (tx_valid1) tx_data1_r <= tx_data1;
+      always @(tx_clk) if (tx_extra_data_valid) tx_extra_data_r <= tx_extra_data;
 
       assign {tx_data1_x_tgtx, tx_data0_x_tgtx} = {tx_data1_r, tx_data0_r};
 
@@ -163,6 +180,7 @@ module chitchat_txrx_wrap #(
       .tx_location               (tx_location_tgtx),
       .tx_data0                  (tx_data0_x_tgtx),
       .tx_data1                  (tx_data1_x_tgtx),
+      .tx_extra_data             (tx_extra_data_x_tgtx),
       .tx_loopback_frame_counter (rx_frame_counter_x_tgtx),
       .local_frame_counter       (tx_local_frame_counter_x_tgtx),
       .gtx_d                     (gtx_tx_d),
@@ -192,6 +210,8 @@ module chitchat_txrx_wrap #(
       .rx_rev_id                 (rx_rev_id_l_rgtx),
       .rx_data0                  (rx_data0_x_rgtx),
       .rx_data1                  (rx_data1_x_rgtx),
+      .rx_extra_data_valid       (rx_extra_data_valid_x_rgtx),
+      .rx_extra_data             (rx_extra_data_x_rgtx),
       .rx_frame_counter          (rx_frame_counter_x_rgtx),
       .rx_loopback_frame_counter (rx_lback_frame_counter_x_rgtx)
    );
@@ -210,16 +230,30 @@ module chitchat_txrx_wrap #(
          .gate_out (rx_valid_l_rx),
          .data_out (rx_pack)
       );
+
+      data_xdomain # (128) i_xrx_sync (
+         .clk_in   (gtx_rx_clk),
+         .gate_in  (rx_extra_data_valid_x_rgtx | ccrx_frame_drop_x_rgtx),
+         .data_in  (rx_extra_data_x_rgtx),
+         .clk_out  (rx_clk),
+         .gate_out (rx_extra_data_valid_rx),
+         .data_out (rx_extra_data_rx)
+      );
+
    end else begin
       assign rx_valid_l_rx    = rx_valid_x_rgtx;
-      assign rx_pack         = rx_pack_x_rgtx;
+      assign rx_pack          = rx_pack_x_rgtx;
+      assign rx_extra_data_valid_rx = rx_extra_data_valid_x_rgtx;
+      assign rx_extra_data_rx = rx_extra_data_x_rgtx;
       assign ccrx_frame_drop = ccrx_frame_drop_x_rgtx;
    end endgenerate
 
    assign rx_valid        = rx_valid_l_rx & ~rx_pack[0]; // Demux valid/frame_drop
+   assign rx_extra_data_valid = rx_extra_data_valid_rx & ~rx_pack[0]; // Demux valid/frame_drop
    assign ccrx_frame_drop = rx_valid_l_rx & rx_pack[0];
 
    assign {rx_data1, rx_data0} = rx_pack[RX_PACK_WI-1:1];
+   assign rx_extra_data = rx_extra_data_rx;
 
    // ----------------------
    // LB CDC

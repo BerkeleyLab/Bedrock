@@ -14,8 +14,8 @@
 module chitchat_tb;
 
 `include "chitchat_pack.vh"
-
-   localparam SIM_TIME = 100000; // ns
+   localparam TEST_CORRUPT = 1'b0;
+   localparam SIM_TIME = 1000000; // ns
    localparam CC_CLK_PERIOD = 10;
    localparam LB_CLK_PERIOD = 15;
 
@@ -30,6 +30,8 @@ module chitchat_tb;
 
    integer SEED;
    integer tx_cnt=0;
+   integer check_count=0;
+   //integer corrupt_count=0;
 
    initial begin
       if ($test$plusargs("vcd")) begin
@@ -42,6 +44,8 @@ module chitchat_tb;
       while ($time < SIM_TIME) @(posedge cc_clk);
 
       $display("%d updates received over link", tx_cnt);
+      if (~TEST_CORRUPT) $display("%d extra data received over link", check_count);
+      //$display("%d corrupt data received over link", corrupt_count);
       if (fail || tx_cnt < 300) begin
          $display("FAIL");
          $stop;
@@ -96,9 +100,11 @@ module chitchat_tb;
    // Add an occasional error to the transmission
    reg [15:0] corrupt=0;
    always @(posedge cc_clk) begin
-      corrupt <= 0;
-//      if (tx_transmit_en && &(cnt_on[5:3]&tx_data[4:2])) // Sporadic random pattern
-//         corrupt <= $urandom(SEED) % 2**16;
+      if (TEST_CORRUPT) begin
+         corrupt <= 0;
+         if (tx_transmit_en && &(cnt_on[5:3]&tx_data[4:2])) // Sporadic random pattern
+         corrupt <= $urandom(SEED) % 2**16;
+      end
    end
 
    // test for the Pulse_id 128 bit transmission in the frame
@@ -147,7 +153,7 @@ module chitchat_tb;
       .tx_data0                  (tx_data0),
       .tx_data1                  (tx_data1),
       .tx_extra_data             (tx_extra_data),
-      .tx_loopback_frame_counter (rx_frame_counter),
+      .tx_loopback_frame_counter (tx_loopback_frame_counter),
       .local_frame_counter       (local_frame_counter),
       .gtx_d                     (gtx_d),
       .gtx_k                     (gtx_k)
@@ -218,6 +224,7 @@ module chitchat_tb;
    // Pop on valid or when frame is dropped on RX side
    // Need to check if fifo is empty because CC_RX will signal empty at start of day
    assign scb_read_en = (rx_valid | frame_drop) & ~scb_empty;
+   reg [127:0] tx_extra_data_mem = 0;
 
    always @(posedge cc_clk) begin
       if (scb_full) begin
@@ -244,14 +251,27 @@ module chitchat_tb;
             fail <= 1;
          end
 
-         if ((rx_frame_counter > local_frame_counter) || (rx_frame_counter + 5 < local_frame_counter)) begin
+         if ((rx_frame_counter > local_frame_counter) || (rx_frame_counter + 3 < local_frame_counter)) begin
             $display("%t, ERROR: Frame comparison failed", $time);
             fail <= 1;
          end
 
-         if ((rx_extra_data_valid) && (rx_extra_data != tx_extra_data)) begin
-            $display("%t, ERROR: Wrong extra data received", $time);
-            fail <= 1;
+      end
+
+      //
+      if (~TEST_CORRUPT) begin
+         if (local_frame_counter[2:0] == 0) tx_extra_data_mem <= tx_extra_data;
+         if (rx_extra_data_valid && (corrupt == 0)) begin
+            check_count <= check_count + 1;
+            if (rx_extra_data != tx_extra_data_mem) begin
+               $display("%t, ERROR: Wrong extra data received", $time);
+               fail <= 1;
+            end
+         //end else if (rx_extra_data_valid) begin
+         //   corrupt_count <= corrupt_count + 1;
+         //   if (rx_extra_data != tx_extra_data_mem) begin
+         //      $display("%t, WARNING: CORRUPT extra data received", $time);
+         //   end
          end
       end
    end

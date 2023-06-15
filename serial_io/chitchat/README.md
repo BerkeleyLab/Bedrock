@@ -30,9 +30,8 @@ Each packet consists of 11x 16-bit words, 4 of which contain the 64-bit of paylo
 | 6     | TX_DATA1[31:16] |
 | 7     | TX_DATA1[15:0] |
 | 8     | TX_FRAME_COUNT[15:0] |
-| 9     | TX_EXTRA_DATA[15:0] |
-| 10    | TX_LOOPBACK_FRAME_COUNT[15:0] | *the tx_extra_data are a slow channel that transmit 8 word register in 8 consecutive frame, according to the TX_FRAME_COUNT[2:0]
-| 11    | CRC_CHECKSUM[15:0] |
+| 9     | TX_LOOPBACK_FRAME_COUNT[15:0] |
+| 10    | CRC_CHECKSUM[15:0] |
 
 ## Link Up detection
 
@@ -58,7 +57,7 @@ and the type of error to be reported in the `ccrx_fault` register.
 
 ## Throughput and latency
 
-As a result of the packet size, the TX and RX data throughput is 64-bit/12 clock-cycles.
+As a result of the packet size, the TX and RX data throughput is 64-bit/11 clock-cycles.
 Additionally, as the receiver must receive a full packet to be able to check the CRC, there
-will necessarily be a full-frame latency (12 clock-cycles) before data is presented to the
+will necessarily be a full-frame latency (11 clock-cycles) before data is presented to the
 user logic.

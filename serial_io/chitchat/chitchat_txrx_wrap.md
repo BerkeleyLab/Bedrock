@@ -28,7 +28,10 @@ must be presented at a low enough rate, if dropped data elements are to be avoid
 * tx_transmit_en - Enables data transmission. Can be held high throughout.
 * tx_valid{0,1} - Qualifies tx_data{0,1} as valid and causes it to be latched internally and
              transmitted on the next packet.
-* rx_valid - Signals that valid return data is present in rx_data{0,1} and ready to be sampled
+* rx_valid - Signals that valid return data is present in rx_data{0,1} and ready to be sampled.
+* tx_extra_data - 128b of extra data
+             transmitted 2 Byte per frame according to local_frame_counter[2:0] in 8 consecutive packets.
+* rx_extra_data_valid - Signals that valid extra data is present in rx_extra_data and ready to be sampled.
 
 ## Status/Debug signals
 All of the following qualify as status/debug signals and convey useful link information and statistics.
@@ -42,3 +45,4 @@ All of the following qualify as status/debug signals and convey useful link info
 * ccrx_fault
 * ccrx_fault_cnt
 * ccrx_los
+* ccrx_frame_drop

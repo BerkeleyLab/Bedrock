@@ -14,7 +14,7 @@ module chitchat_txrx_wrap_tb;
 
 `include "chitchat_pack.vh"
 
-   localparam SIM_TIME = 100000; // ns
+   localparam SIM_TIME = 1000000; // ns
 
    localparam CC_CLK_PERIOD = 10.5; // ns
    localparam GTX_TX_CLK_PERIOD = 8; // ns
@@ -41,6 +41,7 @@ module chitchat_txrx_wrap_tb;
 
    integer SEED;
    integer tx_cnt=0;
+   integer check_count=0;
 
    initial begin
       if ($test$plusargs("vcd")) begin
@@ -53,6 +54,7 @@ module chitchat_txrx_wrap_tb;
       while ($time < SIM_TIME) @(posedge cc_clk);
 
       $display("%d updates received over link", tx_cnt);
+      $display("%d extra data received over link", check_count);
       if (fail || tx_cnt < 300) begin
          $display("FAIL");
          $stop;
@@ -118,6 +120,9 @@ module chitchat_txrx_wrap_tb;
 
    reg  [7:0]  tx_data=0;
    wire [31:0] tx_data0, tx_data1;
+   reg         tx_extra_data_valid = 0;
+   reg  [127:0] tx_extra_data = 128'hffeeddccbbaa99887766554433221100;
+
    always @(posedge tx_clk) if (tx_transmit_en) tx_data <= tx_data + 1;
 
    assign tx_data0 = {(32/8){tx_data}};
@@ -125,6 +130,17 @@ module chitchat_txrx_wrap_tb;
 
    // No corruption in this CDC-enabled testbench
    reg [15:0] corrupt=0;
+
+   // test for the Pulse_id 128 bit transmission in the frame
+   reg [15:0] tx_loopback_frame_counter=0;
+   always @(posedge tx_clk) begin
+      tx_loopback_frame_counter <= tx_loopback_frame_counter +1;
+      tx_extra_data_valid       <= 1'b0;
+      if (tx_loopback_frame_counter[9:0]==10'b1000000000) begin
+         tx_extra_data          <= tx_extra_data + 1;
+         tx_extra_data_valid    <= 1'b1;
+      end
+   end
 
    // ----------------------
    // DUT
@@ -148,6 +164,8 @@ module chitchat_txrx_wrap_tb;
    wire [31:0] rx_data0;
    wire [31:0] rx_data1;
    wire [15:0] rx_loopback_frame_counter;
+   wire        rx_extra_data_valid;
+   wire [127:0] rx_extra_data;
 
    localparam REVID = 32'hdeadbeef;
    localparam [2:0] TX_GATEW_TYPE = 2;
@@ -172,12 +190,16 @@ module chitchat_txrx_wrap_tb;
       .tx_valid1         (tx_valid1),
       .tx_data0          (tx_data0),
       .tx_data1          (tx_data1),
+      .tx_extra_data_valid (tx_extra_data_valid),
+      .tx_extra_data     (tx_extra_data),
 
       .rx_clk            (rx_clk),
 
       .rx_valid          (rx_valid),
       .rx_data0          (rx_data0),
       .rx_data1          (rx_data1),
+      .rx_extra_data_valid (rx_extra_data_valid),
+      .rx_extra_data     (rx_extra_data),
       .ccrx_frame_drop   (frame_drop),
 
       // -------------------
@@ -321,6 +343,10 @@ module chitchat_txrx_wrap_tb;
          prev_frame_cnt <= rx_frame_counter;
       end
       if (~tx_transmit_en) prev_frame_cnt <= 0;
+      if (rx_extra_data_valid && (corrupt == 0)) begin
+         check_count <= check_count + 1;
+      end
+
    end
 
 endmodule
