@@ -153,7 +153,7 @@ module chitchat_tb;
       .tx_data0                  (tx_data0),
       .tx_data1                  (tx_data1),
       .tx_extra_data             (tx_extra_data),
-      .tx_loopback_frame_counter (tx_loopback_frame_counter),
+      .tx_loopback_frame_counter (rx_frame_counter),
       .local_frame_counter       (local_frame_counter),
       .gtx_d                     (gtx_d),
       .gtx_k                     (gtx_k)

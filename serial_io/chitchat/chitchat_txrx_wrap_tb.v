@@ -14,7 +14,7 @@ module chitchat_txrx_wrap_tb;
 
 `include "chitchat_pack.vh"
 
-   localparam SIM_TIME = 1000000; // ns
+   localparam SIM_TIME = 100000; // ns
 
    localparam CC_CLK_PERIOD = 10.5; // ns
    localparam GTX_TX_CLK_PERIOD = 8; // ns

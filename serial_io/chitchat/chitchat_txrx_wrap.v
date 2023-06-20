@@ -70,8 +70,8 @@ module chitchat_txrx_wrap #(
 
    // TX CDC signals
    wire [31:0]           tx_data0_x_tgtx, tx_data1_x_tgtx;
-   wire [127:0]          tx_extra_data_x_tgtx;
    wire                  tx_valid0_x_tgtx, tx_valid1_x_tgtx, tx_extra_data_valid_x_tgtx;
+   wire [127:0]          tx_extra_data_x_tgtx;
    wire                  tx_send_x_tgtx;
    reg                   tx_transmit_en_tgtx = 0;
    reg  [2:0]            tx_location_tgtx;
@@ -85,8 +85,8 @@ module chitchat_txrx_wrap #(
    localparam RX_PACK_WI = 32*2 + 1 + 128;
    wire [RX_PACK_WI-1:0] rx_pack, rx_pack_x_rgtx;
    wire [31:0]           rx_data0_x_rgtx, rx_data1_x_rgtx;
-   wire [127:0]          rx_extra_data_rx, rx_extra_data_x_rgtx;
    wire                  rx_valid_x_rgtx, rx_valid_l_rx, rx_extra_data_valid_x_rgtx, rx_extra_data_valid_rx;
+   wire [127:0]          rx_extra_data_rx, rx_extra_data_x_rgtx;
    wire                  ccrx_frame_drop_x_rgtx;
    reg                   ccrx_los_r_lb;
    reg  [15:0]           ccrx_fault_cnt_r_lb;
