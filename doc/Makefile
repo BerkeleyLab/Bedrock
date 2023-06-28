@@ -198,10 +198,15 @@ $(GEN_DIR)/%.rst: %.v
 		$(PYTHON) $(BUILD_DIR)/portfind.py --gen-rst $< > $@; \
 	fi
 
+# The result of the --filter "" is complex to understand. Basically, given a
+# .md filepath it creates the title with:
+# <last directory name of the file> <filename>
+#
+# If "last directory name of the file" is $(GEN_MD_DIR), discard it
 $(GEN_MD_DIR)/%_md.rst: %.md
 	mkdir -p $(dir $@)
 	$(PYTHON) $(BUILD_DIR)/genrststub.py --gen-md-include \
-		--title "$(notdir $(patsubst %/,%,$(dir $@))) $(patsubst %_md,%,$(basename $(notdir $@)))" \
+		--title "$(filter-out $(GEN_MD_DIR),$(notdir $(patsubst %/,%,$(dir $@)))) $(patsubst %_md,%,$(basename $(notdir $@)))" \
 		$< > $@
 
 $(GEN_DIR)/%_block.eps: %.v
