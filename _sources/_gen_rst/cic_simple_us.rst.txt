@@ -6,6 +6,7 @@ cic_simple_us
 Description
 '''''''''''
 
+| 
 |  Simple first-order CIC filter and decimator
 |  Note that this module is configured with unsigned input and output!
 

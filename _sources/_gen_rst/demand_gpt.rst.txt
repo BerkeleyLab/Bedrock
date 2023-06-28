@@ -34,6 +34,28 @@ Parameters
      - 16
      - 
 
+Ports
+'''''
+
+.. list-table:: demand_gpt_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - gate
+     - Input
+     - 
+   * - trig
+     - Input
+     - 
+   * - time_err
+     - Output
+     - 
+
 Implementation and use
 ''''''''''''''''''''''
 

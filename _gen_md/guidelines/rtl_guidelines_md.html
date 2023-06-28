@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>guidelines rtl_guidelines &#8212; Bedrock  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="i2cbridge README" href="../peripheral_drivers/i2cbridge/README_md.html" />
+    <link rel="prev" title="xilinx README" href="../fpga_family/xilinx/README_md.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="guidelines-rtl-guidelines">
+<span id="rtl-guidelines"></span><h1>guidelines rtl_guidelines<a class="headerlink" href="#guidelines-rtl-guidelines" title="Permalink to this heading">¶</a></h1>
+<section id="rtl-coding-guidelines">
+<h2>RTL Coding Guidelines<a class="headerlink" href="#rtl-coding-guidelines" title="Permalink to this heading">¶</a></h2>
+<p>The following is a set of RTL coding guidelines with the purpose of maximizing the readability and maintainability
+of the codebase, without being too restrictive or inconvenient. The goal is to achieve a consistent ‘look and feel’
+across the several modules and subsystems, so long-term and new contributors alike can infer some of the
+module’s functionality and, more importantly, its interface, without having to reverse-engineer the code. This will
+hopefully promote contributions, facilitate code re-use and mitigate fragmentation.</p>
+<p>These guidelines should be general enough such that they are not restricted to a specific Hardware Description Language, unless otherwise noted.</p>
+<p>Each guideline is individually labeled so it can be easily referred to in the context of code reviews or issue creation.</p>
+<section id="a-interfaces">
+<h3>A - Interfaces<a class="headerlink" href="#a-interfaces" title="Permalink to this heading">¶</a></h3>
+<section id="a-1-interface-signal-naming">
+<h4>A.1 - Interface signal naming<a class="headerlink" href="#a-1-interface-signal-naming" title="Permalink to this heading">¶</a></h4>
+<p>In the context of RTL modules, an interface is a collection of input/output signals that, when used together, implement
+a protocol that allows for the transfer of data in one, or both, directions. These closely-related signals should, therefore,
+share a common prefix that makes their relationship clear. This becomes even more important when the interface is associated
+with a specific clock domain. E.g.: lb_clk, lb_valid, lb_rnw, lb_wdata, lb_rdata.</p>
+</section>
+<section id="a-2-keeping-interfaces-standard">
+<h4>A.2 - Keeping interfaces standard<a class="headerlink" href="#a-2-keeping-interfaces-standard" title="Permalink to this heading">¶</a></h4>
+<p>In order to promote interface re-use and facilitate module interoperability, custom interfaces and protocols should be avoided
+whenever possible. Instead, conventional interface design patterns should be preferred, along with the use of traditional naming
+for both control and data signals. E.g. lb_valid, lb_ready/lb_enable, lb_wdata, lb_wstb/lb_wmask.</p>
+<p>Deviations from this recommendation should be accompanied by detailed documentation that goes beyond what is usually expected.</p>
+</section>
+</section>
+<section id="b-signal-naming">
+<h3>B - Signal naming<a class="headerlink" href="#b-signal-naming" title="Permalink to this heading">¶</a></h3>
+<section id="b-1-registered-and-delayed-signals">
+<h4>B.1 - Registered and Delayed signals<a class="headerlink" href="#b-1-registered-and-delayed-signals" title="Permalink to this heading">¶</a></h4>
+<p>Registered or delayed versions of a signal should use the suffix ‘_r’ or ‘_d’. Where multiple delays are required,
+a number should be appended to the suffix. E.g.: valid_r for single delay; valid_r1, valid_r2 etc. for multiple delays.</p>
+</section>
+<section id="b-2-internal-or-local-signals">
+<h4>B.2 - Internal or Local signals<a class="headerlink" href="#b-2-internal-or-local-signals" title="Permalink to this heading">¶</a></h4>
+<p>Internal or local signals that have no other purpose other than to create an internal version of a module’s port should
+use the port name followed by the suffix ‘_l’ or ‘_i’.</p>
+</section>
+<section id="b-3-signal-case">
+<h4>B.3 - Signal case<a class="headerlink" href="#b-3-signal-case" title="Permalink to this heading">¶</a></h4>
+<p>All signal names should be lower-case and use snake-case, not camel-case. E.g.: valid_out, data_in.</p>
+</section>
+<section id="b-4-active-low-signals">
+<h4>B.4 - Active-low signals<a class="headerlink" href="#b-4-active-low-signals" title="Permalink to this heading">¶</a></h4>
+<p>Active-low signals should make use of the suffix _n. E.g.: reset_n, ce_n.</p>
+</section>
+</section>
+<section id="c-module-declaration">
+<h3>C - Module declaration<a class="headerlink" href="#c-module-declaration" title="Permalink to this heading">¶</a></h3>
+<section id="c-1-parameter-naming">
+<h4>C.1 - Parameter naming<a class="headerlink" href="#c-1-parameter-naming" title="Permalink to this heading">¶</a></h4>
+<p>Parameters should be in all-caps, snake-case, and sufficiently descriptive so that no additional explanation is required.
+Common abbreviations, such as ‘DWI’ and ‘AWI’ for ‘data width’ and ‘address width’, are acceptable, but anything
+more obscure is best avoided.</p>
+</section>
+<section id="c-2-parameter-defaults">
+<h4>C.2 - Parameter defaults<a class="headerlink" href="#c-2-parameter-defaults" title="Permalink to this heading">¶</a></h4>
+<p>All parameters shall have reasonable defaults, such that if the module were to be simulated without any of its parameters
+being overridden, it would perform its typical functionality.</p>
+</section>
+</section>
+<section id="d-module-instantiation">
+<h3>D - Module instantiation<a class="headerlink" href="#d-module-instantiation" title="Permalink to this heading">¶</a></h3>
+<section id="d-1-instance-names">
+<h4>D.1 - Instance names<a class="headerlink" href="#d-1-instance-names" title="Permalink to this heading">¶</a></h4>
+<p>Module instance names should be prefixed by ‘<a href="#id1"><span class="problematic" id="id2">i_</span></a>’, include the module name, or an easily recognizable variant of it (in cases where the
+full module name is too long), and an optional suffix that clarifies the purpose of the instance or disambiguates between
+instances of the same module. E.g.: i_sqrt, i_mixer_field, i_shortfifo_lb.</p>
+</section>
+<section id="d-2-unconnected-ports">
+<h4>D.2 - Unconnected ports<a class="headerlink" href="#d-2-unconnected-ports" title="Permalink to this heading">¶</a></h4>
+<p>Unconnected output ports should never be omitted, but rather included in the module instantiation so it is obvious that they
+have been intentionally left open. It is recommended that an inline comment is added to justify why the port is unused.</p>
+</section>
+<section id="d-3-port-and-parameter-assignment">
+<h4>D.3 - Port and parameter assignment<a class="headerlink" href="#d-3-port-and-parameter-assignment" title="Permalink to this heading">¶</a></h4>
+<p>All ports and parameters should always be connected by name. Unlike unconnected ports, however, it is reasonable to omit unused parameters.</p>
+</section>
+</section>
+<section id="e-misc">
+<h3>E - Misc<a class="headerlink" href="#e-misc" title="Permalink to this heading">¶</a></h3>
+<section id="e-1-todos-and-unfinished-code">
+<h4>E.1 - TODOs and unfinished code<a class="headerlink" href="#e-1-todos-and-unfinished-code" title="Permalink to this heading">¶</a></h4>
+<p>TODOs and unfinished code are best avoided in checked-in code, but if they must be used they should be clearly marked with a ‘TODO’ tag. Alternative
+tags should be avoided as they may more easily go unnoticed.</p>
+</section>
+<section id="e-2-comments">
+<h4>E.2 - Comments<a class="headerlink" href="#e-2-comments" title="Permalink to this heading">¶</a></h4>
+<p>In addition to being useful, clear and concise, comments should not include question marks, rhetorical questions or hypotheticals.</p>
+</section>
+<section id="e-3-precedence-rules">
+<h4>E.3 - Precedence rules<a class="headerlink" href="#e-3-precedence-rules" title="Permalink to this heading">¶</a></h4>
+<p>Non-obvious operator precedence rules should be avoided. Whenever precedences are not completely clear, parentheses should be used.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Bedrock</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../general-docs.html">General Docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../general-docs.html#docs">Docs</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../CONTRIBUTING_md.html">_gen_md CONTRIBUTING</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/README_md.html">badger README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/doc/README_md.html">doc README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/mem_gate_md.html">badger mem_gate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/status_md.html">badger status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../board_support/bmb7_kintex/README_md.html">bmb7_kintex README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../board_support/zest/README_md.html">zest README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build-tools/makefile_md.html">build-tools makefile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build-tools/newad_md.html">build-tools newad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dsp/README_md.html">dsp README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fpga_family/xilinx/README_md.html">xilinx README</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">guidelines rtl_guidelines</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rtl-coding-guidelines">RTL Coding Guidelines</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../peripheral_drivers/i2cbridge/README_md.html">i2cbridge README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../peripheral_drivers/idelay_scanner/README_md.html">idelay_scanner README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/common/README_md.html">common README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/comms_top/README_md.html">comms_top README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/oscope/bmb7_cu/README_md.html">bmb7_cu README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/oscope/marble_family/README_md.html">marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/test_marble_family/README_md.html">test_marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rtsim/README_md.html">rtsim README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../serial_io/chitchat/README_md.html">chitchat README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../serial_io/chitchat/chitchat_txrx_wrap_md.html">chitchat chitchat_txrx_wrap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/README_md.html">picorv32 README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/badger_lwip/README_md.html">badger_lwip README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/fv/README_md.html">fv README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/lb_bridge/README_md.html">lb_bridge README</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../bedrock-modules.html">Bedrock Modules</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../../general-docs.html">General Docs</a><ul>
+      <li>Previous: <a href="../fpga_family/xilinx/README_md.html" title="previous chapter">xilinx README</a></li>
+      <li>Next: <a href="../peripheral_drivers/i2cbridge/README_md.html" title="next chapter">i2cbridge README</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, LBNL ATG.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../_sources/_gen_md/guidelines/rtl_guidelines_md.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

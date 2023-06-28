@@ -7,17 +7,18 @@ Description
 '''''''''''
 
 | 
-|  Simple-minded integer square root
 | 
-|  General purpose with the caveat that XWIDTH should be even.
-|  X_WIDTH/2 + 1 cycles per operation, non-pipelined.
-|  Setting en when computation is in progress will
+|  Simple-minded integer square root
+|  Result is truncated not rounded
+| 
+|  General purpose with the caveat that XWIDTH should be greater than 3.
+|  (X_WIDTH+1)/2 + 1 cycles per operation, non-pipelined.
+|  Asserting en when computation is in progress will
 |  cancel the computation and start another.
 | 
 |  With XWIDTH=32, synthesizable to 110 MHz on Spartan3-5.
 | 
-|  Eric Norum
-|  LBNL
+|  W. Eric Norum, Lawrence Berkeley National Laboratory
 | 
 | 
 
@@ -44,11 +45,6 @@ Parameters
      - ?
      - 32
      - 
-   * - Y_WIDTH
-     - ?
-     - ?
-     - X_WIDTH
-     - 
 
 Ports
 '''''
@@ -68,7 +64,7 @@ Ports
    * - en
      - Input
      - 
-   * - y[Y_WIDTH-1:0]
+   * - y[((X_WIDTH+1)/2)-1:0]
      - Output
      - 
    * - dav

@@ -4,14 +4,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>iq_trace Source File &#8212; Bedrock  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
    
@@ -37,244 +39,246 @@ Expect to see errors and unfinished things.</p>
 </div>
 <section id="iq-trace-source-file">
 <span id="iq-trace-source"></span><h1>iq_trace Source File<a class="headerlink" href="#iq-trace-source-file" title="Permalink to this heading">¶</a></h1>
-<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1">// One more try to package up the LBNL conveyor belt in a usable and</span>
-<span class="linenos">  2</span><span class="c1">// comprehensible form.</span>
-<span class="linenos">  3</span>
-<span class="linenos">  4</span><span class="c1">// New things going on here:</span>
-<span class="linenos">  5</span><span class="c1">//  1. adc count is parameterized, and therefore a single input port</span>
-<span class="linenos">  6</span><span class="c1">//     is nadc*dw bits wide; each block of dw bits is a signed number.</span>
-<span class="linenos">  7</span><span class="c1">//  2. Independent I and Q shift registers</span>
-<span class="linenos">  8</span><span class="c1">//  3. 32-bit wide memory read port can either hold the 20-bit full-resolution</span>
-<span class="linenos">  9</span><span class="c1">//     measurement, or two packed 16-bit I and Q data</span>
-<span class="linenos"> 10</span>
-<span class="linenos"> 11</span><span class="c1">// LCLS-II dissection of possible use cases</span>
-<span class="linenos"> 12</span><span class="c1">// 1320/14 MHz raw ADC clock</span>
-<span class="linenos"> 13</span><span class="c1">// /33 for base CIC, 2.857 MS/s</span>
-<span class="linenos"> 14</span><span class="c1">// /8 to get 357 kS/s, suitable for loop characterization</span>
-<span class="linenos"> 15</span><span class="c1">// or /16 to get 179 kS/s, and a channel-subset is streamable for close-in</span>
-<span class="linenos"> 16</span><span class="c1">//   noise characterization</span>
-<span class="linenos"> 17</span><span class="c1">//   179 kS/s * 2 ADCs * 2 components * 20 bits = 14.3 Mbit/s</span>
-<span class="linenos"> 18</span><span class="c1">//   or without re-writing any infrastructure now,</span>
-<span class="linenos"> 19</span><span class="c1">//   179 kS/s * 2 ADCs * 2 components * 64 bits = 45.7 Mbit/s</span>
-<span class="linenos"> 20</span><span class="c1">// or /64 to get 44.64 kS/s, easily streamable and good for acoustic</span>
-<span class="linenos"> 21</span><span class="c1">//   characterization, including most SRF trip analysis</span>
-<span class="linenos"> 22</span><span class="c1">//   44.64 kS/s * 8 cavities * 2 components * 16 bits = 11.4 Mbit/s</span>
-<span class="linenos"> 23</span><span class="c1">//   Useful to grab 8 packets at a time with 1024 octets each,</span>
-<span class="linenos"> 24</span><span class="c1">//   requires each half of a ping-pong buffer to be 4K x 16.</span>
-<span class="linenos"> 25</span>
-<span class="linenos"> 26</span><span class="c1">// To support more than 33*16-point averaging, without losing resolution, you</span>
-<span class="linenos"> 27</span><span class="c1">// need wider data paths in ccfilt, with its recently-added outw parameter.</span>
-<span class="linenos"> 28</span><span class="c1">// 16 + log2(33*16/2)/2 = 20</span>
-<span class="linenos"> 29</span><span class="c1">// where the /2 inside the log represents mean(sin(theta)^2), and the answer</span>
-<span class="linenos"> 30</span><span class="c1">// comes out slightly more than 20 because we&#39;ve ignored the intended</span>
-<span class="linenos"> 31</span><span class="c1">// adjustment to lo_amp.</span>
-<span class="linenos"> 32</span>
-<span class="linenos"> 33</span><span class="c1">// See nco_setup.py for help setting phase_step_h, phase_step_l, and modulo.</span>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="c1">// One more try to package up the LBNL conveyor belt in a usable and</span>
+<span class="linenos">  4</span><span class="c1">// comprehensible form.</span>
+<span class="linenos">  5</span>
+<span class="linenos">  6</span><span class="c1">// New things going on here:</span>
+<span class="linenos">  7</span><span class="c1">//  1. adc count is parameterized, and therefore a single input port</span>
+<span class="linenos">  8</span><span class="c1">//     is nadc*dw bits wide; each block of dw bits is a signed number.</span>
+<span class="linenos">  9</span><span class="c1">//  2. Independent I and Q shift registers</span>
+<span class="linenos"> 10</span><span class="c1">//  3. 32-bit wide memory read port can either hold the 20-bit full-resolution</span>
+<span class="linenos"> 11</span><span class="c1">//     measurement, or two packed 16-bit I and Q data</span>
+<span class="linenos"> 12</span>
+<span class="linenos"> 13</span><span class="c1">// LCLS-II dissection of possible use cases</span>
+<span class="linenos"> 14</span><span class="c1">// 1320/14 MHz raw ADC clock</span>
+<span class="linenos"> 15</span><span class="c1">// /33 for base CIC, 2.857 MS/s</span>
+<span class="linenos"> 16</span><span class="c1">// /8 to get 357 kS/s, suitable for loop characterization</span>
+<span class="linenos"> 17</span><span class="c1">// or /16 to get 179 kS/s, and a channel-subset is streamable for close-in</span>
+<span class="linenos"> 18</span><span class="c1">//   noise characterization</span>
+<span class="linenos"> 19</span><span class="c1">//   179 kS/s * 2 ADCs * 2 components * 20 bits = 14.3 Mbit/s</span>
+<span class="linenos"> 20</span><span class="c1">//   or without re-writing any infrastructure now,</span>
+<span class="linenos"> 21</span><span class="c1">//   179 kS/s * 2 ADCs * 2 components * 64 bits = 45.7 Mbit/s</span>
+<span class="linenos"> 22</span><span class="c1">// or /64 to get 44.64 kS/s, easily streamable and good for acoustic</span>
+<span class="linenos"> 23</span><span class="c1">//   characterization, including most SRF trip analysis</span>
+<span class="linenos"> 24</span><span class="c1">//   44.64 kS/s * 8 cavities * 2 components * 16 bits = 11.4 Mbit/s</span>
+<span class="linenos"> 25</span><span class="c1">//   Useful to grab 8 packets at a time with 1024 octets each,</span>
+<span class="linenos"> 26</span><span class="c1">//   requires each half of a ping-pong buffer to be 4K x 16.</span>
+<span class="linenos"> 27</span>
+<span class="linenos"> 28</span><span class="c1">// To support more than 33*16-point averaging, without losing resolution, you</span>
+<span class="linenos"> 29</span><span class="c1">// need wider data paths in ccfilt, with its recently-added outw parameter.</span>
+<span class="linenos"> 30</span><span class="c1">// 16 + log2(33*16/2)/2 = 20</span>
+<span class="linenos"> 31</span><span class="c1">// where the /2 inside the log represents mean(sin(theta)^2), and the answer</span>
+<span class="linenos"> 32</span><span class="c1">// comes out slightly more than 20 because we&#39;ve ignored the intended</span>
+<span class="linenos"> 33</span><span class="c1">// adjustment to lo_amp.</span>
 <span class="linenos"> 34</span>
-<span class="linenos"> 35</span><span class="k">module</span><span class="w"> </span><span class="n">iq_trace</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos"> 36</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">dw</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">16</span><span class="p">,</span><span class="w"> </span><span class="c1">// ADC input width</span>
-<span class="linenos"> 37</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">oscw</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">18</span><span class="p">,</span><span class="w"> </span><span class="c1">// Oscillator input width</span>
-<span class="linenos"> 38</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">davr</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">3</span><span class="p">,</span><span class="w">  </span><span class="c1">// Guard bits at output of mixer</span>
-<span class="linenos"> 39</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">ow</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">28</span><span class="p">,</span><span class="w"> </span><span class="c1">// second-order CIC data path width</span>
-<span class="linenos"> 40</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">rw</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">20</span><span class="p">,</span><span class="w"> </span><span class="c1">// result width out of ccfilt</span>
-<span class="linenos"> 41</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">pcw</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mh">13</span><span class="p">,</span><span class="w"> </span><span class="c1">// cic_period counter width</span>
-<span class="linenos"> 42</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">shift_base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">7</span><span class="p">,</span><span class="w">  </span><span class="c1">// see ccfilt.v</span>
-<span class="linenos"> 43</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">nadc</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">8</span><span class="p">,</span>
-<span class="linenos"> 44</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">aw</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">13</span><span class="w">  </span><span class="c1">// for circle_buf, see below</span>
-<span class="linenos"> 45</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
-<span class="linenos"> 46</span><span class="w">  </span><span class="k">input</span><span class="w">                      </span><span class="n">clk</span><span class="p">,</span>
-<span class="linenos"> 47</span><span class="w">  </span><span class="k">input</span><span class="w">                      </span><span class="n">reset</span><span class="p">,</span>
-<span class="linenos"> 48</span><span class="w">  </span><span class="k">input</span><span class="w">                      </span><span class="n">trig</span><span class="p">,</span>
-<span class="linenos"> 49</span><span class="w">  </span><span class="k">input</span><span class="w">        </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">         </span><span class="n">trig_mode</span><span class="p">,</span><span class="w">  </span><span class="c1">// 0: free-run, 1: single-shot, 2: sync start, XXX not yet used</span>
-<span class="linenos"> 50</span><span class="w">  </span><span class="k">input</span><span class="w">        </span><span class="p">[</span><span class="n">nadc</span><span class="o">*</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">adcs</span><span class="p">,</span><span class="w">   </span><span class="c1">// each dw-wide adc data is signed</span>
-<span class="linenos"> 51</span><span class="w">  </span><span class="k">input</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">oscw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">    </span><span class="n">cosa</span><span class="p">,</span>
-<span class="linenos"> 52</span><span class="w">  </span><span class="k">input</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">oscw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">    </span><span class="n">sina</span><span class="p">,</span>
-<span class="linenos"> 53</span><span class="w">  </span><span class="c1">// Presumably host-settable parameters in the clk domain</span>
-<span class="linenos"> 54</span><span class="w">  </span><span class="k">input</span><span class="w">        </span><span class="p">[</span><span class="n">pcw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">     </span><span class="n">cic_period</span><span class="p">,</span><span class="w">  </span><span class="c1">// expected values 33 to 33*128</span>
-<span class="linenos"> 55</span><span class="w">  </span><span class="k">input</span><span class="w">        </span><span class="p">[</span><span class="mh">3</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">         </span><span class="n">cic_shift</span><span class="p">,</span><span class="w">   </span><span class="c1">// expected values 7 to 15</span>
-<span class="linenos"> 56</span><span class="w">  </span><span class="k">input</span><span class="w">        </span><span class="p">[</span><span class="n">nadc</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">    </span><span class="n">keep</span><span class="p">,</span><span class="w">   </span><span class="c1">// bit n :: channel n</span>
-<span class="linenos"> 57</span><span class="w">  </span><span class="c1">// 18+10+4 = 32 so all of the last three parameters could be a single</span>
-<span class="linenos"> 58</span><span class="w">  </span><span class="c1">// configuration word that fully defines output scaling</span>
-<span class="linenos"> 59</span><span class="w">  </span><span class="c1">//</span>
-<span class="linenos"> 60</span><span class="w">  </span><span class="c1">// host readout port, based on circle_buf.  ro_data is:</span>
-<span class="linenos"> 61</span><span class="w">  </span><span class="c1">//  ro_addr[aw+1] == 1&#39;b1       packed 16-bit {I, Q} results</span>
-<span class="linenos"> 62</span><span class="w">  </span><span class="c1">//  ro_addr[aw+1:aw] == 2&#39;b10   long (rw bits) I result</span>
-<span class="linenos"> 63</span><span class="w">  </span><span class="c1">//  ro_addr[aw+1:aw] == 2&#39;b11   long (rw bits) Q result</span>
-<span class="linenos"> 64</span><span class="w">  </span><span class="k">input</span><span class="w">                      </span><span class="n">ro_clk</span><span class="p">,</span>
-<span class="linenos"> 65</span><span class="w">  </span><span class="k">output</span><span class="w">                     </span><span class="n">ro_enable</span><span class="p">,</span>
-<span class="linenos"> 66</span><span class="w">  </span><span class="k">input</span><span class="w">                      </span><span class="n">ro_ack</span><span class="p">,</span>
-<span class="linenos"> 67</span><span class="w">  </span><span class="k">input</span><span class="w">  </span><span class="p">[</span><span class="n">aw</span><span class="o">+</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">            </span><span class="n">ro_addr</span><span class="p">,</span>
-<span class="linenos"> 68</span><span class="w">  </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">              </span><span class="n">ro_data</span><span class="p">,</span>
-<span class="linenos"> 69</span><span class="w">  </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">              </span><span class="n">ro_status</span>
-<span class="linenos"> 70</span><span class="p">);</span>
-<span class="linenos"> 71</span>
-<span class="linenos"> 72</span><span class="w">   </span><span class="c1">// Set up some global signals in the right clock domain</span>
-<span class="linenos"> 73</span><span class="w">   </span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">trig_mode_r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos"> 74</span><span class="w">   </span><span class="kt">reg</span><span class="w">       </span><span class="n">trig_pending</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos"> 75</span><span class="w">   </span><span class="kt">wire</span><span class="w">      </span><span class="n">boundary</span><span class="p">;</span>
-<span class="linenos"> 76</span>
-<span class="linenos"> 77</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">trig_actual</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trig_pending</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">boundary</span><span class="p">;</span>
-<span class="linenos"> 78</span><span class="w">   </span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos"> 79</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">boundary</span><span class="p">)</span><span class="w"> </span><span class="n">trig_pending</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos"> 80</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig</span><span class="p">)</span><span class="w">     </span><span class="n">trig_pending</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span>
-<span class="linenos"> 81</span>
-<span class="linenos"> 82</span><span class="w">      </span><span class="n">trig_mode_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">trig_mode</span><span class="p">;</span>
-<span class="linenos"> 83</span><span class="w">   </span><span class="k">end</span>
-<span class="linenos"> 84</span>
-<span class="linenos"> 85</span><span class="w">   </span><span class="c1">// ---------------------</span>
-<span class="linenos"> 86</span><span class="w">   </span><span class="c1">// Instantiate Sampler</span>
+<span class="linenos"> 35</span><span class="c1">// See nco_setup.py for help setting phase_step_h, phase_step_l, and modulo.</span>
+<span class="linenos"> 36</span>
+<span class="linenos"> 37</span><span class="k">module</span><span class="w"> </span><span class="n">iq_trace</span><span class="w"> </span><span class="p">#(</span>
+<span class="linenos"> 38</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">dw</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">16</span><span class="p">,</span><span class="w"> </span><span class="c1">// ADC input width</span>
+<span class="linenos"> 39</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">oscw</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">18</span><span class="p">,</span><span class="w"> </span><span class="c1">// Oscillator input width</span>
+<span class="linenos"> 40</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">davr</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">3</span><span class="p">,</span><span class="w">  </span><span class="c1">// Guard bits at output of mixer</span>
+<span class="linenos"> 41</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">ow</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">28</span><span class="p">,</span><span class="w"> </span><span class="c1">// second-order CIC data path width</span>
+<span class="linenos"> 42</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">rw</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">20</span><span class="p">,</span><span class="w"> </span><span class="c1">// result width out of ccfilt</span>
+<span class="linenos"> 43</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">pcw</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mh">13</span><span class="p">,</span><span class="w"> </span><span class="c1">// cic_period counter width</span>
+<span class="linenos"> 44</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">shift_base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">7</span><span class="p">,</span><span class="w">  </span><span class="c1">// see ccfilt.v</span>
+<span class="linenos"> 45</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">nadc</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="mh">8</span><span class="p">,</span>
+<span class="linenos"> 46</span><span class="w">   </span><span class="k">parameter</span><span class="w"> </span><span class="n">aw</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="mh">13</span><span class="w">  </span><span class="c1">// for circle_buf, see below</span>
+<span class="linenos"> 47</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos"> 48</span><span class="w">  </span><span class="k">input</span><span class="w">                      </span><span class="n">clk</span><span class="p">,</span>
+<span class="linenos"> 49</span><span class="w">  </span><span class="k">input</span><span class="w">                      </span><span class="n">reset</span><span class="p">,</span>
+<span class="linenos"> 50</span><span class="w">  </span><span class="k">input</span><span class="w">                      </span><span class="n">trig</span><span class="p">,</span>
+<span class="linenos"> 51</span><span class="w">  </span><span class="k">input</span><span class="w">        </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">         </span><span class="n">trig_mode</span><span class="p">,</span><span class="w">  </span><span class="c1">// 0: free-run, 1: single-shot, 2: sync start, XXX not yet used</span>
+<span class="linenos"> 52</span><span class="w">  </span><span class="k">input</span><span class="w">        </span><span class="p">[</span><span class="n">nadc</span><span class="o">*</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">adcs</span><span class="p">,</span><span class="w">   </span><span class="c1">// each dw-wide adc data is signed</span>
+<span class="linenos"> 53</span><span class="w">  </span><span class="k">input</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">oscw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">    </span><span class="n">cosa</span><span class="p">,</span>
+<span class="linenos"> 54</span><span class="w">  </span><span class="k">input</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">oscw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">    </span><span class="n">sina</span><span class="p">,</span>
+<span class="linenos"> 55</span><span class="w">  </span><span class="c1">// Presumably host-settable parameters in the clk domain</span>
+<span class="linenos"> 56</span><span class="w">  </span><span class="k">input</span><span class="w">        </span><span class="p">[</span><span class="n">pcw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">     </span><span class="n">cic_period</span><span class="p">,</span><span class="w">  </span><span class="c1">// expected values 33 to 33*128</span>
+<span class="linenos"> 57</span><span class="w">  </span><span class="k">input</span><span class="w">        </span><span class="p">[</span><span class="mh">3</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">         </span><span class="n">cic_shift</span><span class="p">,</span><span class="w">   </span><span class="c1">// expected values 7 to 15</span>
+<span class="linenos"> 58</span><span class="w">  </span><span class="k">input</span><span class="w">        </span><span class="p">[</span><span class="n">nadc</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">    </span><span class="n">keep</span><span class="p">,</span><span class="w">   </span><span class="c1">// bit n :: channel n</span>
+<span class="linenos"> 59</span><span class="w">  </span><span class="c1">// 18+10+4 = 32 so all of the last three parameters could be a single</span>
+<span class="linenos"> 60</span><span class="w">  </span><span class="c1">// configuration word that fully defines output scaling</span>
+<span class="linenos"> 61</span><span class="w">  </span><span class="c1">//</span>
+<span class="linenos"> 62</span><span class="w">  </span><span class="c1">// host readout port, based on circle_buf.  ro_data is:</span>
+<span class="linenos"> 63</span><span class="w">  </span><span class="c1">//  ro_addr[aw+1] == 1&#39;b1       packed 16-bit {I, Q} results</span>
+<span class="linenos"> 64</span><span class="w">  </span><span class="c1">//  ro_addr[aw+1:aw] == 2&#39;b10   long (rw bits) I result</span>
+<span class="linenos"> 65</span><span class="w">  </span><span class="c1">//  ro_addr[aw+1:aw] == 2&#39;b11   long (rw bits) Q result</span>
+<span class="linenos"> 66</span><span class="w">  </span><span class="k">input</span><span class="w">                      </span><span class="n">ro_clk</span><span class="p">,</span>
+<span class="linenos"> 67</span><span class="w">  </span><span class="k">output</span><span class="w">                     </span><span class="n">ro_enable</span><span class="p">,</span>
+<span class="linenos"> 68</span><span class="w">  </span><span class="k">input</span><span class="w">                      </span><span class="n">ro_ack</span><span class="p">,</span>
+<span class="linenos"> 69</span><span class="w">  </span><span class="k">input</span><span class="w">  </span><span class="p">[</span><span class="n">aw</span><span class="o">+</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">            </span><span class="n">ro_addr</span><span class="p">,</span>
+<span class="linenos"> 70</span><span class="w">  </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">              </span><span class="n">ro_data</span><span class="p">,</span>
+<span class="linenos"> 71</span><span class="w">  </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w">              </span><span class="n">ro_status</span>
+<span class="linenos"> 72</span><span class="p">);</span>
+<span class="linenos"> 73</span>
+<span class="linenos"> 74</span><span class="w">   </span><span class="c1">// Set up some global signals in the right clock domain</span>
+<span class="linenos"> 75</span><span class="w">   </span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">trig_mode_r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 76</span><span class="w">   </span><span class="kt">reg</span><span class="w">       </span><span class="n">trig_pending</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 77</span><span class="w">   </span><span class="kt">wire</span><span class="w">      </span><span class="n">boundary</span><span class="p">;</span>
+<span class="linenos"> 78</span>
+<span class="linenos"> 79</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">trig_actual</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trig_pending</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">boundary</span><span class="p">;</span>
+<span class="linenos"> 80</span><span class="w">   </span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos"> 81</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">boundary</span><span class="p">)</span><span class="w"> </span><span class="n">trig_pending</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 82</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig</span><span class="p">)</span><span class="w">     </span><span class="n">trig_pending</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span>
+<span class="linenos"> 83</span>
+<span class="linenos"> 84</span><span class="w">      </span><span class="n">trig_mode_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">trig_mode</span><span class="p">;</span>
+<span class="linenos"> 85</span><span class="w">   </span><span class="k">end</span>
+<span class="linenos"> 86</span>
 <span class="linenos"> 87</span><span class="w">   </span><span class="c1">// ---------------------</span>
-<span class="linenos"> 88</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">cic_sample</span><span class="p">;</span>
-<span class="linenos"> 89</span>
-<span class="linenos"> 90</span><span class="w">   </span><span class="n">multi_sampler</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos"> 91</span><span class="w">      </span><span class="p">.</span><span class="n">sample_period_wi</span><span class="w"> </span><span class="p">(</span><span class="n">pcw</span><span class="p">))</span>
-<span class="linenos"> 92</span><span class="w">   </span><span class="n">i_multi_sampler</span><span class="w"> </span><span class="p">(</span>
-<span class="linenos"> 93</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">             </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<span class="linenos"> 94</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">           </span><span class="p">(</span><span class="n">reset</span><span class="p">),</span>
-<span class="linenos"> 95</span><span class="w">      </span><span class="p">.</span><span class="n">ext_trig</span><span class="w">        </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
-<span class="linenos"> 96</span><span class="w">      </span><span class="p">.</span><span class="n">sample_period</span><span class="w">   </span><span class="p">(</span><span class="n">cic_period</span><span class="p">),</span>
-<span class="linenos"> 97</span><span class="w">      </span><span class="p">.</span><span class="n">dsample0_period</span><span class="w"> </span><span class="p">(</span><span class="mh">8&#39;h1</span><span class="p">),</span>
-<span class="linenos"> 98</span><span class="w">      </span><span class="p">.</span><span class="n">dsample1_period</span><span class="w"> </span><span class="p">(</span><span class="mh">8&#39;h1</span><span class="p">),</span>
-<span class="linenos"> 99</span><span class="w">      </span><span class="p">.</span><span class="n">dsample2_period</span><span class="w"> </span><span class="p">(</span><span class="mh">8&#39;h1</span><span class="p">),</span>
-<span class="linenos">100</span><span class="w">      </span><span class="p">.</span><span class="n">sample_out</span><span class="w">      </span><span class="p">(</span><span class="n">cic_sample</span><span class="p">),</span>
-<span class="linenos">101</span><span class="w">      </span><span class="p">.</span><span class="n">dsample0_stb</span><span class="w">    </span><span class="p">(),</span>
-<span class="linenos">102</span><span class="w">      </span><span class="p">.</span><span class="n">dsample1_stb</span><span class="w">    </span><span class="p">()</span>
-<span class="linenos">103</span><span class="w">   </span><span class="p">);</span>
-<span class="linenos">104</span>
-<span class="linenos">105</span><span class="w">   </span><span class="c1">// ---------------------</span>
-<span class="linenos">106</span><span class="w">   </span><span class="c1">// Instantiate mixers to create I and Q streams</span>
+<span class="linenos"> 88</span><span class="w">   </span><span class="c1">// Instantiate Sampler</span>
+<span class="linenos"> 89</span><span class="w">   </span><span class="c1">// ---------------------</span>
+<span class="linenos"> 90</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">cic_sample</span><span class="p">;</span>
+<span class="linenos"> 91</span>
+<span class="linenos"> 92</span><span class="w">   </span><span class="n">multi_sampler</span><span class="w"> </span><span class="p">#(</span>
+<span class="linenos"> 93</span><span class="w">      </span><span class="p">.</span><span class="n">sample_period_wi</span><span class="w"> </span><span class="p">(</span><span class="n">pcw</span><span class="p">))</span>
+<span class="linenos"> 94</span><span class="w">   </span><span class="n">i_multi_sampler</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos"> 95</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">             </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
+<span class="linenos"> 96</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">           </span><span class="p">(</span><span class="n">reset</span><span class="p">),</span>
+<span class="linenos"> 97</span><span class="w">      </span><span class="p">.</span><span class="n">ext_trig</span><span class="w">        </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
+<span class="linenos"> 98</span><span class="w">      </span><span class="p">.</span><span class="n">sample_period</span><span class="w">   </span><span class="p">(</span><span class="n">cic_period</span><span class="p">),</span>
+<span class="linenos"> 99</span><span class="w">      </span><span class="p">.</span><span class="n">dsample0_period</span><span class="w"> </span><span class="p">(</span><span class="mh">8&#39;h1</span><span class="p">),</span>
+<span class="linenos">100</span><span class="w">      </span><span class="p">.</span><span class="n">dsample1_period</span><span class="w"> </span><span class="p">(</span><span class="mh">8&#39;h1</span><span class="p">),</span>
+<span class="linenos">101</span><span class="w">      </span><span class="p">.</span><span class="n">dsample2_period</span><span class="w"> </span><span class="p">(</span><span class="mh">8&#39;h1</span><span class="p">),</span>
+<span class="linenos">102</span><span class="w">      </span><span class="p">.</span><span class="n">sample_out</span><span class="w">      </span><span class="p">(</span><span class="n">cic_sample</span><span class="p">),</span>
+<span class="linenos">103</span><span class="w">      </span><span class="p">.</span><span class="n">dsample0_stb</span><span class="w">    </span><span class="p">(),</span>
+<span class="linenos">104</span><span class="w">      </span><span class="p">.</span><span class="n">dsample1_stb</span><span class="w">    </span><span class="p">()</span>
+<span class="linenos">105</span><span class="w">   </span><span class="p">);</span>
+<span class="linenos">106</span>
 <span class="linenos">107</span><span class="w">   </span><span class="c1">// ---------------------</span>
-<span class="linenos">108</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">nadc</span><span class="o">*</span><span class="p">(</span><span class="n">dw</span><span class="o">+</span><span class="n">davr</span><span class="p">)</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">mixout_i</span><span class="p">,</span><span class="w"> </span><span class="n">mixout_q</span><span class="p">;</span>
-<span class="linenos">109</span>
-<span class="linenos">110</span><span class="w">   </span><span class="n">iq_mixer_multichannel</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos">111</span><span class="w">      </span><span class="p">.</span><span class="n">NCHAN</span><span class="w"> </span><span class="p">(</span><span class="n">nadc</span><span class="p">),</span>
-<span class="linenos">112</span><span class="w">      </span><span class="p">.</span><span class="n">DWI</span><span class="w">   </span><span class="p">(</span><span class="n">dw</span><span class="p">),</span>
-<span class="linenos">113</span><span class="w">      </span><span class="p">.</span><span class="n">DAVR</span><span class="w">  </span><span class="p">(</span><span class="n">davr</span><span class="p">),</span>
-<span class="linenos">114</span><span class="w">      </span><span class="p">.</span><span class="n">DWLO</span><span class="w">  </span><span class="p">(</span><span class="n">oscw</span><span class="p">)</span>
-<span class="linenos">115</span><span class="w">   </span><span class="p">)</span><span class="w"> </span><span class="n">i_iq_mixer_multichannel</span><span class="w"> </span><span class="p">(</span>
-<span class="linenos">116</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">      </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<span class="linenos">117</span><span class="w">      </span><span class="p">.</span><span class="n">adc</span><span class="w">      </span><span class="p">(</span><span class="n">adcs</span><span class="p">),</span>
-<span class="linenos">118</span><span class="w">      </span><span class="p">.</span><span class="n">cos</span><span class="w">      </span><span class="p">(</span><span class="n">cosa</span><span class="p">),</span>
-<span class="linenos">119</span><span class="w">      </span><span class="p">.</span><span class="n">sin</span><span class="w">      </span><span class="p">(</span><span class="n">sina</span><span class="p">),</span>
-<span class="linenos">120</span><span class="w">      </span><span class="p">.</span><span class="n">mixout_i</span><span class="w"> </span><span class="p">(</span><span class="n">mixout_i</span><span class="p">),</span>
-<span class="linenos">121</span><span class="w">      </span><span class="p">.</span><span class="n">mixout_q</span><span class="w"> </span><span class="p">(</span><span class="n">mixout_q</span><span class="p">)</span>
-<span class="linenos">122</span><span class="w">   </span><span class="p">);</span>
-<span class="linenos">123</span>
-<span class="linenos">124</span><span class="w">   </span><span class="c1">// ---------------------</span>
-<span class="linenos">125</span><span class="w">   </span><span class="c1">// Instantiate two CIC_MULTICHANNEL, one for each stream</span>
+<span class="linenos">108</span><span class="w">   </span><span class="c1">// Instantiate mixers to create I and Q streams</span>
+<span class="linenos">109</span><span class="w">   </span><span class="c1">// ---------------------</span>
+<span class="linenos">110</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">nadc</span><span class="o">*</span><span class="p">(</span><span class="n">dw</span><span class="o">+</span><span class="n">davr</span><span class="p">)</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">mixout_i</span><span class="p">,</span><span class="w"> </span><span class="n">mixout_q</span><span class="p">;</span>
+<span class="linenos">111</span>
+<span class="linenos">112</span><span class="w">   </span><span class="n">iq_mixer_multichannel</span><span class="w"> </span><span class="p">#(</span>
+<span class="linenos">113</span><span class="w">      </span><span class="p">.</span><span class="n">NCHAN</span><span class="w"> </span><span class="p">(</span><span class="n">nadc</span><span class="p">),</span>
+<span class="linenos">114</span><span class="w">      </span><span class="p">.</span><span class="n">DWI</span><span class="w">   </span><span class="p">(</span><span class="n">dw</span><span class="p">),</span>
+<span class="linenos">115</span><span class="w">      </span><span class="p">.</span><span class="n">DAVR</span><span class="w">  </span><span class="p">(</span><span class="n">davr</span><span class="p">),</span>
+<span class="linenos">116</span><span class="w">      </span><span class="p">.</span><span class="n">DWLO</span><span class="w">  </span><span class="p">(</span><span class="n">oscw</span><span class="p">)</span>
+<span class="linenos">117</span><span class="w">   </span><span class="p">)</span><span class="w"> </span><span class="n">i_iq_mixer_multichannel</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos">118</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">      </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
+<span class="linenos">119</span><span class="w">      </span><span class="p">.</span><span class="n">adc</span><span class="w">      </span><span class="p">(</span><span class="n">adcs</span><span class="p">),</span>
+<span class="linenos">120</span><span class="w">      </span><span class="p">.</span><span class="n">cos</span><span class="w">      </span><span class="p">(</span><span class="n">cosa</span><span class="p">),</span>
+<span class="linenos">121</span><span class="w">      </span><span class="p">.</span><span class="n">sin</span><span class="w">      </span><span class="p">(</span><span class="n">sina</span><span class="p">),</span>
+<span class="linenos">122</span><span class="w">      </span><span class="p">.</span><span class="n">mixout_i</span><span class="w"> </span><span class="p">(</span><span class="n">mixout_i</span><span class="p">),</span>
+<span class="linenos">123</span><span class="w">      </span><span class="p">.</span><span class="n">mixout_q</span><span class="w"> </span><span class="p">(</span><span class="n">mixout_q</span><span class="p">)</span>
+<span class="linenos">124</span><span class="w">   </span><span class="p">);</span>
+<span class="linenos">125</span>
 <span class="linenos">126</span><span class="w">   </span><span class="c1">// ---------------------</span>
-<span class="linenos">127</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">strobe_cc</span><span class="p">;</span>
-<span class="linenos">128</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">result_i</span><span class="p">,</span><span class="w"> </span><span class="n">result_q</span><span class="p">;</span>
-<span class="linenos">129</span>
-<span class="linenos">130</span><span class="w">   </span><span class="n">cic_multichannel</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos">131</span><span class="w">      </span><span class="p">.</span><span class="n">n_chan</span><span class="w">        </span><span class="p">(</span><span class="n">nadc</span><span class="p">),</span>
-<span class="linenos">132</span><span class="w">      </span><span class="c1">// DI parameters</span>
-<span class="linenos">133</span><span class="w">      </span><span class="p">.</span><span class="n">di_dwi</span><span class="w">        </span><span class="p">(</span><span class="n">dw</span><span class="o">+</span><span class="n">davr</span><span class="p">),</span>
-<span class="linenos">134</span><span class="w">      </span><span class="p">.</span><span class="n">di_rwi</span><span class="w">        </span><span class="p">(</span><span class="n">ow</span><span class="p">),</span>
-<span class="linenos">135</span><span class="w">      </span><span class="p">.</span><span class="n">di_noise_bits</span><span class="w"> </span><span class="p">(</span><span class="mh">1</span><span class="p">),</span><span class="w"> </span><span class="c1">// NOTE: Setting to 1 to compensate for removed /2 from double_inte</span>
-<span class="linenos">136</span><span class="w">      </span><span class="p">.</span><span class="n">cc_outw</span><span class="w">       </span><span class="p">(</span><span class="n">rw</span><span class="p">),</span>
-<span class="linenos">137</span><span class="w">      </span><span class="p">.</span><span class="n">cc_halfband</span><span class="w">   </span><span class="p">(</span><span class="mh">0</span><span class="p">),</span>
-<span class="linenos">138</span><span class="w">      </span><span class="p">.</span><span class="n">cc_use_delay</span><span class="w">  </span><span class="p">(</span><span class="mh">0</span><span class="p">),</span>
-<span class="linenos">139</span><span class="w">      </span><span class="p">.</span><span class="n">cc_shift_base</span><span class="w"> </span><span class="p">(</span><span class="n">shift_base</span><span class="p">))</span>
-<span class="linenos">140</span><span class="w">   </span><span class="n">i_cic_multichannel_i</span>
-<span class="linenos">141</span><span class="w">   </span><span class="p">(</span>
-<span class="linenos">142</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">           </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<span class="linenos">143</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">         </span><span class="p">(</span><span class="n">reset</span><span class="p">),</span>
-<span class="linenos">144</span><span class="w">      </span><span class="p">.</span><span class="n">stb_in</span><span class="w">        </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
-<span class="linenos">145</span><span class="w">      </span><span class="p">.</span><span class="n">d_in</span><span class="w">          </span><span class="p">(</span><span class="n">mixout_i</span><span class="p">),</span>
-<span class="linenos">146</span><span class="w">      </span><span class="p">.</span><span class="n">cic_sample</span><span class="w">    </span><span class="p">(</span><span class="n">cic_sample</span><span class="p">),</span>
-<span class="linenos">147</span><span class="w">      </span><span class="p">.</span><span class="n">cc_sample</span><span class="w">     </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
-<span class="linenos">148</span><span class="w">      </span><span class="p">.</span><span class="n">cc_shift</span><span class="w">      </span><span class="p">(</span><span class="n">cic_shift</span><span class="p">),</span>
-<span class="linenos">149</span><span class="w">      </span><span class="p">.</span><span class="n">di_stb_out</span><span class="w">    </span><span class="p">(),</span><span class="w"> </span><span class="c1">// Unused double-integrator tap</span>
-<span class="linenos">150</span><span class="w">      </span><span class="p">.</span><span class="n">di_sr_out</span><span class="w">     </span><span class="p">(),</span>
-<span class="linenos">151</span><span class="w">      </span><span class="p">.</span><span class="n">cc_stb_out</span><span class="w">    </span><span class="p">(</span><span class="n">strobe_cc</span><span class="p">),</span>
-<span class="linenos">152</span><span class="w">      </span><span class="p">.</span><span class="n">cc_sr_out</span><span class="w">     </span><span class="p">(</span><span class="n">result_i</span><span class="p">)</span>
-<span class="linenos">153</span><span class="w">   </span><span class="p">);</span>
-<span class="linenos">154</span>
-<span class="linenos">155</span><span class="w">   </span><span class="n">cic_multichannel</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos">156</span><span class="w">      </span><span class="p">.</span><span class="n">n_chan</span><span class="w">        </span><span class="p">(</span><span class="n">nadc</span><span class="p">),</span>
-<span class="linenos">157</span><span class="w">      </span><span class="c1">// DI parameters</span>
-<span class="linenos">158</span><span class="w">      </span><span class="p">.</span><span class="n">di_dwi</span><span class="w">        </span><span class="p">(</span><span class="n">dw</span><span class="o">+</span><span class="n">davr</span><span class="p">),</span>
-<span class="linenos">159</span><span class="w">      </span><span class="p">.</span><span class="n">di_rwi</span><span class="w">        </span><span class="p">(</span><span class="n">ow</span><span class="p">),</span>
-<span class="linenos">160</span><span class="w">      </span><span class="p">.</span><span class="n">di_noise_bits</span><span class="w"> </span><span class="p">(</span><span class="mh">1</span><span class="p">),</span><span class="w"> </span><span class="c1">// NOTE: Setting to 1 to compensate for removed /2 from double_inte</span>
-<span class="linenos">161</span><span class="w">      </span><span class="p">.</span><span class="n">cc_outw</span><span class="w">       </span><span class="p">(</span><span class="n">rw</span><span class="p">),</span>
-<span class="linenos">162</span><span class="w">      </span><span class="p">.</span><span class="n">cc_halfband</span><span class="w">   </span><span class="p">(</span><span class="mh">0</span><span class="p">),</span>
-<span class="linenos">163</span><span class="w">      </span><span class="p">.</span><span class="n">cc_use_delay</span><span class="w">  </span><span class="p">(</span><span class="mh">0</span><span class="p">),</span>
-<span class="linenos">164</span><span class="w">      </span><span class="p">.</span><span class="n">cc_shift_base</span><span class="w"> </span><span class="p">(</span><span class="n">shift_base</span><span class="p">))</span>
-<span class="linenos">165</span><span class="w">   </span><span class="n">i_cic_multichannel_q</span>
-<span class="linenos">166</span><span class="w">   </span><span class="p">(</span>
-<span class="linenos">167</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">           </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<span class="linenos">168</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">         </span><span class="p">(</span><span class="n">reset</span><span class="p">),</span>
-<span class="linenos">169</span><span class="w">      </span><span class="p">.</span><span class="n">stb_in</span><span class="w">        </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
-<span class="linenos">170</span><span class="w">      </span><span class="p">.</span><span class="n">d_in</span><span class="w">          </span><span class="p">(</span><span class="n">mixout_q</span><span class="p">),</span>
-<span class="linenos">171</span><span class="w">      </span><span class="p">.</span><span class="n">cic_sample</span><span class="w">    </span><span class="p">(</span><span class="n">cic_sample</span><span class="p">),</span>
-<span class="linenos">172</span><span class="w">      </span><span class="p">.</span><span class="n">cc_sample</span><span class="w">     </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
-<span class="linenos">173</span><span class="w">      </span><span class="p">.</span><span class="n">cc_shift</span><span class="w">      </span><span class="p">(</span><span class="n">cic_shift</span><span class="p">),</span>
-<span class="linenos">174</span><span class="w">      </span><span class="p">.</span><span class="n">di_stb_out</span><span class="w">    </span><span class="p">(),</span>
-<span class="linenos">175</span><span class="w">      </span><span class="p">.</span><span class="n">di_sr_out</span><span class="w">     </span><span class="p">(),</span>
-<span class="linenos">176</span><span class="w">      </span><span class="p">.</span><span class="n">cc_stb_out</span><span class="w">    </span><span class="p">(),</span><span class="w"> </span><span class="c1">// Time-aligned with strobe_cc</span>
-<span class="linenos">177</span><span class="w">      </span><span class="p">.</span><span class="n">cc_sr_out</span><span class="w">     </span><span class="p">(</span><span class="n">result_q</span><span class="p">)</span>
-<span class="linenos">178</span><span class="w">   </span><span class="p">);</span>
-<span class="linenos">179</span>
-<span class="linenos">180</span>
-<span class="linenos">181</span><span class="w">   </span><span class="c1">// ---------------------</span>
-<span class="linenos">182</span><span class="w">   </span><span class="c1">// Instantiate circle_buf_serial to store I and Q streams and handle channel masking</span>
+<span class="linenos">127</span><span class="w">   </span><span class="c1">// Instantiate two CIC_MULTICHANNEL, one for each stream</span>
+<span class="linenos">128</span><span class="w">   </span><span class="c1">// ---------------------</span>
+<span class="linenos">129</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">strobe_cc</span><span class="p">;</span>
+<span class="linenos">130</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">result_i</span><span class="p">,</span><span class="w"> </span><span class="n">result_q</span><span class="p">;</span>
+<span class="linenos">131</span>
+<span class="linenos">132</span><span class="w">   </span><span class="n">cic_multichannel</span><span class="w"> </span><span class="p">#(</span>
+<span class="linenos">133</span><span class="w">      </span><span class="p">.</span><span class="n">n_chan</span><span class="w">        </span><span class="p">(</span><span class="n">nadc</span><span class="p">),</span>
+<span class="linenos">134</span><span class="w">      </span><span class="c1">// DI parameters</span>
+<span class="linenos">135</span><span class="w">      </span><span class="p">.</span><span class="n">di_dwi</span><span class="w">        </span><span class="p">(</span><span class="n">dw</span><span class="o">+</span><span class="n">davr</span><span class="p">),</span>
+<span class="linenos">136</span><span class="w">      </span><span class="p">.</span><span class="n">di_rwi</span><span class="w">        </span><span class="p">(</span><span class="n">ow</span><span class="p">),</span>
+<span class="linenos">137</span><span class="w">      </span><span class="p">.</span><span class="n">di_noise_bits</span><span class="w"> </span><span class="p">(</span><span class="mh">1</span><span class="p">),</span><span class="w"> </span><span class="c1">// NOTE: Setting to 1 to compensate for removed /2 from double_inte</span>
+<span class="linenos">138</span><span class="w">      </span><span class="p">.</span><span class="n">cc_outw</span><span class="w">       </span><span class="p">(</span><span class="n">rw</span><span class="p">),</span>
+<span class="linenos">139</span><span class="w">      </span><span class="p">.</span><span class="n">cc_halfband</span><span class="w">   </span><span class="p">(</span><span class="mh">0</span><span class="p">),</span>
+<span class="linenos">140</span><span class="w">      </span><span class="p">.</span><span class="n">cc_use_delay</span><span class="w">  </span><span class="p">(</span><span class="mh">0</span><span class="p">),</span>
+<span class="linenos">141</span><span class="w">      </span><span class="p">.</span><span class="n">cc_shift_base</span><span class="w"> </span><span class="p">(</span><span class="n">shift_base</span><span class="p">))</span>
+<span class="linenos">142</span><span class="w">   </span><span class="n">i_cic_multichannel_i</span>
+<span class="linenos">143</span><span class="w">   </span><span class="p">(</span>
+<span class="linenos">144</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">           </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
+<span class="linenos">145</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">         </span><span class="p">(</span><span class="n">reset</span><span class="p">),</span>
+<span class="linenos">146</span><span class="w">      </span><span class="p">.</span><span class="n">stb_in</span><span class="w">        </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
+<span class="linenos">147</span><span class="w">      </span><span class="p">.</span><span class="n">d_in</span><span class="w">          </span><span class="p">(</span><span class="n">mixout_i</span><span class="p">),</span>
+<span class="linenos">148</span><span class="w">      </span><span class="p">.</span><span class="n">cic_sample</span><span class="w">    </span><span class="p">(</span><span class="n">cic_sample</span><span class="p">),</span>
+<span class="linenos">149</span><span class="w">      </span><span class="p">.</span><span class="n">cc_sample</span><span class="w">     </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
+<span class="linenos">150</span><span class="w">      </span><span class="p">.</span><span class="n">cc_shift</span><span class="w">      </span><span class="p">(</span><span class="n">cic_shift</span><span class="p">),</span>
+<span class="linenos">151</span><span class="w">      </span><span class="p">.</span><span class="n">di_stb_out</span><span class="w">    </span><span class="p">(),</span><span class="w"> </span><span class="c1">// Unused double-integrator tap</span>
+<span class="linenos">152</span><span class="w">      </span><span class="p">.</span><span class="n">di_sr_out</span><span class="w">     </span><span class="p">(),</span>
+<span class="linenos">153</span><span class="w">      </span><span class="p">.</span><span class="n">cc_stb_out</span><span class="w">    </span><span class="p">(</span><span class="n">strobe_cc</span><span class="p">),</span>
+<span class="linenos">154</span><span class="w">      </span><span class="p">.</span><span class="n">cc_sr_out</span><span class="w">     </span><span class="p">(</span><span class="n">result_i</span><span class="p">)</span>
+<span class="linenos">155</span><span class="w">   </span><span class="p">);</span>
+<span class="linenos">156</span>
+<span class="linenos">157</span><span class="w">   </span><span class="n">cic_multichannel</span><span class="w"> </span><span class="p">#(</span>
+<span class="linenos">158</span><span class="w">      </span><span class="p">.</span><span class="n">n_chan</span><span class="w">        </span><span class="p">(</span><span class="n">nadc</span><span class="p">),</span>
+<span class="linenos">159</span><span class="w">      </span><span class="c1">// DI parameters</span>
+<span class="linenos">160</span><span class="w">      </span><span class="p">.</span><span class="n">di_dwi</span><span class="w">        </span><span class="p">(</span><span class="n">dw</span><span class="o">+</span><span class="n">davr</span><span class="p">),</span>
+<span class="linenos">161</span><span class="w">      </span><span class="p">.</span><span class="n">di_rwi</span><span class="w">        </span><span class="p">(</span><span class="n">ow</span><span class="p">),</span>
+<span class="linenos">162</span><span class="w">      </span><span class="p">.</span><span class="n">di_noise_bits</span><span class="w"> </span><span class="p">(</span><span class="mh">1</span><span class="p">),</span><span class="w"> </span><span class="c1">// NOTE: Setting to 1 to compensate for removed /2 from double_inte</span>
+<span class="linenos">163</span><span class="w">      </span><span class="p">.</span><span class="n">cc_outw</span><span class="w">       </span><span class="p">(</span><span class="n">rw</span><span class="p">),</span>
+<span class="linenos">164</span><span class="w">      </span><span class="p">.</span><span class="n">cc_halfband</span><span class="w">   </span><span class="p">(</span><span class="mh">0</span><span class="p">),</span>
+<span class="linenos">165</span><span class="w">      </span><span class="p">.</span><span class="n">cc_use_delay</span><span class="w">  </span><span class="p">(</span><span class="mh">0</span><span class="p">),</span>
+<span class="linenos">166</span><span class="w">      </span><span class="p">.</span><span class="n">cc_shift_base</span><span class="w"> </span><span class="p">(</span><span class="n">shift_base</span><span class="p">))</span>
+<span class="linenos">167</span><span class="w">   </span><span class="n">i_cic_multichannel_q</span>
+<span class="linenos">168</span><span class="w">   </span><span class="p">(</span>
+<span class="linenos">169</span><span class="w">      </span><span class="p">.</span><span class="n">clk</span><span class="w">           </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
+<span class="linenos">170</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">         </span><span class="p">(</span><span class="n">reset</span><span class="p">),</span>
+<span class="linenos">171</span><span class="w">      </span><span class="p">.</span><span class="n">stb_in</span><span class="w">        </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
+<span class="linenos">172</span><span class="w">      </span><span class="p">.</span><span class="n">d_in</span><span class="w">          </span><span class="p">(</span><span class="n">mixout_q</span><span class="p">),</span>
+<span class="linenos">173</span><span class="w">      </span><span class="p">.</span><span class="n">cic_sample</span><span class="w">    </span><span class="p">(</span><span class="n">cic_sample</span><span class="p">),</span>
+<span class="linenos">174</span><span class="w">      </span><span class="p">.</span><span class="n">cc_sample</span><span class="w">     </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
+<span class="linenos">175</span><span class="w">      </span><span class="p">.</span><span class="n">cc_shift</span><span class="w">      </span><span class="p">(</span><span class="n">cic_shift</span><span class="p">),</span>
+<span class="linenos">176</span><span class="w">      </span><span class="p">.</span><span class="n">di_stb_out</span><span class="w">    </span><span class="p">(),</span>
+<span class="linenos">177</span><span class="w">      </span><span class="p">.</span><span class="n">di_sr_out</span><span class="w">     </span><span class="p">(),</span>
+<span class="linenos">178</span><span class="w">      </span><span class="p">.</span><span class="n">cc_stb_out</span><span class="w">    </span><span class="p">(),</span><span class="w"> </span><span class="c1">// Time-aligned with strobe_cc</span>
+<span class="linenos">179</span><span class="w">      </span><span class="p">.</span><span class="n">cc_sr_out</span><span class="w">     </span><span class="p">(</span><span class="n">result_q</span><span class="p">)</span>
+<span class="linenos">180</span><span class="w">   </span><span class="p">);</span>
+<span class="linenos">181</span>
+<span class="linenos">182</span>
 <span class="linenos">183</span><span class="w">   </span><span class="c1">// ---------------------</span>
-<span class="linenos">184</span>
-<span class="linenos">185</span><span class="w">   </span><span class="k">assign</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">strobe_cc</span><span class="p">;</span>
+<span class="linenos">184</span><span class="w">   </span><span class="c1">// Instantiate circle_buf_serial to store I and Q streams and handle channel masking</span>
+<span class="linenos">185</span><span class="w">   </span><span class="c1">// ---------------------</span>
 <span class="linenos">186</span>
-<span class="linenos">187</span><span class="w">   </span><span class="c1">// Run/stop mode based on trigger and trigger mode</span>
-<span class="linenos">188</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">buf_sync</span><span class="p">;</span>
-<span class="linenos">189</span><span class="w">   </span><span class="kt">reg</span><span class="w"> </span><span class="n">run</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">190</span><span class="w">   </span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">191</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig_mode_r</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0</span><span class="p">)</span><span class="w">                </span><span class="n">run</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span>
-<span class="linenos">192</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig_mode_r</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">buf_sync</span><span class="p">)</span><span class="w">    </span><span class="n">run</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">193</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig_mode_r</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mh">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">trig_actual</span><span class="p">)</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span>
-<span class="linenos">194</span><span class="w">   </span><span class="k">end</span>
-<span class="linenos">195</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">circle_stb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strobe_cc</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">run</span><span class="p">;</span>
-<span class="linenos">196</span>
-<span class="linenos">197</span><span class="w">   </span><span class="c1">// Circular buffer</span>
-<span class="linenos">198</span><span class="w">   </span><span class="c1">// 2 * 20 bits from 2 * ccfilt, 8K depth * 2 I&amp;Q channels means aw=13</span>
-<span class="linenos">199</span><span class="w">   </span><span class="c1">// 2 * 8K * 2 * 20 = 640 kbits = 20 BRAM36 in Xilinx 7-series</span>
-<span class="linenos">200</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">2</span><span class="o">*</span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">circle_out</span><span class="p">;</span>
-<span class="linenos">201</span>
-<span class="linenos">202</span><span class="w">   </span><span class="n">circle_buf_serial</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos">203</span><span class="w">      </span><span class="p">.</span><span class="n">n_chan</span><span class="w">        </span><span class="p">(</span><span class="n">nadc</span><span class="p">),</span>
-<span class="linenos">204</span><span class="w">      </span><span class="p">.</span><span class="n">lsb_mask</span><span class="w">      </span><span class="p">(</span><span class="mh">1</span><span class="p">),</span><span class="w"> </span><span class="c1">// Right to left. LSB=CH0</span>
-<span class="linenos">205</span><span class="w">      </span><span class="p">.</span><span class="n">buf_aw</span><span class="w">        </span><span class="p">(</span><span class="n">aw</span><span class="p">),</span>
-<span class="linenos">206</span><span class="w">      </span><span class="p">.</span><span class="n">buf_dw</span><span class="w">        </span><span class="p">(</span><span class="mh">2</span><span class="o">*</span><span class="n">rw</span><span class="p">),</span>
-<span class="linenos">207</span><span class="w">      </span><span class="p">.</span><span class="n">buf_auto_flip</span><span class="w"> </span><span class="p">(</span><span class="mh">0</span><span class="p">))</span>
-<span class="linenos">208</span><span class="w">   </span><span class="n">i_circle_buf_serial</span><span class="w"> </span><span class="p">(</span>
-<span class="linenos">209</span><span class="w">      </span><span class="p">.</span><span class="n">iclk</span><span class="w">            </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<span class="linenos">210</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">           </span><span class="p">(</span><span class="n">reset</span><span class="p">),</span>
-<span class="linenos">211</span><span class="w">      </span><span class="p">.</span><span class="n">sr_in</span><span class="w">           </span><span class="p">({</span><span class="n">result_q</span><span class="p">,</span><span class="n">result_i</span><span class="p">}),</span>
-<span class="linenos">212</span><span class="w">      </span><span class="p">.</span><span class="n">sr_stb</span><span class="w">          </span><span class="p">(</span><span class="n">circle_stb</span><span class="p">),</span>
-<span class="linenos">213</span><span class="w">      </span><span class="p">.</span><span class="n">chan_mask</span><span class="w">       </span><span class="p">(</span><span class="n">keep</span><span class="p">),</span>
-<span class="linenos">214</span><span class="w">      </span><span class="p">.</span><span class="n">oclk</span><span class="w">            </span><span class="p">(</span><span class="n">ro_clk</span><span class="p">),</span>
-<span class="linenos">215</span><span class="w">      </span><span class="p">.</span><span class="n">buf_sync</span><span class="w">        </span><span class="p">(</span><span class="n">buf_sync</span><span class="p">),</span>
-<span class="linenos">216</span><span class="w">      </span><span class="p">.</span><span class="n">buf_transferred</span><span class="w"> </span><span class="p">(),</span>
-<span class="linenos">217</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stop</span><span class="w">        </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">),</span>
-<span class="linenos">218</span><span class="w">      </span><span class="p">.</span><span class="n">buf_count</span><span class="w">       </span><span class="p">(</span><span class="n">ro_status</span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">16</span><span class="p">]),</span>
-<span class="linenos">219</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stat2</span><span class="w">       </span><span class="p">(),</span>
-<span class="linenos">220</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stat</span><span class="w">        </span><span class="p">(</span><span class="n">ro_status</span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]),</span>
-<span class="linenos">221</span><span class="w">      </span><span class="p">.</span><span class="n">debug_stat</span><span class="w">      </span><span class="p">(),</span>
-<span class="linenos">222</span><span class="w">      </span><span class="p">.</span><span class="n">stb_out</span><span class="w">         </span><span class="p">(</span><span class="n">ro_ack</span><span class="p">),</span>
-<span class="linenos">223</span><span class="w">      </span><span class="p">.</span><span class="n">enable</span><span class="w">          </span><span class="p">(</span><span class="n">ro_enable</span><span class="p">),</span>
-<span class="linenos">224</span><span class="w">      </span><span class="p">.</span><span class="n">read_addr</span><span class="w">       </span><span class="p">(</span><span class="n">ro_addr</span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]),</span>
-<span class="linenos">225</span><span class="w">      </span><span class="p">.</span><span class="n">d_out</span><span class="w">           </span><span class="p">(</span><span class="n">circle_out</span><span class="p">)</span>
-<span class="linenos">226</span><span class="w">   </span><span class="p">);</span>
-<span class="linenos">227</span>
-<span class="linenos">228</span><span class="w">   </span><span class="c1">// Form 32-bit output bus</span>
-<span class="linenos">229</span><span class="w">   </span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">obus</span><span class="p">;</span>
-<span class="linenos">230</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">obus_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ro_addr</span><span class="p">[</span><span class="n">aw</span><span class="o">+</span><span class="mh">1</span><span class="o">:</span><span class="n">aw</span><span class="p">];</span>
-<span class="linenos">231</span><span class="w">   </span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">casez</span><span class="w"> </span><span class="p">(</span><span class="n">obus_mode</span><span class="p">)</span>
-<span class="linenos">232</span><span class="w">           </span><span class="mh">2</span><span class="mb">&#39;b0</span><span class="o">?:</span><span class="w"> </span><span class="n">obus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">circle_out</span><span class="p">[</span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="n">rw</span><span class="o">-</span><span class="mh">16</span><span class="p">],</span><span class="w"> </span><span class="n">circle_out</span><span class="p">[</span><span class="mh">2</span><span class="o">*</span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">2</span><span class="o">*</span><span class="n">rw</span><span class="o">-</span><span class="mh">16</span><span class="p">]};</span>
-<span class="linenos">233</span><span class="w">           </span><span class="mh">2</span><span class="mb">&#39;b10</span><span class="o">:</span><span class="w"> </span><span class="n">obus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">circle_out</span><span class="p">[</span><span class="w">  </span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">],</span><span class="w">  </span><span class="p">{(</span><span class="mh">32</span><span class="o">-</span><span class="n">rw</span><span class="p">){</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">}}};</span>
-<span class="linenos">234</span><span class="w">           </span><span class="mh">2</span><span class="mb">&#39;b11</span><span class="o">:</span><span class="w"> </span><span class="n">obus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">circle_out</span><span class="p">[</span><span class="mh">2</span><span class="o">*</span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="n">rw</span><span class="p">],</span><span class="w"> </span><span class="p">{(</span><span class="mh">32</span><span class="o">-</span><span class="n">rw</span><span class="p">){</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">}}};</span>
-<span class="linenos">235</span><span class="w">   </span><span class="k">endcase</span>
-<span class="linenos">236</span><span class="w">   </span><span class="k">assign</span><span class="w"> </span><span class="n">ro_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">obus</span><span class="p">;</span>
-<span class="linenos">237</span>
-<span class="linenos">238</span><span class="k">endmodule</span>
+<span class="linenos">187</span><span class="w">   </span><span class="k">assign</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">~</span><span class="n">strobe_cc</span><span class="p">;</span>
+<span class="linenos">188</span>
+<span class="linenos">189</span><span class="w">   </span><span class="c1">// Run/stop mode based on trigger and trigger mode</span>
+<span class="linenos">190</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">buf_sync</span><span class="p">;</span>
+<span class="linenos">191</span><span class="w">   </span><span class="kt">reg</span><span class="w"> </span><span class="n">run</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">192</span><span class="w">   </span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">193</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig_mode_r</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0</span><span class="p">)</span><span class="w">                </span><span class="n">run</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span>
+<span class="linenos">194</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig_mode_r</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">buf_sync</span><span class="p">)</span><span class="w">    </span><span class="n">run</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">195</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig_mode_r</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mh">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">trig_actual</span><span class="p">)</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span>
+<span class="linenos">196</span><span class="w">   </span><span class="k">end</span>
+<span class="linenos">197</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="n">circle_stb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strobe_cc</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">run</span><span class="p">;</span>
+<span class="linenos">198</span>
+<span class="linenos">199</span><span class="w">   </span><span class="c1">// Circular buffer</span>
+<span class="linenos">200</span><span class="w">   </span><span class="c1">// 2 * 20 bits from 2 * ccfilt, 8K depth * 2 I&amp;Q channels means aw=13</span>
+<span class="linenos">201</span><span class="w">   </span><span class="c1">// 2 * 8K * 2 * 20 = 640 kbits = 20 BRAM36 in Xilinx 7-series</span>
+<span class="linenos">202</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">2</span><span class="o">*</span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">circle_out</span><span class="p">;</span>
+<span class="linenos">203</span>
+<span class="linenos">204</span><span class="w">   </span><span class="n">circle_buf_serial</span><span class="w"> </span><span class="p">#(</span>
+<span class="linenos">205</span><span class="w">      </span><span class="p">.</span><span class="n">n_chan</span><span class="w">        </span><span class="p">(</span><span class="n">nadc</span><span class="p">),</span>
+<span class="linenos">206</span><span class="w">      </span><span class="p">.</span><span class="n">lsb_mask</span><span class="w">      </span><span class="p">(</span><span class="mh">1</span><span class="p">),</span><span class="w"> </span><span class="c1">// Right to left. LSB=CH0</span>
+<span class="linenos">207</span><span class="w">      </span><span class="p">.</span><span class="n">buf_aw</span><span class="w">        </span><span class="p">(</span><span class="n">aw</span><span class="p">),</span>
+<span class="linenos">208</span><span class="w">      </span><span class="p">.</span><span class="n">buf_dw</span><span class="w">        </span><span class="p">(</span><span class="mh">2</span><span class="o">*</span><span class="n">rw</span><span class="p">),</span>
+<span class="linenos">209</span><span class="w">      </span><span class="p">.</span><span class="n">buf_auto_flip</span><span class="w"> </span><span class="p">(</span><span class="mh">0</span><span class="p">))</span>
+<span class="linenos">210</span><span class="w">   </span><span class="n">i_circle_buf_serial</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos">211</span><span class="w">      </span><span class="p">.</span><span class="n">iclk</span><span class="w">            </span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
+<span class="linenos">212</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">           </span><span class="p">(</span><span class="n">reset</span><span class="p">),</span>
+<span class="linenos">213</span><span class="w">      </span><span class="p">.</span><span class="n">sr_in</span><span class="w">           </span><span class="p">({</span><span class="n">result_q</span><span class="p">,</span><span class="n">result_i</span><span class="p">}),</span>
+<span class="linenos">214</span><span class="w">      </span><span class="p">.</span><span class="n">sr_stb</span><span class="w">          </span><span class="p">(</span><span class="n">circle_stb</span><span class="p">),</span>
+<span class="linenos">215</span><span class="w">      </span><span class="p">.</span><span class="n">chan_mask</span><span class="w">       </span><span class="p">(</span><span class="n">keep</span><span class="p">),</span>
+<span class="linenos">216</span><span class="w">      </span><span class="p">.</span><span class="n">oclk</span><span class="w">            </span><span class="p">(</span><span class="n">ro_clk</span><span class="p">),</span>
+<span class="linenos">217</span><span class="w">      </span><span class="p">.</span><span class="n">buf_sync</span><span class="w">        </span><span class="p">(</span><span class="n">buf_sync</span><span class="p">),</span>
+<span class="linenos">218</span><span class="w">      </span><span class="p">.</span><span class="n">buf_transferred</span><span class="w"> </span><span class="p">(),</span>
+<span class="linenos">219</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stop</span><span class="w">        </span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">),</span>
+<span class="linenos">220</span><span class="w">      </span><span class="p">.</span><span class="n">buf_count</span><span class="w">       </span><span class="p">(</span><span class="n">ro_status</span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">16</span><span class="p">]),</span>
+<span class="linenos">221</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stat2</span><span class="w">       </span><span class="p">(),</span>
+<span class="linenos">222</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stat</span><span class="w">        </span><span class="p">(</span><span class="n">ro_status</span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]),</span>
+<span class="linenos">223</span><span class="w">      </span><span class="p">.</span><span class="n">debug_stat</span><span class="w">      </span><span class="p">(),</span>
+<span class="linenos">224</span><span class="w">      </span><span class="p">.</span><span class="n">stb_out</span><span class="w">         </span><span class="p">(</span><span class="n">ro_ack</span><span class="p">),</span>
+<span class="linenos">225</span><span class="w">      </span><span class="p">.</span><span class="n">enable</span><span class="w">          </span><span class="p">(</span><span class="n">ro_enable</span><span class="p">),</span>
+<span class="linenos">226</span><span class="w">      </span><span class="p">.</span><span class="n">read_addr</span><span class="w">       </span><span class="p">(</span><span class="n">ro_addr</span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]),</span>
+<span class="linenos">227</span><span class="w">      </span><span class="p">.</span><span class="n">d_out</span><span class="w">           </span><span class="p">(</span><span class="n">circle_out</span><span class="p">)</span>
+<span class="linenos">228</span><span class="w">   </span><span class="p">);</span>
+<span class="linenos">229</span>
+<span class="linenos">230</span><span class="w">   </span><span class="c1">// Form 32-bit output bus</span>
+<span class="linenos">231</span><span class="w">   </span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">obus</span><span class="p">;</span>
+<span class="linenos">232</span><span class="w">   </span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">obus_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ro_addr</span><span class="p">[</span><span class="n">aw</span><span class="o">+</span><span class="mh">1</span><span class="o">:</span><span class="n">aw</span><span class="p">];</span>
+<span class="linenos">233</span><span class="w">   </span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">casez</span><span class="w"> </span><span class="p">(</span><span class="n">obus_mode</span><span class="p">)</span>
+<span class="linenos">234</span><span class="w">           </span><span class="mh">2</span><span class="mb">&#39;b0</span><span class="o">?:</span><span class="w"> </span><span class="n">obus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">circle_out</span><span class="p">[</span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="n">rw</span><span class="o">-</span><span class="mh">16</span><span class="p">],</span><span class="w"> </span><span class="n">circle_out</span><span class="p">[</span><span class="mh">2</span><span class="o">*</span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">2</span><span class="o">*</span><span class="n">rw</span><span class="o">-</span><span class="mh">16</span><span class="p">]};</span>
+<span class="linenos">235</span><span class="w">           </span><span class="mh">2</span><span class="mb">&#39;b10</span><span class="o">:</span><span class="w"> </span><span class="n">obus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">circle_out</span><span class="p">[</span><span class="w">  </span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">],</span><span class="w">  </span><span class="p">{(</span><span class="mh">32</span><span class="o">-</span><span class="n">rw</span><span class="p">){</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">}}};</span>
+<span class="linenos">236</span><span class="w">           </span><span class="mh">2</span><span class="mb">&#39;b11</span><span class="o">:</span><span class="w"> </span><span class="n">obus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">circle_out</span><span class="p">[</span><span class="mh">2</span><span class="o">*</span><span class="n">rw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="n">rw</span><span class="p">],</span><span class="w"> </span><span class="p">{(</span><span class="mh">32</span><span class="o">-</span><span class="n">rw</span><span class="p">){</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">}}};</span>
+<span class="linenos">237</span><span class="w">   </span><span class="k">endcase</span>
+<span class="linenos">238</span><span class="w">   </span><span class="k">assign</span><span class="w"> </span><span class="n">ro_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">obus</span><span class="p">;</span>
+<span class="linenos">239</span>
+<span class="linenos">240</span><span class="k">endmodule</span>
 </pre></div>
 </div>
 </section>
@@ -298,6 +302,7 @@ Expect to see errors and unfinished things.</p>
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../general-docs.html">General Docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a></li>
 </ul>
 
@@ -334,7 +339,7 @@ Expect to see errors and unfinished things.</p>
       &copy;2022, LBNL ATG.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
       |

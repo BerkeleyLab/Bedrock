@@ -52,6 +52,9 @@ Ports
    * - a[isize-1:0]
      - Input
      - 
+   * - b[isize-1:0]
+     - Input
+     - 
    * - sum[osize-1:0]
      - Output
      - 

@@ -31,6 +31,11 @@ Parameters
      - ?
      - 0
      - 
+   * - NUM_DROP_BITS
+     - ?
+     - ?
+     - 1
+     - Number of bits to drop at the output.
    * - dwi
      - ?
      - ?
@@ -45,7 +50,7 @@ Parameters
      - ?
      - ?
      - 18
-     - 
+     - Width of local-oscillator input
 
 Ports
 '''''

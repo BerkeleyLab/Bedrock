@@ -8,14 +8,16 @@ data_xdomain Source File
 
    // clk_out must be more than twice as fast as the gate_in rate.
    `timescale 1ns / 1ns
-   module data_xdomain(clk_in, gate_in, data_in,
-   	clk_out, gate_out, data_out);
-
-   parameter size=16;
-   	input clk_in, gate_in, clk_out;
-   	input [size-1:0] data_in;
-   	output reg [size-1:0] data_out;
-   	output reg gate_out;
+   module data_xdomain #(
+   	parameter size=16
+   ) (
+   	input clk_in,
+   	input gate_in,
+   	input [size-1:0] data_in,
+   	input clk_out,
+   	output reg gate_out,
+   	output reg [size-1:0] data_out
+   );
    initial gate_out=0;
    initial data_out=0;
 
@@ -29,7 +31,7 @@ data_xdomain Source File
 
    // It can be argued that the final pipeline stage is not needed,
    // but then you'd need oddball timing constraints on the data path.
-   reg [size-1:0] data_pipe=0;
+   (* DONT_TOUCH="TRUE" *) reg [size-1:0] data_pipe=0;
    always @(posedge clk_out) begin
    	data_pipe <= data_latch;
    	gate_out <= gate_x;
