@@ -223,11 +223,11 @@ biquad_tb: ../dsp/saturateMath.v
 iirFilter_tb: ../dsp/saturateMath.v
 
 # Special additional prerequisites for CORDIC generation
-rot_dds_auto: cordicg_b22.v
-mon_12_auto: cordicg_b22.v
-ssb_out_auto: cordicg_b22.v
-cordic_mux_auto: cordicg_b22.v
-fdbk_core_auto: cordicg_b22.v
+rot_dds_tb: cordicg_b22.v
+mon_12_tb: cordicg_b22.v
+ssb_out_tb: cordicg_b22.v
+cordic_mux_tb: cordicg_b22.v
+fdbk_core_tb: cordicg_b22.v
 
 images::
 	if [ -d images ]; then $(MAKE) -C images || exit 1; fi
