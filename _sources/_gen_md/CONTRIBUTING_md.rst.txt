@@ -1,7 +1,7 @@
 .. _CONTRIBUTING:
 
 ------------
-_gen_md CONTRIBUTING
+ CONTRIBUTING
 ------------
 
 .. mdinclude:: /home/runner/work/Bedrock/Bedrock/CONTRIBUTING.md
