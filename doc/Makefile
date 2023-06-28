@@ -110,6 +110,7 @@ SRC = \
    #via.v # not properly formatted for portfind.py
 
 SRC_MD = \
+   CONTRIBUTING.md \
    soc/picorv32/README.md \
    soc/picorv32/test/badger_lwip/README.md \
    soc/picorv32/test/lb_bridge/README.md \
@@ -123,7 +124,6 @@ SRC_MD = \
    projects/oscope/marble_family/README.md \
    projects/oscope/bmb7_cu/README.md \
    projects/comms_top/README.md \
-   guidelines/CONTRIBUTING.md \
    guidelines/rtl_guidelines.md \
    badger/README.md \
    badger/status.md \
