@@ -100,14 +100,22 @@ badger_ac701_run:
 
 sphinx_docs:
   stage: docs
-  before_script:
-    - apt-get update && apt-get install -y imagemagick ghostscript xvfb gtkwave texlive-binaries
-    - python3 -m pip install sphinx==5.0.2 numpy m2r2==0.3.2
-    - >
-        sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g'
-        -e '/pattern="PDF"/ s/rights=".*" pattern=/rights="read|write" pattern=/g'
-        -e '/pattern="EPS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g'
-        -e '/<\/policymap>/i \  <policy domain="coder" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP}" \/>'
-        /etc/ImageMagick-*/policy.xml
+  before_script: |
+    apt-get update
+    apt-get install -y \
+        imagemagick \
+        ghostscript \
+        xvfb \
+        gtkwave \
+        texlive-binaries
+    python3 -m pip install \
+        sphinx==5.0.2 \
+        numpy \
+        m2r2==0.3.2
+    sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
+        -e '/pattern="PDF"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
+        -e '/pattern="EPS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
+        -e '/<\/policymap>/i \  <policy domain="coder" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP}" \/>' \
+    /etc/ImageMagick-*/policy.xml
   script:
     - make -C doc html
