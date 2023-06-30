@@ -1,0 +1,67 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Fri Jun 30 17:51:38 2023
+[*]
+[dumpfile] "C:\SLAC\REPO\LLRF\BEDROCK\SIGNED_CIC\bedrock\cmoc\slow_bridge.vcd"
+[dumpfile_mtime] "Fri Jun 30 17:47:34 2023"
+[dumpfile_size] 938775
+[savefile] "C:\SLAC\REPO\LLRF\BEDROCK\SIGNED_CIC\bedrock\cmoc\slow_bridge.gtkw"
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*0.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] slow_bridge_tb.
+[sst_width] 197
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 153
+@420
+slow_bridge_tb.DUT.aw
+slow_bridge_tb.DUT.dw
+@22
+slow_bridge_tb.DUT.lb_addr[14:0]
+@28
+slow_bridge_tb.DUT.lb_clk
+@22
+slow_bridge_tb.DUT.lb_out[31:0]
+@28
+slow_bridge_tb.DUT.lb_read
+@22
+slow_bridge_tb.DUT.ram.addra[3:0]
+slow_bridge_tb.DUT.ram.addrb[3:0]
+slow_bridge_tb.DUT.ram.ala[3:0]
+slow_bridge_tb.DUT.ram.alb[3:0]
+@420
+slow_bridge_tb.DUT.ram.aw
+@28
+slow_bridge_tb.DUT.ram.clka
+slow_bridge_tb.DUT.ram.clkb
+@22
+slow_bridge_tb.DUT.ram.dina[31:0]
+slow_bridge_tb.DUT.ram.douta[31:0]
+slow_bridge_tb.DUT.ram.doutb[31:0]
+@420
+slow_bridge_tb.DUT.ram.dw
+@28
+slow_bridge_tb.DUT.ram.initial_file
+@420
+slow_bridge_tb.DUT.ram.k
+slow_bridge_tb.DUT.ram.sz
+@28
+slow_bridge_tb.DUT.ram.wena
+@22
+slow_bridge_tb.DUT.ram_out[31:0]
+@28
+slow_bridge_tb.DUT.running
+slow_bridge_tb.DUT.shifting
+slow_bridge_tb.DUT.slow_clk
+slow_bridge_tb.DUT.slow_invalid
+slow_bridge_tb.DUT.slow_op
+@22
+slow_bridge_tb.DUT.slow_out[31:0]
+@28
+slow_bridge_tb.DUT.slow_snap
+@22
+slow_bridge_tb.DUT.write_addr[8:0]
+[pattern_trace] 1
+[pattern_trace] 0
