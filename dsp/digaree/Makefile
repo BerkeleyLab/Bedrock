@@ -32,7 +32,7 @@ SRF_DATA = ../run2.dat
 	$(GTKWAVE) $^
 
 %.pdf: %.eps
-	gs -dEPSCrop -sDEVICE=pdfwrite -sOutputFile=$@ -dNOPAUSE -dBATCH -dAutoRotatePages=/None -c .setpdfwrite -f $<
+	gs -dEPSCrop -sDEVICE=pdfwrite -sOutputFile=$@ -dNOPAUSE -dBATCH -dAutoRotatePages=/None $<
 
 %.pdf: %.tex
 	pdftex $<

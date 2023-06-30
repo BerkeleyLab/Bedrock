@@ -1,5 +1,5 @@
 %.pdf: %.eps
-	SOURCE_DATE_EPOCH=`git log -n1 --pretty=format:%ct $<` gs -dEPSCrop -sDEVICE=pdfwrite -sOutputFile=$@ -dNOPAUSE -dBATCH -dAutoRotatePages=/None -c .setpdfwrite -f $<
+	SOURCE_DATE_EPOCH=`git log -n1 --pretty=format:%ct $<` gs -dEPSCrop -sDEVICE=pdfwrite -sOutputFile=$@ -dNOPAUSE -dBATCH -dAutoRotatePages=/None $<
 
 %.pdf: %.tex
 	SOURCE_DATE_EPOCH=`git log -n1 --pretty=format:%ct $<` pdftex $<
