@@ -101,7 +101,7 @@ badger_ac701_run:
 sphinx_docs:
   stage: docs
   before_script:
-    - apt-get update && apt-get install -y imagemagick ghostscript xvfb gtkwave
+    - apt-get update && apt-get install -y imagemagick ghostscript xvfb gtkwave texlive-binaries
     - python3 -m pip install sphinx==5.0.2 numpy m2r2==0.3.2
     - >
         sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g'
