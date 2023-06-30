@@ -6,6 +6,6 @@ DSP Digaree Module
 DSP Digaree
 -----------
 
-Useful DIgaree extra documetation
+Useful Digaree extra documetation
 
 See :download:`LCLS-II LLRF Quench and Detune Revisited <tuning_dsp4.pdf>`
