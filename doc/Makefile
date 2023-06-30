@@ -109,6 +109,10 @@ SRC = \
    # mp_proc.v # must generate _auto files
    #via.v # not properly formatted for portfind.py
 
+STATIC_RST = \
+   rtsim-module.rst \
+   dsp-digaree-module.rst
+
 SRC_MD = \
    CONTRIBUTING.md \
    soc/picorv32/README.md \
@@ -178,14 +182,14 @@ include $(CORDIC_DIR)/rules.mk
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help images Makefile gen_dir src_rst rst md block_png block_eps timing
+.PHONY: help images Makefile gen_dir src_rst rst md pdf block_png block_eps timing
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 #
 # rst should be last as this targets checks some files to change
 # the way it generates its output
-html: images Makefile block_png timing src_rst rst md
+html: images Makefile block_png timing src_rst rst md pdf static_rst
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 $(GEN_SRC_DIR)/%_source.rst: %.v
@@ -243,6 +247,8 @@ rst: gen_dir $(RST)
 
 md: gen_md_dir $(MD_RST)
 
+pdf: gen_rtsim_pdf gen_digaree_pdf
+
 block_eps: gen_dir $(BLOCK_EPS)
 
 block_png: gen_dir $(BLOCK_PNG)
@@ -254,6 +260,17 @@ gen_dir:
 
 gen_md_dir:
 	mkdir -p $(GEN_MD_DIR)
+
+gen_rtsim_pdf:
+	make -C $(RTSIM_DIR)/doc
+	cp $(RTSIM_DIR)/doc/*.pdf .
+
+gen_digaree_pdf:
+	make -C $(DSP_DIR)/digaree tuning_dsp4.pdf
+	cp $(DSP_DIR)/digaree/*.pdf .
+
+static_rst:
+	cp $(STATIC_RST) $(GEN_DIR)/
 
 clean::
 	if [ -d images ]; then $(MAKE) -C images clean || exit 1; fi
