@@ -79,6 +79,22 @@ repro_pdf: blocks.pdf
 blocks.svg: blocks.eps
 	inkscape --export-plain-svg $@ $<
 
+DEMO_PY=demo_assem.py
+
+demo_assem.in: $(DEMO_PY)
+	$(PYTHON) $< > $@
+
+map.vh: $(DEMO_PY)
+	$(PYTHON) $< v > $@
+
+map.h: $(DEMO_PY)
+	$(PYTHON) $< c > $@
+
+map.json: $(DEMO_PY)
+	$(PYTHON) $< j > $@
+
 clean:
 	rm -f *_tb *.vcd *.dat *.bit *.pdf *.pyc init.in
 	rm -rf _xilinx __pycache__
+	rm -rf map.vh map.h map.json demo_assem.in
+
