@@ -336,17 +336,18 @@ class I2CAssembler(i2c_assem):
         pre = None
         post = None
         inter = ""
-        if style in ('v', 'V', 'Verilog', 'verilog'):
+        style = style.lower()[0]
+        if style == 'v':
             # Verilog-style
             fmt = "localparam {0} = 'h{1:x};\n" \
                 + "localparam {0}_SIZE = {2};\n"
-        elif style in ('c', 'C'):
+        elif style == 'c':
             # C-style
             pre = "#ifndef __{0}_H\n#define __{0}_H\n".format(filename.upper())
             fmt = "#define {0} (0x{1:x})\n" \
                 + "#define {0}_SIZE ({2})\n"
             post = "#endif // __{}_H\n".format(filename.upper())
-        elif style in ('j', 'J', 'JSON'):
+        elif style == 'j':
             # JSON-style
             pre = "{\n"
             inter = ",\n"
