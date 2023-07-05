@@ -1,13 +1,12 @@
 `timescale 1ns / 1ns
 
 module slow_bridge_NANC #(
-    parameter aw=8,
+    parameter aw=9,
     parameter dw=32
 ) (
 	// 32-bit local bus (slave)
 	input lb_clk,
 	input [14:0] lb_addr,
-	input lb_read,
 	output [dw-1:0] lb_out,
 	// Output status bit, valid in slow_clk domain
 	output     slow_invalid,   // indicates internal data transfer in progress
@@ -18,12 +17,14 @@ module slow_bridge_NANC #(
 	input [dw-1:0] slow_out
 );
 
+localparam aw_half = aw/2;
+
 reg running=0, shifting=0;
-reg [8:0] write_addr=0;
+reg [aw-1:0] write_addr=0;
 always @(posedge slow_clk) begin
 	if (slow_snap | &write_addr) running <= slow_snap;
-	if (running) write_addr <= write_addr+1;
-	shifting <= running & |write_addr[8:4];
+	if (running) write_addr <= write_addr + 1;
+	shifting <= running & |write_addr[aw-1:4];
 end
 
 wire [dw-1:0] ram_out;
