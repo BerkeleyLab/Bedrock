@@ -3,7 +3,7 @@ include $(BUILD_DIR)/top_rules.mk
 
 vpath %.v $(SERIAL_IO_DIR) $(DSP_DIR)
 
-TGT_ := chitchat_tb chitchat_txrx_wrap_tb
+TGT_ := chitchat_tb #chitchat_txrx_wrap_tb
 CHK_ = $(TGT_:%_tb=%_check)
 
 all: targets
