@@ -24,11 +24,12 @@ module chitchat_rx #(
    // Status outputs
    output [2:0]  ccrx_fault,     // Error during decoding [0] - Incorrect protocol,
                                  //                       [1] - CRC fail,
-                                 //                       [2] - Incorrect frame number
+                                 //                       [2] - Incorrect frame number,
+                                 //                       [3] - Timeout
    output [15:0] ccrx_fault_cnt,
    output        ccrx_los,        // Loss of sync - No comma characters for one period
    output        ccrx_frame_drop, // Signal dropped frame
-
+   output        ccrx_error,      // as in the old chitchat
    // Application-level outputs
    output        rx_valid,
    output [3:0]  rx_protocol_ver,
@@ -83,16 +84,21 @@ module chitchat_rx #(
    wire crc_fault = last & ~crc_zero;
 
    reg         los_r   = 0;
-   reg  [2:0]  fault_r = 0;
+   reg  [3:0]  fault_r = 0;
    reg  [15:0] fault_cnt_r = 0;
-   wire [2:0]  faults      = {wrong_frame, crc_fault, wrong_prot};
+   wire [3:0]  faults      = {wrong_frame, crc_fault, wrong_prot, timeout};
+
+   reg [2:0] valid_count=0;
+   wire valid_count_max = &valid_count;
+   wire fault = |faults;
+   wire valid_count_inc = ~valid_count_max;
 
    always @(posedge clk) begin
       rx_valid_r   <= 0;
       frame_drop_r <= 0;
       if (last | timeout) begin
          los_r <= timeout;
-         if (|faults || timeout) begin
+         if (|faults) begin
             link_up_cnt  <= 0;
             frame_drop_r <= last;
          end else begin
@@ -106,6 +112,8 @@ module chitchat_rx #(
          fault_r      <= faults; // Latch decoding errors
          fault_cnt_r  <= fault_cnt_r + 1;
       end
+      if (last|timeout)
+         valid_count <= fault ? 0 : valid_count + valid_count_inc;
    end
 
    // Output value unpacking
@@ -198,6 +206,7 @@ module chitchat_rx #(
    assign ccrx_los        = los_r;
    assign ccrx_fault_cnt  = fault_cnt_r;
    assign ccrx_frame_drop = frame_drop_r;
+   assign ccrx_error      = ~valid_count_max;
 
    assign rx_valid         = rx_valid_r;
    assign rx_protocol_ver  = rx_protocol_ver_r;
