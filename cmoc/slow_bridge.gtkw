@@ -1,67 +1,139 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Fri Jun 30 17:51:38 2023
+[*] Thu Jul 06 03:06:23 2023
 [*]
 [dumpfile] "C:\SLAC\REPO\LLRF\BEDROCK\SIGNED_CIC\bedrock\cmoc\slow_bridge.vcd"
-[dumpfile_mtime] "Fri Jun 30 17:47:34 2023"
-[dumpfile_size] 938775
+[dumpfile_mtime] "Thu Jul 06 03:05:09 2023"
+[dumpfile_size] 366688
 [savefile] "C:\SLAC\REPO\LLRF\BEDROCK\SIGNED_CIC\bedrock\cmoc\slow_bridge.gtkw"
-[timestart] 0
-[size] 1000 600
-[pos] -1 -1
-*0.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[timestart] 5061500
+[size] 2560 1377
+[pos] 3831 -9
+*-12.275861 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] slow_bridge_tb.
-[sst_width] 197
-[signals_width] 150
+[treeopen] slow_bridge_tb.cryomodule_cavity[0].
+[treeopen] slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.
+[treeopen] slow_bridge_tb.cryomodule_cavity[1].
+[treeopen] slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.
+[treeopen] slow_bridge_tb.DUT.
+[sst_width] 305
+[signals_width] 270
 [sst_expanded] 1
-[sst_vpaned_height] 153
+[sst_vpaned_height] 426
+@200
+-TB
+@22
+slow_bridge_tb.\slow_bridge_out_NANC[0][31:0]
+slow_bridge_tb.\slow_data_NANC[0][31:0]
+slow_bridge_tb.\slow_bridge_out_NANC[1][31:0]
+slow_bridge_tb.\slow_data_NANC[1][31:0]
 @420
-slow_bridge_tb.DUT.aw
-slow_bridge_tb.DUT.dw
+slow_bridge_tb.RAM_SPACE
+slow_bridge_tb.SIM_STOP
+slow_bridge_tb.aw
+@28
+slow_bridge_tb.buf_transferred
+@420
+slow_bridge_tb.cavity_count
+slow_bridge_tb.cc
+slow_bridge_tb.control_cnt
+slow_bridge_tb.dw
+@22
+slow_bridge_tb.lb_addr[14:0]
+@28
+slow_bridge_tb.lb_clk
+slow_bridge_tb.lb_read
+slow_bridge_tb.lb_write
+slow_bridge_tb.slow_op
+@22
+slow_bridge_tb.slow_read[127:0]
+@420
+slow_bridge_tb.sr_length
+@200
+-old bridge
+@28
+slow_bridge_tb.DUT.invalid
 @22
 slow_bridge_tb.DUT.lb_addr[14:0]
 @28
 slow_bridge_tb.DUT.lb_clk
 @22
-slow_bridge_tb.DUT.lb_out[31:0]
+slow_bridge_tb.DUT.lb_out[7:0]
 @28
 slow_bridge_tb.DUT.lb_read
 @22
-slow_bridge_tb.DUT.ram.addra[3:0]
-slow_bridge_tb.DUT.ram.addrb[3:0]
-slow_bridge_tb.DUT.ram.ala[3:0]
-slow_bridge_tb.DUT.ram.alb[3:0]
-@420
-slow_bridge_tb.DUT.ram.aw
-@28
-slow_bridge_tb.DUT.ram.clka
-slow_bridge_tb.DUT.ram.clkb
-@22
-slow_bridge_tb.DUT.ram.dina[31:0]
-slow_bridge_tb.DUT.ram.douta[31:0]
-slow_bridge_tb.DUT.ram.doutb[31:0]
-@420
-slow_bridge_tb.DUT.ram.dw
-@28
-slow_bridge_tb.DUT.ram.initial_file
-@420
-slow_bridge_tb.DUT.ram.k
-slow_bridge_tb.DUT.ram.sz
-@28
-slow_bridge_tb.DUT.ram.wena
-@22
-slow_bridge_tb.DUT.ram_out[31:0]
+slow_bridge_tb.DUT.ram_out[7:0]
 @28
 slow_bridge_tb.DUT.running
 slow_bridge_tb.DUT.shifting
 slow_bridge_tb.DUT.slow_clk
-slow_bridge_tb.DUT.slow_invalid
 slow_bridge_tb.DUT.slow_op
 @22
-slow_bridge_tb.DUT.slow_out[31:0]
+slow_bridge_tb.DUT.slow_out[7:0]
 @28
 slow_bridge_tb.DUT.slow_snap
 @22
 slow_bridge_tb.DUT.write_addr[8:0]
+@200
+-
+@22
+slow_bridge_tb.DUT.ram.addra[8:0]
+slow_bridge_tb.DUT.ram.addrb[8:0]
+slow_bridge_tb.DUT.ram.ala[8:0]
+slow_bridge_tb.DUT.ram.alb[8:0]
+@28
+slow_bridge_tb.DUT.ram.clka
+slow_bridge_tb.DUT.ram.clkb
+@22
+slow_bridge_tb.DUT.ram.dina[7:0]
+slow_bridge_tb.DUT.ram.douta[7:0]
+slow_bridge_tb.DUT.ram.doutb[7:0]
+@28
+slow_bridge_tb.DUT.ram.wena
+@200
+-NANC bridge
+@28
+slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.ram.clka
+@22
+slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.ram.addra[8:0]
+slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.ram.ala[8:0]
+slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.ram.dina[31:0]
+slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.ram.douta[31:0]
+@200
+-
+@28
+slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.ram.clkb
+@22
+slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.ram.addrb[8:0]
+slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.ram.alb[8:0]
+slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.ram.doutb[31:0]
+@28
+slow_bridge_tb.cryomodule_cavity[0].DUT_NANC.ram.wena
+@200
+-NANC bridge
+@28
+slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.ram.clka
+@22
+slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.ram.addra[8:0]
+slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.ram.ala[8:0]
+slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.ram.dina[31:0]
+slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.ram.douta[31:0]
+@200
+-
+@28
+slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.ram.clkb
+@22
+slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.ram.addrb[8:0]
+slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.ram.alb[8:0]
+slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.ram.doutb[31:0]
+@28
+slow_bridge_tb.cryomodule_cavity[1].DUT_NANC.ram.wena
+@201
+-TB
+@23
+slow_bridge_tb.\slow_bridge_out_NANC[0][31:0]
+slow_bridge_tb.\slow_data_NANC[0][31:0]
+slow_bridge_tb.\slow_bridge_out_NANC[1][31:0]
+slow_bridge_tb.\slow_data_NANC[1][31:0]
 [pattern_trace] 1
 [pattern_trace] 0
