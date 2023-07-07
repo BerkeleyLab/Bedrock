@@ -182,14 +182,14 @@ include $(CORDIC_DIR)/rules.mk
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help images Makefile gen_dir src_rst rst md pdf block_png block_eps timing
+.PHONY: help Makefile gen_dir src_rst rst md pdf block_png block_eps timing
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 #
 # rst should be last as this targets checks some files to change
 # the way it generates its output
-html: images Makefile block_png timing src_rst rst md pdf static_rst
+html: Makefile block_png timing src_rst rst md pdf static_rst
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 $(GEN_SRC_DIR)/%_source.rst: %.v
@@ -238,9 +238,6 @@ ssb_out_tb: cordicg_b22.v
 cordic_mux_tb: cordicg_b22.v
 fdbk_core_tb: cordicg_b22.v
 
-images::
-	if [ -d images ]; then $(MAKE) -C images || exit 1; fi
-
 src_rst: gen_dir $(SRC_RST)
 
 rst: gen_dir $(RST)
@@ -273,7 +270,6 @@ static_rst:
 	cp $(STATIC_RST) $(GEN_DIR)/
 
 clean::
-	if [ -d images ]; then $(MAKE) -C images clean || exit 1; fi
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 include $(BUILD_DIR)/bottom_rules.mk
