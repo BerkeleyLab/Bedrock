@@ -141,12 +141,22 @@ SRC_MD = \
    fpga_family/xilinx/README.md \
    build-tools/newad.md
 
+SRC_SVG = \
+  badger/doc/rtefi.svg \
+  badger/doc/clients.svg \
+  badger/doc/mem_gateway.svg \
+  badger/doc/tx_path.svg \
+  badger/doc/precog_upg.svg \
+  peripheral_drivers/i2cbridge/i2c_chunk.svg \
+  peripheral_drivers/i2cbridge/blocks.svg
+
 DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR)
 VFLAGS     += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS)) -y$(AUTOGEN_DIR)
 
 vpath %.v $(DIRS)
 vpath %.md $(MAKEF_DIR)
 vpath %.gtkw $(DIRS)
+vpath %.svg $(MAKEF_DIR)
 
 _SRC_RST   = $(SRC:.v=_source.rst)
 SRC_RST    = $(addprefix $(GEN_SRC_DIR)/, $(_SRC_RST))
@@ -169,6 +179,7 @@ TB_PNG     = $(GTKW:.gtkw=_tb.v)
 # Generate timing diagrams if testbench and gtkwave files exist
 _TIMING_PNG = $(TB_PNG:_tb.v=_timing.png)
 TIMING_PNG  = $(addprefix $(GEN_DIR)/, $(_TIMING_PNG))
+SVG         = $(addprefix $(GEN_MD_DIR)/, $(SRC_SVG))
 
 # For cleaning
 GEN_TB     = $(addprefix $(GEN_DIR)/, $(basename $(TB)))
@@ -182,14 +193,14 @@ include $(CORDIC_DIR)/rules.mk
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile gen_dir src_rst rst md pdf block_png block_eps timing
+.PHONY: help Makefile gen_dir src_rst rst md pdf block_png block_eps timing svg
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 #
 # rst should be last as this targets checks some files to change
 # the way it generates its output
-html: Makefile block_png timing src_rst rst md pdf static_rst
+html: Makefile block_png timing svg src_rst rst md pdf static_rst
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 $(GEN_SRC_DIR)/%_source.rst: %.v
@@ -227,6 +238,10 @@ $(GEN_DIR)/%_timing.png: %.vcd %.gtkw
 	$(XVFB) $(GTKWAVE) $^ -r gtkwave_nosplash.rc -S fancy.tcl && mv $*_timing.png $@
 	$(CONVERT) -crop 1200x1000+229+68 $@ foo.$$$$ && mv foo.$$$$ $@
 
+$(GEN_MD_DIR)/%.svg: %.svg
+	mkdir -p $(dir $@)
+	cp $< $(dir $@)
+
 # Special additional prerequisites as iverilog does not catch them
 biquad_tb: ../dsp/saturateMath.v
 iirFilter_tb: ../dsp/saturateMath.v
@@ -251,6 +266,8 @@ block_eps: gen_dir $(BLOCK_EPS)
 block_png: gen_dir $(BLOCK_PNG)
 
 timing: gen_dir $(TIMING_PNG)
+
+svg: gen_dir $(SVG)
 
 gen_dir:
 	mkdir -p $(GEN_DIR) $(GEN_SRC_DIR)
