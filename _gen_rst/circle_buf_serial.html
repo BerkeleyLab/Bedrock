@@ -1,236 +1,48 @@
-
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-
-    <title>circle_buf_serial &#8212; Bedrock  documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>circle_buf_serial &mdash; Bedrock  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="complex_freq" href="complex_freq.html" />
-    <link rel="prev" title="circle_buf" href="circle_buf.html" />
-   
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link rel="prev" title="circle_buf" href="circle_buf.html" /> 
+</head>
 
-  </head><body>
-  
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
           
-
-          <div class="body" role="main">
-            
-  <div class="admonition attention">
-<p class="admonition-title">Attention</p>
-<p>This documentation is a work in progress.
-Expect to see errors and unfinished things.</p>
-</div>
-<section id="circle-buf-serial">
-<span id="id1"></span><h1>circle_buf_serial<a class="headerlink" href="#circle-buf-serial" title="Permalink to this heading">¶</a></h1>
-<section id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this heading">¶</a></h2>
-<div class="line-block">
-<div class="line"><br /></div>
-</div>
-</section>
-<section id="pinout">
-<h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this heading">¶</a></h2>
-<figure class="align-default" id="fig-circle-buf-serial-block">
-<img alt="Schematic symbol" src="../_images/circle_buf_serial_block.png" />
-</figure>
-</section>
-<section id="parameters">
-<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
-<table class="docutils align-default" id="id2">
-<caption><span class="caption-number">Table 25 </span><span class="caption-text">circle_buf_serial_param_table</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
-<thead>
-<tr class="row-odd"><th class="head"><p>Name</p></th>
-<th class="head"><p>Min</p></th>
-<th class="head"><p>Max</p></th>
-<th class="head"><p>Default</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>n_chan</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>12</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>lsb_mask</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>0</p></td>
-<td><p>lsb_mask=0: chan_mask is LEFT-to-RIGHT; MSB=CH0</p></td>
-</tr>
-<tr class="row-even"><td><p>buf_dw</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>16</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>buf_aw</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>13</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>buf_stat_w</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>16</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>buf_auto_flip</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>1</p></td>
-<td><p>auto_flip=1: Double buffers will be flipped when</p></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="ports">
-<h2>Ports<a class="headerlink" href="#ports" title="Permalink to this heading">¶</a></h2>
-<table class="docutils align-default" id="id3">
-<caption><span class="caption-number">Table 26 </span><span class="caption-text">circle_buf_serial_port_table</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
-<thead>
-<tr class="row-odd"><th class="head"><p>Signal</p></th>
-<th class="head"><p>Direction</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>iclk</p></td>
-<td><p>Input</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>reset</p></td>
-<td><p>Input</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>sr_in[buf_dw-1:0]</p></td>
-<td><p>Input</p></td>
-<td><p>Conveyor belt carrying n_chan channels</p></td>
-</tr>
-<tr class="row-odd"><td><p>sr_stb</p></td>
-<td><p>Input</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>chan_mask[n_chan-1:0]</p></td>
-<td><p>Input</p></td>
-<td><p>Bitmask of channels to record. See lsb_mask parameter</p></td>
-</tr>
-<tr class="row-odd"><td><p>wave_gate</p></td>
-<td><p>Output</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>wave_dval</p></td>
-<td><p>Output</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>wave_data[buf_dw-1:0]</p></td>
-<td><p>Output</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>buf_sync</p></td>
-<td><p>Output</p></td>
-<td><p>single-cycle when buffer starts/ends</p></td>
-</tr>
-<tr class="row-odd"><td><p>buf_transferred</p></td>
-<td><p>Output</p></td>
-<td><p>single-cycle when a buffer has been</p></td>
-</tr>
-<tr class="row-even"><td><p>buf_stop</p></td>
-<td><p>Input</p></td>
-<td><p>single-cycle - interrupts cbuf writing</p></td>
-</tr>
-<tr class="row-odd"><td><p>buf_count[buf_stat_w-1:0]</p></td>
-<td><p>Output</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>buf_stat2[buf_aw-1:0]</p></td>
-<td><p>Output</p></td>
-<td><p>includes fault bit</p></td>
-</tr>
-<tr class="row-odd"><td><p>buf_stat[buf_stat_w-1:0]</p></td>
-<td><p>Output</p></td>
-<td><p>includes fault bit, and (if set) the last valid location</p></td>
-</tr>
-<tr class="row-even"><td><p>debug_stat[buf_aw+4:0]</p></td>
-<td><p>Output</p></td>
-<td><p>{stb_in, boundary, btest, wbank, rbank, wr_addr}</p></td>
-</tr>
-<tr class="row-odd"><td><p>oclk</p></td>
-<td><p>Input</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>stb_out</p></td>
-<td><p>Input</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>enable</p></td>
-<td><p>Output</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>read_addr[buf_aw-1:0]</p></td>
-<td><p>Input</p></td>
-<td><p>nominally 8192 locations</p></td>
-</tr>
-<tr class="row-odd"><td><p>d_out[buf_dw-1:0]</p></td>
-<td><p>Output</p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="implementation-and-use">
-<h2>Implementation and use<a class="headerlink" href="#implementation-and-use" title="Permalink to this heading">¶</a></h2>
-<p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Software_portability">portable</a> <a class="reference external" href="https://en.wikipedia.org/wiki/Verilog">Verilog</a>
-implementation can be found in <a class="reference internal" href="../_gen_src_rst/circle_buf_serial_source.html#circle-buf-serial-source"><span class="std std-ref">circle_buf_serial Source File</span></a></p>
-</section>
-<section id="timing-diagram">
-<h2>Timing Diagram<a class="headerlink" href="#timing-diagram" title="Permalink to this heading">¶</a></h2>
-<p>A <a class="reference external" href="http://gtkwave.sourceforge.net/">GTKWave</a>-generated timing diagram is shown below:</p>
-<figure class="align-default" id="fig-circle-buf-serial-timing">
-<img alt="Timing diagram" src="../_images/circle_buf_serial_timing.png" />
-</figure>
-</section>
-</section>
-
-
-          </div>
           
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">Bedrock</a></h1>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+          <a href="../index.html" class="icon icon-home">
+            Bedrock
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../general-docs.html">General Docs</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a><ul class="current">
@@ -328,53 +140,239 @@ implementation can be found in <a class="reference internal" href="../_gen_src_r
 <li class="toctree-l1"><a class="reference internal" href="../dsp-digaree-module.html">DSP Digaree Module</a></li>
 </ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="../bedrock-modules.html">Bedrock Modules</a><ul>
-      <li>Previous: <a href="circle_buf.html" title="previous chapter">circle_buf</a></li>
-      <li>Next: <a href="complex_freq.html" title="next chapter">complex_freq</a></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2022, LBNL ATG.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
-      
-      |
-      <a href="../_sources/_gen_rst/circle_buf_serial.rst.txt"
-          rel="nofollow">Page source</a>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Bedrock</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../bedrock-modules.html">Bedrock Modules</a></li>
+      <li class="breadcrumb-item active">circle_buf_serial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_gen_rst/circle_buf_serial.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="circle-buf-serial">
+<span id="id1"></span><h1>circle_buf_serial<a class="headerlink" href="#circle-buf-serial" title="Permalink to this heading"></a></h1>
+<section id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this heading"></a></h2>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="pinout">
+<h2>Pinout<a class="headerlink" href="#pinout" title="Permalink to this heading"></a></h2>
+<figure class="align-default" id="fig-circle-buf-serial-block">
+<img alt="Schematic symbol" src="../_images/circle_buf_serial_block.png" />
+</figure>
+</section>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h2>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-number">Table 25 </span><span class="caption-text">circle_buf_serial_param_table</span><a class="headerlink" href="#id2" title="Permalink to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Min</p></th>
+<th class="head"><p>Max</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>n_chan</p></td>
+<td><p>?</p></td>
+<td><p>?</p></td>
+<td><p>12</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>lsb_mask</p></td>
+<td><p>?</p></td>
+<td><p>?</p></td>
+<td><p>0</p></td>
+<td><p>lsb_mask=0: chan_mask is LEFT-to-RIGHT; MSB=CH0</p></td>
+</tr>
+<tr class="row-even"><td><p>buf_dw</p></td>
+<td><p>?</p></td>
+<td><p>?</p></td>
+<td><p>16</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>buf_aw</p></td>
+<td><p>?</p></td>
+<td><p>?</p></td>
+<td><p>13</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>buf_stat_w</p></td>
+<td><p>?</p></td>
+<td><p>?</p></td>
+<td><p>16</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>buf_auto_flip</p></td>
+<td><p>?</p></td>
+<td><p>?</p></td>
+<td><p>1</p></td>
+<td><p>auto_flip=1: Double buffers will be flipped when</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="ports">
+<h2>Ports<a class="headerlink" href="#ports" title="Permalink to this heading"></a></h2>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-number">Table 26 </span><span class="caption-text">circle_buf_serial_port_table</span><a class="headerlink" href="#id3" title="Permalink to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Signal</p></th>
+<th class="head"><p>Direction</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>iclk</p></td>
+<td><p>Input</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>reset</p></td>
+<td><p>Input</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>sr_in[buf_dw-1:0]</p></td>
+<td><p>Input</p></td>
+<td><p>Conveyor belt carrying n_chan channels</p></td>
+</tr>
+<tr class="row-odd"><td><p>sr_stb</p></td>
+<td><p>Input</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>chan_mask[n_chan-1:0]</p></td>
+<td><p>Input</p></td>
+<td><p>Bitmask of channels to record. See lsb_mask parameter</p></td>
+</tr>
+<tr class="row-odd"><td><p>wave_gate</p></td>
+<td><p>Output</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>wave_dval</p></td>
+<td><p>Output</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>wave_data[buf_dw-1:0]</p></td>
+<td><p>Output</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>buf_sync</p></td>
+<td><p>Output</p></td>
+<td><p>single-cycle when buffer starts/ends</p></td>
+</tr>
+<tr class="row-odd"><td><p>buf_transferred</p></td>
+<td><p>Output</p></td>
+<td><p>single-cycle when a buffer has been</p></td>
+</tr>
+<tr class="row-even"><td><p>buf_stop</p></td>
+<td><p>Input</p></td>
+<td><p>single-cycle - interrupts cbuf writing</p></td>
+</tr>
+<tr class="row-odd"><td><p>buf_count[buf_stat_w-1:0]</p></td>
+<td><p>Output</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>buf_stat2[buf_aw-1:0]</p></td>
+<td><p>Output</p></td>
+<td><p>includes fault bit</p></td>
+</tr>
+<tr class="row-odd"><td><p>buf_stat[buf_stat_w-1:0]</p></td>
+<td><p>Output</p></td>
+<td><p>includes fault bit, and (if set) the last valid location</p></td>
+</tr>
+<tr class="row-even"><td><p>debug_stat[buf_aw+4:0]</p></td>
+<td><p>Output</p></td>
+<td><p>{stb_in, boundary, btest, wbank, rbank, wr_addr}</p></td>
+</tr>
+<tr class="row-odd"><td><p>oclk</p></td>
+<td><p>Input</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>stb_out</p></td>
+<td><p>Input</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>enable</p></td>
+<td><p>Output</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>read_addr[buf_aw-1:0]</p></td>
+<td><p>Input</p></td>
+<td><p>nominally 8192 locations</p></td>
+</tr>
+<tr class="row-odd"><td><p>d_out[buf_dw-1:0]</p></td>
+<td><p>Output</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="implementation-and-use">
+<h2>Implementation and use<a class="headerlink" href="#implementation-and-use" title="Permalink to this heading"></a></h2>
+<p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Software_portability">portable</a> <a class="reference external" href="https://en.wikipedia.org/wiki/Verilog">Verilog</a>
+implementation can be found in <a class="reference internal" href="../_gen_src_rst/circle_buf_serial_source.html#circle-buf-serial-source"><span class="std std-ref">circle_buf_serial Source File</span></a></p>
+</section>
+<section id="timing-diagram">
+<h2>Timing Diagram<a class="headerlink" href="#timing-diagram" title="Permalink to this heading"></a></h2>
+<p>A <a class="reference external" href="http://gtkwave.sourceforge.net/">GTKWave</a>-generated timing diagram is shown below:</p>
+<figure class="align-default" id="fig-circle-buf-serial-timing">
+<img alt="Timing diagram" src="../_images/circle_buf_serial_timing.png" />
+</figure>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="circle_buf.html" class="btn btn-neutral float-left" title="circle_buf" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="complex_freq.html" class="btn btn-neutral float-right" title="complex_freq" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
-    
+  <hr/>
 
-    
-  </body>
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, LBNL ATG.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>
