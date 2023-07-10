@@ -29,7 +29,7 @@ oscope_top_marble:
     paths:
       - projects/oscope/marble_family/oscope_top.bit
 
-.litex_trigger_capture:
+litex_trigger_capture:
   stage: synthesis
   before_script:
     - mkdir /litex_setup_dir && cd /litex_setup_dir
