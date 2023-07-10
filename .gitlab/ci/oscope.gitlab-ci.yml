@@ -37,6 +37,7 @@ litex_trigger_capture:
     - cd litex && git checkout 70c5be6fb8 && cd ..
     - cd liteeth && git checkout 8ba5cf06a6fb3979a6cde5ed46c10e91a053ba3f && cd ..
     - cd litedram && git checkout 2b0f806c96ff089bd8c51da8e223bfff23434ee1 && cd ..
+    - cd liteiclink && git checkout bba716a9c06cc0870d90b31c6aa3bd0982377fcb && cd ..
     - apt-get update && apt-get install -y ninja-build && pip3 install meson==0.64.1 && python3 litex_setup.py install
     - cd /builds/hdl-libraries/bedrock/projects/trigger_capture
   script:
