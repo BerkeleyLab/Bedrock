@@ -2,22 +2,23 @@
 This script decodify the iicCommandTable.dat used by Marble i2c_chunk.v (i2cBridge) printing a report
 """
 
-import argparse
 from os.path import isfile
 from datetime import datetime
 
-#import assem
 
 # ========================= Platform-Specific Overrides =======================
 def platform_write(devaddr, nbytes, cmd_table):
     return None, 0
 
+
 def platform_read(devaddr, nbytes, cmd_table):
     return None, 0
+
 
 def platform_write_rpt(devaddr, memaddr, nbytes, cmd_table):
     return None, 0
 # =============================================================================
+
 
 def decode(argv):
     if len(argv) > 1:
@@ -27,7 +28,8 @@ def decode(argv):
         return
     cmd_table = load_file(filename)
     pa = 0
-    if not cmd_table: return
+    if not cmd_table:
+        return
     else:
         report_file = f"File {cmd_table.name} - {datetime.now()}\n---- Start of report ----\n"
         report_file += "Prog Address : Cmd Byte : [op_code n_code] -> Description and data\n"
@@ -40,14 +42,14 @@ def decode(argv):
         match op_code:
             case 0:  # special
                 if n_code == 0:
-                    report_file += f"STOP (sleep)\n"
+                    report_file += "STOP (sleep)\n"
                 elif n_code == 2:
-                    report_file += f"result buffer flip\n"
+                    report_file += "Result buffer flip\n"
                 elif n_code == 3:
-                    report_file += f"trigger logic analyzer\n"
+                    report_file += "Trigger logic analyzer\n"
                 elif n_code >= 16:
                     cfg = n_code & 0xf
-                    report_file += f"hw_config 0b{cfg:04b}\n"
+                    report_file += f"Set hw_config = 0b{cfg:04b}\n"
 
             case 1:  # read
                 dlen = n_code-1
@@ -58,10 +60,10 @@ def decode(argv):
                     report_file += s + '\n'
                     pa += inc
                 else:
-                    report_file += f"read  - dev_addr: 0x{devaddr:02x} - data number: {dlen}\n"
+                    report_file += f"Read  - dev_addr: 0x{devaddr:02x} - data number: {dlen}\n"
 
             case 2:  # write
-                #n_code = 1 + addr_bytes + len(data)
+                # n_code = 1 + addr_bytes + len(data)
                 nbytes = n_code-1
                 devaddr = int(next(cmd_table)[:2], 16)
                 pa += 1
@@ -70,8 +72,7 @@ def decode(argv):
                     report_file += s + '\n'
                     pa += inc
                 else:
-                    report_file += f"write - dev_addr:" + \
-                                    f" 0x{devaddr:02x} - mem_addr+data:"
+                    report_file += f"Write - dev_addr: 0x{devaddr:02x} - mem_addr+data:"
                     for j in range(nbytes):
                         data = int(next(cmd_table)[:2], 16)
                         pa += 1
@@ -92,8 +93,8 @@ def decode(argv):
                     report_file += s + '\n'
                     pa += inc
                 else:
-                    report_file += f"write - dev_addr:" + \
-                                    f" 0x{devaddr:02x} - mem_addr: 0x{memaddr:04x} - START - data:"
+                    report_file += f"Write - dev_addr: 0x{devaddr:02x} - mem_addr:" + \
+                        f" 0x{memaddr:04x} - START - data:"
                     for j in range(n_code-2):
                         data = int(next(cmd_table)[:2], 16)
                         pa += 1
@@ -102,22 +103,21 @@ def decode(argv):
 
             case 4:  # pause (ticks are 8 bit times)
                 if n_code == 0:
-                    report_file += f"pad\n"
+                    report_file += "pad\n"
                 else:
-                    report_file += f"short pause of {n_code} cycles\n"
+                    report_file += f"Short pause of {n_code} cycles\n"
 
             case 5:  # pause (ticks are 256 bit times)
-                report_file += f"long pause of {n_code*32} cycles\n"
+                report_file += f"Long pause of {n_code*32} cycles\n"
 
             case 6:  # jump
                 jump_addr = n_code*32
-                report_file += f"jump +{n_code} to address 0x{jump_addr:03x}" + \
-                                f" ({hex(n_code)}) lines\n"
+                report_file += f"Jump to address 0x{jump_addr:03x}\n"
 
             case 7:  # set result address
                 result_address = 0x800 + n_code*32
-                report_file += f"set result address {n_code} to" + \
-                                f" address 0x{result_address:03x} ({hex(n_code)})\n"
+                report_file += f"Set result address to 0x{result_address:03x}" + \
+                    f" (0x{n_code:02x})\n"
         pa += 1
 
     report_file += "---- End of report ----\n"
@@ -126,7 +126,7 @@ def decode(argv):
 
 
 def load_file(file_path=None):
-    if file_path == None:
+    if file_path is None:
         return None
     binary = True
     if isfile(file_path):
@@ -144,6 +144,7 @@ def load_file(file_path=None):
         print(f'File "{file_path}" not found')
         return None
 
+
 def is_plaintext(file):
     """Returns True if file with filename 'file' is plaintext (ASCII/utf-8), False otherwise."""
     _ascii = True
@@ -152,7 +153,7 @@ def is_plaintext(file):
         while line:
             try:
                 line = fd.read(100)
-            except UnicodeDecodeError as e:
+            except UnicodeDecodeError:
                 _ascii = False
                 break
     return _ascii

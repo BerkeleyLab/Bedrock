@@ -115,7 +115,11 @@ class i2c_assem:
         pad_n = 32*jump_n - length
         if pad_n < 0:
             raise I2C_Assembler_Exception("Oops!  negative pad %d" % pad_n)
-        return pad_n*[cls.o_zz]
+        return pad_n*[cls.o_p1]  # Pause for zero ticks
+
+    @classmethod
+    def stop(cls):
+        return [cls.o_zz]
 
 
 class I2CAssembler(i2c_assem):
@@ -141,6 +145,11 @@ class I2CAssembler(i2c_assem):
         """Get current program counter value"""
         return len(self._program)
 
+    def _check_pc(self):
+        if len(self._program) > self._ADDRESS_MAX-1:
+            raise I2C_Assembler_Exception("Program size exceeded")
+        return
+
     def write(self, dadr, madr, data, addr_bytes=1):
         """Add an I2C write transaction to the program.
         Params:
@@ -151,6 +160,7 @@ class I2CAssembler(i2c_assem):
         Returns: None
         """
         self._program += super().write(dadr, madr, data, addr_bytes=1)
+        self._check_pc()
 
     def read(self, dadr, madr, dlen, addr_bytes=1, reg_name = None):
         """Add an I2C read transaction to the program.
@@ -163,6 +173,7 @@ class I2CAssembler(i2c_assem):
         Returns: Starting memory offset of result
         """
         self._program += super().read(dadr, madr, dlen, addr_bytes=1)
+        self._check_pc()
         if reg_name is None:
             reg_name = self._mkRegName(dadr, madr, self._rc)
         self._memdict[reg_name] = (self._rc, dlen)
@@ -173,6 +184,7 @@ class I2CAssembler(i2c_assem):
         """Add a pause of 'n' ticks to the program
         See README.md for discussion of tick length."""
         self._program += super().pause(n)
+        self._check_pc()
         return
 
     def jump(self, n):
@@ -189,6 +201,7 @@ class I2CAssembler(i2c_assem):
             raise I2C_Assembler_Exception("Jump would result in 'jump here' instruction" +
                                           "(a jump to the program counter value of the jump instruction).")
         self._program += super().jump(n)
+        self._check_pc()
         return
 
     def jump_address(self, address):
@@ -251,17 +264,20 @@ class I2CAssembler(i2c_assem):
         Sets results address to (0x800 + n*32)."""
         n = int(n)
         self._program += super().set_resx(n)
+        self._check_pc()
         self._rc = 32*n
         return
 
     def buffer_flip(self):
         """Add a buffer flip instruction to the program."""
         self._program += super().buffer_flip()
+        self._check_pc()
         return
 
     def trig_analyz(self):
         """Add an analyzer trigger instruction to the program."""
         self._program += super().trig_analyz()
+        self._check_pc()
         return
 
     def hw_config(self, n):
@@ -269,6 +285,7 @@ class I2CAssembler(i2c_assem):
         Params:
             int n : 4-bit mask of hw_config outputs of module i2c_chunk"""
         self._program += super().hw_config(n)
+        self._check_pc()
         return
 
     def pad(self, n=None):
@@ -289,6 +306,7 @@ class I2CAssembler(i2c_assem):
         elif (n > self._INDEX_MAX):
             raise I2C_Assembler_Exception(f"Program counter index {n} exceeds maximum {self._INDEX_MAX}")
         self._program += super().pad(n, self._pc())
+        self._check_pc()
         return self._pc()//32
 
     def pad_address(self, address=None):
