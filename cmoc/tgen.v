@@ -56,14 +56,14 @@ module tgen #(
 	(* external *)
 	input [31:0] delay_pc_XXX, // external
 	(* external *)
-	output [9:0] delay_pc_XXX_addr, // external
+	output [13:0] delay_pc_XXX_addr, // external
 	// Controlled bus
 	output [31:0] lbo_data,
 	output lbo_write,
 	output [aw-1:0] lbo_addr
 );
 
-localparam pcw=10;  // Set delay_pc_XXX_addr width above to pcw
+localparam pcw=14;  // Set delay_pc_XXX_addr width above to pcw
 assign delay_pc_XXX_addr = 0;
 // Counters
 reg [pcw-1:0] pc=0;
