@@ -51,15 +51,27 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 # and hope to get back to "apt-get install yosys" then.
 # Note that the standard yosys build process used here requires
 # network access to download abc from https://github.com/berkeley-abc/abc.
-RUN git clone https://github.com/cliffordwolf/yosys.git && \
+RUN apt-get update && \
+	apt-get install -y \
+        clang \
+        libreadline-dev \
+        tcl-dev \
+        libffi-dev \
+        graphviz \
+	    xdot \
+        libboost-system-dev \
+        libboost-python-dev \
+        libboost-filesystem-dev \
+        zlib1g-dev && \
+	rm -rf /var/lib/apt/lists/* && \
+    git clone https://github.com/cliffordwolf/yosys.git && \
 	cd yosys && \
 	git checkout 40e35993af6ecb6207f15cc176455ff8d66bcc69 && \
-	apt-get update && \
-	apt-get install -y clang libreadline-dev tcl-dev libffi-dev graphviz \
-	xdot libboost-system-dev libboost-python-dev libboost-filesystem-dev zlib1g-dev && \
-	make config-clang && make -j4 && make install && \
-	cd .. && rm -rf yosys && \
-	rm -rf /var/lib/apt/lists/*
+	make config-clang && \
+    make -j4 && \
+    make install && \
+	cd .. && \
+    rm -rf yosys
 
 # Because we are running inside docker, installing
 # python packages system wide should be ok
@@ -74,12 +86,12 @@ RUN pip3 install --break-system-packages \
 # libz-dev required for Verilator FST support
 RUN apt-get update && \
 	apt-get install -y \
-	libfl2 \
-	libfl-dev \
-	libz-dev \
-	zlib1g \
-	zlib1g-dev \
-	autoconf && \
+	    libfl2 \
+	    libfl-dev \
+	    libz-dev \
+	    zlib1g \
+	    zlib1g-dev \
+	    autoconf && \
 	rm -rf /var/lib/apt/lists/* && \
 	git clone https://github.com/verilator/verilator && \
 	cd verilator && \
@@ -95,11 +107,26 @@ RUN apt-get update && \
 # SymbiYosys formal verification tool + Yices 2 solver (`sby` command)
 RUN apt-get update && \
 	apt-get install -y \
-		build-essential clang bison flex libreadline-dev \
-		tcl-dev libffi-dev git graphviz   \
-		xdot pkg-config python python3 libftdi-dev gperf \
-		libboost-program-options-dev autoconf libgmp-dev \
+		build-essential \
+        clang \
+        bison \
+        flex \
+        libreadline-dev \
+		tcl-dev \
+        libffi-dev \
+        git \
+        graphviz \
+		xdot \
+        pkg-config \
+        python \
+        python3 \
+        libftdi-dev \
+        gperf \
+		libboost-program-options-dev \
+        autoconf \
+        libgmp-dev \
 		cmake && \
+	rm -rf /var/lib/apt/lists/* && \
 	git clone https://github.com/YosysHQ/SymbiYosys.git SymbiYosys && \
 	cd SymbiYosys && \
 	git checkout 091222b87febb10fad87fcbe98a57599a54c5fd3 && \
@@ -110,5 +137,4 @@ RUN apt-get update && \
 	autoconf && \
 	./configure && \
 	make -j$(nproc) && \
-	make install && \
-	rm -rf /var/lib/apt/lists/*
+	make install
