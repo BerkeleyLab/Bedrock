@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim as testing_base_bullseye
+FROM debian:bookworm-slim as testing_base_bookworm
 
 # Vivado needs libtinfo5, at least for Artix?
 RUN apt-get update && \
