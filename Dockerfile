@@ -19,6 +19,9 @@ RUN apt-get update && \
     python3-numpy \
     python3-scipy \
     python3-matplotlib \
+    python3-yaml \
+    python3-serial \
+    python3-setuptools-scm \
     gcc-riscv64-unknown-elf \
     picolibc-riscv64-unknown-elf \
     cmake \
@@ -76,10 +79,7 @@ RUN apt-get update && \
 # Because we are running inside docker, installing
 # python packages system wide should be ok
 RUN pip3 install --break-system-packages \
-    pyyaml==5.1.2 \
-    nmigen==0.2 \
-    pyserial==3.4 \
-    setuptools-scm==7.1.0
+    nmigen==0.2
 
 # we need a version of verilator with more than 20000, issue #1574,
 # any version > v4.110 should have this limit increased to 40000.
