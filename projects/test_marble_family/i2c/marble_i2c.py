@@ -6,14 +6,23 @@ _assem_warn = """INFO: Cannot import module 'assem'; no I2C program assembly ava
 Must set PYTHONPATH=path/to/bedrock/peripheral_drivers/i2cbridge to use this functionality
 """
 import inspect
+import sys
+
+_assem_path = "../../../peripheral_drivers/i2cbridge"
 _assem_available = True
+
+
 try:
-    from i2cbridge import assem
+    import assem
 except ImportError:
     try:
-        import assem
+        from i2cbridge import assem
     except ImportError:
-        _assem_available = False
+        try:
+            sys.path.append(_assem_path)
+            import assem
+        except ImportError:
+            _assem_available = False
 
 
 class MarbleI2C():
@@ -72,6 +81,7 @@ class MarbleI2C():
     # P0_6  QSFP1_RST       Out Low-true (0 = reset)
     # P0_7  QSFP1_MOD_SEL   Out Low-true (0 = module selected)
     u34_port0_dir = 0b00110111
+    u34_port0_out = 0b01000000  # No RST; low-power mode
 
     # Pin   Net             Dir Note
     # ------------------------------
@@ -84,6 +94,7 @@ class MarbleI2C():
     # P1_6  QSFP2_RST       Out Low-true (0 = reset)
     # P1_7  QSFP2_MOD_SEL   Out Low-true (0 = module selected)
     u34_port1_dir = 0b00110111
+    u34_port1_out = 0b01000000  # No RST; low-power mode
 
     # U39 (PCAL9555) I2C GPIO expander
     # Pin   Net             Dir
@@ -97,6 +108,7 @@ class MarbleI2C():
     # P0_6  THERM           In
     # P0_7  CFG_WP_B        In
     u39_port0_dir = 0b11111110
+    u39_port0_out = 0b00000001  # Enable Si570
 
     # Pin   Net             Dir
     # -------------------------
@@ -109,6 +121,7 @@ class MarbleI2C():
     # P1_6  (unused)        In
     # P1_7  CLKMUX_RST      Out
     u39_port1_dir = 0b01110011
+    u39_port1_out = 0b00000000  # No clkmux rst, LEDs off
 
     # U2 (ADDN4600) MGT clock multiplexer
     u2_xpt_config = 0x40  # XPT Configuration register
@@ -179,6 +192,22 @@ class MarbleI2C():
             mux_name, mux_addr = mux
             muxes.append((mux_name, mux_addr))
         return muxes
+
+    @classmethod
+    def get_mux_dict(cls, mux_name=None):
+        """Return a dict of representing the routing of bus mux 'mux_name'.
+        Params:
+            string mux_name : Leave this as None for Marble since there's only one mux.
+        Returns dict of entries in the format:
+            { int channel : (string branch_name, dict branch_tree) }
+        """
+        for mux, tree in cls._i2c_map.items():
+            _mux_name, mux_addr = mux
+            if mux_name is None:
+                return tree
+            if mux_name == _mux_name:
+                return tree
+        return {}
 
     def get_ics(self):
         """Returns a list of tuples (name_str, i2c_address_int) for all ICs in the I2C map."""
@@ -253,7 +282,7 @@ class MarbleI2C():
                 return ic_addr
         return None
 
-    def bsp_configure(self):
+    def bsp_config(self):
         """Initial configuration of Marble board.  Optionally override based on
         application."""
         self.U34_configure()
@@ -335,7 +364,9 @@ class MarbleI2C():
     def U34_configure(self):
         """Configure GPIO expander U34 with proper input/output settings on each pin
         of both ports."""
-        return self.write("U34", 6, [self.u34_port0_dir, self.u34_port1_dir])  # U34 Configuration registers
+        self.write("U34", 2, [self.u34_port0_out, self.u34_port1_out])  # U34 Output port registers
+        self.write("U34", 6, [self.u34_port0_dir, self.u34_port1_dir])  # U34 Configuration registers
+        return
 
     def U34_set_data(self, datamask):
         """Set pin state of outputs on GPIO expander U34 (PCAL9555).
@@ -357,19 +388,20 @@ class MarbleI2C():
         data0 = datamask[0] & p0_mask
         data1 = datamask[1] & p1_mask
         self.write("U34", 2, [data0, data1])  # U34 data registers
-        self.write("U34", 6, [self.u34_port0_dir, self.u34_port1_dir])  # U34 Configuration registers
         return
 
     def U34_read_data(self):
         """Add a read instruction to the I2C program to read the state of GPIO pins on
         GPIO expander U34 (PCAL9555).  Shows up in memory map as 'U34_PORT_DATA'"""
-        return self.read("U34", 2, 2, reg_name="U34_PORT_DATA")
+        return self.read("U34", 0, 2, reg_name="U34_PORT_DATA")
 
     # ======================= U39 Helper Functions ============================
     def U39_configure(self):
         """Configure GPIO expander U39 with proper input/output settings on each pin
         of both ports."""
-        return self.write("U39", 6, [self.u39_port0_dir, self.u39_port1_dir])  # U39 Configuration registers
+        self.write("U39", 2, [self.u39_port0_out, self.u39_port1_out])  # U39 Output port registers
+        self.write("U39", 6, [self.u39_port0_dir, self.u39_port1_dir])  # U39 Configuration registers
+        return
 
     def U39_set_data(self, datamask):
         """Set pin state of outputs on GPIO expander U39 (PCAL9555).
@@ -396,7 +428,7 @@ class MarbleI2C():
     def U39_read_data(self):
         """Add a read instruction to the I2C program to read the state of GPIO pins on
         GPIO expander U39 (PCAL9555).  Shows up in memory map as 'U39_PORT_DATA'"""
-        return self.read("U39", 2, 2, reg_name="U39_PORT_DATA")
+        return self.read("U39", 0, 2, reg_name="U39_PORT_DATA")
 
     # ================ INA219 (U17, U32, U57) Helper Functions ================
     def INA219_read_bus_voltage(self, ic_name, reg_name=None):

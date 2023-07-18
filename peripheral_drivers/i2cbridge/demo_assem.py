@@ -5,7 +5,7 @@
 import assem
 
 
-def ram_test_prog_new(argv):
+def build_prog(argv):
     # ======= Program Instructions =======
     sadr = 0x20
     s = assem.I2CAssembler()
@@ -34,4 +34,4 @@ def ram_test_prog_new(argv):
 
 if __name__ == "__main__":
     import sys
-    ram_test_prog_new(sys.argv)
+    build_prog(sys.argv)
