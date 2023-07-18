@@ -118,7 +118,6 @@ RUN apt-get update && \
         graphviz \
         xdot \
         pkg-config \
-        python \
         python3 \
         libftdi-dev \
         gperf \
