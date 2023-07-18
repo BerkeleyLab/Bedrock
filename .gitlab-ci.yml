@@ -7,7 +7,7 @@ stages:
 variables:
   XILINX_VIVADO: /non-free/Xilinx/Vivado/2020.2
   CI_REGISTRY: mohs.dhcp.lbl.gov
-  CONTAINER_IMAGE: $CI_REGISTRY/testing_base_bullseye
+  CONTAINER_IMAGE: $CI_REGISTRY/testing_base_bookworm
   # CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
