@@ -38,7 +38,7 @@ RUN apt-get update && \
 # vhd2vl
 RUN git clone https://github.com/ldoolitt/vhd2vl && \
     cd vhd2vl && \
-    git checkout 37e3143395ce4e7d2f2e301e12a538caf52b983c && \
+    git checkout bbe3198c435a4a6325bdd08b7b43a47b6dacf5de && \
     make && \
     install src/vhd2vl /usr/local/bin && \
     cd .. && \
