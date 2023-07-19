@@ -12,22 +12,23 @@ except ImportError:
 # QSFP Initial read (static) registers
 qsfp_init_d = {
     # Address : (size, fmt_string)
-    148 : (16, "QSFP{}_VENDOR_NAME"),
-    168 : (16, "QSFP{}_PART_NAME"),
-    184 : (2, "QSFP{}_REVISION_CODE"),
-    186 : (2, "QSFP{}_WAVELENGTH"),
-    196 : (16, "QSFP{}_SER_NUM"),
-    212 : (8, "QSFP{}_DATE_CODE")
-    }
+    148: (16, "QSFP{}_VENDOR_NAME"),
+    168: (16, "QSFP{}_PART_NAME"),
+    184: (2, "QSFP{}_REVISION_CODE"),
+    186: (2, "QSFP{}_WAVELENGTH"),
+    196: (16, "QSFP{}_SER_NUM"),
+    212: (8, "QSFP{}_DATE_CODE")
+}
 
 # QSFP Polling read (dynamic) registers
 qsfp_poll_d = {
-    2  : (1, "QSFP{}_MODULE_STATUS"),
-    22 : (2, "QSFP{}_TEMPERATURE"),
-    26 : (2, "QSFP{}_VSUPPLY"),
-    34 : (8, "QSFP{}_RXPOWER"),     # 4 channels, 2 bytes each
+    2:   (1, "QSFP{}_MODULE_STATUS"),
+    22:  (2, "QSFP{}_TEMPERATURE"),
+    26:  (2, "QSFP{}_VSUPPLY"),
+    34:  (8, "QSFP{}_RXPOWER"),     # 4 channels, 2 bytes each
     128: (2, "QSFP{}_IDENTIFIER"),  # identifier and extended identifier
-    }
+}
+
 
 def _int(x):
     try:
@@ -44,18 +45,16 @@ def _int(x):
         pass
     return None
 
+
 class MarbleI2CProg(marble_i2c.MarbleI2C):
     def __init__(self, i2c_assembler=None):
         super().__init__(i2c_assembler)
 
-
     def qsfp_init(self, qsfp_n=0):
         return self.qsfp_read_many(qsfp_n, qsfp_init_d)
 
-
     def qsfp_poll(self, qsfp_n=0):
         return self.qsfp_read_many(qsfp_n, qsfp_poll_d)
-
 
     def busmux_reset(self):
         """This requires hooking up ~hw_config[0] to TWI_RST (low-true) in gateware."""
@@ -67,7 +66,6 @@ class MarbleI2CProg(marble_i2c.MarbleI2C):
         self._s.hw_config(0)  # turn off reset
         self._s.pause(10)
         return
-
 
     def bsp_config(self):
         """Initial platform configuration."""
@@ -122,6 +120,7 @@ def build_prog(argv):
     else:
         m.write_program()
     return
+
 
 if __name__ == "__main__":
     build_prog(sys.argv)
