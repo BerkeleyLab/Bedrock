@@ -1,6 +1,6 @@
 # iserdes, xadc disabled as they require the xilinx unisims library on CI
 all: clean
-#   $(MAKE) -C ./badger_loopback
+	$(MAKE) -C ./badger_loopback
 	$(MAKE) -C ./bootLoad
 	$(MAKE) -C ./fmc150
 	$(MAKE) -C ./gpio
