@@ -253,9 +253,6 @@ ssb_out_tb: cordicg_b22.v
 cordic_mux_tb: cordicg_b22.v
 fdbk_core_tb: cordicg_b22.v
 
-images::
-	if [ -d images ]; then $(MAKE) -C images || exit 1; fi
-
 src_rst: gen_dir $(SRC_RST)
 
 rst: gen_dir $(RST)
