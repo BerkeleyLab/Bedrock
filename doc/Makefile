@@ -226,6 +226,7 @@ iirFilter_tb: ../dsp/saturateMath.v
 rot_dds_auto: cordicg_b22.v
 mon_12_auto: cordicg_b22.v
 ssb_out_auto: cordicg_b22.v
+ssb_out_tb: cordicg_b22.v
 cordic_mux_auto: cordicg_b22.v
 fdbk_core_auto: cordicg_b22.v
 
