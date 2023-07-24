@@ -8,7 +8,7 @@
 void badger_tx(uint8_t *data, unsigned len, unsigned start_addr) {
     // Wait for previous TX to finish
     if (GET_SFR1(BASE_BADGER_SFR, 0, BIT_BADGER_TX_START)) {
-        while(!GET_SFR1(BASE_BADGER_SFR, 0, BIT_BADGER_TX_DONE));
+        while(!GET_SFR1(BASE_BADGER_SFR, 0, BIT_BADGER_TX_DONE)) {};
         SET_SFR1(BASE_BADGER_SFR, 0, BIT_BADGER_TX_START, 0);
     }
     // start_addr refers to an offset to BASE_BADGER_TX in [16 bit words]
@@ -35,7 +35,7 @@ unsigned badger_rx_len(void) {
 
 unsigned badger_block_rx(void) {
     // wait for packet to be received into the `invisible` half of the buffer
-    while(!GET_SFR1(BASE_BADGER_SFR, 0, BIT_BADGER_RX_NEW_DATA));
+    while(!GET_SFR1(BASE_BADGER_SFR, 0, BIT_BADGER_RX_NEW_DATA)) {};
     // swap buffers, make new data visible
     SET_SFR1(BASE_BADGER_SFR, 0, BIT_BADGER_RX_BUF_SWAP, 0);
     return badger_rx_len();

@@ -23,8 +23,9 @@ initRegs:
     # x0 is always zero
     # x1 is the return address (ra)
     # x2 is stack pointer (sp)
+    # x3 is global pointer (gp)
+    # x4 is thread pointer (tp)
     addi x3, zero, 0
-    addi x4, zero, 0
     addi x5, zero, 0
     addi x6, zero, 0
     addi x7, zero, 0
@@ -52,6 +53,7 @@ initRegs:
     addi x29, zero, 0
     addi x30, zero, 0
     addi x31, zero, 0
+    la  tp, __tls_base        # "it's complicated"
     li  sp, BLOCK_RAM_SIZE    # Set stack pointer to last byte in memory + 1 of user app
     addi sp,sp,-16
     sw zero,0(sp)
