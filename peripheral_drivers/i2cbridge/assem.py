@@ -529,7 +529,7 @@ class I2CAssembler(i2c_assem):
         """Write program contents to file descriptor 'fd'."""
         self.check_program()
         for b in self._program:
-            fd.write(f"{b:0x}\n")
+            fd.write(f"{b:02x}\n")
         return
 
     def write_reg_map(self, fd=sys.stdout, offset=0, style='v', filename=None):
