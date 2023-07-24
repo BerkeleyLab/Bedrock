@@ -170,7 +170,7 @@ i.e., where execution of b2d_tb ends with $stop() on failure,
 but $finish() on success.
 In the other case, fib_tb creates an output file that needs to match fib.gold.</p>
 <p>Normally, the make program displays each command before it is executed.
-This is normally considered a good thing, because it immediately isolates the
+This is considered a good thing, because it helps isolate the
 cause of any failures that occur.
 Referring to the fib_check rule above, the second command</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="n">PASS</span>
@@ -291,7 +291,7 @@ that gets increasingly complicated as the number of files involved climbs.
 One approach we use is based on combining the -y and -M options to iverilog.
 The -y flag will cause iverilog to
 search directories for files that match unresolved module names.
-The -M flag emits a list of files used, which (with some trickery)
+The -M flag emits a list of files used, which
 can be converted to a dependency list for make.</p>
 </section>
 <section id="one-more-trick">
@@ -321,9 +321,9 @@ Two in particular attempt to address the needs of an HDL environment.</p>
 <li><p><a class="reference external" href="https://pypi.org/project/fusesoc/">FuseSoC</a></p></li>
 </ul>
 <p>Our experiments with these tools have generally been frustrating.
-We have used the flexibility of make to support many combinations
-of target hardware and application code, as well as generated code
-and self-tests.  These ideas are not normally priorities of these
+We use the flexibility of make to support many combinations
+of target hardware and application code, as well as manage generated code
+and self-tests.  Such capabilities are not priorities of these
 more specialized tools.</p>
 </section>
 <section id="cross-check">
@@ -353,7 +353,7 @@ following output:</p>
 </pre></div>
 </div>
 <p>The three Makefiles above are all equivalent, in the sense that they produce
-the same output (at least when whitespace is ignored).</p>
+the same output (when whitespace is ignored).</p>
 </section>
 </section>
 </section>
