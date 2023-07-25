@@ -112,7 +112,7 @@ always @(posedge clk) begin
    if (ctrace_start) arm <= 1;
 end
 
-generate if (MMC_CTRACE) begin
+generate if (MMC_CTRACE) begin : mmc_ctrace
 	localparam ctrace_aw=11;
 	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
 	ctrace #(.dw(4), .tw(12), .aw(ctrace_aw)) mmc_ctrace(
@@ -120,7 +120,7 @@ generate if (MMC_CTRACE) begin
 		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
 		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
 	);
-end else begin
+end else begin : no_mmc_trace
 	assign ctrace_out=0;
 	assign ctrace_running=0;
 end endgenerate
@@ -183,7 +183,7 @@ reg [3:0] twi_ctl;
 initial twi_ctl = (initial_twi_file != "") ? 4'b0010 : 4'b0000;
 
 localparam scl_act_high = 3;  // cycles of active pull-up following rising edge
-generate if (USE_I2CBRIDGE) begin
+generate if (USE_I2CBRIDGE) begin : i2cb
 	wire twi_run_stat, twi_analyze_run, twi_analyze_armed, twi_updated, twi_err;
 	wire twi_freeze = twi_ctl[0];
 	wire twi_run_cmd = twi_ctl[1];
@@ -234,7 +234,7 @@ generate if (USE_I2CBRIDGE) begin
 	assign twi_sda_sense = twi_sda[twi_bus_sel];
 	assign twi_scl_sense = twi_scl[twi_bus_sel];
 	assign twi_rst = hw_config[0] ? 1'b0 : 1'bz;  // three-state
-end else begin
+end else begin : no_i2cb
 	assign twi_dout=0;
 	assign twi_status=0;
 	assign twi_rst = 1'bz;
