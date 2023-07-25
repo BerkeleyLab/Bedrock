@@ -85,6 +85,7 @@ module marble_base (
 parameter USE_I2CBRIDGE = 1;
 parameter MMC_CTRACE = 1;
 parameter misc_config_default = 0;
+parameter default_enable_rx = 1;
 
 `ifdef VERILATOR
 parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4};  // 192.168.7.4
@@ -102,6 +103,61 @@ parameter [47:0] mac = 48'h12555500032d;
 wire tx_clk = vgmii_tx_clk;
 wire rx_clk = vgmii_rx_clk;
 
+wire [10:0] mb_addr;
+wire mb_wen, mb_ren, mb_strobe;
+wire enable_rx;
+wire ip_valid;
+wire [31:0] ip_mmc;
+wire mac_valid;
+wire [47:0] mac_mmc;
+wire mailbox_match;
+wire [31:0] mmc_gitid;
+wire mmc_gitid_valid;
+wire lb_mbox_sel = lb_addr[23:20] == 2;
+wire lb_mbox_wen = lb_mbox_sel & lb_write;
+wire lb_control_strobe;
+wire [7:0] mbox_out2;
+wire config_s, config_p;
+wire [7:0] config_a, config_d;
+
+mailbox #(
+  .HASH(32'h44332211), // TODO
+  .DEFAULT_ENABLE_RX(default_enable_rx)
+  ) mailbox_i (
+  .clk(tx_clk), // input
+  .lb_addr(lb_addr[10:0]), // input [10:0]
+  .lb_din(lb_data_out[7:0]), // input [7:0]
+  .lb_dout(mbox_out2), // output [7:0]
+  .lb_write(lb_wen), // input
+  .lb_control_strobe(lb_control_strobe), // input
+  .sck(FPGA_SCK), // input
+  .ncs(FPGA_SSEL), // input
+  .sdi(FPGA_MOSI), // input
+  .sdo(FPGA_MISO), // output
+  .mb_addr(mb_addr),  // output [10:0]
+  .mb_wen(mb_wen), // output
+  .mb_ren(mb_ren), // output
+  .mb_strobe(mb_strobe), // output
+  .pno_a(3'b0), // input [2:0]
+  .pno_d(), // output [15:0]
+`ifdef MAILBOX_CONFIG_PORTS
+  .config_s(config_s), // output
+  .config_p(config_p), // output
+  .config_a(config_a), // output [7:0]
+  .config_d(config_d), // output [7:0]
+`endif
+  .enable_rx(enable_rx), // output
+  .ip_valid(ip_valid), // output
+  .ip(ip_mmc), // output [31:0]
+  .mac_valid(mac_valid), // output
+  .mac(mac_mmc), // output [47:0]
+  .match(mailbox_match), // output
+  .mmc_gitid(mmc_gitid), // output [31:0]
+  .mmc_gitid_valid(mmc_gitid_valid), // output
+  .spi_pins_debug(spi_pins_debug) // {MISO, din, sclk_d1, csb_d1};
+);
+
+/*
 // Configuration port
 wire config_clk = tx_clk;
 wire config_w, config_r;
@@ -124,7 +180,6 @@ spi_gate spi(
 //   0 0 1 1 a a a a d d d d d d d d  ->  set UDP port config[a] = D
 //   0 1 0 0 a a a a d d d d d d d d  ->  mailbox read
 //   0 1 0 1 a a a a d d d d d d d d  ->  mailbox write
-parameter default_enable_rx = 1;
 reg enable_rx=default_enable_rx;  // special case initialization
 reg [6:0] mbox_page=0;
 always @(posedge config_clk) begin
@@ -167,6 +222,7 @@ fake_dpram #(.aw(11), .dw(8)) xmem (
 	.error(error)
 );
 assign spi_return = mbox_out1;  // data sent back to MMC vis SPI
+*/
 
 // Debugging hooks
 wire ibadge_stb, obadge_stb;
