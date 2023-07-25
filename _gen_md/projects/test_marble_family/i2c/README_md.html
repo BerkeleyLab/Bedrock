@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bmb7_cu README &mdash; Bedrock  documentation</title>
+  <title>i2c README &mdash; Bedrock  documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -19,8 +19,8 @@
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
-    <link rel="next" title="marble_family README" href="../marble_family/README_md.html" />
-    <link rel="prev" title="comms_top README" href="../../comms_top/README_md.html" /> 
+    <link rel="next" title="rtsim README" href="../../../rtsim/README_md.html" />
+    <link rel="prev" title="test_marble_family README" href="../README_md.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -62,13 +62,13 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../peripheral_drivers/idelay_scanner/README_md.html">idelay_scanner README</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../common/README_md.html">common README</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../comms_top/README_md.html">comms_top README</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">bmb7_cu README</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#todo">TODO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../oscope/bmb7_cu/README_md.html">bmb7_cu README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../oscope/marble_family/README_md.html">marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../README_md.html">test_marble_family README</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">i2c README</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#marble-platform-support-for-i2cbridge-programming">Marble Platform Support for I2CBridge Programming</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../marble_family/README_md.html">marble_family README</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../test_marble_family/README_md.html">test_marble_family README</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../test_marble_family/i2c/README_md.html">i2c README</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../rtsim/README_md.html">rtsim README</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../serial_io/chitchat/README_md.html">chitchat README</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../serial_io/chitchat/chitchat_txrx_wrap_md.html">chitchat chitchat_txrx_wrap</a></li>
@@ -100,9 +100,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../../../general-docs.html">General Docs</a></li>
-      <li class="breadcrumb-item active">bmb7_cu README</li>
+      <li class="breadcrumb-item active">i2c README</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../../_sources/_gen_md/projects/oscope/bmb7_cu/README_md.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../../_sources/_gen_md/projects/test_marble_family/i2c/README_md.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -115,13 +115,77 @@
 <p>This documentation is a work in progress.
 Expect to see errors and unfinished things.</p>
 </div>
-<section id="bmb7-cu-readme">
-<span id="readme"></span><h1>bmb7_cu README<a class="headerlink" href="#bmb7-cu-readme" title="Permalink to this heading"></a></h1>
-<section id="todo">
-<h2>TODO<a class="headerlink" href="#todo" title="Permalink to this heading"></a></h2>
-<ol class="arabic simple">
-<li><p>[x] Reconcile read_regmap.py with the one in ../../../build-tools/.</p></li>
-</ol>
+<section id="i2c-readme">
+<span id="readme"></span><h1>i2c README<a class="headerlink" href="#i2c-readme" title="Permalink to this heading"></a></h1>
+<section id="marble-platform-support-for-i2cbridge-programming">
+<h2>Marble Platform Support for I2CBridge Programming<a class="headerlink" href="#marble-platform-support-for-i2cbridge-programming" title="Permalink to this heading"></a></h2>
+<section id="usage">
+<h3>Usage:<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h3>
+<p>These tools assume usage of the i2cbridge modules in <code class="docutils literal notranslate"><span class="pre">bedrock/peripheral_drivers/i2cbridge</span></code>.
+See the readme there for documentation on i2cbridge (‘i2c_chunk’).
+While <code class="docutils literal notranslate"><span class="pre">i2cbridge</span></code> is a generic (platform-independent) tool, there is a lot of benefit to
+be gained by wrapping the generic tool in a platform-specific interface such as this.</p>
+<p>Pros:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">1.</span> <span class="n">Better</span> <span class="bp">self</span><span class="o">-</span><span class="n">documentation</span>
+<span class="mf">2.</span> <span class="n">Requires</span> <span class="n">no</span> <span class="n">knowledge</span> <span class="n">of</span> <span class="n">I2C</span> <span class="n">addresses</span> <span class="ow">or</span> <span class="n">bus</span> <span class="n">multiplexing</span>
+<span class="mf">3.</span> <span class="n">Code</span> <span class="n">can</span> <span class="n">be</span> <span class="n">easily</span> <span class="n">ported</span> <span class="n">to</span> <span class="n">another</span> <span class="n">platform</span> <span class="k">with</span> <span class="n">a</span> <span class="n">compatible</span> <span class="n">support</span> <span class="n">package</span>
+</pre></div>
+</div>
+</section>
+<section id="demos">
+<h3>Demos:<a class="headerlink" href="#demos" title="Permalink to this heading"></a></h3>
+<p>See the file <code class="docutils literal notranslate"><span class="pre">demo_marble_i2c.py</span></code>.  This is a demonstration application-specific I2C program
+generator.  The function <code class="docutils literal notranslate"><span class="pre">build_prog</span></code> contains the full program instructions and is easy to
+read and (hopefully) understand.  This program can generate four different output files which
+can all be made my simply running <code class="docutils literal notranslate"><span class="pre">make</span></code>.</p>
+<section id="generate-program-and-memory-maps">
+<h4>Generate program and memory maps<a class="headerlink" href="#generate-program-and-memory-maps" title="Permalink to this heading"></a></h4>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Generated File</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>prog.dat</p></td>
+<td><p>Actual program bytes (in hex-ascii) for <code class="docutils literal notranslate"><span class="pre">i2c_chunk</span></code> to run</p></td>
+</tr>
+<tr class="row-odd"><td><p>prog.vh</p></td>
+<td><p>Map of all values read and their locations and sizes in memory (Verilog format)</p></td>
+</tr>
+<tr class="row-even"><td><p>prog.h</p></td>
+<td><p>Map of all values read and their locations and sizes in memory (C format)</p></td>
+</tr>
+<tr class="row-odd"><td><p>prog.json</p></td>
+<td><p>Map of all values read and their locations and sizes in memory (JSON format)</p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="test-1-decode-the-program">
+<h4>Test 1: Decode the program<a class="headerlink" href="#test-1-decode-the-program" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">decode</span></code></p>
+<p>A handy tool included here is a decoder that is “platform-aware”.  This decoder attempts to recognize
+reads and writes to various ICs based on their I2C address.  If it is known to the Marble I2C map, it
+replaces the address with the IC name in the output, making it easier to read.</p>
+</section>
+<section id="test-2-decode-the-program-without-platform-awareness">
+<h4>Test 2: Decode the program without platform awareness<a class="headerlink" href="#test-2-decode-the-program-without-platform-awareness" title="Permalink to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">generic_decode</span></code></p>
+<p>As a contrast to the above, the program can also be decoded with the generic decoder included with the
+i2cbridge tools.  Note the difference in readability from the application perspective.</p>
+</section>
+<section id="test-3-test-assembler-violations">
+<h4>Test 3: Test assembler violations<a class="headerlink" href="#test-3-test-assembler-violations" title="Permalink to this heading"></a></h4>
+<p>This last test is not truly platform-specific but shows various violations of the I2C assembler rules
+using the Marble platform-aware interface.  None of the rules violated are specific to the platform.</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code></p>
+<p>See <code class="docutils literal notranslate"><span class="pre">demo_i2c_baddy.py</span></code> for examples of what to avoid.</p>
+</section>
+</section>
 </section>
 </section>
 
@@ -129,8 +193,8 @@ Expect to see errors and unfinished things.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../../comms_top/README_md.html" class="btn btn-neutral float-left" title="comms_top README" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../marble_family/README_md.html" class="btn btn-neutral float-right" title="marble_family README" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../README_md.html" class="btn btn-neutral float-left" title="test_marble_family README" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../../rtsim/README_md.html" class="btn btn-neutral float-right" title="rtsim README" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
