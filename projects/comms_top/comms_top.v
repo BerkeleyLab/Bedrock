@@ -258,6 +258,8 @@ module comms_top
    wire [2:0]  tx_location;
    wire [31:0] tx_data0;
    wire [31:0] tx_data1;
+   wire tx_extra_data_valid = 1'b0;  // XXX good enough?
+   wire [127:0] tx_extra_data = 128'h11223344deadbeefcafef00d11223344;
 
    wire [15:0] rx_frame_counter;
    wire [15:0] txrx_latency;
@@ -273,6 +275,8 @@ module comms_top
    wire [31:0] rx_rev_id;
    wire [31:0] rx_data0;
    wire [31:0] rx_data1;
+   wire rx_extra_data_valid;
+   wire [127:0] rx_extra_data;
 
    chitchat_txrx_wrap #(
       .REV_ID        (32'hdeadbeef),
@@ -290,12 +294,16 @@ module comms_top
       .tx_location       (tx_location),
       .tx_data0          (tx_data0),
       .tx_data1          (tx_data1),
+      .tx_extra_data_valid(tx_extra_data_valid),
+      .tx_extra_data     (tx_extra_data),
 
       .rx_clk            (lb_clk),
 
       .rx_valid          (rx_valid),
       .rx_data0          (rx_data0),
       .rx_data1          (rx_data1),
+      .rx_extra_data_valid(rx_extra_data_valid),
+      .rx_extra_data     (rx_extra_data),
       .ccrx_frame_drop   (),
 
       // -------------------
