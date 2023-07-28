@@ -132,7 +132,19 @@ i2c_bit_view, i2c_prog_view, i2c_analyze_view, and i2c_chunk_view.
 
 There is some python code in here that acts as an assembler for
 the instruction sequence that gets loaded into i2cbridge to control
-the I2C operations.
+the I2C operations (see `assem.py`).
+
+A low-level programming interface is provided by `class i2c_assem`
+while a higher-level object-oriented interface is provided by the
+`class I2CAssembler`.  The API of the latter is a superset of the
+former with as few changes as possible to the common function set.
+The higher-level interface attempts to catch common gotchas inherent
+with the low-level interface as well as alternate functions for
+working with explicit address values or address indices (multiples
+of 32).  See `ramtest.py` for a demo of the low-level interface and
+`demo_assem.py` for a demo of the high-level interface.  Also, see
+the Makefile targets 'map.*' for the various flavours of register
+memory maps that can be generated automatically.
 
 Instruction encoding:
 ```

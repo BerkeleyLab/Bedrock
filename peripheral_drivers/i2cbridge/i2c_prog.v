@@ -78,7 +78,9 @@ always @(posedge clk) if (bit_adv) case(state)
 endcase
 //
 assign ok_to_stop = op_ia & (state==s_start);
-assign natural_stop = op_zz & (state==s_idle);
+//assign natural_stop = op_zz & (state==s_idle);
+//assign natural_stop = op_zz & next_op;
+assign natural_stop = op_zz;
 
 
 // Manipulate secondary state, notably bit_cnt, opcode, and stream_cnt
