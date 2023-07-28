@@ -18,7 +18,7 @@ initial begin
 	// Should catch an average of 1280/6 = 213.33 f_in edges in that time
 	if (frequency>212 && frequency < 215) begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end else begin
 		$display("FAIL");
 		$stop();

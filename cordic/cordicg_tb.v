@@ -41,7 +41,7 @@ initial begin
 		clk=0; #10;
 		clk=1; #10;
 	end
-	$finish();
+	$finish(0);
 end
 
 reg [6:0] pstate=0;

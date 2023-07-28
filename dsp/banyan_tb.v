@@ -20,7 +20,7 @@ initial begin
 	// 1*1 + 70*2 + 28*4 + 8*8 = 317
 	if (pass_count == 317) begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end else begin
 		$display("FAIL %d", pass_count);
 		$stop();

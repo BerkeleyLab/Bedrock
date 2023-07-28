@@ -15,7 +15,7 @@ initial begin
 		clk=1; #4;
 	end
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 wire ibadge_clk=clk;

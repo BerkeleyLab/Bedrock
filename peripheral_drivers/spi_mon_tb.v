@@ -36,7 +36,7 @@ module spi_mon_tb;
       while ($time<SIM_TIME) @(posedge clk);
       $display("WARNING: Not a self-checking testbench. Will always pass.");
       $display("PASS");
-      $finish();
+      $finish(0);
    end
 
    always #5 clk=~clk;

@@ -35,7 +35,7 @@ module mdio_tb;
             $display("CPU trap. Stop.");
             if (pass) begin
                 $display("\n    PASS\n");
-                $finish();
+                $finish(0);
             end else begin
                 $display("\n    FAIL\n");
                 $stop();
@@ -120,7 +120,7 @@ module mdio_tb;
         pass = 1;
         $display("\nTime: %g ns, register read back passed.", $time);
         $display("Done.\n");
-        $finish();
+        $finish(0);
     end
 
 endmodule

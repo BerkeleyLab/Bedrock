@@ -20,7 +20,7 @@ module sram_tb;
         #100000
         pass = 0;
         $display("TIMEOUT\nFAIL");
-        $finish();
+        $finish(0);
     end
 
     // --------------------------------------------------------------

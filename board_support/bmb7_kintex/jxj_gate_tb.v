@@ -34,7 +34,7 @@ module jxj_gate_tb;
         $stop;
       end else begin
         $display("PASS");
-        $finish();
+        $finish(0);
       end
    end
 

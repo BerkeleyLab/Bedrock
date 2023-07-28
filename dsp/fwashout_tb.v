@@ -28,7 +28,7 @@ module fwashout_tb;
 
       if (!trace) $display("WARNING: Not a self-checking testbench. Will always pass.");
       $display("PASS");
-      $finish();
+      $finish(0);
    end
 
    reg signed [15:0] adc_in=0;

@@ -22,7 +22,7 @@ initial begin
 		// that can be detected as a failure by make(1).
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 
