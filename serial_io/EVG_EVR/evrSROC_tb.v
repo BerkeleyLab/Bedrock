@@ -21,7 +21,7 @@ module evrSROC_tb;
         $stop();
       end else begin
         $display("PASS");
-        $finish();
+        $finish(0);
       end
    end
 

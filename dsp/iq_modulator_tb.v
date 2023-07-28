@@ -37,7 +37,7 @@ initial begin
 		$stop();
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 

@@ -15,7 +15,7 @@ initial begin
 		clk=1; #5;
 	end
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 wire [15:0] pattern;

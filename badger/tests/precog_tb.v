@@ -17,7 +17,7 @@ initial begin
 		clk=1; #5;
 	end
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 wire clear_to_send;
@@ -87,7 +87,7 @@ initial begin
 		$stop();
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 

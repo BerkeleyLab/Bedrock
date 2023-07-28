@@ -18,7 +18,7 @@ initial begin
 		$display("FAIL", agreed);
 		$stop();
 	end
-	$finish();
+	$finish(0);
 end
 
 // Use ADC data pulled from real hardware (SN011) and AD9653 test pattern 00001100

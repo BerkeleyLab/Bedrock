@@ -23,7 +23,7 @@ module gmii_link_tb;
             $stop();
          end else begin
             $display("PASS: Link is up and auto-negotiation completed successfully.");
-            $finish();
+            $finish(0);
          end
 
       $display("FAIL: Link is not up at the end of the test.");

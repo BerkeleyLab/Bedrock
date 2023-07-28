@@ -66,7 +66,7 @@ module iq_deinterleaver_tb;
       end
       if (errors == 0) begin
         $display("PASS");
-        $finish();
+        $finish(0);
       end else begin
         $display("FAIL");
         $stop();

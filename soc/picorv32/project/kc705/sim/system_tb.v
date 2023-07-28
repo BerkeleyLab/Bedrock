@@ -33,7 +33,7 @@ module system_tb;
         #500000 $display("Simulation finish.");
         //$display("\n%8s", pass ? "PASS" : "FAIL" );
         $display("PASS");
-        $finish();
+        $finish(0);
     end
 
     // ------------------------------------------------------------------------

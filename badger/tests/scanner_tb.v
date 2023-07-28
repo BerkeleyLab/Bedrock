@@ -24,7 +24,7 @@ initial begin
 	if (test_count_goal != 0) $display("expecting %2d tests", test_count_goal);
 	if (pass && test_count == test_count_goal) begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end else begin
 		$display("FAIL");
 		$stop();
