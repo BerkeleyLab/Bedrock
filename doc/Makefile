@@ -124,6 +124,7 @@ SRC_MD = \
    serial_io/chitchat/README.md \
    serial_io/chitchat/chitchat_txrx_wrap.md \
    projects/test_marble_family/README.md \
+   projects/test_marble_family/i2c/README.md \
    projects/common/README.md \
    projects/oscope/marble_family/README.md \
    projects/oscope/bmb7_cu/README.md \
