@@ -33,23 +33,21 @@ module mmc_mailbox #(
   // Port-Number Memory interface
   input  [2:0]  pno_a,      // Port address (config_port_num)
   output [15:0] pno_d,      // Port number byte (8 of 16 bits)
-`ifdef MAILBOX_CONFIG_PORTS
   // Config pins for badger (rtefi) interface
   output        config_s,
   output        config_p,
   output [7:0]  config_a,
   output [7:0]  config_d,
-`endif
   // Special pins
   output        enable_rx,  // Controlled via special mailbox commands
   output        ip_valid,   // Asserted when output 'ip' is valid
   output [31:0] ip,         // IP address from mailbox
   output        mac_valid,  // Asserted when output 'mac' is valid
   output [47:0] mac,        // MAC address from mailbox
-  output        match,      // Asserted if hash from mailbox matches HASH
-  output [31:0] mmc_gitid,  // MMC 32-bit Git ID
   output        mmc_gitid_valid,// Asserted when output 'mmc_gitid' is valid
-  output [3:0] spi_pins_debug // {MISO, din, sclk_d1, csb_d1};
+  output [31:0] mmc_gitid,  // MMC 32-bit Git ID
+  output        match,      // Asserted if hash from mailbox matches HASH
+  output [3:0]  spi_pins_debug // {MISO, din, sclk_d1, csb_d1};
 );
 
 // SPI Naming convention: https://www.sparkfun.com/spi_signal_names
@@ -63,10 +61,6 @@ localparam HASH_OFFSET = 12;
 wire config_w, config_r;
 wire [3:0] a_lo = config_a[3:0];
 wire [3:0] a_hi = config_a[7:4];
-`ifndef MAILBOX_CONFIG_PORTS
-wire [7:0] config_a, config_d;
-wire config_s, config_p;
-`endif
 wire [7:0] spi_return;
 //wire [3:0] spi_pins_debug;
 spi_gate spi (

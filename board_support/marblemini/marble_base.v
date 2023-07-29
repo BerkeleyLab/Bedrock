@@ -130,8 +130,6 @@ wire lb_control_rd, lb_control_rd_valid;
 assign lb_rd_valid = lb_control_rd_valid;
 assign lb_rd = lb_control_rd;
 
-`define MAILBOX_CONFIG_PORTS
-
 // TODO move this to auto-generated .vh file
 localparam [31:0] mailbox_hash = 32'h16db2127;
 
@@ -140,35 +138,39 @@ mmc_mailbox #(
   .DEFAULT_ENABLE_RX(default_enable_rx)
   ) mailbox_i (
   .clk(config_clk), // input
+  // localbus
   .lb_addr(lb_addr[10:0]), // input [10:0]
   .lb_din(lb_data_out[7:0]), // input [7:0]
   .lb_dout(mbox_out2), // output [7:0]
   .lb_write(lb_write), // input
   .lb_control_strobe(lb_control_strobe), // input
+  // SPI PHY
   .sck(SCLK), // input
   .ncs(CSB), // input
   .pico(MOSI), // input
   .poci(MISO), // output
+  // Mailbox status
   .mb_addr(mb_addr),  // output [10:0]
   .mb_wen(mb_wen), // output
   .mb_ren(mb_ren), // output
   .mb_strobe(mb_strobe), // output
+  // Port-Number Memory interface
   .pno_a(3'b0), // input [2:0]
   .pno_d(), // output [15:0]
-`ifdef MAILBOX_CONFIG_PORTS
+  // Config pins for badger (rtefi) interface
   .config_s(config_s), // output
   .config_p(config_p), // output
   .config_a(config_a), // output [7:0]
   .config_d(config_d), // output [7:0]
-`endif
+  // Special pins
   .enable_rx(enable_rx), // output
   .ip_valid(ip_valid), // output
   .ip(ip_mmc), // output [31:0]
   .mac_valid(mac_valid), // output
   .mac(mac_mmc), // output [47:0]
-  .match(mailbox_match), // output
-  .mmc_gitid(mmc_gitid), // output [31:0]
   .mmc_gitid_valid(mmc_gitid_valid), // output
+  .mmc_gitid(mmc_gitid), // output [31:0]
+  .match(mailbox_match), // output
   .spi_pins_debug(spi_pins_debug) // {MISO, din, sclk_d1, csb_d1};
 );
 
