@@ -101,7 +101,7 @@ net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_trx.dat
 # =====
 # syntax-check only, no actual test bench code
 MARBLE_BASE_V = marble_base.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V)
-MARBLE_BASE_V += mailbox.v
+MARBLE_BASE_V += mmc_mailbox.v
 marble_base_tb: $(MARBLE_BASE_V)
 VFLAGS_marble_base_tb =
 

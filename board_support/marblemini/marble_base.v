@@ -120,20 +120,35 @@ wire [7:0] mbox_out2;
 wire config_s, config_p;
 wire [7:0] config_a, config_d;
 
-mailbox #(
-  .HASH(32'h44332211), // TODO
+wire led_user_mode, l1, l2;
+assign lb_clk = tx_clk;
+assign lb_strobe = lb_control_strobe;
+wire config_clk = tx_clk;
+assign lb_write = lb_control_strobe & ~lb_control_rd;
+wire [3:0] spi_pins_debug;
+wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;
+assign lb_rd_valid = lb_control_rd_valid;
+assign lb_rd = lb_control_rd;
+
+`define MAILBOX_CONFIG_PORTS
+
+// TODO move this to auto-generated .vh file
+localparam [31:0] mailbox_hash = 32'h16db2127;
+
+mmc_mailbox #(
+  .HASH(mailbox_hash),
   .DEFAULT_ENABLE_RX(default_enable_rx)
   ) mailbox_i (
-  .clk(tx_clk), // input
+  .clk(config_clk), // input
   .lb_addr(lb_addr[10:0]), // input [10:0]
   .lb_din(lb_data_out[7:0]), // input [7:0]
   .lb_dout(mbox_out2), // output [7:0]
-  .lb_write(lb_wen), // input
+  .lb_write(lb_write), // input
   .lb_control_strobe(lb_control_strobe), // input
-  .sck(FPGA_SCK), // input
-  .ncs(FPGA_SSEL), // input
-  .sdi(FPGA_MOSI), // input
-  .sdo(FPGA_MISO), // output
+  .sck(SCLK), // input
+  .ncs(CSB), // input
+  .pico(MOSI), // input
+  .poci(MISO), // output
   .mb_addr(mb_addr),  // output [10:0]
   .mb_wen(mb_wen), // output
   .mb_ren(mb_ren), // output
@@ -159,12 +174,10 @@ mailbox #(
 
 /*
 // Configuration port
-wire config_clk = tx_clk;
 wire config_w, config_r;
 wire [7:0] config_a;
 wire [7:0] config_d;
 wire [7:0] spi_return;
-wire [3:0] spi_pins_debug;
 spi_gate spi(
 	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB), .MISO(MISO),
 	.config_clk(config_clk), .config_w(config_w), .config_r(config_r),
@@ -193,16 +206,8 @@ wire config_mw = config_w && (config_a[7:4] == 5);
 wire [10:0] mbox_a = {mbox_page, config_a[3:0]};
 
 // Forward declarations
-wire led_user_mode, l1, l2;
 // Local bus
-assign lb_clk = tx_clk;
 //wire [23:0] lb_addr;
-wire [31:0] lb_data_muxed;
-wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;
-assign lb_strobe = lb_control_strobe;
-assign lb_rd = lb_control_rd;
-assign lb_rd_valid = lb_control_rd_valid;
-assign lb_write = lb_control_strobe & ~lb_control_rd;
 
 // Mailbox
 wire error;

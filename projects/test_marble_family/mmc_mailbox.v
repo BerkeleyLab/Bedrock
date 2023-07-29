@@ -1,7 +1,7 @@
 /*  An encapsulation of the FPGA (responder) side of the Marble
  *  pseudo-SPI mailbox interface with the MMC.
  */
-module mailbox #(
+module mmc_mailbox #(
   parameter [31:0] HASH = 0,
   parameter [0:0] DEFAULT_ENABLE_RX = 1,
   parameter [15:0] UDP_PORT0 = 7,
@@ -23,8 +23,8 @@ module mailbox #(
   // SPI PHY
   input         sck,        // SCK
   input         ncs,        // formerly NSS
-  input         sdi,        // formerly MOSI
-  output        sdo,        // formerly MISO
+  input         pico,       // formerly MOSI
+  output        poci,       // formerly MISO
   // Mailbox status
   output [10:0] mb_addr,    // Mailbox address being accessed (decoded from page/offset)
   output        mb_wen,     // SPI operation from remote host ('1' = write; '0' = read)
@@ -32,7 +32,7 @@ module mailbox #(
   output        mb_strobe,  // Asserted on each mailbox transaction (rising edge of ncs)
   // Port-Number Memory interface
   input  [2:0]  pno_a,      // Port address (config_port_num)
-  output [15:0] pno_d,      // Port number associated with pno_a
+  output [15:0] pno_d,      // Port number byte (8 of 16 bits)
 `ifdef MAILBOX_CONFIG_PORTS
   // Config pins for badger (rtefi) interface
   output        config_s,
@@ -56,7 +56,7 @@ module mailbox #(
 
 localparam GITID_PAGE = 3;
 localparam GITID_OFFSET = 12;
-localparam HASH_PAGE = 4;     // TODO - This is currently not implemented in mbox.def
+localparam HASH_PAGE = 4;
 localparam HASH_OFFSET = 12;
 
 // Configuration port
@@ -72,8 +72,8 @@ wire [7:0] spi_return;
 spi_gate spi (
   .SCLK(sck),
   .CSB(ncs),
-  .MOSI(sdi),                     // input
-  .MISO(sdo),                     // output
+  .MOSI(pico),                    // input
+  .MISO(poci),                    // output
   .config_clk(clk),               // input
   .config_w(config_w),            // output
   .config_r(config_r),            // output
@@ -136,7 +136,7 @@ always @(posedge clk) begin
       //$display("MB: gitid page");
       if ((a_lo >= GITID_OFFSET) && (a_lo < GITID_OFFSET+4)) begin
         //$display("gitid offset %d", a_lo-GITID_OFFSET);
-        mmc_gitid_r[8*(a_lo-GITID_OFFSET+1)-1-:8] <= config_d;
+        mmc_gitid_r[8*(GITID_OFFSET+4-a_lo)-1-:8] <= config_d;
         if (a_lo == GITID_OFFSET) mmc_gitid_valid_r <= 1;
         else mmc_gitid_valid_r[a_lo-GITID_OFFSET] <= 1'b1;
       end
@@ -147,7 +147,7 @@ always @(posedge clk) begin
       //$display("MB: hash page");
       if ((a_lo >= HASH_OFFSET) && (a_lo < HASH_OFFSET+4)) begin
         //$display("gitid offset %d", a_lo-HASH_OFFSET);
-        hash[8*(a_lo-HASH_OFFSET+1)-1-:8] <= config_d;
+        hash[8*(HASH_OFFSET+4-a_lo)-1-:8] <= config_d;
         if (a_lo == HASH_OFFSET) hash_valid <= 1;
         else hash_valid[a_lo-HASH_OFFSET] <= 1'b1;
       end
