@@ -27,7 +27,7 @@ module spi_mon_tb;
          rc = $fscanf(fd, "%x\n", mdat);
          if (rc != 1) begin
             $display("FAIL: parse error, aborting");
-            $stop();
+            $stop(0);
          end
       end
       mwe = 0;

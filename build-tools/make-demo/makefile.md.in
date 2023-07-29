@@ -31,7 +31,7 @@ For concrete discussion purposes, consider the following Makefile:
 #include Makefile1
 ```
 This covers two cases: one where b2d_tb is a self-checking testbench,
-i.e., where execution of b2d_tb ends with $stop() on failure,
+i.e., where execution of b2d_tb ends with $stop(0) on failure,
 but $finish(0) on success.
 In the other case, fib_tb creates an output file that needs to match fib.gold.
 

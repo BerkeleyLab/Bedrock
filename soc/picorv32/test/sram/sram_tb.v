@@ -36,7 +36,7 @@ module sram_tb;
                 $finish;
             end else begin
                 $display("FAIL");
-                $stop;
+                $stop(0);
             end
         end
         // $fflush();

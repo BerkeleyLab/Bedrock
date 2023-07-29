@@ -30,7 +30,7 @@ initial begin
         $display("### Check code for bit-width incompatibility ###");
         $display("##################################################");
         $display("FAIL");
-        $stop();
+        $stop(0);
     end
 end
 

@@ -39,7 +39,7 @@ module serializer_multichannel_tb;
       $display("%d errors", errors);
       if (errors > 0) begin
         $display("FAIL");
-        $stop();
+        $stop(0);
       end else begin
         $display("PASS");
         $finish(0);

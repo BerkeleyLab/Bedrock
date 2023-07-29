@@ -30,7 +30,7 @@ initial begin
 	if (checked < 10) fail=1;
 	if (fail) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
 		$finish(0);

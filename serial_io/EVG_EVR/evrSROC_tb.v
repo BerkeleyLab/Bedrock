@@ -18,7 +18,7 @@ module evrSROC_tb;
       while ($time < SIM_TIME) @(posedge sysClk);
       if (fail) begin
         $display("FAIL");
-        $stop();
+        $stop(0);
       end else begin
         $display("PASS");
         $finish(0);

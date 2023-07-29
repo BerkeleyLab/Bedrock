@@ -17,7 +17,7 @@ initial begin
 	end
 	if (fail) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
 		$finish(0);

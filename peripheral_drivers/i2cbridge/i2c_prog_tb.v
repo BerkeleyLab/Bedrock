@@ -17,7 +17,7 @@ initial begin
 	$display("%s", worked==3 ? "PASS" : "FAIL");
 	if (worked != 3) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
 		$finish(0);

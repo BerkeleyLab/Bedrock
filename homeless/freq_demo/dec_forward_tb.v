@@ -17,7 +17,7 @@ initial begin
 	$display("%d tests passed", passed);
 	if (fail) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
 		$finish(0);

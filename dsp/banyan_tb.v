@@ -23,7 +23,7 @@ initial begin
 		$finish(0);
 	end else begin
 		$display("FAIL %d", pass_count);
-		$stop();
+		$stop(0);
 	end
 end
 

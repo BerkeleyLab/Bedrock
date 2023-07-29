@@ -36,7 +36,7 @@ initial begin
 	if (big) begin
 		$display(y, y1);
 		$display("FAIL: ERROR: Non-zero filter output at the end of the test");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
 		$finish(0);

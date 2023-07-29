@@ -21,7 +21,7 @@ module wfm_tb;
         reset <= 0;
         #15000
         $display("TIMEOUT\n");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -36,7 +36,7 @@ module wfm_tb;
                 $finish(0);
             end else begin
                 $display("FAIL");
-                $stop();
+                $stop(0);
             end
         end
     end

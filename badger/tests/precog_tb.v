@@ -84,7 +84,7 @@ initial begin
 	repeat (10) @(posedge clk);
 	if (fail) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
 		$finish(0);

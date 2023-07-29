@@ -16,7 +16,7 @@ initial begin
 	// not 16, because we overwrite lane 7 result with "software"
 	if (agreed == 15) $display("PASS"); else begin
 		$display("FAIL", agreed);
-		$stop();
+		$stop(0);
 	end
 	$finish(0);
 end

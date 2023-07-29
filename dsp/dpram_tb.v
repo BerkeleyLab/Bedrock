@@ -33,7 +33,7 @@ module dpram_tb;
          $finish(0);
       end else begin
          $display("FAIL");
-         $stop();
+         $stop(0);
       end
    end
 

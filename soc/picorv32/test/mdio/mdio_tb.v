@@ -23,7 +23,7 @@ module mdio_tb;
         reset <= 0;
         #1500000
         $display("\nTIMEOUT\n%8s", "FAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -38,7 +38,7 @@ module mdio_tb;
                 $finish(0);
             end else begin
                 $display("\n    FAIL\n");
-                $stop();
+                $stop(0);
             end
         end
         $fflush();

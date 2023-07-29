@@ -20,7 +20,7 @@ initial begin
 	if (outs != 5) fail=1;
 	if (fail) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
 		$finish(0);

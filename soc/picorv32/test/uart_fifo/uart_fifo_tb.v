@@ -19,7 +19,7 @@ module uart_fifo_tb;
         reset <= 0;
         #500000
         $display("TIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     wire trap;
@@ -35,7 +35,7 @@ module uart_fifo_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
     end
 

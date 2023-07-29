@@ -24,7 +24,7 @@ initial begin
         $finish;
     end
     $display("FAIL");
-    $stop;
+    $stop(0);
 end
 
 // generate reset

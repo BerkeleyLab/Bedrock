@@ -48,7 +48,7 @@ always @(negedge clk) if (cc>30) begin
 		fault = (variance/26 > 0.7);
 		if (fault) begin
 			$display("FAIL");
-			$stop();
+			$stop(0);
 		end else begin
 			$display("PASS");
 			$finish(0);
