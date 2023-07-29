@@ -126,7 +126,7 @@ assign lb_strobe = lb_control_strobe;
 wire config_clk = tx_clk;
 assign lb_write = lb_control_strobe & ~lb_control_rd;
 wire [3:0] spi_pins_debug;
-wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;
+wire lb_control_rd, lb_control_rd_valid;
 assign lb_rd_valid = lb_control_rd_valid;
 assign lb_rd = lb_control_rd;
 
