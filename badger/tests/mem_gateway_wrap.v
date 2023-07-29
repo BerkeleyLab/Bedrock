@@ -45,7 +45,7 @@ lb_demo_slave slave(.clk(clk), .addr(addr),
 always @(posedge clk) begin
 	if (slave.stop_sim) begin
 		$display("mem_gateway_wrap:  stopping based on localbus request");
-		$finish();
+		$finish(0);
 	end
 end
 

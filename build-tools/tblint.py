@@ -8,7 +8,7 @@ import re
 
 DISPLAYPASS = '$display("PASS");'
 DISPLAYFAIL = '$display("FAIL");'
-FINISH = '$finish();'
+FINISH = '$finish(0);'
 STOP = '$stop();'
 
 SYNTAX_RULES = f"""
@@ -52,7 +52,7 @@ class TBLinter():
 
     @staticmethod
     def _isFinish(s):
-        match = re.match(r"[^/$\"']*\$finish[(;]", s)  # Should not trigger when commented-out or within string
+        match = re.match(r"[^/$\"']*\$finish\(0", s)  # Should not trigger when commented-out or within string
         if match:
             return True
         return False
@@ -139,15 +139,17 @@ def test_isFinish():
     print("Testing _isFinish()")
     # Test-string: Should pass?
     d = {
-        "$finish();": True,
-        "    $finish()": True,
-        "\t\t$finish;": True,
-        "if (foo) $finish();": True,
+        # New syntax rules (as of 230728) means $finish() without the 0 argument is a violation
+        "$finish();": False,
+        "$finish(0);": True,
+        "    $finish(0)": True,
+        "\t\t$finish;": False,
+        "if (foo) $finish(0);": True,
         "finish": False,
-        "$Finish();": False,
-        "$finishThings();": False,
-        "//$finish()": False,
-        "    //$finish()": False,
+        "$Finish(0);": False,
+        "$finishThings(0);": False,
+        "//$finish(0)": False,
+        "    //$finish(0)": False,
         "'$finish();'": False,
         '"$finish();"': False
     }
