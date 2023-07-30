@@ -33,7 +33,7 @@ module fmc150_tb;
         #40000
         pass = 0;
         $display("TIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -48,7 +48,7 @@ module fmc150_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
     end
 

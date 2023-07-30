@@ -18,7 +18,7 @@ initial begin
 	end
 	$display("WARNING: Not a self-checking testbench. Will always pass.");
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 // Create a fake pps with some random jitter

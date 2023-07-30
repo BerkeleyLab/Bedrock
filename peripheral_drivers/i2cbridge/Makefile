@@ -97,4 +97,3 @@ clean:
 	rm -f *_tb *.vcd *.dat *.bit *.pdf *.pyc init.in
 	rm -rf _xilinx __pycache__
 	rm -rf map.vh map.h map.json demo_assem.in
-

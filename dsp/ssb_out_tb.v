@@ -25,7 +25,7 @@ initial begin
 	if (trace) $display("Please use contents of ssb_out.dat for functional validation");
 	else $display("WARNING: Not a self-checking testbench. Will always pass.");
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 reg [1:0] div_state=0;

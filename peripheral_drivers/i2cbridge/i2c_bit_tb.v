@@ -17,7 +17,7 @@ initial begin
 	end
 	// $display("%s", fail ? "FAIL" : "PASS");
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 // Pacing counter for bit engine

@@ -18,7 +18,7 @@ initial begin
         $dumpvars(6, lb_timing_demo_tb);
     end
     #MAX_SIM;
-    $finish();
+    $finish(0);
 end
 
 always #(CLK_CYCLE/2) lb_clk = ~lb_clk;
@@ -70,7 +70,7 @@ always @(posedge lb_clk) begin
     $display("---- Read Cycle ----\n");
     lb_read_task(TEST_REG2);
     #20;
-    $finish();
+    $finish(0);
 end
 
 // slave

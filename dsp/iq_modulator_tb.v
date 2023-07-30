@@ -34,10 +34,10 @@ initial begin
 		(e_var < 0.3) && (e_min > -2.0) && (e_max < 2.0);
 	if (!pass) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 

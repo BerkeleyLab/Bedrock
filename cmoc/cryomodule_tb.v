@@ -22,7 +22,7 @@ initial begin
 	end
 	//$display("%s",errors==0?"PASS":"FAIL");
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 `endif //  `ifdef SIMULATE
 
