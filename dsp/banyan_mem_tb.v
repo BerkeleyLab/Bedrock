@@ -16,7 +16,7 @@ initial begin
 		clk=1; #5;
 	end
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 // Create input test data that is easy to understand

@@ -39,10 +39,10 @@ module circle_buf_serial_tb;
       $display("%d errors", errors);
       if (errors == 0) begin
         $display("PASS");
-        $finish();
+        $finish(0);
       end else begin
         $display("FAIL");
-        $stop();
+        $stop(0);
       end
    end
 

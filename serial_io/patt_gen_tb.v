@@ -43,7 +43,7 @@ module patt_gen_tb;
       $display("%d successfully matched patterns", tx_cnt);
       if (fail || tx_cnt < 80) begin
          $display("FAIL");
-         $stop;
+         $stop(0);
       end else begin
          $display("PASS");
          $finish;
