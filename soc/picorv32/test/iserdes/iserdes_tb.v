@@ -23,7 +23,7 @@ module iserdes_tb;
         #150000
         pass = (dout == PATTERN[8*DW-1:0]);
         $display("TIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -39,7 +39,7 @@ module iserdes_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
     end
 

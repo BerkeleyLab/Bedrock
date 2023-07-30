@@ -28,7 +28,7 @@ module i2c_tb;
         reset <= 0;
         #1000000
         $display("\nTIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -38,7 +38,7 @@ module i2c_tb;
     always @(posedge mem_clk) begin
         if (~reset && trap) begin
             $display("\nTRAP\nFAIL");
-            $stop();
+            $stop(0);
         end
         $fflush();
     end
@@ -148,7 +148,7 @@ module i2c_tb;
             $finish;
         end
         $display("FAIL");
-        $stop;
+        $stop(0);
     end
 
     // --------------------------------------------------------------

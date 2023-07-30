@@ -18,7 +18,7 @@ initial begin
 		clk=1; #3;
 	end
 	//$display("%s",errors==0?"PASS":"FAIL");
-	$finish();
+	$finish(0);
 end
 `endif
 

@@ -42,7 +42,7 @@ module chitchat_tb;
       $display("%d updates received over link", tx_cnt);
       if (fail || tx_cnt < 300) begin
          $display("FAIL");
-         $stop;
+         $stop(0);
       end else begin
          $display("PASS");
          $finish;

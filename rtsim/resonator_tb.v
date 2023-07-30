@@ -24,7 +24,7 @@ initial begin
 		clk=0; #3;
 		clk=1; #3;
 	end
-	$finish();
+	$finish(0);
 end
 `endif //  `ifdef SIMULATE
 

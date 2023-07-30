@@ -32,10 +32,10 @@ initial begin
 	$display("%d worked, %s", worked, (worked==4) ? "PASS" : "FAIL");
 	if (worked != 4) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 

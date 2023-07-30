@@ -39,7 +39,7 @@ module badger_lb_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
         // $fflush();
     end

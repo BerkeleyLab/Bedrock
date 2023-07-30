@@ -20,7 +20,7 @@ module gpio_tb;
         #100000
         pass = 0;
         $display("TIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -31,7 +31,7 @@ module gpio_tb;
         if (~reset && trap) begin
             pass = 0;
             $display("preliminary TRAP\nFAIL");
-            $stop();
+            $stop(0);
         end
     end
 
@@ -156,7 +156,7 @@ module gpio_tb;
             $finish;
         end
         $display("FAIL");
-        $stop;
+        $stop(0);
     end
 
     task gpio_expect;
