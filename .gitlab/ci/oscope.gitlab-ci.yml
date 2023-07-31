@@ -3,7 +3,8 @@ oscope_top_test:
     - cd projects/oscope/bmb7_cu
   stage: test
   script:
-    - make Voscope_top_tb && make Voscope_top_leep && make clean
+    - make Voscope_top_tb VLATOR_TIMING=--timing && make Voscope_top_leep && make clean
+    # where VLATOR_TIMING=--timing is needed for Verilator v5.006 but not v4.228
 
 oscope_top_bmb7:
   before_script:
