@@ -175,16 +175,18 @@ reg pass_ipdst=0;   always @(posedge clk) begin if (want_c_ip  & ~ip_m) pass_ipd
 wire [15:0] ip_length, udp_length;
 
 wire pass_arp0;
-generate if (handle_arp) begin: find_arp
+generate if (handle_arp) begin : find_arp
 	arp_patt arp_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_arp0));
-end else assign pass_arp0 = 0;
-endgenerate
+end else begin : no_find_arp
+	assign pass_arp0 = 0;
+end endgenerate
 
 wire pass_icmp0;
-generate if (handle_icmp) begin: find_icmp
+generate if (handle_icmp) begin : find_icmp
 	icmp_patt icmp_p(.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_icmp0));
-end else assign pass_icmp0 = 0;
-endgenerate
+end else begin : no_find_icmp
+	assign pass_icmp0 = 0;
+end endgenerate
 
 wire pass_ip0;   ip_patt   ip_p  (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_ip0), .length(ip_length));
 wire pass_udp0;  udp_patt  udp_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_udp0), .length(udp_length));

@@ -23,7 +23,7 @@ module mdio_tb;
         reset <= 0;
         #1500000
         $display("\nTIMEOUT\n%8s", "FAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -35,10 +35,10 @@ module mdio_tb;
             $display("CPU trap. Stop.");
             if (pass) begin
                 $display("\n    PASS\n");
-                $finish();
+                $finish(0);
             end else begin
                 $display("\n    FAIL\n");
-                $stop();
+                $stop(0);
             end
         end
         $fflush();
@@ -120,7 +120,7 @@ module mdio_tb;
         pass = 1;
         $display("\nTime: %g ns, register read back passed.", $time);
         $display("Done.\n");
-        $finish();
+        $finish(0);
     end
 
 endmodule

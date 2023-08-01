@@ -109,7 +109,12 @@ SRC = \
    # mp_proc.v # must generate _auto files
    #via.v # not properly formatted for portfind.py
 
+STATIC_RST = \
+   rtsim-module.rst \
+   dsp-digaree-module.rst
+
 SRC_MD = \
+   CONTRIBUTING.md \
    soc/picorv32/README.md \
    soc/picorv32/test/badger_lwip/README.md \
    soc/picorv32/test/lb_bridge/README.md \
@@ -119,11 +124,11 @@ SRC_MD = \
    serial_io/chitchat/README.md \
    serial_io/chitchat/chitchat_txrx_wrap.md \
    projects/test_marble_family/README.md \
+   projects/test_marble_family/i2c/README.md \
    projects/common/README.md \
    projects/oscope/marble_family/README.md \
    projects/oscope/bmb7_cu/README.md \
    projects/comms_top/README.md \
-   guidelines/CONTRIBUTING.md \
    guidelines/rtl_guidelines.md \
    badger/README.md \
    badger/status.md \
@@ -137,12 +142,22 @@ SRC_MD = \
    fpga_family/xilinx/README.md \
    build-tools/newad.md
 
+SRC_SVG = \
+  badger/doc/rtefi.svg \
+  badger/doc/clients.svg \
+  badger/doc/mem_gateway.svg \
+  badger/doc/tx_path.svg \
+  badger/doc/precog_upg.svg \
+  peripheral_drivers/i2cbridge/i2c_chunk.svg \
+  peripheral_drivers/i2cbridge/blocks.svg
+
 DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR)
 VFLAGS     += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS)) -y$(AUTOGEN_DIR)
 
 vpath %.v $(DIRS)
 vpath %.md $(MAKEF_DIR)
 vpath %.gtkw $(DIRS)
+vpath %.svg $(MAKEF_DIR)
 
 _SRC_RST   = $(SRC:.v=_source.rst)
 SRC_RST    = $(addprefix $(GEN_SRC_DIR)/, $(_SRC_RST))
@@ -165,6 +180,7 @@ TB_PNG     = $(GTKW:.gtkw=_tb.v)
 # Generate timing diagrams if testbench and gtkwave files exist
 _TIMING_PNG = $(TB_PNG:_tb.v=_timing.png)
 TIMING_PNG  = $(addprefix $(GEN_DIR)/, $(_TIMING_PNG))
+SVG         = $(addprefix $(GEN_MD_DIR)/, $(SRC_SVG))
 
 # For cleaning
 GEN_TB     = $(addprefix $(GEN_DIR)/, $(basename $(TB)))
@@ -178,14 +194,14 @@ include $(CORDIC_DIR)/rules.mk
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help images Makefile gen_dir src_rst rst md block_png block_eps timing
+.PHONY: help Makefile gen_dir src_rst rst md pdf block_png block_eps timing svg
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 #
 # rst should be last as this targets checks some files to change
 # the way it generates its output
-html: images Makefile block_png timing src_rst rst md
+html: Makefile block_png timing svg src_rst rst md pdf static_rst
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 $(GEN_SRC_DIR)/%_source.rst: %.v
@@ -198,10 +214,15 @@ $(GEN_DIR)/%.rst: %.v
 		$(PYTHON) $(BUILD_DIR)/portfind.py --gen-rst $< > $@; \
 	fi
 
+# The result of the --filter "" is complex to understand. Basically, given a
+# .md filepath it creates the title with:
+# <last directory name of the file> <filename>
+#
+# If "last directory name of the file" is $(GEN_MD_DIR), discard it
 $(GEN_MD_DIR)/%_md.rst: %.md
 	mkdir -p $(dir $@)
 	$(PYTHON) $(BUILD_DIR)/genrststub.py --gen-md-include \
-		--title "$(notdir $(patsubst %/,%,$(dir $@))) $(patsubst %_md,%,$(basename $(notdir $@)))" \
+		--title "$(filter-out $(GEN_MD_DIR),$(notdir $(patsubst %/,%,$(dir $@)))) $(patsubst %_md,%,$(basename $(notdir $@)))" \
 		$< > $@
 
 $(GEN_DIR)/%_block.eps: %.v
@@ -218,19 +239,20 @@ $(GEN_DIR)/%_timing.png: %.vcd %.gtkw
 	$(XVFB) $(GTKWAVE) $^ -r gtkwave_nosplash.rc -S fancy.tcl && mv $*_timing.png $@
 	$(CONVERT) -crop 1200x1000+229+68 $@ foo.$$$$ && mv foo.$$$$ $@
 
+$(GEN_MD_DIR)/%.svg: %.svg
+	mkdir -p $(dir $@)
+	cp $< $(dir $@)
+
 # Special additional prerequisites as iverilog does not catch them
 biquad_tb: ../dsp/saturateMath.v
 iirFilter_tb: ../dsp/saturateMath.v
 
 # Special additional prerequisites for CORDIC generation
-rot_dds_auto: cordicg_b22.v
-mon_12_auto: cordicg_b22.v
-ssb_out_auto: cordicg_b22.v
-cordic_mux_auto: cordicg_b22.v
-fdbk_core_auto: cordicg_b22.v
-
-images::
-	if [ -d images ]; then $(MAKE) -C images || exit 1; fi
+rot_dds_tb: cordicg_b22.v
+mon_12_tb: cordicg_b22.v
+ssb_out_tb: cordicg_b22.v
+cordic_mux_tb: cordicg_b22.v
+fdbk_core_tb: cordicg_b22.v
 
 src_rst: gen_dir $(SRC_RST)
 
@@ -238,11 +260,15 @@ rst: gen_dir $(RST)
 
 md: gen_md_dir $(MD_RST)
 
+pdf: gen_rtsim_pdf gen_digaree_pdf
+
 block_eps: gen_dir $(BLOCK_EPS)
 
 block_png: gen_dir $(BLOCK_PNG)
 
 timing: gen_dir $(TIMING_PNG)
+
+svg: gen_dir $(SVG)
 
 gen_dir:
 	mkdir -p $(GEN_DIR) $(GEN_SRC_DIR)
@@ -250,8 +276,18 @@ gen_dir:
 gen_md_dir:
 	mkdir -p $(GEN_MD_DIR)
 
+gen_rtsim_pdf:
+	make -C $(RTSIM_DIR)/doc
+	cp $(RTSIM_DIR)/doc/*.pdf .
+
+gen_digaree_pdf:
+	make -C $(DSP_DIR)/digaree tuning_dsp4.pdf
+	cp $(DSP_DIR)/digaree/*.pdf .
+
+static_rst:
+	cp $(STATIC_RST) $(GEN_DIR)/
+
 clean::
-	if [ -d images ]; then $(MAKE) -C images clean || exit 1; fi
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 include $(BUILD_DIR)/bottom_rules.mk

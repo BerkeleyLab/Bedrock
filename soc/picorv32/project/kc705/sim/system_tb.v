@@ -33,7 +33,7 @@ module system_tb;
         #500000 $display("Simulation finish.");
         //$display("\n%8s", pass ? "PASS" : "FAIL" );
         $display("PASS");
-        $finish();
+        $finish(0);
     end
 
     // ------------------------------------------------------------------------
@@ -94,7 +94,7 @@ module system_tb;
         if (!reset && trap && !uart_debug0.busy) begin
             #10000
             $display("TRAP");
-            $stop();
+            $stop(0);
         end
     end
 

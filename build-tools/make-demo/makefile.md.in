@@ -31,12 +31,12 @@ For concrete discussion purposes, consider the following Makefile:
 #include Makefile1
 ```
 This covers two cases: one where b2d_tb is a self-checking testbench,
-i.e., where execution of b2d_tb ends with $stop() on failure,
-but $finish() on success.
+i.e., where execution of b2d_tb ends with $stop(0) on failure,
+but $finish(0) on success.
 In the other case, fib_tb creates an output file that needs to match fib.gold.
 
 Normally, the make program displays each command before it is executed.
-This is normally considered a good thing, because it immediately isolates the
+This is considered a good thing, because it helps isolate the
 cause of any failures that occur.
 Referring to the fib_check rule above, the second command
 ```
@@ -109,7 +109,7 @@ that gets increasingly complicated as the number of files involved climbs.
 One approach we use is based on combining the -y and -M options to iverilog.
 The -y flag will cause iverilog to
 search directories for files that match unresolved module names.
-The -M flag emits a list of files used, which (with some trickery)
+The -M flag emits a list of files used, which
 can be converted to a dependency list for make.
 
 ### One more trick
@@ -139,9 +139,9 @@ Two in particular attempt to address the needs of an HDL environment.
  * [FuseSoC](https://pypi.org/project/fusesoc/)
 
 Our experiments with these tools have generally been frustrating.
-We have used the flexibility of make to support many combinations
-of target hardware and application code, as well as generated code
-and self-tests.  These ideas are not normally priorities of these
+We use the flexibility of make to support many combinations
+of target hardware and application code, as well as manage generated code
+and self-tests.  Such capabilities are not priorities of these
 more specialized tools.
 
 ### Cross-check
@@ -152,4 +152,4 @@ following output:
 #include make.log
 ```
 The three Makefiles above are all equivalent, in the sense that they produce
-the same output (at least when whitespace is ignored).
+the same output (when whitespace is ignored).

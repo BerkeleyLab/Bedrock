@@ -20,7 +20,7 @@ initial begin
 		clk=1; #4;
 	end
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 wire strobe;  // will be xformer.v or precog?

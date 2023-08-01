@@ -26,7 +26,7 @@ module onewire_tb;
         reset <= 0;
         #25000000
         $display("\nTIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -43,7 +43,7 @@ module onewire_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
         $fflush();
     end

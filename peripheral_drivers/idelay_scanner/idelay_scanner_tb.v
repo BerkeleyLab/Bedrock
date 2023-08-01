@@ -16,9 +16,9 @@ initial begin
 	// not 16, because we overwrite lane 7 result with "software"
 	if (agreed == 15) $display("PASS"); else begin
 		$display("FAIL", agreed);
-		$stop();
+		$stop(0);
 	end
-	$finish();
+	$finish(0);
 end
 
 // Use ADC data pulled from real hardware (SN011) and AD9653 test pattern 00001100

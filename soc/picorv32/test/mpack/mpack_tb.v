@@ -81,7 +81,7 @@ module mem_pack_unpack_tb;
             $finish;
         end
         $display("FAIL");
-        $stop;
+        $stop(0);
     end
 
 endmodule

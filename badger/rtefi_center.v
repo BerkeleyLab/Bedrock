@@ -191,7 +191,7 @@ assign idata = eth_data_out;
 localparam precog_latency = (1<<paw) - p_offset + 4 + n_lat;
 wire [7:0] tx_mac_data;
 wire tx_mac_strobe_s, tx_mac_strobe_l;
-generate if (mac_aw > 1) begin: mac_b
+generate if (mac_aw > 1) begin : mac_b
     mac_subset #(
 	.mac_aw(mac_aw),
 	.latency(precog_latency)
@@ -207,7 +207,7 @@ generate if (mac_aw > 1) begin: mac_b
 	.strobe_s(tx_mac_strobe_s),
 	.strobe_l(tx_mac_strobe_l)
     );
-end else begin
+end else begin : no_mac_b
 	assign tx_mac_strobe_s = 0;
 	assign tx_mac_strobe_l = 0;
 	assign tx_mac_data = 0;
