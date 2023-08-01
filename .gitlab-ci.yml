@@ -108,10 +108,9 @@ sphinx_docs:
         xvfb \
         gtkwave \
         texlive-binaries
-    python3 -m pip install \
+    python3 -m pip install --break-system-packages \
         sphinx==5.0.2 \
         sphinx_rtd_theme \
-        numpy \
         m2r2==0.3.2
     sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
         -e '/pattern="PDF"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
