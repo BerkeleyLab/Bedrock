@@ -31,14 +31,14 @@ module ad7794 #(parameter ADDR_WIDTH=8,parameter DATA_WIDTH=24,parameter SPIMODE
 wire sclk_7794, mosi_7794;
 wire miso_7794, ss_7794;
 generate
-if (SPIMODE=="passthrough") begin
+if (SPIMODE=="passthrough") begin: passthrough
 	assign SCLK = sclk_in;
 	assign DIN = mosi_in;
 	assign CS = ss_in;
 	assign miso_out = DOUT_RDY;
 	assign CLK = adcclk;
 end
-else if (SPIMODE=="chain") begin
+else if (SPIMODE=="chain") begin: no_passthrough
 	assign SCLK = spi_ssb_in ? sclk_7794 : sclk_in;
 	assign DIN = spi_ssb_in ? mosi_7794 : mosi_in;
 	assign CS = ss_7794;
