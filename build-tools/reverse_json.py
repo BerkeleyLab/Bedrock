@@ -1,9 +1,9 @@
 '''
-Rummage through input file and construct a JSON file representing
+Rummage through input (Verilog) file and construct a JSON file representing
 most of the read address space.  Depends on stylized Verilog representation
 of the first stage of the (scalar) read data multiplexer, using reg_bank_n
 pipeline registers.  Attempts to deduce signed-ness and bit width for each
-entry by peeking at wire declarations in the Verilog.
+entry by peeking at wire, reg, and input declarations in the Verilog.
 '''
 import re
 from sys import stderr, argv
@@ -132,29 +132,27 @@ for line in f.read().split('\n'):
                 stderr.write(ehead + ' bank %s assignment found in bank %s stanza\n' % (tbank, bank_state))
                 fail = 1
     if "wire" in line:
-        m2 = re.search(r"wire\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", line)
+        m2 = re.search(r"\bwire\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", line)
         if m2:
             memorize(m2.group)
-    if "reg " in line:
-        m2 = re.search(r"reg\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", line)
+    if "reg" in line:
+        m2 = re.search(r"\breg\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", line)
         if m2:
             memorize(m2.group)
-    if any(x in line for x in ["parameter ", "localparam "]):
-        m3 = re.search(r"(?:parameter|localparam)\s+(\w+)\s*=\s*(\d+);", line)
+    if "input" in line:
+        m2 = re.search(r"\binput\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", line)
+        if m2:
+            memorize(m2.group)
+    if any(x in line for x in ["parameter", "localparam"]):
+        m3 = re.search(r"\b(?:parameter|localparam)\s+(\w+)\s*=\s*(\d+);", line)
         if m3:
             p, v = m3.group(1), int(m3.group(2))
             param_db[p] = v
             # stderr.write('INFO: found parameter "%s" with value %d\n' % (p, v))
-    if "localparam " in line:
-        m3 = re.search(r"localparam\s+(\w+)\s*=\s*(\d+);", line)
-        if m3:
-            p, v = m3.group(1), int(m3.group(2))
-            param_db[p] = v
-            # stderr.write('INFO: found localparam "%s" with value %d\n' % (p, v))
     if "endcase" in line:
         bank_state = None
     if "case" in line and "addr" in line:
-        m4 = re.search(r"case\s*\(\w*addr", line)
+        m4 = re.search(r"\bcase\s*\(\w*addr", line)
         if m4:
             bank_state = "=armed="
 print(",\n".join(sl))
