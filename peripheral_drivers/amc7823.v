@@ -1,5 +1,8 @@
-module  amc7823
-#(parameter ADDR_WIDTH=16, parameter DATA_WIDTH=16, parameter SPIMODE="passthrough") (
+module amc7823 #(
+	parameter ADDR_WIDTH=16,
+	parameter DATA_WIDTH=16,
+	parameter SPIMODE="passthrough"
+) (
 	output                  ss,
 	input                   miso,
 	output                  mosi,

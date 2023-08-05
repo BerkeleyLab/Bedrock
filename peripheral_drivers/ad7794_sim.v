@@ -1,4 +1,4 @@
-module  ad7794_sim (
+module ad7794_sim (
    input  CLK,
    input  CS,
    input  DIN,
