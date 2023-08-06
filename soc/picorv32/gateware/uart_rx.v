@@ -27,11 +27,9 @@ THE SOFTWARE.
 /*
  * AXI4-Stream UART
  */
-module uart_rx #
-(
+module uart_rx #(
     parameter DATA_WIDTH = 8
-)
-(
+) (
     input  wire                   clk,
     input  wire                   rst,
 

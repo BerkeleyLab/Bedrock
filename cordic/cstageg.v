@@ -1,17 +1,22 @@
 `timescale 1ns / 1ns
 
-module cstageg(clk, opin, xin, yin, zin, ain, opout, xout, yout, zout);
-	parameter shift=1;
-	parameter zwidth=16;
-	parameter width=16;
-	parameter def_op=0;
-	input clk;
-	input [1:0] opin;
-	input [width-1:0] xin, yin;
-	input [zwidth-1:0] zin, ain;
-	output reg [1:0] opout;
-	output reg [width-1:0] xout, yout;
-	output reg [zwidth-1:0] zout;
+module cstageg #(
+	parameter shift=1,
+	parameter zwidth=16,
+	parameter width=16,
+	parameter def_op=0
+) (
+	input clk,
+	input [1:0] opin,
+	input [width-1:0] xin,
+	input [width-1:0] yin,
+	input [zwidth-1:0] zin,
+	input [zwidth-1:0] ain,
+	output reg [1:0] opout,
+	output reg [width-1:0] xout,
+	output reg [width-1:0] yout,
+	output reg [zwidth-1:0] zout
+);
 
 	initial begin
 		opout=def_op;  xout=0;  yout=0;  zout=0;

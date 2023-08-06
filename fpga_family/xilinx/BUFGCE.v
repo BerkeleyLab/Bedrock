@@ -1,6 +1,10 @@
 `timescale 1ns / 1ns
 
-module BUFGCE (output O, input I, input CE);
+module BUFGCE (
+	output O,
+	input I,
+	input CE
+);
 	// verilator lint_save
 	// verilator lint_off MULTIDRIVEN
 	reg x=0;
