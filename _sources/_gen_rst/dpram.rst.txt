@@ -37,6 +37,11 @@ Parameters
      - ?
      - 8
      - 
+   * - sz
+     - ?
+     - ?
+     - 
+     - 
    * - initial_file
      - ?
      - ?
@@ -55,25 +60,13 @@ Ports
    * - clka
      - Input
      - 
-   * - clkb
-     - Input
-     - 
    * - addra[aw-1:0]
      - Input
-     - 
-   * - douta[dw-1:0]
-     - Output
      - 
    * - dina[dw-1:0]
      - Input
      - 
-   * - wena
-     - Input
-     - 
-   * - addrb[aw-1:0]
-     - Input
-     - 
-   * - doutb[dw-1:0]
+   * - douta[dw-1:0]
      - Output
      - 
 
