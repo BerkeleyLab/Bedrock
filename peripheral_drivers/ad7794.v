@@ -45,7 +45,7 @@ else if (SPIMODE=="chain") begin: no_passthrough
 	assign miso_7794 = DOUT_RDY;
 	assign CLK = adcclk;
 end
-else if (SPIMODE=="standalone") begin
+else if (SPIMODE=="standalone") begin: standalone
 	assign SCLK = sclk_7794;
 	assign DIN = mosi_7794;
 	assign CS = ss_7794;
