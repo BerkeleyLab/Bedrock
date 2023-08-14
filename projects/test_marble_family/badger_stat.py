@@ -10,7 +10,7 @@ def update(dev):
     wrap = 2**16  # hard-coded width of rx_counters in lb_marble_slave.v
     totals = dev.reg_read(["rx_counters"])[0]
     counts = totals - prevs
-    counts = [x&(wrap-1) for x in counts]
+    counts = [x & (wrap-1) for x in counts]
     prevs = totals
     return counts
 
