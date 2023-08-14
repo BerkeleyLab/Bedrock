@@ -1,7 +1,16 @@
 // Reduce number of bits representing the category
 // of a Packet Badger Rx packet from 8 to 4.
-// Might need refinement after real-life testing.
+// Keep the categories here in-sync with badger_stat.py.
 // Output is delayed one cycle; clock domain is unchanged.
+// 0:  not used
+// 1:  failed CRC
+// 2:  ARP for us
+// 3:  not MAC-addressed for us
+// 4:  packet type is not IP
+// 5:  other unrecongized
+// 6:  ICMP
+// 7:  not used
+// 8-15:  UDP to a configured port
 
 module packet_categorize(
 	input clk,

@@ -1,23 +1,24 @@
 [timestart] 0
-[size] 1000 600
+[size] 1073 597
 [pos] -1 -1
-*-8.441157 661 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.181365 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] multi_counter_tb.
 [sst_width] 214
 [signals_width] 158
 [sst_expanded] 1
-[sst_vpaned_height] 152
+[sst_vpaned_height] 151
 @28
 multi_counter_tb.inc
 @22
 multi_counter_tb.inc_addr[3:0]
 multi_counter_tb.read_addr[3:0]
+@24
 multi_counter_tb.read_data[15:0]
 @28
 multi_counter_tb.fault
 @200
 -DUT
-@22
+@24
 multi_counter_tb.dut.old[15:0]
 multi_counter_tb.dut.old_plus_1[15:0]
 [pattern_trace] 1

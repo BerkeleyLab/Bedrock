@@ -27,18 +27,18 @@ end
 // Stimulus
 reg inc=0;  reg[3:0] inc_addr;
 always @(posedge clk) case(cc)
-	4: begin inc<=1; inc_addr<=4; end
-	5: begin inc<=1; inc_addr<=3; end
-	10: begin inc<=1; inc_addr<=4; end
-	11: begin inc<=1; inc_addr<=4; end
-	20: begin inc<=1; inc_addr<=6; end
-	25: begin inc<=1; inc_addr<=6; end
+	4:  begin inc<=1; inc_addr<=4; end
+	5:  begin inc<=1; inc_addr<=3; end
+	8:  begin inc<=1; inc_addr<=4; end
+	9:  begin inc<=1; inc_addr<=4; end
+	14: begin inc<=1; inc_addr<=6; end
+	16: begin inc<=1; inc_addr<=6; end
 	default: begin inc<=0; inc_addr<=4'bx; end
 endcase
 
 // Read address sequencing
 reg [3:0] read_addr=0;
-always @(posedge clk) if ((cc>30) && ((cc%3)==0)) read_addr <= read_addr+1;
+always @(posedge clk) if ((cc>20) && ((cc%3)==0)) read_addr <= read_addr+1;
 
 // Instantiation of Device Under Test
 wire [15:0] read_data;

@@ -9,9 +9,9 @@ module multi_counter #(
 	parameter dw=16  // bit-width of each counter
 ) (
 	input clk,
-	input inc,
+	input inc,  // increment the counter specified by inc_addr
 	input [aw-1:0] inc_addr,
-	input [aw-1:0] read_addr,
+	input [aw-1:0] read_addr,  // local bus address
 	output [dw-1:0] read_data
 );
 
