@@ -36,6 +36,8 @@ module lb_marble_slave #(
 	input [27:0] frequency_si570,
 	// More debugging hooks
 	input [3:0] mmc_pins,
+	input rx_category_s,
+	input [3:0] rx_category,
 	// Features
 	input tx_mac_done,
 	input [15:0] rx_mac_data,
@@ -133,6 +135,13 @@ end endgenerate
 // the FPGA and PHY clock trees come to life at different rates.
 reg [15:0] xdomain_fault_count=0;
 always @(posedge clk) if (xdomain_fault) xdomain_fault_count <= xdomain_fault_count + 1;
+
+// Accumulate packet statistics
+wire [15:0] rx_counters;
+multi_counter #(.aw(4), .dw(16)) badger_rx_counter(
+	.clk(clk), .inc(rx_category_s), .inc_addr(rx_category),
+	.read_addr(addr[3:0]), .read_data(rx_counters)
+);
 
 // Frequency counter
 wire [31:0] tx_freq;
@@ -337,7 +346,8 @@ always @(posedge clk) if (do_rd_r) begin
 		24'h01????: lb_data_in <= ibadge_out;
 		24'h02????: lb_data_in <= obadge_out;
 		24'h03????: lb_data_in <= rx_mac_data;
-		24'h04????: lb_data_in <= twi_dout;
+		24'h040???: lb_data_in <= twi_dout;
+		24'h041???: lb_data_in <= rx_counters;
 		24'h05????: lb_data_in <= mirror_out_0;
 		24'h06????: lb_data_in <= ctrace_out;
 		24'h07????: lb_data_in <= gps_buf_out;
