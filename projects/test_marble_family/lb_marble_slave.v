@@ -137,8 +137,8 @@ reg [15:0] xdomain_fault_count=0;
 always @(posedge clk) if (xdomain_fault) xdomain_fault_count <= xdomain_fault_count + 1;
 
 // Accumulate packet statistics
-wire [15:0] rx_counters;
-multi_counter #(.aw(4), .dw(16)) badger_rx_counter(
+wire [19:0] rx_counters;
+multi_counter #(.aw(4), .dw(20)) badger_rx_counter(
 	.clk(clk), .inc(rx_category_s), .inc_addr(rx_category),
 	.read_addr(addr[3:0]), .read_data(rx_counters)
 );

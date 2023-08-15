@@ -137,7 +137,7 @@
         "addr_width": 4,
         "sign": "unsigned",
         "base_addr": "0x41000",
-        "data_width": 16
+        "data_width": 20
     },
     "ctrace_out": {
         "access": "r",

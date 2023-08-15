@@ -6,7 +6,7 @@ prevs = np.array([0]*16)
 
 def update(dev):
     global prevs
-    wrap = 2**16  # hard-coded width of rx_counters in lb_marble_slave.v
+    wrap = 2**20  # hard-coded width of rx_counters in lb_marble_slave.v
     totals = dev.reg_read(["rx_counters"])[0]
     counts = totals - prevs
     counts = [x & (wrap-1) for x in counts]
