@@ -27,14 +27,18 @@ jobs:
 
       - name: Install python PIP packages
         run: |
-          python -m pip install sphinx==5.0.2 numpy m2r2==0.3.2
+          python -m pip install \
+                sphinx==5.0.2 \
+                sphinx_rtd_theme \
+                numpy m2r2==0.3.2
 
       - name: Install documentation tools
         run: |
           sudo apt-get update
           sudo apt-get -y install make \
                           imagemagick ghostscript \
-                          iverilog xvfb gtkwave
+                          iverilog xvfb gtkwave \
+                          texlive-binaries
           sudo sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
                       -e '/pattern="PDF"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
                       -e '/pattern="EPS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \

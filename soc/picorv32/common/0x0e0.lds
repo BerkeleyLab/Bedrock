@@ -43,6 +43,10 @@ SECTIONS {
 
     .theRest : {
         . = ALIGN(4);
+        /*
+        See comments in 0x000.lds
+        */
+        __tls_base = .;
         *(*);
         . = ALIGN(4);
     }

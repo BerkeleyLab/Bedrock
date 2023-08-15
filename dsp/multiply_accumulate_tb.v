@@ -19,7 +19,7 @@ initial begin
 		clk=1; #4;
 	end
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 reg signed [17:0] signal = 10000, constant = 200;

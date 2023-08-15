@@ -49,7 +49,7 @@ module badger_lwip_tb(
                 $finish;
             end else begin
                 $display("FAIL");
-                $stop;
+                $stop(0);
             end
         end
     end

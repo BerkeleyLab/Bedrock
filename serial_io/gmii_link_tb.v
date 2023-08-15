@@ -20,14 +20,14 @@ module gmii_link_tb;
       if (operate)
          if (an_status[6]) begin
             $display("FAIL: Link is up but auto-negotiation timed out.");
-            $stop();
+            $stop(0);
          end else begin
             $display("PASS: Link is up and auto-negotiation completed successfully.");
-            $finish();
+            $finish(0);
          end
 
       $display("FAIL: Link is not up at the end of the test.");
-      $stop();
+      $stop(0);
    end
 
    wire operate;  // from link negotiator
@@ -68,7 +68,7 @@ module gmii_link_tb;
       // No physical link; Don't expect any AN activity
       if (operate || an_status[6] || an_status[0] || rx_dv) begin
          $display("FAIL: %t AN unexpected when physical link is down", $time);
-         $stop;
+         $stop(0);
       end
 
       #(CLKP*10)
@@ -78,7 +78,7 @@ module gmii_link_tb;
       wait (operate)
       if (an_status[6] || ~an_status[0]) begin
          $display("FAIL: %t Link is up but AN failed", $time);
-         $stop;
+         $stop(0);
       end
 
       #(CLKP*1000)
@@ -90,7 +90,7 @@ module gmii_link_tb;
       wait (operate)
       if (~an_status[6]) begin
          $display("FAIL: %t Link is up but AN abort not signalled", $time);
-         $stop;
+         $stop(0);
       end
 
       #(CLKP*1000)
@@ -102,7 +102,7 @@ module gmii_link_tb;
       wait (operate)
       if (an_status[6] || ~an_status[0]) begin
          $display("FAIL: %t Link is up but AN failed", $time);
-         $stop;
+         $stop(0);
       end
 
    end

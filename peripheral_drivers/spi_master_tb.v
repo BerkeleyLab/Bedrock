@@ -30,7 +30,7 @@ initial begin
 		#10;
 	end
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 always #5 clk=~clk;  // 100 MHz clk

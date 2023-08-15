@@ -422,7 +422,7 @@ assign phy_rstn = phy_rb;
 always @(posedge tx_clk) begin
 	if (slave.stop_sim & ~in_use) begin
 		$display("marble_base:  stopping based on localbus request");
-		$finish();
+		$finish(0);
 	end
 end
 
