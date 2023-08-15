@@ -49,9 +49,11 @@ MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@
 VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I.
 # keep -Wno-TIMESCALEMOD separate, since it's a new flag not supported by Verilator 4.010 in Debian Buster
 VLATOR_TIMESCALEMOD = -Wno-TIMESCALEMOD
+# new flag for Verilator v4.226 and beyond
+# VLATOR_TIMING = --timing
 VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY $(VLATOR_TIMESCALEMOD)
 VERILATOR_LINT = $(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $(filter %.v %.sv, $^)
-VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN --MMD --Mdir $(DEPDIR)
+VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN $(VLATOR_TIMING) --MMD --Mdir $(DEPDIR)
 VERILATOR_SIM = $(VERILATOR) --trace-fst -O2 $(VLATOR_LINT_IGNORE) $(VG_ALL) +define+VERILATOR_SIM
 
 FMC_MAP = awk -F\" 'NR==FNR{a[$$2]=$$4;next}$$4 in a{printf "NET %-15s LOC = %-4s | IOSTANDARD = %10s; \# %s\n",$$2,a[$$4],$$6,$$4}'

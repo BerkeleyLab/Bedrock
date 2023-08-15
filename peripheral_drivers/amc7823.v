@@ -1,5 +1,8 @@
-module  amc7823
-#(parameter ADDR_WIDTH=16, parameter DATA_WIDTH=16, parameter SPIMODE="passthrough") (
+module amc7823 #(
+	parameter ADDR_WIDTH=16,
+	parameter DATA_WIDTH=16,
+	parameter SPIMODE="passthrough"
+) (
 	output                  ss,
 	input                   miso,
 	output                  mosi,
@@ -29,13 +32,13 @@ module  amc7823
 wire sclk_7823, mosi_7823;
 wire miso_7823, ss_7823;
 generate
-if (SPIMODE=="passthrough") begin
+if (SPIMODE=="passthrough") begin: passthrough
 	assign sclk = sclk_in;
 	assign mosi = mosi_in;
 	assign ss = ss_in;
 	assign miso_out = miso;
 end
-else if (SPIMODE=="chain") begin
+else if (SPIMODE=="chain") begin: no_passthrough
 	assign sclk = spi_ssb_in ? sclk_7823 : sclk_in;
 	assign mosi = spi_ssb_in ? mosi_7823 : mosi_in;
 	assign ss = ss_7823;

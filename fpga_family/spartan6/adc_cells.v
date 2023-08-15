@@ -28,13 +28,14 @@
 
 `timescale 1ns / 1ns
 
-module adc_cells(clk, mux_data_in, adc0, adc1);
+module adc_cells(
+	input clk,
+	input [13:0] mux_data_in,
+	output [13:0] adc0,
+	output [13:0] adc1
+);
 
    parameter width = 14;
-   input         clk;
-   input [13:0]  mux_data_in;
-   output [13:0] adc0;
-   output [13:0] adc1;
 
    // interleave DDR output from AD9258
    wire        adc_iddr2_rst=1'b0;

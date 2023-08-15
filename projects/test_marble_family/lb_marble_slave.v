@@ -78,7 +78,8 @@ wire [31:0] xadc_internal_temperature;
 assign xadc_internal_temperature = {16'h0000, xadc_temp_dout};
 
 // Device DNA
-wire [31:0] dna_high, dna_low;
+wire [31:0] dna_high;
+wire [31:0] dna_low;
 
 //`define BADGE_TRACE
 `ifdef BADGE_TRACE
