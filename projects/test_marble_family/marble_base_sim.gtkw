@@ -1,10 +1,10 @@
-[timestart] 7600
+[timestart] 4
 [size] 1270 773
 [pos] 2021 184
-*-9.542541 10028 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-15.234827 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.marble_base.
-[sst_width] 213
+[sst_width] 214
 [signals_width] 194
 [sst_expanded] 1
 [sst_vpaned_height] 212
@@ -28,13 +28,18 @@ TOP.marble_base.spi.halfway
 TOP.marble_base.spi.tx_data[7:0]
 @1000200
 -SPI
-@c00200
--ETH
+@800200
+-vgmii
 @28
-TOP.marble_base.vgmii_rx_dv
-TOP.marble_base.vgmii_tx_en
-@1401200
--ETH
+TOP.vgmii_rx_dv
+@22
+TOP.vgmii_rxd[7:0]
+@28
+TOP.vgmii_tx_en
+@22
+TOP.vgmii_txd[7:0]
+@1000200
+-vgmii
 @800200
 -Mailbox
 @28
