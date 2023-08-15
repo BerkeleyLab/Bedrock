@@ -32,11 +32,11 @@ if __name__ == "__main__":
         print("Leep initialization error:", err)
         sys.exit(1)
 
-    print("   n/a  !crc   arp  !MAC   !IP  other  ICMP  n/a   UDP     1     2     3")
+    print("   n/a   !crc    arp   !MAC    !IP   other   ICMP   n/a    UDP      1      2      3")
     while True:
         try:
             counts = update(dev)
-            print("".join(["%6d" % counts[ix] for ix in range(16)]))
+            print(" ".join(["%6d" % counts[ix] for ix in range(16)]))
             sleep(args.interval)
         except (KeyboardInterrupt, OSError) as err:
             if isinstance(err, KeyboardInterrupt):
