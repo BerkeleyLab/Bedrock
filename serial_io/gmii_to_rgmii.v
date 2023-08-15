@@ -73,6 +73,11 @@ generate for (ix=0; ix<4; ix=ix+1)
     end
 endgenerate
 
+// Notes here refer to PG051, which is
+//  Tri-Mode Ethernet MAC LogiCORE IP Product Guide (PG051)
+// currently v9.0, May 17, 2023.  Of course my figure references
+// are for a much older version, going back to at least 2018.
+//
 // RGMII Tx, Refer to PG051 Fig 3-66
 // Refer to PG051 page 154 for reason of using ODDR & 90 phase clock.
 // Other hardware (like Marvell 88E1512 in default mode)

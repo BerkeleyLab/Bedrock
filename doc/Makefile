@@ -26,6 +26,7 @@ GEN_DIR = _gen_rst
 GEN_MD_DIR = _gen_md
 GEN_SRC_DIR = _gen_src_rst
 
+# No need to specify directory for each of these, thanks to the magic of make's vpath.
 SRC = \
    afterburner.v \
    async_to_sync_reset_shift.v \
@@ -81,6 +82,7 @@ SRC = \
    mon_2chiq.v \
    mon_chans.v \
    multiply_accumulate.v \
+   multi_counter.v \
    multi_sampler.v \
    pdetect.v \
    ph_acc.v \
@@ -107,7 +109,7 @@ SRC = \
    # lp_notch.v  # must generate _auto files
    # lp.v # must generate _auto files
    # mp_proc.v # must generate _auto files
-   #via.v # not properly formatted for portfind.py
+   # via.v # not properly formatted for portfind.py
 
 STATIC_RST = \
    rtsim-module.rst \
@@ -151,7 +153,7 @@ SRC_SVG = \
   peripheral_drivers/i2cbridge/i2c_chunk.svg \
   peripheral_drivers/i2cbridge/blocks.svg
 
-DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR)
+DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR) $(HOMELESS_DIR)
 VFLAGS     += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS)) -y$(AUTOGEN_DIR)
 
 vpath %.v $(DIRS)

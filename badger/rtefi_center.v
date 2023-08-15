@@ -123,6 +123,9 @@ scanner #(.handle_arp(handle_arp), .handle_icmp(handle_icmp)) a_scan(
 );
 assign rx_mac_status_d = status_vec;
 assign rx_mac_status_s = status_valid;
+`ifdef SIMULATE
+// always @(negedge rx_clk) if (status_valid) $display("Rx scanner status %x", status_vec);
+`endif
 
 // Second step: create data flow to DPRAM
 wire [paw-1:0] pbuf_a_rx, gray_state;
