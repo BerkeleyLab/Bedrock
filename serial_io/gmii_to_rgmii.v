@@ -21,7 +21,12 @@ module gmii_to_rgmii #(
     output [7:0] gmii_rxd,  // to MAC
     output gmii_rx_clk,     // to MAC
     output gmii_rx_dv,      // to MAC
-    output gmii_rx_er       // to MAC
+    output gmii_rx_er,      // to MAC
+
+    // IDELAYE2 control, matches lvds_iophy
+    input            clk_div,
+    input            idelay_ce,
+    input [4:0]      idelay_value_in
 );
 
 // RGMII
@@ -150,6 +155,60 @@ BUFR rgmii_rx_clk_bufr_i (
 
 assign gmii_rx_clk = rgmii_rx_clk_bufr;
 
+// AC701 does not need RX delay
+// instantiate IDELAYCTRL & use IDELAY_VALUE for IDELAYE2 to work
+// Note that this chunk of code delays rxd (and ctl) but not clk.
+wire rgmii_rx_ctl_delay;
+wire [3:0] rgmii_rxd_delay;
+//`define RXDELAY
+`ifdef RXDELAY
+
+IDELAYE2 #(
+    .DELAY_SRC("IDATAIN"),
+    .IDELAY_TYPE("VAR_LOAD"),
+    .IDELAY_VALUE(0)
+) rgmii_rx_ctl_delay_i (
+    .IDATAIN(rgmii_rx_ctl_ibuf),
+    .DATAOUT(rgmii_rx_ctl_delay),
+    .DATAIN(1'b0),
+    .C(clk_div),
+    .CE(idelay_ce),
+    .INC(1'b0),
+    .CINVCTRL(1'b0),
+    .CNTVALUEIN(idelay_value_in),
+    .CNTVALUEOUT(),
+    .LD(1'b0),
+    .LDPIPEEN(1'b0),
+    .REGRST(1'b0)
+);
+
+genvar j;
+generate for (j=0; j<4; j=j+1)
+    begin: gen_gmii_rxd_delay
+        IDELAYE2 #(
+            .IDELAY_TYPE("FIXED")
+        ) delay_rgmii_rxd (
+            .IDATAIN(rgmii_rxd_ibuf[j]),
+            .DATAOUT(rgmii_rxd_delay[j]),
+            .DATAIN(1'b0),
+            .C(clk_div),
+            .CE(idelay_ce),
+            .INC(1'b0),
+            .CINVCTRL(1'b0),
+            .CNTVALUEIN(idelay_value_in),
+            .CNTVALUEOUT(),
+            .LD(1'b0),
+            .LDPIPEEN(1'b0),
+            .REGRST(1'b0)
+        );
+    end
+endgenerate
+
+`else
+// pass-through
+assign rgmii_rx_ctl_delay = rgmii_rx_ctl_ibuf;
+assign rgmii_rxd_delay = rgmii_rxd_ibuf;
+`endif // `ifdef RXDELAY
 
 // rgmii_rx_ctl
 wire gmii_rx_dv_int;
@@ -162,7 +221,7 @@ IDDR #(
     .Q2(rgmii_rx_ctl_int),
     .C(rgmii_rx_clk_bufio),
     .CE(1'b1),
-    .D(rgmii_rx_ctl_ibuf),
+    .D(rgmii_rx_ctl_delay),
     .R(1'b0),
     .S(1'b0)
 );
@@ -186,58 +245,12 @@ generate for (k=0; k<4; k=k+1)
             .Q2(gmii_rxd_fall[k]),
             .C(rgmii_rx_clk_bufio),
             .CE(1'b1),
-            .D(rgmii_rxd_ibuf[k]),
+            .D(rgmii_rxd_delay[k]),
             .R(1'b0),
             .S(1'b0)
         );
     end
 endgenerate
 
-// AC701 does not need RX delay
-// instantiate IDELAYCTRL & use IDELAY_VALUE for IDELAYE2 to work
-`ifdef RXDELAY
-wire rgmii_rx_ctl_delay;
-wire [3:0] rgmii_rxd_delay;
-
-IDELAYE2 #(
-    .IDELAY_TYPE("FIXED")
-) rgmii_rx_ctl_delay_i (
-    .IDATAIN(rgmii_rx_ctl_ibuf),
-    .DATAOUT(rgmii_rx_ctl_delay),
-    .DATAIN(1'b0),
-    .C(1'b0),
-    .CE(1'b0),
-    .INC(1'b0),
-    .CINVCTRL(1'b0),
-    .CNTVALUEIN(5'h0),
-    .CNTVALUEOUT(),
-    .LD(1'b0),
-    .LDPIPEEN(1'b0),
-    .REGRST(1'b0)
-);
-
-genvar j;
-generate for (j=0; j<4; j=j+1)
-    begin: gen_gmii_rxd_delay
-        IDELAYE2 #(
-            .IDELAY_TYPE("FIXED")
-        ) delay_rgmii_rxd (
-            .IDATAIN(rgmii_rxd_ibuf[j]),
-            .DATAOUT(rgmii_rxd_delay[j]),
-            .DATAIN(1'b0),
-            .C(1'b0),
-            .CE(1'b0),
-            .INC(1'b0),
-            .CINVCTRL(1'b0),
-            .CNTVALUEIN(5'h0),
-            .CNTVALUEOUT(),
-            .LD(1'b0),
-            .LDPIPEEN(1'b0),
-            .REGRST(1'b0)
-        );
-    end
-endgenerate
-
-`endif // `ifdef RXDELAY
 `endif // `ifndef SIMULATE
 endmodule
