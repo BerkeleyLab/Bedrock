@@ -21,14 +21,17 @@ initial begin
     end
 end
 
+// verilator lint_save
+// verilator lint_off MULTIDRIVEN
 reg [1:0] r;
 reg [1:0] r1;
-assign {Q2, Q1} = r1;
-
 always @(posedge C) begin
     r[0] <= D;
     r1   <= r;
 end
 always @(negedge C) r[1] <= D;
+// verilator lint_restore
+
+assign {Q2, Q1} = r1;
 
 endmodule

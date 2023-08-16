@@ -1,7 +1,8 @@
 `timescale 1ns / 1ns
 
 module gmii_to_rgmii #(
-   parameter in_phase_tx_clk=0
+   parameter in_phase_tx_clk=0,
+   parameter use_idelay=0
 ) (
 
     // RGMII physical interface with PHY
@@ -155,14 +156,27 @@ BUFR rgmii_rx_clk_bufr_i (
 
 assign gmii_rx_clk = rgmii_rx_clk_bufr;
 
-// AC701 does not need RX delay
-// instantiate IDELAYCTRL & use IDELAY_VALUE for IDELAYE2 to work
+// AC701 seems to not need RX delay.
 // Note that this chunk of code delays rxd (and ctl) but not clk.
+//
+// I'm pretty sure that instantiating IDELAY doesn't really change the hardware;
+// that block is always present in the data flow from the I/O pin, just set to
+// a minimum delay configuration.
+//
+// Instantiating it does two things:  gives us access to the control pins,
+// and the tools then force us to instantiate an IDELAYCTRL block somewhere
+// to define calibration.
+//
+// Leaving it non-instantiated (parameter use_idelay=0) constructs the
+// hdl as a bare wire, speeding and simplifying simulation, and avoiding
+// the need to instantiate an IDELAYCTRL.
 wire rgmii_rx_ctl_delay;
 wire [3:0] rgmii_rxd_delay;
-//`define RXDELAY
-`ifdef RXDELAY
+genvar j;
+generate if (use_idelay) begin : with_idelay
 
+wire idelay_rx_ctl_value_out;
+(* IODELAY_GROUP = "IODELAY_200" *)
 IDELAYE2 #(
     .DELAY_SRC("IDATAIN"),
     .IDELAY_TYPE("VAR_LOAD"),
@@ -176,17 +190,20 @@ IDELAYE2 #(
     .INC(1'b0),
     .CINVCTRL(1'b0),
     .CNTVALUEIN(idelay_value_in),
-    .CNTVALUEOUT(),
+    .CNTVALUEOUT(idelay_rx_ctl_value_out),
     .LD(1'b0),
     .LDPIPEEN(1'b0),
     .REGRST(1'b0)
 );
 
-genvar j;
-generate for (j=0; j<4; j=j+1)
+wire [3:0] idelay_rx_ctl_value_out;
+for (j=0; j<4; j=j+1)
     begin: gen_gmii_rxd_delay
+        (* IODELAY_GROUP = "IODELAY_200" *)
         IDELAYE2 #(
-            .IDELAY_TYPE("FIXED")
+            .DELAY_SRC("IDATAIN"),
+            .IDELAY_TYPE("VAR_LOAD"),
+            .IDELAY_VALUE(0)
         ) delay_rgmii_rxd (
             .IDATAIN(rgmii_rxd_ibuf[j]),
             .DATAOUT(rgmii_rxd_delay[j]),
@@ -196,19 +213,18 @@ generate for (j=0; j<4; j=j+1)
             .INC(1'b0),
             .CINVCTRL(1'b0),
             .CNTVALUEIN(idelay_value_in),
-            .CNTVALUEOUT(),
+            .CNTVALUEOUT(idelay_rx_ctl_value_out[j]),
             .LD(1'b0),
             .LDPIPEEN(1'b0),
             .REGRST(1'b0)
         );
     end
-endgenerate
 
-`else
+end else begin : without_idelay
 // pass-through
 assign rgmii_rx_ctl_delay = rgmii_rx_ctl_ibuf;
 assign rgmii_rxd_delay = rgmii_rxd_ibuf;
-`endif // `ifdef RXDELAY
+end endgenerate
 
 // rgmii_rx_ctl
 wire gmii_rx_dv_int;
