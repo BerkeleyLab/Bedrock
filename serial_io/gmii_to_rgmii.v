@@ -38,7 +38,6 @@ wire rgmii_tx_clk_buf;
 wire rgmii_rx_ctl_ibuf;
 wire rgmii_rx_clk_buf;
 
-`ifndef SIMULATE
 OBUF rgmii_tx_ctl_obuf_i (
     .I(rgmii_tx_ctl_buf),
     .O(rgmii_tx_ctl)
@@ -175,7 +174,7 @@ wire [3:0] rgmii_rxd_delay;
 genvar j;
 generate if (use_idelay) begin : with_idelay
 
-wire idelay_rx_ctl_value_out;
+wire idelay_rx_ctl_value_out;  // ignored
 (* IODELAY_GROUP = "IODELAY_200" *)
 IDELAYE2 #(
     .DELAY_SRC("IDATAIN"),
@@ -196,7 +195,7 @@ IDELAYE2 #(
     .REGRST(1'b0)
 );
 
-wire [3:0] idelay_rx_ctl_value_out;
+wire [3:0] idelay_rxd_value_out;  // ignored
 for (j=0; j<4; j=j+1)
     begin: gen_gmii_rxd_delay
         (* IODELAY_GROUP = "IODELAY_200" *)
@@ -213,7 +212,7 @@ for (j=0; j<4; j=j+1)
             .INC(1'b0),
             .CINVCTRL(1'b0),
             .CNTVALUEIN(idelay_value_in),
-            .CNTVALUEOUT(idelay_rx_ctl_value_out[j]),
+            .CNTVALUEOUT(idelay_rxd_value_out[j]),
             .LD(1'b0),
             .LDPIPEEN(1'b0),
             .REGRST(1'b0)
@@ -268,5 +267,4 @@ generate for (k=0; k<4; k=k+1)
     end
 endgenerate
 
-`endif // `ifndef SIMULATE
 endmodule

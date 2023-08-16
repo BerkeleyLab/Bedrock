@@ -2,6 +2,7 @@
 // Mostly cut-and-paste from rgmii_hw_test.v
 
 `include "marble_features_defs.vh"
+//`define DEBUG_RGMII
 
 module marble_top(
 	input GTPREFCLK_P,
@@ -112,6 +113,9 @@ wire tx_clk, tx_clk90, clk62;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
 wire test_clk;
+wire clk_out1;
+wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
+// used for calibrating IODELAY cells
 
 `ifdef USE_GTPCLK
 xilinx7_clocks #(
@@ -119,13 +123,17 @@ xilinx7_clocks #(
 	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
 	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
 	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
+`ifdef DEBUG_RGMII
+	.DIV1     (5)     // 1 GHz / 5 = 200 MHz
+`else
 	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
+`endif
 ) clocks_i(
 	.sysclk_p (gtpclk),
 	.sysclk_n (1'b0),
 	.reset    (pll_reset),
 	.clk_out0 (tx_clk),
-	.clk_out1 (clk62),
+	.clk_out1 (clk_out1),
 	.clk_out2 (tx_clk90),
 	.clk_out3f(test_clk),  // not buffered, straight from MMCM
 	.locked   (clk_locked)
@@ -142,12 +150,26 @@ gmii_clock_handle clocks(
 );
 assign test_clk=0;
 `endif
+`ifdef DEBUG_RGMII
+assign clk200 = clk_out1;
+assign clk62 = 0;  // will break readout of dna
+`else
+assign clk200 = 0;
+assign clk62 = clk_out1;
+`endif
 
 // Double-data-rate conversion
 wire vgmii_tx_clk, vgmii_tx_clk90, vgmii_rx_clk;
 wire [7:0] vgmii_txd, vgmii_rxd;
 wire vgmii_tx_en, vgmii_tx_er, vgmii_rx_dv, vgmii_rx_er;
-gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
+wire idelay_clk, idelay_ce;
+wire [4:0] idelay_value_in;
+gmii_to_rgmii #(
+	.in_phase_tx_clk(in_phase_tx_clk)
+`ifdef DEBUG_RGMII
+	,.use_idelay(1)
+`endif
+) gmii_to_rgmii_i(
 	.rgmii_txd(RGMII_TXD),
 	.rgmii_tx_ctl(RGMII_TX_CTRL),
 	.rgmii_tx_clk(RGMII_TX_CLK),
@@ -165,14 +187,24 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 	.gmii_rx_dv(vgmii_rx_dv),
 	.gmii_rx_er(vgmii_rx_er),
 
-	.clk_div(1'b0),
-	.idelay_ce(1'b0),
-	.idelay_value_in(5'b0)
+	.clk_div(idelay_clk),
+	.idelay_ce(idelay_ce),
+	.idelay_value_in(idelay_value_in)
 );
 
 wire BOOT_CCLK;
 wire cfg_clk;  // Just for fun, so we can measure its frequency
 STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
+
+wire idelayctrl_rdy;  // ignored, just like in prc
+wire idelayctrl_reset;  // prc pushes this button with software
+assign idelayctrl_reset = ext_config[2];  // might be helpful?
+`ifdef DEBUG_RGMII
+`ifndef SIMULATE
+    (* IODELAY_GROUP = "IODELAY_200" *)
+    IDELAYCTRL idelayctrl (.RST(idelayctrl_reset),.REFCLK(clk200),.RDY(idelayctrl_rdy));
+`endif
+`endif
 
 // Placeholders
 wire ZEST_PWR_EN;
@@ -190,12 +222,29 @@ localparam C_MMC_CTRACE = 1;
 localparam C_MMC_CTRACE = 0;
 `endif
 
+// scrap bus -- see additional info in marble_base.v
+wire [7:0] scrap_addr;
+wire [15:0] scrap_wdata, scrap_rdata;
+wire scrap_we;
+wire [1:0] scrap_op;
+
+// use scrap bus to control IDELAY inside gmii_to_rgmii
+// XXX untested
+// won't be used unless DEBUG_RGMII is set
+assign idelay_clk = tx_clk;
+assign idelay_ce = scrap_we;
+assign idelay_value_in = scrap_wdata[4:0];
+assign scrap_rdata = 16'hface;
+
 wire [7:0] leds;
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
 marble_base #(
 	.USE_I2CBRIDGE(C_USE_I2CBRIDGE),
 	.MMC_CTRACE(C_MMC_CTRACE),
+`ifdef DEBUG_RGMII
+	.USE_SCRAP(1),
+`endif
 	.default_enable_rx(C_DEFAULT_ENABLE_RX),
 	.misc_config_default(C_MISC_CONFIG_DEFAULT)
 ) base(
@@ -220,6 +269,9 @@ marble_base #(
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
+	.scrap_addr(scrap_addr),
+	.scrap_wdata(scrap_wdata), .scrap_rdata(scrap_rdata),
+	.scrap_we(scrap_we), .scrap_op(scrap_op),
 	.GPS(Pmod2[3:0]), .ext_config(ext_config), .LED(leds)
 );
 defparam base.rtefi.p4_client.engine.seven = 1;

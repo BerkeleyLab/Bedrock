@@ -76,6 +76,14 @@ module marble_base (
 	output [31:0] lb_data_out,
 	input [31:0] lb_data_in,
 
+	// scrap bus, also in lb_clk domain
+	// (for RGMII_DEBUG and IDELAY setting, otherwise ignored)
+	output [7:0] scrap_addr,
+	output [15:0] scrap_wdata,
+	input  [15:0] scrap_rdata,
+	output scrap_we,
+	output [1:0] scrap_op,
+
 	// Something physical
 	output [131:0] fmc_test,
 	output ZEST_PWR_EN,
@@ -84,6 +92,7 @@ module marble_base (
 
 parameter USE_I2CBRIDGE = 1;
 parameter MMC_CTRACE = 1;
+parameter USE_SCRAP = 0;  // otherwise freq_demo
 parameter misc_config_default = 0;
 
 `ifdef VERILATOR
@@ -185,6 +194,7 @@ freq_count freq_cnt_si570(.f_in(si570), .sysclk(lb_clk), .frequency(frequency_si
 
 //
 wire [3:0] rx_category_rx, rx_category;
+wire rx_category_s_rx, rx_category_s;
 lb_marble_slave #(
 	.USE_I2CBRIDGE(USE_I2CBRIDGE),
 	.MMC_CTRACE(MMC_CTRACE),
@@ -328,15 +338,32 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 assign vgmii_tx_er=1'b0;
 assign in_use = blob_in_use | boot_busy;
 
+generate if (USE_SCRAP) begin : with_scrap
+// experiment with SCRAP from K. Penney
+scrap_dev #(
+	.F_CLK_IN(125000000), .F_BAUD(115200),
+	.ADDRESS_WIDTH(8), .DATA_WIDTH(16)
+) scrap_dev (
+	.clk(tx_clk), .rst(1'b0),
+	.uart_rxd(FPGA_TxD), .uart_txd(FPGA_RxD),
+	.addr(scrap_addr),
+	.rdata(scrap_rdata), .wdata(scrap_wdata),
+	.we(scrap_we), .op(scrap_op)
+);
+end else begin : without_scrap
+assign scrap_addr = 0;
+assign scrap_wdata = 0;
+assign scrap_we = 0;
+assign scrap_op = 0;
 // Frequency counter demo to UART
 wire [3:0] unk_clk = {cfg_clk, si570, aux_clk, rx_clk};
 freq_demo freq_demo(
 	.refclk(tx_clk), .unk_clk(unk_clk),
 	.uart_tx(FPGA_RxD), .uart_rx(FPGA_TxD)
 );
+end endgenerate
 
 // For statistics-gathering purposes
-wire rx_category_s_rx, rx_category_s;
 packet_categorize i_categorize(.clk(vgmii_rx_clk),
 	.strobe(rx_mac_status_s), .status(rx_mac_status_d),
 	.strobe_o(rx_category_s_rx), .category(rx_category_rx)
