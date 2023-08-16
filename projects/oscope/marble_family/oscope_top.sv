@@ -151,9 +151,7 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 wire BOOT_CCLK;
 `ifndef SIMULATE
 STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0));
-`else // !`ifndef SIMULATE
-   assign BOOT_CCLK = tx_clk;
-`endif // !`ifndef SIMULATE
+`endif // `ifndef SIMULATE
 
 // Placeholders
 wire ZEST_PWR_EN;
