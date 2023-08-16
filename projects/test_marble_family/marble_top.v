@@ -196,6 +196,11 @@ wire BOOT_CCLK;
 wire cfg_clk;  // Just for fun, so we can measure its frequency
 STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
 
+// Placeholders
+wire ZEST_PWR_EN;
+wire dum_scl, dum_sda;
+wire [3:0] ext_config;
+
 wire idelayctrl_rdy;  // ignored, just like in prc
 wire idelayctrl_reset;  // prc pushes this button with software
 assign idelayctrl_reset = ext_config[2];  // might be helpful?
@@ -205,11 +210,6 @@ assign idelayctrl_reset = ext_config[2];  // might be helpful?
     IDELAYCTRL idelayctrl (.RST(idelayctrl_reset),.REFCLK(clk200),.RDY(idelayctrl_rdy));
 `endif
 `endif
-
-// Placeholders
-wire ZEST_PWR_EN;
-wire dum_scl, dum_sda;
-wire [3:0] ext_config;
 
 `ifdef USE_I2CBRIDGE
 localparam C_USE_I2CBRIDGE = 1;

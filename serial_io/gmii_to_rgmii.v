@@ -174,7 +174,7 @@ wire [3:0] rgmii_rxd_delay;
 genvar j;
 generate if (use_idelay) begin : with_idelay
 
-wire idelay_rx_ctl_value_out;  // ignored
+wire [4:0] idelay_rx_ctl_value_out;  // ignored
 (* IODELAY_GROUP = "IODELAY_200" *)
 IDELAYE2 #(
     .DELAY_SRC("IDATAIN"),
@@ -195,7 +195,7 @@ IDELAYE2 #(
     .REGRST(1'b0)
 );
 
-wire [3:0] idelay_rxd_value_out;  // ignored
+wire [4:0] idelay_rxd_value_out [0:3];  // ignored
 for (j=0; j<4; j=j+1)
     begin: gen_gmii_rxd_delay
         (* IODELAY_GROUP = "IODELAY_200" *)
