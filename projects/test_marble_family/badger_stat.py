@@ -37,6 +37,7 @@ if __name__ == "__main__":
         try:
             counts = update(dev)
             print(" ".join(["%6d" % counts[ix] for ix in range(16)]))
+            sys.stdout.flush()
             sleep(args.interval)
         except (KeyboardInterrupt, OSError) as err:
             if isinstance(err, KeyboardInterrupt):
