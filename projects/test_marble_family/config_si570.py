@@ -20,9 +20,20 @@ def decode_settings(addr, verbose):
             print(page, " ".join([" %2.2x" % d for d in subset]))
     i2c_addr = foo[96]
     config = foo[97]
-    start_freq = foo[101]
-    start_addr = 0x0d if (config & 0x02) else 0x07
-    polarity = 1 if (config & 0x01) else 0
+    start_freq = foo[101]  # unused
+    # For config value: Bit 0: Enable pin polarity (0 = polarity low, 1 = polarity high).
+    # Bit 1: Temperature stability (0 = 20 ppm or 50 ppm, 1 = 7 ppm)
+    # Bits 2-5: reserved. Bits [7:6]: 0b01 = Valid config (avoid acting on invalid 0xff or 0x00).
+    if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff)):
+        print("BAD:SI570 parameters are not configured, use MMC console to configure.")
+        sys.exit(1)
+    # check the [7:6] bits of the config value is either 2'b01 or 2'b10, to make sure it valid
+    elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
+        start_addr = 0x0d if (config & 0x02) else 0x07
+        polarity = 1 if (config & 0x01) else 0
+    else:
+        print("BAD: Invalid SI570 configuration parameter(MSB), use MMC console to set the correct value.")
+        sys.exit(1)
     return i2c_addr, polarity, start_addr, start_freq
 
 

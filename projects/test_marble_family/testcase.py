@@ -375,8 +375,17 @@ if __name__ == "__main__":
             subset = foo[page*16:page*16+16]
         si570_addr = foo[96]
         config = foo[97]
-        si570_start_addr = 0x0d if (config & 0x02) else 0x07
-        prog = read_trx.hw_test_prog(args.marble, si570_addr, si570_start_addr)
+        print("SI570 status at 0x%02x" % si570_addr)
+        if ((si570_addr == 0) or (si570_addr == 0xff) or (config == 0) or (config == 0xff)):
+            print("BAD:SI570 parameters are not configured, use MMC console to configure.")
+            sys.exit(1)
+        # check the MSB bit of the config value, to make sure it valid
+        elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
+            si570_start_addr = 0x0d if (config & 0x02) else 0x07
+            prog = read_trx.hw_test_prog(args.marble, si570_addr, si570_start_addr)
+        else:
+            print("BAD: Invalid SI570 configuration parameter(MSB), use MMC console to set the correct value.")
+            sys.exit(1)
     else:
         import poller
         prog = poller.hw_test_prog()
