@@ -50,7 +50,7 @@ some of which is specific to either Marble or Marble-Mini.
 Two [Easter eggs](https://en.wikipedia.org/wiki/Easter%20egg%20%28media%29):
 
 1. Connect up a user terminal to the third FTDI USB UART port, typically /dev/ttyUSB2,
-and you'll get a continuous readout of on-board frequencies:
+at 9600 baud and you'll get a continuous readout of on-board frequencies:
 ```
     Channel 0:  124.99998 MHz
     Channel 1:  019.99654 MHz
@@ -67,3 +67,7 @@ to the top half of J13 (a.k.a. Pmod2[3:0]),
 and you can read out NMEA position and time, use the pps signal
 to calibrate the on-board crystals, and even phase-lock the
 on-board 125 MHz source to GPS time with a jitter of under 100 ns.
+Supporting python:
+
+* [scan_vcxo.py](scan_vcxo.py)
+* [lock_vcxo.py](lock_vcxo.py)
