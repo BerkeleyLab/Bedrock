@@ -65,12 +65,13 @@ def busmux_reset(s):
 
 
 # see i2c_map_marble.txt for more documentation on I2C addresses
-def hw_test_prog(marble):
+def hw_test_prog(marble, si570_addr, si570_start_addr):
     s = assem.i2c_assem()
     ina_list = [0x80, 0x82, 0x84]  # U17, U32, U58
     # from the part number: 570_N_C_ --> C denotes temperature stability of 7ppm
     # so the registers change
-    si570_list = [0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12]
+    si570_list = [si570_start_addr, si570_start_addr+1, si570_start_addr+2]
+    si570_list += [si570_start_addr+3, si570_start_addr+4, si570_start_addr+5]
     # SFP1 is closest to edge of board
     # SFP4 is closest to center of board
     sfp_list = [2, 5, 4, 3]  # SFP modules 1-4, for Marble-Mini
@@ -100,7 +101,7 @@ def hw_test_prog(marble):
         a += s.read(ax, 0, 2)  # config register0 with 2 bytes to read
 
     for ax in si570_list:
-        a += s.read(0xee, ax, 1)  # config register0 with 2 bytes to read
+        a += s.read(si570_addr, ax, 1)  # config register0 with 2 bytes to read
 
     if marble:
         for qsfp_port in qsfp_list:
@@ -183,5 +184,8 @@ def hw_test_prog(marble):
 
 if __name__ == "__main__":
     marble = 0
-    a = hw_test_prog(marble)
+    # make sure to change this based on the SI570 for simulation
+    si570_addr = 0xaa
+    si570_start_addr = 0x07
+    a = hw_test_prog(marble, si570_addr, si570_start_addr)
     print("\n".join(["%02x" % x for x in a]))

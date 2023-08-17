@@ -356,6 +356,11 @@ if __name__ == "__main__":
         if args.port == 0:
             port = 803
 
+    # OK, setup is finished, start the actual work
+    # dev = lbus_access.lbus_access(addr, port=port, timeout=3.0, allow_burst=False)
+    leep_addr = "leep://" + addr + ":" + str(port)
+    print(leep_addr)
+    dev = leep.open(leep_addr, timeout=5.0)
     # Consider importlib instead to give more flexibility at runtime
     # will require turning ramtest and poller into actual classes
     # Or, better, turning this inside out and encapsulating the
@@ -365,16 +370,17 @@ if __name__ == "__main__":
         prog = ramtest.ram_test_prog()
     elif args.trx:
         import read_trx
-        prog = read_trx.hw_test_prog(args.marble)
+        foo = dev.reg_read(["spi_mbox"])[0]
+        for page in range(7):
+            subset = foo[page*16:page*16+16]
+        si570_addr = foo[96]
+        config = foo[97]
+        si570_start_addr = 0x0d if (config & 0x02) else 0x07
+        prog = read_trx.hw_test_prog(args.marble, si570_addr, si570_start_addr)
     else:
         import poller
         prog = poller.hw_test_prog()
 
-    # OK, setup is finished, start the actual work
-    # dev = lbus_access.lbus_access(addr, port=port, timeout=3.0, allow_burst=False)
-    leep_addr = "leep://" + addr + ":" + str(port)
-    print(leep_addr)
-    dev = leep.open(leep_addr, timeout=5.0)
     if args.poll:
         while True:
             wait_for_new(dev, sim=sim)
