@@ -174,62 +174,6 @@ mmc_mailbox #(
   .spi_pins_debug(spi_pins_debug) // {MISO, din, sclk_d1, csb_d1};
 );
 
-/*
-// Configuration port
-wire config_w, config_r;
-wire [7:0] config_a;
-wire [7:0] config_d;
-wire [7:0] spi_return;
-spi_gate spi(
-	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB), .MISO(MISO),
-	.config_clk(config_clk), .config_w(config_w), .config_r(config_r),
-	.config_a(config_a), .config_d(config_d), .tx_data(spi_return),
-	.spi_pins_debug(spi_pins_debug)
-);
-
-// Map generic configuration bus to application
-// 16-bit SPI word semantics:
-//   0 0 0 1 a a a a d d d d d d d d  ->  set MAC/IP config[a] = D
-//   0 0 1 0 0 0 0 0 x x x x x x x V  ->  set enable_rx to V
-//   0 0 1 0 0 0 1 0 x d d d d d d d  ->  set 7-bit mailbox page selector
-//   0 0 1 1 a a a a d d d d d d d d  ->  set UDP port config[a] = D
-//   0 1 0 0 a a a a d d d d d d d d  ->  mailbox read
-//   0 1 0 1 a a a a d d d d d d d d  ->  mailbox write
-reg enable_rx=default_enable_rx;  // special case initialization
-reg [6:0] mbox_page=0;
-always @(posedge config_clk) begin
-	if (config_w && (config_a == 8'h20)) enable_rx <= config_d[0];
-	if (config_w && (config_a == 8'h22)) mbox_page <= config_d[6:0];
-end
-wire config_s = config_w && (config_a[7:4] == 1);
-wire config_p = config_w && (config_a[7:4] == 3);
-wire config_mr = config_r && (config_a[7:4] == 4);
-wire config_mw = config_w && (config_a[7:4] == 5);
-wire [10:0] mbox_a = {mbox_page, config_a[3:0]};
-
-// Forward declarations
-// Local bus
-//wire [23:0] lb_addr;
-
-// Mailbox
-wire error;
-wire lb_mbox_sel = lb_addr[23:20] == 2;
-wire lb_mbox_wen = lb_mbox_sel & lb_write;
-// Local bus read-enable is a bit fragile, since we need to
-// match the latency configured deep inside Packet Badger's mem_gateway.
-reg lb_mbox_ren=0;
-always @(posedge lb_clk) begin
-	lb_mbox_ren <= lb_mbox_sel & lb_control_strobe & lb_control_rd;
-end
-wire [7:0] mbox_out1, mbox_out2;
-fake_dpram #(.aw(11), .dw(8)) xmem (
-	.clk(lb_clk),  // must be the same as config_clk
-	.addr1(mbox_a), .din1(config_d), .dout1(mbox_out1), .wen1(config_mw), .ren1(config_mr),
-	.addr2(lb_addr[10:0]), .din2(lb_data_out[7:0]), .dout2(mbox_out2), .wen2(lb_mbox_wen), .ren2(lb_mbox_ren),
-	.error(error)
-);
-assign spi_return = mbox_out1;  // data sent back to MMC vis SPI
-*/
 
 // Debugging hooks
 wire ibadge_stb, obadge_stb;
