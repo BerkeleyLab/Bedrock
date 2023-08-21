@@ -247,6 +247,7 @@ wire [27:0] frequency_si570;
 freq_count freq_cnt_si570(.f_in(si570), .sysclk(lb_clk), .frequency(frequency_si570));
 
 //
+wire [3:0] rx_category_rx, rx_category;
 lb_marble_slave #(
 	.USE_I2CBRIDGE(USE_I2CBRIDGE),
 	.MMC_CTRACE(MMC_CTRACE),
@@ -261,6 +262,7 @@ lb_marble_slave #(
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
 	.mmc_pins(spi_pins_debug),
+	.rx_category_s(rx_category_s), .rx_category(rx_category),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
 	.twi_scl(twi_scl), .twi_sda(twi_sda),
@@ -394,6 +396,17 @@ wire [3:0] unk_clk = {cfg_clk, si570, aux_clk, rx_clk};
 freq_demo freq_demo(
 	.refclk(tx_clk), .unk_clk(unk_clk),
 	.uart_tx(FPGA_RxD), .uart_rx(FPGA_TxD)
+);
+
+// For statistics-gathering purposes
+wire rx_category_s_rx, rx_category_s;
+packet_categorize i_categorize(.clk(vgmii_rx_clk),
+	.strobe(rx_mac_status_s), .status(rx_mac_status_d),
+	.strobe_o(rx_category_s_rx), .category(rx_category_rx)
+);
+data_xdomain #(.size(4)) x_category(
+	.clk_in(vgmii_rx_clk), .gate_in(rx_category_s_rx), .data_in(rx_category_rx),
+	.clk_out(lb_clk), .gate_out(rx_category_s), .data_out(rx_category)
 );
 
 // Heartbeats and other LED

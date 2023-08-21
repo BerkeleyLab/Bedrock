@@ -8,6 +8,7 @@ make -C dsp/hosted clean
 make -C dsp clean
 make -C dsp/feedforward clean
 make -C homeless/freq_demo clean
+make -C homeless clean
 make -C build-tools/make-demo spotless
 make -C projects/test_marble_family clean
 make -C projects/oscope/bmb7_cu clean

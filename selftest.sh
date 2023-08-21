@@ -70,7 +70,8 @@ make -C dsp all checks
 ## feedforward_test
 make -C dsp/feedforward
 
-## freq_demo
+## homeless and freq_demo
+make -C homeless all checks
 make -C homeless/freq_demo
 
 ## leep_test
