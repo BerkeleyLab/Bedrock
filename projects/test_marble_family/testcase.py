@@ -207,10 +207,10 @@ def compute_si570(a):
         print('SI570 output frequency: %4.3f MHz' % default)
 
 
-def print_result(result, args, poll_only=False):
+def print_result(result, args, board_type, poll_only=False):
     n_fmc = 2 if args.fmc else 0
     tester = 2 if args.fmc_tester else 0
-    transceiver = 2 if args.marble else 4
+    transceiver = 2 if board_type else 4
     if args.debug:
         for jx in range(16):
             p = result[jx*16:(jx+1)*16]
@@ -262,7 +262,7 @@ def print_result(result, args, poll_only=False):
             wp_bit = result[0] & 0x80
             ss = "Off" if wp_bit else "On"
             print("Write Protect switch is %s" % ss)
-            if args.marble:
+            if board_type:
                 qsfp_pp1 = [result[2], result[3]]
             else:
                 qsfp_pp = result[2]*256 + result[3]  # parallel SFP status via U34
@@ -274,14 +274,14 @@ def print_result(result, args, poll_only=False):
         if args.trx:
             for ix in range(transceiver):
                 print("########################################################################")
-                if args.marble:
+                if board_type:
                     pitch = 28
                 else:
                     pitch = 10
                 hx = 16 + pitch*ix
                 a1 = result[hx:hx+pitch]
                 print("Status pin monitor Transceiver%d:  0x%X" % (ix+1, qsfp_pp1[ix]))
-                print_qsfp_z(a1) if args.marble else print_sfp_z(a1)
+                print_qsfp_z(a1) if board_type else print_sfp_z(a1)
             for ix in range(tester):
                 print("########################################################################")
                 pitch = 10
@@ -365,27 +365,18 @@ if __name__ == "__main__":
     # will require turning ramtest and poller into actual classes
     # Or, better, turning this inside out and encapsulating the
     # infrastructure part of this file as a class.
+    import config_si570
+    board, si570_addr, _, si570_start_addr, _ = config_si570.decode_settings(dev, verbose=False)
+    # if mailbox is not updated, use args.marble user argument
+    # board values - simulation = 0, marble = 1, marble_mini = 2
+    # just some workaround to keep the functionality the same
+    board_type = args.marble if board == 0 else board-2 if board == 2 else board
     if args.ramtest:
         import ramtest
         prog = ramtest.ram_test_prog()
     elif args.trx:
         import read_trx
-        foo = dev.reg_read(["spi_mbox"])[0]
-        for page in range(7):
-            subset = foo[page*16:page*16+16]
-        si570_addr = foo[96]
-        config = foo[97]
-        print("SI570 status at 0x%02x" % si570_addr)
-        if ((si570_addr == 0) or (si570_addr == 0xff) or (config == 0) or (config == 0xff)):
-            print("BAD:SI570 parameters are not configured, use MMC console to configure.")
-            sys.exit(1)
-        # check the MSB bit of the config value, to make sure it valid
-        elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
-            si570_start_addr = 0x0d if (config & 0x02) else 0x07
-            prog = read_trx.hw_test_prog(args.marble, si570_addr, si570_start_addr)
-        else:
-            print("BAD: Invalid SI570 configuration parameter(MSB), use MMC console to set the correct value.")
-            sys.exit(1)
+        prog = read_trx.hw_test_prog(board_type, si570_addr, si570_start_addr)
     else:
         import poller
         prog = poller.hw_test_prog()
@@ -394,7 +385,7 @@ if __name__ == "__main__":
         while True:
             wait_for_new(dev, sim=sim)
             result = read_result(dev, result_len=args.rlen)
-            print_result(result, args, poll_only=True)
+            print_result(result, args, board_type, poll_only=True)
 
     else:
         if args.debug:
@@ -403,4 +394,4 @@ if __name__ == "__main__":
         result = run_testcase(dev, prog, sim=sim, result_len=args.rlen,
                               debug=args.debug,
                               stop=args.stop, capture=args.vcd)
-        print_result(result, args)
+        print_result(result, args, board_type)

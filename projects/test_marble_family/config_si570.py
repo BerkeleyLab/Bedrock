@@ -18,23 +18,33 @@ def decode_settings(addr, verbose):
         subset = foo[page*16:page*16+16]
         if verbose:
             print(page, " ".join([" %2.2x" % d for d in subset]))
-    i2c_addr = foo[96]
-    config = foo[97]
-    start_freq = foo[101]  # unused
-    # For config value: Bit 0: Enable pin polarity (0 = polarity low, 1 = polarity high).
-    # Bit 1: Temperature stability (0 = 20 ppm or 50 ppm, 1 = 7 ppm)
-    # Bits 2-5: reserved. Bits [7:6]: 0b01 = Valid config (avoid acting on invalid 0xff or 0x00).
-    if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff)):
-        print("BAD:SI570 parameters are not configured, use MMC console to configure.")
-        sys.exit(1)
-    # check the [7:6] bits of the config value is either 2'b01 or 2'b10, to make sure it valid
-    elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
-        start_addr = 0x0d if (config & 0x02) else 0x07
-        polarity = 1 if (config & 0x01) else 0
+    pcb_rev = foo[72]
+    # if board = 1, marble and board = 2, marble-mini
+    board = ((pcb_rev >> 4) & 0xf)
+    # use default values if it's a marble_mini, SI570 - 570NCB000933DG
+    if (board == 2):
+        i2c_addr = 0xee
+        polarity = 0
+        start_addr = 0x0d
+        start_freq = 0
     else:
-        print("BAD: Invalid SI570 configuration parameter(MSB), use MMC console to set the correct value.")
-        sys.exit(1)
-    return i2c_addr, polarity, start_addr, start_freq
+        i2c_addr = foo[96]
+        config = foo[97]
+        start_freq = foo[101]  # unused
+        # For config value: Bit 0: Enable pin polarity (0 = polarity low, 1 = polarity high).
+        # Bit 1: Temperature stability (0 = 20 ppm or 50 ppm, 1 = 7 ppm)
+        # Bits 2-5: reserved. Bits [7:6]: 0b01 = Valid config (avoid acting on invalid 0xff or 0x00).
+        if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff)):
+            print("BAD:SI570 parameters are not configured, use MMC console to configure.")
+            sys.exit(1)
+        # check the [7:6] bits of the config value is either 2'b01 or 2'b10, to make sure it valid
+        elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
+            start_addr = 0x0d if (config & 0x02) else 0x07
+            polarity = 1 if (config & 0x01) else 0
+        else:
+            print("BAD: Invalid SI570 configuration parameter(MSB), use MMC console to set the correct value.")
+            sys.exit(1)
+    return board, i2c_addr, polarity, start_addr, start_freq
 
 
 # select one port of an I2C bus multiplexer
@@ -157,7 +167,7 @@ def check(fin):
 
 def compute_si570(addr, key, verbose):
     # using keyword just to keep print consistent
-    si570_addr, polarity, config_addr, _ = decode_settings(addr, verbose)
+    _, si570_addr, polarity, config_addr, _ = decode_settings(addr, verbose)
     prog = hw_test_prog(si570_addr, polarity, config_addr)
     result = testcase.run_testcase(addr, prog, result_len=359, debug=args.debug, verbose=verbose)
     if args.debug:
