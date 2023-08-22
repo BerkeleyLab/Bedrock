@@ -103,16 +103,7 @@ parameter [47:0] mac = 48'h12555500032d;
 wire tx_clk = vgmii_tx_clk;
 wire rx_clk = vgmii_rx_clk;
 
-wire [10:0] mb_addr;
-wire mb_wen, mb_ren, mb_strobe;
 wire enable_rx;
-wire ip_valid;
-wire [31:0] ip_mmc;
-wire mac_valid;
-wire [47:0] mac_mmc;
-wire mailbox_match;
-wire [31:0] mmc_gitid;
-wire mmc_gitid_valid;
 wire lb_mbox_sel = lb_addr[23:20] == 2;
 wire lb_mbox_wen = lb_mbox_sel & lb_write;
 wire lb_control_strobe;
@@ -149,14 +140,8 @@ mmc_mailbox #(
   .ncs(CSB), // input
   .pico(MOSI), // input
   .poci(MISO), // output
-  // Mailbox status
-  .mb_addr(mb_addr),  // output [10:0]
-  .mb_wen(mb_wen), // output
-  .mb_ren(mb_ren), // output
-  .mb_strobe(mb_strobe), // output
   // Port-Number Memory interface
   .pno_a(3'b0), // input [2:0]
-  .pno_d(), // output [15:0]
   // Config pins for badger (rtefi) interface
   .config_s(config_s), // output
   .config_p(config_p), // output
@@ -164,16 +149,8 @@ mmc_mailbox #(
   .config_d(config_d), // output [7:0]
   // Special pins
   .enable_rx(enable_rx), // output
-  .ip_valid(ip_valid), // output
-  .ip(ip_mmc), // output [31:0]
-  .mac_valid(mac_valid), // output
-  .mac(mac_mmc), // output [47:0]
-  .mmc_gitid_valid(mmc_gitid_valid), // output
-  .mmc_gitid(mmc_gitid), // output [31:0]
-  .match(mailbox_match), // output
   .spi_pins_debug(spi_pins_debug) // {MISO, din, sclk_d1, csb_d1};
 );
-
 
 // Debugging hooks
 wire ibadge_stb, obadge_stb;
