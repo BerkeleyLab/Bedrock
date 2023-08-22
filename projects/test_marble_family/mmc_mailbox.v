@@ -1,6 +1,7 @@
 /*  An encapsulation of the FPGA (responder) side of the Marble
  *  pseudo-SPI mailbox interface with the MMC.
  */
+
 module mmc_mailbox #(
   parameter [31:0] HASH = 0,
   parameter [0:0] DEFAULT_ENABLE_RX = 1,
@@ -52,10 +53,14 @@ module mmc_mailbox #(
 
 // SPI Naming convention: https://www.sparkfun.com/spi_signal_names
 
-localparam GITID_PAGE = 3;
-localparam GITID_OFFSET = 12;
-localparam HASH_PAGE = 4;
-localparam HASH_OFFSET = 12;
+`include "mailbox_map.vh"
+
+localparam [7:0] GITID_ADDRESS = GIT32_ADDR;
+localparam [3:0] GITID_PAGE = GITID_ADDRESS[7:4];
+localparam [3:0] GITID_OFFSET = GITID_ADDRESS[3:0];
+localparam [7:0] HASH_ADDRESS = HASH_ADDR;
+localparam [3:0] HASH_PAGE = HASH_ADDRESS[7:4];
+localparam [3:0] HASH_OFFSET = HASH_ADDRESS[3:0];
 
 // Configuration port
 wire config_w, config_r;

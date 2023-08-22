@@ -82,6 +82,10 @@ CFLAGS_udp_model.o = $(VPI_CFLAGS)
 udp-vpi.vpi: udp_model.o
 
 # =====
+# MMC mailbox self-checking testbench
+mmc_mailbox_tb: mmc_mailbox.v $(HOMELESS_DIR)/fake_dpram.v $(DSP_DIR)/dpram.v $(BADGER_DIR)/tests/spi_gate.v $(PERIPH_DRIVERS_DIR)/spi_master.v mailbox_map.vh
+
+# =====
 # subset that is interesting to test live on network
 AD5662_V = ad5662_lock.v pps_lock.v pps_loop_filter.v ad5662.v
 LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v multi_counter.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
