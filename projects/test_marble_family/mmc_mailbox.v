@@ -53,12 +53,12 @@ module mmc_mailbox #(
 
 // SPI Naming convention: https://www.sparkfun.com/spi_signal_names
 
-`include "mailbox_map.vh"
+// Gotcha: the MMC needs to agree on these addresses
+localparam [7:0] GITID_ADDRESS = 8'h3c;
+localparam [7:0] HASH_ADDRESS = 8'h4c;
 
-localparam [7:0] GITID_ADDRESS = GIT32_ADDR;
 localparam [3:0] GITID_PAGE = GITID_ADDRESS[7:4];
 localparam [3:0] GITID_OFFSET = GITID_ADDRESS[3:0];
-localparam [7:0] HASH_ADDRESS = HASH_ADDR;
 localparam [3:0] HASH_PAGE = HASH_ADDRESS[7:4];
 localparam [3:0] HASH_OFFSET = HASH_ADDRESS[3:0];
 

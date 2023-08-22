@@ -83,7 +83,7 @@ udp-vpi.vpi: udp_model.o
 
 # =====
 # MMC mailbox self-checking testbench
-mmc_mailbox_tb: mmc_mailbox.v $(HOMELESS_DIR)/fake_dpram.v $(DSP_DIR)/dpram.v $(BADGER_DIR)/tests/spi_gate.v $(PERIPH_DRIVERS_DIR)/spi_master.v mailbox_map.vh
+mmc_mailbox_tb: mmc_mailbox.v $(HOMELESS_DIR)/fake_dpram.v $(DSP_DIR)/dpram.v $(BADGER_DIR)/tests/spi_gate.v $(PERIPH_DRIVERS_DIR)/spi_master.v
 
 # =====
 # subset that is interesting to test live on network
