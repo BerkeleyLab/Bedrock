@@ -121,11 +121,7 @@ wire lb_control_rd, lb_control_rd_valid;
 assign lb_rd_valid = lb_control_rd_valid;
 assign lb_rd = lb_control_rd;
 
-// TODO move this to auto-generated .vh file
-localparam [31:0] mailbox_hash = 32'h16db2127;
-
 mmc_mailbox #(
-  .HASH(mailbox_hash),
   .DEFAULT_ENABLE_RX(default_enable_rx)
   ) mailbox_i (
   .clk(config_clk), // input
@@ -140,8 +136,6 @@ mmc_mailbox #(
   .ncs(CSB), // input
   .pico(MOSI), // input
   .poci(MISO), // output
-  // Port-Number Memory interface
-  .pno_a(3'b0), // input [2:0]
   // Config pins for badger (rtefi) interface
   .config_s(config_s), // output
   .config_p(config_p), // output

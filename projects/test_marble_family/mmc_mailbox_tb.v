@@ -13,30 +13,21 @@ end
 
 always #5 clk <= ~clk;
 
-reg [10:0] lb_addr;
-reg [7:0] lb_din;
+reg [10:0] lb_addr=0;
+reg [7:0] lb_din=0;
 wire [7:0] lb_dout;
-reg lb_write;
-reg lb_control_strobe;
+wire [3:0] a_hi, a_lo;
+reg lb_write=1'b0;
+reg lb_control_strobe=1'b0;
 wire ncs;
 wire sck;
 wire pico;
 wire poci;
-wire [10:0] mb_addr;
-wire mb_wen, mb_ren, mb_strobe;
 wire enable_rx;
-wire ip_valid;
-wire [31:0] ip;
-wire mac_valid;
-wire [47:0] mac;
-wire match;
-wire [31:0] mmc_gitid;
-wire mmc_gitid_valid;
+wire config_s;
+wire [7:0] config_d;
 localparam [31:0] hash_in = 32'h01234567;
-wire [3:0] hash_valid;
-mmc_mailbox #(
-  .HASH(hash_in)
-  ) mailbox_i (
+mmc_mailbox mailbox_i (
   .clk(clk), // input
   .lb_addr(lb_addr), // input [10:0]
   .lb_din(lb_din), // input [7:0]
@@ -47,28 +38,42 @@ mmc_mailbox #(
   .ncs(ncs), // input
   .pico(pico), // input
   .poci(poci), // output
-  .mb_addr(mb_addr),  // output [10:0]
-  .mb_wen(mb_wen), // output
-  .mb_ren(mb_ren), // output
-  .mb_strobe(mb_strobe), // output
-  .pno_a(3'h0), // input [2:0]
-  .pno_d(), // output [15:0]
-  .config_s(), // output
+  .config_s(config_s), // output
   .config_p(), // output
   .config_a(), // output [7:0]
-  .config_d(), // output [7:0]
+  .config_d(config_d), // output [7:0]
+  .a_hi(a_hi), // output [3:0]
+  .a_lo(a_lo), // output [3:0]
   .enable_rx(enable_rx), // output),
-  .ip_valid(ip_valid), // output
-  .ip(ip), // output [31:0]
-  .mac_valid(mac_valid), // output
-  .mac(mac), // output [47:0]
-  .mmc_gitid_valid(mmc_gitid_valid), // output
-  .mmc_gitid(mmc_gitid), // output [31:0]
-  .match(match), // output
   .spi_pins_debug()
 );
 
-wire [31:0] hash_out = mailbox_i.hash;
+localparam [3:0] GITID_PAGE = 3;
+localparam [3:0] GITID_OFFSET = 12;
+localparam [3:0] HASH_PAGE = 4;
+localparam [3:0] HASH_OFFSET = 12;
+
+`define MBMEM(pg, entry)    mailbox_i.xmem.xmem.mem[{pg,entry}]
+wire [31:0] hash_out = {`MBMEM(HASH_PAGE,HASH_OFFSET), `MBMEM(HASH_PAGE,HASH_OFFSET+4'd1),
+                        `MBMEM(HASH_PAGE,HASH_OFFSET+4'd2), `MBMEM(HASH_PAGE,HASH_OFFSET+4'd3)};
+wire [31:0] gitid_out = {`MBMEM(GITID_PAGE,GITID_OFFSET), `MBMEM(GITID_PAGE,GITID_OFFSET+4'd1),
+                        `MBMEM(GITID_PAGE,GITID_OFFSET+4'd2), `MBMEM(GITID_PAGE,GITID_OFFSET+4'd3)};
+
+reg [7:0] ipmac [0:15];
+wire [31:0] ip_out = {ipmac[9], ipmac[8], ipmac[7], ipmac[6]};
+wire [47:0] mac_out = {ipmac[5], ipmac[4], ipmac[3], ipmac[2], ipmac[1], ipmac[0]};
+reg [15:0] ipmac_valid=0;  // Each bit is set to '1' as each byte of ipmac is latched
+wire ip_valid = &ipmac_valid[9:6];
+wire mac_valid = &ipmac_valid[5:0];
+
+always @(posedge clk) begin
+  // IP/MAC configuration
+  if (config_s) begin
+    ipmac[a_lo] <= config_d;
+    if (a_lo == 0) ipmac_valid <= 1; // reset valid bits on address 0
+    else ipmac_valid[a_lo] <= 1'b1;
+  end
+end
 
 reg spi_start;
 wire spi_busy;
@@ -141,19 +146,19 @@ initial begin
     wait((spi_busy == 1'b1) | to);
     wait((spi_busy == 1'b0) | to);
   end
-  #20 $display("ip_in = 0x%h, ip_out = 0x%h", ip_in, ip);
-  #20 $display("mac_in = 0x%h, mac_out = 0x%h", mac_in, mac);
+  #20 $display("ip_in = 0x%h, ip_out = 0x%h", ip_in, ip_out);
+  #20 $display("mac_in = 0x%h, mac_out = 0x%h", mac_in, mac_out);
 
   if (~ip_valid) begin $display("IP not valid"); pass = 1'b0; end
-  if (ip_in != ip) begin $display("IP does not match"); pass = 1'b0; end
+  if (ip_in != ip_out) begin $display("IP does not match"); pass = 1'b0; end
   if (~mac_valid) begin $display("MAC not valid"); pass = 1'b0; end
-  if (mac_in != mac) begin $display("MAC does not match"); pass = 1'b0; end
+  if (mac_in != mac_out) begin $display("MAC does not match"); pass = 1'b0; end
 
   // Select GITID page
   $display("GITID");
-  $display("Select page %1d", mailbox_i.GITID_PAGE);
+  $display("Select page %1d", GITID_PAGE);
   spi_addr = 8'h22;
-  spi_data = mailbox_i.GITID_PAGE;
+  spi_data = GITID_PAGE;
   #20 spi_start = 1'b1;
   #10 spi_start = 1'b0;
   timeout = TOSET;
@@ -163,7 +168,7 @@ initial begin
   // Send GITID (MSB-first)
   for(I = 0; I < 4; I = I + 1) begin
     //$display("Byte %2d", I);
-    spi_addr = 8'h50 + I + mailbox_i.GITID_OFFSET;
+    spi_addr = 8'h50 + I + GITID_OFFSET;
     spi_data = gitid_in[8*(4-I)-1-:8];
     #20 spi_start = 1'b1;
     #10 spi_start = 1'b0;
@@ -171,17 +176,16 @@ initial begin
     wait((spi_busy == 1'b1) | to);
     wait((spi_busy == 1'b0) | to);
   end
-  #20 $display("gitid_in = 0x%h; gitid_out = 0x%h", gitid_in, mmc_gitid);
+  #20 $display("gitid_in = 0x%h; gitid_out = 0x%h", gitid_in, gitid_out);
 
-  if (~mmc_gitid_valid) begin $display("GIT ID not valid"); pass = 1'b0; end
-  if (gitid_in != mmc_gitid) begin $display("GIT ID does not match"); pass = 1'b0; end
+  if (gitid_in != gitid_out) begin $display("GIT ID does not match"); pass = 1'b0; end
 
   // Send HASH
   // Select HASH page
   $display("HASH");
-  $display("Select page %1d", mailbox_i.HASH_PAGE);
+  $display("Select page %1d", HASH_PAGE);
   spi_addr = 8'h22;
-  spi_data = mailbox_i.HASH_PAGE;
+  spi_data = HASH_PAGE;
   #20 spi_start = 1'b1;
   #10 spi_start = 1'b0;
   timeout = TOSET;
@@ -191,7 +195,7 @@ initial begin
   // Send HASH (MSB first)
   for(I = 0; I < 4; I = I + 1) begin
     //$display("Byte %2d", I);
-    spi_addr = 8'h50 + I + mailbox_i.HASH_OFFSET;
+    spi_addr = 8'h50 + I + HASH_OFFSET;
     spi_data = hash_in[8*(4-I)-1-:8];
     #20 spi_start = 1'b1;
     #10 spi_start = 1'b0;
@@ -201,7 +205,6 @@ initial begin
   end
   #20 $display("hash_in = 0x%h; hash_out = 0x%h", hash_in, hash_out);
 
-  if (~(&(mailbox_i.hash_valid))) begin $display("Hash invalid"); pass = 1'b0; end
   if (hash_in != hash_out) begin $display("Hash does not match"); pass = 1'b0; end
 
   #4000; // Let me see the results on the waveform without zooming in a bunch
