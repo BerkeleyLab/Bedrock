@@ -84,7 +84,11 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 	.gmii_rxd(vgmii_rxd),
 	.gmii_rx_clk(vgmii_rx_clk),
 	.gmii_rx_dv(vgmii_rx_dv),
-	.gmii_rx_er(vgmii_rx_er)
+	.gmii_rx_er(vgmii_rx_er),
+
+	.clk_div(1'b0),
+	.idelay_ce(1'b0),
+	.idelay_value_in(5'b0)
 );
 
 `ifdef CHIP_FAMILY_7SERIES
