@@ -147,6 +147,8 @@ assign test_clk=0;
 wire vgmii_tx_clk, vgmii_tx_clk90, vgmii_rx_clk;
 wire [7:0] vgmii_txd, vgmii_rxd;
 wire vgmii_tx_en, vgmii_tx_er, vgmii_rx_dv, vgmii_rx_er;
+wire idelay_clk, idelay_ce;
+wire [4:0] idelay_value_in;
 gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 	.rgmii_txd(RGMII_TXD),
 	.rgmii_tx_ctl(RGMII_TX_CTRL),
@@ -163,7 +165,11 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 	.gmii_rxd(vgmii_rxd),
 	.gmii_rx_clk(vgmii_rx_clk),
 	.gmii_rx_dv(vgmii_rx_dv),
-	.gmii_rx_er(vgmii_rx_er)
+	.gmii_rx_er(vgmii_rx_er),
+
+	.clk_div(idelay_clk),
+	.idelay_ce(idelay_ce),
+	.idelay_value_in(idelay_value_in)
 );
 
 wire BOOT_CCLK;
@@ -174,6 +180,11 @@ STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
 wire ZEST_PWR_EN;
 wire dum_scl, dum_sda;
 wire [3:0] ext_config;
+
+// Placeholders for possible IDELAY control inside gmii_to_rgmii
+assign idelay_clk = 0;
+assign idelay_ce = 0;
+assign idelay_value_in = 0;
 
 `ifdef USE_I2CBRIDGE
 localparam C_USE_I2CBRIDGE = 1;
