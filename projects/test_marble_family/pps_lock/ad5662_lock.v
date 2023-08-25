@@ -1,13 +1,15 @@
 module ad5662_lock(
 	input clk,
 	input tick,  // pacing gate
-	input pps_in,  // from GPS
+	input [1:0] pps_in,  // from GPS, via IDDR
+	output pps_tick,  // from our phase-locked counter
 	// host control bus
 	input [17:0] host_data,
 	input host_write_dac,  // single-cycle gate
 	input host_write_cr,  // single-cycle gate
 	output spi_busy,
 	output [31:0] dsp_status,
+	input fir_enable,
 	// hardware pins
 	output sclk,  // peak rate is half that of input tick
 	output [1:0] sync_,
@@ -35,10 +37,11 @@ wire lock_send;
 wire pps_out;
 wire [13:0] dsp_substatus;
 pps_lock #(.count_period(count_period)) dut(.clk(clk),
+	.fir_enable(fir_enable),
 	.pps_in(pps_in), .err_sign(err_sign),
 	.run_request(run_request), .dac_preset_val(dac_preset_r),
 	.dac_data(lock_data), .dac_send(lock_send),
-	.dsp_status(dsp_substatus), .pps_out(pps_out)
+	.dsp_status(dsp_substatus), .pps_tick(pps_tick), .pps_out(pps_out)
 );
 
 // Multiplex host and PLL sources

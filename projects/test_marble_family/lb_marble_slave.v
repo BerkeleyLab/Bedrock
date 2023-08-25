@@ -8,6 +8,7 @@ module lb_marble_slave #(
 	parameter USE_I2CBRIDGE = 0,
 	parameter MMC_CTRACE = 0,
 	parameter misc_config_default = 0,
+	parameter use_ddr_pps = 1,
 	// Timing hooks, can be used to speed up simulation
 	parameter twi_q0=6,  // 145 kbps with 125 MHz clock
 	parameter twi_q1=2,
@@ -148,21 +149,51 @@ wire [31:0] tx_freq;
 freq_count #(.refcnt_width(27), .freq_width(32)) f_count(.f_in(ibadge_clk),
 	.sysclk(clk), .frequency(tx_freq));
 
-// GPS, includes another frequency counter
-// Capture input pins
-reg [3:0] gps_pins=0;
-always @(posedge clk) gps_pins <= gps;
+// Capture Pmod GPS input pins
+// gps[3] is special: that's the PPS signal that we want to
+// acquire with an IDDR cell.  Leave portable code as backup
+// for any synthesis that can't do our brand of IDDR.
+reg [2:0] gps_pins=0;
+always @(posedge clk) gps_pins <= gps[2:0];
+wire [1:0] pps_in;
+generate if (use_ddr_pps) begin : gen_ddr_pps
+	IDDR #(
+		.DDR_CLK_EDGE("SAME_EDGE_PIPELINED")
+	) iddr_pps (
+		.Q1(pps_in[0]),
+		.Q2(pps_in[1]),
+		.C(clk), .D(gps[3]),
+		.CE(1'b1), .R(1'b0), .S(1'b0)
+	);
+end else begin : no_gen_ddr_pps
+	reg pps_dff=0;
+	always @(posedge clk) pps_dff <= gps[3];
+	assign pps_in = {pps_dff, pps_dff};
+end endgenerate
+
+// GPS handling, includes another frequency counter
 reg gps_buf_reset=0;
 wire gps_buf_full;
 wire [7:0] gps_buf_out;
 wire [27:0] gps_freq;
 wire [3:0] pps_cnt;
-gps_test gps_test(.gps_pins(gps_pins),
+// Ignore IDDR enhancement of PPS pin for this module
+wire [3:0] gps_4pins = {pps_in[0], gps_pins};
+gps_test gps_test(.gps_pins(gps_4pins),
 	.clk(clk), .lb_addr(addr[9:0]), .lb_dout(gps_buf_out),
 	.buf_full(gps_buf_full), .buf_reset(gps_buf_reset),
 	.f_read(gps_freq), .pps_cnt(pps_cnt)
 );
-wire [8:0] gps_stat = {gps_buf_full, pps_cnt, gps_pins};
+// Simple counter based on output of pps-lock module below (inside ad5662_lock)
+// Will wrap every 1 hour, 8 minutes, 16 seconds
+// Hope this will be helpful diagnosing pps dropouts
+wire pps_tick;
+reg [11:0] locked_pps_cnt=0;
+always @(posedge clk) if (pps_tick) locked_pps_cnt <= locked_pps_cnt+1;
+//
+wire use_ddr_pps_bit = use_ddr_pps;
+wire [9:0] gps_stat_low = {use_ddr_pps_bit, gps_buf_full, pps_cnt, gps_4pins};
+wire [27:0] gps_stat = {locked_pps_cnt, 2'b00, gps_stat_low};
 wire [31:0] gps_pps_data = {pps_cnt, gps_freq};
 
 // Configuration ROM
@@ -250,7 +281,7 @@ end else begin : no_i2cb
 	assign twi_rst = 1'bz;
 end endgenerate
 
-// White Rabbit DAC - with EXPERIMENTAL internal GPS pps lock
+// White Rabbit DAC - with work-in-progress internal GPS pps lock
 // wr_dac_tick is 31.2 MHz, wr_dac_sclk is 15.6 MHz when operating
 reg [led_cw-1:0] led_cc=0;
 reg wr_dac_tick;  always @(posedge clk) wr_dac_tick <= &led_cc[1:0];
@@ -258,12 +289,13 @@ reg wr_dac_send=0;
 reg pps_config_write=0;
 wire [0:0] wr_dac_busy;
 wire [31:0] pps_dsp_status;
-wire pps_in = gps_pins[3];
+wire fir_enable = 1;  // XXX make me run-time configurable!
 ad5662_lock wr_dac(.clk(clk), .tick(wr_dac_tick),
-	.pps_in(pps_in),
+	.pps_in(pps_in), .pps_tick(pps_tick),
 	.host_data(data_out[17:0]),
 	.host_write_dac(wr_dac_send),
 	.host_write_cr(pps_config_write),
+	.fir_enable(fir_enable),
 	.spi_busy(wr_dac_busy),
 	.dsp_status(pps_dsp_status),
 	.sclk(wr_dac_sclk), .sync_(wr_dac_sync), .sdo(wr_dac_sdo)
