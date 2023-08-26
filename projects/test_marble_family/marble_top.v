@@ -2,6 +2,9 @@
 // Mostly cut-and-paste from rgmii_hw_test.v
 
 `include "marble_features_defs.vh"
+// At least one Marble v1.4 board _needs_ this option set
+// to get reliable Ethernet operation.  Need more data.
+`define DEBUG_RGMII
 
 module marble_top(
 	input GTPREFCLK_P,
@@ -112,6 +115,9 @@ wire tx_clk, tx_clk90, clk62;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
 wire test_clk;
+wire clk_out1;
+wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
+// used for calibrating IODELAY cells
 
 `ifdef USE_GTPCLK
 xilinx7_clocks #(
@@ -119,18 +125,23 @@ xilinx7_clocks #(
 	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
 	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
 	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
+`ifdef DEBUG_RGMII
+       .DIV1     (5)     // 1 GHz / 5 = 200 MHz
+`else
 	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
+`endif
 ) clocks_i(
 	.sysclk_p (gtpclk),
 	.sysclk_n (1'b0),
 	.reset    (pll_reset),
 	.clk_out0 (tx_clk),
-	.clk_out1 (clk62),
+	.clk_out1 (clk_out1),
 	.clk_out2 (tx_clk90),
 	.clk_out3f(test_clk),  // not buffered, straight from MMCM
 	.locked   (clk_locked)
 );
 `else
+// this configuration is probably bit-rotted
 wire SYSCLK_N = 0;
 gmii_clock_handle clocks(
 	.sysclk_p(SYSCLK_P),
@@ -142,6 +153,15 @@ gmii_clock_handle clocks(
 );
 assign test_clk=0;
 `endif
+`ifdef DEBUG_RGMII
+assign clk200 = clk_out1;
+reg bad_slow_clock=0;
+always @(posedge tx_clk) bad_slow_clock <= ~bad_slow_clock;
+assign clk62 = bad_slow_clock;  // sample-size of one says readout of dna still works
+`else
+assign clk200 = 0;
+assign clk62 = clk_out1;
+`endif
 
 // Double-data-rate conversion
 wire vgmii_tx_clk, vgmii_tx_clk90, vgmii_rx_clk;
@@ -149,7 +169,12 @@ wire [7:0] vgmii_txd, vgmii_rxd;
 wire vgmii_tx_en, vgmii_tx_er, vgmii_rx_dv, vgmii_rx_er;
 wire idelay_clk, idelay_ce;
 wire [4:0] idelay_value_in;
-gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
+gmii_to_rgmii #(
+`ifdef DEBUG_RGMII
+	.use_idelay(1),
+`endif
+	.in_phase_tx_clk(in_phase_tx_clk)
+) gmii_to_rgmii_i(
 	.rgmii_txd(RGMII_TXD),
 	.rgmii_tx_ctl(RGMII_TX_CTRL),
 	.rgmii_tx_clk(RGMII_TX_CLK),
@@ -174,12 +199,26 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 
 wire BOOT_CCLK;
 wire cfg_clk;  // Just for fun, so we can measure its frequency
+`ifndef SIMULATE
 STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
+`else
+assign cfg_clk = 0;
+`endif
 
 // Placeholders
 wire ZEST_PWR_EN;
 wire dum_scl, dum_sda;
 wire [3:0] ext_config;
+
+`ifdef DEBUG_RGMII
+wire idelayctrl_reset;  // prc pushes this button with software
+assign idelayctrl_reset = ext_config[2];  // might be helpful?
+`ifndef SIMULATE
+	wire idelayctrl_rdy;  // ignored, just like in prc
+	(* IODELAY_GROUP = "IODELAY_200" *)
+	IDELAYCTRL idelayctrl (.RST(idelayctrl_reset),.REFCLK(clk200),.RDY(idelayctrl_rdy));
+`endif
+`endif
 
 // Placeholders for possible IDELAY control inside gmii_to_rgmii
 assign idelay_clk = 0;
@@ -229,7 +268,11 @@ marble_base #(
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
 	.GPS(Pmod2[3:0]), .ext_config(ext_config), .LED(leds)
 );
+`ifndef SIMULATE
+// Verilator can't handle this, says
+//   Unsupported: defparam with more than one dot
 defparam base.rtefi.p4_client.engine.seven = 1;
+`endif
 assign Pmod1 = leds;
 assign LD16 = leds[0];
 assign LD17 = leds[1];

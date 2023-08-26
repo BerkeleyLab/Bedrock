@@ -113,6 +113,10 @@ no_multiple_drivers_check: marble_base_tb
 marble_base_lint: $(MARBLE_BASE_V) IDDR.v
 	$(VERILATOR) --lint-only -DSIMULATE $(VLATOR_LINT_IGNORE) $^
 
+# You'd better have a verilator in the v5 series!
+marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
+	$(VERILATOR) --lint-only --timing $(VLATOR_LINT_IGNORE) -DSIMULATE -y $(FPGA_FAMILY_DIR)/xilinx $(filter-out marble2_features, $^)
+
 # =====
 # constraint
 pin_map_fmc.csv: pin_map_fmc.py
