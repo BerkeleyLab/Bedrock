@@ -289,13 +289,11 @@ reg wr_dac_send=0;
 reg pps_config_write=0;
 wire [0:0] wr_dac_busy;
 wire [31:0] pps_dsp_status;
-wire fir_enable = 1;  // XXX make me run-time configurable!
 ad5662_lock wr_dac(.clk(clk), .tick(wr_dac_tick),
 	.pps_in(pps_in), .pps_tick(pps_tick),
 	.host_data(data_out[17:0]),
 	.host_write_dac(wr_dac_send),
 	.host_write_cr(pps_config_write),
-	.fir_enable(fir_enable),
 	.spi_busy(wr_dac_busy),
 	.dsp_status(pps_dsp_status),
 	.sclk(wr_dac_sclk), .sync_(wr_dac_sync), .sdo(wr_dac_sdo)

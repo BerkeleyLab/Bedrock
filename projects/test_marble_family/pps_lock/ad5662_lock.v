@@ -9,7 +9,6 @@ module ad5662_lock(
 	input host_write_cr,  // single-cycle gate
 	output spi_busy,
 	output [31:0] dsp_status,
-	input fir_enable,
 	// hardware pins
 	output sclk,  // peak rate is half that of input tick
 	output [1:0] sync_,
@@ -18,13 +17,15 @@ module ad5662_lock(
 
 parameter count_period = 125000000;
 
-// 4-bit configuration register and its decoding
-reg [3:0] config_r=0;
+// 5-bit configuration register and its decoding
+// XXX add one more bit controlling twos-complement vs. unsigned DAC chip
+reg [4:0] config_r=0;
 always @(posedge clk) if (host_write_cr) config_r <= host_data;
 wire run_request = config_r[0];  // When this is 0, we get
 // 100% software compatibility with simpler (non-lockable) previous behavior.
 wire err_sign = config_r[1];
 wire [1:0] lock_sel = config_r[3:2];
+wire fir_enable = config_r[4];
 
 // Slightly strange, peek at writes to DAC
 // I bet I could reduce resource usage if I tried.
