@@ -8,7 +8,7 @@ module lb_marble_slave #(
 	parameter USE_I2CBRIDGE = 0,
 	parameter MMC_CTRACE = 0,
 	parameter misc_config_default = 0,
-	parameter use_ddr_pps = 1,
+	parameter use_ddr_pps = 0,
 	// Timing hooks, can be used to speed up simulation
 	parameter twi_q0=6,  // 145 kbps with 125 MHz clock
 	parameter twi_q1=2,
@@ -192,8 +192,8 @@ reg [11:0] locked_pps_cnt=0;
 always @(posedge clk) if (pps_tick) locked_pps_cnt <= locked_pps_cnt+1;
 //
 wire use_ddr_pps_bit = use_ddr_pps;
-wire [9:0] gps_stat_low = {use_ddr_pps_bit, gps_buf_full, pps_cnt, gps_4pins};
-wire [27:0] gps_stat = {locked_pps_cnt, 2'b00, gps_stat_low};
+wire [9:0] gps_stat_low = {use_ddr_pps_bit, gps_buf_full, pps_cnt, gps_4pins};  // 1 + 1 + 4 + 4
+wire [23:0] gps_stat = {locked_pps_cnt, 2'b00, gps_stat_low};  // 12 + 2 + 10
 wire [31:0] gps_pps_data = {pps_cnt, gps_freq};
 
 // Configuration ROM

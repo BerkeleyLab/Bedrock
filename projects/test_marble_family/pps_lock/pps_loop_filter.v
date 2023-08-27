@@ -20,19 +20,17 @@ module pps_loop_filter(
 wire signed [15:0] dac_preset_sval = dac_preset_val ^ (1<<15);
 
 // Optional FIR
-reg [12:0] old_phase=0;
-wire [13:0] phase_sum = phase + old_phase;
-wire [13:0] phase2 = phase << 1;
-reg [13:0] phase_filt=0;
+reg signed [12:0] old_phase=0;
+reg signed [13:0] phase_filt=0;
 reg istrobe1=0;
 always @(posedge clk) begin
 	istrobe1 <= istrobe;
 	if (istrobe) begin
 		old_phase <= phase;
-		phase_filt <= fir_enable ? phase_sum : phase2;
+		phase_filt <= phase + (fir_enable ? old_phase : phase);
 	end
 end
-// With IDDR and fir_enable, phase_filt might be real 14-bits.
+// With IDDR and fir_enable, phase_filt might really be 14 bits.
 // Otherwise there will be one or two dud lsb.
 
 // Kp = -8, Ki = -1, on the low side, see transient.py
@@ -47,7 +45,7 @@ reg dac_stb_r=0, overflow_r=0;
 always @(posedge clk) begin
 	istrobe2 <= istrobe1;
 	istrobe3 <= istrobe2;
-	if (dac_preset_stb) istate <= dac_preset_sval;
+	if (dac_preset_stb) istate <= dac_preset_sval <<< 2;
 	if (istrobe1) new_istate <= istate - intg_term;
 	if (istrobe1) raw_sum <= istate - prop_term;
 	if (istrobe2) overflow_r <= new_istate_ovf | raw_sum_ovf;

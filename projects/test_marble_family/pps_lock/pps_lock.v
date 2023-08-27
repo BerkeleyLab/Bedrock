@@ -1,6 +1,6 @@
 `timescale 1ns / 1ns
 
-// clk is suppsed to be the output of a quality VCXO,
+// clk is supposed to be the output of a quality VCXO,
 // more-or-less White-Rabbit compatible, like the x5 output from
 // the Taitien TXEAADSANF-25.000000 on Marble or Marble-Mini.
 //
@@ -46,7 +46,7 @@ always @(posedge clk) begin
 	if (pps_edge0) pps_inhibit <= 1;
 	// This setting of fine_phase is the whole point of using
 	// an IDDR on the PPS input pin
-	if (pps_edge0) fine_phase <= pps2[0];  // XXX tricky timing, check in simulation
+	if (pps_edge0) fine_phase <= 0 & pps2[0];  // XXX tricky timing, check in simulation
 	if (pps_inhibit) pps_debounce <= pps_debounce+1;
 	pps_debounce_end <= pps_debounce == ((count_period>>2) - 2);
 	if (pps_debounce_end) begin
@@ -104,11 +104,12 @@ pps_loop_filter plf(.clk(clk),
 	.dac_val(dac_data)
 );
 assign pps_out = count_active;  // not phase-aligned with pps_in
-// The 12-bit representation of phase_r is pretty deeply baked
-// into the upper firmware and software layesrs.
+// The 12-bit representation of phase in dsp_status is pretty deeply
+// baked into the upper firmware and software layers.
 // Since the actual value is 13 bits now, and I'm more interested
 // in jitter than large-swing transients, I choose the lsb.
 // The equilibrium point that I got used to at 2048 will now be at 0.
-assign dsp_status = {dsp_on, arm, phase_r[11:0]};
+// Well, temporarily go for compatibility and the msb.
+assign dsp_status = {dsp_on, arm, phase_r[12:1]};
 
 endmodule
