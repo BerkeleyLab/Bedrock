@@ -99,11 +99,11 @@ wire si570;
 `ifdef USE_SI570
 // Single-ended clock derived from programmable xtal oscillator
 ds_clk_buf #(
-   .GTX (1))
+	.GTX (1))
 i_ds_gtrefclk1 (
-   .clk_p   (GTREFCLK_P),
-   .clk_n   (GTREFCLK_N),
-   .clk_out (si570)
+	.clk_p   (GTREFCLK_P),
+	.clk_n   (GTREFCLK_N),
+	.clk_out (si570)
 );
 `else
 assign si570 = 0;
@@ -126,7 +126,7 @@ xilinx7_clocks #(
 	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
 	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
 `ifdef DEBUG_RGMII
-       .DIV1     (5)     // 1 GHz / 5 = 200 MHz
+	.DIV1     (5)     // 1 GHz / 5 = 200 MHz
 `else
 	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
 `endif
