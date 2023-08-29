@@ -1,0 +1,55 @@
+Date: 230829
+Marble v1.3 s/n #45
+
+Test:
+-----
+  cd badger/tests/
+  # Set IDELAY value
+  python3 -m scrap -t /dev/ttyUSB2 0 $IDELAY
+  # Optionally readback IDELAY from ctl and data instances
+  python3 -m scrap -t /dev/ttyUSB2 1 -r 2
+  # Optionally Ping
+  ping $IP
+  # Run UDP test
+  ./udprtx $IP 100000 8
+
+Tabulate values from above test. Number failed and number timeouts are
+reported from udprtx
+
+(note: it seems like udprtx will send more packets than requested until
+the requested number is received)
+
+IDELAY  Failed    Timeouts    Sent
+----------------------------------
+0       0         0
+1       0         0
+2       0         0
+3       0         0
+4       0         0
+5       0         0
+6       0         0
+7       0         0
+8       0         0
+9       0         0
+10      0         0
+11      0         0
+12      0         0
+13      0         0
+14      0         0
+15      0         0
+16      0         0
+17      0         0
+18      0         0
+19      0         0
+20      0         0
+21      0         0
+22      0         0
+23      0         0
+24      0         0
+25      0         0
+26      0         0
+27      0         0
+28      0         0
+29      0         19870
+30      0         118913  118947
+31      0?        all? (I stopped it... took too long)

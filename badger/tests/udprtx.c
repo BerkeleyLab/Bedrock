@@ -23,12 +23,12 @@ static unsigned udp_handle(char *data, unsigned data_len)
 
 	static unsigned last_key=-1;
 	if (key != ((last_key+1)&0xff)) {
-		printf("dropped packet? key %u not %u+1\n", key, last_key);
+		fprintf(stderr, "dropped packet? key %u not %u+1\n", key, last_key);
 	}
 	last_key = key;
 
 	if (data_len != want_len) {
-		printf("length not %u", want_len);
+		fprintf(stderr, "length not %u", want_len);
 		fail++;
 	}
 	if (1) for (u=0; u<data_len; u++) {

@@ -168,7 +168,7 @@ wire vgmii_tx_clk, vgmii_tx_clk90, vgmii_rx_clk;
 wire [7:0] vgmii_txd, vgmii_rxd;
 wire vgmii_tx_en, vgmii_tx_er, vgmii_rx_dv, vgmii_rx_er;
 wire idelay_clk, idelay_ce;
-wire [4:0] idelay_value_in;
+wire [4:0] idelay_value_in, idelay_value_out_ctl, idelay_value_out_data;
 gmii_to_rgmii #(
 `ifdef DEBUG_RGMII
 	.use_idelay(1),
@@ -194,7 +194,9 @@ gmii_to_rgmii #(
 
 	.clk_div(idelay_clk),
 	.idelay_ce(idelay_ce),
-	.idelay_value_in(idelay_value_in)
+	.idelay_value_in(idelay_value_in),
+	.idelay_value_out_ctl(idelay_value_out_ctl),
+	.idelay_value_out_data(idelay_value_out_data)
 );
 
 wire BOOT_CCLK;
@@ -221,9 +223,9 @@ assign idelayctrl_reset = ext_config[2];  // might be helpful?
 `endif
 
 // Placeholders for possible IDELAY control inside gmii_to_rgmii
-assign idelay_clk = 0;
-assign idelay_ce = 0;
 `ifndef DEBUG_RGMII
+assign idelay_ce = 0;
+assign idelay_clk = 0;
 assign idelay_value_in = 0;
 `endif
 
@@ -241,6 +243,7 @@ localparam C_MMC_CTRACE = 0;
 wire marble_base_uart_txd, marble_base_uart_rxd;
 wire scrap_rxd, scrap_txd;
 `ifdef DEBUG_RGMII
+localparam USE_SCRAP = 1;
 assign scrap_rxd = FPGA_TxD;
 assign FPGA_RxD = scrap_txd;
 assign marble_base_uart_txd = 1'b0;
@@ -249,6 +252,7 @@ assign marble_base_uart_txd = 1'b0;
 wire [7:0] scrap_addr;
 wire [15:0] scrap_wdata, scrap_rdata;
 reg [15:0] scrap_rdata_r=0;
+assign scrap_rdata = scrap_rdata_r;
 wire scrap_we;
 
 scrap_dev #(
@@ -260,29 +264,37 @@ scrap_dev #(
   .addr(scrap_addr),
   .rdata(scrap_rdata), .wdata(scrap_wdata),
   .we(scrap_we), .op()
-)
+);
 
 // use scrap bus to control IDELAY inside gmii_to_rgmii
 // XXX untested
 // won't be used unless DEBUG_RGMII is set
-assign idelay_clk = tx_clk;
-assign idelay_ce = scrap_we;
+reg idelay_ce_r=1'b0;
 reg [4:0] idelay_value_in_r=0;
+assign idelay_clk = tx_clk;
+assign idelay_ce = idelay_ce_r;
+assign idelay_value_in = idelay_value_in_r;
 always @(posedge tx_clk) begin
+  idelay_ce_r <= 1'b0;
   if (scrap_we) begin
     case (scrap_addr)
-      0: idelay_value_in_r <= scrap_wdata[4:0];
+      0: begin
+        idelay_value_in_r <= scrap_wdata[4:0];
+        idelay_ce_r <= 1'b1;
+      end
     endcase
   end
   case (scrap_addr)
-    0: scrap_rdata_r <= {11{1'b0}, idelay_value_in_r};
+    0: scrap_rdata_r <= {{11{1'b0}}, idelay_value_in_r};
+    1: scrap_rdata_r <= {{11{1'b0}}, idelay_value_out_ctl};
+    2: scrap_rdata_r <= {{11{1'b0}}, idelay_value_out_data};
   endcase
-assign idelay_value_in = idelay_value_in_r;
-assign scrap_rdata = scrap_rdata_r;
-`else // No SCRAP
+end
+`else // No DEBUG_RGMII
 assign scrap_rxd = 1'b0;
 assign FPGA_RxD = marble_base_uart_rxd;
 assign marble_base_uart_txd = FPGA_TxD;
+localparam USE_SCRAP = 0;
 `endif
 wire [7:0] leds;
 // Real, portable implementation
@@ -291,7 +303,8 @@ marble_base #(
 	.USE_I2CBRIDGE(C_USE_I2CBRIDGE),
 	.MMC_CTRACE(C_MMC_CTRACE),
 	.default_enable_rx(C_DEFAULT_ENABLE_RX),
-	.misc_config_default(C_MISC_CONFIG_DEFAULT)
+	.misc_config_default(C_MISC_CONFIG_DEFAULT),
+	.USE_SCRAP(USE_SCRAP)
 ) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),

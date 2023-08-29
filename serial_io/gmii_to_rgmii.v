@@ -27,7 +27,9 @@ module gmii_to_rgmii #(
     // IDELAYE2 control, matches lvds_iophy
     input            clk_div,
     input            idelay_ce,
-    input [4:0]      idelay_value_in
+    input [4:0]      idelay_value_in,
+    output [4:0]     idelay_value_out_ctl,
+    output [4:0]     idelay_value_out_data
 );
 
 // RGMII
@@ -174,7 +176,8 @@ wire [3:0] rgmii_rxd_delay;
 genvar j;
 generate if (use_idelay) begin : with_idelay
 
-wire [4:0] idelay_rx_ctl_value_out;  // ignored
+wire [4:0] idelay_rx_ctl_value_out;
+assign idelay_value_out_ctl = idelay_rx_ctl_value_out;
 (* IODELAY_GROUP = "IODELAY_200" *)
 IDELAYE2 #(
     .DELAY_SRC("IDATAIN"),
@@ -185,17 +188,18 @@ IDELAYE2 #(
     .DATAOUT(rgmii_rx_ctl_delay),
     .DATAIN(1'b0),
     .C(clk_div),
-    .CE(idelay_ce),
+    .CE(1'b0),
     .INC(1'b0),
     .CINVCTRL(1'b0),
     .CNTVALUEIN(idelay_value_in),
     .CNTVALUEOUT(idelay_rx_ctl_value_out),
-    .LD(1'b0),
+    .LD(idelay_ce),
     .LDPIPEEN(1'b0),
     .REGRST(1'b0)
 );
 
-wire [4:0] idelay_rxd_value_out [0:3];  // ignored
+wire [4:0] idelay_rxd_value_out [0:3];  // [1:3] ignored
+assign idelay_value_out_data = idelay_rxd_value_out[0];
 for (j=0; j<4; j=j+1)
     begin: gen_gmii_rxd_delay
         (* IODELAY_GROUP = "IODELAY_200" *)
@@ -208,12 +212,12 @@ for (j=0; j<4; j=j+1)
             .DATAOUT(rgmii_rxd_delay[j]),
             .DATAIN(1'b0),
             .C(clk_div),
-            .CE(idelay_ce),
+            .CE(1'b0),
             .INC(1'b0),
             .CINVCTRL(1'b0),
             .CNTVALUEIN(idelay_value_in),
             .CNTVALUEOUT(idelay_rxd_value_out[j]),
-            .LD(1'b0),
+            .LD(idelay_ce),
             .LDPIPEEN(1'b0),
             .REGRST(1'b0)
         );
