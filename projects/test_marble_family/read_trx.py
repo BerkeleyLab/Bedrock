@@ -169,14 +169,14 @@ def hw_test_prog(marble, si570_addr, si570_start_addr):
     a += s.pause(3470)
     #
     a += busmux_sel(s, 6)  # App bus
-    a += s.write(0x42, 2, [0x00, 0x88])  # Output registers
+    a += s.write(0x42, 2, [0x00, 0x88])  # Output registers, LD13 is OFF, LD14 is ON
     a += s.pause(2)
     a += s.read(0x42, 0, 2)  # Physical pin logic levels
     a += s.pause(3470)
-    if False:  # extra weird little flicker
-        a += s.write(0x42, 2, [0x00, 0x84])  # Output registers, LD12
+    if True:  # extra weird little flicker
+        a += s.write(0x42, 2, [0x00, 0x84])  # Output registers, LD13
         a += s.pause(1056)
-        a += s.write(0x42, 2, [0x00, 0x88])  # Output registers, LD11
+        a += s.write(0x42, 2, [0x00, 0x88])  # Output registers, LD14
         a += s.pause(1056)
     a += s.jump(jump_n)
     return a
