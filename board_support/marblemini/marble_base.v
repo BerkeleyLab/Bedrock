@@ -84,6 +84,7 @@ module marble_base (
 
 parameter USE_I2CBRIDGE = 1;
 parameter MMC_CTRACE = 1;
+parameter USE_SCRAP = 1;
 parameter misc_config_default = 0;
 
 `ifdef VERILATOR
@@ -329,12 +330,14 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 assign vgmii_tx_er=1'b0;
 assign in_use = blob_in_use | boot_busy;
 
+generate if (~USE_SCRAP) begin : branch_freq_demo
 // Frequency counter demo to UART
 wire [3:0] unk_clk = {cfg_clk, si570, aux_clk, rx_clk};
 freq_demo freq_demo(
 	.refclk(tx_clk), .unk_clk(unk_clk),
 	.uart_tx(FPGA_RxD), .uart_rx(FPGA_TxD)
 );
+end endgenerate
 
 // For statistics-gathering purposes
 packet_categorize i_categorize(.clk(vgmii_rx_clk),

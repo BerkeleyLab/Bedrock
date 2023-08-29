@@ -223,7 +223,9 @@ assign idelayctrl_reset = ext_config[2];  // might be helpful?
 // Placeholders for possible IDELAY control inside gmii_to_rgmii
 assign idelay_clk = 0;
 assign idelay_ce = 0;
+`ifndef DEBUG_RGMII
 assign idelay_value_in = 0;
+`endif
 
 `ifdef USE_I2CBRIDGE
 localparam C_USE_I2CBRIDGE = 1;
@@ -236,6 +238,52 @@ localparam C_MMC_CTRACE = 1;
 localparam C_MMC_CTRACE = 0;
 `endif
 
+wire marble_base_uart_txd, marble_base_uart_rxd;
+wire scrap_rxd, scrap_txd;
+`ifdef DEBUG_RGMII
+assign scrap_rxd = FPGA_TxD;
+assign FPGA_RxD = scrap_txd;
+assign marble_base_uart_txd = 1'b0;
+
+// scrap bus
+wire [7:0] scrap_addr;
+wire [15:0] scrap_wdata, scrap_rdata;
+reg [15:0] scrap_rdata_r=0;
+wire scrap_we;
+
+scrap_dev #(
+  .F_CLK_IN(125000000), .F_BAUD(115200),
+  .ADDRESS_WIDTH(8), .DATA_WIDTH(16)
+) scrap_dev (
+  .clk(tx_clk), .rst(1'b0),
+  .uart_rxd(scrap_rxd), .uart_txd(scrap_txd),
+  .addr(scrap_addr),
+  .rdata(scrap_rdata), .wdata(scrap_wdata),
+  .we(scrap_we), .op()
+)
+
+// use scrap bus to control IDELAY inside gmii_to_rgmii
+// XXX untested
+// won't be used unless DEBUG_RGMII is set
+assign idelay_clk = tx_clk;
+assign idelay_ce = scrap_we;
+reg [4:0] idelay_value_in_r=0;
+always @(posedge tx_clk) begin
+  if (scrap_we) begin
+    case (scrap_addr)
+      0: idelay_value_in_r <= scrap_wdata[4:0];
+    endcase
+  end
+  case (scrap_addr)
+    0: scrap_rdata_r <= {11{1'b0}, idelay_value_in_r};
+  endcase
+assign idelay_value_in = idelay_value_in_r;
+assign scrap_rdata = scrap_rdata_r;
+`else // No SCRAP
+assign scrap_rxd = 1'b0;
+assign FPGA_RxD = marble_base_uart_rxd;
+assign marble_base_uart_txd = FPGA_TxD;
+`endif
 wire [7:0] leds;
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
@@ -255,7 +303,7 @@ marble_base #(
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
 	.aux_clk(SYSCLK_P), .clk62(clk62), .cfg_clk(cfg_clk),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
-	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
+	.FPGA_RxD(marble_base_uart_rxd), .FPGA_TxD(marble_base_uart_txd),
 	.twi_scl({dum_scl, FMC2_LA_P[2], FMC1_LA_P[2], TWI_SCL}),
 	.twi_sda({dum_sda, FMC2_LA_N[2], FMC1_LA_N[2], TWI_SDA}),
 	.fmc_test({
