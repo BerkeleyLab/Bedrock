@@ -2,7 +2,9 @@
 // Mostly cut-and-paste from rgmii_hw_test.v
 
 `include "marble_features_defs.vh"
-//`define DEBUG_RGMII
+// At least one Marble v1.4 board _needs_ this option set
+// to get reliable Ethernet operation.  Need more data.
+`define DEBUG_RGMII
 
 module marble_top(
 	input GTPREFCLK_P,
@@ -124,7 +126,7 @@ xilinx7_clocks #(
 	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
 	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
 `ifdef DEBUG_RGMII
-	.DIV1     (5)     // 1 GHz / 5 = 200 MHz
+       .DIV1     (5)     // 1 GHz / 5 = 200 MHz
 `else
 	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
 `endif
@@ -139,6 +141,7 @@ xilinx7_clocks #(
 	.locked   (clk_locked)
 );
 `else
+// this configuration is probably bit-rotted
 wire SYSCLK_N = 0;
 gmii_clock_handle clocks(
 	.sysclk_p(SYSCLK_P),
@@ -152,7 +155,9 @@ assign test_clk=0;
 `endif
 `ifdef DEBUG_RGMII
 assign clk200 = clk_out1;
-assign clk62 = 0;  // will break readout of dna
+reg bad_slow_clock=0;
+always @(posedge tx_clk) bad_slow_clock <= ~bad_slow_clock;
+assign clk62 = bad_slow_clock;  // sample-size of one says readout of dna still works
 `else
 assign clk200 = 0;
 assign clk62 = clk_out1;
@@ -165,10 +170,10 @@ wire vgmii_tx_en, vgmii_tx_er, vgmii_rx_dv, vgmii_rx_er;
 wire idelay_clk, idelay_ce;
 wire [4:0] idelay_value_in;
 gmii_to_rgmii #(
-	.in_phase_tx_clk(in_phase_tx_clk)
 `ifdef DEBUG_RGMII
-	,.use_idelay(1)
+	.use_idelay(1),
 `endif
+	.in_phase_tx_clk(in_phase_tx_clk)
 ) gmii_to_rgmii_i(
 	.rgmii_txd(RGMII_TXD),
 	.rgmii_tx_ctl(RGMII_TX_CTRL),
@@ -194,22 +199,31 @@ gmii_to_rgmii #(
 
 wire BOOT_CCLK;
 wire cfg_clk;  // Just for fun, so we can measure its frequency
+`ifndef SIMULATE
 STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
+`else
+assign cfg_clk = 0;
+`endif
 
 // Placeholders
 wire ZEST_PWR_EN;
 wire dum_scl, dum_sda;
 wire [3:0] ext_config;
 
-wire idelayctrl_rdy;  // ignored, just like in prc
+`ifdef DEBUG_RGMII
 wire idelayctrl_reset;  // prc pushes this button with software
 assign idelayctrl_reset = ext_config[2];  // might be helpful?
-`ifdef DEBUG_RGMII
 `ifndef SIMULATE
-    (* IODELAY_GROUP = "IODELAY_200" *)
-    IDELAYCTRL idelayctrl (.RST(idelayctrl_reset),.REFCLK(clk200),.RDY(idelayctrl_rdy));
+	wire idelayctrl_rdy;  // ignored, just like in prc
+	(* IODELAY_GROUP = "IODELAY_200" *)
+	IDELAYCTRL idelayctrl (.RST(idelayctrl_reset),.REFCLK(clk200),.RDY(idelayctrl_rdy));
 `endif
 `endif
+
+// Placeholders for possible IDELAY control inside gmii_to_rgmii
+assign idelay_clk = 0;
+assign idelay_ce = 0;
+assign idelay_value_in = 0;
 
 `ifdef USE_I2CBRIDGE
 localparam C_USE_I2CBRIDGE = 1;
@@ -225,6 +239,7 @@ localparam C_MMC_CTRACE = 0;
 // scrap bus -- see additional info in marble_base.v
 wire [7:0] scrap_addr;
 wire [15:0] scrap_wdata, scrap_rdata;
+reg [15:0] scrap_rdata_r=0;
 wire scrap_we;
 wire [1:0] scrap_op;
 
@@ -233,8 +248,18 @@ wire [1:0] scrap_op;
 // won't be used unless DEBUG_RGMII is set
 assign idelay_clk = tx_clk;
 assign idelay_ce = scrap_we;
-assign idelay_value_in = scrap_wdata[4:0];
-assign scrap_rdata = 16'hface;
+reg [4:0] idelay_value_in_r=0;
+always @(posedge tx_clk) begin
+  if (scrap_we) begin
+    case (scrap_addr)
+      0: idelay_value_in_r <= scrap_wdata[4:0];
+    endcase
+  end
+  case (scrap_addr)
+    0: scrap_rdata_r <= {11{1'b0}, idelay_value_in_r};
+  endcase
+assign idelay_value_in = idelay_value_in_r;
+assign scrap_rdata = scrap_rdata_r;
 
 wire [7:0] leds;
 // Real, portable implementation
@@ -274,7 +299,11 @@ marble_base #(
 	.scrap_we(scrap_we), .scrap_op(scrap_op),
 	.GPS(Pmod2[3:0]), .ext_config(ext_config), .LED(leds)
 );
+`ifndef SIMULATE
+// Verilator can't handle this, says
+//   Unsupported: defparam with more than one dot
 defparam base.rtefi.p4_client.engine.seven = 1;
+`endif
 assign Pmod1 = leds;
 assign LD16 = leds[0];
 assign LD17 = leds[1];

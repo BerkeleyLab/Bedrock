@@ -1,5 +1,8 @@
 // !!! Placeholder only !!!
 
+// verilator lint_save
+// verilator lint_off UNDRIVEN
+
 module MMCME2_BASE #(
     parameter BANDWIDTH = "OPTIMIZED",
     parameter real CLKFBOUT_MULT_F = 5.000,
@@ -53,5 +56,6 @@ module MMCME2_BASE #(
 
 assign CLKOUT0 = CLKIN1;
 assign CLKOUT1 = CLKIN1;
+// verilator lint_restore
 
 endmodule // MMCME2_BASE

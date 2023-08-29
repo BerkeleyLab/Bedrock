@@ -1,6 +1,6 @@
 [timestart] 0
 [size] 1000 664
-[pos] 243 175
+[pos] -1 -1
 *-22.120813 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] spi_flash_tb.
 [treeopen] spi_flash_tb.dut.

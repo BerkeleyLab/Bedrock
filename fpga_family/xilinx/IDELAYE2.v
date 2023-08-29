@@ -41,11 +41,14 @@ always @(posedge C) begin
     end
 end
 
+// verilator lint_save
+// verilator lint_off BLKSEQ
 reg [31:0] shiftReg = 32'h0;
 always begin
     #(TAP_DEL);
     shiftReg = { shiftReg[30:0], IDATAIN };
     DATAOUT = shiftReg[cntValue];
 end
+// verilator lint_restore
 
 endmodule // IDELAYE2
