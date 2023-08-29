@@ -185,6 +185,7 @@ freq_count freq_cnt_si570(.f_in(si570), .sysclk(lb_clk), .frequency(frequency_si
 
 //
 wire [3:0] rx_category_rx, rx_category;
+wire rx_category_s_rx, rx_category_s;
 lb_marble_slave #(
 	.USE_I2CBRIDGE(USE_I2CBRIDGE),
 	.MMC_CTRACE(MMC_CTRACE),
@@ -336,7 +337,6 @@ freq_demo freq_demo(
 );
 
 // For statistics-gathering purposes
-wire rx_category_s_rx, rx_category_s;
 packet_categorize i_categorize(.clk(vgmii_rx_clk),
 	.strobe(rx_mac_status_s), .status(rx_mac_status_d),
 	.strobe_o(rx_category_s_rx), .category(rx_category_rx)
