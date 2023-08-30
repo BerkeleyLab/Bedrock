@@ -26,5 +26,16 @@ pps_lock_tb: pps_lock.v pps_loop_filter.v
 lint: pps_lock.v pps_loop_filter.v
 	$(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $^
 
+# Build a testbench with Verilator that exercises full PLL functionality
+# (scaled by 1000)
+Vpps_lock: pll_sim.cpp pps_lock.v pps_loop_filter.v
+	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -DSIMULATE -Gcount_period=125000 -cc --exe $^
+	MAKEFLAGS="" make -C obj_dir -f Vpps_lock.mk
+	mv obj_dir/$@ $@
+
+pll_sim.vcd: Vpps_lock
+	./Vpps_lock +trace
+
 clean:
-	rm -f *_tb *.vcd
+	rm -f *_tb *.vcd Vpps_lock
+	rm -rf obj_dir
