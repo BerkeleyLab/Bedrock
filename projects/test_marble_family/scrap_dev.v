@@ -703,16 +703,11 @@ reg [3:0] receiver_stage;
 
 reg [BYTE_COUNT_WIDTH-1:0] nbyte_inbuf, nbyte_outbuf, nbyte_stage; // Packet byte counter
 reg  [7:0] rebuf_wdata;
-reg  rebuf_wselect, rebuf_we;
+reg  rebuf_wselect=1'b0, rebuf_we=1'b0;
 wire [RESPONSE_ADDR_WIDTH-1:0] rebuf_raddr;
 wire [7:0] rebuf_rdata;
 wire rebuf_rce;
 reg  rebuf_rselect;
-
-initial begin
-  rebuf_rselect = 1'b0;
-  rebuf_wselect = 1'b0;
-end
 
 wire [RESPONSE_ADDR_WIDTH-1:0] rebuf_waddr = nbyte_outbuf;
 
@@ -722,8 +717,23 @@ initial pkt_offset = 0;
 wire [3:0] bread_hex_max = ((1<<(cmd_dw+1))-1);
 wire [3:0] bread_hex_index = bread_hex_max - ((rebuf_raddr[3:0] - pkt_offset[3:0]) & bread_hex_max);
 // Bus addr
-wire [ADDRESS_WIDTH-1:0] bread_bus_addr  = (rebuf_raddr >= pkt_offset) ?
-  pkt_addr[ADDRESS_WIDTH-1:0] + ((rebuf_raddr - pkt_offset) >> (cmd_dw+1)) : pkt_addr[ADDRESS_WIDTH-1:0];
+wire [ADDRESS_WIDTH-1:0] rebuf_raddr_w;
+wire [ADDRESS_WIDTH-1:0] pkt_offset_w;
+generate if (ADDRESS_WIDTH > RESPONSE_ADDR_WIDTH) begin : branch_a_gt_r
+  assign rebuf_raddr_w = {{ADDRESS_WIDTH-RESPONSE_ADDR_WIDTH{1'b0}}, rebuf_raddr};
+  assign pkt_offset_w = {{ADDRESS_WIDTH-RESPONSE_ADDR_WIDTH{1'b0}}, pkt_offset};
+end else begin : branch_r_gt_a
+  assign rebuf_raddr_w = rebuf_raddr[ADDRESS_WIDTH-1:0];
+  assign pkt_offset_w = pkt_offset[ADDRESS_WIDTH-1:0];
+end endgenerate
+/*wire [ADDRESS_WIDTH-1:0] bread_bus_addr = (rebuf_raddr >= pkt_offset) ?
+  pkt_addr[ADDRESS_WIDTH-1:0] + ((rebuf_raddr[ADDRESS_WIDTH-1:0] - pkt_offset[ADDRESS_WIDTH-1:0]) >> (cmd_dw+1)) :
+  pkt_addr[ADDRESS_WIDTH-1:0];
+*/
+wire [ADDRESS_WIDTH-1:0] bread_bus_addr = (rebuf_raddr >= pkt_offset) ?
+  pkt_addr[ADDRESS_WIDTH-1:0] + ((rebuf_raddr_w - pkt_offset_w) >> (cmd_dw+1)) :
+  pkt_addr[ADDRESS_WIDTH-1:0];
+
 wire test = (cmd_op_ex == CMD_OP_EX_BREAD) ? rebuf_raddr[cmd_dw] & bread_override & rebuf_rce : rdata_prelatch;
 
 // Latch rdata on bus addr change
@@ -865,7 +875,7 @@ wire [BYTE_COUNT_WIDTH-1:0] ex_ndata_w = ex_ndata[BYTE_COUNT_WIDTH-1:0];
 `endif
 assign last_addr_byte = (1 << (cmd_aw + 1)) + 1;
 assign nbyte_addr     = nbyte_inbuf < last_addr_byte ? last_addr_byte - nbyte_inbuf - 1 : 0;
-assign last_data_byte = cmd_op_ex == CMD_OP_EX_BWRITE ? last_addr_byte + 2 + (ex_ndata_w<<1) : 
+assign last_data_byte = cmd_op_ex == CMD_OP_EX_BWRITE ? last_addr_byte + 2 + (ex_ndata_w<<1) :
                         cmd_op_ex == CMD_OP_EX_BREAD  ? last_addr_byte + 2 :
                         last_addr_byte + (1 << (cmd_dw + 1));
 assign nbyte_data     = nbyte_inbuf < last_data_byte ? last_data_byte - nbyte_inbuf - 1: 0;
@@ -879,7 +889,7 @@ wire [3:0] ex_data_nbyte_max = (1 << (cmd_dw+1)) - 1;
 reg [7:0] ex_data_count;  // Count of number of data elements parsed in BWRITE phase
 wire [7:0] ex_data_count_max = (ex_ndata >> cmd_dw) - 1;
 reg [2:0] nbyte_ndata;  // = nbyte_inbuf == last_addr_byte + 4 ? 3'b1 : 3'b0; // 3-bit for annoying verilator warning
-wire [BYTE_COUNT_WIDTH-1:0] nbytes_bulk = 6 + (1<<(cmd_aw+1)) + (1<<(cmd_dw+1)) + ex_ndata_w; 
+wire [BYTE_COUNT_WIDTH-1:0] nbytes_bulk = 6 + (1<<(cmd_aw+1)) + (1<<(cmd_dw+1)) + ex_ndata_w;
 initial begin
   ex_ndata = 0;
   nbyte_ndata = 0;
@@ -971,14 +981,14 @@ end
 
 // Assume bad command byte if no other condition is met
 wire [7:0] nack_char = (protocol_ok == 1'b0) ? CHAR_NACK_UNSUPPORTED :
-                      (timeout == 1'b1) ? CHAR_NACK_TIMEOUT : 
+                      (timeout == 1'b1) ? CHAR_NACK_TIMEOUT :
                       (data_err == 1'b1) ? CHAR_NACK_DECODE :
                       (term_ok == 1'b0) ? CHAR_NACK_TERM :
                       (crc_ok == 1'b0) ? CHAR_NACK_CRC :
                       (bus_contention == 1'b1) ? CHAR_NACK_CONTENTION :
                       CHAR_NACK_CMD;
 wire [7:0] ack_char = (protocol_ok == 1'b0) ? CHAR_NACK_UNSUPPORTED :
-                      (timeout == 1'b1) ? CHAR_NACK_TIMEOUT : 
+                      (timeout == 1'b1) ? CHAR_NACK_TIMEOUT :
                       (data_err == 1'b1) ? CHAR_NACK_DECODE :
                       (term_ok == 1'b0) ? CHAR_NACK_TERM :
                       (crc_ok == 1'b0) ? CHAR_NACK_CRC :
@@ -1217,7 +1227,7 @@ always @(posedge clk) begin
       STAGE_TERM:
       begin
         if (uart_drdy) begin
-          // Only execute this stage once. If termination not detected, will not overflow rebuf 
+          // Only execute this stage once. If termination not detected, will not overflow rebuf
           //$display("incrc = 0x%h, crc = 0x%h", incrc, crc);
           if (incrc == crc) crc_ok <= 1'b1;
           else crc_ok <= 1'b0;
@@ -1347,7 +1357,7 @@ always @(posedge clk) begin
               //$display("Going to BWRITE");
               crc_in_enable <= 1'b1;
               receiver_stage <= STAGE_BWRITE;
-            end else begin 
+            end else begin
               //$display("BREAD - to CRC");
               crc_in_enable <= 1'b0;
               receiver_stage <= STAGE_CRC; // BREAD stage deferred until after packet received
@@ -1604,163 +1614,6 @@ debounce #(
   .din(RxD),
   .dout(debounce_nothing)
 );
-assign rxd_db = RxD;
-`else
-debounce #(
-  .LEN(DEBOUNCE_COUNT),
-  .INITIAL_STATE(1'b1)  // Initial state of dout
-  ) debounce_rxd (
-  .clk(clk),
-  .din(RxD),
-  .dout(rxd_db)
-);
-`endif
-
-  // First need baud clk for clock-enable
-baudclk #(
-  .SYSCLK_FREQ_HZ(SYSCLK_FREQ_HZ),  // 100MHz
-  .BAUD_FREQ_HZ(BAUD_FREQ_HZ),      // 1,152,000 # 10*115200
-  .COUNT_WIDTH($clog2(SYSCLK_FREQ_HZ/BAUD_FREQ_HZ)+1) // TODO how calculate count width?  Needs to be ceil(log2(f_clk/f_baud))
-  ) baudclk_inst (
-  .clk(clk),
-  .rst(~baud_en),
-  .bclk(baud_clk),
-  .re(baud_re),
-  .fe(baud_fe)
-);
-
-always @(posedge clk)
-begin
-  if (rst) begin
-    rxd_0 <= 1'b0;
-    rxd_1 <= 1'b0;
-    drdy <= 1'b0;
-    state <= STATE_IDLE;
-  end else begin
-    rxd_1 <= rxd_0;
-    rxd_0 <= rxd_db;
-    drdy <= 1'b0;
-    if ((state == STATE_IDLE) && rxd_fe) begin
-      //$display("RX Starting");
-      state <= STATE_START;
-      baud_en <= 1'b1;
-    end
-    if (baud_fe) begin
-      casez (state)
-        STATE_IDLE: begin
-          state <= STATE_IDLE;
-        end
-        STATE_START: begin
-          // Start bit is ignored
-          state <= STATE_BIT0;
-        end
-        5'b00???: begin // Matches STATE_BIT0 through STATE_BIT0+7
-          r_rdata[state[2:0]] <= rxd_db;
-          state <= state + 1;
-        end
-        STATE_STOP0: begin
-          if (STOP_BITS == 1) begin
-            //$display("RX going IDLE");
-            state <= STATE_IDLE;
-            drdy <= 1'b1;
-            baud_en <= 1'b0;
-          end else begin
-            state <= STATE_STOP1;
-          end
-        end
-        STATE_STOP1: begin
-          state <= STATE_IDLE;
-          //$display("RX going IDLE");
-          drdy <= 1'b1;
-          baud_en <= 1'b0;
-        end
-        default: begin
-          state <= 0;
-        end
-      endcase
-    end
-  end
-end
-
-endmodule
-/*
- * Simple UART receiver application
- * Implements simple bus master
- * TODO:
- *   Add support for 7-bit data width
- *   Add support for 1 stop bit
- */
-
-/*
-* 0. De-bounce filter RxD
-* 1. Watch for falling edge on RxD (start bit)
-*    Start Baud Clk
-* 2. Sample on baud clk falling edge
-* -- Reset Baud clk count on RxD falling edge to re-synchronize (NO; debouncer)
-* 3. Disable baud clk on STOP bit
-*/
-
-module uart_rx
-  #(
-    parameter SYSCLK_FREQ_HZ = 100000000,
-    parameter BAUD_FREQ_HZ = 115200,
-    parameter DATAWIDTH = 8,        // Data width in bits. TODO - Support 7 bits
-    parameter DEBOUNCE_COUNT = 2,   // Count in 'clk' periods to debounce RxD
-    parameter STOP_BITS = 1         // 1 or 2
-  )(
-    input wire clk,                 // System clock
-    input wire rst,                 // Synchronous reset ('1' = reset)
-    output wire [DATAWIDTH-1:0] rdata,  // Byte read
-    output reg drdy,                // Asserted for 1 'clk' cycle. '1' = New read byte ready to consume
-    output wire busy,               // UART is receiving a byte (START detected, no STOP yet)
-    // Debug
-    output wire baudclk,
-    input wire RxD                  // Actual RxD line from the wire
-  );
-
-  wire baud_clk;
-  assign baudclk = baud_clk;
-  wire baud_re;
-  wire baud_fe;
-  reg baud_en;
-  wire rxd_db;
-  reg rxd_0, rxd_1;
-  wire rxd_fe;
-  reg [DATAWIDTH-1:0] r_rdata;
-  reg [4:0] state;
-
-  assign rdata = r_rdata;
-  assign rxd_fe = (rxd_0 == 1'b0) && (rxd_1 == 1'b1) ? 1'b1 : 1'b0;
-
-  localparam [4:0]
-    STATE_BIT0    = 5'b00000,
-    STATE_IDLE    = 5'b10000,
-    STATE_START   = 5'b10001,
-    STATE_STOP0   = 5'b01000, // Swap defs of STOP0/STOP1 to use only 1 stop bit
-    STATE_STOP1   = 5'b01001;
-
-  assign busy = state == STATE_IDLE ? 1'b0 : 1'b1;
-
-  initial
-  begin
-    state = STATE_IDLE;
-    baud_en = 1'b0;
-    r_rdata = {DATAWIDTH{1'b0}};
-  end
-
-`ifdef SIMULATE
-  // Don't debounce for simulation
-/*
-wire debounce_nothing;
-debounce #(
-  .LEN(DEBOUNCE_COUNT),
-  .INITIAL_STATE(1'b1)  // Initial state of dout
-  ) debounce_rxd (
-  .clk(clk),
-  .din(RxD),
-  .dout(debounce_nothing)
-);
-*/
 assign rxd_db = RxD;
 `else
 debounce #(

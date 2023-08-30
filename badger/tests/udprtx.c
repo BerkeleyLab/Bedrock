@@ -71,7 +71,7 @@ static void primary_loop(int usd, unsigned npack, unsigned juggle)
 	struct timeval to;
 	int i, pack_len;
 	int debug1=0;
-	unsigned probes_sent=0, probes_recv=0, probes_fail=0;
+	unsigned probes_sent=0, probes_recv=0, probes_cplt=0, probes_fail=0;
 	unsigned timeouts=0;
 	static char incoming[1500];
 	sa_xmit_len=sizeof sa_xmit;
@@ -80,7 +80,7 @@ static void primary_loop(int usd, unsigned npack, unsigned juggle)
 	}
 	to.tv_sec=0;
 	to.tv_usec=0;
-	for (;npack == 0 || probes_recv < npack;) {
+	for (;npack == 0 || probes_cplt < npack;) {
 		FD_ZERO(&fds_r);
 		FD_SET(usd,&fds_r);
 		FD_ZERO(&fds_e);
@@ -120,6 +120,7 @@ static void primary_loop(int usd, unsigned npack, unsigned juggle)
 			fflush(stdout);
 			break;
 		}
+		++probes_cplt;
 		to.tv_sec=0;
 		to.tv_usec=0;
 	}
