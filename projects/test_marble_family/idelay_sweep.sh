@@ -53,5 +53,5 @@ for i in $(seq 0 31); do
   python3 -m scrap --silent -t "$DEV" 1 -r 2
   #time ./badger/tests/udprtx $IP $NPACKETS 8 2> /dev/null
   # Run udprtx stress test
-  "$UDPRTX $IP $NPACKETS" 8 2> /dev/null
+  "$UDPRTX" "$IP" "$NPACKETS" 8 2> /dev/null
 done

@@ -23,7 +23,7 @@ module marble_base (
 	input clk_locked,
 	input si570,
 
-	// SPI pins, can give access to configuration
+	// SPI pins to on-board microcontroller; can give access to configuration
 	input SCLK,
 	input CSB,
 	input MOSI,
@@ -37,13 +37,13 @@ module marble_base (
 	input boot_miso,
 	output cfg_d02,
 
-	// One I2C bus, everything gatewayed through a TCA9548
+	// One I2C bus; everything gatewayed through a TCA9548A
 	inout  [3:0] twi_scl,
 	inout  [3:0] twi_sda,
 	inout  TWI_RST,
 	input  TWI_INT,
 
-	// White Rabbit DAC
+	// White Rabbit compatible DAC subsystem controlling VCXOs
 	output WR_DAC_SCLK,
 	output WR_DAC_DIN,
 	output WR_DAC1_SYNC,
@@ -52,6 +52,9 @@ module marble_base (
 	// UART to USB
 	// The RxD and TxD directions are with respect
 	// to the USB/UART chip, not the FPGA!
+	// Note that the freq_demo feature doesn't actually use FPGA_TxD.
+	// If you don't connect anything to FPGA_RxD, the synthesizer
+	// will drop the whole freq_demo feature.
 	output FPGA_RxD,
 	input FPGA_TxD,
 
@@ -84,7 +87,6 @@ module marble_base (
 
 parameter USE_I2CBRIDGE = 1;
 parameter MMC_CTRACE = 1;
-parameter USE_SCRAP = 1;
 parameter misc_config_default = 0;
 
 `ifdef VERILATOR
@@ -330,14 +332,12 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 assign vgmii_tx_er=1'b0;
 assign in_use = blob_in_use | boot_busy;
 
-generate if (~USE_SCRAP) begin : branch_freq_demo
 // Frequency counter demo to UART
 wire [3:0] unk_clk = {cfg_clk, si570, aux_clk, rx_clk};
 freq_demo freq_demo(
 	.refclk(tx_clk), .unk_clk(unk_clk),
 	.uart_tx(FPGA_RxD), .uart_rx(FPGA_TxD)
 );
-end endgenerate
 
 // For statistics-gathering purposes
 packet_categorize i_categorize(.clk(vgmii_rx_clk),

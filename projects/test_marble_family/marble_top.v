@@ -2,9 +2,6 @@
 // Mostly cut-and-paste from rgmii_hw_test.v
 
 `include "marble_features_defs.vh"
-// At least one Marble v1.4 board _needs_ this option set
-// to get reliable Ethernet operation.  Need more data.
-`define DEBUG_RGMII
 
 module marble_top(
 	input GTPREFCLK_P,
@@ -99,11 +96,11 @@ wire si570;
 `ifdef USE_SI570
 // Single-ended clock derived from programmable xtal oscillator
 ds_clk_buf #(
-   .GTX (1))
+	.GTX (1))
 i_ds_gtrefclk1 (
-   .clk_p   (GTREFCLK_P),
-   .clk_n   (GTREFCLK_N),
-   .clk_out (si570)
+	.clk_p   (GTREFCLK_P),
+	.clk_n   (GTREFCLK_N),
+	.clk_out (si570)
 );
 `else
 assign si570 = 0;
@@ -119,14 +116,20 @@ wire clk_out1;
 wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
 // used for calibrating IODELAY cells
 
+// You really want to set this define.
+// It's only valid to leave it off when C_USE_RGMII_IDELAY is 0.
+// Maybe useful if you're exploring parameter space or
+// have problems with the Xilinx DNA readout.
+`define USE_IDELAYCTRL
+
 `ifdef USE_GTPCLK
 xilinx7_clocks #(
 	.DIFF_CLKIN("BYPASS"),
 	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
 	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
 	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
-`ifdef DEBUG_RGMII
-       .DIV1     (5)     // 1 GHz / 5 = 200 MHz
+`ifdef USE_IDELAYCTRL
+	.DIV1     (5)     // 1 GHz / 5 = 200 MHz
 `else
 	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
 `endif
@@ -153,14 +156,14 @@ gmii_clock_handle clocks(
 );
 assign test_clk=0;
 `endif
-`ifdef DEBUG_RGMII
+`ifdef USE_IDELAYCTRL
 assign clk200 = clk_out1;
 reg bad_slow_clock=0;
 always @(posedge tx_clk) bad_slow_clock <= ~bad_slow_clock;
-assign clk62 = bad_slow_clock;  // sample-size of one says readout of dna still works
+assign clk62 = bad_slow_clock;  // sample-size of two says readout of dna still works
 `else
 assign clk200 = 0;
-assign clk62 = clk_out1;
+assign clk62 = clk_out1;  // better tested way to give dna primitive the clock it wants
 `endif
 
 // Double-data-rate conversion
@@ -170,9 +173,7 @@ wire vgmii_tx_en, vgmii_tx_er, vgmii_rx_dv, vgmii_rx_er;
 wire idelay_clk, idelay_ce;
 wire [4:0] idelay_value_in, idelay_value_out_ctl, idelay_value_out_data;
 gmii_to_rgmii #(
-`ifdef DEBUG_RGMII
-	.use_idelay(1),
-`endif
+	.use_idelay(C_USE_RGMII_IDELAY),
 	.in_phase_tx_clk(in_phase_tx_clk)
 ) gmii_to_rgmii_i(
 	.rgmii_txd(RGMII_TXD),
@@ -212,7 +213,7 @@ wire ZEST_PWR_EN;
 wire dum_scl, dum_sda;
 wire [3:0] ext_config;
 
-`ifdef DEBUG_RGMII
+`ifdef USE_IDELAYCTRL
 wire idelayctrl_reset;  // prc pushes this button with software
 assign idelayctrl_reset = ext_config[2];  // might be helpful?
 `ifndef SIMULATE
@@ -220,13 +221,6 @@ assign idelayctrl_reset = ext_config[2];  // might be helpful?
 	(* IODELAY_GROUP = "IODELAY_200" *)
 	IDELAYCTRL idelayctrl (.RST(idelayctrl_reset),.REFCLK(clk200),.RDY(idelayctrl_rdy));
 `endif
-`endif
-
-// Placeholders for possible IDELAY control inside gmii_to_rgmii
-`ifndef DEBUG_RGMII
-assign idelay_ce = 0;
-assign idelay_clk = 0;
-assign idelay_value_in = 0;
 `endif
 
 `ifdef USE_I2CBRIDGE
@@ -242,8 +236,14 @@ localparam C_MMC_CTRACE = 0;
 
 wire marble_base_uart_txd, marble_base_uart_rxd;
 wire scrap_rxd, scrap_txd;
-`ifdef DEBUG_RGMII
-localparam USE_SCRAP = 1;
+
+// Option for UART control of IDELAY inside gmii_to_rgmii
+// Requires USE_IDELAYCTRL and C_USE_RGMII_IDELAY
+// scrap_dev should not be part of bedrock?  XXX additional instructions required
+// Of course this changes the UART feature from freq_demo to scrap,
+// and that includes changing the line rate from 9600 baud to 115200 baud.
+`define USE_SCRAP
+`ifdef USE_SCRAP
 assign scrap_rxd = FPGA_TxD;
 assign FPGA_RxD = scrap_txd;
 assign marble_base_uart_txd = 1'b0;
@@ -266,9 +266,7 @@ scrap_dev #(
   .we(scrap_we), .op()
 );
 
-// use scrap bus to control IDELAY inside gmii_to_rgmii
-// XXX untested
-// won't be used unless DEBUG_RGMII is set
+// Use scrap bus to control IDELAY inside gmii_to_rgmii
 reg idelay_ce_r=1'b0;
 reg [4:0] idelay_value_in_r=0;
 assign idelay_clk = tx_clk;
@@ -290,12 +288,15 @@ always @(posedge tx_clk) begin
     2: scrap_rdata_r <= {{11{1'b0}}, idelay_value_out_data};
   endcase
 end
-`else // No DEBUG_RGMII
+`else // No USE_SCRAP
+assign idelay_ce = 0;
+assign idelay_clk = 0;
+assign idelay_value_in = 0;
 assign scrap_rxd = 1'b0;
 assign FPGA_RxD = marble_base_uart_rxd;
 assign marble_base_uart_txd = FPGA_TxD;
-localparam USE_SCRAP = 0;
 `endif
+
 wire [7:0] leds;
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
@@ -303,8 +304,7 @@ marble_base #(
 	.USE_I2CBRIDGE(C_USE_I2CBRIDGE),
 	.MMC_CTRACE(C_MMC_CTRACE),
 	.default_enable_rx(C_DEFAULT_ENABLE_RX),
-	.misc_config_default(C_MISC_CONFIG_DEFAULT),
-	.USE_SCRAP(USE_SCRAP)
+	.misc_config_default(C_MISC_CONFIG_DEFAULT)
 ) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),

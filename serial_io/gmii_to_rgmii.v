@@ -2,6 +2,7 @@
 
 module gmii_to_rgmii #(
    parameter in_phase_tx_clk=0,
+   parameter idelay_value=0,
    parameter use_idelay=0
 ) (
 
@@ -182,7 +183,7 @@ assign idelay_value_out_ctl = idelay_rx_ctl_value_out;
 IDELAYE2 #(
     .DELAY_SRC("IDATAIN"),
     .IDELAY_TYPE("VAR_LOAD"),
-    .IDELAY_VALUE(0)
+    .IDELAY_VALUE(idelay_value)
 ) rgmii_rx_ctl_delay_i (
     .IDATAIN(rgmii_rx_ctl_ibuf),
     .DATAOUT(rgmii_rx_ctl_delay),
@@ -206,7 +207,7 @@ for (j=0; j<4; j=j+1)
         IDELAYE2 #(
             .DELAY_SRC("IDATAIN"),
             .IDELAY_TYPE("VAR_LOAD"),
-            .IDELAY_VALUE(0)
+            .IDELAY_VALUE(idelay_value)
         ) delay_rgmii_rxd (
             .IDATAIN(rgmii_rxd_ibuf[j]),
             .DATAOUT(rgmii_rxd_delay[j]),
@@ -227,6 +228,8 @@ end else begin : without_idelay
 // pass-through
 assign rgmii_rx_ctl_delay = rgmii_rx_ctl_ibuf;
 assign rgmii_rxd_delay = rgmii_rxd_ibuf;
+assign idelay_value_out_ctl = 0;
+assign idelay_value_out_data = 0;
 end endgenerate
 
 // rgmii_rx_ctl
