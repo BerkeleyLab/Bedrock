@@ -60,7 +60,7 @@ static void send_packet(int usd, unsigned id)
 		sta = NEXT(sta);
 	}
 	if (PRINT_PER_TX_PACKET) printf("send_packet %u, key %u len %u\n", id, key, len);
-	send(usd,foo,len,0);
+	send(usd, foo, len, 0);
 }
 
 static void primary_loop(int usd, unsigned npack, unsigned juggle)
@@ -71,26 +71,26 @@ static void primary_loop(int usd, unsigned npack, unsigned juggle)
 	struct timeval to;
 	int i, pack_len;
 	int debug1=0;
-	unsigned probes_sent=0, probes_recv=0, probes_cplt=0, probes_fail=0;
+	unsigned probes_sent=0, probes_recv=0, probes_fail=0;
 	unsigned timeouts=0;
 	static char incoming[1500];
-	sa_xmit_len=sizeof sa_xmit;
+	sa_xmit_len = sizeof sa_xmit;
 	for (probes_sent=0; probes_sent<juggle; probes_sent++) {
 		send_packet(usd, probes_sent);
 	}
-	to.tv_sec=0;
-	to.tv_usec=0;
-	for (;npack == 0 || probes_cplt < npack;) {
+	to.tv_sec = 0;
+	to.tv_usec = 0;
+	for (;npack == 0 || probes_recv < npack;) {
 		FD_ZERO(&fds_r);
-		FD_SET(usd,&fds_r);
+		FD_SET(usd, &fds_r);
 		FD_ZERO(&fds_e);
-		FD_SET(usd,&fds_e);
-		to.tv_sec=0;
-		to.tv_usec=10000;
-		i=select(usd+1,&fds_r,NULL,&fds_e,&to);
+		FD_SET(usd, &fds_e);
+		to.tv_sec = 0;
+		to.tv_usec = 10000;
+		i = select(usd+1, &fds_r, NULL, &fds_e, &to);
 		  /* Wait on read or error */
 		if (debug1) printf("select returns %d,", i);
-		if ((i!=1)||(!FD_ISSET(usd,&fds_r))) {
+		if ((i!=1)||(!FD_ISSET(usd, &fds_r))) {
 			if (i<0) {
 				if (debug1) printf(" error\n");
 				if (errno != EINTR) perror("select");
@@ -104,25 +104,23 @@ static void primary_loop(int usd, unsigned npack, unsigned juggle)
 			continue;
 		}
 		if (debug1) printf(" receiving\n");
-		pack_len=recvfrom(usd,incoming,sizeof incoming,0,
-		                  &sa_xmit,&sa_xmit_len);
+		pack_len = recvfrom(usd, incoming, sizeof incoming, 0,
+		                  &sa_xmit, &sa_xmit_len);
 		if (pack_len<0) {
 			perror("recvfrom");
 		} else if (pack_len>0 && (unsigned)pack_len<sizeof incoming){
 			++probes_recv;
-			if (udp_handle(incoming,pack_len)>0) ++probes_fail;
+			if (udp_handle(incoming, pack_len)>0) ++probes_fail;
 			if (probes_recv > probes_sent-juggle) {
 				send_packet(usd, probes_sent);
 				++probes_sent;
 			}
 		} else {
-			printf("Ooops.  pack_len=%d\n",pack_len);
-			fflush(stdout);
+			fprintf(stderr, "Ooops.  pack_len=%d\n", pack_len);
 			break;
 		}
-		++probes_cplt;
-		to.tv_sec=0;
-		to.tv_usec=0;
+		to.tv_sec = 0;
+		to.tv_usec = 0;
 	}
 	printf("%u packets sent, %u received, %u failed, %u timeouts\n",
 		probes_sent, probes_recv, probes_fail, timeouts);
@@ -131,29 +129,29 @@ static void primary_loop(int usd, unsigned npack, unsigned juggle)
 static void stuff_net_addr(struct in_addr *p, char *hostname)
 {
 	struct hostent *server;
-	server=gethostbyname(hostname);
+	server = gethostbyname(hostname);
 	if (server == NULL) {
 		herror(hostname);
 		exit(1);
 	}
 	if (server->h_length != 4) {
 		/* IPv4 only */
-		fprintf(stderr,"oops %d\n",server->h_length);
+		fprintf(stderr, "oops %d\n", server->h_length);
 		exit(1);
 	}
-	memcpy(&(p->s_addr),server->h_addr_list[0],4);
+	memcpy(&(p->s_addr), server->h_addr_list[0], 4);
 }
 
 static void setup_receive(int usd, unsigned int interface, short port)
 {
 	struct sockaddr_in sa_rcvr;
-	memset(&sa_rcvr,0,sizeof sa_rcvr);
-	sa_rcvr.sin_family=AF_INET;
-	sa_rcvr.sin_addr.s_addr=htonl(interface);
-	sa_rcvr.sin_port=htons(port);
-	if(bind(usd,(struct sockaddr *) &sa_rcvr,sizeof sa_rcvr) == -1) {
+	memset(&sa_rcvr, 0, sizeof sa_rcvr);
+	sa_rcvr.sin_family = AF_INET;
+	sa_rcvr.sin_addr.s_addr = htonl(interface);
+	sa_rcvr.sin_port = htons(port);
+	if(bind(usd, (struct sockaddr *) &sa_rcvr, sizeof sa_rcvr) == -1) {
 		perror("bind");
-		fprintf(stderr,"could not bind to udp port %d\n",port);
+		fprintf(stderr, "could not bind to udp port %d\n", port);
 		exit(1);
 	}
 }
@@ -161,12 +159,14 @@ static void setup_receive(int usd, unsigned int interface, short port)
 static void setup_transmit(int usd, char *host, short port)
 {
 	struct sockaddr_in sa_dest;
-	memset(&sa_dest,0,sizeof sa_dest);
-	sa_dest.sin_family=AF_INET;
-	stuff_net_addr(&(sa_dest.sin_addr),host);
-	sa_dest.sin_port=htons(port);
-	if (connect(usd,(struct sockaddr *)&sa_dest,sizeof sa_dest)==-1)
-		{perror("connect");exit(1);}
+	memset(&sa_dest, 0, sizeof sa_dest);
+	sa_dest.sin_family = AF_INET;
+	stuff_net_addr(&(sa_dest.sin_addr), host);
+	sa_dest.sin_port = htons(port);
+	if (connect(usd, (struct sockaddr *)&sa_dest, sizeof sa_dest)==-1) {
+		perror("connect");
+		exit(1);
+	}
 }
 
 int main(int argc, char *argv[])
@@ -174,19 +174,25 @@ int main(int argc, char *argv[])
 	int usd;
 	unsigned npack=0;
 	unsigned juggle=1;
-	if (argc<2) {fprintf(stderr,"Usage: %s host npack juggle\n",argv[0]);exit(1);}
+	if (argc<2) {
+		fprintf(stderr, "Usage: %s host npack juggle\n", argv[0]);
+		exit(1);
+	}
 
-	if (argc>=3) npack=atoi(argv[2]);
-	if (argc>=4) juggle=atoi(argv[3]);
+	if (argc>=3) npack = atoi(argv[2]);
+	if (argc>=4) juggle = atoi(argv[3]);
 
 	usd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (usd==-1) {perror("socket"); exit(1);}
+	if (usd==-1) {
+		perror("socket");
+		exit(1);
+	}
 
 	setup_receive(usd, INADDR_ANY, 0);
 
 	setup_transmit(usd, argv[1], 802);
 
-	primary_loop(usd,npack,juggle);
+	primary_loop(usd, npack, juggle);
 	close(usd);
 	return 0;
 }
