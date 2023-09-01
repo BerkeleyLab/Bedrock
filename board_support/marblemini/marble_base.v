@@ -87,6 +87,7 @@ module marble_base (
 
 parameter USE_I2CBRIDGE = 1;
 parameter MMC_CTRACE = 1;
+parameter use_ddr_pps = 0;
 parameter misc_config_default = 0;
 
 `ifdef VERILATOR
@@ -192,6 +193,7 @@ wire rx_category_s_rx, rx_category_s;
 lb_marble_slave #(
 	.USE_I2CBRIDGE(USE_I2CBRIDGE),
 	.MMC_CTRACE(MMC_CTRACE),
+	.use_ddr_pps(use_ddr_pps),
 	.misc_config_default(misc_config_default)
 ) slave(
 	.clk(lb_clk), .addr(lb_addr),

@@ -49,9 +49,10 @@ wire dac_send, pps_out;
 wire err_sign=0;
 wire [13:0] dsp_status;
 wire fir_enable = 0;
+wire fine_sel = 0;
 pps_lock #(.count_period(12500)) dut(.clk(clk),
 	.pps_in(pps_in), .err_sign(err_sign),
-	.fir_enable(fir_enable),
+	.fir_enable(fir_enable), .fine_sel(fine_sel),
 	.run_request(run_request), .dac_preset_val(dac_preset_val),
 	.dac_data(dac_data), .dac_send(dac_send),
 	.dsp_status(dsp_status), .pps_out(pps_out)

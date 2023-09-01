@@ -17,15 +17,16 @@ module ad5662_lock(
 
 parameter count_period = 125000000;
 
-// 5-bit configuration register and its decoding
+// 6-bit configuration register and its decoding
 // XXX add one more bit controlling twos-complement vs. unsigned DAC chip
-reg [4:0] config_r=0;
+reg [5:0] config_r=0;
 always @(posedge clk) if (host_write_cr) config_r <= host_data;
 wire run_request = config_r[0];  // When this is 0, we get
 // 100% software compatibility with simpler (non-lockable) previous behavior.
 wire err_sign = config_r[1];
 wire [1:0] lock_sel = config_r[3:2];
 wire fir_enable = config_r[4];
+wire fine_sel = config_r[5];
 
 // Slightly strange, peek at writes to DAC
 // I bet I could reduce resource usage if I tried.
@@ -38,7 +39,7 @@ wire lock_send;
 wire pps_out;
 wire [13:0] dsp_substatus;
 pps_lock #(.count_period(count_period)) dut(.clk(clk),
-	.fir_enable(fir_enable),
+	.fir_enable(fir_enable), .fine_sel(fine_sel),
 	.pps_in(pps_in), .err_sign(err_sign),
 	.run_request(run_request), .dac_preset_val(dac_preset_r),
 	.dac_data(lock_data), .dac_send(lock_send),

@@ -9,7 +9,7 @@ global old_pps_cnt
 old_pps_cnt = None
 
 
-def set_lock(chip, v, dac=1, fir=False, verbose=False):
+def set_lock(chip, v, dac=1, fir=False, fine_sel=True, verbose=False):
     '''
     experimental
     '''
@@ -17,6 +17,8 @@ def set_lock(chip, v, dac=1, fir=False, verbose=False):
     cfg = 1
     if fir:
         cfg += 16
+    if fine_sel:
+        cfg += 32
     if dac in prefix_map:
         v |= prefix_map[dac]
         cfg |= prefix_map[dac] >> 14
@@ -41,6 +43,8 @@ def poll_lock(chip, verbose=False):
         pps_cnt = (gps_status >> 4) & 0xf
         pps_lcnt = (gps_status >> 12) & 0xfff
         pha = dsp_status & 0xfff
+        if pha > 2047:
+            pha -= 4096
         if verbose or pps_cnt != old_pps_cnt:
             break
         time.sleep(0.20)

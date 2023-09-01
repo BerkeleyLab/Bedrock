@@ -4,6 +4,7 @@
 module pps_loop_filter(
 	input clk,
 	input istrobe,
+	input arm,  // used to reset FIR
 	// phase is intended static for several cycles on and following istrobe
 	input signed [12:0] phase,
 	input fir_enable,  // enable [0.5 0.5] FIR
@@ -25,6 +26,7 @@ reg signed [13:0] phase_filt=0;
 reg istrobe1=0;
 always @(posedge clk) begin
 	istrobe1 <= istrobe;
+	if (arm) old_phase <= 0;  // FIR gets a soft and reproducible start
 	if (istrobe) begin
 		old_phase <= phase;
 		phase_filt <= phase + (fir_enable ? old_phase : phase);

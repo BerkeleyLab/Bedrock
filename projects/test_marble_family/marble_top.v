@@ -246,6 +246,7 @@ marble_base #(
 	.USE_I2CBRIDGE(C_USE_I2CBRIDGE),
 	.MMC_CTRACE(C_MMC_CTRACE),
 	.default_enable_rx(C_DEFAULT_ENABLE_RX),
+	.use_ddr_pps(1),
 	.misc_config_default(C_MISC_CONFIG_DEFAULT)
 ) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
