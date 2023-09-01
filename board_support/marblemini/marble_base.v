@@ -23,7 +23,7 @@ module marble_base (
 	input clk_locked,
 	input si570,
 
-	// SPI pins, can give access to configuration
+	// SPI pins to on-board microcontroller; can give access to configuration
 	input SCLK,
 	input CSB,
 	input MOSI,
@@ -37,13 +37,13 @@ module marble_base (
 	input boot_miso,
 	output cfg_d02,
 
-	// One I2C bus, everything gatewayed through a TCA9548
+	// One I2C bus; everything gatewayed through a TCA9548A
 	inout  [3:0] twi_scl,
 	inout  [3:0] twi_sda,
 	inout  TWI_RST,
 	input  TWI_INT,
 
-	// White Rabbit DAC
+	// White Rabbit compatible DAC subsystem controlling VCXOs
 	output WR_DAC_SCLK,
 	output WR_DAC_DIN,
 	output WR_DAC1_SYNC,
@@ -52,6 +52,9 @@ module marble_base (
 	// UART to USB
 	// The RxD and TxD directions are with respect
 	// to the USB/UART chip, not the FPGA!
+	// Note that the freq_demo feature doesn't actually use FPGA_TxD.
+	// If you don't connect anything to FPGA_RxD, the synthesizer
+	// will drop the whole freq_demo feature.
 	output FPGA_RxD,
 	input FPGA_TxD,
 
