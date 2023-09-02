@@ -82,6 +82,7 @@ make -C build-tools/make-demo clean check consistency
 
 ## marble_sim
 make -C projects/test_marble_family all net_slave_check
+make -C projects/test_marble_family/pps_lock
 
 ## oscope_top_test
 # optional, since it requires nmigen==0.2 (nmigen is not in Debian)

@@ -9,7 +9,7 @@ global old_pps_cnt
 old_pps_cnt = None
 
 
-def set_lock(chip, v, dac=1, fir=False, fine_sel=True, verbose=False):
+def set_lock(chip, v, dac=1, fir=False, fine_sel=False, verbose=False):
     '''
     experimental
     '''

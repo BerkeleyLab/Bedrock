@@ -47,7 +47,7 @@ always @(posedge clk) begin
 	if (pps_edge0) pps_inhibit <= 1;
 	// This setting of fine_phase is the whole point of using
 	// an IDDR on the PPS input pin
-	if (pps_edge1) fine_phase <= fine_sel ? pps2[0] : pps2[1];  // tricky timing, checked in simulation
+	if (pps_edge1) fine_phase <= fine_sel ? pps2[1] : pps2[0];  // tricky timing, checked in simulation
 	if (pps_inhibit) pps_debounce <= pps_debounce+1;
 	pps_debounce_end <= pps_debounce == ((count_period>>2) - 2);
 	if (pps_debounce_end) begin

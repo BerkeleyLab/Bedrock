@@ -66,10 +66,14 @@ int main(int argc, char** argv, char** env) {
 	static int dds_wrap = 1170960;  // 1/(4*0.014/2^16), 1.4% span
 	unsigned int jitter = 0;
 	int updated_jitter = 0;
+	int dsp_on = 0;
+	int bad_phase = 0;
+	int stat_n = 0;
+	int stat_v = 0;
 
 	// Goal is to see loop lock in ~60 ms, 60 "pps" pulses
 	top->clk = 0;
-	while (main_time < 60*1000*1000) {
+	while (main_time < 80*1000*1000) {
 		// modulate time between clock edges
 		main_time += 4;  // Time passes in ticks of 8ns nominal
 		dds_accum += (8000-dac_hold);  // increasing dac_hold -> higher frequeny
@@ -92,14 +96,28 @@ int main(int argc, char** argv, char** env) {
 			pps_phase += jitter;
 			int pps0 = (pps_phase > 34) && (pps_phase < 30000);
 			int pps1 = (pps_phase > 38) && (pps_phase < 30004);
-			top->pps_in = (pps1 << 1) | pps0;  // or the other way around?
+			top->pps_in = (pps0 << 1) | pps1;  // confirmed on hardware
 		}
 
 		// Startup control
 		if (top->clk==1) top->run_request = main_time > 2500000;
 
 		// update dac on negedge clk; our dac_hold is signed
-		if (top->clk==0 && top->dac_send) dac_hold = top->dac_data - 32768;
+		if (top->clk==0 && top->dac_send) {
+			dac_hold = top->dac_data - 32768;
+			unsigned dsp_status = top->dsp_status;
+			// next few lines exactly match stanza found in lock_vcxo.py
+			int dsp_arm = (dsp_status >> 12) & 1;
+			dsp_on = (dsp_status >> 13) & 1;
+			int pha = dsp_status & 0xfff;
+			if (pha > 2047) pha -= 4096;
+			printf("%d %u %u %d\n", top->dac_data, dsp_on, dsp_arm, pha);
+			if (main_time > 50000000) {
+				if ((pha > 6) || (pha < -6)) bad_phase=1;
+				stat_n += 1;
+				stat_v += pha*pha;
+			}
+		}
 
 		// Evaluate model
 		top->eval();
@@ -107,6 +125,9 @@ int main(int argc, char** argv, char** env) {
 		// Dump trace data for this cycle
 		if (tfp) tfp->dump (main_time);
 	}
+	double rms = 4.0 * sqrt(stat_v/(double) stat_n);
+	printf("stat_n = %d   stat_v = %d   rms = %.3f ns\n", stat_n, stat_v, rms);
+	if (bad_phase) printf("Excess peak phase\n");
 
 	// Final model cleanup
 	top->final();
@@ -122,5 +143,8 @@ int main(int argc, char** argv, char** env) {
 	delete top;
 
 	// Fin
-	exit(0);
+	// Return code for regression test; 0 is success
+	int rc = (dsp_on == 1 && bad_phase == 0) ? 0 : 1;
+	printf("%s\n", (rc==0) ? "PASS" : "FAIL");
+	return rc;
 }

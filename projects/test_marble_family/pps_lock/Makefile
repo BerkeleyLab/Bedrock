@@ -18,8 +18,7 @@ VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTE
 %_check: %_tb
 	$(VVP) -N $< $(VFLAGS)
 
-# XXX to-do: make a real regression test
-all: pps_lock_tb
+all: pps_lock_tb pll_sim_check
 
 pps_lock_tb: pps_lock.v pps_loop_filter.v
 
@@ -35,6 +34,9 @@ Vpps_lock: pll_sim.cpp tt800.c pps_lock.v pps_loop_filter.v
 
 pll_sim.vcd: Vpps_lock
 	./Vpps_lock +trace
+
+pll_sim_check: Vpps_lock
+	./Vpps_lock
 
 clean:
 	rm -f *_tb *.vcd Vpps_lock
