@@ -8,7 +8,7 @@
 unsigned long genrand(void);
 
 // 32-bit input version, popularized in Linux kernel bitops.h
-static int countbits(unsigned long ux)
+static unsigned int countbits(unsigned long ux)
 {
 	ux = (ux & 0x55555555) + ((ux >> 1) & 0x55555555);  // pairs
 	ux = (ux & 0x33333333) + ((ux >> 2) & 0x33333333);  // quads
@@ -17,8 +17,8 @@ static int countbits(unsigned long ux)
 	return ux & 0xff;
 }
 
-// Approximately Gaussian distribution
-// Mean of 16, variance of 32/12, standard deviation approx. 1.63, peak/rms = 9.8
+// Pseudo-random number generator with approximately Gaussian distribution
+// Mean of 16, variance of 32/4, standard deviation approx. 2.83, peak/rms = 5.66
 static unsigned int grand(void)
 {
 	unsigned long rint = genrand();
@@ -87,7 +87,7 @@ int main(int argc, char** argv, char** env) {
 			unsigned int pps_phase = main_time % 1000000;  // 1 ms
 			// only update jitter once per pps edge
 			if (pps_phase < 10 && updated_jitter == 0) {
-				jitter = grand();  // lazy evaluation
+				jitter = grand()*2;  // planned jitter 5.66 ns rms
 				if (0) printf("new jitter %u\n", jitter);
 				updated_jitter = 1;
 			} else if (pps_phase > 100) {
