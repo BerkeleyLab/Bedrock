@@ -2,9 +2,10 @@
 # digital time detect between PPS input and divider, DAC output to VCXO
 import numpy as np
 from matplotlib import pyplot
+fir_enable = True
 
-# 125 MHz * 17.7 ppm / 65535 counts
-A = 0.034  # phase counts / DAC counts
+# 125 MHz * 1 second * 14 ppm / 65535 counts
+A = 0.028  # phase counts / DAC counts
 Kp = -8  # DAC counts / phase counts
 Ki = -1  # DAC counts / phase counts / cycle
 
@@ -13,26 +14,45 @@ T = 1  # second, sample rate
 z = np.exp(2*np.pi*f*T*1j)
 zi = 1/z
 
-g1 = A * zi / (1-zi)
-g2 = Kp + Ki * zi / (1-zi)
-
-# g1: A * zi / (1-zi);
-# g2: Kp + Ki * zi / (1-zi);
-# ratsimp((1-zi)^2*(1-g1*g2));
+g1 = A * zi / (1-zi)        # plant
+g2 = Kp + Ki * zi / (1-zi)  # controller
+if fir_enable:
+    g2 *= 0.5 * (1+zi)   # FIR filter
 
 g_df = g1 / (1 - g1*g2)  # phase response to VCXO noise
-g_dp = 1 / (1 - g1*g2)  # phase response to phase measurement noise
+g_dp = 1 / (1 - g1*g2)   # phase response to phase measurement noise
 
-# Can also do more of this analytically, find poles of
-# 1 + z^{-1}(-2-Kp*A) + z^{-2}(1+Kp*A-Ki*A) ?
-dpoly = [1, (-2-Kp*A), (1+Kp*A-Ki*A)]
-print("Poly %.3f z^2 + %.3f z + %.3f" % tuple(dpoly))
+# Can also process this analytically.
+# Without the FIR filter, use maxima to find the denominator:
+#   g1: A * zi / (1-zi);
+#   g2: Kp + Ki * zi / (1-zi);
+#   ratsimp((1-zi)^2*(1-g1*g2));
+# result:
+#   1 + z^{-1}*(-2-Kp*A) + z^{-2}*(1+Kp*A-Ki*A)
+# Repeat with the FIR filter:
+#   g1: A * zi / (1-zi);
+#   g2: (Kp + Ki * zi / (1-zi))*(1+zi)/2;
+#   ratsimp((1-zi)^2*(1-g1*g2));
+# result:
+#   (2 + z^{-1}*(-4-Kp*A) + z^{-2}*(2-Ki*A) + z^{-3}*(Kp*A-Ki*A))/2
+# Express that denominator as a polynomial in z:
+if fir_enable:
+    dpoly = [1, -2-0.5*Kp*A, 1-0.5*Ki*A, 0.5*A*(Kp-Ki)]
+else:
+    dpoly = [1, (-2-Kp*A), (1+Kp*A-Ki*A)]
+dpoly = np.array(dpoly)
+
+np.set_printoptions(precision=4, floatmode="fixed", suppress=False)
+print("Poly", dpoly)
 rr = np.roots(dpoly)
-rrp = rr[0].real, rr[0].imag, rr[1].real, rr[1].imag
-print("roots %.3f %+.3f i,  %.3f %+.3f i" % rrp)
-print("root mags %.3f,  %.3f" % (abs(rr[0]), abs(rr[1])))
+print("Roots", rr)
+print("Root mags", abs(rr))
+if all(abs(rr) < 1.0):
+    print("Stable!  :-)")
+else:
+    print("Unstable!  :-(")
 
-den = 1 + zi*(-2-Kp*A) + zi*zi*(1+Kp*A-Ki*A)
+# then cross-check numerically
 den = np.polyval(dpoly, zi)
 g_dp2 = (1-zi)**2 / den
 
