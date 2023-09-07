@@ -29,27 +29,27 @@ oscope_top_marble:
     paths:
       - projects/oscope/marble_family/oscope_top.bit
 
-litex_trigger_capture:
-  stage: synthesis
-  before_script:
-    - mkdir /litex_setup_dir && cd /litex_setup_dir
-    - wget https://raw.githubusercontent.com/enjoy-digital/litex/70c5be6fb8/litex_setup.py && python3 litex_setup.py init
-    - cd litex && git checkout 70c5be6fb8 && cd ..
-    - cd liteeth && git checkout 8ba5cf06a6fb3979a6cde5ed46c10e91a053ba3f && cd ..
-    - cd litedram && git checkout 2b0f806c96ff089bd8c51da8e223bfff23434ee1 && cd ..
-    - cd liteiclink && git checkout bba716a9c06cc0870d90b31c6aa3bd0982377fcb && cd ..
-    - cd litescope && git checkout 457f0875db0c1a0ff0e20659fe81b5bf696875d4 && cd ..
-    - apt-get update && apt-get install -y ninja-build && pip3 install meson==0.64.1 && python3 litex_setup.py install
-    - cd /builds/hdl-libraries/bedrock/projects/trigger_capture
-  script:
-    XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && make marble.bit
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
-    expire_in: 1 week
-    when: always
-    paths:
-      - projects/trigger_capture/build/marble/gateware/marble.bit
-      - projects/trigger_capture/csr.csv
+# litex_trigger_capture:
+#   stage: synthesis
+#   before_script:
+#     - mkdir /litex_setup_dir && cd /litex_setup_dir
+#     - wget https://raw.githubusercontent.com/enjoy-digital/litex/70c5be6fb8/litex_setup.py && python3 litex_setup.py init
+#     - cd litex && git checkout 70c5be6fb8 && cd ..
+#     - cd liteeth && git checkout 8ba5cf06a6fb3979a6cde5ed46c10e91a053ba3f && cd ..
+#     - cd litedram && git checkout 2b0f806c96ff089bd8c51da8e223bfff23434ee1 && cd ..
+#     - cd liteiclink && git checkout bba716a9c06cc0870d90b31c6aa3bd0982377fcb && cd ..
+#     - cd litescope && git checkout 457f0875db0c1a0ff0e20659fe81b5bf696875d4 && cd ..
+#     - apt-get update && apt-get install -y ninja-build && pip3 install meson==0.64.1 && python3 litex_setup.py install
+#     - cd /builds/hdl-libraries/bedrock/projects/trigger_capture
+#   script:
+#     XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && make marble.bit
+#   artifacts:
+#     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+#     expire_in: 1 week
+#     when: always
+#     paths:
+#       - projects/trigger_capture/build/marble/gateware/marble.bit
+#       - projects/trigger_capture/csr.csv
 
 # oscope_program:
 #   before_script:
