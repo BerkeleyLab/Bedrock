@@ -110,10 +110,9 @@ always @(posedge clk) begin
 	mem_zero <= mem_out==0;
 end
 assign new_timer=mem_out;
+reg write_cycle=0;
 wire [31:0] our_data = write_cycle ? {mem_out1,mem_out} : 32'd0;
 wire [15:0] our_addr = write_cycle ? mem_out2 : 16'd0;
-
-reg write_cycle=0;
 always @(posedge clk) write_cycle <= subcycle==3 & ~mem_zero;
 
 // Now merge the two streams

@@ -127,6 +127,7 @@ module negotiate(
    reg link_timer_on=0, link_timer_done;
    reg link_timer_start;
    reg wdog_an_disable=0;
+   wire wdog_timeout;
 
    always @(posedge rx_clk) begin
       link_timer_done <= 0;
@@ -210,7 +211,6 @@ module negotiate(
    localparam WATCHDOG_LOG2 = TIMER_LOG2+3;
 
    reg [WATCHDOG_LOG2-1:0] wdog_cnt=0;
-   wire wdog_timeout;
    always @(posedge rx_clk) begin
       // Clear on FWD progress or on first pulse in after last AN
       if ((n_an_state > an_state && an_state != AN_RESTART) || los)
