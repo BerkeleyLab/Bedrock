@@ -21,10 +21,7 @@ fdownconvert Source File
    // | I | =  |  sin[n + 1]\theta   -sin n\theta |  X  | a_data[n]   |
    // | Q |    | -cos[n + 1]\theta    cos n\theta |     | a_data[n+1] |
    // Larry Doolittle, LBNL, 2014
-   module fdownconvert #(
-   	parameter a_dw=16,  // XXX don't change this
-   	parameter o_dw=16   // XXX don't change this
-   ) (
+   module fdownconvert(
    	input clk,  // timespec 6.66 ns
    	input mod2,
    	input signed [17:0] cosd,  // LO input
@@ -39,6 +36,9 @@ fdownconvert Source File
    	output o_trig,
    	output time_err   // TODO: Explain this
    );
+
+   parameter a_dw=16; // XXX don't change this
+   parameter o_dw=16; // XXX don't change this
 
    // reordering logic, generate the delayed signals for the above matrix multiplication
    reg signed [17:0] cosd_d1=0, cosd_d2=0, cosd_r=0;
