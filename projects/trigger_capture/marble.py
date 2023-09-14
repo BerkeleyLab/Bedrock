@@ -121,10 +121,7 @@ class SDRAMLoopbackSoC(BaseSoC):
         self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port, adc_source, adc_dw)
         self.add_csr("data_pipe")
 
-        self.add_rom("bootrom",
-                     origin=0x20000000,
-                     size=2**14,
-                     contents=get_mem_data("firmware/app.bin", endianness="little"))
+        self.init_rom("rom", contents=get_mem_data("firmware/app.bin", endianness="little"))
         self.add_constant("ROM_BOOT_ADDRESS", 0x20000000)
 
 
