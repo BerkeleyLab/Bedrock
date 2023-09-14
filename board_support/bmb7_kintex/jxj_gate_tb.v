@@ -31,10 +31,10 @@ module jxj_gate_tb;
       end
       if (fail) begin
         $display("FAIL");
-        $stop;
+        $stop(0);
       end else begin
         $display("PASS");
-        $finish();
+        $finish(0);
       end
    end
 

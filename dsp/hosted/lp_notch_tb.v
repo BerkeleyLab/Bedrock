@@ -40,10 +40,10 @@ initial begin
 		$display(y, y1);
 		$display("ERROR: Non-zero filter output at the end of the test");
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 

@@ -15,10 +15,10 @@ initial begin
 	end
 	if (fail) begin
 		$display("FAIL");  // tell Makefile that we broke
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 

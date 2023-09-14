@@ -16,7 +16,7 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$finish();
+	$finish(0);
 end
 
 reg signed [19:0] ind=0, ind0=0;

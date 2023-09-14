@@ -61,7 +61,7 @@ int main(void)
     print_str("\n---------------------------------------\n");
     print_str("running UART0 at ");
     print_dec(BOOTLOADER_BAUDRATE);
-    print_str(" baud/s\n\n");
+    print_str(" baud\n\n");
     print_str("`CTRL+T` to reset, `s` to sift for prime numbers, `d` for a 3D donut ...\n");
     LED(0b011);  // Ready for test, LED = yellow
     while (1) {

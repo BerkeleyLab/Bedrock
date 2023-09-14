@@ -8,8 +8,8 @@ import re
 
 DISPLAYPASS = '$display("PASS");'
 DISPLAYFAIL = '$display("FAIL");'
-FINISH = '$finish();'
-STOP = '$stop();'
+FINISH = '$finish(0);'
+STOP = '$stop(0);'
 
 SYNTAX_RULES = f"""
 Syntax Rules for checking test benches:
@@ -52,14 +52,14 @@ class TBLinter():
 
     @staticmethod
     def _isFinish(s):
-        match = re.match(r"[^/$\"']*\$finish[(;]", s)  # Should not trigger when commented-out or within string
+        match = re.match(r"[^/$\"']*\$finish\(0", s)  # Should not trigger when commented-out or within string
         if match:
             return True
         return False
 
     @staticmethod
     def _isStop(s):
-        match = re.match(r"[^/$\"']*\$stop[(;]", s)  # Should not trigger when commented-out or within string
+        match = re.match(r"[^/$\"']*\$stop\(0", s)  # Should not trigger when commented-out or within string
         if match:
             return True
         return False
@@ -139,15 +139,17 @@ def test_isFinish():
     print("Testing _isFinish()")
     # Test-string: Should pass?
     d = {
-        "$finish();": True,
-        "    $finish()": True,
-        "\t\t$finish;": True,
-        "if (foo) $finish();": True,
+        # New syntax rules (as of 230728) means $finish() without the 0 argument is a violation
+        "$finish();": False,
+        "$finish(0);": True,
+        "    $finish(0)": True,
+        "\t\t$finish;": False,
+        "if (foo) $finish(0);": True,
         "finish": False,
-        "$Finish();": False,
-        "$finishThings();": False,
-        "//$finish()": False,
-        "    //$finish()": False,
+        "$Finish(0);": False,
+        "$finishThings(0);": False,
+        "//$finish(0)": False,
+        "    //$finish(0)": False,
         "'$finish();'": False,
         '"$finish();"': False
     }
@@ -158,17 +160,18 @@ def test_isStop():
     print("Testing _isStop()")
     # Test-string: Should pass?
     d = {
-        "$stop();": True,
-        "    $stop()": True,
-        "\t\t$stop;": True,
-        "if (foo) $stop();": True,
+        "$stop(0);": True,
+        "    $stop(0)": True,
+        "\t\t$stop;": False,
+        "stop();": False,
+        "if (foo) $stop(0);": True,
         "stop": False,
         "$Stop();": False,
         "$stopThings();": False,
-        "//$stop()": False,
-        "    //$stop()": False,
-        "'$stop();'": False,
-        '"$stop();"': False
+        "//$stop(0)": False,
+        "    //$stop(0)": False,
+        "'$stop(0);'": False,
+        '"$stop(0);"': False
     }
     return testfunction(d, TBLinter._isStop)
 

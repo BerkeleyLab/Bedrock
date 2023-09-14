@@ -57,6 +57,8 @@ if __name__ == "__main__":
                    help="Plot data")
     p.add_argument('--gps', action='store_true',
                    help="Use GPS-pps-based measurement")
+    p.add_argument('--signed', action='store_true',
+                   help="Assume DAC uses signed binary codes")
     p.add_argument('-v', '--verbose', action='store_true',
                    help="Produce extra chatter")
     args = p.parse_args()
@@ -69,7 +71,8 @@ if __name__ == "__main__":
     plot1 = []
     plot2 = []
     for jx in range(0, 17):
-        v = min(jx * 4096, 65535)
+        v_unsigned = min(jx * 4096, 65535)
+        v = v_unsigned-32768 if args.signed else v_unsigned
         ppm = measure_1(
             chip,
             v,
@@ -78,7 +81,7 @@ if __name__ == "__main__":
             gps=args.gps,
             verbose=args.verbose
         )
-        print("%5d  %+.3f %+.3f %+.3f ppm" % (v, ppm[1], ppm[2], ppm[3]))
+        print("%6d  %+7.3f %+7.3f %+7.3f ppm" % (v, ppm[1], ppm[2], ppm[3]))
         plx += [float(v) / 65535]
         plot1 += [ppm[1]]
         plot2 += [ppm[2]]
@@ -86,6 +89,7 @@ if __name__ == "__main__":
     if args.plot:
         pyplot.plot(plx, plot1, '-o')
         pyplot.plot(plx, plot2, '-x')
+        pyplot.plot(plx, [0]*len(plx), ls='dashed')
         pyplot.xlabel('Control (normalized)')
         pyplot.ylabel('Frequency offset (ppm)')
         pyplot.title('Ethernet VCXO characterization')

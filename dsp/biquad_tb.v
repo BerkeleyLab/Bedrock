@@ -127,10 +127,10 @@ initial begin
     #100;
     if (pass) begin
       $display("PASS");
-      $finish();
+      $finish(0);
     end else begin
       $display("FAIL");
-      $stop();
+      $stop(0);
     end
 end
 

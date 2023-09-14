@@ -114,14 +114,14 @@ wire [15:0] icap_wdata = {icap_upper_data,pack_data_in_rev};
 wire [15:0] icap_result;
 wire icap_busy;
 
-generate if (xc6slx == 1) begin: ICAP6
+generate if (xc6slx == 1) begin : ICAP6
     // 16-bit I port (for writing) and O port (for reading)
     ICAP_SPARTAN6 intern(.CLK(icap_clk),
 	.CE(~icap_en), // icap_en is active high, CE "pin" is active low
 	.WRITE(1'b0), // funny name for a pin where "0" means write
 	.I(icap_wdata),
 	.O(icap_result), .BUSY(icap_busy));
-end else if (seven == 1) begin: ICAP7
+end else if (seven == 1) begin : ICAP7
     // see UG953 and
     // https://opencores.org/projects/wbicapetwo by Dan Gisselquist
     wire [15:0] o_padding;  // half of the O port not used, since we configure width as X16
@@ -129,7 +129,7 @@ end else if (seven == 1) begin: ICAP7
 	.CSIB(~icap_en), .RDWRB(1'b0),
 	.I(icap_wdata), .O({o_padding, icap_result}));
     assign icap_busy=0;
-end else begin
+end else begin : no_ICAP
     assign icap_result=0;
     assign icap_busy=0;
 end endgenerate

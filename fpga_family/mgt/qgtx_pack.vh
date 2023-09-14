@@ -19,8 +19,8 @@
                           `ifdef GT``GTi``_8B10B_EN\
                           .gt0_rxcharisk_out           (gt``GTi``_rxcharisk_out),\
                           .gt0_txcharisk_in            (gt``GTi``_txcharisk_in),\
-                          .gt0_rxdisperr_out           (),\
-                          .gt0_rxnotintable_out        (),\
+                          .gt0_rxdisperr_out           (gt``GTi``_rxdisperr_out),\
+                          .gt0_rxnotintable_out        (gt``GTi``_rxnotintable_out),\
                           .gt0_rxmcommaalignen_in      (1'b1),\
                           .gt0_rxpcommaalignen_in      (1'b1),\
                           .gt0_rxbyteisaligned_out     (gt``GTi``_rxbyteisaligned),\

@@ -25,6 +25,8 @@
                             output [(DWI/8)-1:0] gt``GTi``_rxcharisk_out,\
                             output [(DWI/8)-1:0] gt``GTi``_rxchariscomma_out,\
                             input  [(DWI/8)-1:0] gt``GTi``_txcharisk_in,\
+                            output [(DWI/8)-1:0] gt``GTi``_rxdisperr_out,\
+                            output [(DWI/8)-1:0] gt``GTi``_rxnotintable_out,\
                             output               gt``GTi``_rxbyteisaligned,\
                             input                gt``GTi``_rxslide_in,\
                             `endif\

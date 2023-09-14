@@ -247,7 +247,7 @@ kc705_gmii_test.bit: kc705_gmii_test.tcl kc705_gmii_test.d $(SYNTH_SOURCE_KC705)
 # Make bitfiles for AC701 with both Xilinx XST and Xilinx Vivado
 # first just a syntax check (ac701_rgmii_test.v is empty)
 SYNTH_SOURCE_AC701 = rgmii_hw_test.v $(SYNTH_SOURCE_KC705) gmii_to_rgmii.v
-ac701_rgmii_test_tb: $(SYNTH_SOURCE_AC701) kc705/ODDR.v kc705/BUFG.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v
+ac701_rgmii_test_tb: $(SYNTH_SOURCE_AC701) kc705/ODDR.v kc705/BUFG.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v $(patsubst %, $(FPGA_FAMILY_DIR)/xilinx/%.v, BUFIO BUFR IBUF IDDR OBUF)
 ac701_rgmii_test.bit: $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.ucf
 	PART=xc7a200t-fbg676-2 $(ISE_SYNTH) $(notdir $(basename $<)) $^
 	mv _xilinx/rgmii_hw_test.bit $@

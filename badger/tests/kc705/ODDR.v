@@ -1,7 +1,14 @@
 // pathetic model of Xilinx DDR output cell
 // ignores set and reset inputs
-module ODDR(input S, input R,
-	input D1, input D2, input CE, input C, output Q);
+module ODDR (
+	input S,
+	input R,
+	input D1,
+	input D2,
+	input CE,
+	input C,
+	output Q
+);
 
 parameter DDR_CLK_EDGE = "SAME_EDGE";
 parameter INIT = 0;

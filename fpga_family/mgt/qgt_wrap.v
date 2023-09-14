@@ -40,8 +40,8 @@ module q0_gt_wrap # (
    `ifdef GT3_ENABLE
    `GTi_PORTS(3, GT3_WI)
    `endif
-   output        gt_cpll_locked,
-   output        gt_txrx_resetdone
+   output [3:0]   gt_cpll_locked,
+   output [3:0]   gt_txrx_resetdone
 );
 `include "qgt_wrap_stub.vh"
 

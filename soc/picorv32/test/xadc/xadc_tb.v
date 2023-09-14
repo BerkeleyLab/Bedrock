@@ -19,7 +19,7 @@ module xadc_tb;
         reset <= 0;
         #15000
         $display("TIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -33,7 +33,7 @@ module xadc_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
     end
 

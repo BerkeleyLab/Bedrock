@@ -42,7 +42,7 @@ module spi_test_tb;
         bit_reverse(ROM1, rom1r);
         #MAX_SIM;
         $display("TIMEOUT\nFAIL\n");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -89,7 +89,7 @@ module spi_test_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
     end
 
