@@ -29,11 +29,13 @@ void delayCycles( const uint32_t nCycles ){
     } while( curValue < nCycles );
 }
 
-/* uint32_t millis(void) */
-/* { */
-/*     uint64_t cs = _picorv32_rd_cycle_64(); */
-/*     return cs / (F_CLK / 1000); */
-/* } */
+#if 0
+uint32_t millis(void)
+{
+    uint64_t cs = _picorv32_rd_cycle_64();
+    return cs / (F_CLK / 1000);
+}
+#endif
 
 int periodic_delay(unsigned cycles)
 {

@@ -1,7 +1,7 @@
 marble.bit:
-	cd firmware && echo "dummy" > app.bin && cd ..
+	echo "dummy" > firmware/app.bin
 	python3 marble.py --no-compile-gateware --csr-csv csr.csv --cpu-type picorv32 --uart-name crossover
-	cd firmware && make clean && make && cd ..
+	make -C firmware clean all
 	python3 marble.py --build --csr-csv csr.csv --cpu-type picorv32 --uart-name crossover+uartbone
 
 load:
@@ -9,3 +9,4 @@ load:
 
 clean:
 	rm -rf build
+	rm -f analyzer.csv csr.csv
