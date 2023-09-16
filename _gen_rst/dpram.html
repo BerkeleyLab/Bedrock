@@ -111,6 +111,7 @@
 <li class="toctree-l3"><a class="reference internal" href="mon_2chan.html">mon_2chan</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mon_2chiq.html">mon_2chiq</a></li>
 <li class="toctree-l3"><a class="reference internal" href="mon_chans.html">mon_chans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multi_counter.html">multi_counter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="multi_sampler.html">multi_sampler</a></li>
 <li class="toctree-l3"><a class="reference internal" href="multiply_accumulate.html">multiply_accumulate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pdetect.html">pdetect</a></li>
@@ -210,13 +211,7 @@ Expect to see errors and unfinished things.</p>
 <td><p>8</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>sz</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>initial_file</p></td>
+<tr class="row-even"><td><p>initial_file</p></td>
 <td><p>?</p></td>
 <td><p>?</p></td>
 <td></td>
@@ -240,15 +235,31 @@ Expect to see errors and unfinished things.</p>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>addra[aw-1:0]</p></td>
+<tr class="row-odd"><td><p>clkb</p></td>
 <td><p>Input</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>addra[aw-1:0]</p></td>
+<td><p>Input</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>douta[dw-1:0]</p></td>
+<td><p>Output</p></td>
 <td></td>
 </tr>
 <tr class="row-even"><td><p>dina[dw-1:0]</p></td>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>douta[dw-1:0]</p></td>
+<tr class="row-odd"><td><p>wena</p></td>
+<td><p>Input</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>addrb[aw-1:0]</p></td>
+<td><p>Input</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>doutb[dw-1:0]</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
