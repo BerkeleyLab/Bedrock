@@ -143,9 +143,9 @@ cic_wave_recorder Source File
       generate
          if (cc_outw > buf_dw) begin: g_wave_data_resize
             assign wave_data_i = cic_sr_out[cc_outw-1:(cc_outw-buf_dw)]; // Drop lsbs
-         end else if (cc_outw < buf_dw) begin: g_wave_data_pad
+         end else if (cc_outw < buf_dw) begin
             assign wave_data_i = {{(buf_dw-cc_outw){1'b0}}, cic_sr_out}; // Zero extend
-         end else begin: g_wave_data_direct
+         end else begin
             assign wave_data_i = cic_sr_out;
          end
       endgenerate

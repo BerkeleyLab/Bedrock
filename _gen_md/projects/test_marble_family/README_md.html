@@ -165,11 +165,12 @@ some of which is specific to either Marble or Marble-Mini.</p>
 <p>Two <a class="reference external" href="https://en.wikipedia.org/wiki/Easter%20egg%20%28media%29">Easter eggs</a>:</p>
 <ol class="arabic">
 <li><p>Connect up a user terminal to the third FTDI USB UART port, typically /dev/ttyUSB2,
-at 9600 baud and you’ll get a continuous readout of on-board frequencies:</p>
+and you’ll get a continuous readout of on-board frequencies:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>   <span class="n">Channel</span> <span class="mi">0</span><span class="p">:</span>  <span class="mf">124.99998</span> <span class="n">MHz</span>
    <span class="n">Channel</span> <span class="mi">1</span><span class="p">:</span>  <span class="mf">019.99654</span> <span class="n">MHz</span>
    <span class="n">Channel</span> <span class="mi">2</span><span class="p">:</span>  <span class="mf">125.00003</span> <span class="n">MHz</span>
    <span class="n">Channel</span> <span class="mi">3</span><span class="p">:</span>  <span class="mf">068.54776</span> <span class="n">MHz</span>
+
 <span class="n">Channel</span> <span class="mi">0</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">Ethernet</span> <span class="n">Rx</span> <span class="n">clock</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">switch</span><span class="p">,</span>
 <span class="n">Channel</span> <span class="mi">1</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">on</span><span class="o">-</span><span class="n">board</span> <span class="mi">20</span> <span class="n">MHz</span> <span class="n">VCXO</span><span class="p">,</span>
 <span class="n">Channel</span> <span class="mi">2</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">on</span><span class="o">-</span><span class="n">board</span> <span class="n">Si570</span> <span class="p">(</span><span class="n">Marble</span><span class="o">-</span><span class="n">only</span><span class="p">),</span> <span class="ow">and</span>
@@ -177,25 +178,12 @@ at 9600 baud and you’ll get a continuous readout of on-board frequencies:</p>
 </pre></div>
 </div>
 </li>
-</ol>
-<p>Frequencies above use the on-board 125 MHz clock as a reference.
-This output can be really helpful diagnostics: success indicates
-all of power, bitfile loaded, USB functioning, and 125 MHz clock
-present, independent of Ethernet and microcontroller.</p>
-<ol class="arabic simple">
 <li><p>Attach a <a class="reference external" href="https://digilent.com/reference/pmod/start">Digilent Pmod</a> GPS
-to the top half of J13 (a.k.a. Pmod2[3:0]), and you can
-read out <a class="reference external" href="https://en.wikipedia.org/wiki/NMEA_0183">NMEA</a> position and time,
-use the pps signal to calibrate the on-board crystals,
-and even phase-lock the on-board 125 MHz source to GPS time
-with a jitter of under 100 ns.
-Supporting python:</p></li>
+to the top half of J13 (a.k.a. Pmod2[3:0]),
+and you can read out NMEA position and time, use the pps signal
+to calibrate the on-board crystals, and even phase-lock the
+on-board 125 MHz source to GPS time with a jitter of under 100 ns.</p></li>
 </ol>
-<ul class="simple">
-<li><p><a class="reference external" href="nmea_view.py">nmea_view.py</a></p></li>
-<li><p><a class="reference external" href="scan_vcxo.py">scan_vcxo.py</a></p></li>
-<li><p><a class="reference external" href="lock_vcxo.py">lock_vcxo.py</a></p></li>
-</ul>
 </section>
 </section>
 
