@@ -41,6 +41,8 @@ module ff_pulser (
 
    reg fall=0;
    reg [LENGTH_WI-1:0] len_cnt, rise_cnt, fall_t;
+   reg x_railed=0, y_railed=0;
+   reg x_railed_r=0, y_railed_r=0;
    always @(posedge clk) begin
       if (start&~pulse_on) begin // Ignore if already pulsing
          pulse_on <= 1;
@@ -84,8 +86,6 @@ module ff_pulser (
       end
    end
 
-   reg x_railed=0, y_railed=0;
-   reg x_railed_r=0, y_railed_r=0;
    reg x_zero=0, y_zero=0;
    always @(posedge clk) if (pulse_on) begin
       {x_railed_r, y_railed_r} <= {x_railed, y_railed}; // Match pipeline

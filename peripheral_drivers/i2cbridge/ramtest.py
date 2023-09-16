@@ -7,7 +7,6 @@ def ram_test_prog():
     a = []
     a += s.pause(2)  # ignored?
     a += s.hw_config(0)
-    a += s.trig_analyz()
     a += s.write(sadr, 1, [0xa5, 0x5a])
     a += s.pause(4)
     a += s.read(sadr, 2, 1)
@@ -16,6 +15,7 @@ def ram_test_prog():
     a += s.pad(1, len(a))
 
     a += s.set_resx(1)
+    a += s.trig_analyz()
     a += s.read(sadr, 1, 1)
     a += s.buffer_flip()
     a += s.pause(34)
