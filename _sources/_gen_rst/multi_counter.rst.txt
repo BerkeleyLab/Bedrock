@@ -1,0 +1,88 @@
+.. _multi_counter:
+
+multi_counter
+=============
+
+Description
+'''''''''''
+
+|  Single-clock-domain multi-channel counter
+|  No restrictions on how often the "inc" port is high.
+|  Reads go through dpram, so are delayed one cycle.
+|  Reads are passive, so don't need an enable.
+| 
+
+Pinout
+''''''
+
+.. _fig:multi_counter_block:
+.. figure:: multi_counter_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: multi_counter_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - aw
+     - ?
+     - ?
+     - 4
+     - 2**aw counters, non-resettable
+   * - dw
+     - ?
+     - ?
+     - 16
+     - bit-width of each counter
+
+Ports
+'''''
+
+.. list-table:: multi_counter_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - 
+   * - inc
+     - Input
+     - increment the counter specified by inc_addr
+   * - inc_addr[aw-1:0]
+     - Input
+     - 
+   * - read_addr[aw-1:0]
+     - Input
+     - local bus address
+   * - read_data[dw-1:0]
+     - Output
+     - 
+
+Implementation and use
+''''''''''''''''''''''
+
+The `portable`_ `Verilog`_
+implementation can be found in :ref:`multi_counter_source`
+
+.. _`portable`: https://en.wikipedia.org/wiki/Software_portability
+.. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
+
+Timing Diagram
+''''''''''''''
+
+A `GTKWave`_-generated timing diagram is shown below:
+
+.. _`GTKWave`: http://gtkwave.sourceforge.net/
+
+.. _fig:multi_counter_timing:
+.. figure:: multi_counter_timing.png
+    :alt: Timing diagram
+

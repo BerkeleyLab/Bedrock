@@ -33,7 +33,7 @@ mixer Source File
       reg signed [dwi-1+davr:0] mix_out1 = 0, mix_out2 = 0;
 
       generate
-      if (NORMALIZE==1) begin
+      if (NORMALIZE==1) begin : g_normalize
          reg  signed [dwi+dwlo-1:0] mixmulti=0;
          wire signed [dwi+dwlo-1:0] mix_out_w=mixmulti;//adcf*mult;
          always @(posedge clk) begin
@@ -42,7 +42,7 @@ mixer Source File
          end
          assign mixout = mixout_r;
       end
-      else begin
+      else begin : ng_normalize
          always @(posedge clk) begin
             adcf1     <= adcf;
             mult1     <= mult;
