@@ -374,7 +374,7 @@ if __name__ == "__main__":
     if args.ramtest:
         import ramtest
         prog = ramtest.ram_test_prog()
-    elif args.trx:
+    elif args.trx or args.si570:
         import read_trx
         prog = read_trx.hw_test_prog(board_type, si570_addr, si570_start_addr)
     else:

@@ -1,11 +1,11 @@
 [timestart] 0
 [size] 1295 872
 [pos] -1 -1
-*-17.961386 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-17.961386 1089310 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] i2c_chunk_tb.
 [treeopen] i2c_chunk_tb.chunk.
-[sst_width] 210
-[signals_width] 171
+[sst_width] 214
+[signals_width] 195
 [sst_expanded] 1
 [sst_vpaned_height] 250
 @22
@@ -44,12 +44,17 @@ i2c_chunk_tb.chunk.lb_wpend
 @200
 -Trace
 @28
+i2c_chunk_tb.trace_cmd
+i2c_chunk_tb.chunk.trace_armed
+i2c_chunk_tb.chunk.trigger
 i2c_chunk_tb.chunk.trace_run
 i2c_chunk_tb.chunk.trace_push
 i2c_chunk_tb.chunk.trace_k
 @22
 i2c_chunk_tb.chunk.trace_h[7:0]
 i2c_chunk_tb.chunk.trace_a[9:0]
+@28
+i2c_chunk_tb.chunk.trace_done
 @200
 -Program
 @24

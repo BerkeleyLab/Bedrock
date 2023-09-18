@@ -40,13 +40,20 @@ parameter [2:0]
   RX_PAYLOAD = 4,
   RX_EXTEND = 5;
 
+initial begin
+  gmii_data=0;
+  gmii_dv=0;
+  lacr_rx_val=0;
+  lacr_rx_stb=0;
+end
+
 reg [2:0] rx_state=RX_NOFRAME;
-reg d_is_k; reg d_err; reg d_is_comma; reg d_is_epd;
-reg d_is_spd; reg d_is_extend; reg d_is_idle; reg d_is_lcr;
-reg [7:0] d_data;
-reg d_is_even;
+reg d_is_k=0; reg d_err=0; reg d_is_comma=0; reg d_is_epd=0;
+reg d_is_spd=0; reg d_is_extend=0; reg d_is_idle=0; reg d_is_lcr=0;
+reg [7:0] d_data=0;
+reg d_is_even=0;
 wire dec_err;
-reg fifo_error;
+reg fifo_error=0;
 wire rx_synced; wire rx_even;
 
   assign dec_err = dec_err_code | dec_err_rdisp;
@@ -110,7 +117,6 @@ wire rx_synced; wire rx_even;
   end
 
   // RBCLK-driven RX state machine
-  initial lacr_rx_stb = 0;
   always @(posedge clk) begin
     if(rst) begin
       rx_state <= RX_NOFRAME;

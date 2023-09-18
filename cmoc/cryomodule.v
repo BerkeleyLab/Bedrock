@@ -435,7 +435,9 @@ always @(posedge lb_clk) begin
 	lb_addr_d1 <= lb_addr;
 	// Note: use of mirror_out_0 triggers warnings under newad -y
 	// since it's so tightly coupled to operation of newad.  Actually harmless.
-	lb_out_r <= (lb_addr_d1[16:14] == 3'b101) ? circle_out[lb_addr_d1[13]] : ((lb_addr_d1[16:14] == 3'b100) & lb_addr_d1[13]) ? slow_bridge_out[lb_addr_d1[9]] : lb_addr_d1[16]? rom_data: mirror_out_0;
+	lb_out_r <= (lb_addr_d1[16:14] == 3'b101) ? circle_out[lb_addr_d1[13]] :
+		((lb_addr_d1[16:14] == 3'b100) & lb_addr_d1[13]) ? slow_bridge_out[lb_addr_d1[9]] :
+		lb_addr_d1[16] ? rom_data : mirror_out_0;
 end
 assign lb_out = lb_out_r;
 
