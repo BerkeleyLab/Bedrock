@@ -21,29 +21,36 @@ def decode_settings(addr, verbose):
     pcb_rev = foo[72]
     # if board = 1, marble and board = 2, marble-mini
     board = ((pcb_rev >> 4) & 0xf)
-    # use default values if it's a marble_mini, SI570 - 570NCB000933DG
-    if (board == 2 or pcb_rev == 0xdeadbeef):
-        i2c_addr = 0xee
-        polarity = 0
-        start_addr = 0x0d
+    board_name = "Marble" if board else "Marble-mini"
+    # marble_v1_2 = 0, marble_v1_3 = 1, marble_v1_4 = 2 and so on..
+    # addition of 2 to make things easier to print
+    marble_rev = (pcb_rev & 0xf)+2 if (board == 1) else 0
+    # For config value: Bit 0: Enable pin polarity (0 = polarity low, 1 = polarity high).
+    # Bit 1: Temperature stability (0 = 20 ppm or 50 ppm, 1 = 7 ppm)
+    # Bits 2-5: reserved. Bits [7:6]: 0b01 = Valid config (avoid acting on invalid 0xff or 0x00).
+    i2c_addr = foo[96]
+    config = foo[97]
+    start_freq = foo[101]  # unused
+    if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff)):
+        print("SI570 parameters not configured through MMC, using default for %s v1.%d" % (board_name, marble_rev))
         start_freq = 0
+        # use default values if it's a marble v1.2, v1.3 or marble_mini, SI570 - 570NCB000933DG
+        # and if we are in simulation
+        if (marble_rev == 2 or marble_rev == 3 or board == 2 or pcb_rev == 0xdeadbeef):
+            i2c_addr = 0xee
+            polarity = 0
+            start_addr = 0x0d
+        else:  # valid for marble v1.4, SI570 - 570NBB001808DGR
+            i2c_addr = 0xaa
+            polarity = 0
+            start_addr = 0x07
+    # check the [7:6] bits of the config value is either 2'b01 or 2'b10, to make sure it valid
+    elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
+        start_addr = 0x0d if (config & 0x02) else 0x07
+        polarity = 1 if (config & 0x01) else 0
     else:
-        i2c_addr = foo[96]
-        config = foo[97]
-        start_freq = foo[101]  # unused
-        # For config value: Bit 0: Enable pin polarity (0 = polarity low, 1 = polarity high).
-        # Bit 1: Temperature stability (0 = 20 ppm or 50 ppm, 1 = 7 ppm)
-        # Bits 2-5: reserved. Bits [7:6]: 0b01 = Valid config (avoid acting on invalid 0xff or 0x00).
-        if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff)):
-            print("BAD:SI570 parameters are not configured, use MMC console to configure.")
-            sys.exit(1)
-        # check the [7:6] bits of the config value is either 2'b01 or 2'b10, to make sure it valid
-        elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
-            start_addr = 0x0d if (config & 0x02) else 0x07
-            polarity = 1 if (config & 0x01) else 0
-        else:
-            print("BAD: Invalid SI570 configuration parameter(MSB), use MMC console to set the correct value.")
-            sys.exit(1)
+        print("BAD: Invalid SI570 configuration parameter, default values not supported for board.")
+        sys.exit(1)
     return board, i2c_addr, polarity, start_addr, start_freq
 
 
