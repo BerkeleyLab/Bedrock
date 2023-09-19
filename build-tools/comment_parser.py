@@ -56,6 +56,7 @@ class CommentParser(Parser):
             if m:
                 value = m.group(1)
                 attributes["description"] = value
+            line_no_attributes = re.sub(r"\(\*[^\*]*\*\)", "", line)
             # (a) instantiations
             m = re.search(INSTANTIATION_SITE, line)
             if m:
@@ -111,7 +112,7 @@ class CommentParser(Parser):
                         self.construct_map(inst, p, gcnt, this_mod)
             # (b) ports
             # Search for port with register width defined 'input (signed)? [%d:%d] name // <...>'
-            m = re.search(PORT_WIDTH_MULTI, line)
+            m = re.search(PORT_WIDTH_MULTI, line_no_attributes)
             if m:
                 info = [m.group(i) for i in range(7)]
                 p = Port(
@@ -190,7 +191,6 @@ class CommentParser(Parser):
                     # Since these are top level registers, decoders can be generated here
                     self.make_decoder(None, this_mod, p, None)
                     attributes = {}
-                line_no_attributes = re.sub(r"\(\*[^\*]*\*\)", "", line)
                 m = re.search(TOP_LEVEL_NEW, line_no_attributes)
                 if m:
                     info = [m.group(i) for i in range(6)]

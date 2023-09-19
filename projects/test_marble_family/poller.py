@@ -24,15 +24,16 @@ def hw_test_prog():
     a += busmux_sel(s, 6)  # App bus
     a += s.read(0xe0, 0, 1, addr_bytes=0)
     a += s.read(0x80, 0, 2)  # U17 config
-    a += s.read(0x82, 0, 2)  # U17 config
-    a += s.write(0x42, 6, [0xff, 0xf3])  # Configuration registers
+    a += s.read(0x82, 0, 2)  # U32 config
+    a += s.read(0x84, 0, 2)  # U58 config
+    a += s.write(0x42, 6, [0xfe, 0x73])  # Configuration registers
     a += s.jump(1)
     a += s.pad(1, len(a))
     #
     # Toggle LEDs at 2.5 Hz
     a += s.trig_analyz()
     a += s.set_resx(0)
-    a += s.write(0x42, 2, [0, 4])  # Output registers
+    a += s.write(0x42, 2, [0, 0x84])  # Output registers
     a += s.pause(2)
     a += s.read(0x42, 0, 2)  # Physical pin logic levels
     a += s.read(0x44, 0, 2)  # Physical pin logic levels
@@ -42,8 +43,11 @@ def hw_test_prog():
     # INA219 U32 FMC2 address 0x82
     a += s.read(0x82, 1, 2)  # shunt voltage
     a += s.read(0x82, 2, 2)  # bus voltage
+    # INA219 U58 FMC2 address 0x84
+    a += s.read(0x84, 1, 2)  # shunt voltage
+    a += s.read(0x84, 2, 2)  # bus voltage
     a += s.pause(6944)  # 13888
-    a += s.write(0x42, 2, [0, 8])  # Output registers
+    a += s.write(0x42, 2, [0, 0x88])  # Output registers
     a += s.pause(2)
     a += s.read(0x42, 0, 2)  # Physical pin logic levels
     a += s.buffer_flip()

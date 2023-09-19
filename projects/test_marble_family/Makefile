@@ -84,7 +84,7 @@ udp-vpi.vpi: udp_model.o
 # =====
 # subset that is interesting to test live on network
 AD5662_V = ad5662_lock.v pps_lock.v pps_loop_filter.v ad5662.v
-LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
+LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v multi_counter.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
 										gps_test.v simpleuart.v fake_dpram.v xadc_tempmon.v dna.v
 lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v udp-vpi.vpi
 VFLAGS_lb_marble_slave_tb = -m ./udp-vpi
@@ -100,7 +100,7 @@ net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_trx.dat
 
 # =====
 # syntax-check only, no actual test bench code
-MARBLE_BASE_V = marble_base.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V)
+MARBLE_BASE_V = marble_base.v packet_categorize.v data_xdomain.v flag_xdomain.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V)
 marble_base_tb: $(MARBLE_BASE_V)
 VFLAGS_marble_base_tb =
 
@@ -111,6 +111,10 @@ no_multiple_drivers_check: marble_base_tb
 
 marble_base_lint: $(MARBLE_BASE_V)
 	$(VERILATOR) --lint-only -DSIMULATE $(VLATOR_LINT_IGNORE) $^
+
+# You'd better have a verilator in the v5 series!
+marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
+	$(VERILATOR) --lint-only --timing $(VLATOR_LINT_IGNORE) -DSIMULATE -y $(FPGA_FAMILY_DIR)/xilinx $(filter-out marble2_features, $^)
 
 # =====
 # constraint
@@ -143,6 +147,7 @@ Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c 
 # =====
 # bitfile
 MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_trx.dat ../../fpga_family/ds_clk_buf.v
+# MARBLE_SYNTH_SOURCE += scrap_dev.v
 marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
 	echo $^ | tr ' ' '\n' > $@
 

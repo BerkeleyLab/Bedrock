@@ -12,7 +12,7 @@ always sent in the lower byte of the transmitted data.
 The integrity of each transmitted packet is validated by a CRC16 check.
 
 While the protocol was original conceived to transmit data over a Fiber link, nominally
-at a rate of 2.5 Gbaud (16-bit data + 4-bit 8b/10b overhead) * 125 MHz), it could
+at a rate of 2.5 GBd (16-bit data + 4-bit 8b/10b overhead) * 125 MHz), it could
 conceivably be run at different rates or over a different medium.
 
 ## Packet format

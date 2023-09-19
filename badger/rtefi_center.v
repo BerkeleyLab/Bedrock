@@ -105,7 +105,7 @@ end
 
 // First real step: scan the input packet
 wire [3:0] ip_a;  reg [7:0] ip_d=0;  // MAC/IP config, Rx side
-wire [3:0] pno_a; reg [7:0] pno_d;  // UDP port numbers
+wire [3:0] pno_a; reg [7:0] pno_d=0;  // UDP port numbers
 wire [7:0] sdata;
 wire scanner_busy;
 wire sdata_s, sdata_l;
@@ -123,6 +123,9 @@ scanner #(.handle_arp(handle_arp), .handle_icmp(handle_icmp)) a_scan(
 );
 assign rx_mac_status_d = status_vec;
 assign rx_mac_status_s = status_valid;
+`ifdef SIMULATE
+// always @(negedge rx_clk) if (status_valid) $display("Rx scanner status %x", status_vec);
+`endif
 
 // Second step: create data flow to DPRAM
 wire [paw-1:0] pbuf_a_rx, gray_state;
@@ -142,7 +145,7 @@ assign ibadge_data = pbuf_din;
 // 1 MTU DPRAM; note the ninth bit used to mark Start of Frame.
 // Also note the lack of a write-enable, just write every cycle.
 reg [8:0] pbuf[0:(1<<paw)-1];
-reg [8:0] pbuf_out;
+reg [8:0] pbuf_out=0;
 `ifndef YOSYS
 initial pbuf_out=0;
 `endif
