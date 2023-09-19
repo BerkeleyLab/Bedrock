@@ -31,12 +31,11 @@ def decode_settings(addr, verbose):
     i2c_addr = foo[96]
     config = foo[97]
     start_freq = foo[101]  # unused
-    if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff)):
+    if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff) or (pcb_rev == 0xdeadbeef)):
         print("SI570 parameters not configured through MMC, using default for %s v1.%d" % (board_name, marble_rev))
         start_freq = 0
         # use default values if it's a marble v1.2, v1.3 or marble_mini, SI570 - 570NCB000933DG
-        # and if we are in simulation
-        if (marble_rev == 2 or marble_rev == 3 or board == 2 or pcb_rev == 0xdeadbeef):
+        if (marble_rev == 2 or marble_rev == 3 or board == 2):
             i2c_addr = 0xee
             polarity = 0
             start_addr = 0x0d
