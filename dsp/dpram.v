@@ -21,12 +21,12 @@ reg [dw-1:0] mem[0:sz-1];
 reg [aw-1:0] ala=0, alb=0;
 
 // In principle the zeroing loop should work OK for synthesis, but
-// there seems to be a bug in the Xilinx synthesizer
-// triggered when k briefly becomes sz.
+// there was a bug at least one version of Xilinx tools back in 2014.
+// No known current tool needs it disabled.
 integer k=0;
 initial begin
 	if (initial_file != "") $readmemh(initial_file, mem);
-`ifdef SIMULATE
+`ifndef BUGGY_FORLOOP
 	else begin
 		for (k=0;k<sz;k=k+1) mem[k]=0;
 	end
