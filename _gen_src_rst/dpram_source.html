@@ -102,12 +102,12 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">21</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">ala</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">alb</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">22</span>
 <span class="linenos">23</span><span class="c1">// In principle the zeroing loop should work OK for synthesis, but</span>
-<span class="linenos">24</span><span class="c1">// there seems to be a bug in the Xilinx synthesizer</span>
-<span class="linenos">25</span><span class="c1">// triggered when k briefly becomes sz.</span>
+<span class="linenos">24</span><span class="c1">// there was a bug at least one version of Xilinx tools back in 2014.</span>
+<span class="linenos">25</span><span class="c1">// No known current tool needs it disabled.</span>
 <span class="linenos">26</span><span class="k">integer</span><span class="w"> </span><span class="n">k</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">27</span><span class="k">initial</span><span class="w"> </span><span class="k">begin</span>
 <span class="linenos">28</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">initial_file</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">)</span><span class="w"> </span><span class="nb">$readmemh</span><span class="p">(</span><span class="n">initial_file</span><span class="p">,</span><span class="w"> </span><span class="n">mem</span><span class="p">);</span>
-<span class="linenos">29</span><span class="no">`ifdef</span><span class="w"> </span><span class="n">SIMULATE</span>
+<span class="linenos">29</span><span class="no">`ifndef</span><span class="w"> </span><span class="n">BUGGY_FORLOOP</span>
 <span class="linenos">30</span><span class="w">     </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
 <span class="linenos">31</span><span class="w">             </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="n">k</span><span class="o">&lt;</span><span class="n">sz</span><span class="p">;</span><span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mh">1</span><span class="p">)</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">32</span><span class="w">     </span><span class="k">end</span>
