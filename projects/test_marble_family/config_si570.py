@@ -17,16 +17,17 @@ from time import sleep
 
 
 def decode_settings(addr, verbose):
-    foo = addr.reg_read(["spi_mbox"])[0]
+    mbox = addr.reg_read(["spi_mbox"])[0]
     for page in range(7):
-        subset = foo[page*16:page*16+16]
+        subset = mbox[page*16:page*16+16]
         if verbose:
             print(page, " ".join([" %2.2x" % d for d in subset]))
-    pcb_rev = foo[72]
+    pcb_rev = mbox[72]
     # see marble_mmc/doc/mailbox.md for more details, page 4
     # if board = 1, marble and board = 2, marble-mini
     board = ((pcb_rev >> 4) & 0xf)
-    board_name = "Marble" if board else "Marble-mini"
+    board_names = {1 : "Marble", 2 : "Marble-mini"}
+    board_name = board_names.get(board, "Unknown_{}".format(board))
     # marble_v1_2 = 0, marble_v1_3 = 1, marble_v1_4 = 2 and so on..
     # addition of 2 to make things easier to print
     marble_rev = (pcb_rev & 0xf)+2 if (board == 1) else 0
@@ -34,11 +35,11 @@ def decode_settings(addr, verbose):
     # For config value: Bit 0: Enable pin polarity (0 = polarity low, 1 = polarity high).
     # Bit 1: Temperature stability (0 = 20 ppm or 50 ppm, 1 = 7 ppm)
     # Bits 2-5: reserved. Bits [7:6]: 0b01 = Valid config (avoid acting on invalid 0xff or 0x00).
-    i2c_addr = foo[96]
-    config = foo[97]
-    start_freq = foo[101]  # unused
+    i2c_addr = mbox[96]
+    config = mbox[97]
+    start_freq = int.from_bytes(bytes(mbox[98:102]), 'big')  # 4 bytes, MSB-first, unused
     if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff) or (pcb_rev == 0xdeadbeef)):
-        print("SI570 parameters not configured through MMC, using default for %s v1.%d" % (board_name, marble_rev))
+        print("SI570 parameters not configured through MMC, using default for {:s} v1.{:d}".format(board_name, marble_rev))
         start_freq = 0
         # use default values if it's a marble v1.2, v1.3 or marble_mini
         if (marble_rev == 2 or marble_rev == 3 or board == 2):
@@ -52,7 +53,7 @@ def decode_settings(addr, verbose):
     # check the [7:6] bits of the config value is either 2'b01 or 2'b10, to make sure it valid
     elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
         start_addr = 0x0d if (config & 0x02) else 0x07
-        polarity = 1 if (config & 0x01) else 0
+        polarity = config & 0x01
     else:
         raise ValueError("BAD: Invalid SI570 configuration parameter, default values not supported for board.")
     return board, i2c_addr, polarity, start_addr, start_freq
