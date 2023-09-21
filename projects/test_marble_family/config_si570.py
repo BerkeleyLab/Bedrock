@@ -16,8 +16,7 @@ import testcase
 from time import sleep
 
 
-def decode_settings(addr, verbose):
-    mbox = addr.reg_read(["spi_mbox"])[0]
+def decode_settings(mbox, verbose):
     for page in range(7):
         subset = mbox[page*16:page*16+16]
         if verbose:
@@ -172,8 +171,9 @@ def check(fin):
 
 
 def compute_si570(addr, key, verbose):
+    mbox = addr.reg_read(["spi_mbox"])[0]
     # using keyword just to keep print consistent
-    _, si570_addr, polarity, config_addr, _ = decode_settings(addr, verbose)
+    _, si570_addr, polarity, config_addr, _ = decode_settings(mbox, verbose)
     prog = hw_test_prog(si570_addr, polarity, config_addr)
     result = testcase.run_testcase(addr, prog, result_len=359, debug=args.debug, verbose=verbose)
     if args.debug:

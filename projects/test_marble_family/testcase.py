@@ -360,7 +360,8 @@ if __name__ == "__main__":
     # Or, better, turning this inside out and encapsulating the
     # infrastructure part of this file as a class.
     import config_si570
-    board, si570_addr, si570_polarity, si570_start_addr, _ = config_si570.decode_settings(dev, verbose=False)
+    mbox = dev.reg_read(["spi_mbox"])[0]
+    board, si570_addr, si570_polarity, si570_start_addr, _ = config_si570.decode_settings(mbox, verbose=False)
     # if mailbox is not updated, use args.marble user argument
     # board values - simulation = 0, marble = 1, marble_mini = 2
     # just some workaround to keep the functionality the same
