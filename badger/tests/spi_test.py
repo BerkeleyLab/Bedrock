@@ -402,7 +402,9 @@ def main():
         description="Utility for working with SPI Flash chips attached to Packet Badger")
     parser.add_argument('--ip', default='192.168.19.8', help='IP address')
     parser.add_argument('--udp', type=int, default=804, help='UDP Port number')
-    parser.add_argument('-a', '--add', type=lambda x: int(x, 0), help='Flash offset address')
+    if EXPERT:
+        parser.add_argument('-a', '--add', type=lambda x: int(x, 0), help='Flash offset address')
+    parser.add_argument('--upper', action='store_true', help="Use upper half of flash")
     parser.add_argument('--pages', type=int, help='Number of 256-byte pages')
     parser.add_argument('--mem_read', action='store_true', help='Read ROM info')
     parser.add_argument('--id', action='store_true',
@@ -447,7 +449,9 @@ def main():
     sock.connect((IPADDR, PORTNUM))
 
     # default starting address and length
-    ad = args.add if args.add is not None else 0x0
+    ad = 8388608 if args.upper else 0
+    if EXPERT and args.add is not None:
+        ad = args.add
     # 1814 for XC6SLX16, could also get this from JEDEC status?
     page_count = 1814
     page_count = 2
@@ -516,7 +520,7 @@ def main():
             print("Unexpected CONFIG, aborting")
             exit(1)
         write_status(sock, 0x98, config=0x24)
-        write_status(sock, 0x98, config=0x25)
+        # write_status(sock, 0x98, config=0x25)
     elif EXPERT and args.status_write is not None:
         write_status(sock, args.status_write, config=args.config_write)
 

@@ -41,9 +41,10 @@ module construct #(
 
 // Capture state across clock domains, convert back to binary
 reg [paw-1:0] gray_l=0, state=0;
+// verilator lint_save
 // verilator lint_off UNOPTFLAT
 wire [paw-1:0] new_state = gray_l ^ {1'b0, new_state[paw-1:1]};
-// verilator lint_on UNOPTFLAT
+// verilator lint_restore
 always @(posedge clk) begin
 	gray_l <= gray_state;
 	state <= new_state;

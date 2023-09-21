@@ -146,9 +146,6 @@ assign ibadge_data = pbuf_din;
 // Also note the lack of a write-enable, just write every cycle.
 reg [8:0] pbuf[0:(1<<paw)-1];
 reg [8:0] pbuf_out=0;
-`ifndef YOSYS
-initial pbuf_out=0;
-`endif
 wire [paw-1:0] mem_a2;  // see below
 always @(posedge rx_clk) pbuf[pbuf_a_rx] <= pbuf_din;
 always @(posedge tx_clk) pbuf_out <= pbuf[mem_a2];
