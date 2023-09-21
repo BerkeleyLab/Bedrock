@@ -65,7 +65,7 @@ module lb_marble_slave #(
 	output [3:0] ext_config,
 	// Output to hardware
 	output [131:0] fmc_test,
-	output led_user_mode,
+	output [1:0] led_user_mode,
 	output led1,  // PWM
 	output led2  // PWM
 );
@@ -356,7 +356,7 @@ always @(posedge clk) if (do_rd_r) begin
 end
 
 // Direct writes
-reg led_user_r=0;
+reg [1:0] led_user_r=0;
 reg [7:0] misc_config = misc_config_default;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
