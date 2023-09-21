@@ -360,7 +360,7 @@ if __name__ == "__main__":
     # Or, better, turning this inside out and encapsulating the
     # infrastructure part of this file as a class.
     import config_si570
-    board, si570_addr, _, si570_start_addr, _ = config_si570.decode_settings(dev, verbose=False)
+    board, si570_addr, si570_polarity, si570_start_addr, _ = config_si570.decode_settings(dev, verbose=False)
     # if mailbox is not updated, use args.marble user argument
     # board values - simulation = 0, marble = 1, marble_mini = 2
     # just some workaround to keep the functionality the same
@@ -371,7 +371,7 @@ if __name__ == "__main__":
         prog = ramtest.ram_test_prog()
     elif args.trx or args.si570:
         import read_trx
-        prog = read_trx.hw_test_prog(board_type, si570_addr, si570_start_addr)
+        prog = read_trx.hw_test_prog(board_type, si570_addr, si570_start_addr, si570_polarity)
     else:
         import poller
         prog = poller.hw_test_prog()

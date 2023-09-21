@@ -65,7 +65,7 @@ def busmux_reset(s):
 
 
 # see i2c_map_marble.txt for more documentation on I2C addresses
-def hw_test_prog(marble, si570_addr, si570_start_addr):
+def hw_test_prog(marble, si570_addr, si570_start_addr, si570_polarity):
     s = assem.i2c_assem()
     ina_list = [0x80, 0x82, 0x84]  # U17, U32, U58
     # from the part number: 570_N_C_ --> C denotes temperature stability of 7ppm
@@ -87,7 +87,7 @@ def hw_test_prog(marble, si570_addr, si570_start_addr):
 
     if marble:
         a += s.write(0x42, 6, [0xfe, 0x77])  # U39 Configuration registers
-        a += s.write(0x42, 2, [0x00, 0x88])  # U39 output register for clkmux_reset and SI570_OE
+        a += s.write(0x42, 2, [si570_polarity, 0x88])  # U39 output register for clkmux_reset and SI570_OE
         # pull down MOD_SEL, RESET and LPMODE, i.e set them as outputs
         a += s.write(0x44, 6, [0x37, 0x37])  # U34 Configuration registers
         a += s.write(0x44, 2, [0x48, 0x48])  # U34 Output registers
@@ -132,7 +132,7 @@ def hw_test_prog(marble, si570_addr, si570_start_addr):
     a += s.set_resx(0)
     a += busmux_sel(s, 6)  # App bus
     # keep clkmux_reset high always
-    a += s.write(0x42, 2, [0x00, 0x84])  # Output registers
+    a += s.write(0x42, 2, [si570_polarity, 0x84])  # Output registers
     a += s.pause(2)
     a += s.read(0x42, 0, 2)  # Physical pin logic levels
     a += s.read(0x44, 0, 2)  # Physical pin logic levels
@@ -169,14 +169,14 @@ def hw_test_prog(marble, si570_addr, si570_start_addr):
     a += s.pause(3470)
     #
     a += busmux_sel(s, 6)  # App bus
-    a += s.write(0x42, 2, [0x00, 0x88])  # Output registers, LD13 is OFF, LD14 is ON
+    a += s.write(0x42, 2, [si570_polarity, 0x88])  # Output registers, LD13 is OFF, LD14 is ON
     a += s.pause(2)
     a += s.read(0x42, 0, 2)  # Physical pin logic levels
     a += s.pause(3470)
     if True:  # extra weird little flicker
-        a += s.write(0x42, 2, [0x00, 0x84])  # Output registers, LD13
+        a += s.write(0x42, 2, [si570_polarity, 0x84])  # Output registers, LD13
         a += s.pause(1056)
-        a += s.write(0x42, 2, [0x00, 0x88])  # Output registers, LD14
+        a += s.write(0x42, 2, [si570_polarity, 0x88])  # Output registers, LD14
         a += s.pause(1056)
     a += s.jump(jump_n)
     return a
@@ -187,5 +187,6 @@ if __name__ == "__main__":
     # make sure to change this based on the SI570 for simulation
     si570_addr = 0xaa
     si570_start_addr = 0x07
-    a = hw_test_prog(marble, si570_addr, si570_start_addr)
+    si570_polarity = 0
+    a = hw_test_prog(marble, si570_addr, si570_start_addr, si570_polarity)
     print("\n".join(["%02x" % x for x in a]))
