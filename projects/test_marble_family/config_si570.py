@@ -1,5 +1,9 @@
 # Measures the current output frequency from SI570
 # also one can configure it to a different frequency
+# marble v1.2, v1.3 SI570 - 570NCB000933DG
+# marble v1.4 SI570 - 570NBB001808DGR
+# tested on marble_mmc branch marble_v1_4 commit 80a96fc6
+# but also backward compatible because of default values
 import sys
 import numpy as np
 bedrock_dir = "../../"
@@ -19,12 +23,14 @@ def decode_settings(addr, verbose):
         if verbose:
             print(page, " ".join([" %2.2x" % d for d in subset]))
     pcb_rev = foo[72]
+    # see marble_mmc/doc/mailbox.md for more details, page 4
     # if board = 1, marble and board = 2, marble-mini
     board = ((pcb_rev >> 4) & 0xf)
     board_name = "Marble" if board else "Marble-mini"
     # marble_v1_2 = 0, marble_v1_3 = 1, marble_v1_4 = 2 and so on..
     # addition of 2 to make things easier to print
     marble_rev = (pcb_rev & 0xf)+2 if (board == 1) else 0
+    # See page 6 MMC mailbox for SI570 settings
     # For config value: Bit 0: Enable pin polarity (0 = polarity low, 1 = polarity high).
     # Bit 1: Temperature stability (0 = 20 ppm or 50 ppm, 1 = 7 ppm)
     # Bits 2-5: reserved. Bits [7:6]: 0b01 = Valid config (avoid acting on invalid 0xff or 0x00).
@@ -34,12 +40,12 @@ def decode_settings(addr, verbose):
     if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff) or (pcb_rev == 0xdeadbeef)):
         print("SI570 parameters not configured through MMC, using default for %s v1.%d" % (board_name, marble_rev))
         start_freq = 0
-        # use default values if it's a marble v1.2, v1.3 or marble_mini, SI570 - 570NCB000933DG
+        # use default values if it's a marble v1.2, v1.3 or marble_mini
         if (marble_rev == 2 or marble_rev == 3 or board == 2):
             i2c_addr = 0xee
             polarity = 0
             start_addr = 0x0d
-        else:  # valid for marble v1.4, SI570 - 570NBB001808DGR
+        else:  # default values for marble v1.4
             i2c_addr = 0xaa
             polarity = 0
             start_addr = 0x07
@@ -48,8 +54,7 @@ def decode_settings(addr, verbose):
         start_addr = 0x0d if (config & 0x02) else 0x07
         polarity = 1 if (config & 0x01) else 0
     else:
-        print("BAD: Invalid SI570 configuration parameter, default values not supported for board.")
-        sys.exit(1)
+        raise ValueError("BAD: Invalid SI570 configuration parameter, default values not supported for board.")
     return board, i2c_addr, polarity, start_addr, start_freq
 
 
@@ -72,7 +77,7 @@ def busmux_reset(s):
 
 def hw_test_prog(si570_addr, polarity, start_addr):
     s = assem.i2c_assem()
-    si570_list = [start_addr, start_addr+1, start_addr+2, start_addr+3, start_addr+4, start_addr+5]
+    si570_list = [start_addr + ix for ix in range(6)]
     a = []
     a += s.pause(2)  # ignored?
     a += s.set_resx(3)  # avoid any confusion
@@ -126,7 +131,7 @@ def hw_test_prog(si570_addr, polarity, start_addr):
 
 
 def hw_write_prog(si570_addr, start_addr, reg):
-    si570_list = [start_addr, start_addr+1, start_addr+2, start_addr+3, start_addr+4, start_addr+5]
+    si570_list = [start_addr + ix for ix in range(6)]
     s = assem.i2c_assem()
     a = []
     a += s.pause(2)  # ignored?
@@ -139,12 +144,8 @@ def hw_write_prog(si570_addr, start_addr, reg):
     # Freeze the DCO by setting Freeze DCO=1 (bit 4 of register 137).
     a += s.write(si570_addr, 0x89, [0x10])
     # Write the new frequency configuration (RFREQ, HS_DIV, and N1)
-    a += s.write(si570_addr, start_addr, [reg[0]])
-    a += s.write(si570_addr, start_addr+1, [reg[1]])
-    a += s.write(si570_addr, start_addr+2, [reg[2]])
-    a += s.write(si570_addr, start_addr+3, [reg[3]])
-    a += s.write(si570_addr, start_addr+4, [reg[4]])
-    a += s.write(si570_addr, start_addr+5, [reg[5]])
+    for jx in range(6):
+        a += s.write(si570_addr, start_addr+jx, [reg[jx]])
     # Unfreeze the DCO by setting Freeze DCO=0 (register 137 bit 4)
     a += s.write(si570_addr, 0x89, [0x00])
     # assert the NewFreq bit (bit 6 of register 135) within 10 ms.
@@ -165,10 +166,8 @@ def hw_write_prog(si570_addr, start_addr, reg):
 # check if the final output frequency is <= 50 ppm
 def check(fin):
     ppm = ((fin)*(1/args.new_freq) - 1.0)*1e6
-    if (abs(ppm) <= 50):
-        sys.exit(0)
-    else:
-        print('SI570 final frequency measurement is not correct, out of spec by %i ppm' % ppm)
+    if (abs(ppm) >= 50):
+        raise ValueError('SI570 final frequency measurement is not correct, out of spec by %i ppm' % ppm)
 
 
 def compute_si570(addr, key, verbose):
@@ -213,7 +212,7 @@ def config_si570(addr, verbose):
         si570_addr, config_addr, fxtal, default = compute_si570(addr, "Measured", verbose)
         # if first measured frequency and new output frequency are < 10 ppm don't change/update
         if (abs(((default)*(1/args.new_freq) - 1.0)*1e6) < 10):
-            sys.exit(0)
+            pass
         else:
             print("#######################################")
             print("Changing output frequency to %4.4f MHz" % args.new_freq)

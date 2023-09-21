@@ -178,7 +178,7 @@ def print_ina219_config(title, a):
     print("%s INA219 config: 0x%4.4X %s" % (title, x, suffix))
 
 
-def compute_si570(a):
+def compute_si570(freq_default, a):
     # DCO frequency range: 4850 - 5670MHz
     # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
     # N1 values: 1, 2, 4, 6, 8...128
@@ -186,12 +186,6 @@ def compute_si570(a):
     n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6)) + 1
     rfreq = np.uint64((((a[1] & 0x3f) << 32) | (a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5])) / (2**28)
 
-    import leep
-    leep_addr = "leep://" + str(args.addr) + str(":") + str(args.port)
-    print(leep_addr)
-
-    addr = leep.open(leep_addr, instance=[])
-    freq_default = addr.reg_read(["frequency_si570"])
     default = (freq_default[0]/2**24.0)*125
     fxtal = default * hs_div * n1 / rfreq
     fdco = default * n1 * hs_div
@@ -207,7 +201,7 @@ def compute_si570(a):
         print('SI570 output frequency: %4.3f MHz' % default)
 
 
-def print_result(result, args, board_type, poll_only=False):
+def print_result(result, args, board_type, si570_dfreq, poll_only=False):
     n_fmc = 2 if args.fmc else 0
     tester = 2 if args.fmc_tester else 0
     transceiver = 2 if board_type else 4
@@ -241,7 +235,7 @@ def print_result(result, args, board_type, poll_only=False):
             print("########################################################################")
             pitch = 6
             hx = ib + 1 + pitch
-            compute_si570(result[hx:hx+pitch])
+            compute_si570(si570_dfreq, result[hx:hx+pitch])
         if args.trx:
             for ix in range(transceiver):
                 print("########################################################################")
@@ -371,6 +365,7 @@ if __name__ == "__main__":
     # board values - simulation = 0, marble = 1, marble_mini = 2
     # just some workaround to keep the functionality the same
     board_type = args.marble if board == 0 else board-2 if board == 2 else board
+    si570_dfreq = dev.reg_read(["frequency_si570"])
     if args.ramtest:
         import ramtest
         prog = ramtest.ram_test_prog()
@@ -385,7 +380,7 @@ if __name__ == "__main__":
         while True:
             wait_for_new(dev, sim=sim)
             result = read_result(dev, result_len=args.rlen)
-            print_result(result, args, board_type, poll_only=True)
+            print_result(result, args, board_type, si570_dfreq, poll_only=True)
 
     else:
         if args.debug:
@@ -394,4 +389,4 @@ if __name__ == "__main__":
         result = run_testcase(dev, prog, sim=sim, result_len=args.rlen,
                               debug=args.debug,
                               stop=args.stop, capture=args.vcd)
-        print_result(result, args, board_type)
+        print_result(result, args, board_type, si570_dfreq)
