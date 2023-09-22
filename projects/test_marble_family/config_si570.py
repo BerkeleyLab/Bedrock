@@ -1,5 +1,9 @@
 # Measures the current output frequency from SI570
 # also one can configure it to a different frequency
+# marble v1.2, v1.3 SI570 - 570NCB000933DG
+# marble v1.4 SI570 - 570NBB001808DGR
+# tested on marble_mmc branch marble_v1_4 commit 80a96fc6
+# but also backward compatible because of default values
 import sys
 import numpy as np
 bedrock_dir = "../../"
@@ -10,6 +14,48 @@ import leep
 import assem
 import testcase
 from time import sleep
+
+
+def decode_settings(mbox, verbose):
+    for page in range(7):
+        subset = mbox[page*16:page*16+16]
+        if verbose:
+            print(page, " ".join([" %2.2x" % d for d in subset]))
+    pcb_rev = mbox[72]
+    # see marble_mmc/doc/mailbox.md for more details, page 4
+    # if board = 1, marble and board = 2, marble-mini
+    board = ((pcb_rev >> 4) & 0xf)
+    board_names = {1: "Marble", 2: "Marble-mini"}
+    board_name = board_names.get(board, "Unknown_{}".format(board))
+    # marble_v1_2 = 0, marble_v1_3 = 1, marble_v1_4 = 2 and so on..
+    # addition of 2 to make things easier to print
+    marble_rev = (pcb_rev & 0xf)+2 if (board == 1) else 0
+    # See page 6 MMC mailbox for SI570 settings
+    # For config value: Bit 0: Enable pin polarity (0 = polarity low, 1 = polarity high).
+    # Bit 1: Temperature stability (0 = 20 ppm or 50 ppm, 1 = 7 ppm)
+    # Bits 2-5: reserved. Bits [7:6]: 0b01 = Valid config (avoid acting on invalid 0xff or 0x00).
+    i2c_addr = mbox[96]
+    config = mbox[97]
+    start_freq = int.from_bytes(bytes(mbox[98:102]), 'big')  # 4 bytes, MSB-first, unused
+    if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff) or (pcb_rev == 0xdeadbeef)):
+        print("SI570 settings not configured through MMC,using default for {:s} v1.{:d}".format(board_name, marble_rev))
+        start_freq = 0
+        # use default values if it's a marble v1.2, v1.3 or marble_mini
+        if (marble_rev == 2 or marble_rev == 3 or board == 2):
+            i2c_addr = 0xee
+            polarity = 0
+            start_addr = 0x0d
+        else:  # default values for marble v1.4
+            i2c_addr = 0xaa
+            polarity = 0
+            start_addr = 0x07
+    # check the [7:6] bits of the config value is either 2'b01 or 2'b10, to make sure it valid
+    elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
+        start_addr = 0x0d if (config & 0x02) else 0x07
+        polarity = config & 0x01
+    else:
+        raise ValueError("BAD: Invalid SI570 configuration parameter, default values not supported for board.")
+    return board, i2c_addr, polarity, start_addr, start_freq
 
 
 # select one port of an I2C bus multiplexer
@@ -29,9 +75,9 @@ def busmux_reset(s):
     return a
 
 
-def hw_test_prog():
+def hw_test_prog(si570_addr, polarity, start_addr):
     s = assem.i2c_assem()
-    si570_list = [0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12]
+    si570_list = [start_addr + ix for ix in range(6)]
     a = []
     a += s.pause(2)  # ignored?
     a += s.set_resx(3)  # avoid any confusion
@@ -40,15 +86,15 @@ def hw_test_prog():
     a += busmux_sel(s, 6)  # App bus
     a += s.read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
 
-    a += s.write(0x42, 6, [0xfe, 0x77])  # U39 Configuration registers
-    a += s.write(0x42, 2, [0x00, 0x88])  # U39 output register for clkmux_reset and SI570_OE
+    a += s.write(0x42, 6, [0xfe, 0x73])  # U39 Configuration registers
+    a += s.write(0x42, 2, [polarity, 0x88])  # U39 output register for clkmux_reset and SI570_OE
     # pull down MOD_SEL, RESET and LPMODE, i.e set them as outputs
     a += s.write(0x44, 6, [0x37, 0x37])  # U34 Configuration registers
     a += s.write(0x44, 2, [0x48, 0x48])  # U34 Output registers
 
     a += s.pause(100)
     for ax in si570_list:
-        a += s.read(0xee, ax, 1)  # config register0 with 2 bytes to read
+        a += s.read(si570_addr, ax, 1)  # config register0 with 2 bytes to read
 
     a += s.trig_analyz()
     #
@@ -60,7 +106,7 @@ def hw_test_prog():
     a += s.set_resx(0)
     a += busmux_sel(s, 6)  # App bus
     # keep clkmux_reset high always
-    a += s.write(0x42, 2, [0x00, 0x84])  # Output registers
+    a += s.write(0x42, 2, [polarity, 0x84])  # Output registers, LD13 is ON, LD14 is OFF
     a += s.pause(2)
     a += s.read(0x42, 0, 2)  # Physical pin logic levels
     a += s.read(0x44, 0, 2)  # Physical pin logic levels
@@ -71,20 +117,21 @@ def hw_test_prog():
     a += s.pause(3470)
     #
     a += busmux_sel(s, 6)  # App bus
-    a += s.write(0x42, 2, [0x00, 0x88])  # Output registers
+    a += s.write(0x42, 2, [polarity, 0x88])  # Output registers, LD13 is OFF, LD14 is ON
     a += s.pause(2)
     a += s.read(0x42, 0, 2)  # Physical pin logic levels
     a += s.pause(3470)
     if False:  # extra weird little flicker
-        a += s.write(0x42, 2, [0x00, 0x84])  # Output registers, LD12
+        a += s.write(0x42, 2, [polarity, 0x84])  # Output registers, LD13 ON
         a += s.pause(1056)
-        a += s.write(0x42, 2, [0x00, 0x88])  # Output registers, LD11
+        a += s.write(0x42, 2, [polarity, 0x88])  # Output registers, LD14 ON
         a += s.pause(1056)
     a += s.jump(jump_n)
     return a
 
 
-def hw_write_prog(reg):
+def hw_write_prog(si570_addr, start_addr, reg):
+    si570_list = [start_addr + ix for ix in range(6)]
     s = assem.i2c_assem()
     a = []
     a += s.pause(2)  # ignored?
@@ -95,24 +142,19 @@ def hw_write_prog(reg):
     a += s.read(0xe0, 0, 1, addr_bytes=0)  # busmux readback
 
     # Freeze the DCO by setting Freeze DCO=1 (bit 4 of register 137).
-    a += s.write(0xee, 0x89, [0x10])
+    a += s.write(si570_addr, 0x89, [0x10])
     # Write the new frequency configuration (RFREQ, HS_DIV, and N1)
-    a += s.write(0xee, 0x0d, [reg[0]])
-    a += s.write(0xee, 0x0e, [reg[1]])
-    a += s.write(0xee, 0x0f, [reg[2]])
-    a += s.write(0xee, 0x10, [reg[3]])
-    a += s.write(0xee, 0x11, [reg[4]])
-    a += s.write(0xee, 0x12, [reg[5]])
+    for jx in range(6):
+        a += s.write(si570_addr, start_addr+jx, [reg[jx]])
     # Unfreeze the DCO by setting Freeze DCO=0 (register 137 bit 4)
-    a += s.write(0xee, 0x89, [0x00])
+    a += s.write(si570_addr, 0x89, [0x00])
     # assert the NewFreq bit (bit 6 of register 135) within 10 ms.
-    a += s.write(0xee, 0x87, [0x40])
+    a += s.write(si570_addr, 0x87, [0x40])
 
     a += s.pause(100)
 
-    si570_list = [0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12]
     for ax in si570_list:
-        a += s.read(0xee, ax, 1)  # config register0 with 2 bytes to read
+        a += s.read(si570_addr, ax, 1)  # config register0 with 2 bytes to read
     a += s.trig_analyz()
     #
     jump_n = 9
@@ -124,16 +166,16 @@ def hw_write_prog(reg):
 # check if the final output frequency is <= 50 ppm
 def check(fin):
     ppm = ((fin)*(1/args.new_freq) - 1.0)*1e6
-    if (abs(ppm) <= 50):
-        sys.exit(0)
-    else:
-        print('SI570 final frequency measurement is not correct, out of spec by %i ppm' % ppm)
+    if (abs(ppm) >= 50):
+        raise ValueError('SI570 final frequency measurement is not correct, out of spec by %i ppm' % ppm)
 
 
-def compute_si570(addr, key):
+def compute_si570(addr, key, verbose):
+    mbox = addr.reg_read(["spi_mbox"])[0]
     # using keyword just to keep print consistent
-    prog = hw_test_prog()
-    result = testcase.run_testcase(addr, prog, result_len=359, debug=args.debug, verbose=args.verbose)
+    _, si570_addr, polarity, config_addr, _ = decode_settings(mbox, verbose)
+    prog = hw_test_prog(si570_addr, polarity, config_addr)
+    result = testcase.run_testcase(addr, prog, result_len=359, debug=args.debug, verbose=verbose)
     if args.debug:
         print(" ".join(["%2.2x" % p for p in prog]))
         print("")
@@ -163,15 +205,15 @@ def compute_si570(addr, key):
         print('Output frequency: %4.4f MHz' % default)
     else:
         print('%s SI570 output frequency: %4.4f MHz' % (key, default))
-    return fxtal, default
+    return si570_addr, config_addr, fxtal, default
 
 
-def config_si570(addr):
+def config_si570(addr, verbose):
     if args.new_freq:
-        fxtal, default = compute_si570(addr, "Measured")
+        si570_addr, config_addr, fxtal, default = compute_si570(addr, "Measured", verbose)
         # if first measured frequency and new output frequency are < 10 ppm don't change/update
         if (abs(((default)*(1/args.new_freq) - 1.0)*1e6) < 10):
-            sys.exit(0)
+            pass
         else:
             print("#######################################")
             print("Changing output frequency to %4.4f MHz" % args.new_freq)
@@ -202,7 +244,7 @@ def config_si570(addr):
             rfreq_i = int(best[2] / fxtal)
             n1 = best[0]-1
             hs_div = best[1]-4
-            if args.verbose:
+            if verbose:
                 print('Expected SI570 settings:')
                 print('REFREQ: %4.4f' % rfreq_i)
                 print('N1: %3d' % best[0])
@@ -216,10 +258,10 @@ def config_si570(addr):
             reg10 = (rfreq >> 16) & 0xff  # reg 10: rfreq[23:16]
             reg11 = (rfreq >> 8) & 0xff  # reg 11: rfreq[15:8]
             reg12 = rfreq & 0xff  # reg 12: rfreq[7:0]
-            reg = [reg7, reg8, reg9, reg10, reg11, reg12]
             # write new registers
-            chg = hw_write_prog(reg)
-            result1 = testcase.run_testcase(addr, chg, result_len=359, debug=args.debug, verbose=args.verbose)
+            reg = [reg7, reg8, reg9, reg10, reg11, reg12]
+            chg = hw_write_prog(si570_addr, config_addr, reg)
+            result1 = testcase.run_testcase(addr, chg, result_len=359, debug=args.debug, verbose=verbose)
             if args.debug:
                 print(" ".join(["%2.2x" % p for p in chg]))
                 print("")
@@ -230,11 +272,11 @@ def config_si570(addr):
             sleep(1)
             # read final values and output frequency?
             print("#######################################")
-            _, freq = compute_si570(addr, "Final")
+            _, _, _, freq = compute_si570(addr, "Final", verbose)
             check(freq)
     else:  # read only current settings if you don't want to change anything
         print("#######################################")
-        compute_si570(addr, "Measured")
+        compute_si570(addr, "Measured", verbose)
 
 
 if __name__ == "__main__":
@@ -255,7 +297,7 @@ if __name__ == "__main__":
 
     # dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
 
-    config_si570(addr)
+    config_si570(addr, args.verbose)
 
 # usage:
 # To read current output frequency:
