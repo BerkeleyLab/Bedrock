@@ -141,7 +141,8 @@ wire config_mw = config_w && (config_a[7:4] == 5);
 wire [10:0] mbox_a = {mbox_page, config_a[3:0]};
 
 // Forward declarations
-wire led_user_mode, l1, l2;
+wire [1:0] led_user_mode;
+wire l1, l2;
 // Local bus
 assign lb_clk = tx_clk;
 //wire [23:0] lb_addr;
@@ -360,8 +361,13 @@ activity rx_act(.clk(rx_clk), .trigger(rx_mon), .led(rx_led));
 activity tx_act(.clk(tx_clk), .trigger(tx_mon), .led(tx_led));
 wire rx_h = rx_heartbeat[26];
 wire tx_h = tx_heartbeat[26];
-assign LED = {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, led1, led0};
-// assign LED = {scanner_debug, tx_led, rx_led, led1, led0};
+reg mod=0, reset=0;
+reg [31:0] cnt=0;
+always @(posedge rx_clk) begin
+    cnt <= reset ? 32'h0 : cnt + 1'b1;
+    mod <= cnt[0];
+end
+assign LED = (led_user_mode==2) ? cnt[30:23] & {8{mod}} : {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, led1, led0};
 
 // Keep the PHY's reset pin low for the first 33 ms
 reg phy_rb=0;
