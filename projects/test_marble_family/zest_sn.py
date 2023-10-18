@@ -4,7 +4,7 @@
 import sys
 # bedrock_dir = "../../"
 import os
-bedrock_dir = os.path.dirname(__file__) + "/../../"
+bedrock_dir = os.path.dirname(__file__) + "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 import assem
