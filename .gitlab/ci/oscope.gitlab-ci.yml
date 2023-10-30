@@ -19,7 +19,7 @@ oscope_top_bmb7:
 
 oscope_top_marble:
   before_script:
-    - cd projects/oscope/marble_family && ls /non-free && apt-get update && apt-get install -y yosys
+    - cd projects/oscope/marble_family && ls /non-free
   stage: synthesis
   script:
     - verilator -V && XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH make oscope_top.bit

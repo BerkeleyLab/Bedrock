@@ -47,10 +47,10 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 # Yosys
 # For now we need to build yosys from source, since Debian Bullseye
 # is stuck at yosys-0.9 that doesn't have the features we need.
-# Revisit this choice when Debian catches up, maybe in Bookworm,
-# and hope to get back to "apt-get install yosys" then.
+# Commit 7ce5011 corresponds to yosys-0.23 2022-11-08, matching
+# the version in Debian Bookworm.
 # Note that the standard yosys build process used here requires
-# network access to download abc from https://github.com/berkeley-abc/abc.
+# network access to download abc from https://github.com/YosysHQ/abc.
 RUN apt-get update && \
     apt-get install -y \
         clang \
@@ -66,7 +66,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     git clone https://github.com/cliffordwolf/yosys.git && \
     cd yosys && \
-    git checkout 40e35993af6ecb6207f15cc176455ff8d66bcc69 && \
+    git checkout 7ce5011c24bc4c605578bb16576cadf79373e23f && \
     make config-clang && \
     make -j4 && \
     make install && \
