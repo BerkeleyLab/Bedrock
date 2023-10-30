@@ -21,11 +21,11 @@ initial begin
     end
 end
 
-reg [1:0] r;
 // verilator lint_save
 // verilator lint_off MULTIDRIVEN
-reg [1:0] r1;
+reg [1:0] r;
 // verilator lint_restore
+reg [1:0] r1;
 always @(posedge C) begin
     r[0] <= D;
     r1   <= r;
