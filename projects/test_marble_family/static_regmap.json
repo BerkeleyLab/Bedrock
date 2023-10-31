@@ -115,42 +115,49 @@
         "access": "rw",
         "addr_width": 10,
         "sign": "unsigned",
-        "base_addr": 262144,
+        "base_addr": "0x40000",
         "data_width": 8
     },
     "twi_analyz": {
         "access": "r",
         "addr_width": 10,
         "sign": "unsigned",
-        "base_addr": 263168,
+        "base_addr": "0x40400",
         "data_width": 8
     },
     "twi_data": {
         "access": "r",
         "addr_width": 10,
         "sign": "unsigned",
-        "base_addr": 264192,
+        "base_addr": "0x40800",
         "data_width": 8
+    },
+    "rx_counters": {
+        "access": "r",
+        "addr_width": 4,
+        "sign": "unsigned",
+        "base_addr": "0x41000",
+        "data_width": 20
     },
     "ctrace_out": {
         "access": "r",
         "addr_width": 11,
         "sign": "unsigned",
-        "base_addr": 393216,
+        "base_addr": "0x60000",
         "data_width": 16
     },
     "gps_buff": {
         "access": "r",
         "addr_width": 10,
         "sign": "unsigned",
-        "base_addr": 458752,
+        "base_addr": "0x70000",
         "data_width": 8
     },
     "spi_mbox": {
         "access": "r",
         "addr_width": 11,
         "sign": "unsigned",
-        "base_addr": 2097152,
+        "base_addr": "0x200000",
         "data_width": 8
     }
 }

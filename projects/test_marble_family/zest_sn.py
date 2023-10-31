@@ -2,9 +2,7 @@
 # using Marble i2c bridge functionality.
 # More, generally, interacts with EEPROM address 0xa0 on FMC 1.
 import sys
-# bedrock_dir = "../../"
-import os
-bedrock_dir = os.path.dirname(__file__) + "/../../"
+bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 import assem

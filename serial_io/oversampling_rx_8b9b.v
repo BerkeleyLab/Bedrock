@@ -57,26 +57,62 @@ assign  inv_clk_4x = ~(clk_4x);
 	assign pre_int_data[3] = d_out[0];
 `else
 generate
-if (DEVICE == "SPARTAN 6") begin // ISERDES2 receiver
+if (DEVICE == "SPARTAN 6") begin : spartan6_iserdes  // ISERDES2 receiver
 	wire bitslip=0;
-	ISERDES2 #(.BITSLIP_ENABLE("FALSE"),.DATA_RATE("SDR"),.DATA_WIDTH(4),.INTERFACE_TYPE("RETIMED"),.SERDES_MODE("NONE") )
-	inst_iserdes(.CE0(1'b1),.CLKDIV(clk),.CLK0(clk_4x),.D(data_in),.RST(async_reset),.Q4(pre_int_data[3]),.Q3(pre_int_data[2]),.Q2(pre_int_data[1]),.Q1(pre_int_data[0]),.BITSLIP(bitslip),.CFB0(),.CFB1(),.CLK1(1'b0),.DFB(),.FABRICOUT(),.INCDEC(),.IOCE(serdes_strobe),.SHIFTIN(1'b0),.SHIFTOUT(),.VALID());
-end
-else  if (DEVICE == "KINTEX 7") begin// ISERDESE2 receiver
-	ISERDESE2 #(.DATA_RATE("SDR"),.DATA_WIDTH(4),.INTERFACE_TYPE("NETWORKING"),.IOBDELAY("NONE"),.NUM_CE(1'b1)
-	,.INIT_Q1(0)
-	,.INIT_Q2(0)
-	,.INIT_Q3(0)
-	,.INIT_Q4(0)
-	,.SRVAL_Q1(0)
-	,.SRVAL_Q2(0)
-	,.SRVAL_Q3(0)
-	,.SRVAL_Q4(0)
-)
-	inst_iserdes (.CLK(clk_4x),.CLKB(inv_clk_4x),.CLKDIV(clk),.D(data_in),.Q4(pre_int_data[0]),.Q3(pre_int_data[1]),.Q2(pre_int_data[2]),.Q1(pre_int_data[3]),.RST(async_reset),.CLKDIVP(1'b0),.CE1(1'b1),.CE2(1'b0),.OCLK(1'b0),.OCLKB(1'b0),.BITSLIP(1'b0),.SHIFTIN1(1'b0),.SHIFTIN2(1'b0),.OFB(1'b0),.DYNCLKSEL(1'b0),.DYNCLKDIVSEL(1'b0),.DDLY(1'b0),.O());
+	ISERDES2 #(.BITSLIP_ENABLE("FALSE"), .DATA_RATE("SDR"), .DATA_WIDTH(4), .INTERFACE_TYPE("RETIMED"), .SERDES_MODE("NONE") ) inst_iserdes (
+		.CE0(1'b1),
+		.CLKDIV(clk),
+		.CLK0(clk_4x),
+		.D(data_in),
+		.RST(async_reset),
+		.Q4(pre_int_data[3]),
+		.Q3(pre_int_data[2]),
+		.Q2(pre_int_data[1]),
+		.Q1(pre_int_data[0]),
+		.BITSLIP(bitslip),
+		.CFB0(),
+		.CFB1(),
+		.CLK1(1'b0),
+		.DFB(),
+		.FABRICOUT(),
+		.INCDEC(),
+		.IOCE(serdes_strobe),
+		.SHIFTIN(1'b0),
+		.SHIFTOUT(),
+		.VALID()
+	);
+end else if (DEVICE == "KINTEX 7") begin : kintex7_iserdes  // ISERDESE2 receiver
+	ISERDESE2 #(.DATA_RATE("SDR"), .DATA_WIDTH(4), .INTERFACE_TYPE("NETWORKING"), .IOBDELAY("NONE"), .NUM_CE(1'b1),
+		.INIT_Q1(0), .INIT_Q2(0), .INIT_Q3(0), .INIT_Q4(0),
+		.SRVAL_Q1(0), .SRVAL_Q2(0), .SRVAL_Q3(0), .SRVAL_Q4(0)
+	) inst_iserdes (
+		.CLK(clk_4x),
+		.CLKB(inv_clk_4x),
+		.CLKDIV(clk),
+		.D(data_in),
+		.Q4(pre_int_data[0]),
+		.Q3(pre_int_data[1]),
+		.Q2(pre_int_data[2]),
+		.Q1(pre_int_data[3]),
+		.RST(async_reset),
+		.CLKDIVP(1'b0),
+		.CE1(1'b1),
+		.CE2(1'b0),
+		.OCLK(1'b0),
+		.OCLKB(1'b0),
+		.BITSLIP(1'b0),
+		.SHIFTIN1(1'b0),
+		.SHIFTIN2(1'b0),
+		.OFB(1'b0),
+		.DYNCLKSEL(1'b0),
+		.DYNCLKDIVSEL(1'b0),
+		.DDLY(1'b0),
+		.O()
+	);
 end
 endgenerate
 `endif
+
 // int_data(0) is first to arrive, int_data(3) is last
 always @(posedge clk) begin
 	int_data <= pre_int_data;

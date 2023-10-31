@@ -6,6 +6,8 @@
 
 module eth_gtx_hook #(
     parameter JUMBO_DW = 14, // Not used, just holdover for compatibility with older eth_gtx_bridge
+    parameter EVENINIT = 0,
+    parameter ENC_DISPINIT=1'b0,
     parameter GTX_DW   = 20) // Parallel GTX data width; Supported values are 10b and 20b
     (
         input               gtx_tx_clk,  // Transceiver clock at half rate
@@ -37,12 +39,12 @@ module eth_gtx_hook #(
 
         generate if (GTX_DW==20) begin: G_GTX_DATA_CONV
 
-            reg  [9:0] gtx_rxd_10_r;
-            reg  [9:0] gtx_txd_r;
+            reg  [9:0] gtx_rxd_10_r=0;
+            reg  [9:0] gtx_txd_r=0;
             wire [9:0] gtp_rxd_l = gtx_rxd[9:0];
             wire [9:0] gtp_rxd_h = gtx_rxd[19:10];
-            reg  [19:0] gtx_txd_l;
-            reg even=0;
+            reg  [19:0] gtx_txd_l=0;
+            reg even=EVENINIT;
 
             always @(posedge gmii_tx_clk) begin
                 gtx_txd_r <= gtx_txd_10;
@@ -73,8 +75,8 @@ module eth_gtx_hook #(
         // ---------------------------------
 
 
-        gmii_link i_gmii_link(
-            //GMII to MAC
+        gmii_link #(.ENC_DISPINIT(ENC_DISPINIT)) i_gmii_link(
+            // GMII to MAC
             .RX_CLK       (gmii_rx_clk),
             .RXD          (gmii_rxd),
             .RX_DV        (gmii_rx_dv),

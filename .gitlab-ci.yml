@@ -47,6 +47,7 @@ freq_demo:
   stage: test
   script:
     - make -C homeless/freq_demo
+    - make -C homeless all checks
 
 make_docs:
   before_script:

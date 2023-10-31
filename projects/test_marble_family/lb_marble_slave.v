@@ -36,6 +36,8 @@ module lb_marble_slave #(
 	input [27:0] frequency_si570,
 	// More debugging hooks
 	input [3:0] mmc_pins,
+	input rx_category_s,
+	input [3:0] rx_category,
 	// Features
 	input tx_mac_done,
 	input [15:0] rx_mac_data,
@@ -63,7 +65,7 @@ module lb_marble_slave #(
 	output [3:0] ext_config,
 	// Output to hardware
 	output [131:0] fmc_test,
-	output led_user_mode,
+	output [1:0] led_user_mode,
 	output led1,  // PWM
 	output led2  // PWM
 );
@@ -78,7 +80,8 @@ wire [31:0] xadc_internal_temperature;
 assign xadc_internal_temperature = {16'h0000, xadc_temp_dout};
 
 // Device DNA
-wire [31:0] dna_high, dna_low;
+wire [31:0] dna_high;
+wire [31:0] dna_low;
 
 //`define BADGE_TRACE
 `ifdef BADGE_TRACE
@@ -132,6 +135,13 @@ end endgenerate
 // the FPGA and PHY clock trees come to life at different rates.
 reg [15:0] xdomain_fault_count=0;
 always @(posedge clk) if (xdomain_fault) xdomain_fault_count <= xdomain_fault_count + 1;
+
+// Accumulate packet statistics
+wire [19:0] rx_counters;
+multi_counter #(.aw(4), .dw(20)) badger_rx_counter(
+	.clk(clk), .inc(rx_category_s), .inc_addr(rx_category),
+	.read_addr(addr[3:0]), .read_data(rx_counters)
+);
 
 // Frequency counter
 wire [31:0] tx_freq;
@@ -336,7 +346,8 @@ always @(posedge clk) if (do_rd_r) begin
 		24'h01????: lb_data_in <= ibadge_out;
 		24'h02????: lb_data_in <= obadge_out;
 		24'h03????: lb_data_in <= rx_mac_data;
-		24'h04????: lb_data_in <= twi_dout;
+		24'h040???: lb_data_in <= twi_dout;
+		24'h041???: lb_data_in <= rx_counters;
 		24'h05????: lb_data_in <= mirror_out_0;
 		24'h06????: lb_data_in <= ctrace_out;
 		24'h07????: lb_data_in <= gps_buf_out;
@@ -345,7 +356,7 @@ always @(posedge clk) if (do_rd_r) begin
 end
 
 // Direct writes
-reg led_user_r=0;
+reg [1:0] led_user_r=0;
 reg [7:0] misc_config = misc_config_default;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;

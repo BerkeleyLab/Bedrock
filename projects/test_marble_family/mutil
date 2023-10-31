@@ -28,7 +28,7 @@ case "$1" in
   gold)
     # copy $BITFILE to gold location in flash
     if test -r "$BITFILE"; then
-      $PYTHON bedrock/badger/tests/spi_test.py --ip "$IP" --udp 804 --wait 0.001 --add 0 --program "$BITFILE"
+      $PYTHON bedrock/badger/tests/spi_test.py --ip "$IP" --udp 804 --wait 0.001 --program "$BITFILE"
     else
       echo "$BITFILE not found"
     fi

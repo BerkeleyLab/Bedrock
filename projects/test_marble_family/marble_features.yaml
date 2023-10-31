@@ -13,6 +13,7 @@ marble_mini:
         carrier_rev: "v1"
         default_enable_rx: 1
         misc_config_default: 4
+        use_rgmii_idelay: 1
 
 marble_v2:
     defs:
@@ -26,3 +27,4 @@ marble_v2:
         carrier_rev: "v2"
         default_enable_rx: 1
         misc_config_default: 4
+        use_rgmii_idelay: 1

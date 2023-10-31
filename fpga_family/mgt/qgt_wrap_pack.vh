@@ -24,6 +24,8 @@
                             `ifdef GT``GTi``_8B10B_EN\
                             output [(DWI/8)-1:0] gt``GTi``_rxcharisk_out,\
                             input  [(DWI/8)-1:0] gt``GTi``_txcharisk_in,\
+                            output [(DWI/8)-1:0] gt``GTi``_rxdisperr_out,\
+                            output [(DWI/8)-1:0] gt``GTi``_rxnotintable_out,\
                             output               gt``GTi``_rxbyteisaligned,\
                             `endif\
                             output [2:0]         gt``GTi``_rxbufstatus,\
