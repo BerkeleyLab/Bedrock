@@ -40,6 +40,12 @@ RUN apt-get update && \
 # gcc-riscv64-unknown-elf above replace our previous
 #   approach, used in Buster, of building from source
 
+# Allow pip to install packages
+RUN mkdir -p $HOME/.config/pip && \
+    printf "[global]\nbreak-system-packages = true\n" > \
+        $HOME/.config/pip/pip.conf && \
+    cat $HOME/.config/pip/pip.conf
+
 # vhd2vl
 RUN git clone https://github.com/ldoolitt/vhd2vl && \
     cd vhd2vl && \
