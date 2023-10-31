@@ -208,7 +208,7 @@ initial begin
   if (hash_in != hash_out) begin $display("Hash does not match"); pass = 1'b0; end
 
   #4000; // Let me see the results on the waveform without zooming in a bunch
-  if (pass) begin $display("PASS"); $finish(); end 
+  if (pass) begin $display("PASS"); $finish(); end
   else begin $display("FAIL"); $stop(); end
 end
 

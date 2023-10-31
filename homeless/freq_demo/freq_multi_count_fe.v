@@ -51,9 +51,10 @@ end
 // and then accumulate them.  Relegate reference counter and other
 // control logic to the module that instantiates us; all we need to
 // know is when to zero this accumulator.
+// verilator lint_save
 // verilator lint_off UNOPTFLAT
 wire [gw-1:0] bin4 = gray4 ^ {1'b0, bin4[gw-1:1]}; // convert Gray to binary
-// verilator lint_on UNOPTFLAT
+// verilator lint_restore
 reg [gw-1:0] bin5=0, diff5=0;
 reg [uw-1:0] accum=0;
 always @(posedge refclk) begin

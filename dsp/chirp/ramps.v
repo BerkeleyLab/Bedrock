@@ -27,6 +27,7 @@ assign error = error_r;
 // Off time initiates fall of ramp above
 // Pipeline step requires every gate pulse preceded by a non-gate cycle
 reg pulse_on = 0;
+reg [cw-1:0] rise_t=0;
 reg [cw-1:0] counter=0;
 reg counter_zero=0;
 always @(posedge clk) begin
@@ -59,7 +60,7 @@ assign amp = amp_r;
 assign a_warning = a_warning_r;
 
 // Determine rise time; to be used in off-ramp
-reg [cw-1:0] rise_cnt=0, rise_t=0;
+reg [cw-1:0] rise_cnt=0;
 always @(posedge clk) begin
 	if (reset) begin
 		rise_cnt <= 0;

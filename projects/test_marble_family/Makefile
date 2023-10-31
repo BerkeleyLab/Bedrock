@@ -116,6 +116,10 @@ no_multiple_drivers_check: marble_base_tb
 marble_base_lint: $(MARBLE_BASE_V)
 	$(VERILATOR) --lint-only -DSIMULATE $(VLATOR_LINT_IGNORE) $^
 
+# You'd better have a verilator in the v5 series!
+marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
+	$(VERILATOR) --lint-only --timing $(VLATOR_LINT_IGNORE) -DSIMULATE -y $(FPGA_FAMILY_DIR)/xilinx $(filter-out marble2_features, $^)
+
 # =====
 # constraint
 pin_map_fmc.csv: pin_map_fmc.py
@@ -147,6 +151,7 @@ Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c 
 # =====
 # bitfile
 MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_trx.dat ../../fpga_family/ds_clk_buf.v
+# MARBLE_SYNTH_SOURCE += scrap_dev.v
 marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
 	echo $^ | tr ' ' '\n' > $@
 

@@ -75,7 +75,7 @@ def file_grab(fname, ix):
             if m and m.group(1) != "n_lat":
                 pn = m.group(1)
                 pv = m.group(2)
-                params += ["parameter p%d_%s = %s;" % (ix, pn, pv)]
+                params += ["\tparameter p%d_%s = %s," % (ix, pn, pv)]
                 param_set += [".%s(p%d_%s)" % (pn, ix, pn)]
                 param_map += [pn]
         for p_spec, p_name in x2list:
