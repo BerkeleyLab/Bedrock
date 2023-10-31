@@ -222,7 +222,7 @@ generate if (USE_I2CBRIDGE) begin : i2cb
 	// twi_scl_h == pull pin high
 	// neither == let pin float
 	wire [1:0] twi_bus_sel = hw_config[2:1];
-	reg [3:0] twi_scl_l=0, twi_scl_h=0, twi_sda_r=0;
+	reg [3:0] twi_scl_l=0, twi_scl_h=0, twi_sda_r=0, twi_sda_grab=0, twi_scl_grab=0;
 	reg [scl_act_high:0] twi0_scl_shf=0;
 	always @(posedge clk) begin
 		twi0_scl_shf <= {twi0_scl_shf[scl_act_high-1:0], twi0_scl};
@@ -232,6 +232,8 @@ generate if (USE_I2CBRIDGE) begin : i2cb
 		twi_scl_h[twi_bus_sel] <= ~twi0_scl_shf[scl_act_high];
 		twi_sda_r <= 4'b1111;
 		twi_sda_r[twi_bus_sel] <= twi_sda_drive;
+		twi_sda_grab <= twi_sda;
+		twi_scl_grab <= twi_scl;
 	end
 	assign twi_scl[0] = twi_scl_l[0] ? 1'b0 : twi_scl_h[0] ? 1'b1 : 1'bz;
 	assign twi_scl[1] = twi_scl_l[1] ? 1'b0 : twi_scl_h[1] ? 1'b1 : 1'bz;
@@ -241,8 +243,8 @@ generate if (USE_I2CBRIDGE) begin : i2cb
 	assign twi_sda[1] = twi_sda_r[1] ? 1'bz : 1'b0;
 	assign twi_sda[2] = twi_sda_r[2] ? 1'bz : 1'b0;
 	assign twi_sda[3] = twi_sda_r[3] ? 1'bz : 1'b0;
-	assign twi_sda_sense = twi_sda[twi_bus_sel];
-	assign twi_scl_sense = twi_scl[twi_bus_sel];
+	assign twi_sda_sense = twi_sda_grab[twi_bus_sel];
+	assign twi_scl_sense = twi_scl_grab[twi_bus_sel];
 	assign twi_rst = hw_config[0] ? 1'b0 : 1'bz;  // three-state
 end else begin : no_i2cb
 	assign twi_dout=0;
@@ -434,6 +436,7 @@ always @(posedge clk) begin
 end
 `endif
 
+`ifndef YOSYS
 // ----------------------------------
 // XADC Internal Temperature Monitor
 // ----------------------------------
@@ -459,6 +462,11 @@ dna dna_inst0 (
   .dna_msb                            (dna_high),
   .dna_lsb                            (dna_low)
   );
+`else
+assign xadc_temp_dout=0;
+assign dna_high=0;
+assign dna_low=0;
+`endif
 
 
 endmodule
