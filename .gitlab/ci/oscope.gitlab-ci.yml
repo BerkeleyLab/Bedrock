@@ -33,6 +33,7 @@ litex_trigger_capture:
   stage: synthesis
   before_script:
     - apt-get update && apt-get install -y ninja-build && pip3 install --break-system-packages meson==0.64.1
+    - mkdir -p $HOME/.config/pip && printf "[global]\nbreak-system-packages = true\n" > $HOME/.config/pip/pip.conf && cat $HOME/.config/pip/pip.conf
     - mkdir /litex_setup_dir
     - (BD=$PWD && cd /litex_setup_dir && sh $BD/build-tools/litex_meta.sh)
     - cd projects/trigger_capture
