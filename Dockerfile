@@ -60,7 +60,7 @@ RUN git clone https://github.com/ldoolitt/vhd2vl && \
 
 # Because we are running inside docker, installing
 # python packages system wide should be ok
-RUN pip3 install --break-system-packages \
+RUN pip3 install \
     nmigen==0.2
 
 # SymbiYosys formal verification tool + Yices 2 solver (`sby` command)

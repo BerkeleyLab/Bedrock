@@ -109,7 +109,7 @@ sphinx_docs:
         xvfb \
         gtkwave \
         texlive-binaries
-    python3 -m pip install --break-system-packages \
+    python3 -m pip install \
         sphinx==5.0.2 \
         sphinx_rtd_theme \
         m2r2==0.3.2
