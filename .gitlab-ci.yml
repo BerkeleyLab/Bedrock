@@ -31,6 +31,7 @@ include:
   - local: .gitlab/ci/dsp.gitlab-ci.yml
   - local: .gitlab/ci/marble_family.gitlab-ci.yml
   - local: .gitlab/ci/swap_gitid.gitlab-ci.yml
+  - local: .gitlab/ci/cdc_check.gitlab-ci.yml
 
 leep_test:
   script:
