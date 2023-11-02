@@ -1,4 +1,19 @@
-module hdmi (output CEC,output CKP, output CKN,output D0N,output D0P,output D1N,output D1P,output D2N,output D2P,output DET,output SCL,output SDA,input [5:0] hdmi_data, input [5:0] hdmi_ctrl);
+module hdmi (
+	output CEC,
+	output CKP,
+	output CKN,
+	output D0N,
+	output D0P,
+	output D1N,
+	output D1P,
+	output D2N,
+	output D2P,
+	output DET,
+	output SCL,
+	output SDA,
+	input [5:0] hdmi_data,
+	input [5:0] hdmi_ctrl
+);
 assign {D0P,D0N,D1P,D1N,D2P,D2N}=hdmi_data;
 assign {CEC,CKP,CKN,SCL,SDA,DET}=hdmi_ctrl;
 // pin   CEC is     IO_L7P_T1_D09_14 bank  14 bus_digitizer_J19[1]        D21

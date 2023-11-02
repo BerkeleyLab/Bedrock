@@ -44,10 +44,10 @@ initial begin
 	$display("# Fourier %d %f %s",fourier_n,fourier_v,fourier_fault?"FAULT":"    .");
 	if (fail) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 

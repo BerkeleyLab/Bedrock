@@ -44,7 +44,7 @@ module system_tb;
 
         // repeat(200000) @(posedge clk_p);  // 2 ms
         // $display("TIMEOUT");
-        // $stop();
+        // $stop(0);
     end
 
     // ------------------------------------------------------------------------
@@ -194,10 +194,10 @@ module system_tb;
             $display("TRAP,  return %08x;", retVal);
             if (retVal == 32'h1234) begin
                 $display("PASS");
-                $finish();
+                $finish(0);
             end else begin
                 $display("FAIL");
-                $stop;
+                $stop(0);
             end
         end
         $fflush();

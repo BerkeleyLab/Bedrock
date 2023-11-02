@@ -36,6 +36,8 @@ module lb_marble_slave #(
 	input [27:0] frequency_si570,
 	// More debugging hooks
 	input [3:0] mmc_pins,
+	input rx_category_s,
+	input [3:0] rx_category,
 	// Features
 	input tx_mac_done,
 	input [15:0] rx_mac_data,
@@ -63,7 +65,7 @@ module lb_marble_slave #(
 	output [3:0] ext_config,
 	// Output to hardware
 	output [131:0] fmc_test,
-	output led_user_mode,
+	output [1:0] led_user_mode,
 	output led1,  // PWM
 	output led2  // PWM
 );
@@ -78,7 +80,8 @@ wire [31:0] xadc_internal_temperature;
 assign xadc_internal_temperature = {16'h0000, xadc_temp_dout};
 
 // Device DNA
-wire [31:0] dna_high, dna_low;
+wire [31:0] dna_high;
+wire [31:0] dna_low;
 
 //`define BADGE_TRACE
 `ifdef BADGE_TRACE
@@ -112,7 +115,7 @@ always @(posedge clk) begin
    if (ctrace_start) arm <= 1;
 end
 
-generate if (MMC_CTRACE) begin
+generate if (MMC_CTRACE) begin : mmc_ctrace
 	localparam ctrace_aw=11;
 	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
 	ctrace #(.dw(4), .tw(12), .aw(ctrace_aw)) mmc_ctrace(
@@ -120,7 +123,7 @@ generate if (MMC_CTRACE) begin
 		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
 		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
 	);
-end else begin
+end else begin : no_mmc_trace
 	assign ctrace_out=0;
 	assign ctrace_running=0;
 end endgenerate
@@ -132,6 +135,13 @@ end endgenerate
 // the FPGA and PHY clock trees come to life at different rates.
 reg [15:0] xdomain_fault_count=0;
 always @(posedge clk) if (xdomain_fault) xdomain_fault_count <= xdomain_fault_count + 1;
+
+// Accumulate packet statistics
+wire [19:0] rx_counters;
+multi_counter #(.aw(4), .dw(20)) badger_rx_counter(
+	.clk(clk), .inc(rx_category_s), .inc_addr(rx_category),
+	.read_addr(addr[3:0]), .read_data(rx_counters)
+);
 
 // Frequency counter
 wire [31:0] tx_freq;
@@ -183,7 +193,7 @@ reg [3:0] twi_ctl;
 initial twi_ctl = (initial_twi_file != "") ? 4'b0010 : 4'b0000;
 
 localparam scl_act_high = 3;  // cycles of active pull-up following rising edge
-generate if (USE_I2CBRIDGE) begin
+generate if (USE_I2CBRIDGE) begin : i2cb
 	wire twi_run_stat, twi_analyze_run, twi_analyze_armed, twi_updated, twi_err;
 	wire twi_freeze = twi_ctl[0];
 	wire twi_run_cmd = twi_ctl[1];
@@ -212,7 +222,7 @@ generate if (USE_I2CBRIDGE) begin
 	// twi_scl_h == pull pin high
 	// neither == let pin float
 	wire [1:0] twi_bus_sel = hw_config[2:1];
-	reg [3:0] twi_scl_l=0, twi_scl_h=0, twi_sda_r=0;
+	reg [3:0] twi_scl_l=0, twi_scl_h=0, twi_sda_r=0, twi_sda_grab=0, twi_scl_grab=0;
 	reg [scl_act_high:0] twi0_scl_shf=0;
 	always @(posedge clk) begin
 		twi0_scl_shf <= {twi0_scl_shf[scl_act_high-1:0], twi0_scl};
@@ -222,6 +232,8 @@ generate if (USE_I2CBRIDGE) begin
 		twi_scl_h[twi_bus_sel] <= ~twi0_scl_shf[scl_act_high];
 		twi_sda_r <= 4'b1111;
 		twi_sda_r[twi_bus_sel] <= twi_sda_drive;
+		twi_sda_grab <= twi_sda;
+		twi_scl_grab <= twi_scl;
 	end
 	assign twi_scl[0] = twi_scl_l[0] ? 1'b0 : twi_scl_h[0] ? 1'b1 : 1'bz;
 	assign twi_scl[1] = twi_scl_l[1] ? 1'b0 : twi_scl_h[1] ? 1'b1 : 1'bz;
@@ -231,10 +243,10 @@ generate if (USE_I2CBRIDGE) begin
 	assign twi_sda[1] = twi_sda_r[1] ? 1'bz : 1'b0;
 	assign twi_sda[2] = twi_sda_r[2] ? 1'bz : 1'b0;
 	assign twi_sda[3] = twi_sda_r[3] ? 1'bz : 1'b0;
-	assign twi_sda_sense = twi_sda[twi_bus_sel];
-	assign twi_scl_sense = twi_scl[twi_bus_sel];
+	assign twi_sda_sense = twi_sda_grab[twi_bus_sel];
+	assign twi_scl_sense = twi_scl_grab[twi_bus_sel];
 	assign twi_rst = hw_config[0] ? 1'b0 : 1'bz;  // three-state
-end else begin
+end else begin : no_i2cb
 	assign twi_dout=0;
 	assign twi_status=0;
 	assign twi_rst = 1'bz;
@@ -336,7 +348,8 @@ always @(posedge clk) if (do_rd_r) begin
 		24'h01????: lb_data_in <= ibadge_out;
 		24'h02????: lb_data_in <= obadge_out;
 		24'h03????: lb_data_in <= rx_mac_data;
-		24'h04????: lb_data_in <= twi_dout;
+		24'h040???: lb_data_in <= twi_dout;
+		24'h041???: lb_data_in <= rx_counters;
 		24'h05????: lb_data_in <= mirror_out_0;
 		24'h06????: lb_data_in <= ctrace_out;
 		24'h07????: lb_data_in <= gps_buf_out;
@@ -345,7 +358,7 @@ always @(posedge clk) if (do_rd_r) begin
 end
 
 // Direct writes
-reg led_user_r=0;
+reg [1:0] led_user_r=0;
 reg [7:0] misc_config = misc_config_default;
 reg [7:0] led_1_df=0, led_2_df=0;
 reg rx_mac_hbank_r=1;
@@ -423,6 +436,7 @@ always @(posedge clk) begin
 end
 `endif
 
+`ifndef YOSYS
 // ----------------------------------
 // XADC Internal Temperature Monitor
 // ----------------------------------
@@ -448,6 +462,11 @@ dna dna_inst0 (
   .dna_msb                            (dna_high),
   .dna_lsb                            (dna_low)
   );
+`else
+assign xadc_temp_dout=0;
+assign dna_high=0;
+assign dna_low=0;
+`endif
 
 
 endmodule

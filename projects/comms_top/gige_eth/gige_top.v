@@ -4,8 +4,7 @@
 // NOTE: Minimal example of Gigabit Ethernet / 100BASE-X over gigabit transceiver
 // ------------------------------------
 
-module gige_top
-(
+module gige_top (
    input   SYS_CLK_P,
    input   SYS_CLK_N,
 

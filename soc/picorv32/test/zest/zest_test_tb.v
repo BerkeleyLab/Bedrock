@@ -33,7 +33,7 @@ module zest_test_tb;
         #40000
         pass = 0;
         $display("TIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -48,7 +48,7 @@ module zest_test_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
     end
 

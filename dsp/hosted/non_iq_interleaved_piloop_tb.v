@@ -21,7 +21,7 @@ initial begin
 		clk=1; #5;
 	end
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 
 reg signed [17:0] xin=0, setpoint=5000;

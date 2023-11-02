@@ -51,7 +51,7 @@ initial begin
 		clk=1; #5;
 	end
 	$display("PASS");
-	$finish();
+	$finish(0);
 end
 `endif //  `ifdef SIMULATE
 

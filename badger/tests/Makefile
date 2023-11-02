@@ -210,6 +210,17 @@ hw_test_start: hw_test_tb tap-vpi.vpi
 	$(VVP) $<
 
 # =====
+# experimental check of CDC-correctness
+# not yet turned into a regression test
+hw_test_yosys.json: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v ../../build-tools/cdc_snitch_proc.ys
+	$(YOSYS) --version
+	nn=$$$$; $(YOSYS) -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@" > yosys.$$nn.log || exit 1 && grep "Warning" yosys.$$nn.log || echo "No Warnings!"
+# (I don't think yosys for-loop is actually buggy, just tediously slow, and in this case unnecessary)
+hw_test_cdc.txt: ../../build-tools/cdc_snitch.py hw_test_yosys.json
+	$(PYTHON) $^ > $@
+	@tail -n 1 $@
+
+# =====
 # experimental bitfiles, not for hardware
 bits: scanner.bit construct.bit xformer.bit ethernet_crc_add.bit udp_port_cam_wrap.bit rtefi_blob.bit
 	(cd _xilinx && for f in $(basename $^); do echo $$f; grep "Slice LUT" $${f}_map.mrp; done)
@@ -247,7 +258,7 @@ kc705_gmii_test.bit: kc705_gmii_test.tcl kc705_gmii_test.d $(SYNTH_SOURCE_KC705)
 # Make bitfiles for AC701 with both Xilinx XST and Xilinx Vivado
 # first just a syntax check (ac701_rgmii_test.v is empty)
 SYNTH_SOURCE_AC701 = rgmii_hw_test.v $(SYNTH_SOURCE_KC705) gmii_to_rgmii.v
-ac701_rgmii_test_tb: $(SYNTH_SOURCE_AC701) kc705/ODDR.v kc705/BUFG.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v
+ac701_rgmii_test_tb: $(SYNTH_SOURCE_AC701) kc705/ODDR.v kc705/BUFG.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v $(patsubst %, $(FPGA_FAMILY_DIR)/xilinx/%.v, BUFIO BUFR IBUF IDDR OBUF)
 ac701_rgmii_test.bit: $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.ucf
 	PART=xc7a200t-fbg676-2 $(ISE_SYNTH) $(notdir $(basename $<)) $^
 	mv _xilinx/rgmii_hw_test.bit $@
@@ -424,9 +435,9 @@ CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_deriv
 CLEAN += crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test Vcluster
 CLEAN += stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen
 CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab udprtx
-CLEAN += cluster_run.out
+CLEAN += cluster_run.out hw_test_cdc.txt hw_test_yosys.json
 CLEAN += $(RTEFI_CLEAN)
-CLEAN += *.html *.pdf
+CLEAN += *.html *.pdf *.log
 CLEAN_DIRS += obj_dir _xilinx
 # Actual "clean" rule in bottom_rules.mk
 include $(BUILD_DIR)/bottom_rules.mk

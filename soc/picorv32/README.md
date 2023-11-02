@@ -133,7 +133,7 @@ Configure FPGA with bit-file (needs xc3sprog).
 make system_config
 ```
 
-At this point the demo-program should run and it should be possible to interact with it through serial at 115200 baud/s. For example through miniterm.py, assuming the usb serial port appears at /dev/ttyUSB0
+At this point the demo-program should run and it should be possible to interact with it through serial at 115200 baud. For example through miniterm.py, assuming the usb serial port appears at /dev/ttyUSB0
 
 ```bash
 miniterm.py /dev/ttyUSB0 115200

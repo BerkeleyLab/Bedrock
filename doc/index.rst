@@ -20,6 +20,8 @@ mirror is the `Bedrock Github Repository`_.
 
    general-docs
    bedrock-modules
+   rtsim-module
+   dsp-digaree-module
 
 
 Indices and tables

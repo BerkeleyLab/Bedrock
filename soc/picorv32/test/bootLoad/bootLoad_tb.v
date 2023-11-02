@@ -24,7 +24,7 @@ module bootloader_tb;
         reset <= 0;
         #500000
         $display("TIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -194,7 +194,7 @@ module bootloader_tb;
             $finish;
         end
         $display("FAIL");
-        $stop;
+        $stop(0);
     end
 
     // --------------------------------------------------------------

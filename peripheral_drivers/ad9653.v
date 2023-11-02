@@ -73,14 +73,14 @@ parameter INFER_IOBUF=0;
 assign PDWN = pdwn_in;
 
 generate
-if (SPIMODE=="passthrough") begin
+if (SPIMODE=="passthrough") begin: passthrough
 	assign CSB  = csb_in;
 	assign SCLK = sclk_in;
 	if (INFER_IOBUF == 0) begin
 `ifndef SIMULATE
 	IOBUF IOBUF(.O(sdi), .T(sdio_as_i), .I(sdo), .IO(SDIO));
 `endif
-	end else begin
+	end else begin: no_passthrough
 		// Inferred IOBUF
 		assign SDIO = sdio_as_i ? 1'bz : sdo;
 		assign sdi = SDIO;

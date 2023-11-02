@@ -27,7 +27,7 @@ module lb_bridge_tb;
         reset <= 0;
         #MAX_SIM;
         $display("TIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -154,7 +154,7 @@ module lb_bridge_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
     end
 

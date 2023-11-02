@@ -19,10 +19,10 @@ initial begin
 	if (tx_cnt < 10) fail=1;
 	if (fail) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 

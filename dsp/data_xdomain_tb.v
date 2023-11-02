@@ -18,10 +18,10 @@ initial begin
 	$display("After %d clk1 cycles, # of errors: %d", cc1, err_cnt);
 	if (fail) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 

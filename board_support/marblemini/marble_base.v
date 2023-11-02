@@ -23,7 +23,7 @@ module marble_base (
 	input clk_locked,
 	input si570,
 
-	// SPI pins, can give access to configuration
+	// SPI pins to on-board microcontroller; can give access to configuration
 	input SCLK,
 	input CSB,
 	input MOSI,
@@ -37,13 +37,13 @@ module marble_base (
 	input boot_miso,
 	output cfg_d02,
 
-	// One I2C bus, everything gatewayed through a TCA9548
+	// One I2C bus; everything gatewayed through a TCA9548A
 	inout  [3:0] twi_scl,
 	inout  [3:0] twi_sda,
 	inout  TWI_RST,
 	input  TWI_INT,
 
-	// White Rabbit DAC
+	// White Rabbit compatible DAC subsystem controlling VCXOs
 	output WR_DAC_SCLK,
 	output WR_DAC_DIN,
 	output WR_DAC1_SYNC,
@@ -52,6 +52,9 @@ module marble_base (
 	// UART to USB
 	// The RxD and TxD directions are with respect
 	// to the USB/UART chip, not the FPGA!
+	// Note that the freq_demo feature doesn't actually use FPGA_TxD.
+	// If you don't connect anything to FPGA_RxD, the synthesizer
+	// will drop the whole freq_demo feature.
 	output FPGA_RxD,
 	input FPGA_TxD,
 
@@ -138,7 +141,8 @@ wire config_mw = config_w && (config_a[7:4] == 5);
 wire [10:0] mbox_a = {mbox_page, config_a[3:0]};
 
 // Forward declarations
-wire led_user_mode, l1, l2;
+wire [1:0] led_user_mode;
+wire l1, l2;
 // Local bus
 assign lb_clk = tx_clk;
 //wire [23:0] lb_addr;
@@ -184,6 +188,8 @@ wire [27:0] frequency_si570;
 freq_count freq_cnt_si570(.f_in(si570), .sysclk(lb_clk), .frequency(frequency_si570));
 
 //
+wire [3:0] rx_category_rx, rx_category;
+wire rx_category_s_rx, rx_category_s;
 lb_marble_slave #(
 	.USE_I2CBRIDGE(USE_I2CBRIDGE),
 	.MMC_CTRACE(MMC_CTRACE),
@@ -198,6 +204,7 @@ lb_marble_slave #(
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
 	.mmc_pins(spi_pins_debug),
+	.rx_category_s(rx_category_s), .rx_category(rx_category),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
 	.twi_scl(twi_scl), .twi_sda(twi_sda),
@@ -273,6 +280,10 @@ mac_compat_dpram #(
 	.tx_mac_start(tx_mac_start)
 );
 
+// Be careful with clock domains:
+// rtefi_blob uses this in rx_clk, so send it a registered value.
+reg enable_rx_r=0;  always @(posedge tx_clk) enable_rx_r <= enable_rx | ~allow_mmc_eth_config;
+
 // Instantiate the Real Work
 parameter enable_bursts=1;
 
@@ -292,7 +303,7 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 // Simple combinational logic is OK, since all signals are in tx_clk domain
 // (config_clk == tx_clk == lb_clk).
 
-	.enable_rx(enable_rx | ~allow_mmc_eth_config),
+	.enable_rx(enable_rx_r),
 	.config_clk(config_clk),
 	.config_s(config_s & allow_mmc_eth_config),
 	.config_p(config_p & allow_mmc_eth_config),
@@ -333,6 +344,16 @@ freq_demo freq_demo(
 	.uart_tx(FPGA_RxD), .uart_rx(FPGA_TxD)
 );
 
+// For statistics-gathering purposes
+packet_categorize i_categorize(.clk(vgmii_rx_clk),
+	.strobe(rx_mac_status_s), .status(rx_mac_status_d),
+	.strobe_o(rx_category_s_rx), .category(rx_category_rx)
+);
+data_xdomain #(.size(4)) x_category(
+	.clk_in(vgmii_rx_clk), .gate_in(rx_category_s_rx), .data_in(rx_category_rx),
+	.clk_out(lb_clk), .gate_out(rx_category_s), .data_out(rx_category)
+);
+
 // Heartbeats and other LED
 reg [26:0] rx_heartbeat=0, tx_heartbeat=0;
 always @(posedge rx_clk) rx_heartbeat <= rx_heartbeat+1;
@@ -344,8 +365,13 @@ activity rx_act(.clk(rx_clk), .trigger(rx_mon), .led(rx_led));
 activity tx_act(.clk(tx_clk), .trigger(tx_mon), .led(tx_led));
 wire rx_h = rx_heartbeat[26];
 wire tx_h = tx_heartbeat[26];
-assign LED = {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, led1, led0};
-// assign LED = {scanner_debug, tx_led, rx_led, led1, led0};
+reg mod=0, reset=0;
+reg [31:0] cnt=0;
+always @(posedge rx_clk) begin
+    cnt <= reset ? 32'h0 : cnt + 1'b1;
+    mod <= cnt[0];
+end
+assign LED = (led_user_mode==2) ? cnt[30:23] & {8{mod}} : {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, led1, led0};
 
 // Keep the PHY's reset pin low for the first 33 ms
 reg phy_rb=0;
@@ -356,11 +382,13 @@ end
 assign phy_rstn = phy_rb;
 
 // One weird hack, even works in Verilator!
+`ifndef YOSYS
 always @(posedge tx_clk) begin
 	if (slave.stop_sim & ~in_use) begin
 		$display("marble_base:  stopping based on localbus request");
-		$finish();
+		$finish(0);
 	end
 end
+`endif
 
 endmodule

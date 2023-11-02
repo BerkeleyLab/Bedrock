@@ -57,7 +57,7 @@ module chitchat_txrx_wrap_tb;
       $display("%d extra data received over link", check_count);
       if (fail || tx_cnt < 300) begin
          $display("FAIL");
-         $stop;
+         $stop(0);
       end else begin
          $display("PASS");
          $finish;

@@ -34,8 +34,8 @@ TODO: Integrate into Makefile/CI
 
 # Architecture
 
-`comms_top.v` consists of an Ethernet to Local Bus bridge running over a Fiber link at 1.25 GBaud
-and a ChitChat link also routed through a Fiber link at 2.5 GBaud. Limited test-pattern
+`comms_top.v` consists of an Ethernet to Local Bus bridge running over a Fiber link at 1.25 GBd
+and a ChitChat link also routed through a Fiber link at 2.5 GBd. Limited test-pattern
 generation is provided, with the Ethernet/Local Bus guaranteeing the interface with the Host.
 
 ## Ethernet and Local Bus

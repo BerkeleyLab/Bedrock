@@ -48,7 +48,7 @@ module chitchat_tb;
       //$display("%d corrupt data received over link", corrupt_count);
       if (fail || tx_cnt < 300) begin
          $display("FAIL");
-         $stop;
+         $stop(0);
       end else begin
          $display("PASS");
          $finish;

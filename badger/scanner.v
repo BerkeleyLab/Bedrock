@@ -78,12 +78,14 @@ reg [3:0] ifg_count=0;  // Inter-frame gap counter
 wire ifg_inc = ~(&ifg_count[3:2]);  // saturate at 12
 wire ifg_ok = ifg_count >= 10;  // slightly relaxed from spec of 12,
 // this configuration guarantees 11 non-data cycles between frames
+reg enable_rx_r=0;
 always @(posedge clk) begin
+	enable_rx_r <= enable_rx;  // cross clock domains
 	if (h_idle | h_preamble) ifg_count <= ifg_count + ifg_inc;
 	else ifg_count <= 0;
 	if (h_idle & eth_strobe) begin
 		h_idle <= 0;
-		if (eth_octet==8'h55 && enable_rx) h_preamble <= 1;
+		if (eth_octet==8'h55 && enable_rx_r) h_preamble <= 1;
 		else h_drop <= 1;
 	end
 	if (h_preamble) begin
@@ -174,18 +176,23 @@ reg pass_ipdst=0;   always @(posedge clk) begin if (want_c_ip  & ~ip_m) pass_ipd
 // Specific protocols; IP is a component of both ICMP and UDP
 wire [15:0] ip_length, udp_length;
 
+// ARP handling is optional, chosen by the handle_arp parameter.
 wire pass_arp0;
-generate if (handle_arp) begin: find_arp
+generate if (handle_arp) begin : find_arp
 	arp_patt arp_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_arp0));
-end else assign pass_arp0 = 0;
-endgenerate
+end else begin : no_find_arp
+	assign pass_arp0 = 0;
+end endgenerate
 
+// ICMP handling is optional, chosen by the handle_icmp parameter.
 wire pass_icmp0;
-generate if (handle_icmp) begin: find_icmp
+generate if (handle_icmp) begin : find_icmp
 	icmp_patt icmp_p(.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_icmp0));
-end else assign pass_icmp0 = 0;
-endgenerate
+end else begin : no_find_icmp
+	assign pass_icmp0 = 0;
+end endgenerate
 
+// IP, UDP, and checksum handling are given, but see note below about UDP checksums.
 wire pass_ip0;   ip_patt   ip_p  (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_ip0), .length(ip_length));
 wire pass_udp0;  udp_patt  udp_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_udp0), .length(udp_length));
 wire pass_sum;   cksum_chk chk_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_sum), .length(ip_length));
@@ -224,7 +231,7 @@ always @(posedge clk) begin
 	if (pack_cnt==7) unicast_src_mac <= ~data_d1[0];
 end
 
-// Summary bits don't leak irrelevant state
+// Summary bits (mostly) don't leak irrelevant state
 wire pass_arp  = unicast_src_mac & crc_zero & pass_arp0 & pass_arpip;
 wire pass_ip   = unicast_src_mac & crc_zero & pass_ethmac & pass_ip0 & pass_ipdst & ip_len_check;
 wire pass_icmp = pass_ip & pass_icmp0 & pass_sum;

@@ -51,7 +51,7 @@ steps and gives flexibility to add hooks for generating code, stubs,
 definitions and much more.
 
 However, there are valid cases for using a graphical, interactive
-interface such as: analyzing eleborated, synthesized or implemented
+interface such as: analyzing elaborated, synthesized or implemented
 design schematic; adding/removing placement constraints;
 customizing a block design; customizing an IP core from a vendor.
 
@@ -70,7 +70,7 @@ to open a project in Graphical mode:
 vivado <PROJECT_DIRECTORY>/_xilinx/<TOP_LEVEL_DESIGN_NAME>/<TOP_LEVEL_DESIGN_NAME>.xpr
 ```
 
-in which `<PROJECT_DIRECTORY>` is the direcotry in which you invoked
+in which `<PROJECT_DIRECTORY>` is the directory in which you invoked
 `make` and `<TOP_LEVEL_DESIGN_NAME>` is the bitstream name without the
 `.bit` extension.
 

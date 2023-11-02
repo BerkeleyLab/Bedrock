@@ -18,10 +18,10 @@ initial begin
 	$display("WARNING: Not a self-checking testbench. Will always pass.");
 	if (fail) begin
 		$display("FAIL");
-		$stop();
+		$stop(0);
 	end else begin
 		$display("PASS");
-		$finish();
+		$finish(0);
 	end
 end
 `endif //  `ifdef SIMULATE
