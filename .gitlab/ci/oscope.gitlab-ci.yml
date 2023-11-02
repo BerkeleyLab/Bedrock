@@ -37,8 +37,8 @@ marble_ddr3_test:
     - (BD=$PWD && cd /litex_setup_dir && sh $BD/build-tools/litex_meta.sh)
     - cd /litex_setup_dir/litex-boards/litex_boards/targets
   script:
-    XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && python3 berkeleylab_marble.py --build
-    pwd && find . -name "*.bit"
+    - XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && python3 berkeleylab_marble.py --build
+    - pwd && find . -name "*.bit" || echo "what"
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week
