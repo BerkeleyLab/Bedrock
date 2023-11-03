@@ -27,6 +27,10 @@ proc ip_properties {ip_name ip_version vendor} {
         set_property vendor {lbl.gov} [ipx::current_core]
         set_property vendor_display_name {LBNL} [ipx::current_core]
         set_property company_url {www.lbl.gov} [ipx::current_core]
+    } elseif {$vendor eq "bnl"} {
+        set_property vendor {bnl.gov} [ipx::current_core]
+        set_property vendor_display_name {BNL} [ipx::current_core]
+        set_property company_url {www.bnl.gov} [ipx::current_core]
     } elseif {$vendor eq "xilinx"} {
         set_property vendor {xilinx.com} [ipx::current_core]
         set_property vendor_display_name {Xilinx} [ipx::current_core]
