@@ -29,9 +29,14 @@ proc project_create {platform_name project_name} {
         set project_part "xc7a35tcpg236-1"
     }
     if [regexp "zed" $platform_name] {
-        set platform "zed"
-        set project_part "xc7z020clg484-1"
-        set project_board "em.avnet.com:zed:part0:1.3"
+        if [regexp "picozed_7030" $platform_name] {
+            set platform "picozed_7030"
+            set project_part "xc7z030sbg485-1"
+        } else {
+            set platform "zed"
+            set project_part "xc7z020clg484-1"
+            set project_board "em.avnet.com:zed:part0:1.3"
+        }
     }
     if [regexp "zc706" $platform_name] {
         set platform "zc706"
