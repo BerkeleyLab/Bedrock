@@ -38,13 +38,13 @@ marble_ddr3_test:
     - cd /litex_setup_dir/litex-boards/litex_boards/targets
   script:
     - XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && python3 berkeleylab_marble.py --build
-    - pwd && find . -name "*.bit" || echo "what"
+    - /litex_setup_dir/litex-boards/litex_boards/targets/build/berkeleylab_marble/gateware/berkeleylab_marble.bit $CI_BUILDS_DIR/.
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week
     when: always
     paths:
-      - $CI_BUILDS_DIR/litex_setup_dir/litex-boards/litex_boards/targets/build/berkeleylab_marble/gateware/berkeleylab_marble.bit
+      - $CI_BUILDS_DIR/berkeleylab_marble.bit
 
 litex_trigger_capture:
   stage: synthesis
