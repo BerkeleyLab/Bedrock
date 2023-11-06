@@ -44,7 +44,7 @@ marble_ddr3_test:
     expire_in: 1 week
     when: always
     paths:
-      - build/berkeleylab_marble/gateware/berkeleylab_marble.bit
+      - $CI_BUILDS_DIR/litex_setup_dir/litex-boards/litex_boards/targets/build/berkeleylab_marble/gateware/berkeleylab_marble.bit
 
 litex_trigger_capture:
   stage: synthesis
