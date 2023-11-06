@@ -36,6 +36,10 @@ proc project_create {platform_name project_name} {
             set platform "zed"
             set project_part "xc7z020clg484-1"
             set project_board "em.avnet.com:zed:part0:1.3"
+            set project_spi_buswidth "none"
+            set project_cfgmem_interface "none"
+            set project_cfgmem_size "none"
+            set project_cfgrate "none"
         }
     }
     if [regexp "zc706" $platform_name] {
