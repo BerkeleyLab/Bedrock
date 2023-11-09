@@ -29,8 +29,8 @@ proc project_create {platform_name project_name} {
         set project_part "xc7a35tcpg236-1"
     }
     if [regexp "zed" $platform_name] {
-        if [regexp "picozed_7030" $platform_name] {
-            set platform "picozed_7030"
+        if [regexp "picozed7030" $platform_name] {
+            set platform "picozed7030"
             set project_part "xc7z030sbg485-1"
         } else {
             set platform "zed"
