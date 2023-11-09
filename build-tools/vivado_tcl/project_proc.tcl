@@ -32,6 +32,10 @@ proc project_create {platform_name project_name} {
         if [regexp "picozed7030" $platform_name] {
             set platform "picozed7030"
             set project_part "xc7z030sbg485-1"
+            set project_spi_buswidth "none"
+            set project_cfgmem_interface "none"
+            set project_cfgmem_size "none"
+            set project_cfgrate "none"
         } else {
             set platform "zed"
             set project_part "xc7z020clg484-1"
