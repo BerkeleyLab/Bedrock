@@ -85,13 +85,14 @@ foo_yosys.json: foo_shell.v foo.v worker1.v worker2.v $(BUILD_DIR)/cdc_snitch_pr
 foo_cdc.txt: $(BUILD_DIR)/cdc_snitch.py foo_yosys.json
 	$(PYTHON) $^ -o $@
 ```
-The resulting `foo_cdc.txt` ends with a line like
+The chatter from that last command ends with a line like
 ```
 OK1: 81504  CDC: 337  OKX: 1105  BAD: 97
 ```
-and its body includes details, which ideally can help you find the
+counting the number of registers in each category.
+The `foo_cdc.txt` file gives details, which ideally can help you find the
 design errors that led to the "BAD" registers.
-If `foo.v` includes any such "BAD" registers, the makefile rule for
+If the design includes any such "BAD" registers, the makefile rule for
 `foo_cdc.txt` will fail, as would be used for a regression test.
 
 ## Dependencies
