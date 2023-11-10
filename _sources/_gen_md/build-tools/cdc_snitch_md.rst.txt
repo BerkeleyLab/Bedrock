@@ -1,0 +1,8 @@
+.. _cdc_snitch:
+
+----------
+build-tools cdc_snitch
+----------
+
+.. mdinclude:: /home/runner/work/Bedrock/Bedrock/build-tools/cdc_snitch.md
+

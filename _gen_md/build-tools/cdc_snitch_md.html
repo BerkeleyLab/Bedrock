@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>build-tools cdc_snitch &mdash; Bedrock  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="build-tools makefile" href="makefile_md.html" />
+    <link rel="prev" title="zest README" href="../board_support/zest/README_md.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Bedrock
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../general-docs.html">General Docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../general-docs.html#docs">Docs</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../CONTRIBUTING_md.html">CONTRIBUTING</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/README_md.html">badger README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/doc/README_md.html">doc README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/mem_gate_md.html">badger mem_gate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../badger/status_md.html">badger status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../board_support/bmb7_kintex/README_md.html">bmb7_kintex README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../board_support/zest/README_md.html">zest README</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">build-tools cdc_snitch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cdc-snitch-documentation">cdc_snitch Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="makefile_md.html">build-tools makefile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="newad_md.html">build-tools newad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dsp/README_md.html">dsp README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fpga_family/xilinx/README_md.html">xilinx README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../guidelines/rtl_guidelines_md.html">guidelines rtl_guidelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../peripheral_drivers/i2cbridge/README_md.html">i2cbridge README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../peripheral_drivers/idelay_scanner/README_md.html">idelay_scanner README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/common/README_md.html">common README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/comms_top/README_md.html">comms_top README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/oscope/bmb7_cu/README_md.html">bmb7_cu README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/oscope/marble_family/README_md.html">marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/test_marble_family/README_md.html">test_marble_family README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../projects/test_marble_family/i2c/README_md.html">i2c README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../rtsim/README_md.html">rtsim README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../serial_io/chitchat/README_md.html">chitchat README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../serial_io/chitchat/chitchat_txrx_wrap_md.html">chitchat chitchat_txrx_wrap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/README_md.html">picorv32 README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/badger_lwip/README_md.html">badger_lwip README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/fv/README_md.html">fv README</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../soc/picorv32/test/lb_bridge/README_md.html">lb_bridge README</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../bedrock-modules.html">Bedrock Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rtsim-module.html">RTSIM Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dsp-digaree-module.html">DSP Digaree Module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Bedrock</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../general-docs.html">General Docs</a></li>
+      <li class="breadcrumb-item active">build-tools cdc_snitch</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_gen_md/build-tools/cdc_snitch_md.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="build-tools-cdc-snitch">
+<span id="cdc-snitch"></span><h1>build-tools cdc_snitch<a class="headerlink" href="#build-tools-cdc-snitch" title="Permalink to this heading"></a></h1>
+<section id="cdc-snitch-documentation">
+<h2>cdc_snitch Documentation<a class="headerlink" href="#cdc-snitch-documentation" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">cdc_snitch.py</span></code> is a python script which, combined with
+<a class="reference external" href="https://yosyshq.net/yosys/">yosys</a> processing of Verilog files,
+can detect anti-patterns of Clock-Domain-Crossing (CDC).</p>
+<p>We use yosys to synthesize and break down the design to registers,
+combinational logic, and memories.  Using json as an intermediate
+file format, <code class="docutils literal notranslate"><span class="pre">cdc_snitch.py</span></code> categorizes each register by how its
+clock domain does or doesn’t match the clock domains of its data sources.</p>
+<section id="ok1">
+<h3>OK1<a class="headerlink" href="#ok1" title="Permalink to this heading"></a></h3>
+<a class="reference external image-reference" href="cdc_OK1.svg"><img alt="OK1 topology" src="_gen_md/build-tools/cdc_OK1.svg" /></a>
+<p>If all inputs leading to a register are in the same domain as its own
+clock, that’s called “OK1”.  This should be the standard topology for all
+real computation and state-machines.</p>
+</section>
+<section id="okx-or-cdc">
+<h3>OKX or CDC<a class="headerlink" href="#okx-or-cdc" title="Permalink to this heading"></a></h3>
+<a class="reference external image-reference" href="cdc_OKX.svg"><img alt="OKX topology" src="_gen_md/build-tools/cdc_OKX.svg" /></a>
+<p>If each input comes from a single register in another domain, so the
+combinational logic is a trivial ‘straight wire’, that’s called “OKX” or “CDC”.
+All real CDC circuits should be built with this topology at their core.
+The default category is “OKX”; if the register has a magic CDC attribute,
+then it gets labeled “CDC”.  That attribute is intended to mark
+<em>intentional</em> CDC crossings.  <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span></code> itself has no way to know
+if such intentional CDC crossings are properly designed to avoid
+data corruption.</p>
+</section>
+<section id="bad">
+<h3>BAD<a class="headerlink" href="#bad" title="Permalink to this heading"></a></h3>
+<a class="reference external image-reference" href="cdc_BAD.svg"><img alt="BAD topology" src="_gen_md/build-tools/cdc_BAD.svg" /></a>
+<p>Registers with combinational input, that get at least one input not from
+its own domain, are categorized as “BAD”.
+Maybe this rule could be relaxed some for an ASIC, but in an FPGA
+there are no expectations that the output of a LUT will be glitch-free
+when inputs change.</p>
+<p>Designs with a non-zero number of BAD registers cause <code class="docutils literal notranslate"><span class="pre">cdc_snitch.py</span></code> to
+return with an error, as is relevant for a regression-testing makefile.</p>
+</section>
+<section id="memories">
+<h3>Memories<a class="headerlink" href="#memories" title="Permalink to this heading"></a></h3>
+<p>Memories are a special case.  If used to cross clock domains,
+the general case would necessarily mark them as “BAD” because
+the inputs to the output register include the memory cells
+(in the input domain) and address bits (in the output domain).
+But when used properly, a data word is not written to and read from
+at the same time.
+So <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span></code> ignores what goes on inside dual-port memories.</p>
+</section>
+<section id="i-o">
+<h3>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading"></a></h3>
+<p>Each input is placed in its own domain, and outputs are not checked for errors.
+This may or may not represent the demands of a specific use case.
+We have written shells around the logic-under-test, that adds
+input and output registers, defining the domain of each signal.
+If an input <em>does</em> represent a physical pin, the own-domain rule
+will give reasonable results.  Such a design will normally capture
+the input in a simple register (placed by the synthesizer in the I/O cell),
+and that’s a valid “OKX” or (with attribute) “CDC”.</p>
+</section>
+<section id="verilog-input">
+<h3>Verilog input<a class="headerlink" href="#verilog-input" title="Permalink to this heading"></a></h3>
+<p>Because we call on yosys to process the source Verilog, that Verilog
+needs to be portable and synthesizable, and not instantiate (closed-source,
+non-synthesizable) vendor primitives.  For many reasons, we try to layer
+our designs to put such constructions in an outer chip-specific layer,
+with the Real Work instantiated as a portable Verilog module on the inside.
+You would then point <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span></code> at that inner layer.</p>
+<p>Of course, <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span></code> itself doesn’t know or care what language
+you feed into yosys.  Verilog and SystemVerilog are OK with yosys-0.23.</p>
+</section>
+<section id="tool-flow">
+<h3>Tool flow<a class="headerlink" href="#tool-flow" title="Permalink to this heading"></a></h3>
+<p>Our makefiles specify rules based on the following</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>foo_yosys.json: foo_shell.v foo.v worker1.v worker2.v $(BUILD_DIR)/cdc_snitch_proc.ys
+    $(YOSYS) -p &quot;read_verilog  $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@&quot;
+foo_cdc.txt: $(BUILD_DIR)/cdc_snitch.py foo_yosys.json
+    $(PYTHON) $^ -o $@
+</pre></div>
+</div>
+<p>The resulting <code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code> ends with a line like</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OK1</span><span class="p">:</span> <span class="mi">81504</span>  <span class="n">CDC</span><span class="p">:</span> <span class="mi">337</span>  <span class="n">OKX</span><span class="p">:</span> <span class="mi">1105</span>  <span class="n">BAD</span><span class="p">:</span> <span class="mi">97</span>
+</pre></div>
+</div>
+<p>and its body includes details, which ideally can help you find the
+design errors that led to the “BAD” registers.
+If <code class="docutils literal notranslate"><span class="pre">foo.v</span></code> includes any such “BAD” registers, the makefile rule for
+<code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code> will fail, as would be used for a regression test.</p>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading"></a></h3>
+<p>Besides <a class="reference external" href="cdc_snitch.py">cdc_snitch.py</a> and its associated yosys command script
+<a class="reference external" href="cdc_snitch_proc.ys">cdc_snitch_proc.ys</a>, you need:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://yosyshq.net/yosys/">yosys</a> 0.23 or higher</p></li>
+<li><p>python3</p></li>
+<li><p>python3 json module</p></li>
+</ul>
+</section>
+<section id="discussion">
+<h3>Discussion<a class="headerlink" href="#discussion" title="Permalink to this heading"></a></h3>
+<p>See <a class="reference external" href="https://github.com/YosysHQ/yosys/discussions/3956">CDC detection with yosys</a>,
+a discussion started (with prototype code) on Sep 25, 2023.</p>
+<p>This code is definitely useful in its current state.
+We welcome suggestions for or work on improvements.</p>
+<p>We’re still looking for a permanent name for the attribute marking
+intentional CDC registers, to replace the placeholder <code class="docutils literal notranslate"><span class="pre">magic_cdc</span></code>.
+Maybe this interacts with industry standards and/or vendor-specific
+attributes like <code class="docutils literal notranslate"><span class="pre">DONT_TOUCH</span></code> and <code class="docutils literal notranslate"><span class="pre">ASYNC_REG</span></code>.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../board_support/zest/README_md.html" class="btn btn-neutral float-left" title="zest README" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="makefile_md.html" class="btn btn-neutral float-right" title="build-tools makefile" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, LBNL ATG.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
