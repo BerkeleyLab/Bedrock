@@ -37,7 +37,7 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install make \
                           imagemagick ghostscript \
-                          iverilog xvfb gtkwave \
+                          iverilog xvfb gtkwave xcircuit \
                           texlive-binaries
           sudo sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
                       -e '/pattern="PDF"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \

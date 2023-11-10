@@ -18,6 +18,8 @@ GTKWAVE = gtkwave
 VPIEXT = vpi
 PYTHON = python3
 AWK = awk
+XCIRCUIT = xcircuit
+
 VPI_CFLAGS := $(shell $(VERILOG_VPI) --cflags)
 VPI_LDFLAGS := $(shell $(VERILOG_VPI) --ldflags)
 DEPDIR = _dep
@@ -126,6 +128,10 @@ V%_tb: $(wildcard *.sv) $(wildcard *.v)
 
 %.pdf: %.eps
 	$(PS2PDF)
+
+# Kind of weird to use xcircuit's rc file for this purpose, but it does work.
+%.svg: %.eps
+	echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
 
 %.rbf: %.bit
 	$(BIT2RBF)
