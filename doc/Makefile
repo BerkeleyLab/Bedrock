@@ -153,9 +153,9 @@ SRC_SVG = \
   badger/doc/precog_upg.svg \
   peripheral_drivers/i2cbridge/i2c_chunk.svg \
   peripheral_drivers/i2cbridge/blocks.svg \
-  cdc_BAD.svg \
-  cdc_OK1.svg \
-  cdc_OKX.svg
+  build-tools/cdc_BAD.svg \
+  build-tools/cdc_OK1.svg \
+  build-tools/cdc_OKX.svg
 
 DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR) $(HOMELESS_DIR)
 VFLAGS     += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS)) -y$(AUTOGEN_DIR)
@@ -236,9 +236,6 @@ $(GEN_DIR)/%_block.eps: %.v
 
 $(GEN_DIR)/%.png: $(GEN_DIR)/%.eps
 	$(CONVERT) $< $@
-
-$(GEN_MD_DIR)/%.eps: $(BUILD_DIR)/%.eps
-	cp $< $@
 
 # Expect the magic numbers 229 and 68 to be gtkwave-version-dependent.
 # Note that gtkwave must be run from a session with X enabled.

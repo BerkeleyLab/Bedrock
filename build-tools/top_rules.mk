@@ -131,7 +131,7 @@ V%_tb: $(wildcard *.sv) $(wildcard *.v)
 
 # Kind of weird to use xcircuit's rc file for this purpose, but it does work.
 %.svg: %.eps
-	echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
+	cd $(dir $@) && echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
 
 %.rbf: %.bit
 	$(BIT2RBF)

@@ -14,5 +14,10 @@ all: cdc_snitch.html
 cdc_snitch.html: cdc_snitch.md cdc_BAD.svg cdc_OK1.svg cdc_OKX.svg
 	pandoc -t html $< > $@
 
-spotless:
-	rm -f cdc_*.svg cdc_snitch.html
+clean:
+	rm -f cdc_snitch.html
+
+# Our sphinx CI toolchain needs these non-source files
+# checked into git, unfortunately.  Maybe that can be fixed eventually.
+spotless: clean
+	rm -f cdc_*.svg
