@@ -129,14 +129,14 @@ file format, <code class="docutils literal notranslate"><span class="pre">cdc_sn
 clock domain does or doesn’t match the clock domains of its data sources.</p>
 <section id="ok1">
 <h3>OK1<a class="headerlink" href="#ok1" title="Permalink to this heading"></a></h3>
-<a class="reference external image-reference" href="cdc_OK1.svg"><img alt="OK1 topology" src="_gen_md/build-tools/cdc_OK1.svg" /></a>
+<a class="reference external image-reference" href="cdc_OK1.svg"><img alt="OK1 topology" src="../../_images/cdc_OK1.svg" /></a>
 <p>If all inputs leading to a register are in the same domain as its own
 clock, that’s called “OK1”.  This should be the standard topology for all
 real computation and state-machines.</p>
 </section>
 <section id="okx-or-cdc">
 <h3>OKX or CDC<a class="headerlink" href="#okx-or-cdc" title="Permalink to this heading"></a></h3>
-<a class="reference external image-reference" href="cdc_OKX.svg"><img alt="OKX topology" src="_gen_md/build-tools/cdc_OKX.svg" /></a>
+<a class="reference external image-reference" href="cdc_OKX.svg"><img alt="OKX topology" src="../../_images/cdc_OKX.svg" /></a>
 <p>If each input comes from a single register in another domain, so the
 combinational logic is a trivial ‘straight wire’, that’s called “OKX” or “CDC”.
 All real CDC circuits should be built with this topology at their core.
@@ -148,7 +148,7 @@ data corruption.</p>
 </section>
 <section id="bad">
 <h3>BAD<a class="headerlink" href="#bad" title="Permalink to this heading"></a></h3>
-<a class="reference external image-reference" href="cdc_BAD.svg"><img alt="BAD topology" src="_gen_md/build-tools/cdc_BAD.svg" /></a>
+<a class="reference external image-reference" href="cdc_BAD.svg"><img alt="BAD topology" src="../../_images/cdc_BAD.svg" /></a>
 <p>Registers with combinational input, that get at least one input not from
 its own domain, are categorized as “BAD”.
 Maybe this rule could be relaxed some for an ASIC, but in an FPGA
