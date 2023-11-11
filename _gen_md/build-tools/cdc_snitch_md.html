@@ -198,13 +198,14 @@ foo_cdc.txt: $(BUILD_DIR)/cdc_snitch.py foo_yosys.json
     $(PYTHON) $^ -o $@
 </pre></div>
 </div>
-<p>The resulting <code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code> ends with a line like</p>
+<p>The chatter from that last command ends with a line like</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OK1</span><span class="p">:</span> <span class="mi">81504</span>  <span class="n">CDC</span><span class="p">:</span> <span class="mi">337</span>  <span class="n">OKX</span><span class="p">:</span> <span class="mi">1105</span>  <span class="n">BAD</span><span class="p">:</span> <span class="mi">97</span>
 </pre></div>
 </div>
-<p>and its body includes details, which ideally can help you find the
+<p>counting the number of registers in each category.
+The <code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code> file gives details, which ideally can help you find the
 design errors that led to the “BAD” registers.
-If <code class="docutils literal notranslate"><span class="pre">foo.v</span></code> includes any such “BAD” registers, the makefile rule for
+If the design includes any such “BAD” registers, the makefile rule for
 <code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code> will fail, as would be used for a regression test.</p>
 </section>
 <section id="dependencies">
