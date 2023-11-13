@@ -116,3 +116,12 @@ We're still looking for a permanent name for the attribute marking
 intentional CDC registers, to replace the placeholder `magic_cdc`.
 Maybe this interacts with industry standards and/or vendor-specific
 attributes like `DONT_TOUCH` and `ASYNC_REG`.
+
+Some registers will have non-clock inputs other than data (D).
+That includes clock-enable (E) pins and sometimes synchronous reset (R).
+Each such input is analyzed independently for clock-domain consistency.
+That only makes sense, especially for R, if yosys's synthesis
+results match that of the final (normally vendor-specific) synthesis.
+We use yosys's "techmap" step, that creates gate-level cells for registers
+with a type name based around "DFF".  We don't currently check for
+DFF with asynchronous inputs, that are unlikely to be correctly handled.
