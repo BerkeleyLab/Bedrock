@@ -228,6 +228,14 @@ We welcome suggestions for or work on improvements.</p>
 intentional CDC registers, to replace the placeholder <code class="docutils literal notranslate"><span class="pre">magic_cdc</span></code>.
 Maybe this interacts with industry standards and/or vendor-specific
 attributes like <code class="docutils literal notranslate"><span class="pre">DONT_TOUCH</span></code> and <code class="docutils literal notranslate"><span class="pre">ASYNC_REG</span></code>.</p>
+<p>Some registers will have non-clock inputs other than data (D).
+That includes clock-enable (E) pins and sometimes synchronous reset (R).
+Each such input is analyzed independently for clock-domain consistency.
+That only makes sense, especially for R, if yosys’s synthesis
+results match that of the final (normally vendor-specific) synthesis.
+We use yosys’s “techmap” step, that creates gate-level cells for registers
+with a type name based around “DFF”.  We don’t currently check for
+DFF with asynchronous inputs, that are unlikely to be correctly handled.</p>
 </section>
 </section>
 </section>
