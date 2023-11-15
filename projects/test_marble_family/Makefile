@@ -119,11 +119,10 @@ marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) $(FPGA_FAMILY_DI
 
 marble_base_yosys.json: marble_base_shell.v $(MARBLE_BASE_V) $(BUILD_DIR)/cdc_snitch_proc.ys
 	$(YOSYS) --version
-	nn=$$$$; $(YOSYS) -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@" > yosys.$$nn.log || exit 1 && grep "Warning" yosys.$$nn.log || echo "No Warnings!"
+	$(YOSYS) -q -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
 # (I don't think yosys for-loop is actually buggy, just tediously slow, and in this case unnecessary)
 marble_base_cdc.txt: $(BUILD_DIR)/cdc_snitch.py marble_base_yosys.json
-	$(PYTHON) $^ > $@
-	@tail -n 1 $@
+	$(PYTHON) $^ -o $@
 
 # =====
 # constraint
