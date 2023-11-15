@@ -1,4 +1,5 @@
-# Look through a yosys-output json file checking for clock-domain crossings (CDC)
+"""Analyze Clock-Domain-Crossings (CDC)
+"""
 # Pretty crude WIP.  Has some "issues".
 
 # Tested Yosys commands to create a compatible json file are
@@ -8,6 +9,10 @@
 # https://github.com/YosysHQ/yosys/discussions/3956
 
 import json
+
+
+# This is a lot of globals.
+# Maybe a python expert would like to convert this into a class.
 xref = {}
 driver = {}
 driverless = {}
@@ -82,11 +87,11 @@ def check_bit(dout_num, dout_name, clk, magic, inputs, ofile, verbose=True):
             else:
                 px = ["unknown"]
             if px:
-                pl = ["  tree", dout_num, "from", ix] + px
+                pl = ["  tree", dout_num, "from", str(ix)] + px
                 ofile.write(" ".join(pl) + "\n")
 
 
-def find_dff(mod_name, mod, ofile):
+def find_dff(mod, ofile):
     for cell in mod['cells'].keys():
         # print(cell)
         # print(mod['cells'][cell])
@@ -100,14 +105,14 @@ def find_dff(mod_name, mod, ofile):
             # Should really check that the port_direction for C is "input",
             # and its list of connections is exactly 1 long.
             if len(conns["C"]) != 1:
-                print("warning: multiple clocks", mod_name, cell)
+                print("warning: multiple clocks", cell)
             clk = conns["C"][0]
             clocks[clk] = True
             #
             # Q = dout used for naming
             # Should really check that the port_direction for Q is "output",
             if len(conns["Q"]) != 1:
-                print("warning: multiple clocks", mod_name, cell)
+                print("warning: multiple clocks", cell)
             dout = conns["Q"][0]  # ditto about multiple Q
             magic = dout in magic_list
             #
@@ -151,7 +156,7 @@ def list_domains(ix):
         # treat each module input as if it were its own clock domain
         return [ix]
     if ix not in driver:
-        print("driverless", ix, netnames[ix])
+        # print("driverless", ix, netnames[ix])
         driverless[ix] = True
         return []
     direct = driver[ix]
@@ -177,7 +182,7 @@ def get_clk_name(nbit):
     return netnames.get(nbit, str(nbit))
 
 
-def index_netnames(mod_name, mod):
+def index_netnames(mod):
     for nn in mod['netnames'].keys():
         attr = mod['netnames'][nn]['attributes']
         bits = mod['netnames'][nn]['bits']
@@ -191,11 +196,10 @@ def index_netnames(mod_name, mod):
                 magic_list[b] = True
 
 
-def index_drivers(mod_name, mod):
+def index_drivers(mod):
     for cell in mod['cells'].keys():
         c = mod['cells'][cell]
         # type_name = c['type']
-        # print(mod_name, cell, type_name)
         for conn in c['connections'].keys():
             if c['port_directions'][conn] == "output":
                 for ix in c['connections'][conn]:
@@ -218,27 +222,29 @@ def sift_design(yosys_json, ofile):
     creator = yosys_json['creator']
     print("json from", creator)
     # maybe we should bark if yosys version is less than 0.23
-    module_set = list(yosys_json['modules'].keys())
+    modules = yosys_json['modules']
+    module_set = sorted(list(modules.keys()))
     print("modules:", " ".join(module_set))
     if len(module_set) != 1:
         print('too many modules; try yosys command "flatten -wb <top_module>"')
-        exit(1)
-    for m in module_set:
-        index_netnames(m, yosys_json['modules'][m])
-    for m in module_set:
-        index_drivers(m, yosys_json['modules'][m])
-    for m in module_set:
-        find_dff(m, yosys_json['modules'][m], ofile)
+        return 1
+    module1 = modules[module_set[0]]
+    index_netnames(module1)
+    index_drivers(module1)
+    find_dff(module1, ofile)
+    return 0
 
 
-def sift_file(f, ofile):
-    sift_design(json.load(f), ofile)
+def sift_file(f, ofile, strict=False):
+    rc = sift_design(json.load(f), ofile)
+    if rc != 0:
+        return rc
     if False:
         for b in sorted(driver.keys()):
             print(b, driver[b]['type'])
     if True:
         for b in sorted(driverless.keys()):
-            print(b, 'driverless')
+            print('driverless', b, netnames[b])
     if False:
         domain_list = sorted(clocks.keys())
         print('clock domains', domain_list)
@@ -246,15 +252,24 @@ def sift_file(f, ofile):
             print('net', d, 'name', netnames[d])
     pp = (ok1_count, cdc_count, okx_count, bad_count)
     print("OK1: %d  CDC: %d  OKX: %d  BAD: %d" % pp)
-    return 0 if bad_count == 0 else 1
+    if bad_count != 0:
+        rc = 1
+    if strict and okx_count != 0:
+        rc = 1
+    return rc
 
 
 if __name__ == "__main__":
     import argparse
     from sys import stdout
-    parser = argparse.ArgumentParser(description="Analyze Clock-Domain-Crossings")
+    hint = "Looks through a yosys-output json file and categorizes CDCs.\n"
+    hint += "Longer documentation in cdc_snitch.md."
+    parser = argparse.ArgumentParser(description=__doc__, epilog=hint,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-o", "--output", dest='ofile', default=None,
                         help="Output file")
+    parser.add_argument("--strict", default=False, action="store_true",
+                        help="Strict checking: all CDC must be marked")
     parser.add_argument("file", help="json input file, as generated by yosys")
     args = parser.parse_args()
     rc = 1
@@ -263,5 +278,5 @@ if __name__ == "__main__":
     else:
         ofile = stdout
     with open(args.file, "r") as f:
-        rc = sift_file(f, ofile)
+        rc = sift_file(f, ofile, strict=args.strict)
     exit(rc)
