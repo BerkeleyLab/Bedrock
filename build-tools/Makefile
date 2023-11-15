@@ -1,5 +1,6 @@
 # No real work gets done in this directory.
 # This Makefile is only used to build documentation.
+# Requires xcircuit and pandoc, not otherwise needed in bedrock.
 
 XCIRCUIT = xcircuit
 XVFB = xvfb-run -a -s "-screen 0 1440x900x24"

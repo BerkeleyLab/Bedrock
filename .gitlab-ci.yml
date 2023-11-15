@@ -108,7 +108,6 @@ sphinx_docs:
         imagemagick \
         ghostscript \
         xvfb \
-        xcircuit \
         gtkwave \
         texlive-binaries
     python3 -m pip install \
