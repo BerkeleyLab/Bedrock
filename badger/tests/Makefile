@@ -214,11 +214,10 @@ hw_test_start: hw_test_tb tap-vpi.vpi
 # not yet turned into a regression test
 hw_test_yosys.json: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v ../../build-tools/cdc_snitch_proc.ys
 	$(YOSYS) --version
-	nn=$$$$; $(YOSYS) -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@" > yosys.$$nn.log || exit 1 && grep "Warning" yosys.$$nn.log || echo "No Warnings!"
+	$(YOSYS) -q -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
 # (I don't think yosys for-loop is actually buggy, just tediously slow, and in this case unnecessary)
 hw_test_cdc.txt: ../../build-tools/cdc_snitch.py hw_test_yosys.json
-	$(PYTHON) $^ > $@
-	@tail -n 1 $@
+	$(PYTHON) $^ -o $@
 
 # =====
 # experimental bitfiles, not for hardware
