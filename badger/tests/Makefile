@@ -210,6 +210,16 @@ hw_test_start: hw_test_tb tap-vpi.vpi
 	$(VVP) $<
 
 # =====
+# experimental check of CDC-correctness
+# not yet turned into a regression test
+hw_test_yosys.json: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v ../../build-tools/cdc_snitch_proc.ys
+	$(YOSYS) --version
+	$(YOSYS) -q -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
+# (I don't think yosys for-loop is actually buggy, just tediously slow, and in this case unnecessary)
+hw_test_cdc.txt: ../../build-tools/cdc_snitch.py hw_test_yosys.json
+	$(PYTHON) $^ -o $@
+
+# =====
 # experimental bitfiles, not for hardware
 bits: scanner.bit construct.bit xformer.bit ethernet_crc_add.bit udp_port_cam_wrap.bit rtefi_blob.bit
 	(cd _xilinx && for f in $(basename $^); do echo $$f; grep "Slice LUT" $${f}_map.mrp; done)
@@ -424,9 +434,9 @@ CLEAN += *_tb *.o *.vpi *.vcd *.d *.out *_synth.v *.svg crc_genguts.vh crc_deriv
 CLEAN += crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gateway_wrap Vhw_test Vcluster
 CLEAN += stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen
 CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab udprtx
-CLEAN += cluster_run.out
+CLEAN += cluster_run.out hw_test_cdc.txt hw_test_yosys.json
 CLEAN += $(RTEFI_CLEAN)
-CLEAN += *.html *.pdf
+CLEAN += *.html *.pdf *.log
 CLEAN_DIRS += obj_dir _xilinx
 # Actual "clean" rule in bottom_rules.mk
 include $(BUILD_DIR)/bottom_rules.mk

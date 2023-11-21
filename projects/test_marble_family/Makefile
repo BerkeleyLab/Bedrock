@@ -25,6 +25,7 @@ VERILOG += -Wno-timescale
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
 VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
+YOSYS = yosys
 
 # XXX consider converting this to something more compatible with Bedrock's VIVADO_SYNTH.
 VIVADOEXEC = vivado
@@ -117,6 +118,13 @@ marble_base_lint: $(MARBLE_BASE_V) IDDR.v
 marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
 	$(VERILATOR) --lint-only --timing $(VLATOR_LINT_IGNORE) -DSIMULATE -y $(FPGA_FAMILY_DIR)/xilinx $(filter-out marble2_features, $^)
 
+marble_base_yosys.json: marble_base_shell.v $(MARBLE_BASE_V) $(BUILD_DIR)/cdc_snitch_proc.ys
+	$(YOSYS) --version
+	$(YOSYS) -q -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
+# (I don't think yosys for-loop is actually buggy, just tediously slow, and in this case unnecessary)
+marble_base_cdc.txt: $(BUILD_DIR)/cdc_snitch.py marble_base_yosys.json
+	$(PYTHON) $^ -o $@
+
 # =====
 # constraint
 pin_map_fmc.csv: pin_map_fmc.py
@@ -206,5 +214,5 @@ clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
 	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
-	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx
+	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx marble_base_cdc.txt
 	rm -rf _xilinx .Xil obj_dir __pycache__

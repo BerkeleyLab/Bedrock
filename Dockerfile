@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim as testing_base_bullseye
+FROM debian:bookworm-slim as testing_base_bookworm
 
 # Vivado needs libtinfo5, at least for Artix?
 RUN apt-get update && \
@@ -8,6 +8,8 @@ RUN apt-get update && \
     libbsd-dev \
     xc3sprog \
     build-essential \
+    yosys \
+    verilator \
     libtinfo5 \
     wget \
     iputils-ping \
@@ -19,6 +21,9 @@ RUN apt-get update && \
     python3-numpy \
     python3-scipy \
     python3-matplotlib \
+    python3-yaml \
+    python3-serial \
+    python3-setuptools-scm \
     gcc-riscv64-unknown-elf \
     picolibc-riscv64-unknown-elf \
     cmake \
@@ -35,70 +40,28 @@ RUN apt-get update && \
 # gcc-riscv64-unknown-elf above replace our previous
 #   approach, used in Buster, of building from source
 
+# Allow pip to install packages
+RUN mkdir -p $HOME/.config/pip && \
+    printf "[global]\nbreak-system-packages = true\n" > \
+        $HOME/.config/pip/pip.conf && \
+    cat $HOME/.config/pip/pip.conf
+
 # vhd2vl
 RUN git clone https://github.com/ldoolitt/vhd2vl && \
     cd vhd2vl && \
-    git checkout 37e3143395ce4e7d2f2e301e12a538caf52b983c && \
+    git checkout bbe3198c435a4a6325bdd08b7b43a47b6dacf5de && \
     make && \
     install src/vhd2vl /usr/local/bin && \
     cd .. && \
     rm -rf vhd2vl
 
-# Yosys
-# For now we need to build yosys from source, since Debian Bullseye
-# is stuck at yosys-0.9 that doesn't have the features we need.
-# Revisit this choice when Debian catches up, maybe in Bookworm,
-# and hope to get back to "apt-get install yosys" then.
-# Note that the standard yosys build process used here requires
-# network access to download abc from https://github.com/berkeley-abc/abc.
-RUN apt-get update && \
-    apt-get install -y \
-        clang \
-        libreadline-dev \
-        tcl-dev \
-        libffi-dev \
-        graphviz \
-        xdot \
-        libboost-system-dev \
-        libboost-python-dev \
-        libboost-filesystem-dev \
-        zlib1g-dev && \
-    rm -rf /var/lib/apt/lists/* && \
-    git clone https://github.com/cliffordwolf/yosys.git && \
-    cd yosys && \
-    git checkout 40e35993af6ecb6207f15cc176455ff8d66bcc69 && \
-    make config-clang && \
-    make -j4 && \
-    make install && \
-    cd .. && \
-    rm -rf yosys
+# Yosys and Verilator are no longer built from source, just included
+# in apt-get list above.  Tested good in Debian Bookworm.
 
+# Because we are running inside docker, installing
+# python packages system wide should be ok
 RUN pip3 install \
-    pyyaml==5.1.2 pyserial==3.4 setuptools-scm==7.1.0 \
     nmigen==0.2
-
-# we need a version of verilator with more than 20000, issue #1574,
-# any version > v4.110 should have this limit increased to 40000.
-# libz-dev required for Verilator FST support
-RUN apt-get update && \
-    apt-get install -y \
-        libfl2 \
-        libfl-dev \
-        libz-dev \
-        zlib1g \
-        zlib1g-dev \
-        autoconf && \
-    rm -rf /var/lib/apt/lists/* && \
-    git clone https://github.com/verilator/verilator && \
-    cd verilator && \
-    git checkout v4.228 && \
-    autoconf && \
-    ./configure && \
-    make -j4 && \
-    make install && \
-    cd ../ && \
-    rm -rf verilator && \
-    verilator -V
 
 # SymbiYosys formal verification tool + Yices 2 solver (`sby` command)
 RUN apt-get update && \
@@ -114,7 +77,6 @@ RUN apt-get update && \
         graphviz \
         xdot \
         pkg-config \
-        python \
         python3 \
         libftdi-dev \
         gperf \

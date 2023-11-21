@@ -17,9 +17,9 @@ parameter SRTYPE = "SYNC";
 // verilator lint_save
 // verilator lint_off MULTIDRIVEN
 reg qx=INIT, hold=INIT;
+// verilator lint_restore
 always @(negedge C) qx <= hold;
 always @(posedge C) if (CE) qx <= D1;
-// verilator lint_restore
 always @(posedge C) if (CE) hold <= D2;
 assign Q = qx;
 
