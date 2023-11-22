@@ -163,8 +163,6 @@ will configure and read out SFPs, read the write-protect status, FMC voltage and
 </div>
 <p>Also see <a class="reference external" href="testcase.py">testcase.py</a> for other I2C feature support,
 some of which is specific to either Marble or Marble-Mini.</p>
-<section id="extras">
-<h3>Extras<a class="headerlink" href="#extras" title="Permalink to this heading"></a></h3>
 <p>Two <a class="reference external" href="https://en.wikipedia.org/wiki/Easter%20egg%20%28media%29">Easter eggs</a>:</p>
 <ol class="arabic">
 <li><p>Connect up a user terminal to the third FTDI USB UART port, typically /dev/ttyUSB2,
@@ -191,7 +189,7 @@ to the top half of J13 (a.k.a. Pmod2[3:0]), and you can
 read out <a class="reference external" href="https://en.wikipedia.org/wiki/NMEA_0183">NMEA</a> position and time,
 use the pps signal to calibrate the on-board crystals,
 and even phase-lock the on-board 125 MHz source to GPS time
-with an additive jitter as little as 10 ns rms.
+with a jitter of under 100 ns.
 Supporting python:</p></li>
 </ol>
 <ul class="simple">
@@ -199,7 +197,6 @@ Supporting python:</p></li>
 <li><p><a class="reference external" href="scan_vcxo.py">scan_vcxo.py</a></p></li>
 <li><p><a class="reference external" href="lock_vcxo.py">lock_vcxo.py</a></p></li>
 </ul>
-</section>
 </section>
 </section>
 
