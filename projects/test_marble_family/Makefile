@@ -132,7 +132,7 @@ marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/m
 	$(PYTHON) $^ > $@
 
 marble2.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marble/%, Marble.xdc pin_map.csv) pin_map_fmc.csv marble_top.csv
-	$(PYTHON) $^ > $@
+	$(PYTHON) $^ | sed -e '/FMC._LA_/s/IOSTANDARD LVCMOS25/IOSTANDARD LVCMOS25 PULLTYPE PULLUP/' > $@
 
 # =====
 # Initialization file for i2cbridge

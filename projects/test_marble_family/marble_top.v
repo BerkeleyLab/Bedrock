@@ -239,6 +239,9 @@ localparam C_MMC_CTRACE = 1;
 localparam C_MMC_CTRACE = 0;
 `endif
 
+// vestiges of CERN FMC tester support
+wire old_scl1, old_scl2, old_sda1, old_sda2;
+
 wire [7:0] leds;
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
@@ -259,13 +262,9 @@ marble_base #(
 	.aux_clk(SYSCLK_P), .clk62(clk62), .cfg_clk(cfg_clk),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
-	.twi_scl({dum_scl, FMC2_LA_P[2], FMC1_LA_P[2], TWI_SCL}),
-	.twi_sda({dum_sda, FMC2_LA_N[2], FMC1_LA_N[2], TWI_SDA}),
-	.fmc_test({
-		FMC2_LA_P[33:3], FMC2_LA_P[1:0],
-		FMC2_LA_N[33:3], FMC2_LA_N[1:0],
-		FMC1_LA_P[33:3], FMC1_LA_P[1:0],
-		FMC1_LA_N[33:3], FMC1_LA_N[1:0]}),
+	.twi_scl({dum_scl, old_scl1, old_scl2, TWI_SCL}),
+	.twi_sda({dum_sda, old_sda1, old_sda2, TWI_SDA}),
+	.fmc_test({FMC2_LA_P, FMC2_LA_N, FMC1_LA_P, FMC1_LA_N}),
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),

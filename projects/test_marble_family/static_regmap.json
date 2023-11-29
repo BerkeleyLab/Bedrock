@@ -69,47 +69,47 @@
         "base_addr": 327692,
         "data_width": 4
     },
-    "fmc_test_0": {
+    "fmc1_test_l": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327696,
         "data_width": 22
     },
-    "fmc_test_1": {
+    "fmc1_test_m": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327697,
         "data_width": 22
     },
-    "fmc_test_2": {
+    "fmc1_test_h": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327698,
-        "data_width": 22
+        "data_width": 24
     },
-    "fmc_test_3": {
+    "fmc2_test_l": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327699,
         "data_width": 22
     },
-    "fmc_test_4": {
+    "fmc2_test_m": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327700,
         "data_width": 22
     },
-    "fmc_test_5": {
+    "fmc2_test_h": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327701,
-        "data_width": 22
+        "data_width": 24
     },
     "twi_prog": {
         "access": "rw",
