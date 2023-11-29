@@ -111,6 +111,20 @@
         "base_addr": 327701,
         "data_width": 24
     },
+    "fmc2h_test_l": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327702,
+        "data_width": 24
+    },
+    "fmc2h_test_h": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327703,
+        "data_width": 24
+    },
     "twi_prog": {
         "access": "rw",
         "addr_width": 10,

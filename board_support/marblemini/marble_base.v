@@ -80,7 +80,7 @@ module marble_base (
 	input [31:0] lb_data_in,
 
 	// Something physical
-	inout [135:0] fmc_test,
+	inout [183:0] fmc_test,
 	output ZEST_PWR_EN,
 	output [7:0] LED
 );
