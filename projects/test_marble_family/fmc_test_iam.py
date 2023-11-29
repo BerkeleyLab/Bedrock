@@ -29,7 +29,7 @@ def get_iam_fmc(addr):
     # print(d)
     p1 = to_bin_fmc(d[0:3])
     p2 = to_bin_fmc(d[3:6])
-    return(p1, p2)
+    return (p1, p2)
 
 
 def set_iam_fmc(addr, p, bit):
