@@ -43,7 +43,7 @@ def set_iam_fmc(addr, p, bit):
     r_set += [(port+"_test_l", 0), (port+"_test_m", 0), (port+"_test_h", 0)]
     # print(r_set)
     addr.reg_write(r_set)
-    
+
 
 def test_iam_fmc(addr):
     gitid = addr.codehash
