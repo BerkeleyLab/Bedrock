@@ -178,7 +178,7 @@ def print_ina219_config(title, a):
     print("%s INA219 config: 0x%4.4X %s" % (title, x, suffix))
 
 
-def compute_si570(a):
+def compute_si570(freq_default, a):
     # DCO frequency range: 4850 - 5670MHz
     # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
     # N1 values: 1, 2, 4, 6, 8...128
@@ -186,12 +186,6 @@ def compute_si570(a):
     n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6)) + 1
     rfreq = np.uint64((((a[1] & 0x3f) << 32) | (a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5])) / (2**28)
 
-    import leep
-    leep_addr = "leep://" + str(args.addr) + str(":") + str(args.port)
-    print(leep_addr)
-
-    addr = leep.open(leep_addr, instance=[])
-    freq_default = addr.reg_read(["frequency_si570"])
     default = (freq_default[0]/2**24.0)*125
     fxtal = default * hs_div * n1 / rfreq
     fdco = default * n1 * hs_div
@@ -207,10 +201,10 @@ def compute_si570(a):
         print('SI570 output frequency: %4.3f MHz' % default)
 
 
-def print_result(result, args, poll_only=False):
+def print_result(result, args, board_type, si570_dfreq, poll_only=False):
     n_fmc = 2 if args.fmc else 0
     tester = 2 if args.fmc_tester else 0
-    transceiver = 2 if args.marble else 4
+    transceiver = 2 if board_type else 4
     if args.debug:
         for jx in range(16):
             p = result[jx*16:(jx+1)*16]
@@ -241,7 +235,7 @@ def print_result(result, args, poll_only=False):
             print("########################################################################")
             pitch = 6
             hx = ib + 1 + pitch
-            compute_si570(result[hx:hx+pitch])
+            compute_si570(si570_dfreq, result[hx:hx+pitch])
         if args.trx:
             for ix in range(transceiver):
                 print("########################################################################")
@@ -262,7 +256,7 @@ def print_result(result, args, poll_only=False):
             wp_bit = result[0] & 0x80
             ss = "Off" if wp_bit else "On"
             print("Write Protect switch is %s" % ss)
-            if args.marble:
+            if board_type:
                 qsfp_pp1 = [result[2], result[3]]
             else:
                 qsfp_pp = result[2]*256 + result[3]  # parallel SFP status via U34
@@ -274,14 +268,14 @@ def print_result(result, args, poll_only=False):
         if args.trx:
             for ix in range(transceiver):
                 print("########################################################################")
-                if args.marble:
+                if board_type:
                     pitch = 28
                 else:
                     pitch = 10
                 hx = 16 + pitch*ix
                 a1 = result[hx:hx+pitch]
                 print("Status pin monitor Transceiver%d:  0x%X" % (ix+1, qsfp_pp1[ix]))
-                print_qsfp_z(a1) if args.marble else print_sfp_z(a1)
+                print_qsfp_z(a1) if board_type else print_sfp_z(a1)
             for ix in range(tester):
                 print("########################################################################")
                 pitch = 10
@@ -356,30 +350,38 @@ if __name__ == "__main__":
         if args.port == 0:
             port = 803
 
-    # Consider importlib instead to give more flexibility at runtime
-    # will require turning ramtest and poller into actual classes
-    # Or, better, turning this inside out and encapsulating the
-    # infrastructure part of this file as a class.
-    if args.ramtest:
-        import ramtest
-        prog = ramtest.ram_test_prog()
-    elif args.trx or args.si570:
-        import read_trx
-        prog = read_trx.hw_test_prog(args.marble)
-    else:
-        import poller
-        prog = poller.hw_test_prog()
-
     # OK, setup is finished, start the actual work
     # dev = lbus_access.lbus_access(addr, port=port, timeout=3.0, allow_burst=False)
     leep_addr = "leep://" + addr + ":" + str(port)
     print(leep_addr)
     dev = leep.open(leep_addr, timeout=5.0)
+    # Consider importlib instead to give more flexibility at runtime
+    # will require turning ramtest and poller into actual classes
+    # Or, better, turning this inside out and encapsulating the
+    # infrastructure part of this file as a class.
+    import config_si570
+    mbox = dev.reg_read(["spi_mbox"])[0]
+    board, si570_addr, si570_polarity, si570_start_addr, _ = config_si570.decode_settings(mbox, verbose=False)
+    # if mailbox is not updated, use args.marble user argument
+    # board values - simulation = 0, marble = 1, marble_mini = 2
+    # just some workaround to keep the functionality the same
+    board_type = args.marble if board == 0 else board-2 if board == 2 else board
+    si570_dfreq = dev.reg_read(["frequency_si570"])
+    if args.ramtest:
+        import ramtest
+        prog = ramtest.ram_test_prog()
+    elif args.trx or args.si570:
+        import read_trx
+        prog = read_trx.hw_test_prog(board_type, si570_addr, si570_start_addr, si570_polarity)
+    else:
+        import poller
+        prog = poller.hw_test_prog()
+
     if args.poll:
         while True:
             wait_for_new(dev, sim=sim)
             result = read_result(dev, result_len=args.rlen)
-            print_result(result, args, poll_only=True)
+            print_result(result, args, board_type, si570_dfreq, poll_only=True)
 
     else:
         if args.debug:
@@ -388,4 +390,4 @@ if __name__ == "__main__":
         result = run_testcase(dev, prog, sim=sim, result_len=args.rlen,
                               debug=args.debug,
                               stop=args.stop, capture=args.vcd)
-        print_result(result, args)
+        print_result(result, args, board_type, si570_dfreq)

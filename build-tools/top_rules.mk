@@ -18,6 +18,8 @@ GTKWAVE = gtkwave
 VPIEXT = vpi
 PYTHON = python3
 AWK = awk
+XCIRCUIT = xcircuit
+
 VPI_CFLAGS := $(shell $(VERILOG_VPI) --cflags)
 VPI_LDFLAGS := $(shell $(VERILOG_VPI) --ldflags)
 DEPDIR = _dep
@@ -50,7 +52,7 @@ VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I.
 # keep -Wno-TIMESCALEMOD separate, since it's a new flag not supported by Verilator 4.010 in Debian Buster
 VLATOR_TIMESCALEMOD = -Wno-TIMESCALEMOD
 # new flag for Verilator v4.226 and beyond
-# VLATOR_TIMING = --timing
+VLATOR_TIMING = --timing
 VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY $(VLATOR_TIMESCALEMOD)
 VERILATOR_LINT = $(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $(filter %.v %.sv, $^)
 VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN $(VLATOR_TIMING) --MMD --Mdir $(DEPDIR)
@@ -126,6 +128,10 @@ V%_tb: $(wildcard *.sv) $(wildcard *.v)
 
 %.pdf: %.eps
 	$(PS2PDF)
+
+# Kind of weird to use xcircuit's rc file for this purpose, but it does work.
+%.svg: %.eps
+	cd $(dir $@) && echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
 
 %.rbf: %.bit
 	$(BIT2RBF)

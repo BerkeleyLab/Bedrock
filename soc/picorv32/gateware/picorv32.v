@@ -17,6 +17,7 @@
  *
  */
 
+/* verilator lint_save */
 /* verilator lint_off WIDTH */
 /* verilator lint_off PINMISSING */
 /* verilator lint_off CASEOVERLAP */
@@ -3042,3 +3043,4 @@ module picorv32_wb #(
 		end
 	end
 endmodule
+/* verilator lint_restore */

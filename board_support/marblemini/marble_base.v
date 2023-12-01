@@ -141,7 +141,8 @@ wire config_mw = config_w && (config_a[7:4] == 5);
 wire [10:0] mbox_a = {mbox_page, config_a[3:0]};
 
 // Forward declarations
-wire led_user_mode, l1, l2;
+wire [1:0] led_user_mode;
+wire l1, l2;
 // Local bus
 assign lb_clk = tx_clk;
 //wire [23:0] lb_addr;
@@ -279,6 +280,10 @@ mac_compat_dpram #(
 	.tx_mac_start(tx_mac_start)
 );
 
+// Be careful with clock domains:
+// rtefi_blob uses this in rx_clk, so send it a registered value.
+reg enable_rx_r=0;  always @(posedge tx_clk) enable_rx_r <= enable_rx | ~allow_mmc_eth_config;
+
 // Instantiate the Real Work
 parameter enable_bursts=1;
 
@@ -298,7 +303,7 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 // Simple combinational logic is OK, since all signals are in tx_clk domain
 // (config_clk == tx_clk == lb_clk).
 
-	.enable_rx(enable_rx | ~allow_mmc_eth_config),
+	.enable_rx(enable_rx_r),
 	.config_clk(config_clk),
 	.config_s(config_s & allow_mmc_eth_config),
 	.config_p(config_p & allow_mmc_eth_config),
@@ -360,8 +365,13 @@ activity rx_act(.clk(rx_clk), .trigger(rx_mon), .led(rx_led));
 activity tx_act(.clk(tx_clk), .trigger(tx_mon), .led(tx_led));
 wire rx_h = rx_heartbeat[26];
 wire tx_h = tx_heartbeat[26];
-assign LED = {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, led1, led0};
-// assign LED = {scanner_debug, tx_led, rx_led, led1, led0};
+reg mod=0, reset=0;
+reg [31:0] cnt=0;
+always @(posedge rx_clk) begin
+    cnt <= reset ? 32'h0 : cnt + 1'b1;
+    mod <= cnt[0];
+end
+assign LED = (led_user_mode==2) ? cnt[30:23] & {8{mod}} : {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, led1, led0};
 
 // Keep the PHY's reset pin low for the first 33 ms
 reg phy_rb=0;
@@ -372,11 +382,13 @@ end
 assign phy_rstn = phy_rb;
 
 // One weird hack, even works in Verilator!
+`ifndef YOSYS
 always @(posedge tx_clk) begin
 	if (slave.stop_sim & ~in_use) begin
 		$display("marble_base:  stopping based on localbus request");
 		$finish(0);
 	end
 end
+`endif
 
 endmodule

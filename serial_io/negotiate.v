@@ -48,10 +48,14 @@ module negotiate(
                     AN_LINK_OK = 4,
                     AN_ABORT   = 5;
 
-   reg [2:0] an_state = AN_RESTART, n_an_state;
+   reg [2:0] an_state = AN_RESTART, n_an_state = AN_RESTART;
 
-   initial lacr_send=0;
-   initial operate=0;
+   initial begin
+     lacr_out=0;
+     lacr_send=0;
+     operate=0;
+     an_status=0;
+   end
 
    wire an_rst;
    // Detect physical link
@@ -86,7 +90,7 @@ module negotiate(
    end
 
    // Ack/Abl and consistency flags
-   reg [15:0] lacr_ability;
+   reg [15:0] lacr_ability=0;
    reg ack_match=0, abl_match=0;
    reg consistency_match=0;
    always @(posedge rx_clk) begin
@@ -124,8 +128,8 @@ module negotiate(
    wire abl_mismatch = ~lacr_ability[FD_BITPOS];
 
    reg [TIMER_LOG2-1:0] link_timer = 0;
-   reg link_timer_on=0, link_timer_done;
-   reg link_timer_start;
+   reg link_timer_on=0, link_timer_done=0;
+   reg link_timer_start=0;
    reg wdog_an_disable=0;
    wire wdog_timeout;
 
@@ -153,10 +157,10 @@ module negotiate(
 
    wire idle_match = 1; // TODO: Perform actual idle marker check
 
-   reg n_lacr_send; // lacr_send in the rx clock domain
-   reg n_send_ack;
-   reg n_send_breaklink;
-   reg n_operate;
+   reg n_lacr_send=0;  // lacr_send in the rx clock domain
+   reg n_send_ack=0;
+   reg n_send_breaklink=0;
+   reg n_operate=0;
    always @(*) begin
       n_lacr_send      = 0;
       n_send_ack       = 0;
@@ -235,8 +239,8 @@ module negotiate(
 
    // Register comb signals in rx_clk before transferring to tx_clk
    reg lacr_send_r=0; // lacr_send in the rx clock domain
-   reg send_ack_r;
-   reg send_breaklink_r;
+   reg send_ack_r=0;
+   reg send_breaklink_r=0;
    reg operate_r=0;
    reg [8:0] an_status_r=0;
    always @(posedge rx_clk) begin
@@ -247,7 +251,7 @@ module negotiate(
        an_status_r      <= an_status_l;
    end
 
-   reg send_ack, send_breaklink;
+   reg send_ack=0, send_breaklink=0;
    always @(posedge tx_clk) begin
       operate        <= operate_r;
       lacr_send      <= lacr_send_r;

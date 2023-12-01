@@ -8,7 +8,7 @@ stages:
 variables:
   XILINX_VIVADO: /non-free/Xilinx/Vivado/2020.2
   CI_REGISTRY: mohs.dhcp.lbl.gov
-  CONTAINER_IMAGE: $CI_REGISTRY/testing_base_bullseye
+  CONTAINER_IMAGE: $CI_REGISTRY/testing_base_bookworm
   # CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
@@ -31,6 +31,7 @@ include:
   - local: .gitlab/ci/dsp.gitlab-ci.yml
   - local: .gitlab/ci/marble_family.gitlab-ci.yml
   - local: .gitlab/ci/swap_gitid.gitlab-ci.yml
+  - local: .gitlab/ci/cdc_check.gitlab-ci.yml
 
 leep_test:
   script:
@@ -112,7 +113,6 @@ sphinx_docs:
     python3 -m pip install \
         sphinx==5.0.2 \
         sphinx_rtd_theme \
-        numpy \
         m2r2==0.3.2
     sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
         -e '/pattern="PDF"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
