@@ -97,7 +97,7 @@ net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 # Depends on UDP port 8030 not being tied up.
 # It would be nice to have a "quiet" option to udp-vpi.
 net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_trx.dat
-	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py --sim --ramtest --stop --rlen=34
+	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py -a localhost -p 0 --sim --ramtest --stop --rlen=34
 
 # =====
 # syntax-check only, no actual test bench code
@@ -185,7 +185,7 @@ marble1_hwtest: udprtx
 	ping -c 2 ${RGMII_IP}
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py -a ${RGMII_IP} -p 803 --trx --marble 0
+	$(PYTHON) testcase.py -a ${RGMII_IP} --trx --marble 0
 
 
 # =====
@@ -206,7 +206,7 @@ marble2_hwtest: udprtx
 	ping -c 2 ${MARBLE_IP}
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${MARBLE_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${MARBLE_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py -a ${MARBLE_IP} -p 803 --trx --si570
+	$(PYTHON) testcase.py -a ${MARBLE_IP} --trx --si570
 	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = ${ZEST_SN}
 
 clean:
