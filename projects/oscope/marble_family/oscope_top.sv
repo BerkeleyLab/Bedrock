@@ -174,6 +174,10 @@ assign LD17 = 1;
 // vestiges of CERN FMC tester support
 wire old_scl1, old_scl2, old_sda1, old_sda2;
 // placeholders
+wire [1:0] FMC1_CK_P;
+wire [1:0] FMC1_CK_N;
+wire [1:0] FMC2_CK_P;
+wire [1:0] FMC2_CK_N;
 wire [23:0] FMC2_HA_P;
 wire [23:0] FMC2_HA_N;
 
@@ -206,7 +210,7 @@ marble_base #(
 	.lb_rd_valid(lb_rd_valid),
 	.lb_data_out(lb_data_out),
 	.lb_data_in(lb_din),
-	.fmc_test({FMC2_HA_P, FMC2_HA_N, FMC2_LA_P, FMC2_LA_N, FMC1_LA_P, FMC1_LA_N}),
+	.fmc_test({FMC2_HA_P, FMC2_HA_N, FMC2_CK_P, FMC2_CK_N, FMC2_LA_P, FMC2_LA_N, FMC1_CK_P, FMC1_CK_N, FMC1_LA_P, FMC1_LA_N}),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
 	.LED(LED)
