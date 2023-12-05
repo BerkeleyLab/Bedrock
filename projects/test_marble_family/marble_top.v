@@ -67,6 +67,10 @@ module marble_top(
 	inout [33:0] FMC2_LA_P,
 	inout [33:0] FMC2_LA_N,
 `ifdef MARBLE_V2
+	inout [1:0] FMC1_CK_P,
+	inout [1:0] FMC1_CK_N,
+	inout [1:0] FMC2_CK_P,
+	inout [1:0] FMC2_CK_N,
 	inout [23:0] FMC2_HA_P,
 	inout [23:0] FMC2_HA_N,
 `endif
@@ -90,6 +94,10 @@ module marble_top(
 `include "marble_features_params.vh"
 
 `ifndef MARBLE_V2
+wire [1:0] FMC1_CK_P;
+wire [1:0] FMC1_CK_N;
+wire [1:0] FMC2_CK_P;
+wire [1:0] FMC2_CK_N;
 wire [23:0] FMC2_HA_P;
 wire [23:0] FMC2_HA_N;
 `endif
@@ -273,7 +281,7 @@ marble_base #(
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
 	.twi_scl({dum_scl, old_scl1, old_scl2, TWI_SCL}),
 	.twi_sda({dum_sda, old_sda1, old_sda2, TWI_SDA}),
-	.fmc_test({FMC2_HA_P, FMC2_HA_N, FMC2_LA_P, FMC2_LA_N, FMC1_LA_P, FMC1_LA_N}),
+	.fmc_test({FMC2_HA_P, FMC2_HA_N, FMC2_CK_P, FMC2_CK_N, FMC2_LA_P, FMC2_LA_N, FMC1_CK_P, FMC1_CK_N, FMC1_LA_P, FMC1_LA_N}),
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),

@@ -64,7 +64,7 @@ module lb_marble_slave #(
 	input [3:0] gps,
 	output [3:0] ext_config,
 	// Output to hardware
-	inout [183:0] fmc_test,
+	inout [191:0] fmc_test,
 	output [1:0] led_user_mode,
 	output led1,  // PWM
 	output led2  // PWM
@@ -286,10 +286,10 @@ wire [31:0] hello_3 = "(::)";
 wire [31:0] mirror_out_0;
 reg [21:0] fmc1_test_in_l=0;
 reg [21:0] fmc1_test_in_m=0;
-reg [23:0] fmc1_test_in_h=0;
+reg [27:0] fmc1_test_in_h=0;
 reg [21:0] fmc2_test_in_l=0;
 reg [21:0] fmc2_test_in_m=0;
-reg [23:0] fmc2_test_in_h=0;
+reg [27:0] fmc2_test_in_h=0;
 reg [23:0] fmc2h_test_in_l=0;
 reg [23:0] fmc2h_test_in_h=0;
 
@@ -373,8 +373,8 @@ reg rx_mac_hbank_r=1;
 // decoding corresponds to mirror readback, see notes above
 wire local_write = control_strobe & ~control_rd & (addr[23:16]==5);
 reg stop_sim=0;  // clearly only useful in simulation
-reg [67:0] fmc1_test_r=0;
-reg [67:0] fmc2_test_r=0;
+reg [71:0] fmc1_test_r=0;
+reg [71:0] fmc2_test_r=0;
 reg [47:0] fmc2h_test_r=0;
 always @(posedge clk) if (local_write) case (addr[4:0])
 	1: led_user_r <= data_out;
@@ -391,10 +391,10 @@ always @(posedge clk) if (local_write) case (addr[4:0])
 	// 12: pps_config_write
 	16: fmc1_test_r[21:0] <= data_out;
 	17: fmc1_test_r[43:22] <= data_out;
-	18: fmc1_test_r[67:44] <= data_out;
+	18: fmc1_test_r[71:44] <= data_out;
 	19: fmc2_test_r[21:0] <= data_out;
 	20: fmc2_test_r[43:22] <= data_out;
-	21: fmc2_test_r[67:44] <= data_out;
+	21: fmc2_test_r[71:44] <= data_out;
 	22: fmc2h_test_r[23:0] <= data_out;
 	23: fmc2h_test_r[47:24] <= data_out;
 endcase
@@ -435,22 +435,22 @@ assign ext_config = misc_config[7:4];
 
 // 3-state
 genvar ix;
-generate for (ix=0; ix<68; ix=ix+1) begin: fmc_lbit
+generate for (ix=0; ix<72; ix=ix+1) begin: fmc_lbit
 	assign fmc_test[ix+0] = fmc1_test_r[ix] ? 1'b0 : 1'bz;
-	assign fmc_test[ix+68] = fmc2_test_r[ix] ? 1'b0 : 1'bz;
+	assign fmc_test[ix+72] = fmc2_test_r[ix] ? 1'b0 : 1'bz;
 end endgenerate
 generate for (ix=0; ix<48; ix=ix+1) begin: fmc_hbit
-	assign fmc_test[ix+136] = fmc2h_test_r[ix] ? 1'b0 : 1'bz;
+	assign fmc_test[ix+144] = fmc2h_test_r[ix] ? 1'b0 : 1'bz;
 end endgenerate
 always @(posedge clk) begin
 	fmc1_test_in_l <= fmc_test[21:0];
 	fmc1_test_in_m <= fmc_test[43:22];
-	fmc1_test_in_h <= fmc_test[67:44];
-	fmc2_test_in_l <= fmc_test[89:68];
-	fmc2_test_in_m <= fmc_test[111:90];
-	fmc2_test_in_h <= fmc_test[135:112];
-	fmc2h_test_in_l <= fmc_test[159:136];
-	fmc2h_test_in_h <= fmc_test[183:160];
+	fmc1_test_in_h <= fmc_test[71:44];
+	fmc2_test_in_l <= fmc_test[93:72];
+	fmc2_test_in_m <= fmc_test[115:94];
+	fmc2_test_in_h <= fmc_test[143:116];
+	fmc2h_test_in_l <= fmc_test[167:144];
+	fmc2h_test_in_h <= fmc_test[191:168];
 end
 
 // Bus activity trace output

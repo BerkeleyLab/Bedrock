@@ -6,6 +6,7 @@ import sys
 bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "projects/common")
 import leep
+import time
 
 
 def tobin(x, count=8):
@@ -14,12 +15,12 @@ def tobin(x, count=8):
     return "".join([str((x >> y) & 1) for y in range(count-1, -1, -1)])
 
 
-# stupidly customized for 68-pin LA banks in this application
-# input is numeric, 22 bits + 22 bits + 24 bits
+# stupidly customized for 68-pin LA banks (plus 4 clock pins) in this application
+# input is numeric, 22 bits + 22 bits + 28 bits
 def to_bin_fmc(v):
     al = tobin(v[0], count=22)
     am = tobin(v[1], count=22)
-    ah = tobin(v[2], count=24)
+    ah = tobin(v[2], count=28)
     return ah+am+al
 
 
@@ -40,9 +41,9 @@ def get_iam_fmc(addr):
 def set_iam_fmc(addr, p, bit):
     a = 1 << bit
     if p != 3:  # LPC
-        al = (a >> 0)  & 0x3fffff
-        am = (a >> 22) & 0x3fffff
-        ah = (a >> 44) & 0xffffff
+        al = (a >> 0)  & 0x03fffff
+        am = (a >> 22) & 0x03fffff
+        ah = (a >> 44) & 0xfffffff
         port = "fmc%d" % p
         r_set = [(port+"_test_l", al), (port+"_test_m", am), (port+"_test_h", ah)]
     else:  # HPC
@@ -67,8 +68,9 @@ def test_iam_fmc(addr):
     gitid = addr.codehash
     print("# test_iam_fmc " + gitid)
     for px in [1, 2, 3]:
-        for bx in range(48 if px == 3 else 68):
+        for bx in range(48 if px == 3 else 72):
             set_iam_fmc(addr, px, bx)
+            time.sleep(0.001)
             r = get_iam_fmc(addr)
             print(px, "%3d" % bx, r[0], r[1], r[2])
 
