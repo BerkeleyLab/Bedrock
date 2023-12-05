@@ -71,8 +71,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(
         description="Utility to read internal temperature of ")
-    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
-    parser.add_argument('-p', '--port', type=int, default=0, help='Port number')
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
 
     import leep
     args = parser.parse_args()

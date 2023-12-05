@@ -58,7 +58,7 @@ make_docs:
     - make check consistency
 
 flake8:
-  stage: synthesis
+  stage: test
   script:
     - find . -name "*.py" -exec flake8 {} +
 

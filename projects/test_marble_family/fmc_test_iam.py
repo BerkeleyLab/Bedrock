@@ -2,8 +2,10 @@
 # https://www.iamelectronic.com/shop/produkt/fpga-mezzanine-card-fmc-loopback-module
 # Still doesn't cover LA_1 to GBTCLK0_M2C or LA_18 to GBTCLK1_M2C (HPC)
 
+import sys
+bedrock_dir = "../../"
+sys.path.append(bedrock_dir + "projects/common")
 import leep
-from sys import argv
 
 
 def tobin(x, count=8):
@@ -72,6 +74,16 @@ def test_iam_fmc(addr):
 
 
 if __name__ == "__main__":
-    leep_addr = argv[1]
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Utility for testing IAM Electronic FMC Loopback Module on Marble")
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
+    parser.add_argument('-d', '--debug', action='store_true', help='print raw arrays')
+
+    args = parser.parse_args()
+    leep_addr = "leep://" + str(args.addr) + str(":") + str(args.port)
+    print(leep_addr)
     addr = leep.open(leep_addr, timeout=5.0)
     test_iam_fmc(addr)

@@ -283,8 +283,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(
         description="Utility for configuring SI570 with i2cbridge attached to Packet Badger")
-    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
-    parser.add_argument('-p', '--port', type=int, default=803, help='Port number')
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
     parser.add_argument('-f', '--new_freq', type=float, default=None, help='Enter new SI570 output frequency in MHz')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
     parser.add_argument('-d', '--debug', action='store_true', help='print raw arrays')
