@@ -67,17 +67,20 @@ def set_iam_fmc(addr, p, bit):
 
 def test_iam_fmc(addr, plugged="12", verbose=False):
     gitid = addr.codehash
-    fault = False
+    bmap = {1: "P1L", 2: "P2L", 3: "P2H"}
     print("# test_iam_fmc " + gitid)
     for px in [1, 2, 3]:
+        faults = []
         for bx in range(48 if px == 3 else 72):
             set_iam_fmc(addr, px, bx)
             time.sleep(0.001)
             r = get_iam_fmc(addr)
             if verbose:
                 print(px, "%3d" % bx, r[0], r[1], r[2])
-            fault |= check_row(px, bx, r, plugged=plugged)
-    return fault
+            faults += [check_row(px, bx, r, plugged=plugged)]
+        ss = "".join(["X" if f else "." for f in faults])
+        print(bmap[px], ss)
+    return any(faults)
 
 
 if __name__ == "__main__":
@@ -92,7 +95,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     leep_addr = "leep://" + str(args.addr) + str(":") + str(args.port)
-    print(leep_addr)
+    print("#", leep_addr)
     addr = leep.open(leep_addr, timeout=5.0)
     fault = test_iam_fmc(addr, plugged=args.plugged, verbose=args.verbose)
     print("FAIL" if fault else "PASS")
