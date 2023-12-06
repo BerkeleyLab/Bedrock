@@ -1,5 +1,5 @@
 # Tie the raw results of fmc_test_iam bit-scanning process
-# to the connectivity quirks of the 
+# to the connectivity quirks of the
 # IAM Electronic FPGA Mezzanine Card (FMC) Loopback Module
 # https://github.com/FMCHUB/FMC_LOOPBACK
 # so as to generate a pass/fail result.
