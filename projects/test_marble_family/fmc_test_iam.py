@@ -68,7 +68,7 @@ def set_iam_fmc(addr, p, bit):
 def test_iam_fmc(addr, plugged="12", verbose=False):
     gitid = addr.codehash
     bmap = {1: "P1L", 2: "P2L", 3: "P2H"}
-    print("# test_iam_fmc " + gitid)
+    print("# test_iam_fmc " + gitid + " plugged=" + plugged)
     for px in [1, 2, 3]:
         faults = []
         for bx in range(48 if px == 3 else 72):
