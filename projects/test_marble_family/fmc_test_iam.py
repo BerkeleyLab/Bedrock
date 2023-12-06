@@ -7,6 +7,7 @@ bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "projects/common")
 import leep
 import time
+from grok_iam import check_row
 
 
 def tobin(x, count=8):
@@ -64,15 +65,19 @@ def set_iam_fmc(addr, p, bit):
     addr.reg_write(r_set)
 
 
-def test_iam_fmc(addr):
+def test_iam_fmc(addr, plugged="12", verbose=False):
     gitid = addr.codehash
+    fault = False
     print("# test_iam_fmc " + gitid)
     for px in [1, 2, 3]:
         for bx in range(48 if px == 3 else 72):
             set_iam_fmc(addr, px, bx)
             time.sleep(0.001)
             r = get_iam_fmc(addr)
-            print(px, "%3d" % bx, r[0], r[1], r[2])
+            if verbose:
+                print(px, "%3d" % bx, r[0], r[1], r[2])
+            fault |= check_row(px, bx, r, plugged=plugged)
+    return fault
 
 
 if __name__ == "__main__":
@@ -81,6 +86,7 @@ if __name__ == "__main__":
         description="Utility for testing IAM Electronic FMC Loopback Module on Marble")
     parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
     parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
+    parser.add_argument('--plugged', type=str, default="12", help='Which FMC have IAM loopback (defauilt "12")')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
     parser.add_argument('-d', '--debug', action='store_true', help='print raw arrays')
 
@@ -88,4 +94,6 @@ if __name__ == "__main__":
     leep_addr = "leep://" + str(args.addr) + str(":") + str(args.port)
     print(leep_addr)
     addr = leep.open(leep_addr, timeout=5.0)
-    test_iam_fmc(addr)
+    fault = test_iam_fmc(addr, plugged=args.plugged, verbose=args.verbose)
+    print("FAIL" if fault else "PASS")
+    exit(1 if fault else 1)
