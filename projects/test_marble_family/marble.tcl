@@ -71,8 +71,14 @@ project_rpt $my_proj_name
 
 # experimental!
 # this old_commit value matches that in build_rom.py --placeholder_rev
+proc get_gitid {} {
+    switch -glob -- [exec git describe --always --dirty] {
+        *-dirty      {return [string toupper [exec git rev-parse --short=24 HEAD]]0000000000000000}
+        default      {return [string toupper [exec git rev-parse HEAD]]}
+    }
+}
 set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
-set new_commit [string toupper [exec git rev-parse HEAD]]
+set new_commit [get_gitid]
 swap_gitid $old_commit $new_commit 16 0
 
 write_bitstream -force $build_id.$gitid.x.bit
