@@ -89,7 +89,7 @@ if __name__ == "__main__":
         description="Utility for testing IAM Electronic FMC Loopback Module on Marble")
     parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
     parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
-    parser.add_argument('--plugged', type=str, default="12", help='Which FMC have IAM loopback (defauilt "12")')
+    parser.add_argument('--plugged', type=str, default="12", help='Which FMC have IAM loopback (default "12")')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
     parser.add_argument('-d', '--debug', action='store_true', help='print raw arrays')
 
