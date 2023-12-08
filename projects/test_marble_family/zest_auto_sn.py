@@ -68,8 +68,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(
         description="Utility for auto-configuring Zest serial number")
-    parser.add_argument('-a', '--addr', default=None, help='IP address')
-    parser.add_argument('-p', '--port', type=int, default=803, help='Port number')
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
     parser.add_argument('-c', '--camera', type=str, default='/dev/video0', help='Camera device')
     parser.add_argument('-w', '--write', action='store_true', help='Write to eeprom')
     args = parser.parse_args()

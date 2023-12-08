@@ -1,6 +1,7 @@
 // Ultra-stupid layer to define clock domains of signals coming in to marble_base
 // See cdc_snitch.py
 module marble_base_shell(
+	// GMII Tx port
 	input vgmii_tx_clk,
 	output [7:0] vgmii_txd,
 	output vgmii_tx_en,
@@ -75,7 +76,7 @@ module marble_base_shell(
 	output lb_rd_valid,
 	// output [read_pipe_len:0] control_pipe_rd,
 	output [31:0] lb_data_out,
-	input [31:0] lb_data_in,
+	input [31:0] lb_data_in
 );
 
 (* magic_cdc *) reg [7:0] vgmii_rxd_r=0;

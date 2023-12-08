@@ -132,8 +132,8 @@ if __name__ == "__main__":
     import sys
     parser = argparse.ArgumentParser(
         description="Utility to read GPS NMEA from Marble Ethernet")
-    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
-    parser.add_argument('-p', '--port', type=int, default=803, help='Port number')
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
     parser.add_argument('-i', '--interval', type=float, default=60.0, help='Polling inteval (seconds)')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
     parser.add_argument('--test', action='store_true', help="Test parsing data from stdin")
