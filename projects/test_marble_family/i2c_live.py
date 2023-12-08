@@ -88,8 +88,8 @@ class i2c_live:
 
 
 def i2c_live_pre_args(parser):
-    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
-    parser.add_argument('-p', '--port', type=int, default=0, help='Port number')
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
     parser.add_argument('-s', '--sim', action='store_true', help='simulation context')
     parser.add_argument('-S', '--stop', action='store_true', help='stop after run')
     parser.add_argument('-V', '--vcd', type=str, help='VCD file to capture')
