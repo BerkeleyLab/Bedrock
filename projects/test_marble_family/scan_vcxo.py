@@ -47,10 +47,10 @@ def measure_1(chip, v, dac=2, pause=1.1, repeat=1, gps=False, verbose=False):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('-a', '--addr', default="192.168.19.10",
-                   help="IP address of FPGA")
+    p.add_argument('-a', '--addr', required=True,
+                   help="IP address of FPGA (required)")
     p.add_argument('-p', '--port', default=803,
-                   help="UDP port for I/O")
+                   help="UDP port for I/O (default 803)")
     p.add_argument('--dac', default=1,
                    help="DAC (1 or 2), 1 tunes precision 25 MHz")
     p.add_argument('--plot', action='store_true',

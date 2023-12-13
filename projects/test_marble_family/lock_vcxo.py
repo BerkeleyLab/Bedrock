@@ -56,10 +56,10 @@ def poll_lock(chip, verbose=False):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('-a', '--addr', default="192.168.19.8",
-                   help="IP address of FPGA")
+    p.add_argument('-a', '--addr', required=True,
+                   help="IP address of FPGA (required)")
     p.add_argument('-p', '--port', default=803,
-                   help="UDP port for I/O")
+                   help="UDP port for I/O (default 803)")
     p.add_argument('-d', '--dac', default=1,
                    help="DAC (1 or 2), 1 tunes precision 25 MHz")
     p.add_argument('-i', '--val', default=0,
