@@ -168,7 +168,7 @@ marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
 
 marble2.bit: marble.tcl marble2.d marble2_features bit_stamp_mod
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
-	G=marble2.$$(git describe --always --abbrev=8 --dirty); if git diff | grep -q .; then echo "modified code; not coercing bitfile header timestamp"; mv $$G.x.bit $$G.bit; else ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) $$G.bit < $$G.x.bit && rm $$G.x.bit && sha256sum $$G.bit; fi
+	G=marble2.$$(git describe --always --abbrev=8 --dirty); if test $${G%-dirty} != $${G}; then echo "modified code; not coercing bitfile header timestamp"; mv $$G.x.bit $$G.bit; else ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) $$G.bit < $$G.x.bit && rm $$G.x.bit && sha256sum $$G.bit; fi
 
 # =====
 # bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'
