@@ -2,7 +2,6 @@ set outputDir ./_xilinx
 file mkdir $outputDir
 
 # experimental!
-# this old_commit value matches that in build_rom.py --placeholder_rev
 proc get_gitid {} {
     switch -glob -- [exec git describe --always --dirty] {
         *-dirty      {return [string toupper [exec git rev-parse --short=24 HEAD]]0000000000000000}
@@ -13,6 +12,7 @@ proc get_gitid {} {
 proc gitid_print {gitid_arg} {
     puts "#[string repeat "-" 48]\n# gitid $gitid_arg\n#[string repeat "-" 48]"
 }
+# this old_commit value matches that in build_rom.py --placeholder_rev
 set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
 set new_commit [get_gitid]
 gitid_print $new_commit
@@ -50,10 +50,10 @@ add_files $file_data
 set_property top "marble_top" [current_fileset]
 set_property verilog_define [list "CHIP_FAMILY_7SERIES"] [current_fileset]
 
-# Get git commit ID
-set gitid [exec git describe --always --abbrev=8 --dirty]
-set gitid_v 32'h$gitid
-set new_defs [list "GIT_32BIT_ID=$gitid_v" "REVC_1W"]
+# Get shorter git commit ID for verilog and bitfile filename
+set gitid_for_filename [exec git describe --always --abbrev=8 --dirty]
+set gitid_for_verilog 32'h$[string range $gitid_for_filename 0 7]
+set new_defs [list "GIT_32BIT_ID=$gitid_for_verilog" "REVC_1W"]
 
 launch_runs synth_1
 wait_on_run synth_1
@@ -86,4 +86,4 @@ project_rpt $my_proj_name
 
 swap_gitid $old_commit $new_commit 16 0
 
-write_bitstream -force $build_id.$gitid.x.bit
+write_bitstream -force $build_id.$gitid_for_filename.x.bit
