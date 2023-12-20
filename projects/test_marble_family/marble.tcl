@@ -52,7 +52,7 @@ set_property verilog_define [list "CHIP_FAMILY_7SERIES"] [current_fileset]
 
 # Get shorter git commit ID for verilog and bitfile filename
 set gitid_for_filename [exec git describe --always --abbrev=8 --dirty]
-set gitid_for_verilog 32'h$[string range $gitid_for_filename 0 7]
+set gitid_for_verilog 32'h[exec git rev-parse --short=8 HEAD]
 set new_defs [list "GIT_32BIT_ID=$gitid_for_verilog" "REVC_1W"]
 
 launch_runs synth_1
