@@ -3,6 +3,7 @@ import argparse
 import sys
 import os
 import time
+import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../badger"))
 from lbus_access import lbus_access
 global old_pps_cnt
@@ -75,11 +76,15 @@ if __name__ == "__main__":
 
     args = p.parse_args()
 
-    chip = lbus_access(args.addr, port=args.port)
+    chip = lbus_access(args.addr, port=args.port, verbose=args.verbose)
+    print("# " + datetime.datetime.utcnow().isoformat() + "Z")
+    first = ""
     if not args.cont:
         set_lock(chip, int(args.val), dac=int(args.dac), fir=args.fir, verbose=args.verbose)
+        first = "# "  # don't want to see stale DAC value in plots
     for ix in range(int(args.npt)):
         ss = poll_lock(chip, verbose=args.verbose)
-        print(ss)
+        print(first + ss)
         sys.stdout.flush()
         time.sleep(0.85)
+        first = ""
