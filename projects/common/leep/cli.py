@@ -102,6 +102,10 @@ def dumpgitid(args, dev):
     print(dev.codehash)
 
 
+def dumpdescript(args, dev):
+    print(dev.descript.decode())
+
+
 def dumpdrv(args, dev):
     if dev.backend != 'ca':
         _log.error("Only 'ca' backend supports, not '%s'", dev.backend)
@@ -172,7 +176,7 @@ def gentemplate(args, dev):
 # Code: %s
 # Name Mode: -M %s
 
-''' % (dev.descript, dev.jsonhash, dev.codehash, args.mode))
+''' % (dev.descript.decode(), dev.jsonhash, dev.codehash, args.mode))
 
     out.write('file "feed_base.template"\n{\n{PREF="$(CHAS):CTRL_"}\n}\n\n')
 
@@ -242,6 +246,9 @@ def getargs():
 
     S = SP.add_parser('gitid', help='print gitid')
     S.set_defaults(func=dumpgitid)
+
+    S = SP.add_parser('descript', help='print descript')
+    S.set_defaults(func=dumpdescript)
 
     S = SP.add_parser('drvinfo', help='print drive info json (ca:// only)')
     S.set_defaults(func=dumpdrv)
