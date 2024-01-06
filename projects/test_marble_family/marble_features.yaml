@@ -7,6 +7,7 @@ marble_mini:
         USE_SI570: 0
         USE_I2CBRIDGE: 1
         MMC_CTRACE: 1
+        GPS_CTRACE: 0
         USE_GTPCLK: 1
     params:
         carrier: "Marble Mini"
@@ -21,6 +22,7 @@ marble_v2:
         USE_SI570: 1
         USE_I2CBRIDGE: 1
         MMC_CTRACE: 1
+        GPS_CTRACE: 0
         USE_GTPCLK: 1
     params:
         carrier: "Marble"

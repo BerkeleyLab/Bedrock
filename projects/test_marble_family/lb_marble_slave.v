@@ -7,6 +7,7 @@
 module lb_marble_slave #(
 	parameter USE_I2CBRIDGE = 0,
 	parameter MMC_CTRACE = 0,
+	parameter GPS_CTRACE = 0,
 	parameter misc_config_default = 0,
 	parameter use_ddr_pps = 0,
 	// Timing hooks, can be used to speed up simulation
@@ -105,22 +106,31 @@ assign obadge_out=0;
 
 wire [15:0] ctrace_out;
 reg ctrace_start=0;
-wire [0:0] ctrace_running;
+reg ctrace_arm=0;
+wire ctrace_running;
 
-reg csb_r=0, csb_toggle;
-reg arm=1;
-always @(posedge clk) begin
-	csb_r <= mmc_pins[0];  // Note! from spi_gate.v; spi_pins_debug = {MISO, din, sclk_d1, csb_d1};
-	csb_toggle <= (~mmc_pins[0] & csb_r);
-	if (csb_toggle) arm <= 0;
-	if (ctrace_start) arm <= 1;
-end
-
+wire [1:0] gps_ctrace_pins;
 generate if (MMC_CTRACE) begin : mmc_ctrace
+	// Trigger logic to look at MMC activity
+	reg csb_r=0, csb_toggle=0;
+	always @(posedge clk) begin
+		csb_r <= mmc_pins[0];  // Note! from spi_gate.v; spi_pins_debug = {MISO, din, sclk_d1, csb_d1};
+		csb_toggle <= (~mmc_pins[0] & csb_r);
+		if (csb_toggle) ctrace_arm <= 0;
+		if (ctrace_start) ctrace_arm <= 1;
+	end
 	localparam ctrace_aw=11;
 	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
 	ctrace #(.dw(4), .tw(12), .aw(ctrace_aw)) mmc_ctrace(
-		.clk(clk), .data(mmc_pins), .start(csb_toggle & arm),
+		.clk(clk), .data(mmc_pins), .start(csb_toggle & ctrace_arm),
+		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
+		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
+	);
+end else if (GPS_CTRACE) begin : gps_ctrace
+	localparam ctrace_aw=11;
+	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
+	ctrace #(.dw(2), .tw(14), .aw(ctrace_aw)) mmc_ctrace(
+		.clk(clk), .data(gps_ctrace_pins), .start(ctrace_start),
 		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
 		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
 	);
@@ -128,6 +138,7 @@ end else begin : no_mmc_trace
 	assign ctrace_out=0;
 	assign ctrace_running=0;
 end endgenerate
+wire [1:0] ctrace_status = {ctrace_arm, ctrace_running};
 
 // Simple cross-domain fault counter
 // Trigger originates deep inside construct.v
@@ -170,6 +181,9 @@ end else begin : no_gen_ddr_pps
 	always @(posedge clk) pps_dff <= gps[3];
 	assign pps_in = {pps_dff, pps_dff};
 end endgenerate
+
+// ctrace handling of GPS PPS (pps_in[0]) and UART (gps_pins[2])
+assign gps_ctrace_pins = {pps_in[0], gps_pins[2]};
 
 // GPS handling, includes another frequency counter
 reg gps_buf_reset=0;
@@ -338,7 +352,7 @@ always @(posedge clk) if (do_rd) begin
 		4'h8: reg_bank_0 <= uptime;
 		4'h9: reg_bank_0 <= twi_status;
 		4'ha: reg_bank_0 <= wr_dac_busy;
-		4'hb: reg_bank_0 <= ctrace_running;
+		4'hb: reg_bank_0 <= ctrace_status;
 		4'hc: reg_bank_0 <= gps_stat;
 		4'hd: reg_bank_0 <= gps_pps_data;
 		4'he: reg_bank_0 <= pps_dsp_status;
