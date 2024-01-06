@@ -90,7 +90,7 @@ def ctrace_collect(fpga, ctrace_base="ctrace"):
     wait_cnt = 0
     while True:
         a = fpga.reg_read([ctrace_status_name])[0]
-        print(("poll %s 0x%x" % (ctrace_status_name, a))
+        print("poll %s 0x%x" % (ctrace_status_name, a))
         if (a & 1) == 0:
             break
         wait_cnt += 1
