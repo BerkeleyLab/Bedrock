@@ -155,10 +155,10 @@
     },
     "ctrace_out": {
         "access": "r",
-        "addr_width": 11,
+        "addr_width": 14,
         "sign": "unsigned",
         "base_addr": "0x60000",
-        "data_width": 16
+        "data_width": 20
     },
     "gps_buff": {
         "access": "r",

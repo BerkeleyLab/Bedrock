@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # signals, tw, tstep should be runtime config
     # this static configuration matches GPS_CTRACE option in lb_marble_slave.v
     signals = ["pps", "uart"]
-    tw = 14
+    tw = 18
     tstep = 8  # ns
     # effective aw determined at runtime via leep and config_rom
     # done with setup, now start the actions

@@ -104,7 +104,7 @@ assign ibadge_out=0;
 assign obadge_out=0;
 `endif
 
-wire [15:0] ctrace_out;
+wire [19:0] ctrace_out;
 reg ctrace_start=0;
 reg ctrace_arm=0;
 wire ctrace_running;
@@ -127,9 +127,9 @@ generate if (MMC_CTRACE) begin : mmc_ctrace
 		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
 	);
 end else if (GPS_CTRACE) begin : gps_ctrace
-	localparam ctrace_aw=11;
+	localparam ctrace_aw=14;
 	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
-	ctrace #(.dw(2), .tw(14), .aw(ctrace_aw)) mmc_ctrace(
+	ctrace #(.dw(2), .tw(18), .aw(ctrace_aw)) mmc_ctrace(
 		.clk(clk), .data(gps_ctrace_pins), .start(ctrace_start),
 		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
 		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
