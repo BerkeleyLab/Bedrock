@@ -55,13 +55,6 @@
         "base_addr": 327690,
         "data_width": 1
     },
-    "gps_buf_reset": {
-        "access": "rw",
-        "addr_width": 0,
-        "sign": "unsigned",
-        "base_addr": 327691,
-        "data_width": 1
-    },
     "pps_config": {
         "access": "rw",
         "addr_width": 0,

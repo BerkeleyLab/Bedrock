@@ -2,15 +2,15 @@
 // Slight adaptation of bedrock/badger/tests/lb_demo_slave.v
 // Has accreted some self-diagnostic features that (probably) would
 // not be part of a final production build.
-// Only a few write addresses implemented for LEDs etc.,
-// see logic below for local_write.
+// Only a few write addresses implemented for LEDs etc.
+// See logic below for local_write.
 module lb_marble_slave #(
 	parameter USE_I2CBRIDGE = 0,
 	parameter MMC_CTRACE = 0,
 	parameter GPS_CTRACE = 0,
 	parameter misc_config_default = 0,
 	parameter use_ddr_pps = 0,
-	// Timing hooks, can be used to speed up simulation
+	// Timing hooks, which can be used to speed up simulation
 	parameter twi_q0=6,  // 145 kbps with 125 MHz clock
 	parameter twi_q1=2,
 	parameter twi_q2=7,
@@ -185,17 +185,17 @@ end endgenerate
 // ctrace handling of GPS PPS (pps_in[0]) and UART (gps_pins[2])
 assign gps_ctrace_pins = {pps_in[0], gps_pins[2]};
 
-// GPS handling, includes another frequency counter
-reg gps_buf_reset=0;
+// GPS handling, which includes another frequency counter
 wire gps_buf_full;
 wire [7:0] gps_buf_out;
 wire [27:0] gps_freq;
 wire [3:0] pps_cnt;
 // Ignore IDDR enhancement of PPS pin for this module
 wire [3:0] gps_4pins = {pps_in[0], gps_pins};
+wire [13:0] nmea_buf_status;
 gps_test gps_test(.gps_pins(gps_4pins),
 	.clk(clk), .lb_addr(addr[9:0]), .lb_dout(gps_buf_out),
-	.buf_full(gps_buf_full), .buf_reset(gps_buf_reset),
+	.buf_full(gps_buf_full), .buf_status(nmea_buf_status),
 	.f_read(gps_freq), .pps_cnt(pps_cnt)
 );
 // Simple counter based on output of pps-lock module below (inside ad5662_lock)
@@ -225,7 +225,7 @@ always @(posedge clk) begin
 	rx_mac_buf_status_r <= rx_mac_buf_status;
 end
 
-// Crude uptime counter, wraps every 9.77 hours
+// Crude uptime counter, that wraps every 9.77 hours
 reg led_tick=0;
 reg [31:0] uptime=0;
 always @(posedge clk) if (led_tick) uptime <= uptime+1;
@@ -297,8 +297,8 @@ end else begin : no_i2cb
 	assign twi_rst = 1'bz;
 end endgenerate
 
-// White Rabbit DAC - with work-in-progress internal GPS pps lock
-// wr_dac_tick is 31.2 MHz, wr_dac_sclk is 15.6 MHz when operating
+// White Rabbit DAC - with capability of locking to PPS signal
+// wr_dac_tick is 31.2 MHz, and wr_dac_sclk is 15.6 MHz when operating
 reg [led_cw-1:0] led_cc=0;
 reg wr_dac_tick;  always @(posedge clk) wr_dac_tick <= &led_cc[1:0];
 reg wr_dac_send=0;
@@ -367,7 +367,7 @@ always @(posedge clk) if (do_rd) begin
 		4'h0: reg_bank_1 <= xadc_internal_temperature;
 		4'h1: reg_bank_1 <= dna_high;
 		4'h2: reg_bank_1 <= dna_low;
-		//  xxxx13  unused
+		4'h3: reg_bank_1 <= nmea_buf_status;
 		//  xxxx14  unused
 		//  xxxx15  unused
 		//  xxxx16  unused
@@ -431,7 +431,7 @@ always @(posedge clk) if (local_write) case (addr[4:0])
 	8: misc_config <= data_out;
 	// 9: wr_dac
 	// 10: ctrace_start
-	// 11: gps_buf_reset
+	// 11: unused
 	// 12: pps_config_write
 	16: fmc1_test_r[21:0] <= data_out;
 	17: fmc1_test_r[43:22] <= data_out;
@@ -446,7 +446,6 @@ endcase
 always @(posedge clk) begin
 	wr_dac_send <= local_write & (addr[4:0] == 9);
 	ctrace_start <= local_write & (addr[4:0] == 10);
-	gps_buf_reset <= local_write & (addr[4:0] == 11);
 	pps_config_write <= local_write & (addr[4:0] == 12);
 end
 
