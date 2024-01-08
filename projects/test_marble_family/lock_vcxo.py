@@ -33,9 +33,10 @@ def set_lock(chip, v, dac=1, fir=False, fine_sel=False, verbose=False):
     chip.exchange([327692], [cfg])  # pps_config
 
 
-def poll_lock(chip, verbose=False):
+def poll_lock(chip, verbose=False, timeout=10):
     global old_pps_cnt
     rct = 0
+    start = time.time()
     while True:
         dsp_status, gps_status, cfg = chip.exchange([14, 12, 327692])
         dac = dsp_status >> 16
@@ -48,10 +49,13 @@ def poll_lock(chip, verbose=False):
             pha -= 4096
         if verbose or pps_cnt != old_pps_cnt:
             break
+        if (timeout > 0) and ((time.time() - start) > timeout):
+            return None
         time.sleep(0.20)
         rct += 1
     old_pps_cnt = pps_cnt
-    ss = "%5d %d %d %4d %2d %d %d %4d" % (dac, dsp_on, dsp_arm, pha, pps_cnt, cfg, rct, pps_lcnt)
+    ss = " {:5d} {:6d} {:7d} {:5d} {:7d} {:3d} {:3d} {:8d}".format(
+        dac, dsp_on, dsp_arm, pha, pps_cnt, cfg, rct, pps_lcnt)
     return ss
 
 
@@ -73,18 +77,32 @@ if __name__ == "__main__":
                    help="Number of time steps to collect")
     p.add_argument('-c', '--cont', action='store_true',
                    help="Monitor only, don't initialize")
+    p.add_argument('-t', '--timeout', default=10,
+                   help="Time (in seconds) to exit after last PPS signal (negative values disable timeout)")
 
     args = p.parse_args()
 
     chip = lbus_access(args.addr, port=args.port, verbose=args.verbose)
     print("# " + datetime.datetime.utcnow().isoformat() + "Z")
-    first = ""
+    first = True
     if not args.cont:
         set_lock(chip, int(args.val), dac=int(args.dac), fir=args.fir, verbose=args.verbose)
-        first = "# "  # don't want to see stale DAC value in plots
+        first = True  # don't want to see stale DAC value in plots
+    print("#{:>5s} {:>6s} {:>7s} {:>5s} {:>7s} {:>3s} {:>3s} {:>8s}".format(
+        "dac", "dsp_on", "dsp_arm", "pha", "pps_cnt", "cfg", "rct", "pps_lcnt"))
     for ix in range(int(args.npt)):
-        ss = poll_lock(chip, verbose=args.verbose)
-        print(first + ss)
-        sys.stdout.flush()
-        time.sleep(0.85)
-        first = ""
+        try:
+            ss = poll_lock(chip, verbose=args.verbose, timeout=int(args.timeout))
+            if ss is None:
+                print("Timeout waiting for PPS signal")
+                break
+            if first:
+                print("#" + ss[1:])
+            else:
+                print(ss)
+            sys.stdout.flush()
+            time.sleep(0.85)
+            first = False
+        except KeyboardInterrupt:
+            print("# Exiting")
+            break
