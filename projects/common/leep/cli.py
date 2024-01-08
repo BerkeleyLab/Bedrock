@@ -212,6 +212,7 @@ def getargs():
     P.add_argument('-i', '--inst', action='append', default=[])
     P.add_argument('dest', metavar="URI",
                    help="Server address.  ca://Prefix or leep://host[:port]")
+    P.set_defaults(func=lambda args, dev: None)
 
     SP = P.add_subparsers()
 
