@@ -54,7 +54,7 @@ def poll_lock(chip, verbose=False, timeout=10):
         time.sleep(0.20)
         rct += 1
     old_pps_cnt = pps_cnt
-    ss = " {:5d} {:6d} {:7d} {:5d} {:7d} {:3d} {:3d} {:8d}".format(
+    ss = "{:5d} {:6d} {:7d} {:5d} {:7d} {:3d} {:3d} {:8d}".format(
         dac, dsp_on, dsp_arm, pha, pps_cnt, cfg, rct, pps_lcnt)
     return ss
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     chip = lbus_access(args.addr, port=args.port, verbose=args.verbose)
     print("# " + datetime.datetime.utcnow().isoformat() + "Z")
-    first = True
+    first = False
     if not args.cont:
         set_lock(chip, int(args.val), dac=int(args.dac), fir=args.fir, verbose=args.verbose)
         first = True  # don't want to see stale DAC value in plots
@@ -96,10 +96,7 @@ if __name__ == "__main__":
             if ss is None:
                 print("Timeout waiting for PPS signal")
                 break
-            if first:
-                print("#" + ss[1:])
-            else:
-                print(ss)
+            print(("#" if first else " ") + ss)
             sys.stdout.flush()
             time.sleep(0.85)
             first = False
