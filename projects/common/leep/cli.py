@@ -10,8 +10,6 @@ import ast
 
 from collections import defaultdict
 
-import numpy
-
 from . import open
 from . import RomError
 
@@ -30,7 +28,7 @@ def readwrite(args, dev):
             try:
                 _ = iter(value)
                 print("%s \t%s" % (name, ' '.join(['%x' % v for v in value])))
-            except:
+            except TypeError:
                 print("%s \t%08x" % (name, value))
 
 
