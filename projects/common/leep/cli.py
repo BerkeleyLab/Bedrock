@@ -27,9 +27,10 @@ def readwrite(args, dev):
             dev.reg_write([(name, val)])
         else:
             value, = dev.reg_read((name,))
-            if isinstance(value, (list, numpy.ndarray)):
+            try:
+                _ = iter(value)
                 print("%s \t%s" % (name, ' '.join(['%x' % v for v in value])))
-            else:
+            except:
                 print("%s \t%08x" % (name, value))
 
 
