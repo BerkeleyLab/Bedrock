@@ -36,8 +36,12 @@ def handle_gsv(gsv_state, a):
 
 
 def gps2dec(x):
-    dd, ff = x.split(".")
-    gdeg = int(dd[:-2]) + float(dd[-2:] + "." + ff)/60.0
+    gdeg = float('nan')
+    try:
+        dd, ff = x.split(".")
+        gdeg = int(dd[:-2]) + float(dd[-2:] + "." + ff)/60.0
+    except ValueError:
+        pass
     # print(x, gdeg)
     return gdeg
 
