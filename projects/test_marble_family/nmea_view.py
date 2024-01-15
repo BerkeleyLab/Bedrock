@@ -41,6 +41,7 @@ def gps2dec(x):
         dd, ff = x.split(".")
         gdeg = int(dd[:-2]) + float(dd[-2:] + "." + ff)/60.0
     except ValueError:
+        print("# gps2dec oddity (%s)" % x)
         pass
     # print(x, gdeg)
     return gdeg
