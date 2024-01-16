@@ -215,7 +215,7 @@ end
 // ========= Mandatory Include for GTKWave Support (see Makefile) ============
 initial begin
   if ($test$plusargs("vcd")) begin
-    $dumpfile("mmc_mailbox_tb.vcd");
+    $dumpfile("mmc_mailbox.vcd");
     $dumpvars;
   end
 end
