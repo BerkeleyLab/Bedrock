@@ -309,6 +309,33 @@ def flash_dump(s, file_name, ad, page_count, otp=False):
     return
 
 
+# Verify that flash contents match local file
+def remote_verify(s, file_name, ad, size):
+    start_p = ad >> 8
+    stop_p = ((ad + size - 1) >> 8) + 1
+    final_a = (stop_p << 8) + 255
+    logging.info('Verifying file %s to %s from add 0x%x to add 0x%x, length = 0x%x...'
+                 % (file_name, IPADDR, ad, final_a, size))
+    f = open(file_name, 'rb')
+    ok = True
+    for ba in range(start_p, stop_p):
+        f.seek((ba << 8) - ad)
+        bd_file = f.read(PAGE)
+        bd = page_read(s, ba << 8, fast=False, otp=False)
+        if ba+1 == stop_p:  # last block of file may be short
+            bd = bd[:len(bd_file)]
+        # print(ba, len(bd), len(bd_file), bd == bd_file)
+        if ba % 512 == 0:
+            sys.stdout.write(".")
+            sys.stdout.flush()
+        if bd != bd_file:
+            ok = False
+            break
+    sys.stdout.write("\n")
+    f.close()
+    return ok
+
+
 # Read local file and write to flash from FF to 00
 def remote_program(s, file_name, ad, size):
     start_p = ad >> 8
@@ -413,6 +440,7 @@ def main():
                         help='Number of 256-byte sectors to erase')
     parser.add_argument('--power', action='store_true', help='power up the flash chip')
     parser.add_argument('--program', type=str, help='File to be stored in SPI Flash')
+    parser.add_argument('--verify', action='store_true', help="just verify, don't program")
     parser.add_argument('--dump', type=str, help='Dump flash memory contents into file')
     parser.add_argument('--wait', default=0.001, type=float,
                         help='Wait time between consecutive writes (seconds)')
@@ -485,6 +513,9 @@ def main():
             print("CONFIG_REG 0x%2x OTP bits not good for programming!" % cnf)
             exit(1)
         if args.force_write_enable:
+            if args.verify:
+                print("Don't force and verify at the same time")
+                exit(1)
             status1 = status & 0xE3  # attempt force all BP bits to zero
             write_status(sock, status1)
             time.sleep(0.3)  # empirically needed,
@@ -494,8 +525,13 @@ def main():
                 print("Failed to set status from 0x%2.2x to 0x%2.2x, now 0x%2.2x" % (status, status1, status2))
                 print("Check Write-Protect switch")
                 exit(1)
-        remote_erase(sock, ad, size)
-        remote_program(sock, prog_file, ad, size)
+        if args.verify:
+            ok = remote_verify(sock, prog_file, ad, size)
+            print("Verify result is %s" % ("GOOD" if ok else "BAD"))
+            exit(0 if ok else 1)
+        else:
+            remote_erase(sock, ad, size)
+            remote_program(sock, prog_file, ad, size)
         if args.force_write_enable:
             write_status(sock, status)  # back to what it was
 

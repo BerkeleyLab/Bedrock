@@ -1,0 +1,11 @@
+badger_cdc:
+  stage: test
+  script:
+    - cd badger/tests && make hw_test_cdc.txt
+# not yet a regression test -- just checking the process for now
+
+marble_cdc:
+  stage: test
+  script:
+    - cd projects/test_marble_family && make marble_base_cdc.txt
+# not yet a regression test -- just checking the process for now

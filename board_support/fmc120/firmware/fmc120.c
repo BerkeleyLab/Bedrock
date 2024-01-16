@@ -1,5 +1,9 @@
 #include <stdbool.h>
-#include "print.h"
+#ifdef NONSTD_PRINTF
+#include "printf.h"
+#else
+#include <stdio.h>
+#endif
 #include "sfr.h"
 #include "timer.h"
 #include "i2c_soft.h"
@@ -8,10 +12,6 @@
 #include "dsp.h"
 #include "settings.h"
 #include "gpio.h"
-
-#ifdef _PRINTF
-#include "printf.h" // cost 10kB
-#endif
 
 /*
  JESD204B subclass1 deterministic latency
@@ -102,8 +102,8 @@ void FMC120_SelectAddr(uint8_t ga, uint32_t base_addr) {
     g_base_jesd_sfr = base_addr + FMC120_JESD_SFR;
 }
 
-void FMC120_PrintStatus(bool status) {
-    print_str(status ? "   OK.\n" : "Error.\n");
+void FMC120_PrintStatus(const char* string, bool pass) {
+    printf("%30s: %s\n", string, pass ? "Pass" : "Fail");
 }
 
 bool FMC120_CheckPrsnt(uint32_t base_addr) {
@@ -119,19 +119,15 @@ bool FMC120_Init(uint8_t clockmode, uint8_t ga, uint32_t base_addr) {
 
     // Double check board presence
     ret &= FMC120_CheckPrsnt(base_addr);
-    print_str("GA1,GA0       : ");
-    print_hex(ga, 1);
-    print_str("\n");
+    printf("GA1,GA0       : %1d\n", ga);
 
     FMC120_SelectAddr(ga, base_addr);
     byte = FMC120_CPLD_GetVer();
     if (byte != 0x10) {
-        print_str("ERROR: FMC120 Version Invalid.\n");
+        printf("ERROR: FMC120 Version Invalid.\n");
         return false;
     } else {
-        print_str("FMC120 Ver: ");
-        print_hex(byte, 2);
-        print_str("\n");
+        printf("FMC120 Ver: %2d\n", byte);
     }
 
     FMC120_SetTxEnable(false);
@@ -143,8 +139,7 @@ bool FMC120_Init(uint8_t clockmode, uint8_t ga, uint32_t base_addr) {
 
     // Configure the clock tree
     ret &= FMC120_InitClock(clockmode);
-    print_str("  --- FMC120 CLK Init ---: ");
-    FMC120_PrintStatus(ret);
+    FMC120_PrintStatus("  --- FMC120 CLK Init ---", ret);
 
     // Assert Transceiver Reset
     SET_SFR1(g_base_jesd_sfr, 0, BIT_RX_SYS_RESET, 1);
@@ -152,31 +147,26 @@ bool FMC120_Init(uint8_t clockmode, uint8_t ga, uint32_t base_addr) {
     SET_SFR1(g_base_jesd_sfr, 0, BIT_RX_RESET, 1);
     DELAY_MS(5);
     byte = GET_SFR1(g_base_jesd_sfr, 0, BIT_STAT_RXRESET_DONE);
-    print_str("PHY RX_RESET_DONE        : ");
-    FMC120_PrintStatus(byte & 0x1);
+    FMC120_PrintStatus("PHY RX_RESET_DONE", byte & 0x1);
     SET_SFR1(g_base_jesd_sfr, 0, BIT_TX_RESET, 1);
     DELAY_MS(5);
     byte = GET_SFR1(g_base_jesd_sfr, 0, BIT_STAT_TXRESET_DONE);
-    print_str("PHY TX_RESET_DONE        : ");
-    FMC120_PrintStatus(byte & 0x1);
+    FMC120_PrintStatus("PHY TX_RESET_DONE", byte & 0x1);
 
     // Wait for QPLLs to lock
     DELAY_MS(1);
     byte = GET_SFR1(g_base_jesd_sfr, 0, BIT_STAT_QPLLLOCK_0);
-    print_str("QPLL0 locked             : ");
-    FMC120_PrintStatus(byte & 0x1);
+    FMC120_PrintStatus("QPLL0 locked", byte & 0x1);
     byte = GET_SFR1(g_base_jesd_sfr, 0, BIT_STAT_QPLLLOCK_1);
-    print_str("QPLL1 locked             : ");
-    FMC120_PrintStatus(byte & 0x1);
+    FMC120_PrintStatus("QPLL1 locked", byte & 0x1);
 
     // jesd204 cores are properly configured by default.
     ret &= init_jesd204_core();
-    print_str("  --- INIT_JESD204_CORE ---: ");
-    FMC120_PrintStatus(ret);
+    FMC120_PrintStatus("  --- INIT_JESD204_CORE ---", ret);
 
     // Configure ADC0 and ADC1
-    //ret &= FMC120_InitADC();
-    //DELAY_MS(50);
+    // ret &= FMC120_InitADC();
+    // DELAY_MS(5);
 
     //ret &= FMC120_InitDAC();
 
@@ -208,25 +198,6 @@ uint32_t * FMC120_AD7291_ReadAll(void) {
 void FMC120_PrintMonitor(uint32_t *data) {
     uint8_t scale, chan, nBit=12;
     const char * unit = " Volt";
-#ifdef _PRINTF
-    float fvalue;
-    for (chan=0; chan<=8; chan++) {
-        switch (chan) {
-            case 7:
-                fvalue = (2048-data[chan]) * 6.6 / 0xfff;
-                printf("Vin7    : %8.3f V\n", fvalue);
-                break;
-            case 8:
-                fvalue = data[chan] / 4;
-                printf("Temp    : %8.3f degC\n", fvalue);
-                break;
-            default:
-                scale = (chan < 4) ? 5 : 10;
-                fvalue = data[chan] * scale / 0x1fff;
-                printf("Vin%d    : %8.3f V\n", chan, fvalue);
-        }
-    }
-#else
     for (chan=0; chan<=8; chan++) {
         print_str("FMC120 ");
         switch (chan) {
@@ -257,7 +228,6 @@ void FMC120_PrintMonitor(uint32_t *data) {
         print_str(unit);
         print_str("\n");
     }
-#endif
 }
 
 uint8_t FMC120_CPLD_GetVer(void) {
@@ -551,8 +521,7 @@ bool FMC120_InitClock(uint8_t clockmode) {
         // verify PLL2 status
         ret &= FMC120_SPI_Read(LMK_SELECT, 0x183, &spi_read_dat[1]);
         ret &= CHECK_BIT(spi_read_dat[0], 1) && CHECK_BIT(spi_read_dat[1], 1);
-        print_str("PLL Locked              : ");
-        FMC120_PrintStatus(ret);
+        FMC120_PrintStatus("PLL Locked", ret);
 
     } else if (clockmode == FMC120_EXTERNAL_CLK) {
 
@@ -763,19 +732,17 @@ bool FMC120_ShortPatternTest(void) {
     ret &= FMC120_SPI_Write(DAC_SELECT, 0x06, 0x00FF);
     DELAY_MS(10);
     ret &= FMC120_SPI_Read(DAC_SELECT, 0x6D, &spi_read_dat);
-    print_str("DAC Short Pattern       : ");
-    print_hex(spi_read_dat, 4);
+    printf("DAC Short Pattern       : %4x\n", spi_read_dat);
     //spi_read_dat &= 0xFF00;
-    FMC120_PrintStatus(spi_read_dat == 0x0000);
+    FMC120_PrintStatus("DAC Short Pattern Check", spi_read_dat == 0x0000);
 
     // Force Error
     FMC120_SetTestPatEnable(false);
     ret &= FMC120_SPI_Read(DAC_SELECT, 0x6D, &spi_read_dat);
     DELAY_MS(20);
-    print_str("DAC Short Pattern Inject: ");
-    print_hex(spi_read_dat, 4);
+    printf("DAC Short Pattern Inject: %4x\n", spi_read_dat);
     //spi_read_dat &= 0xFF00;
-    FMC120_PrintStatus(spi_read_dat == 0xFF00);
+    FMC120_PrintStatus("DAC Short Pattern Inject Check", spi_read_dat == 0xFF00);
 
     // Disable short test pattern test
     ret &= FMC120_SPI_Write(DAC_SELECT, 0x02, reg02);
@@ -945,18 +912,16 @@ bool FMC120_InitDAC(void) {
     // uint16_t pll_mask = pll_ena ? 0xFFFF : 0xFFFE;
     // 12. Verify SERDES PLL lock status
     // SLAA696 step 5. Check alarm_from_pll, alarm_rw0_pll, alarm_rw1_pll
-    // print_str("  DAC PLL               : ");
     // ret &= FMC120_SPI_Read(DAC_SELECT, 0x6C, &spi_read_dat);
-    // FMC120_PrintStatus((spi_read_dat & pll_mask) == 0x2);
+    // FMC120_PrintStatus("  DAC PLL", (spi_read_dat & pll_mask) == 0x2);
 
     // SLAA696 step 14. gapped periodic SYSREF, SYNCB should be low
-    FMC120_LMK04828_SyncAll();
+    // FMC120_LMK04828_SyncAll();
 
     // 16. Clear alarms, check lane and link err cnts
     // ret &= FMC120_check_dac_alarms(pll_ena);
 
-    print_str(" --- FMC120 DAC Init ---: ");
-    FMC120_PrintStatus(ret);
+    FMC120_PrintStatus(" --- FMC120 DAC Init ---", ret);
     return ret;
 }
 
@@ -980,10 +945,9 @@ bool FMC120_check_dac_alarms(bool pll_ena) {
     };
     FMC120_SPI_WriteRegs(DAC_SELECT, regmap1, sizeof(regmap1)/sizeof(regmap1[0]));
 
-    print_str("    DAC PLL             : ");
     FMC120_SPI_Read(DAC_SELECT, 0x6C, &spi_read_dat);
     valid &= (spi_read_dat & pll_mask) == 0x2;
-    FMC120_PrintStatus(valid);
+    FMC120_PrintStatus("    DAC PLL", valid);
     if (!valid) {
         // Unacceptable alarm_sysref_err, pll_alarm, serdes_alarm
         print_str("DBG 0x6C :");
@@ -993,45 +957,38 @@ bool FMC120_check_dac_alarms(bool pll_ena) {
     }
 
     if (pll_ena) {
-        print_str("    PLL Filter Volt     : ");
         FMC120_SPI_Read(DAC_SELECT, 0x31, &spi_read_dat);
         spi_read_dat &= 0x7;
-        FMC120_PrintStatus(spi_read_dat == 3 || spi_read_dat == 4);
+        FMC120_PrintStatus(
+            "    PLL Filter Volt", spi_read_dat == 3 || spi_read_dat == 4);
     }
 
-    print_str("    DAC LANE LOS        : ");
     FMC120_SPI_Read(DAC_SELECT, 0x6D, &spi_read_dat);
     valid &= spi_read_dat == 0;
-    FMC120_PrintStatus(valid);
+    FMC120_PrintStatus("    DAC LANE LOS", valid);
 
     uint8_t ix;
-    print_str("    DAC LANE: ");
+    printf("    DAC LANE: ");
     for (ix=0; ix<8; ix++) {
         FMC120_SPI_Read(DAC_SELECT, 0x64+ix, &spi_read_dat);
         alarm_valid = ((spi_read_dat & ~0x3) == 0 );       // ignore read alarms of 'FIFO is empty'
-        print_str( alarm_valid ? " OK" :  "FAIL");
+        printf("%s ", alarm_valid ? "OK" :  "FAIL");
         if (!alarm_valid) {
-            print_str("\n DBG 0x");
-            print_hex(ix + 0x64, 2);
-            print_str(" : ");
-            print_hex(spi_read_dat, 4);
+            printf("\n DBG 0x%2x : 0x%4x", ix + 0x64, spi_read_dat);
         }
         valid &= alarm_valid;
     }
-    print_str("\n    DAC LINK: ");
+    printf("\n    DAC LINK: ");
     for (ix=0; ix<4; ix++) {
         FMC120_SPI_Read(DAC_SELECT, 0x41+ix, &spi_read_dat);
         alarm_valid = (spi_read_dat <= 2);  // XXX
         valid &= alarm_valid;
-        print_str( alarm_valid ? " OK" :  "FAIL");
+        printf("%s ", alarm_valid ? "OK" :  "FAIL");
         if (!alarm_valid) {
-            print_str("\n DBG 0x");
-            print_hex(ix + 0x41, 2);
-            print_str(" : ");
-            print_hex(spi_read_dat, 4);
+            printf("\n DBG 0x%2x : 0x%4x", ix + 0x41, spi_read_dat);
         }
     }
-    print_str("\n");
+    printf("\n");
 
     return valid;
 }
@@ -1066,10 +1023,73 @@ bool FMC120_ResetADC(void) {
     return FMC120_SPI_WriteRegs(ADC_SELECT_BOTH, regmap, sizeof(regmap)/sizeof(regmap[0]));
 }
 
+
+bool FMC120_Cal_ADC_DC_Offset(void) {
+    // Table 77.
+    bool ret = true;
+    uint16_t offset_a[2][8];
+    uint16_t offset_b[2][8];
+    uint16_t core_offset_a[4], core_offset_b[4];  // 2 channel, 4 cores, 11 bits
+    uint8_t adc_select[] = {ADC0_SELECT, ADC1_SELECT};
+
+    for (size_t adc=0; adc<2; adc++) {
+        // Read internal estimate of dc offset
+        t_reg16 regmap[] = {
+            { 0x4005, 0x01 },        // Disable broadcast mode
+            { 0x4004, 0x61 },        // Select offset read page
+            { 0x4003, 0x00 },        // Select offset read page
+            { 0x4002, 0x00 },        // Select offset read page
+            { 0x4001, 0x00 },        // Select offset read page
+        };
+        ret &= FMC120_SPI_WriteRegs(
+            adc_select[adc], regmap, sizeof(regmap)/sizeof(regmap[0]));
+
+        for (size_t ix=0; ix<8; ix++) {
+            FMC120_SPI_Read(adc_select[adc], 0xE074 + ix, &offset_a[adc][ix]);
+            FMC120_SPI_Read(adc_select[adc], 0xF074 + ix, &offset_b[adc][ix]);
+        }
+        for (size_t core=0; core<4; core++) {
+            core_offset_a[core] = (offset_a[adc][core*2+1] << 8) |offset_a[adc][core*2];
+            core_offset_b[core] = (offset_b[adc][core*2+1] << 8) |offset_b[adc][core*2];
+            printf("  %s: ADC%1d core[%1d] Ch A DC=%4d, Ch B DC=%4d\n",
+                     __func__, adc, core,
+                     core_offset_a[core], core_offset_b[core]);
+        }
+        t_reg16 regmap_load[] = {
+            { 0x6069, 0x01 },        // Enable external correction bit for Ch A
+            { 0x7069, 0x01 },        // Enable external correction bit for Ch B
+            { 0x4004, 0x61 },        // Select offset load page
+            { 0x4003, 0x00 },        // Select offset load page
+            { 0x4002, 0x05 },        // Select offset load page
+            { 0x4001, 0x00 },        // Select offset load page
+            { 0x6000, offset_a[adc][0] },
+            { 0x6001, offset_a[adc][1] },
+            { 0x6004, offset_a[adc][2] },
+            { 0x6005, offset_a[adc][3] },
+            { 0x6008, offset_a[adc][4] },
+            { 0x6009, offset_a[adc][5] },
+            { 0x600c, offset_a[adc][6] },
+            { 0x600d, offset_a[adc][7] },
+            { 0x7000, offset_b[adc][0] },
+            { 0x7001, offset_b[adc][1] },
+            { 0x7004, offset_b[adc][2] },
+            { 0x7005, offset_b[adc][3] },
+            { 0x7008, offset_b[adc][4] },
+            { 0x7009, offset_b[adc][5] },
+            { 0x700c, offset_b[adc][6] },
+            { 0x700d, offset_b[adc][7] },
+            { 0x4005, 0x00 },       // enable broadcast
+        };
+        ret &= FMC120_SPI_WriteRegs(
+            adc_select[adc], regmap_load, sizeof(regmap_load)/sizeof(regmap_load[0]));
+    }
+    return ret;
+}
+
 bool FMC120_InitADC(void) {
     bool ret = true;
     uint8_t byteBuf;
-    ret &= FMC120_ADS54J60_Reset();
+    // ret &= FMC120_ADS54J60_Reset();
 
     // power up adc input amplifiers
     ret &= i2c_read_regs( I2C_ADR_FMC120_CPLD, CPLD_ADR_CONTROL0, &byteBuf, 1);
@@ -1081,10 +1101,10 @@ bool FMC120_InitADC(void) {
     DELAY_MS(2);
 
     t_reg16 regmap[] = {
-        { 0x0000, 0x81 },        // LMFS = 4211
+        { 0x0000, 0x81 },
         { 0x0011, 0x80 },        // select master page of analog bank
         // set analog input to DC coupling Z5K **********************************
-        { 0x004F, 0x00 },        // DC coupling enable Bit 0 = off,  1 = Enabled shifts VCM at adc down ~ 200mV ***
+        { 0x004F, 0x01 },        // DC coupling enable Bit 0 = off,  1 = Enabled shifts VCM at adc down ~ 200mV ***
         { 0x0026, 0x40 },        // IGNORE inputs on power down pin
         { 0x0059, 0x20 },        // Set the always write 1 Bit
 
@@ -1132,8 +1152,9 @@ bool FMC120_InitADC(void) {
     };
 
     ret &= FMC120_SPI_WriteRegs(ADC_SELECT_BOTH, regmap, sizeof(regmap)/sizeof(regmap[0]));
-    print_str(" --- FMC120 ADC Init ---: ");
-    FMC120_PrintStatus(ret);
+    ret &= FMC120_Cal_ADC_DC_Offset();
+
+    FMC120_PrintStatus(" --- FMC120 ADC Init ---", ret);
     return ret;
 }
 
@@ -1148,12 +1169,12 @@ void reset_jesd204_core(uint32_t base_core) {
     uint32_t dword = 1;
     write_jesd204_axi(base_core, 0x04, 0x01); // Reset core
 
-    print_str("    Core Reset wait");
+    printf("    Core Reset wait");
     while (dword != 0) {
         dword = read_jesd204_axi(base_core, 0x04);
-        print_str(".");
+        printf(".");
     }
-    print_str(" Done.\n");
+    printf(" Done.\n");
 }
 
 bool init_jesd204_core(void) {
@@ -1210,7 +1231,7 @@ bool init_jesd204_core(void) {
     size_t size_cfg_adc = sizeof(jesd_cfg_adc)/sizeof(jesd_cfg_adc[0]);
     size_t size_cfg_dac = sizeof(jesd_cfg_dac)/sizeof(jesd_cfg_dac[0]);
 
-    print_str("JESD204 Core Init:\n");
+    printf("JESD204 Core Init:\n");
     for (size_t i=0; i<3; i++) {
         // Check core versions to be 7.2.x
         // 7.2.1 (vivado 2017.4)
@@ -1219,7 +1240,7 @@ bool init_jesd204_core(void) {
         dword = read_jesd204_axi(base_core, 0); // 0x00: Read Version
         pass &= (dword>>16 == 0x0702);
         if (!pass) {
-            print_str("JESD204 Core Version:\n");
+            printf("JESD204 Core Version:\n");
             print_hex(dword, 8);
         }
 
@@ -1238,8 +1259,7 @@ bool check_jesd204_sync(uint32_t base_core) {
     bool pass;
     dword = read_jesd204_axi(base_core, 0x38);
     pass = (dword & 0x01);
-    print_str("JESD Sync Status: ");
-    FMC120_PrintStatus(pass);
+    FMC120_PrintStatus("JESD Sync Status", pass);
     return pass;
 }
 
@@ -1256,38 +1276,22 @@ void FMC120_print_dac_core_status(void) {
     bool status[2];
     for (size_t j=0; j<15; j++) {
         dword = read_jesd204_axi(BASE2_JESD_DAC, (j<<2));
-        print_str("JESD DAC Adr ");
-        print_hex((j<<2), 4);
-        print_str(":");
-        print_hex(dword, 8);
-        print_str("\n");
+        printf("JESD DAC Adr %4x:%8lx\n", (j<<2), dword);
     }
     for (size_t j=256; j<256+8; j++) {
         dword = read_jesd204_axi(BASE2_JESD_DAC, (j<<2));
-        print_str("JESD DAC LANE ");
-        print_hex(j-256, 4);
-        print_str(" ID :");
-        print_hex(dword, 8);
-        print_str("\n");
+        printf("JESD DAC Lane %4xID:%8lx\n", j-256, dword);
     }
     for (size_t j=512+3; j<512+8; j++) {
         dword = read_jesd204_axi(BASE2_JESD_DAC, (j<<2));
-        print_str("JESD ILA CFG ");
-        print_hex(j-512, 4);
-        print_str(" DAT :");
-        print_hex(dword, 8);
-        print_str("\n");
+        printf("JESD ILA CFG %4xDAT:%8lx\n", j-512, dword);
     }
     status[0] = check_jesd204_sync(BASE2_JESD_DAC);
-    print_str(status[0] ? "Pass\n" : "Fail\n");
+    FMC120_PrintStatus("JESD204 DAC Core", status[0]);
     dword = GET_REG(g_base_jesd_sfr);
-    print_str("JESD SFR:");
-    print_hex(dword, 8);
-    print_str("\n");
+    printf("JESD SFR: %8lx\n", dword);
     dword = GET_REG(g_base_sfr);
-    print_str("BASE SFR:");
-    print_hex(dword, 8);
-    print_str("\n");
+    printf("BASE SFR: %8lx\n", dword);
 }
 
 void FMC120_print_adc_core_status(void) {
@@ -1295,8 +1299,7 @@ void FMC120_print_adc_core_status(void) {
     bool status[2];
     status[0] = check_jesd204_sync(BASE2_JESD_ADC0);
     status[1] = check_jesd204_sync(BASE2_JESD_ADC1);
-    print_str(status[0] ? "Pass\n" : "Fail\n");
-    print_str(status[1] ? "Pass\n" : "Fail\n");
+    FMC120_PrintStatus("JESD204 ADC Core", status[0] && status[1]);
 
     dword = GET_REG(g_base_jesd_sfr);
     print_str("JESD SFR:");

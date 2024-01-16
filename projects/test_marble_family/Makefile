@@ -25,6 +25,7 @@ VERILOG += -Wno-timescale
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
 VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
+YOSYS = yosys
 
 # XXX consider converting this to something more compatible with Bedrock's VIVADO_SYNTH.
 VIVADOEXEC = vivado
@@ -100,7 +101,7 @@ net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 # Depends on UDP port 8030 not being tied up.
 # It would be nice to have a "quiet" option to udp-vpi.
 net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_trx.dat
-	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py --sim --ramtest --stop --rlen=34
+	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py -a localhost -p 0 --sim --ramtest --stop --rlen=34
 
 # syntax-check only, no actual test bench code
 MARBLE_BASE_V = marble_base.v packet_categorize.v data_xdomain.v flag_xdomain.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V) mmc_mailbox.v
@@ -120,6 +121,13 @@ marble_base_lint: $(MARBLE_BASE_V)
 marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
 	$(VERILATOR) --lint-only --timing $(VLATOR_LINT_IGNORE) -DSIMULATE -y $(FPGA_FAMILY_DIR)/xilinx $(filter-out marble2_features, $^)
 
+marble_base_yosys.json: marble_base_shell.v $(MARBLE_BASE_V) $(BUILD_DIR)/cdc_snitch_proc.ys
+	$(YOSYS) --version
+	$(YOSYS) -q -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
+# (I don't think yosys for-loop is actually buggy, just tediously slow, and in this case unnecessary)
+marble_base_cdc.txt: $(BUILD_DIR)/cdc_snitch.py marble_base_yosys.json
+	$(PYTHON) $^ -o $@
+
 # =====
 # constraint
 pin_map_fmc.csv: pin_map_fmc.py
@@ -128,7 +136,7 @@ marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/m
 	$(PYTHON) $^ > $@
 
 marble2.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marble/%, Marble.xdc pin_map.csv) pin_map_fmc.csv marble_top.csv
-	$(PYTHON) $^ > $@
+	$(PYTHON) $^ | sed -e '/FMC._.[AK]_/s/IOSTANDARD LVCMOS25/IOSTANDARD LVCMOS25 PULLTYPE PULLUP/' > $@
 
 # =====
 # Initialization file for i2cbridge
@@ -164,7 +172,7 @@ marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
 
 marble2.bit: marble.tcl marble2.d marble2_features bit_stamp_mod
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
-	G=marble2.$$(git rev-parse --short=8 --verify HEAD); if git diff | grep -q .; then echo "modified code; not coercing bitfile header timestamp"; mv $$G.x.bit $$G.bit; else ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) $$G.bit < $$G.x.bit && rm $$G.x.bit && sha256sum $$G.bit; fi
+	G=marble2.$$(git describe --always --abbrev=8 --dirty); if test $${G%-dirty} != $${G}; then echo "modified code; not coercing bitfile header timestamp"; mv $$G.x.bit $$G.bit; else ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) $$G.bit < $$G.x.bit && rm $$G.x.bit && sha256sum $$G.bit; fi
 
 # =====
 # bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'
@@ -181,7 +189,7 @@ marble1_hwtest: udprtx
 	ping -c 2 ${RGMII_IP}
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py -a ${RGMII_IP} -p 803 --trx --marble 0
+	$(PYTHON) testcase.py -a ${RGMII_IP} --trx --marble 0
 
 
 # =====
@@ -202,12 +210,12 @@ marble2_hwtest: udprtx
 	ping -c 2 ${MARBLE_IP}
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${MARBLE_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx ${MARBLE_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py -a ${MARBLE_IP} -p 803 --trx --si570
+	$(PYTHON) testcase.py -a ${MARBLE_IP} --trx --si570
 	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = ${ZEST_SN}
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
 	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
-	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx
+	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx marble_base_cdc.txt
 	rm -rf _xilinx .Xil obj_dir __pycache__

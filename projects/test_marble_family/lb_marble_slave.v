@@ -64,7 +64,7 @@ module lb_marble_slave #(
 	input [3:0] gps,
 	output [3:0] ext_config,
 	// Output to hardware
-	output [131:0] fmc_test,
+	inout [191:0] fmc_test,
 	output [1:0] led_user_mode,
 	output led1,  // PWM
 	output led2  // PWM
@@ -222,7 +222,7 @@ generate if (USE_I2CBRIDGE) begin : i2cb
 	// twi_scl_h == pull pin high
 	// neither == let pin float
 	wire [1:0] twi_bus_sel = hw_config[2:1];
-	reg [3:0] twi_scl_l=0, twi_scl_h=0, twi_sda_r=0;
+	reg [3:0] twi_scl_l=0, twi_scl_h=0, twi_sda_r=0, twi_sda_grab=0, twi_scl_grab=0;
 	reg [scl_act_high:0] twi0_scl_shf=0;
 	always @(posedge clk) begin
 		twi0_scl_shf <= {twi0_scl_shf[scl_act_high-1:0], twi0_scl};
@@ -232,6 +232,8 @@ generate if (USE_I2CBRIDGE) begin : i2cb
 		twi_scl_h[twi_bus_sel] <= ~twi0_scl_shf[scl_act_high];
 		twi_sda_r <= 4'b1111;
 		twi_sda_r[twi_bus_sel] <= twi_sda_drive;
+		twi_sda_grab <= twi_sda;
+		twi_scl_grab <= twi_scl;
 	end
 	assign twi_scl[0] = twi_scl_l[0] ? 1'b0 : twi_scl_h[0] ? 1'b1 : 1'bz;
 	assign twi_scl[1] = twi_scl_l[1] ? 1'b0 : twi_scl_h[1] ? 1'b1 : 1'bz;
@@ -241,8 +243,8 @@ generate if (USE_I2CBRIDGE) begin : i2cb
 	assign twi_sda[1] = twi_sda_r[1] ? 1'bz : 1'b0;
 	assign twi_sda[2] = twi_sda_r[2] ? 1'bz : 1'b0;
 	assign twi_sda[3] = twi_sda_r[3] ? 1'bz : 1'b0;
-	assign twi_sda_sense = twi_sda[twi_bus_sel];
-	assign twi_scl_sense = twi_scl[twi_bus_sel];
+	assign twi_sda_sense = twi_sda_grab[twi_bus_sel];
+	assign twi_scl_sense = twi_scl_grab[twi_bus_sel];
 	assign twi_rst = hw_config[0] ? 1'b0 : 1'bz;  // three-state
 end else begin : no_i2cb
 	assign twi_dout=0;
@@ -282,6 +284,14 @@ wire [31:0] hello_1 = "o wo";
 wire [31:0] hello_2 = "rld!";
 wire [31:0] hello_3 = "(::)";
 wire [31:0] mirror_out_0;
+reg [21:0] fmc1_test_in_l=0;
+reg [21:0] fmc1_test_in_m=0;
+reg [27:0] fmc1_test_in_h=0;
+reg [21:0] fmc2_test_in_l=0;
+reg [21:0] fmc2_test_in_m=0;
+reg [27:0] fmc2_test_in_h=0;
+reg [23:0] fmc2h_test_in_l=0;
+reg [23:0] fmc2h_test_in_h=0;
 
 // First read cycle
 reg [31:0] reg_bank_0=0, dbg_mem_out=0;
@@ -313,19 +323,19 @@ always @(posedge clk) if (do_rd) begin
 		4'h0: reg_bank_1 <= xadc_internal_temperature;
 		4'h1: reg_bank_1 <= dna_high;
 		4'h2: reg_bank_1 <= dna_low;
-		//  xxxx83  unused
-		//  xxxx84  unused
-		//  xxxx85  unused
-		//  xxxx86  unused
-		//  xxxx87  unused
-		//  xxxx88  unused
-		//  xxxx89  unused
-		//  xxxx8a  unused
-		//  xxxx8b  unused
-		//  xxxx8c  unused
-		//  xxxx8d  unused
-		//  xxxx8e  unused
-		//  xxxx8f  unused
+		//  xxxx13  unused
+		//  xxxx14  unused
+		//  xxxx15  unused
+		//  xxxx16  unused
+		//  xxxx17  unused
+		4'h8: reg_bank_1 <= fmc1_test_in_l;
+		4'h9: reg_bank_1 <= fmc1_test_in_m;
+		4'ha: reg_bank_1 <= fmc1_test_in_h;
+		4'hb: reg_bank_1 <= fmc2_test_in_l;
+		4'hc: reg_bank_1 <= fmc2_test_in_m;
+		4'hd: reg_bank_1 <= fmc2_test_in_h;
+		4'he: reg_bank_1 <= fmc2h_test_in_l;
+		4'hf: reg_bank_1 <= fmc2h_test_in_h;
 		default: reg_bank_1 <= "zzzz";
 	endcase
 end
@@ -363,7 +373,9 @@ reg rx_mac_hbank_r=1;
 // decoding corresponds to mirror readback, see notes above
 wire local_write = control_strobe & ~control_rd & (addr[23:16]==5);
 reg stop_sim=0;  // clearly only useful in simulation
-reg [131:0] fmc_test_r=0;
+reg [71:0] fmc1_test_r=0;
+reg [71:0] fmc2_test_r=0;
+reg [47:0] fmc2h_test_r=0;
 always @(posedge clk) if (local_write) case (addr[4:0])
 	1: led_user_r <= data_out;
 	2: led_1_df <= data_out;
@@ -377,12 +389,14 @@ always @(posedge clk) if (local_write) case (addr[4:0])
 	// 10: ctrace_start
 	// 11: gps_buf_reset
 	// 12: pps_config_write
-	16: fmc_test_r[21:0] <= data_out;
-	17: fmc_test_r[43:22] <= data_out;
-	18: fmc_test_r[65:44] <= data_out;
-	19: fmc_test_r[87:66] <= data_out;
-	20: fmc_test_r[109:88] <= data_out;
-	21: fmc_test_r[131:110] <= data_out;
+	16: fmc1_test_r[21:0] <= data_out;
+	17: fmc1_test_r[43:22] <= data_out;
+	18: fmc1_test_r[71:44] <= data_out;
+	19: fmc2_test_r[21:0] <= data_out;
+	20: fmc2_test_r[43:22] <= data_out;
+	21: fmc2_test_r[71:44] <= data_out;
+	22: fmc2h_test_r[23:0] <= data_out;
+	23: fmc2h_test_r[47:24] <= data_out;
 endcase
 //
 always @(posedge clk) begin
@@ -418,7 +432,26 @@ assign mmc_int = misc_config[1];
 assign allow_mmc_eth_config = misc_config[2];
 assign zest_pwr_en = misc_config[3];
 assign ext_config = misc_config[7:4];
-assign fmc_test = fmc_test_r;
+
+// 3-state
+genvar ix;
+generate for (ix=0; ix<72; ix=ix+1) begin: fmc_lbit
+	assign fmc_test[ix+0] = fmc1_test_r[ix] ? 1'b0 : 1'bz;
+	assign fmc_test[ix+72] = fmc2_test_r[ix] ? 1'b0 : 1'bz;
+end endgenerate
+generate for (ix=0; ix<48; ix=ix+1) begin: fmc_hbit
+	assign fmc_test[ix+144] = fmc2h_test_r[ix] ? 1'b0 : 1'bz;
+end endgenerate
+always @(posedge clk) begin
+	fmc1_test_in_l <= fmc_test[21:0];
+	fmc1_test_in_m <= fmc_test[43:22];
+	fmc1_test_in_h <= fmc_test[71:44];
+	fmc2_test_in_l <= fmc_test[93:72];
+	fmc2_test_in_m <= fmc_test[115:94];
+	fmc2_test_in_h <= fmc_test[143:116];
+	fmc2h_test_in_l <= fmc_test[167:144];
+	fmc2h_test_in_h <= fmc_test[191:168];
+end
 
 // Bus activity trace output
 `ifdef SIMULATE
@@ -434,6 +467,7 @@ always @(posedge clk) begin
 end
 `endif
 
+`ifndef YOSYS
 // ----------------------------------
 // XADC Internal Temperature Monitor
 // ----------------------------------
@@ -459,6 +493,11 @@ dna dna_inst0 (
   .dna_msb                            (dna_high),
   .dna_lsb                            (dna_low)
   );
+`else
+assign xadc_temp_dout=0;
+assign dna_high=0;
+assign dna_low=0;
+`endif
 
 
 endmodule

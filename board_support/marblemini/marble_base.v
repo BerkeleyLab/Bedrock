@@ -80,7 +80,7 @@ module marble_base (
 	input [31:0] lb_data_in,
 
 	// Something physical
-	output [131:0] fmc_test,
+	inout [191:0] fmc_test,
 	output ZEST_PWR_EN,
 	output [7:0] LED
 );
@@ -260,6 +260,10 @@ mac_compat_dpram #(
 	.tx_mac_start(tx_mac_start)
 );
 
+// Be careful with clock domains:
+// rtefi_blob uses this in rx_clk, so send it a registered value.
+reg enable_rx_r=0;  always @(posedge tx_clk) enable_rx_r <= enable_rx | ~allow_mmc_eth_config;
+
 // Instantiate the Real Work
 parameter enable_bursts=1;
 
@@ -279,7 +283,7 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 // Simple combinational logic is OK, since all signals are in tx_clk domain
 // (config_clk == tx_clk == lb_clk).
 
-	.enable_rx(enable_rx | ~allow_mmc_eth_config),
+	.enable_rx(enable_rx_r),
 	.config_clk(config_clk),
 	.config_s(config_s & allow_mmc_eth_config),
 	.config_p(config_p & allow_mmc_eth_config),
@@ -358,11 +362,13 @@ end
 assign phy_rstn = phy_rb;
 
 // One weird hack, even works in Verilator!
+`ifndef YOSYS
 always @(posedge tx_clk) begin
 	if (slave.stop_sim & ~in_use) begin
 		$display("marble_base:  stopping based on localbus request");
 		$finish(0);
 	end
 end
+`endif
 
 endmodule
