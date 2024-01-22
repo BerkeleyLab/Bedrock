@@ -26,5 +26,5 @@ marble_v2:
         carrier: "Marble"
         carrier_rev: "v2"
         default_enable_rx: 1
-        misc_config_default: 4
+        misc_config_default: 0
         use_rgmii_idelay: 1
