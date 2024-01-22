@@ -214,13 +214,11 @@ lb_marble_slave #(
 	.cfg_d02(cfg_d02),
 	.mmc_int(mmc_int),
 	.zest_pwr_en(ZEST_PWR_EN),
-	.allow_mmc_eth_config(), // allow_mmc_eth_config removed to avoid MMC to change IP/MAC
+	.allow_mmc_eth_config(allow_mmc_eth_config),
 	.fmc_test(fmc_test),
 	.gps(GPS), .ext_config(ext_config), .frequency_si570(frequency_si570),
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
 );
-// !! allow_mmc_eth_config is forced to 0 in order to have always a default IP/MAC
-assign allow_mmc_eth_config = 0;
 
 // Delegate part of the address space to application code outside this module
 reg [23:0] p3_lb_addr_d;
