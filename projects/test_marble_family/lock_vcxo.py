@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import argparse
 import sys
 import os
 import time
@@ -33,7 +32,7 @@ def set_lock(chip, v, dac=1, fir=False, fine_sel=False, verbose=False):
     chip.exchange([327692], [cfg])  # pps_config
 
 
-def poll_lock(chip, verbose=False, timeout=10):
+def poll_lock(chip, verbose=False, timeout=10, log=False):
     global old_pps_cnt
     rct = 0
     start = time.time()
@@ -56,10 +55,63 @@ def poll_lock(chip, verbose=False, timeout=10):
     old_pps_cnt = pps_cnt
     ss = "{:5d} {:6d} {:7d} {:5d} {:7d} {:3d} {:3d} {:8d}".format(
         dac, dsp_on, dsp_arm, pha, pps_cnt, cfg, rct, pps_lcnt)
-    return ss
+    if log:
+        _log = (dac, dsp_on, dsp_arm, pha, pps_cnt, cfg, rct, pps_lcnt)
+    else:
+        _log = None
+    return ss, _log
 
 
-if __name__ == "__main__":
+def monitor(addr, port, init_val, npts=60, dac_n=1, use_fir=False, cont=False, timeout=10, verbose=False, log=False):
+    """Monitor (and initialize if cont==False) the VCXO frequency-locking feedback loop.
+    Returns log of monitored values (2D list).
+    If log==False, the returned log is empty.  Otherwise, each row is:
+        (int DAC value, bool dsp_on, bool dsp_arm, int phase, int pps_cnt (0-15), bitmap cfg, int rct, int pps_lcnt)
+    """
+    chip = lbus_access(addr, port=port, verbose=verbose)
+    print("# " + datetime.datetime.utcnow().isoformat() + "Z")
+    first = False
+    if not cont:
+        set_lock(chip, int(init_val), dac=int(dac_n), fir=use_fir, verbose=verbose)
+        first = True  # don't want to see stale DAC value in plots
+    print("#{:>5s} {:>6s} {:>7s} {:>5s} {:>7s} {:>3s} {:>3s} {:>8s}".format(
+        "dac", "dsp_on", "dsp_arm", "pha", "pps_cnt", "cfg", "rct", "pps_lcnt"))
+    _log = []
+    for ix in range(int(npts)):
+        try:
+            ss, _nlog = poll_lock(chip, verbose=verbose, timeout=int(timeout))[0]
+            if ss is None:
+                print("Timeout waiting for PPS signal")
+                break
+            _log.append(_nlog)
+            print(("#" if first else " ") + ss)
+            sys.stdout.flush()
+            time.sleep(0.85)
+            first = False
+        except KeyboardInterrupt:
+            print("# Exiting")
+            break
+    return _log
+
+
+def main(args):
+    monitor(addr=args.addr,
+            port=int(args.port),
+            init_val=int(args.val),
+            npts=int(args.npt),
+            dac_n=int(args.dac),
+            use_fir=args.fir,
+            cont=args.cont,
+            timeout=int(args.timeout),
+            verbose=args.verbose)
+
+
+def ArgumentParser(parent_parser=None, **kwargs):
+    import argparse
+    if parent_parser is not None:
+        p = parent_parser
+    else:
+        p = argparse.ArgumentParser(**kwargs)
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('-a', '--addr', required=True,
                    help="IP address of FPGA (required)")
@@ -79,27 +131,10 @@ if __name__ == "__main__":
                    help="Monitor only, don't initialize")
     p.add_argument('-t', '--timeout', default=10,
                    help="Time (in seconds) to exit after last PPS signal (negative values disable timeout)")
+    return p
 
+
+if __name__ == "__main__":
+    p = ArgumentParser()
     args = p.parse_args()
-
-    chip = lbus_access(args.addr, port=args.port, verbose=args.verbose)
-    print("# " + datetime.datetime.utcnow().isoformat() + "Z")
-    first = False
-    if not args.cont:
-        set_lock(chip, int(args.val), dac=int(args.dac), fir=args.fir, verbose=args.verbose)
-        first = True  # don't want to see stale DAC value in plots
-    print("#{:>5s} {:>6s} {:>7s} {:>5s} {:>7s} {:>3s} {:>3s} {:>8s}".format(
-        "dac", "dsp_on", "dsp_arm", "pha", "pps_cnt", "cfg", "rct", "pps_lcnt"))
-    for ix in range(int(args.npt)):
-        try:
-            ss = poll_lock(chip, verbose=args.verbose, timeout=int(args.timeout))
-            if ss is None:
-                print("Timeout waiting for PPS signal")
-                break
-            print(("#" if first else " ") + ss)
-            sys.stdout.flush()
-            time.sleep(0.85)
-            first = False
-        except KeyboardInterrupt:
-            print("# Exiting")
-            break
+    main(args)
