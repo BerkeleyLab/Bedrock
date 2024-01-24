@@ -97,7 +97,7 @@ module chirp_driver #(
       .opin     (2'b00),
       .xin      (18'b0),
       .yin      (cordic_amp),
-      .phasein  ({cordic_phase}),
+      .phasein  (cordic_phase),
       .xout     (cordic_cos),
       .yout     (cordic_sin),
       .phaseout ()
