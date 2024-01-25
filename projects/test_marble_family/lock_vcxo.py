@@ -49,7 +49,7 @@ def poll_lock(chip, verbose=False, timeout=10, log=False):
         if verbose or pps_cnt != old_pps_cnt:
             break
         if (timeout > 0) and ((time.time() - start) > timeout):
-            return None
+            return None, None
         time.sleep(0.20)
         rct += 1
     old_pps_cnt = pps_cnt
@@ -79,7 +79,7 @@ def monitor(addr, port, init_val, npts=60, dac_n=1, use_fir=False, cont=False, t
     _log = []
     for ix in range(int(npts)):
         try:
-            ss, _nlog = poll_lock(chip, verbose=verbose, timeout=int(timeout))[0]
+            ss, _nlog = poll_lock(chip, verbose=verbose, timeout=int(timeout))
             if ss is None:
                 print("Timeout waiting for PPS signal")
                 break
