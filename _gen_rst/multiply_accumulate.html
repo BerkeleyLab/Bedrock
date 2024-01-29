@@ -179,6 +179,17 @@ Expect to see errors and unfinished things.</p>
 <h2>Description<a class="headerlink" href="#description" title="Permalink to this heading"></a></h2>
 <div class="line-block">
 <div class="line"><br /></div>
+<div class="line-block">
+<div class="line">TL;DR</div>
+<div class="line">accumulated += ((constant * signal) &gt;&gt;&gt; downscale) + correction</div>
+<div class="line"><br /></div>
+<div class="line">Multiply a <cite>constant</cite> K to input <cite>signal</cite> and accumulate the result on <cite>enable</cite>.</div>
+<div class="line"><br /></div>
+<div class="line">Notice <cite>downscale</cite>, this is meant to downscale the input into the accumulator</div>
+<div class="line">Useful in times of high “natural” integration gain: like running with a superconducting cavity</div>
+<div class="line"><br /></div>
+<div class="line"><cite>correction</cite> comes from some externally-supplied feedforward, maybe derived from the previous pulse</div>
+</div>
 </div>
 </section>
 <section id="pinout">

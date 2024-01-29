@@ -7,6 +7,15 @@ Description
 '''''''''''
 
 | 
+|  TL;DR
+|  accumulated += ((constant * signal) >>> downscale) + correction
+| 
+|  Multiply a `constant` K to input `signal` and accumulate the result on `enable`.
+| 
+|  Notice `downscale`, this is meant to downscale the input into the accumulator
+|  Useful in times of high "natural" integration gain: like running with a superconducting cavity
+| 
+|  `correction` comes from some externally-supplied feedforward, maybe derived from the previous pulse
 
 Pinout
 ''''''
