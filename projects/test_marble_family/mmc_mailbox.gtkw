@@ -1,0 +1,32 @@
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-14.720415 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 214
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 152
+@28
+mmc_mailbox_tb.sck
+mmc_mailbox_tb.ncs
+mmc_mailbox_tb.pico
+mmc_mailbox_tb.poci
+@22
+mmc_mailbox_tb.spi_addr[7:0]
+mmc_mailbox_tb.mac_in[47:0]
+@28
+mmc_mailbox_tb.mac_valid
+@22
+mmc_mailbox_tb.mac_out[47:0]
+mmc_mailbox_tb.ip_in[31:0]
+@28
+mmc_mailbox_tb.ip_valid
+@22
+mmc_mailbox_tb.ip_out[31:0]
+mmc_mailbox_tb.gitid_in[31:0]
+mmc_mailbox_tb.gitid_out[31:0]
+mmc_mailbox_tb.hash_out[31:0]
+@28
+mmc_mailbox_tb.pass
+[pattern_trace] 1
+[pattern_trace] 0
