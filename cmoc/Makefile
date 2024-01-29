@@ -10,7 +10,6 @@ include $(BADGER_DIR)/rules.mk
 
 NEWAD_ARGS += -y
 
-VFLAGS += -Wno-macro-redefinition
 TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb rf_controller_tb
 
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
@@ -55,7 +54,7 @@ cryomodule_check: cryomodule.dat
 $(AUTOGEN_DIR)/config_romx.v:
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/config_crunch.py --OUTPUT=$@
 
-VFLAGS_DEP += -y $(BADGER_DIR) -Wno-macro-redefinition
+VFLAGS_DEP += -y $(BADGER_DIR)
 
 cryomodule_badger_tb.v: $(RTEFI_V) $(AUTOGEN_DIR)/config_romx.v cordicg_b22.v cryomodule_auto
 

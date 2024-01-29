@@ -1,6 +1,5 @@
 `timescale 1ns / 1ns
 
-`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 /// TL;DR
 /// accumulated += ((constant * signal) >>> downscale) + correction
 ///
@@ -25,6 +24,8 @@ parameter KW = 18;  // Constant Width
 parameter SW = 18;  // Signal Width
 parameter OW = 21;  // OutputWidth: Desired bitwidth of the accumulator
 
+`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
+
 reg signed [KW+SW-1: 0] integrator_in_large=0;
 reg signed [OW-1: 0] integrator_sum=0;
 
@@ -39,6 +40,8 @@ always @ (posedge clk) begin
 		integrator_sum <= `SAT(integrator_sum_pre, OW, OW-1);
 	end
 end
+
+`undef SAT
 
 assign accumulated = integrator_sum;
 

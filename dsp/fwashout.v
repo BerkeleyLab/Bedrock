@@ -32,6 +32,7 @@ end
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 wire signed [a_dw+cut-1:0] clipped=`SAT(sub,a_dw+cut,a_dw+cut-1);
 assign o_data = clipped[a_dw+cut-1:cut];
+`undef SAT
 
 // Intended for raw ADC inputs.
 // Could go back and make this module handle other data patterns

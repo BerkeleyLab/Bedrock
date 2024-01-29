@@ -101,6 +101,7 @@ always @(posedge clk) begin
   eig_drive <= eig_drive0;
   edrive_clip <= ~`UNIFORM(sum_eig_drive[19:17]);
 end
+`undef SAT
 
 // Reserve space for several possible clipping status signals
 // Caller should take care of latching, reporting, and clearing.

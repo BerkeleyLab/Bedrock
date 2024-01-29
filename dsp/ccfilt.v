@@ -81,6 +81,8 @@ always @(posedge clk) begin
 	valid4 <= valid3;
 end
 
+`undef SAT
+
 // Instantiate half-band filter .. or not
 wire [outw-1:0] d5;
 wire valid5;
