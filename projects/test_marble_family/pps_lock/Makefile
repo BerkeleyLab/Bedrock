@@ -4,7 +4,7 @@ VERILOG = iverilog$(ICARUS_SUFFIX) -Wall -Wno-timescale
 VVP = vvp$(ICARUS_SUFFIX)
 GTKWAVE = gtkwave
 VERILATOR = verilator
-VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY
+VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-PINCONNECTEMPTY
 
 %_tb: %_tb.v
 	$(VERILOG) ${VFLAGS_$@} -o $@ $(filter %.v, $^)

@@ -60,9 +60,6 @@ module station(
 
 `AUTOMATIC_decode
 
-`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
-`define UNIFORM(x) ((~|(x)) | &(x))  // All 0's or all 1's
-
 // Virtual Piezo
 // Couple the piezo to mechanical drive
 (* lb_automatic *)

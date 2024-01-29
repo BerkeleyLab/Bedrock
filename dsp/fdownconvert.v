@@ -73,6 +73,8 @@ always @(posedge clk) begin
 	time_err_r <= (mod2 ^ ~last_mod2) | ~a_gate;
 end
 
+`undef SAT
+
 assign o_data = iq_out0;
 assign o_gate = 1'b1;
 assign o_trig = mod2;

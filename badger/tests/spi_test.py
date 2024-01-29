@@ -260,6 +260,84 @@ def clear_status(s):
     return
 
 
+def prog_status(s):
+    good = True
+    clear_status(s)
+    status, cnf = read_status_config(s)
+    if (status & 0x3) != 0:
+        logging.info("Status 0x%2.2x: clear errors first" % status)
+        good = False
+    # require TBPROT set, BPNV clear
+    # ignore DNU and TBPARM at least for now
+    if (cnf & 0x28) != 0x20:
+        logging.info("CONFIG_REG 0x%2x OTP bits not good for programming!" % cnf)
+        good = False
+
+    return good, status, cnf
+
+
+def set_block_protect(s, protect=True):
+    good = True
+    clear_status(s)
+    status, cnf = read_status_config(s)
+    if protect:
+        status1 = status | 0x1C  # attempt to force all BP bits to one
+    else:
+        status1 = status & 0xE3  # attempt to force all BP bits to zero
+
+    write_status(s, status1)
+    time.sleep(0.3)  # empirically needed,
+    read_id(s)  # otherwise status2 comes back not updated
+    status2, cnf = read_status_config(s)
+    if status2 != status1:
+        logging.info("Failed to set status from 0x%2.2x to 0x%2.2x, now 0x%2.2x" % (status, status1, status2))
+        logging.info("Check Write-Protect switch")
+        good = False
+
+    return good, status, cnf
+
+
+def enable_wp(s):
+    return set_block_protect(s, protect=True)
+
+
+def disable_wp(s):
+    return set_block_protect(s, protect=False)
+
+
+def set_prog(s, prog=True):
+    prog_good, _, _ = prog_status(s)
+    if not prog_good:
+        return False
+
+    protect = not prog
+    write_good, _, _ = set_block_protect(s, protect=protect)
+    if not write_good:
+        return False
+
+    return True
+
+
+def enable_prog(s):
+    set_prog(s, prog=True)
+
+
+def disable_prog(s):
+    set_prog(s, prog=False)
+
+
+def check_prog(s):
+    good, status, cnf = prog_status(s)
+    logging.info('Status Reg: 0x%02x, Config Reg: 0x%02x' % (status, cnf))
+
+    if good and ((status & 0x1C) == 0):
+        print("Flash is writable")
+        return True
+    else:
+        print("Flash is NOT writable")
+        return False
+
+
 # Not currently used
 def reset_chip(s):
     p = RESET_CHIP
@@ -450,7 +528,9 @@ def main():
                         help='Clear status (CLSR)')
     parser.add_argument('--force_write_enable', action='store_true',
                         help='Configure flash to write normally protected blocks; only works if WE# pin is high')
+    parser.add_argument('--check_prog', action='store_true', help="Check if flash is writable")
     if EXPERT:
+        parser.add_argument('--disable_wp', action='store_true', help="Disable Write-Protect mechanism")
         parser.add_argument('--status_write', type=lambda x: int(x, 0),
                             help='A value to be written to status register (Experts only)')
         parser.add_argument('--config_write', type=lambda x: int(x, 0),
@@ -501,29 +581,17 @@ def main():
         if size > 7*1024*1024:
             print("Too big!")
             exit(1)
-        # XXX refactor this into a function
-        clear_status(sock)
-        status, cnf = read_status_config(sock)
-        if (status & 0x3) != 0:
-            print("Status 0x%2.2x: clear errors first" % status)
+
+        prog_good, _, _ = prog_status(sock)
+        if not prog_good:
             exit(1)
-        # require TBPROT set, BPNV clear
-        # ignore DNU and TBPARM at least for now
-        if (cnf & 0x28) != 0x20:
-            print("CONFIG_REG 0x%2x OTP bits not good for programming!" % cnf)
-            exit(1)
+
         if args.force_write_enable:
             if args.verify:
                 print("Don't force and verify at the same time")
                 exit(1)
-            status1 = status & 0xE3  # attempt force all BP bits to zero
-            write_status(sock, status1)
-            time.sleep(0.3)  # empirically needed,
-            read_id(sock)  # otherwise status2 comes back not updated
-            status2, cnf = read_status_config(sock)
-            if status2 != status1:
-                print("Failed to set status from 0x%2.2x to 0x%2.2x, now 0x%2.2x" % (status, status1, status2))
-                print("Check Write-Protect switch")
+            write_good = disable_wp(sock)
+            if not write_good:
                 exit(1)
         if args.verify:
             ok = remote_verify(sock, prog_file, ad, size)
@@ -533,7 +601,13 @@ def main():
             remote_erase(sock, ad, size)
             remote_program(sock, prog_file, ad, size)
         if args.force_write_enable:
-            write_status(sock, status)  # back to what it was
+            enable_wp(sock)  # back to what it was
+
+    if args.check_prog:
+        check_prog(sock)
+
+    if EXPERT and args.disable_wp is not None:
+        enable_prog(sock)
 
     if args.erase:
         remote_erase(sock, ad, args.erase)
