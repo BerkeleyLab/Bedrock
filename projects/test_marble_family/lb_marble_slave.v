@@ -124,8 +124,9 @@ generate if (MMC_CTRACE) begin : mmc_ctrace
 	ctrace #(.dw(4), .tw(12), .aw(ctrace_aw)) mmc_ctrace(
 		.clk(clk), .data(mmc_pins), .start(csb_toggle & ctrace_arm),
 		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
-		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
+		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out[15:0])
 	);
+        assign ctrace_out[19:16] = 0;
 end else if (GPS_CTRACE) begin : gps_ctrace
 	localparam ctrace_aw=14;
 	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
