@@ -22,9 +22,9 @@ def getTransfer(z, clk_freq=125.0e6, dac_dw=16, vcxo_ppm=14, Kp=-8, Ki=-1):
     g_df = g1 / (1 - g1*g2)  # phase response to VCXO noise
     g_dp = 1 / (1 - g1*g2)   # phase response to phase measurement noise
 
-    # Processing that equation analytically can convert those expressions into the
-    # canonical ratio-of-z-polynomial form.  That's helpful for checking stability,
-    # and for using scipy.signal.lfilter().
+    # Processing that equation analytically can convert those expressions into
+    # the canonical ratio-of-z-polynomial form.  That's helpful for checking
+    # stability, and for using scipy.signal.lfilter().
     # Both the above expressions have the same poles, and
     # zeros of the denominator of 1/(1-g1*g2) represent those poles.
     # Here I use maxima.
@@ -32,16 +32,20 @@ def getTransfer(z, clk_freq=125.0e6, dac_dw=16, vcxo_ppm=14, Kp=-8, Ki=-1):
     # Without the FIR filter:
     #   g1: A * zi / (1-zi);
     #   g2: Kp + Ki * zi / (1-zi);
+    #   g: ratsimp(1/(1-g1*g2));
+    #   num(g);  denom(g);
     #   denom(ratsimp((1/(1-g1*g2))));
     # hand-formatted result:
     #   1 + z^{-1}*(-2-Kp*A) + z^{-2}*(1+Kp*A-Ki*A)
     # Repeat with the FIR filter:
     #   g1: A * zi / (1-zi);
     #   g2: (Kp + Ki * zi / (1-zi))*(1+zi)/2;
-    #   denom(ratsimp(1/(1-g1*g2)));
+    #   g: ratsimp(1/(1-g1*g2));
+    #   num(g);  denom(g);
     # hand-formatted result:
     #   2 + z^{-1}*(-4-Kp*A) + z^{-2}*(2-Ki*A) + z^{-3}*(Kp*A-Ki*A)
-    # Express those denominator as polynomials in z:
+    # Express those numerators and denomenators as polynomials in z:
+    npoly = np.array([1, -2, 1])
     if fir_enable:
         dpoly = [1, -2-0.5*Kp*A, 1-0.5*Ki*A, 0.5*A*(Kp-Ki)]
     else:
@@ -59,7 +63,6 @@ def getTransfer(z, clk_freq=125.0e6, dac_dw=16, vcxo_ppm=14, Kp=-8, Ki=-1):
         print("Stable!  :-)")
     else:
         print("Unstable!  :-(")
-    npoly = np.array([1, -2, 1])
 
     return (g_df, g_dp, A, npoly, dpoly)
 
@@ -75,12 +78,13 @@ def plotTransfer(f, g_df, g_dp, g_dp2, A):
     return
 
 
-def genTransferPlot():
-    f = (np.arange(1, 499)/500.0) * 0.5  # Hz
+# span is in Hz
+def genTransferPlot(npt=500, span=0.5, vcxo_ppm=14):
+    f = (np.arange(1, npt)/npt) * span
     T = 1  # second, sample rate
     z = np.exp(2*np.pi*f*T*1j)
     zi = 1/z
-    g_df, g_dp, A, npoly, dpoly = getTransfer(z)
+    g_df, g_dp, A, npoly, dpoly = getTransfer(z, vcxo_ppm=vcxo_ppm)
     #
     # Quick evaluation of the canonical polynomial form.
     # If our symbolic math was done correctly,
@@ -90,14 +94,29 @@ def genTransferPlot():
     return (npoly, dpoly)
 
 
-def genTimeDomain(polys):
+def genTimeDomain(polys, data_file=None, label="computed"):
     npoly, dpoly = polys
-    y = signal.lfilter(npoly, dpoly, 100*[1])
-    pyplot.plot(y)
+    x_input = 100*[1]  # unit step input (relative to zero initial condition)
+    y = signal.lfilter(npoly, dpoly, x_input)
+    pyplot.plot(y, label=label)
+    if data_file is not None:
+        measurement = np.loadtxt(data_file).transpose()
+        y = measurement[0]  # DAC (frequency) value
+        # normalize, assuming measurement has reached equilibrium at its end
+        y = y - y[-1]
+        y = y / y[0]
+        pyplot.plot(y, label='measured (normalized) DAC')
     pyplot.xlabel("time (s)")
+    pyplot.legend()
     pyplot.show()
 
 
 if __name__ == "__main__":
-    polys = genTransferPlot()
-    genTimeDomain(polys)
+    from sys import argv
+    vcxo_ppm = 18.2
+    polys = genTransferPlot(vcxo_ppm=vcxo_ppm)
+    data_file = None
+    if len(argv) > 1:
+        data_file = argv[1]
+    label = "Computed for %.1f ppm VCXO" % vcxo_ppm
+    genTimeDomain(polys, label=label, data_file=data_file)
