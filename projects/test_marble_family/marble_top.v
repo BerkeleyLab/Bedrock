@@ -6,6 +6,10 @@
 module marble_top(
 	input GTPREFCLK_P,
 	input GTPREFCLK_N,
+`ifdef MARBLE_V2
+	input DDR_REF_CLK_P,
+	input DDR_REF_CLK_N,
+`endif
 	input SYSCLK_P,
 
 	// SI570 clock inputs
@@ -102,12 +106,28 @@ wire [23:0] FMC2_HA_P;
 wire [23:0] FMC2_HA_N;
 `endif
 
+wire clk125;
+// Use DDR_REF_CLK_P as the reference for Marble V2, as this does not depend
+// on the ADN4600 clock switch configuration
+`ifdef MARBLE_V2
+wire ddrrefclk_unbuf, ddrrefclk;
+IBUFDS passi_125(.I(DDR_REF_CLK_P), .IB(DDR_REF_CLK_N), .O(ddrrefclk_unbuf));
+// Vivado fails, with egregiously useless error messages,
+// if you don't put this BUFG in the chain to the MMCM.
+BUFG passg_125(.I(ddrrefclk_unbuf), .O(ddrrefclk));
+assign clk125 = ddrrefclk;
+// For Marblemini, GTPREFCLKs are routed directly to MGTCLK pins,
+// so using them does not depend on the clock switch configuration
+// either
+`else
 wire gtpclk0, gtpclk;
 // Gateway GTP refclk to fabric
 IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0));
 // Vivado fails, with egregiously useless error messages,
 // if you don't put this BUFG in the chain to the MMCM.
 BUFG passg_125(.I(gtpclk0), .O(gtpclk));
+assign clk125 = gtpclk;
+`endif
 
 wire si570;
 `ifdef USE_SI570
@@ -139,28 +159,7 @@ wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
 // have problems with the Xilinx DNA readout.
 `define USE_IDELAYCTRL
 
-`ifdef USE_GTPCLK
-xilinx7_clocks #(
-	.DIFF_CLKIN("BYPASS"),
-	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
-	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
-	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
-`ifdef USE_IDELAYCTRL
-	.DIV1     (5)     // 1 GHz / 5 = 200 MHz
-`else
-	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
-`endif
-) clocks_i(
-	.sysclk_p (gtpclk),
-	.sysclk_n (1'b0),
-	.reset    (pll_reset),
-	.clk_out0 (tx_clk),
-	.clk_out1 (clk_out1),
-	.clk_out2 (tx_clk90),
-	.clk_out3f(test_clk),  // not buffered, straight from MMCM
-	.locked   (clk_locked)
-);
-`else
+`ifdef USE_SYSCLK
 // this configuration is probably bit-rotted
 wire SYSCLK_N = 0;
 gmii_clock_handle clocks(
@@ -172,6 +171,27 @@ gmii_clock_handle clocks(
 	.clk_locked(clk_locked)
 );
 assign test_clk=0;
+`else
+xilinx7_clocks #(
+	.DIFF_CLKIN("BYPASS"),
+	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
+	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
+	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
+`ifdef USE_IDELAYCTRL
+	.DIV1     (5)     // 1 GHz / 5 = 200 MHz
+`else
+	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
+`endif
+) clocks_i(
+	.sysclk_p (clk125),
+	.sysclk_n (1'b0),
+	.reset    (pll_reset),
+	.clk_out0 (tx_clk),
+	.clk_out1 (clk_out1),
+	.clk_out2 (tx_clk90),
+	.clk_out3f(test_clk),  // not buffered, straight from MMCM
+	.locked   (clk_locked)
+);
 `endif
 `ifdef USE_IDELAYCTRL
 assign clk200 = clk_out1;
