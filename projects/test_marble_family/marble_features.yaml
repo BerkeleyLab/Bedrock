@@ -13,6 +13,8 @@ marble_mini:
         default_enable_rx: 1
         misc_config_default: 4
         use_rgmii_idelay: 1
+        # Options are "gtp_ref_clk, ddr_ref_clk or sysclk"
+        sysclk_src: "gtp_ref_clk"
 
 marble_v2:
     defs:
@@ -26,3 +28,5 @@ marble_v2:
         default_enable_rx: 1
         misc_config_default: 4
         use_rgmii_idelay: 1
+        # Options are "gtp_ref_clk, ddr_ref_clk or sysclk"
+        sysclk_src: "ddr_ref_clk"
