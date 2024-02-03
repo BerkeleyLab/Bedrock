@@ -6,6 +6,10 @@
 module marble_top(
 	input GTPREFCLK_P,
 	input GTPREFCLK_N,
+`ifdef MARBLE_V2
+	input DDR_REF_CLK_P,
+	input DDR_REF_CLK_N,
+`endif
 	input SYSCLK_P,
 
 	// SI570 clock inputs
@@ -102,6 +106,20 @@ wire [23:0] FMC2_HA_P;
 wire [23:0] FMC2_HA_N;
 `endif
 
+// Only Marble V2 has DDR ref clk
+wire ddrrefclk_unbuf, ddrrefclk;
+generate
+if (C_CARRIER_REV == "v2") begin
+IBUFDS ddri_125(.I(DDR_REF_CLK_P), .IB(DDR_REF_CLK_N), .O(ddrrefclk_unbuf));
+// Vivado fails, with egregiously useless error messages,
+// if you don't put this BUFG in the chain to the MMCM.
+BUFG ddrg_125(.I(ddrrefclk_unbuf), .O(ddrrefclk));
+end
+endgenerate
+
+// For Marblemini, GTPREFCLKs are routed directly to MGTCLK pins,
+// so using them does not depend on the clock switch configuration
+// either
 wire gtpclk0, gtpclk;
 // Gateway GTP refclk to fabric
 IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0));
@@ -139,7 +157,51 @@ wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
 // have problems with the Xilinx DNA readout.
 `define USE_IDELAYCTRL
 
-`ifdef USE_GTPCLK
+// Sanity check for C_SYSCLK_SRC
+generate
+if (C_SYSCLK_SRC != "gtp_ref_clk" &&
+    C_SYSCLK_SRC != "ddr_ref_clk" &&
+    C_SYSCLK_SRC != "sys_clk") begin
+    C_SYSCLK_SRC_parameter_has_an_invalid_value();
+end
+endgenerate
+
+// If using ddr_ref_clk it must be a v2
+generate
+if (C_SYSCLK_SRC == "ddr_ref_clk" &&
+    C_CARRIER_REV != "v2") begin
+    C_SYSCLK_SRC_ddr_ref_clk_can_only_be_used_with_a_Marble_v2();
+end
+endgenerate
+
+generate
+// this configuration is probably bit-rotted
+if(C_SYSCLK_SRC == "sys_clk") begin
+wire SYSCLK_N = 0;
+gmii_clock_handle clocks(
+	.sysclk_p(SYSCLK_P),
+	.sysclk_n(SYSCLK_N),
+	.reset(pll_reset),
+	.clk_eth(tx_clk),
+	.clk_eth_90(tx_clk90),
+	.clk_locked(clk_locked)
+);
+assign test_clk=0;
+end
+else begin
+
+wire clk125;
+// Use GTPREFCLK_P
+if (C_SYSCLK_SRC == "gtp_ref_clk") begin
+assign clk125 = gtpclk;
+end
+// Use DDR_REF_CLK_P, preferred because it does not depend
+// on the ADN4600 clock switch configuration. Only available
+// on Marble v2
+else if (C_SYSCLK_SRC == "ddr_ref_clk") begin
+assign clk125 = ddrrefclk;
+end
+
 xilinx7_clocks #(
 	.DIFF_CLKIN("BYPASS"),
 	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
@@ -151,7 +213,7 @@ xilinx7_clocks #(
 	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
 `endif
 ) clocks_i(
-	.sysclk_p (gtpclk),
+	.sysclk_p (clk125),
 	.sysclk_n (1'b0),
 	.reset    (pll_reset),
 	.clk_out0 (tx_clk),
@@ -160,19 +222,9 @@ xilinx7_clocks #(
 	.clk_out3f(test_clk),  // not buffered, straight from MMCM
 	.locked   (clk_locked)
 );
-`else
-// this configuration is probably bit-rotted
-wire SYSCLK_N = 0;
-gmii_clock_handle clocks(
-	.sysclk_p(SYSCLK_P),
-	.sysclk_n(SYSCLK_N),
-	.reset(pll_reset),
-	.clk_eth(tx_clk),
-	.clk_eth_90(tx_clk90),
-	.clk_locked(clk_locked)
-);
-assign test_clk=0;
-`endif
+end
+endgenerate
+
 `ifdef USE_IDELAYCTRL
 assign clk200 = clk_out1;
 reg bad_slow_clock=0;
