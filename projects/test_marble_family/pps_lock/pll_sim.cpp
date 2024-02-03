@@ -54,16 +54,24 @@ int main(int argc, char** argv, char** env) {
 	// User-configurable
 	const char* flag2 = Verilated::commandArgsPlusMatch("fir_enable");
 	top->fir_enable = (flag2 && 0==strcmp(flag2, "+fir_enable"));
+	double vcxo_ppm = 18.2;  // default emulated actual VCXO span
+	const char* ppm_arg = Verilated::commandArgsPlusMatch("vcxo_ppm=");
+	if (ppm_arg && strlen(ppm_arg) > 1) {
+		const char* ppm_float = strchr(ppm_arg, '=');
+		if (ppm_float) vcxo_ppm = strtod(ppm_float+1, NULL);
+	}
 
 	// These three could also potentially come from plusargs
 	top->fine_sel = 0;  // static
 	top->err_sign = 0;  // static
-	top->dac_preset_val = 7500 + 32768;  // static
+	top->dac_preset_val = 5500 + 32768;  // static
 
 	// Internal simulation state
 	int dds_accum = 0;
 	int dac_hold = 0;
-	static int dds_wrap = 1170960;  // 1/(4*0.014/2^16), 1.4% span
+	// (1e-3*vcxo_ppm) instead of (1e-6*vcxo_ppm) because the dividers below
+	// are configured for 1 kHz phase comparison, not 1 Hz like the hardware.
+	static int dds_wrap = int(1/(4*(1e-3*vcxo_ppm)/65536)+0.5);
 	unsigned int jitter = 0;
 	int updated_jitter = 0;
 	int dsp_on = 0;
@@ -71,7 +79,13 @@ int main(int argc, char** argv, char** env) {
 	int stat_n = 0;
 	int stat_v = 0;
 
-	// Goal is to see loop lock in ~60 ms, 60 "pps" pulses
+	FILE *fcurve = fopen("sim_lock.dat", "w");
+	if (fcurve) {
+		printf("saving curve to sim_lock.dat\n");
+		fprintf(fcurve, "# Vpps_lock run using %.1f ppm VCXO span\n", vcxo_ppm);
+	}
+
+	// Goal is to see loop lock in ~80 ms, 80 "pps" pulses
 	top->clk = 0;
 	while (main_time < 80*1000*1000) {
 		// modulate time between clock edges
@@ -111,7 +125,8 @@ int main(int argc, char** argv, char** env) {
 			dsp_on = (dsp_status >> 13) & 1;
 			int pha = dsp_status & 0xfff;
 			if (pha > 2047) pha -= 4096;
-			printf("%d %u %u %d\n", top->dac_data, dsp_on, dsp_arm, pha);
+			if (fcurve) fprintf(fcurve, "%d %u %u %d\n",
+				top->dac_data, dsp_on, dsp_arm, pha);
 			if (main_time > 50000000) {
 				if ((pha > 6) || (pha < -6)) bad_phase=1;
 				stat_n += 1;
@@ -125,6 +140,7 @@ int main(int argc, char** argv, char** env) {
 		// Dump trace data for this cycle
 		if (tfp) tfp->dump (main_time);
 	}
+	if (fcurve) fclose(fcurve);
 	double rms = 4.0 * sqrt(stat_v/(double) stat_n);
 	printf("stat_n = %d   stat_v = %d   rms = %.3f ns\n", stat_n, stat_v, rms);
 	if (bad_phase) printf("Excess peak phase\n");

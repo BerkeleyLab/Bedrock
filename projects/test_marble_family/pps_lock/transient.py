@@ -74,7 +74,9 @@ def plotTransfer(f, g_df, g_dp, g_dp2, A):
     pyplot.legend(frameon=False)
     pyplot.xlabel("Frequency (Hz)")
     pyplot.ylabel("Gain")
-    pyplot.show()
+    # pyplot.show()
+    pyplot.savefig("pll_freq.png")
+    pyplot.clf()
     return
 
 
@@ -94,21 +96,27 @@ def genTransferPlot(npt=500, span=0.5, vcxo_ppm=14):
     return (npoly, dpoly)
 
 
-def genTimeDomain(polys, data_file=None, label="computed"):
-    npoly, dpoly = polys
-    x_input = 100*[1]  # unit step input (relative to zero initial condition)
-    y = signal.lfilter(npoly, dpoly, x_input)
-    pyplot.plot(y, label=label)
-    if data_file is not None:
-        measurement = np.loadtxt(data_file).transpose()
+def add_trace(filen, label):
+    if filen is not None:
+        measurement = np.loadtxt(filen).transpose()
         y = measurement[0]  # DAC (frequency) value
         # normalize, assuming measurement has reached equilibrium at its end
         y = y - y[-1]
         y = y / y[0]
-        pyplot.plot(y, label='measured (normalized) DAC')
+        pyplot.plot(y, label=label)
+
+
+def genTimeDomain(polys, data_file=None, vsim_file=None, label="computed"):
+    npoly, dpoly = polys
+    x_input = 80*[1.0]  # unit step input (relative to zero initial condition)
+    y = signal.lfilter(npoly, dpoly, x_input)
+    pyplot.plot(y, label=label)
+    add_trace(data_file, "Measured (normalized) DAC");
+    add_trace(vsim_file, "Verilator simulated (normalized) DAC");
     pyplot.xlabel("time (s)")
     pyplot.legend()
-    pyplot.show()
+    # pyplot.show()
+    pyplot.savefig("pll_xcheck.png")
 
 
 if __name__ == "__main__":
@@ -118,5 +126,8 @@ if __name__ == "__main__":
     data_file = None
     if len(argv) > 1:
         data_file = argv[1]
+    vsim_file = None
+    if len(argv) > 2:
+        vsim_file = argv[2]
     label = "Computed for %.1f ppm VCXO" % vcxo_ppm
-    genTimeDomain(polys, label=label, data_file=data_file)
+    genTimeDomain(polys, label=label, data_file=data_file, vsim_file=vsim_file)
