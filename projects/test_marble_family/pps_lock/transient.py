@@ -111,8 +111,8 @@ def genTimeDomain(polys, data_file=None, vsim_file=None, label="computed"):
     x_input = 80*[1.0]  # unit step input (relative to zero initial condition)
     y = signal.lfilter(npoly, dpoly, x_input)
     pyplot.plot(y, label=label)
-    add_trace(data_file, "Measured (normalized) DAC");
-    add_trace(vsim_file, "Verilator simulated (normalized) DAC");
+    add_trace(data_file, "Measured (normalized) DAC")
+    add_trace(vsim_file, "Verilator simulated (normalized) DAC")
     pyplot.xlabel("time (s)")
     pyplot.legend()
     # pyplot.show()
