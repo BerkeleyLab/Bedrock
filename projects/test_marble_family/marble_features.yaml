@@ -8,25 +8,27 @@ marble_mini:
         USE_I2CBRIDGE: 1
         MMC_CTRACE: 1
         GPS_CTRACE: 0
-        USE_GTPCLK: 1
     params:
         carrier: "Marble Mini"
         carrier_rev: "v1"
         default_enable_rx: 1
         misc_config_default: 4
         use_rgmii_idelay: 1
+        # Options are "gtp_ref_clk, ddr_ref_clk or sysclk"
+        sysclk_src: "gtp_ref_clk"
 
 marble_v2:
     defs:
         MARBLE_V2: 1
         USE_SI570: 1
         USE_I2CBRIDGE: 1
-        MMC_CTRACE: 0
-        GPS_CTRACE: 1
-        USE_GTPCLK: 1
+        MMC_CTRACE: 1
+        GPS_CTRACE: 0
     params:
         carrier: "Marble"
         carrier_rev: "v2"
         default_enable_rx: 1
         misc_config_default: 4
         use_rgmii_idelay: 1
+        # Options are "gtp_ref_clk, ddr_ref_clk or sysclk"
+        sysclk_src: "ddr_ref_clk"
