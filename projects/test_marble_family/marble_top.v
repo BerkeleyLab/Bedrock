@@ -297,6 +297,8 @@ assign idelay_ce = 0;
 assign idelay_clk = 0;
 assign idelay_value_in = 0;
 
+// Maybe this cruft could be eliminated if the corresponding yaml defs
+// were rejiggered to be parameters.
 `ifdef USE_I2CBRIDGE
 localparam C_USE_I2CBRIDGE = 1;
 `else
@@ -306,6 +308,11 @@ localparam C_USE_I2CBRIDGE = 0;
 localparam C_MMC_CTRACE = 1;
 `else
 localparam C_MMC_CTRACE = 0;
+`endif
+`ifdef GPS_CTRACE
+localparam C_GPS_CTRACE = 1;
+`else
+localparam C_GPS_CTRACE = 0;
 `endif
 
 // vestiges of CERN FMC tester support
@@ -317,7 +324,9 @@ wire [7:0] leds;
 marble_base #(
 	.USE_I2CBRIDGE(C_USE_I2CBRIDGE),
 	.MMC_CTRACE(C_MMC_CTRACE),
+	.GPS_CTRACE(C_GPS_CTRACE),
 	.default_enable_rx(C_DEFAULT_ENABLE_RX),
+	.use_ddr_pps(1),
 	.misc_config_default(C_MISC_CONFIG_DEFAULT)
 ) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
