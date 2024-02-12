@@ -73,7 +73,7 @@ module lb_marble_slave #(
 );
 
 wire do_rd = control_strobe & control_rd;
-reg dbg_rst=0;
+reg dbg_rst=0;  // purposefully unused unless BADGE_TRACE is set
 wire [7:0] ibadge_out, obadge_out;
 
 // XADC Internal Temperature Monitor
