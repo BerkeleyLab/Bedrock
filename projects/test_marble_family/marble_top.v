@@ -153,8 +153,8 @@ wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
 
 // You really want to set this define.
 // It's only valid to leave it off when C_USE_RGMII_IDELAY is 0.
-// Maybe useful if you're exploring parameter space or
-// have problems with the Xilinx DNA readout.
+// It might be useful to not define it if you're exploring parameter space
+// or have problems with the Xilinx DNA readout.
 `define USE_IDELAYCTRL
 
 // Sanity check for C_SYSCLK_SRC
