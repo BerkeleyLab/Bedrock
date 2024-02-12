@@ -105,30 +105,27 @@ parameter [47:0] mac = 48'h12555500032d;
 `endif
 `endif
 
+// Basic clock setup
 wire tx_clk = vgmii_tx_clk;
 wire rx_clk = vgmii_rx_clk;
 
-wire enable_rx;
-wire lb_mbox_sel = lb_addr[23:20] == 2;
-wire lb_mbox_wen = lb_mbox_sel & lb_write;
-wire lb_control_strobe;
-wire [7:0] mbox_out2;
-wire config_s, config_p;
-wire [7:0] config_a, config_d;
-
-// Forward declarations
-wire [1:0] led_user_mode;
-wire l1, l2;
 // Local bus
+wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;  // outputs from rtefi_blob
 assign lb_clk = tx_clk;
 assign lb_strobe = lb_control_strobe;
 wire config_clk = tx_clk;
 assign lb_write = lb_control_strobe & ~lb_control_rd;
-wire [3:0] spi_pins_debug;
-wire lb_control_rd, lb_control_rd_valid;
 assign lb_rd_valid = lb_control_rd_valid;
 assign lb_rd = lb_control_rd;
 
+// Signals provided by mmc_mailbox
+wire [3:0] spi_pins_debug;
+wire enable_rx;
+wire [7:0] mbox_out2;
+wire config_s, config_p;
+wire [7:0] config_a, config_d;
+
+// Actual mmc_mailbox instance
 mmc_mailbox #(
   .DEFAULT_ENABLE_RX(default_enable_rx)
   ) mailbox_i (
@@ -169,9 +166,15 @@ wire [31:0] lb_slave_data_read;
 wire [27:0] frequency_si570;
 freq_count freq_cnt_si570(.f_in(si570), .sysclk(lb_clk), .frequency(frequency_si570));
 
-//
+// Signals provided to lb_marble_slave
 wire [3:0] rx_category_rx, rx_category;
 wire rx_category_s_rx, rx_category_s;
+
+// Signals provided by lb_marble_slave
+wire [1:0] led_user_mode;
+wire l1, l2;
+
+// Actual lb_marble_slave instance
 lb_marble_slave #(
 	.USE_I2CBRIDGE(USE_I2CBRIDGE),
 	.MMC_CTRACE(MMC_CTRACE),
