@@ -1,4 +1,15 @@
-module ad9653 (
+module ad9653 #(
+	parameter DWIDTH=8,
+	parameter BANK_CNT=1,
+	parameter BANK_CNT_WIDTH=$clog2(BANK_CNT)+1,
+	parameter [DWIDTH*BANK_CNT_WIDTH-1:0] BANK_SEL=0,
+	parameter SPIMODE="passthrough",
+	parameter dbg = "true",
+	parameter [DWIDTH-1:0] FLIP_D=0,
+	parameter FLIP_DCO=0,
+	parameter FLIP_FRAME=0,
+	parameter INFER_IOBUF=0
+) (
 	input                 D0NA,
 	input                 D0NB,
 	input                 D0NC,
@@ -50,25 +61,6 @@ module ad9653 (
 	input                 mmcm_psincdec,
 	output                mmcm_psdone
 );
-parameter DWIDTH=8;
-parameter BANK_CNT=1;
-parameter BANK_CNT_WIDTH=clog2(BANK_CNT)+1;
-function integer clog2;
-	input integer value;
-	integer local_value;
-	begin
-		local_value = value-1;
-		for (clog2=0; local_value>0; clog2=clog2+1)
-			local_value = local_value>>1;
-	end
-endfunction
-parameter [DWIDTH*BANK_CNT_WIDTH-1:0] BANK_SEL=0;
-parameter SPIMODE="passthrough";
-parameter dbg = "true";
-parameter [DWIDTH-1:0] FLIP_D=0;
-parameter FLIP_DCO=0;
-parameter FLIP_FRAME=0;
-parameter INFER_IOBUF=0;
 
 assign PDWN = pdwn_in;
 
