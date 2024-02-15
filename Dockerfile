@@ -97,3 +97,12 @@ RUN apt-get update && \
     ./configure && \
     make -j$(nproc) && \
     make install
+
+# Add some configuration for Vivado here, so we don't break the cache
+RUN apt-get update && \
+    apt-get install -y \
+        locales && \
+    rm -rf /var/lib/apt/lists/* && \
+    locale -a && \
+    cat /etc/locale.gen && \
+    localedef -i en_US -f UTF-8 en_US.UTF-8
