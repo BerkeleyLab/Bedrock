@@ -38,7 +38,6 @@ VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
 VVP_FLAGS = ${VVP_FLAGS_$@} ${VCD_ARGS_$@}
-YOSYS = yosys
 PERL = perl
 XCIRCUIT = xcircuit
 # XXX consider converting this to something more compatible with Bedrock's VIVADO_SYNTH.
@@ -210,14 +209,9 @@ hw_test_start: hw_test_tb tap-vpi.vpi
 	$(VVP) $<
 
 # =====
-# experimental check of CDC-correctness
-# not yet turned into a regression test
-hw_test_yosys.json: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v ../../build-tools/cdc_snitch_proc.ys
-	$(YOSYS) --version
-	$(YOSYS) -q -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
-# (I don't think yosys for-loop is actually buggy, just tediously slow, and in this case unnecessary)
-hw_test_cdc.txt: ../../build-tools/cdc_snitch.py hw_test_yosys.json
-	$(PYTHON) $^ -o $@
+# check of basic CDC-correctness
+hw_test_yosys.json: $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v
+# exercise with make hw_test_cdc.txt
 
 # =====
 # experimental bitfiles, not for hardware

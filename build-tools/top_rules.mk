@@ -19,6 +19,10 @@ VPIEXT = vpi
 PYTHON = python3
 AWK = awk
 XCIRCUIT = xcircuit
+YOSYS = yosys
+YOSYS_QUIET = -q
+YOSYS_JSON_OPTION = -DBUGGY_FORLOOP
+# (I don't think yosys for-loop is actually buggy, just tediously slow, and in this case unnecessary)
 
 VPI_CFLAGS := $(shell $(VERILOG_VPI) --cflags)
 VPI_LDFLAGS := $(shell $(VERILOG_VPI) --ldflags)
@@ -144,6 +148,14 @@ V%_tb: $(wildcard *.sv) $(wildcard *.v)
 
 %.dat: %_tb
 	$(VVP) $< $(VVP_FLAGS) > $@
+
+# cdc_snitch
+%_yosys.json: %.v $(BUILD_DIR)/cdc_snitch_proc.ys
+	$(YOSYS) --version
+	$(YOSYS) $(YOSYS_QUIET) -p "read_verilog $(YOSYS_JSON_OPTION) $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
+
+%_cdc.txt: $(BUILD_DIR)/cdc_snitch.py %_yosys.json
+	$(PYTHON) $^ -o $@
 
 ifeq ($(XILINX_TOOL), VIVADO)
 %_$(DAUGHTER).xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/%.xdc  $(BOARD_SUPPORT_DIR)/$(DAUGHTER)/fmc.map
