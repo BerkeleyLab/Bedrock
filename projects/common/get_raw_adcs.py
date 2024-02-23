@@ -15,7 +15,8 @@ from banyan_ch_find import banyan_ch_find
 start_time = datetime.datetime.now()
 
 
-def get_raw_adcs_run(dev, filewritepath='raw_adcs_', mask="0xff", npt_wish=0, count=10, save_data=True, verbose=False):
+def get_raw_adcs_run(dev, filewritepath='raw_adcs_', freq=7/33.0, mask="0xff",
+                     npt_wish=0, count=10, save_data=True, verbose=False):
 
     b_status = dev.reg_read([('banyan_status')])[0]
     npt = 1 << ((b_status >> 24) & 0x3F)
@@ -32,7 +33,7 @@ def get_raw_adcs_run(dev, filewritepath='raw_adcs_', mask="0xff", npt_wish=0, co
     chans = banyan_ch_find(mask_int)
     print(chans, 8/len(chans))
     nptx = int(npt*8/len(chans))
-    theta = numpy.array(range(nptx))*7*2*numpy.pi/33
+    theta = numpy.array(range(nptx))*freq*2*numpy.pi
     basis = numpy.vstack((numpy.cos(theta), numpy.sin(theta), theta*0+1)).T
     chan_txt = "column assignment for banyan_mask 0x%2.2x: " % mask_int + " ".join(["%d" % x for x in chans])
 
@@ -73,7 +74,7 @@ def get_raw_adcs_run(dev, filewritepath='raw_adcs_', mask="0xff", npt_wish=0, co
     return header, filename, block
 
     # print 'try this'
-    # print process_adcs(dev,npt,mask_int)#,block,timestamp);
+    # print process_adcs(dev, npt, mask_int, freq=freq)  #,block,timestamp);
 
 
 def pair_ram(buff, idx, count):
@@ -193,10 +194,10 @@ def collect_adcs(dev, npt, nchans, print_minmax=True):
     return block2, timestamp
 
 
-def process_adcs(dev, npt, mask_int):  # ,block,timestamp):
+def process_adcs(dev, npt, mask_int, freq=7/33.0):  # ,block,timestamp):
     chans = banyan_ch_find(mask_int)
     nptx = int(npt*(8/len(chans)))
-    theta = numpy.array(range(nptx))*7*2*numpy.pi/33
+    theta = numpy.array(range(nptx))*freq*2*numpy.pi
     basis = numpy.vstack((numpy.cos(theta), numpy.sin(theta), theta*0+1)).T
     (block, timestamp) = collect_adcs(dev, npt, len(chans), print_minmax=False)
     nblock = numpy.array(block).transpose()
@@ -228,6 +229,18 @@ def slow_chain_readout(dev):
     return slow_chain_unpack(readlist)
 
 
+def get_freq(fstring):
+    # will crash if the string isn't either a simple float (e.g., 0.2121)
+    # or a fraction (e.g., 7/33).
+    a = fstring.split('/')
+    if len(a) == 2:
+        freq = int(a[0]) / float(int(a[1]))
+    else:
+        freq = float(fstring)
+    # print("%s %f" % (fstring, freq))
+    return freq
+
+
 def usage():
     print("python get_raw_adcs_.py -a leep://192.168.21.12 -m 0xff -n 1 -c 8192")
 
@@ -242,6 +255,8 @@ if __name__ == "__main__":
                         help='Device URL (leep://<IP> or ca://<PREFIX>)')
     parser.add_argument('-D', '--dir', dest='filewritepath', default="raw_adcs_",
                         help='Log/data directory prefix (can include path)')
+    parser.add_argument('-f', '--freq', dest='freq', default="7/33", type=str,
+                        help='IF/Fs ratio, where rational numbers like 7/33 are accepted')
     parser.add_argument('-m', '--mask', dest="mask", default="0xff",
                         help='Channel mask')
     parser.add_argument('-n', '--npt', dest="npt_wish", default=0, type=int,
@@ -255,12 +270,14 @@ if __name__ == "__main__":
 
     print("get_raw_adcs: collect and save Banyan waveforms")
 
+    freq = get_freq(args.freq)
+
     import leep
 
     print("Raw ADC acquisition")
     print('Carrier board URL %s' % args.dev_addr)
     dev = leep.open(args.dev_addr, instance=[])
 
-    get_raw_adcs_run(dev, filewritepath=args.filewritepath, mask=args.mask,
-                     npt_wish=args.npt_wish, count=args.count, verbose=args.verbose)
+    get_raw_adcs_run(dev, filewritepath=args.filewritepath, freq=freq,
+                     mask=args.mask, npt_wish=args.npt_wish, count=args.count, verbose=args.verbose)
     print("Done")
