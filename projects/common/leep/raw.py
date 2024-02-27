@@ -547,7 +547,7 @@ class LEEPDevice(DeviceBase):
                 raise RomError("Truncated ROM Descriptor")
 
             if type == 1:
-                blob = blob.tobytes()
+                blob = blob.tobytes().decode()
                 self.size_desc = size
                 if self.descript is None:
                     self.descript = blob

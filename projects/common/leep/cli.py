@@ -102,7 +102,7 @@ def dumpgitid(args, dev):
 
 
 def dumpdescript(args, dev):
-    print(dev.descript.decode())
+    print(dev.descript)
 
 
 def dumpdrv(args, dev):
@@ -175,7 +175,7 @@ def gentemplate(args, dev):
 # Code: %s
 # Name Mode: -M %s
 
-''' % (dev.descript.decode(), dev.jsonhash, dev.codehash, args.mode))
+''' % (dev.descript, dev.jsonhash, dev.codehash, args.mode))
 
     out.write('file "feed_base.template"\n{\n{PREF="$(CHAS):CTRL_"}\n}\n\n')
 
