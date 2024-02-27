@@ -36,6 +36,8 @@ python3 --version
 iverilog -V
 verilator --version
 yosys -V
+echo 'puts "tclsh [info patchlevel]"' | tclsh
+flake8 --version
 if [ "$1" = "more" ]; then
 python3 -c 'import nmigen; print("nmigen found")'
 riscv64-unknown-elf-gcc --version
