@@ -6,9 +6,6 @@ import hashlib
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "../projects/common"))
-import leep
-
 
 def chunk(li, flag=1):
     '''
@@ -158,6 +155,8 @@ def opt_bus_width(entries, min_rom_size, max_rom_size):
 
 
 def read_live_array(dev):
+    sys.path.append(os.path.join(os.path.dirname(__file__), "../projects/common"))
+    import leep
     leep_dev = leep.open(addr=dev, timeout=20)
     foo = leep_dev.the_rom
     return foo
