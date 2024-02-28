@@ -99,7 +99,7 @@ void spi_model(unsigned char *SCLK, unsigned char *CSB, unsigned char *MOSI, uns
 		unsigned word_ix;
 		unsigned pattern_ix;
 		uint16_t tx_word;
-	} state = {0};
+	} state = {0, 0, 0, 0};
 	static int cc=0;
 	// Write "1234ABCD" to first half of page 3
 	// (well, the high bit is set for the 1234 part)

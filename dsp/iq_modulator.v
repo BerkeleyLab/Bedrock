@@ -16,7 +16,6 @@ module iq_modulator #(
 // also plan that abs(ampi+ampq*i) < 1
 
 // Universal definition; note: old and new are msb numbers, not bit widths.
-`undef SAT
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 reg signed [2*WIDTH-1:0] p1=0, p2=0;  // product registers
 wire signed [WIDTH:0] p1s = p1[2*WIDTH-2:WIDTH-2];
@@ -30,5 +29,6 @@ always @(posedge clk) begin
 	d3 <= `SAT(sum, WIDTH+1, WIDTH);
 end
 assign d_out = d3[WIDTH:1];
+`undef SAT
 
 endmodule

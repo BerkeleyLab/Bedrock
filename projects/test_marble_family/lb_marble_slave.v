@@ -2,13 +2,15 @@
 // Slight adaptation of bedrock/badger/tests/lb_demo_slave.v
 // Has accreted some self-diagnostic features that (probably) would
 // not be part of a final production build.
-// Only a few write addresses implemented for LEDs etc.,
-// see logic below for local_write.
+// Only a few write addresses implemented for LEDs etc.
+// See logic below for local_write.
 module lb_marble_slave #(
 	parameter USE_I2CBRIDGE = 0,
 	parameter MMC_CTRACE = 0,
+	parameter GPS_CTRACE = 0,
 	parameter misc_config_default = 0,
-	// Timing hooks, can be used to speed up simulation
+	parameter use_ddr_pps = 0,
+	// Timing hooks, which can be used to speed up simulation
 	parameter twi_q0=6,  // 145 kbps with 125 MHz clock
 	parameter twi_q1=2,
 	parameter twi_q2=7,
@@ -71,7 +73,7 @@ module lb_marble_slave #(
 );
 
 wire do_rd = control_strobe & control_rd;
-reg dbg_rst=0;
+reg dbg_rst=0;  // purposefully unused unless BADGE_TRACE is set
 wire [7:0] ibadge_out, obadge_out;
 
 // XADC Internal Temperature Monitor
@@ -102,24 +104,34 @@ assign ibadge_out=0;
 assign obadge_out=0;
 `endif
 
-wire [15:0] ctrace_out;
+wire [19:0] ctrace_out;
 reg ctrace_start=0;
-wire [0:0] ctrace_running;
+reg ctrace_arm=0;
+wire ctrace_running;
 
-reg csb_r=0, csb_toggle;
-reg arm=1;
-always @(posedge clk) begin
-   csb_r <= mmc_pins[0];  // Note! from spi_gate.v; spi_pins_debug = {MISO, din, sclk_d1, csb_d1};
-   csb_toggle <= (~mmc_pins[0] & csb_r);
-   if (csb_toggle) arm <= 0;
-   if (ctrace_start) arm <= 1;
-end
-
+wire [1:0] gps_ctrace_pins;
 generate if (MMC_CTRACE) begin : mmc_ctrace
+	// Trigger logic to look at MMC activity
+	reg csb_r=0, csb_toggle=0;
+	always @(posedge clk) begin
+		csb_r <= mmc_pins[0];  // Note! from spi_gate.v; spi_pins_debug = {MISO, din, sclk_d1, csb_d1};
+		csb_toggle <= (~mmc_pins[0] & csb_r);
+		if (csb_toggle) ctrace_arm <= 0;
+		if (ctrace_start) ctrace_arm <= 1;
+	end
 	localparam ctrace_aw=11;
 	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
 	ctrace #(.dw(4), .tw(12), .aw(ctrace_aw)) mmc_ctrace(
-		.clk(clk), .data(mmc_pins), .start(csb_toggle & arm),
+		.clk(clk), .data(mmc_pins), .start(csb_toggle & ctrace_arm),
+		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
+		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out[15:0])
+	);
+        assign ctrace_out[19:16] = 0;
+end else if (GPS_CTRACE) begin : gps_ctrace
+	localparam ctrace_aw=14;
+	wire [ctrace_aw-1:0] ctrace_pc_mon;  // not used
+	ctrace #(.dw(2), .tw(18), .aw(ctrace_aw)) mmc_ctrace(
+		.clk(clk), .data(gps_ctrace_pins), .start(ctrace_start),
 		.running(ctrace_running), .pc_mon(ctrace_pc_mon),
 		.lb_clk(clk), .lb_addr(addr[ctrace_aw-1:0]), .lb_out(ctrace_out)
 	);
@@ -127,6 +139,7 @@ end else begin : no_mmc_trace
 	assign ctrace_out=0;
 	assign ctrace_running=0;
 end endgenerate
+wire [1:0] ctrace_status = {ctrace_arm, ctrace_running};
 
 // Simple cross-domain fault counter
 // Trigger originates deep inside construct.v
@@ -148,21 +161,54 @@ wire [31:0] tx_freq;
 freq_count #(.refcnt_width(27), .freq_width(32)) f_count(.f_in(ibadge_clk),
 	.sysclk(clk), .frequency(tx_freq));
 
-// GPS, includes another frequency counter
-// Capture input pins
-reg [3:0] gps_pins=0;
-always @(posedge clk) gps_pins <= gps;
-reg gps_buf_reset=0;
+// Capture Pmod GPS input pins
+// gps[3] is special: that's the PPS signal that we want to
+// acquire with an IDDR cell.  Leave portable code as backup
+// for any synthesis that can't do our brand of IDDR.
+reg [2:0] gps_pins=0;
+always @(posedge clk) gps_pins <= gps[2:0];
+wire [1:0] pps_in;
+generate if (use_ddr_pps) begin : gen_ddr_pps
+	IDDR #(
+		.DDR_CLK_EDGE("SAME_EDGE_PIPELINED")
+	) iddr_pps (
+		.Q1(pps_in[0]),
+		.Q2(pps_in[1]),
+		.C(clk), .D(gps[3]),
+		.CE(1'b1), .R(1'b0), .S(1'b0)
+	);
+end else begin : no_gen_ddr_pps
+	reg pps_dff=0;
+	always @(posedge clk) pps_dff <= gps[3];
+	assign pps_in = {pps_dff, pps_dff};
+end endgenerate
+
+// ctrace handling of GPS PPS (pps_in[0]) and UART (gps_pins[2])
+assign gps_ctrace_pins = {pps_in[0], gps_pins[2]};
+
+// GPS handling, which includes another frequency counter
 wire gps_buf_full;
 wire [7:0] gps_buf_out;
 wire [27:0] gps_freq;
 wire [3:0] pps_cnt;
-gps_test gps_test(.gps_pins(gps_pins),
+// Ignore IDDR enhancement of PPS pin for this module
+wire [3:0] gps_4pins = {pps_in[0], gps_pins};
+wire [13:0] nmea_buf_status;
+gps_test gps_test(.gps_pins(gps_4pins),
 	.clk(clk), .lb_addr(addr[9:0]), .lb_dout(gps_buf_out),
-	.buf_full(gps_buf_full), .buf_reset(gps_buf_reset),
+	.buf_full(gps_buf_full), .buf_status(nmea_buf_status),
 	.f_read(gps_freq), .pps_cnt(pps_cnt)
 );
-wire [8:0] gps_stat = {gps_buf_full, pps_cnt, gps_pins};
+// Simple counter based on output of pps-lock module below (inside ad5662_lock)
+// Will wrap every 1 hour, 8 minutes, 16 seconds
+// Hope this will be helpful diagnosing pps dropouts
+wire pps_tick;
+reg [11:0] locked_pps_cnt=0;
+always @(posedge clk) if (pps_tick) locked_pps_cnt <= locked_pps_cnt+1;
+//
+wire use_ddr_pps_bit = use_ddr_pps;
+wire [9:0] gps_stat_low = {use_ddr_pps_bit, gps_buf_full, pps_cnt, gps_4pins};  // 1 + 1 + 4 + 4
+wire [23:0] gps_stat = {locked_pps_cnt, 2'b00, gps_stat_low};  // 12 + 2 + 10
 wire [31:0] gps_pps_data = {pps_cnt, gps_freq};
 
 // Configuration ROM
@@ -180,7 +226,7 @@ always @(posedge clk) begin
 	rx_mac_buf_status_r <= rx_mac_buf_status;
 end
 
-// Crude uptime counter, wraps every 9.77 hours
+// Crude uptime counter, that wraps every 9.77 hours
 reg led_tick=0;
 reg [31:0] uptime=0;
 always @(posedge clk) if (led_tick) uptime <= uptime+1;
@@ -252,17 +298,16 @@ end else begin : no_i2cb
 	assign twi_rst = 1'bz;
 end endgenerate
 
-// White Rabbit DAC - with EXPERIMENTAL internal GPS pps lock
-// wr_dac_tick is 31.2 MHz, wr_dac_sclk is 15.6 MHz when operating
+// White Rabbit DAC - with capability of locking to PPS signal
+// wr_dac_tick is 31.2 MHz, and wr_dac_sclk is 15.6 MHz when operating
 reg [led_cw-1:0] led_cc=0;
 reg wr_dac_tick;  always @(posedge clk) wr_dac_tick <= &led_cc[1:0];
 reg wr_dac_send=0;
 reg pps_config_write=0;
 wire [0:0] wr_dac_busy;
 wire [31:0] pps_dsp_status;
-wire pps_in = gps_pins[3];
 ad5662_lock wr_dac(.clk(clk), .tick(wr_dac_tick),
-	.pps_in(pps_in),
+	.pps_in(pps_in), .pps_tick(pps_tick),
 	.host_data(data_out[17:0]),
 	.host_write_dac(wr_dac_send),
 	.host_write_cr(pps_config_write),
@@ -308,7 +353,7 @@ always @(posedge clk) if (do_rd) begin
 		4'h8: reg_bank_0 <= uptime;
 		4'h9: reg_bank_0 <= twi_status;
 		4'ha: reg_bank_0 <= wr_dac_busy;
-		4'hb: reg_bank_0 <= ctrace_running;
+		4'hb: reg_bank_0 <= ctrace_status;
 		4'hc: reg_bank_0 <= gps_stat;
 		4'hd: reg_bank_0 <= gps_pps_data;
 		4'he: reg_bank_0 <= pps_dsp_status;
@@ -323,7 +368,7 @@ always @(posedge clk) if (do_rd) begin
 		4'h0: reg_bank_1 <= xadc_internal_temperature;
 		4'h1: reg_bank_1 <= dna_high;
 		4'h2: reg_bank_1 <= dna_low;
-		//  xxxx13  unused
+		4'h3: reg_bank_1 <= nmea_buf_status;
 		//  xxxx14  unused
 		//  xxxx15  unused
 		//  xxxx16  unused
@@ -387,7 +432,7 @@ always @(posedge clk) if (local_write) case (addr[4:0])
 	8: misc_config <= data_out;
 	// 9: wr_dac
 	// 10: ctrace_start
-	// 11: gps_buf_reset
+	// 11: unused
 	// 12: pps_config_write
 	16: fmc1_test_r[21:0] <= data_out;
 	17: fmc1_test_r[43:22] <= data_out;
@@ -402,7 +447,6 @@ endcase
 always @(posedge clk) begin
 	wr_dac_send <= local_write & (addr[4:0] == 9);
 	ctrace_start <= local_write & (addr[4:0] == 10);
-	gps_buf_reset <= local_write & (addr[4:0] == 11);
 	pps_config_write <= local_write & (addr[4:0] == 12);
 end
 

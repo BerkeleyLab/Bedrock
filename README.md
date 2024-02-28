@@ -45,9 +45,9 @@ Graphical x Batch mode
 ======================
 
 Bedrock is structured in such a way to make use of traditional *nix
-tools, suck as `make` and `grep`, bash-like and python scripts from the
+tools, such as `make` and `grep`, shell and python scripts from the
 command-line. This makes it easy to automate the build process, customize
-steps and gives flexibility to add hooks for generating code, stubs,
+steps, and gives flexibility to add hooks for generating code, stubs,
 definitions and much more.
 
 However, there are valid cases for using a graphical, interactive
@@ -60,8 +60,10 @@ directory in the synthesis directory. So, for instance, when synthesizing
 a design for `Xilinx`, Bedrock scripts will create a directory called
 `_xilinx` with the unmodified vendor files within.
 
-In this way, after the vendor project file is created (see the [build-tools discussion](build-tools/makefile.md) for details), one can simply invoke the
-vendor tool manually with the project file name as the argument.
+In this way, after the vendor project file is created (see the
+[build-tools discussion](build-tools/makefile.md) for details),
+one can simply invoke the vendor tool manually with the project
+file name as the argument.
 
 For instance, if using Vivado, one can use the following command
 to open a project in Graphical mode:

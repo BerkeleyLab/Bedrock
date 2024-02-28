@@ -99,6 +99,7 @@ always @(posedge clk) begin
 end
 
 wire signed [29:0] mr_sat = `SAT(mr_ff,42,29);
+`undef SAT
 
 reg signed [35:0] mr=0;
 reg signed [30:0] lim1=0;

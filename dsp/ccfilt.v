@@ -57,6 +57,7 @@ always @(posedge clk) begin
 end
 reg valid3=0;
 always @(posedge clk) valid3 <= valid2;
+`undef UNIFORM
 
 `ifdef SIMULATE
 reg [3:0] ch_id=0;
@@ -80,6 +81,8 @@ always @(posedge clk) begin
 	d4 <= `SAT(d3, outw, outw-1);
 	valid4 <= valid3;
 end
+
+`undef SAT
 
 // Instantiate half-band filter .. or not
 wire [outw-1:0] d5;

@@ -23,7 +23,7 @@ end
 
 // Create a fake pps with some random jitter
 integer local_count=0;
-reg pps_in=0;
+reg [1:0] pps_in=0;
 integer pps_start=100;
 always @(posedge clk) begin
 	local_count <= local_count + 1;
@@ -32,11 +32,11 @@ always @(posedge clk) begin
 		pps_start <= 95 + $urandom(seed)%10;
 	end
 	pps_in <= 0;
-	if (local_count == pps_start) pps_in <= 1;
-	if (local_count == pps_start+1) pps_in <= 1;
-	if (local_count == pps_start+2) pps_in <= 1;
-	if ((local_count >= pps_start+2) && (local_count < pps_start+100)) pps_in <= 1;
-	if (local_count == pps_start+103) pps_in <= 1;
+	if (local_count == pps_start) pps_in <= 3;
+	if (local_count == pps_start+1) pps_in <= 3;
+	if (local_count == pps_start+2) pps_in <= 3;
+	if ((local_count >= pps_start+2) && (local_count < pps_start+100)) pps_in <= 3;
+	if (local_count == pps_start+103) pps_in <= 3;
 end
 
 // Just do one run
@@ -48,8 +48,11 @@ wire [15:0] dac_data;
 wire dac_send, pps_out;
 wire err_sign=0;
 wire [13:0] dsp_status;
+wire fir_enable = 0;
+wire fine_sel = 0;
 pps_lock #(.count_period(12500)) dut(.clk(clk),
 	.pps_in(pps_in), .err_sign(err_sign),
+	.fir_enable(fir_enable), .fine_sel(fine_sel),
 	.run_request(run_request), .dac_preset_val(dac_preset_val),
 	.dac_data(dac_data), .dac_send(dac_send),
 	.dsp_status(dsp_status), .pps_out(pps_out)

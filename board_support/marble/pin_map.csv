@@ -88,6 +88,10 @@ LD17       LD17
 
 # Literal output follows
 
+# 125 MHz from U20 CDCM61004 routed directly to a MRCC pin
+set_property -dict {PACKAGE_PIN AC9 IOSTANDARD DIFF_SSTL15} [get_ports DDR_REF_CLK_P]
+set_property -dict {PACKAGE_PIN AD9 IOSTANDARD DIFF_SSTL15} [get_ports DDR_REF_CLK_N]
+
 # Truly special:
 #   125 MHz from U20 CDCM61004 routed through GBX_MUX to any one of four MGT_CLK_* pairs
 #   This configuration is for MGT_CLK_0 (bank 116 MGTREFCLK0)
@@ -113,6 +117,7 @@ set_property CONFIG_VOLTAGE 2.5 [current_design]
 create_clock -name sys_clk -period 50.00 [get_ports SYSCLK_P]
 create_clock -period 8.00 -name tx_clk [get_ports GTPREFCLK_P]
 create_clock -period 8.00 -name rx_clk [get_ports RGMII_RX_CLK]
+create_clock -period 8.00 -name ddr_clk [get_ports DDR_REF_CLK_P]
 create_clock -period 5.385 -name SI57X_A [get_ports GTREFCLK_P]
 # you need to set clock groups as asynchronous in some other file
 

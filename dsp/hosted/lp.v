@@ -62,6 +62,8 @@ always @(posedge clk) begin
 end
 assign y = yr[18+shift:1];
 
+`undef SAT
+
 endmodule
 
 

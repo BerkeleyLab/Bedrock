@@ -41,6 +41,7 @@ always @(posedge clk) begin
 	I_small <= `SAT(z_I_sel, 19, 18);
 	Q_small <= `SAT(z_Q_sel, 19, 18);
 end
+`undef SAT
 
 assign z_I_all = z_I_all_i;
 assign z_Q_all = z_Q_all_i;

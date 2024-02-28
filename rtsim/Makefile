@@ -11,7 +11,6 @@ ifneq (clean,$(MAKECMDGOALS))
 	-include $(DEPDIR)/resonator.bit.d
 endif
 
-VFLAGS += -Wno-macro-redefinition
 VVP_FLAGS += +trace
 
 # -y for yosys

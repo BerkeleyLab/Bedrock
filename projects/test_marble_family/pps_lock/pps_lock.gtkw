@@ -1,15 +1,15 @@
 [timestart] 0
-[size] 1000 600
+[size] 1033 618
 [pos] -1 -1
-*-17.338549 181404 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-17.179115 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] pps_lock_tb.
 [treeopen] pps_lock_tb.dut.
-[sst_width] 213
+[sst_width] 214
 [signals_width] 174
 [sst_expanded] 1
-[sst_vpaned_height] 151
+[sst_vpaned_height] 157
 @28
-pps_lock_tb.pps_in
+pps_lock_tb.pps_in[1:0]
 pps_lock_tb.run_request
 pps_lock_tb.dsp_on
 pps_lock_tb.pps_out
@@ -25,16 +25,16 @@ pps_lock_tb.dut.pps_inhibit
 pps_lock_tb.dut.arm
 @24
 pps_lock_tb.dut.count[26:0]
-pps_lock_tb.dut.phase_r[11:0]
+pps_lock_tb.dut.phase_r[12:0]
 @420
-pps_lock_tb.dut.phase_dsp[11:0]
+pps_lock_tb.dut.phase_dsp[12:0]
 @28
 pps_lock_tb.dut.dsp_on
 pps_lock_tb.dut.dsp_strobe
 pps_lock_tb.dut.count_active
 pps_lock_tb.dut.dsp_ovf
 @24
-pps_lock_tb.dut.dac_val[15:0]
+pps_lock_tb.dut.dac_data[15:0]
 @28
 pps_lock_tb.dut.dac_send
 @200
@@ -42,9 +42,9 @@ pps_lock_tb.dut.dac_send
 @28
 pps_lock_tb.dut.plf.istrobe
 @420
-pps_lock_tb.dut.plf.phase[11:0]
-pps_lock_tb.dut.plf.istate[15:0]
-pps_lock_tb.dut.plf.raw_sum[16:0]
+pps_lock_tb.dut.plf.phase[12:0]
+pps_lock_tb.dut.plf.istate[17:0]
+pps_lock_tb.dut.plf.raw_sum[18:0]
 @28
 pps_lock_tb.dut.plf.dac_stb
 [pattern_trace] 1
