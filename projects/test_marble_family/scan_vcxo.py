@@ -9,15 +9,16 @@ from lbus_access import lbus_access
 
 def measure_1(chip, v, dac=2, pause=1.1, repeat=1, gps=False, verbose=False):
     '''
-    v should be between 0 and 65535
-    freq_count gateware module configured to update every 1.0737 s
+    v is 16-bit tuning word, which should be between 0 and 65535 or -32768 and 32767
+    freq_count gateware module is configured to update every 1.0737 s
     '''
+    v &= 0xffff
     prefix_map = {1: 0x10000, 2: 0x20000}
     if dac in prefix_map:
         v |= prefix_map[dac]
     else:
         print("Invalid DAC choice")
-        exit(1)
+        return None
     if gps:
         pause = 0.3 * pause
     chip.exchange([327692, 327689], [0, v])  # pps_config, wr_dac
@@ -26,7 +27,7 @@ def measure_1(chip, v, dac=2, pause=1.1, repeat=1, gps=False, verbose=False):
     while len(ppm) < repeat:
         time.sleep(pause)
         if gps:
-            raw = chip.exchange([13])
+            raw = chip.exchange([13])  # gps_pps_data
             n = (raw >> 28) & 0xf
             ovf = (raw >> 27) & 0x1
             count = raw & 0x7ffffff
@@ -39,9 +40,12 @@ def measure_1(chip, v, dac=2, pause=1.1, repeat=1, gps=False, verbose=False):
                 x = (float(count) / 125000000.0 - 1.0) * 1e6
                 ppm += [x]
             oldn = n
+        elif dac == 2:
+            raw = chip.exchange([20])  # aux_freq
+            ppm += [(float(raw) * (0.5**27) * 125.0/20.0 - 1.0) * 1e6]
         else:
-            raw = chip.exchange([5])
-            ppm += [(float(raw) / 2**27 - 1.0) * 1e6]
+            raw = chip.exchange([5])  # tx_freq
+            ppm += [(float(raw) * (0.5**27) - 1.0) * 1e6]
     return ppm
 
 
@@ -81,7 +85,9 @@ if __name__ == "__main__":
             gps=args.gps,
             verbose=args.verbose
         )
-        print("%6d  %+7.3f %+7.3f %+7.3f ppm" % (v, ppm[1], ppm[2], ppm[3]))
+        if ppm is None:
+            exit(1)
+        print("%6d  %+8.3f %+8.3f %+8.3f ppm" % (v, ppm[1], ppm[2], ppm[3]))
         plx += [float(v) / 65535]
         plot1 += [ppm[1]]
         plot2 += [ppm[2]]

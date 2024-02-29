@@ -21,15 +21,16 @@ module lb_marble_slave #(
 	parameter initial_twi_file=""
 	`endif
 )(
-	input clk,
+	input clk,  // 125 MHz lb_clk == tx_clk originating with 25 MHz VCXO Y1
 	input [23:0] addr,
 	input control_strobe,
 	input control_rd,
 	input [31:0] data_out,
 	output [31:0] data_in,
+	input aux_clk,  // presumably from 20 MHz VCXO Y3
 	input clk62,
 	// Debugging
-	input ibadge_clk,
+	input ibadge_clk,  // 125 MHz rx_clk, also sent to frequency counter
 	input ibadge_stb,
 	input [7:0] ibadge_data,
 	input obadge_stb,
@@ -156,10 +157,17 @@ multi_counter #(.aw(4), .dw(20)) badger_rx_counter(
 	.read_addr(addr[3:0]), .read_data(rx_counters)
 );
 
-// Frequency counter
+// Frequency counter 1: Ethernet Rx referenced to Ethernet Tx
+// The Ethernet Rx frequency is what's provided by the other end of the cable,
+// i.e., the Ethernet switch or router.
 wire [31:0] tx_freq;
-freq_count #(.refcnt_width(27), .freq_width(32)) f_count(.f_in(ibadge_clk),
+freq_count #(.refcnt_width(27), .freq_width(32)) f_count1(.f_in(ibadge_clk),
 	.sysclk(clk), .frequency(tx_freq));
+
+// Frequency counter 2: aux_clk referenced to Ethernet Tx
+wire [31:0] aux_freq;
+freq_count #(.refcnt_width(27), .freq_width(32)) f_count2(.f_in(aux_clk),
+	.sysclk(clk), .frequency(aux_freq));
 
 // Capture Pmod GPS input pins
 // gps[3] is special: that's the PPS signal that we want to
@@ -369,7 +377,7 @@ always @(posedge clk) if (do_rd) begin
 		4'h1: reg_bank_1 <= dna_high;
 		4'h2: reg_bank_1 <= dna_low;
 		4'h3: reg_bank_1 <= nmea_buf_status;
-		//  xxxx14  unused
+		4'h4: reg_bank_1 <= aux_freq;
 		//  xxxx15  unused
 		//  xxxx16  unused
 		//  xxxx17  unused
