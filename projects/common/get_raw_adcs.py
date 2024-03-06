@@ -15,11 +15,18 @@ from banyan_ch_find import banyan_ch_find
 start_time = datetime.datetime.now()
 
 
+def banyan_status(dev):
+    b_status, clk_status = dev.reg_read(['banyan_status', 'clk_status_out'])
+    # full and not (running or armed)
+    b_readable = b_status & 0x40000000 and not (b_status & 0x80400000)
+    astep = 1 << ((b_status >> 24) & 0x3F)
+    return b_readable, astep, clk_status
+
+
 def get_raw_adcs_run(dev, filewritepath='raw_adcs_', ext_trig=False, freq=7/33.0,
                      mask="0xff", npt_wish=0, count=10, save_data=True, verbose=False):
 
-    b_status = dev.reg_read([('banyan_status')])[0]
-    npt = 1 << ((b_status >> 24) & 0x3F)
+    _, npt, _ = banyan_status(dev)
     if npt == 1:
         print("aborting since hardware module not present")
         sys.exit(2)
@@ -120,29 +127,20 @@ def collect(dev, npt, print_minmax=True, ext_trig=False, allow_clk_frozen=False,
         timestamp, minmax = slow_chain_readout(dev)
     else:
         timestamp, minmax = (0, 16*[0])
-
     if print_minmax:
         print(" ".join(["%d" % x for x in minmax]), "%.8f" % (timestamp*14/1320.0e6))
+
     while True:
         time.sleep(0.002)
-        status = dev.reg_read(['banyan_status', 'clk_status_out'])
-        b_status = status[0]
-        clk_status = status[1]
-        # print("banyan_status A: %8.8x" % b_status)
-        # full and not pending
-        if ext_trig:
-            if b_status & 0x40000000 and not (b_status & 0x00400000):
-                break
-        else:
-            if not (b_status & 0x80000000):
-                break
+        b_readable, astep, clk_status = banyan_status(dev)
+        if b_readable:
+            break
     # See logic for clk_status_r in digitizer_config.v, and associated comments.
     # The allow_clk_frozen feature is needed because collect() is called by zest_setup.py
     # as part of the data transfer verification process.
     if not (clk_status == 2 or allow_clk_frozen and clk_status == 1):
         print('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
         exit(3)
-    astep = 1 << ((b_status >> 24) & 0x3F)
 
     # TODO: The I/O call here takes twice as long, as leep/raw.py is not aware of the banyan, dual
     #       read option. The old collect_prc takes advantage of that but not leep.
@@ -153,31 +151,28 @@ def collect(dev, npt, print_minmax=True, ext_trig=False, allow_clk_frozen=False,
     return value, timestamp
 
 
-def collect_prc(prc, npt, print_minmax=True, ext_trig=False, allow_clk_frozen=False):
+def collect_prc(prc, npt, print_minmax=True, ext_trig=False, allow_clk_frozen=False, slow_chain=True):
     prc.reg_write([{'rawadc_trig_req': 1}]) if ext_trig else prc.reg_write([{'rawadc_trig': 1}])
 
-    (timestamp, minmax) = prc.slow_chain_readout()
+    if slow_chain:
+        timestamp, minmax = slow_chain_readout(dev)
+    else:
+        timestamp, minmax = (0, 16*[0])
     if print_minmax:
         print(" ".join(["%d" % x for x in minmax]), "%.8f" % (timestamp*14/1320.0e6))
+
     while True:
         time.sleep(0.002)
-        status = prc.reg_read_value(['banyan_status', 'clk_status_out'])
-        b_status = status[0]
-        clk_status = status[1]
-        # print("banyan_status B: %8.8x" % b_status)
-        if ext_trig:
-            if b_status & 0x40000000 and not (b_status & 0x00400000):
-                break
-        else:
-            if not (b_status & 0x80000000):
-                break
+        b_readable, astep, clk_status = banyan_status(dev)
+        if b_readable:
+            break
     # See logic for clk_status_r in digitizer_config.v, and associated comments.
     # The allow_clk_frozen feature is needed because collect() is called by zest_setup.py
     # as part of the data transfer verification process.
     if not (clk_status == 2 or allow_clk_frozen and clk_status == 1):
         print('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
         exit(3)
-    astep = 1 << ((b_status >> 24) & 0x3F)
+
     addr_wave0 = prc.get_read_address('banyan_data')
     value = []
     for ix in range(0, 8, 2):
@@ -189,7 +184,7 @@ def collect_adcs(dev, npt, nchans, print_minmax=True, ext_trig=False):
     '''
     nchans must be the result of len(banyan_ch_find())
     '''
-    value, timestamp = collect(dev, npt, print_minmax, ext_trig)
+    value, timestamp = collect(dev, npt, print_minmax, ext_trig=ext_trig)
     # value holds 8 raw RAM blocks
     # block will have these assembled into ADC channels
     mult = 8//nchans
