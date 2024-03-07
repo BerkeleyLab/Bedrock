@@ -103,7 +103,7 @@ class CADevice(DeviceBase):
             pvname = str(info['output'])
 
             # CA only has signed integers
-            value = numpy.asarray(value, dtype='i')
+            value = numpy.array(value).astype(dtype='i')
 
             caput(pvname, value, wait=True, timeout=self.timeout)
 
