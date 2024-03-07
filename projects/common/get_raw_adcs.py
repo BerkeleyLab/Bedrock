@@ -28,8 +28,7 @@ def get_raw_adcs_run(dev, filewritepath='raw_adcs_', ext_trig=False, freq=7/33.0
 
     _, npt, _ = banyan_status(dev)
     if npt == 1:
-        print("aborting since hardware module not present")
-        sys.exit(2)
+        raise ValueError("Aborting since hardware module not present")
     mask_int = int(mask, 0)
     # npt_wish only works correctly if mask is 0xff
     if npt_wish and npt_wish < npt and mask_int == 0xff:
@@ -139,8 +138,7 @@ def collect(dev, npt, print_minmax=True, ext_trig=False, allow_clk_frozen=False,
     # The allow_clk_frozen feature is needed because collect() is called by zest_setup.py
     # as part of the data transfer verification process.
     if not (clk_status == 2 or allow_clk_frozen and clk_status == 1):
-        print('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
-        exit(3)
+        raise SystemError('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
 
     # TODO: The I/O call here takes twice as long, as leep/raw.py is not aware of the banyan, dual
     #       read option. The old collect_prc takes advantage of that but not leep.
@@ -170,8 +168,7 @@ def collect_prc(prc, npt, print_minmax=True, ext_trig=False, allow_clk_frozen=Fa
     # The allow_clk_frozen feature is needed because collect() is called by zest_setup.py
     # as part of the data transfer verification process.
     if not (clk_status == 2 or allow_clk_frozen and clk_status == 1):
-        print('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
-        exit(3)
+        raise SystemError('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
 
     addr_wave0 = prc.get_read_address('banyan_data')
     value = []
