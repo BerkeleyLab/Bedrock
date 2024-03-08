@@ -269,6 +269,8 @@ if __name__ == "__main__":
                         help='Number of acquisitions')
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', default=False,
                         help='Verbose mode')
+    parser.add_argument('-t', '--timeout', type=float, default=0.1,
+                        help='LEEP network timeout')
 
     args = parser.parse_args()
 
@@ -280,7 +282,7 @@ if __name__ == "__main__":
 
     print("Raw ADC acquisition")
     print('Carrier board URL %s' % args.dev_addr)
-    dev = leep.open(args.dev_addr, instance=[])
+    dev = leep.open(args.dev_addr, instance=[], timeout=args.timeout)
 
     print("Using external trigger...") if args.ext_trig else print("Using internal trigger...")
     get_raw_adcs_run(dev, filewritepath=args.filewritepath, freq=freq, ext_trig=args.ext_trig,
