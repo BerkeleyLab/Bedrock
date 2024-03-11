@@ -107,3 +107,10 @@ RUN apt-get update && \
     locale -a && \
     cat /etc/locale.gen && \
     localedef -i en_US -f UTF-8 en_US.UTF-8
+
+# Shady stuff to make cmake work with libidn12
+RUN apt-get update && \
+    apt-get install -y \
+        libidn12 && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -s libidn.so.12 /usr/lib/x86_64-linux-gnu/libidn.so.11
