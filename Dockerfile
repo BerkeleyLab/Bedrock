@@ -32,7 +32,6 @@ RUN apt-get update && \
     libftdi1-dev \
     libusb-dev \
     openocd \
-    time \
     pkg-config && \
     rm -rf /var/lib/apt/lists/* && \
     python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
