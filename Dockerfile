@@ -100,6 +100,8 @@ RUN apt-get update && \
 # Add some configuration for Vivado here, so we don't break the cache
 RUN apt-get update && \
     apt-get install -y \
+        x11-utils \
+        xvfb \
         locales && \
     rm -rf /var/lib/apt/lists/* && \
     locale -a && \
