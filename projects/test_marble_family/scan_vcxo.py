@@ -110,21 +110,14 @@ def check_answer(x, plot1, plot2, dac=1, plot=False):
     return ok, center
 
 
-def collect_scan(chip, npt, signed):
+def collect_scan(chip, dac, npt=12, signed=False, gps=False, verbose=False):
     x = []
     plot1 = []
     plot2 = []
-    for jx in range(args.npt):
-        v_unsigned = int(min(jx * (65536/(args.npt-1)), 65535))
-        v = v_unsigned-32768 if args.signed else v_unsigned
-        ppm = measure_1(
-            chip,
-            v,
-            dac=args.dac,
-            repeat=4,
-            gps=args.gps,
-            verbose=args.verbose
-        )
+    for jx in range(npt):
+        v_unsigned = int(min(jx * (65536/(npt-1)), 65535))
+        v = v_unsigned-32768 if signed else v_unsigned
+        ppm = measure_1(chip, v, dac=dac, repeat=4, gps=gps, verbose=verbose)
         if ppm is None:
             return None
         print("%6d  %+8.3f %+8.3f %+8.3f ppm" % (v, ppm[1], ppm[2], ppm[3]))
@@ -162,7 +155,9 @@ if __name__ == "__main__":
     chip = lbus_access(args.addr, port=args.port)
     est_t = int(round(4.4*args.npt))
     print("Design run rate is 4.4 seconds per line, %d s total" % est_t)
-    scan_data = collect_scan(chip, args.npt, args.signed)
+    scan_data = collect_scan(
+        chip, args.dac, npt=args.npt, signed=args.signed,
+        gps=args.gps, verbose=args.verbose)
     if scan_data is None:
         exit(1)
     x, plot1, plot2 = scan_data
