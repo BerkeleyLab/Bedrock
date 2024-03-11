@@ -15,14 +15,20 @@ from banyan_ch_find import banyan_ch_find
 start_time = datetime.datetime.now()
 
 
-def get_raw_adcs_run(dev, filewritepath='raw_adcs_', freq=7/33.0, mask="0xff",
-                     npt_wish=0, count=10, save_data=True, verbose=False):
+def banyan_status(dev):
+    b_status, clk_status = dev.reg_read(['banyan_status', 'clk_status_out'])
+    # full and not (running or armed)
+    b_readable = b_status & 0x40000000 and not (b_status & 0x80400000)
+    astep = 1 << ((b_status >> 24) & 0x3F)
+    return b_readable, astep, clk_status
 
-    b_status = dev.reg_read([('banyan_status')])[0]
-    npt = 1 << ((b_status >> 24) & 0x3F)
+
+def get_raw_adcs_run(dev, filewritepath='raw_adcs_', ext_trig=False, freq=7/33.0,
+                     mask="0xff", npt_wish=0, count=10, save_data=True, verbose=False):
+
+    _, npt, _ = banyan_status(dev)
     if npt == 1:
-        print("aborting since hardware module not present")
-        sys.exit(2)
+        raise ValueError("Aborting since hardware module not present")
     mask_int = int(mask, 0)
     # npt_wish only works correctly if mask is 0xff
     if npt_wish and npt_wish < npt and mask_int == 0xff:
@@ -42,7 +48,7 @@ def get_raw_adcs_run(dev, filewritepath='raw_adcs_', freq=7/33.0, mask="0xff",
 
     for run_n in range(count):
         print(run_n)
-        (block, timestamp) = collect_adcs(dev, npt, len(chans))
+        (block, timestamp) = collect_adcs(dev, npt, len(chans), ext_trig=ext_trig)
         nblock = numpy.array(block).transpose()
         coeffzs = []
         for jx in range(len(chans) if verbose else 0):
@@ -113,31 +119,26 @@ def gen_test_data(npt):
     return numpy.hstack([numpy.ones(npt).astype(numpy.int32) * (i+1) for i in range(8)])
 
 
-def collect(dev, npt, print_minmax=True, allow_clk_frozen=False, slow_chain=True):
-    dev.reg_write([('rawadc_trig', 1)])
+def collect(dev, npt, print_minmax=True, ext_trig=False, allow_clk_frozen=False, slow_chain=True):
+    dev.reg_write([('rawadc_trig_req', 1)]) if ext_trig else dev.reg_write([('rawadc_trig', 1)])
 
     if slow_chain:
         timestamp, minmax = slow_chain_readout(dev)
     else:
         timestamp, minmax = (0, 16*[0])
-
     if print_minmax:
         print(" ".join(["%d" % x for x in minmax]), "%.8f" % (timestamp*14/1320.0e6))
+
     while True:
         time.sleep(0.002)
-        status = dev.reg_read(['banyan_status', 'clk_status_out'])
-        b_status = status[0]
-        clk_status = status[1]
-        # print "%8.8x"%b_status
-        if not (b_status & 0x80000000):
+        b_readable, astep, clk_status = banyan_status(dev)
+        if b_readable:
             break
     # See logic for clk_status_r in digitizer_config.v, and associated comments.
     # The allow_clk_frozen feature is needed because collect() is called by zest_setup.py
     # as part of the data transfer verification process.
     if not (clk_status == 2 or allow_clk_frozen and clk_status == 1):
-        print('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
-        exit(3)
-    astep = 1 << ((b_status >> 24) & 0x3F)
+        raise SystemError('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
 
     # TODO: The I/O call here takes twice as long, as leep/raw.py is not aware of the banyan, dual
     #       read option. The old collect_prc takes advantage of that but not leep.
@@ -148,26 +149,27 @@ def collect(dev, npt, print_minmax=True, allow_clk_frozen=False, slow_chain=True
     return value, timestamp
 
 
-def collect_prc(prc, npt, print_minmax=True, allow_clk_frozen=False):
-    prc.reg_write([{'rawadc_trig': 1}])
-    (timestamp, minmax) = prc.slow_chain_readout()
+def collect_prc(prc, npt, print_minmax=True, ext_trig=False, allow_clk_frozen=False, slow_chain=True):
+    prc.reg_write([{'rawadc_trig_req': 1}]) if ext_trig else prc.reg_write([{'rawadc_trig': 1}])
+
+    if slow_chain:
+        timestamp, minmax = slow_chain_readout(dev)
+    else:
+        timestamp, minmax = (0, 16*[0])
     if print_minmax:
         print(" ".join(["%d" % x for x in minmax]), "%.8f" % (timestamp*14/1320.0e6))
+
     while True:
         time.sleep(0.002)
-        status = prc.reg_read_value(['banyan_status', 'clk_status_out'])
-        b_status = status[0]
-        clk_status = status[1]
-        # print "%8.8x"%b_status
-        if not (b_status & 0x80000000):
+        b_readable, astep, clk_status = banyan_status(dev)
+        if b_readable:
             break
     # See logic for clk_status_r in digitizer_config.v, and associated comments.
     # The allow_clk_frozen feature is needed because collect() is called by zest_setup.py
     # as part of the data transfer verification process.
     if not (clk_status == 2 or allow_clk_frozen and clk_status == 1):
-        print('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
-        exit(3)
-    astep = 1 << ((b_status >> 24) & 0x3F)
+        raise SystemError('Loss of clock detected!  Rerun "zest_setup.py -r" to recover.  Disaster, aborting!')
+
     addr_wave0 = prc.get_read_address('banyan_data')
     value = []
     for ix in range(0, 8, 2):
@@ -175,11 +177,11 @@ def collect_prc(prc, npt, print_minmax=True, allow_clk_frozen=False):
     return value, timestamp
 
 
-def collect_adcs(dev, npt, nchans, print_minmax=True):
+def collect_adcs(dev, npt, nchans, print_minmax=True, ext_trig=False):
     '''
     nchans must be the result of len(banyan_ch_find())
     '''
-    value, timestamp = collect(dev, npt, print_minmax)
+    value, timestamp = collect(dev, npt, print_minmax, ext_trig=ext_trig)
     # value holds 8 raw RAM blocks
     # block will have these assembled into ADC channels
     mult = 8//nchans
@@ -257,6 +259,8 @@ if __name__ == "__main__":
                         help='Log/data directory prefix (can include path)')
     parser.add_argument('-f', '--freq', dest='freq', default="7/33", type=str,
                         help='IF/Fs ratio, where rational numbers like 7/33 are accepted')
+    parser.add_argument('-e', '--ext_trig', dest='ext_trig', action='store_true', default=False,
+                        help='Use external trigger to capture data')
     parser.add_argument('-m', '--mask', dest="mask", default="0xff",
                         help='Channel mask')
     parser.add_argument('-n', '--npt', dest="npt_wish", default=0, type=int,
@@ -265,6 +269,8 @@ if __name__ == "__main__":
                         help='Number of acquisitions')
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', default=False,
                         help='Verbose mode')
+    parser.add_argument('-t', '--timeout', type=float, default=0.1,
+                        help='LEEP network timeout')
 
     args = parser.parse_args()
 
@@ -276,8 +282,9 @@ if __name__ == "__main__":
 
     print("Raw ADC acquisition")
     print('Carrier board URL %s' % args.dev_addr)
-    dev = leep.open(args.dev_addr, instance=[])
+    dev = leep.open(args.dev_addr, instance=[], timeout=args.timeout)
 
-    get_raw_adcs_run(dev, filewritepath=args.filewritepath, freq=freq,
+    print("Using external trigger...") if args.ext_trig else print("Using internal trigger...")
+    get_raw_adcs_run(dev, filewritepath=args.filewritepath, freq=freq, ext_trig=args.ext_trig,
                      mask=args.mask, npt_wish=args.npt_wish, count=args.count, verbose=args.verbose)
     print("Done")

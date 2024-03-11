@@ -4,7 +4,7 @@ import unittest
 from ..base import DeviceBase
 
 
-class TestingDevice(DeviceBase):
+class DummyDevice(DeviceBase):
     def __init__(self, *args, **kws):
         DeviceBase.__init__(self, *args, **kws)
         self.regmap = {
@@ -31,7 +31,7 @@ class TestingDevice(DeviceBase):
 
 class TestTGEN(unittest.TestCase):
     def test_assemble(self):
-        D = TestingDevice()
+        D = DummyDevice()
         prog = D.assemble_tgen([
             ('set', 'test1', 0x12345678),
             ('sleep', 0xabcd),
@@ -48,7 +48,7 @@ class TestTGEN(unittest.TestCase):
         ])
 
     def test_long_sleep(self):
-        D = TestingDevice()
+        D = DummyDevice()
         prog = D.assemble_tgen([
             ('set', 'test1', 0x12345678),
             ('sleep', 0x1abcd),
