@@ -17,13 +17,13 @@ fiq_interp Source File
    	parameter q_dw=17
    ) (
    	input clk,
-   	input signed [a_dw-1:0] a_data,  // Interleaved I-Q Data
+   	input [a_dw-1:0] a_data,  // Interleaved I-Q Data
    	input a_gate,  // Data valid gate
    	input a_trig,  // 1 bit information telling data is I or Q
-   	output signed [i_dw-1:0] i_data,
+   	output [i_dw-1:0] i_data,
    	output i_gate,
    	output i_trig,
-   	output signed [q_dw-1:0] q_data,
+   	output [q_dw-1:0] q_data,
    	output q_gate,
    	output q_trig,
    	output time_err
