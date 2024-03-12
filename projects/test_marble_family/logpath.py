@@ -3,6 +3,7 @@
 # Get the logfile path for test/bringup data logs
 
 def sanitize_sn(sn):
+    sn = str(sn)
     sn = sn.strip().strip("#")
     # This is just to fail if sn is not numeric
     try:
@@ -23,17 +24,13 @@ def get_version_from_sn(sn):
 
 
 def get_log_path(serial_num, base=None, version=None, absolute=False):
-    sn = sanitize_sn(args.serial_number)
+    sn = sanitize_sn(serial_num)
     if sn is None:
         return None
     import os
-    if args.base is not None:
-        base = args.base
-    else:
+    if base is None:
         base = os.environ.get("MARBLE_LOGPATH", "~/marble_logfiles")
-    if args.version is not None:
-        version = args.version
-    else:
+    if version is None:
         version = get_version_from_sn(sn)
     if absolute:
         base = os.path.expanduser(base)
