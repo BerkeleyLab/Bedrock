@@ -55,9 +55,11 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Marble test data log file path exporter")
     parser.add_argument("serial_number", help="Marble board serial number")
-    parser.add_argument('-b', '--base', default=None, help="Base logfile directory (attempts to use $MARBLE_LOGPATH by default)")
+    parser.add_argument('-b', '--base', default=None,
+        help="Base logfile directory (attempts to use $MARBLE_LOGPATH by default)")
     parser.add_argument('-v', '--version', default=None, help="Marble board version (e.g. 1.2, 1.3, 1.4, 1.4.1, etc)")
-    parser.add_argument('-a', '--absolute', default=False, action="store_true", help="Return an absolute path instead of a relative one.")
+    parser.add_argument('-a', '--absolute', default=False, action="store_true",
+        help="Return an absolute path instead of a relative one.")
     args = parser.parse_args()
     import sys
     sys.exit(main(args))
