@@ -7,10 +7,31 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../../badger"))
 from lbus_access import lbus_access
 
 
+def vcxo_en(chip, enable):
+    value = 0x4  # ought to match misc_config_default in marble_features.yaml
+    if not enable:
+        value |= 0x20
+    chip.exchange([327688], [value])  # misc_config
+
+
 def run_test_vcxo(args):
     chip = lbus_access(args.addr, port=args.port)
 
+    # Step 0: see if 20 MHz can be turned off and on with VCXO_EN pin
+    # Do this first, so Y3 has time to recover from the thermal transient
+    # before we start step 4.
+    print("Checking function of VCXO_EN")
+    vcxo_en(chip, False)
+    ppm = measure_1(chip, 0, dac=2, repeat=3, gps=False)
+    oka1 = ppm[2] == -1e6
+    print("off:  %.3f ppm  %s" % (ppm[2], "as expected" if oka1 else "what?"))
+    vcxo_en(chip, True)
+    ppm = measure_1(chip, 0, dac=2, repeat=3, gps=False)
+    oka2 = abs(ppm[2]) < 120
+    print("on:   %.3f ppm  %s" % (ppm[2], "OK" if oka2 else "BAD"))
+
     # Step 1: calibrate Ethernet Tx clock to GPS
+    # Marble Y1  Taitien TXEAADSANF-25.000000
     est_t = int(round(4.4*args.npt))
     print("Checking primary 125 MHz clock (Y1) vs. GPS")
     print("Design run rate is 4.4 seconds per line, %d s total" % est_t)
@@ -43,6 +64,7 @@ def run_test_vcxo(args):
 
     # Step 4: calibrate auxiliary 20 MHz clock,
     # relative to the (just calibrated) Ethernet clock
+    # Marble Y3  IQD ECS-VXO-73-20.00
     print("Checking secondary 20 MHz clock (Y3) against primary")
     print("Design run rate is 4.4 seconds per line, %d s total" % est_t)
     scan_data = collect_scan(
@@ -51,7 +73,7 @@ def run_test_vcxo(args):
         exit(1)
     x, plot1, plot2 = scan_data
     ok2, center = check_answer(x, plot1, plot2, dac=2)
-    return ok1 and ok_rx and ok2
+    return oka1 and oka2 and ok1 and ok_rx and ok2
 
 
 if __name__ == "__main__":
