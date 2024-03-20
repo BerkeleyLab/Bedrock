@@ -62,6 +62,8 @@ open_run synth_1
 # See UG908 Appendix A
 set_property BITSTREAM.CONFIG.SPI_BUSWIDTH  2  [current_design]
 set_property BITSTREAM.CONFIG.CONFIGRATE   33  [current_design]
+# Compress image
+set_property BITSTREAM.GENERAL.COMPRESS  TRUE  [current_design]
 
 launch_runs impl_1 -to_step route_design
 wait_on_run impl_1
