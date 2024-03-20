@@ -3,6 +3,8 @@ from scan_vcxo import collect_scan, check_answer, measure_1
 import argparse
 import sys
 import os
+import numpy as np
+from logpath import get_log_path
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../badger"))
 from lbus_access import lbus_access
 
@@ -12,6 +14,25 @@ def vcxo_en(chip, enable):
     if not enable:
         value |= 0x20
     chip.exchange([327688], [value])  # misc_config
+
+
+def check_dac(chip, dac, fname, gps=False, npt=12, signed=False, serial=""):
+    est_t = int(round(4.4*npt))
+    print("Design run rate is 4.4 seconds per line, %d s total" % est_t)
+    scan_data = collect_scan(
+        chip, dac, npt=npt, signed=signed, gps=gps)
+    if scan_data is None:
+        exit(1)
+    if serial != "":
+        fullname = os.path.join(get_log_path(serial, absolute=True), fname)
+        spread = np.array(scan_data).transpose()
+        try:
+            np.savetxt(fullname, spread, header="DAC ppm ppm", fmt="%6d  %+8.3f %+8.3f")
+            print("saved data to " + fullname)
+        except Exception:
+            print("failed to save data to " + fullname)
+    x, plot1, plot2 = scan_data
+    return check_answer(x, plot1, plot2, dac=dac)
 
 
 def run_test_vcxo(args):
@@ -32,15 +53,9 @@ def run_test_vcxo(args):
 
     # Step 1: calibrate Ethernet Tx clock to GPS
     # Marble Y1  Taitien TXEAADSANF-25.000000
-    est_t = int(round(4.4*args.npt))
     print("Checking primary 125 MHz clock (Y1) vs. GPS")
-    print("Design run rate is 4.4 seconds per line, %d s total" % est_t)
-    scan_data = collect_scan(
-        chip, 1, npt=args.npt, signed=args.signed, gps=True)
-    if scan_data is None:
-        exit(1)
-    x, plot1, plot2 = scan_data
-    ok1, center = check_answer(x, plot1, plot2, dac=1)
+    ok1, center = check_dac(chip, 1, "eth_clk_cal.dat", gps=True,
+                            npt=args.npt, signed=args.signed, serial=args.serial)
     # print(ok, center)
 
     # Step 2: check results
@@ -63,16 +78,11 @@ def run_test_vcxo(args):
     print("Rx clock from Ethernet switch %+8.3f ppm  %s" % (ppm, "OK" if ok_rx else "BAD"))
 
     # Step 4: calibrate auxiliary 20 MHz clock,
-    # relative to the (just calibrated) Ethernet clock
     # Marble Y3  IQD ECS-VXO-73-20.00
+    # relative to the (just calibrated) Ethernet clock
     print("Checking secondary 20 MHz clock (Y3) against primary")
-    print("Design run rate is 4.4 seconds per line, %d s total" % est_t)
-    scan_data = collect_scan(
-        chip, 2, npt=args.npt, signed=args.signed, gps=False)
-    if scan_data is None:
-        exit(1)
-    x, plot1, plot2 = scan_data
-    ok2, center = check_answer(x, plot1, plot2, dac=2)
+    ok2, center = check_dac(chip, 2, "aux_clk_cal.dat", gps=False,
+                            npt=args.npt, signed=args.signed, serial=args.serial)
     return oka1 and oka2 and ok1 and ok_rx and ok2
 
 
@@ -86,6 +96,8 @@ if __name__ == "__main__":
                    help="number of points in scan")
     p.add_argument('--signed', action='store_true',
                    help="Assume DAC uses signed binary codes")
+    p.add_argument('--serial', default="", type=str,
+                   help="Board serial number as index for saving data")
     args = p.parse_args()
     ok = run_test_vcxo(args)
     if ok:

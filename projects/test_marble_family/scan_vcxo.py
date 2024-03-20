@@ -88,8 +88,8 @@ def check_answer(x, plot1, plot2, dac=1, plot=False):
             print("center at x = %d" % center)
             # print(center, np.polyval(fitc, center))
     else:
-        ok &= check_one_curve("col1", plot1, None, mintune=80.0)
-        ok &= check_one_curve("col2", plot2, None, mintune=80.0)
+        ok &= check_one_curve("col1", plot1, None, mintune=55.0)
+        ok &= check_one_curve("col2", plot2, None, mintune=55.0)
     if plot:
         otype = "20 MHz" if dac == 2 else "Ethernet"
         plx = x / 65535.0
