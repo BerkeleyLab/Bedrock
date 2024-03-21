@@ -248,3 +248,18 @@ proc is_project_dirty {} {
         default      {return 0}
     }
 }
+
+# Generate 40 digits git id where the latest 16 digits are zeros in case of
+# local modification
+proc generate_extended_git_id {} {
+    if {[is_project_dirty] == 1} {
+        return [get_git_id 24]0000000000000000
+    } else {
+        return [get_git_id 40]
+    }
+}
+
+# Print git hash in huge and nice way
+proc git_id_print {gitid_arg} {
+    puts "#[string repeat "-" 48]\n# gitid $gitid_arg\n#[string repeat "-" 48]"
+}
