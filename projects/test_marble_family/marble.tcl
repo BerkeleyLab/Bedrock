@@ -10,8 +10,8 @@ if { $argc == 3 } {
 
 # this old_commit value matches that in build_rom.py --placeholder_rev
 set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
-set new_commit [get_gitid]
-gitid_print $new_commit
+set new_commit [generate_extended_git_id]
+git_id_print $new_commit
 
 # Read in dependencies file
 set flist [lindex $argv 0]
@@ -40,8 +40,8 @@ set_property top "marble_top" [current_fileset]
 set_property verilog_define [list "CHIP_FAMILY_7SERIES"] [current_fileset]
 
 # Get shorter git commit ID for verilog and bitfile filename
-set gitid_for_filename [exec git describe --always --abbrev=8 --dirty]
-set gitid_for_verilog 32'h[exec git rev-parse --short=8 HEAD]
+set gitid_for_filename [get_dirty_git_id 8]
+set gitid_for_verilog 32'h[get_git_id 8]
 set new_defs [list "GIT_32BIT_ID=$gitid_for_verilog" "REVC_1W"]
 
 launch_runs synth_1
