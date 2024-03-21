@@ -1,7 +1,13 @@
 set outputDir ./_xilinx
 file mkdir $outputDir
 
+# Read in optional TCL script
+if { $argc == 3 } {
+   set aux_tcl [lindex $argv 2]
+   puts "Sourcing $aux_tcl"
+   source $aux_tcl
 }
+
 # this old_commit value matches that in build_rom.py --placeholder_rev
 set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
 set new_commit [get_gitid]
@@ -14,13 +20,6 @@ puts "Obtaining dependencies from $flist"
 # Read in build identifier
 set build_id [lindex $argv 1]
 puts "Building for $build_id"
-
-# Read in optional TCL script
-if { $argc == 3 } {
-   set aux_tcl [lindex $argv 2]
-   puts "Sourcing $aux_tcl"
-   source $aux_tcl
-}
 
 if { $build_id == "marble1" } {
    set part "xc7a100t-fgg484-2"
