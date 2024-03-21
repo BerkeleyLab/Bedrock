@@ -1,16 +1,6 @@
 set outputDir ./_xilinx
 file mkdir $outputDir
 
-# experimental!
-proc get_gitid {} {
-    switch -glob -- [exec git describe --always --dirty] {
-        *-dirty      {return [string toupper [exec git rev-parse --short=24 HEAD]]0000000000000000}
-        default      {return [string toupper [exec git rev-parse HEAD]]}
-    }
-}
-# Print git hash in huge and nice way
-proc gitid_print {gitid_arg} {
-    puts "#[string repeat "-" 48]\n# gitid $gitid_arg\n#[string repeat "-" 48]"
 }
 # this old_commit value matches that in build_rom.py --placeholder_rev
 set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
