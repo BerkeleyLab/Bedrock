@@ -1,11 +1,12 @@
 set outputDir ./_xilinx
 file mkdir $outputDir
 
-# Read in optional TCL script
-if { $argc == 3 } {
-   set aux_tcl [lindex $argv 2]
-   puts "Sourcing $aux_tcl"
-   source $aux_tcl
+# TODO: update this with the one from lcls2 project!
+# Provision to source additional TCL scripts
+# Currently used for swap_gitid.tcl
+foreach aux_tcl [lrange $argv 2 end] {
+    puts "Sourcing $aux_tcl"
+    source $aux_tcl
 }
 
 # this old_commit value matches that in build_rom.py --placeholder_rev
