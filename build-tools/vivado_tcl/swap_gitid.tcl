@@ -229,3 +229,22 @@ proc swap_gitid {old_commit new_commit rowwidth dry_run} {
     puts OK
     return 1
 }
+
+# Returns the N-digit git id sha
+proc get_git_id {N} {
+    return [exec git describe --always --abbrev=$N --exclude "*"]
+}
+
+# Returns the N-digit git id sha ending with '-dirty' in case of local
+# modification
+proc get_dirty_git_id {N} {
+    return [exec git describe --always --abbrev=$N --dirty --exclude "*"]
+}
+
+# utility for local modification presence check
+proc is_project_dirty {} {
+    switch -glob -- [get_dirty_git_id 8] {
+        *-dirty      {return 1}
+        default      {return 0}
+    }
+}
