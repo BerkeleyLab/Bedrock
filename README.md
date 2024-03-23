@@ -96,7 +96,7 @@ Full list: see [dependencies.txt](dependencies.txt) and [Dockerfile](Dockerfile)
 
 On contributing
 ===============
-See our first take [here](guidelines/CONTRIBUTING.md)
+See our first take [here](CONTRIBUTING.md)
 
 ************************************************************************************
 
