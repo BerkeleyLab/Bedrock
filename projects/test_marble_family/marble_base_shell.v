@@ -1,4 +1,4 @@
-// Ultra-stupid layer to define clock domains of signals coming in to marble_base
+// Ultra-stupid layer to define clock domains of signals coming in and out of marble_base
 // See cdc_snitch.py
 module marble_base_shell(
 	// GMII Tx port
@@ -79,6 +79,21 @@ module marble_base_shell(
 	input [31:0] lb_data_in
 );
 
+// vgmii Tx
+wire [7:0] vgmii_txd_w;
+reg [7:0] vgmii_txd_r=0;
+wire vgmii_tx_en_w, vgmii_tx_er_w;
+reg vgmii_tx_en_r=0, vgmii_tx_er_r=0;
+always @(posedge vgmii_tx_clk) begin
+	vgmii_txd_r <= vgmii_txd_w;
+	vgmii_tx_en_r <= vgmii_tx_en_w;
+	vgmii_tx_er_r <= vgmii_tx_er_w;
+end
+assign vgmii_txd = vgmii_txd_r;
+assign vgmii_tx_en = vgmii_tx_en_r;
+assign vgmii_tx_er = vgmii_tx_er_r;
+
+// vgmii Rx
 (* magic_cdc *) reg [7:0] vgmii_rxd_r=0;
 (* magic_cdc *) reg vgmii_rx_dv_r=0, vgmii_rx_er_r=0;
 always @(posedge vgmii_rx_clk) begin
@@ -87,6 +102,29 @@ always @(posedge vgmii_rx_clk) begin
 	vgmii_rx_er_r <= vgmii_rx_er;
 end
 
+// Local bus outputs
+wire [23:0] lb_addr_w;
+reg [23:0] lb_addr_r=0;
+wire lb_strobe_w, lb_rd_w, lb_write_w, lb_rd_valid_w;
+reg lb_strobe_r=0, lb_rd_r=0, lb_write_r=0, lb_rd_valid_r=0;
+wire [31:0] lb_data_out_w;
+reg [31:0] lb_data_out_r=0;
+always @(posedge lb_clk) begin
+	lb_addr_r <= lb_addr_w;
+	lb_strobe_r <= lb_strobe_w;
+	lb_rd_r <= lb_rd_w;
+	lb_write_r <= lb_write_w;
+	lb_rd_valid_r <= lb_rd_valid_w;
+	lb_data_out_r <= lb_data_out_w;
+end
+assign lb_addr = lb_addr_r;
+assign lb_strobe = lb_strobe_r;
+assign lb_rd = lb_rd_r;
+assign lb_write = lb_write_r;
+assign lb_rd_valid = lb_rd_valid_r;
+assign lb_data_out = lb_data_out_r;
+
+// Other inputs
 (* magic_cdc *) reg [31:0] lb_data_in_r=0;
 (* magic_cdc *) reg [3:0] GPS_r=0;
 always @(posedge lb_clk) begin
@@ -94,11 +132,12 @@ always @(posedge lb_clk) begin
 	GPS_r <= GPS;
 end
 
+// Module under test
 marble_base i_mb(
 	.vgmii_tx_clk(vgmii_tx_clk),
-	.vgmii_txd(vgmii_txd),
-	.vgmii_tx_en(vgmii_tx_en),
-	.vgmii_tx_er(vgmii_tx_er),
+	.vgmii_txd(vgmii_txd_w),
+	.vgmii_tx_en(vgmii_tx_en_w),
+	.vgmii_tx_er(vgmii_tx_er_w),
 	.vgmii_rx_clk(vgmii_rx_clk),
 	.vgmii_rxd(vgmii_rxd_r),
 	.vgmii_rx_er(vgmii_rx_er_r),
@@ -133,12 +172,12 @@ marble_base i_mb(
 	.ext_config(ext_config),
 	.in_use(in_use),
 	.lb_clk(lb_clk),
-	.lb_addr(lb_addr),
-	.lb_strobe(lb_strobe),
-	.lb_rd(lb_rd),
-	.lb_write(lb_write),
-	.lb_rd_valid(lb_rd_valid),
-	.lb_data_out(lb_data_out),
+	.lb_addr(lb_addr_w),
+	.lb_strobe(lb_strobe_w),
+	.lb_rd(lb_rd_w),
+	.lb_write(lb_write_w),
+	.lb_rd_valid(lb_rd_valid_w),
+	.lb_data_out(lb_data_out_w),
 	.lb_data_in(lb_data_in_r)
 );
 
