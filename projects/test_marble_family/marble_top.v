@@ -176,7 +176,7 @@ endgenerate
 
 generate
 // this configuration is probably bit-rotted
-if(C_SYSCLK_SRC == "sys_clk") begin
+if (C_SYSCLK_SRC == "sys_clk") begin
 wire SYSCLK_N = 0;
 gmii_clock_handle clocks(
 	.sysclk_p(SYSCLK_P),
