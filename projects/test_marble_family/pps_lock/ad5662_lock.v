@@ -28,7 +28,7 @@ wire [1:0] lock_sel = config_r[3:2];
 wire fir_enable = config_r[4];
 wire fine_sel = config_r[5];
 
-// Slightly strange, peek at writes to DAC
+// Slightly strange approach, peeking at writes to the DAC.
 // I bet I could reduce resource usage if I tried.
 reg [15:0] dac_preset_r=0;
 always @(posedge clk) if (host_write_dac) dac_preset_r <= host_data;

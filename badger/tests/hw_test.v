@@ -18,10 +18,12 @@ module hw_test(
 	output phy_rstn,
 	input clk_locked,
 
-	// SPI pins, can give access to configuration
+	// SPI pins, which on Marble are a link to the on-board microcontroller
+	// and get used to set IP and MAC, among other things.
 	input SCLK,
 	input CSB,
 	input MOSI,
+	output MISO,
 
 	// SPI boot flash programming port
 	output boot_clk,
@@ -29,7 +31,7 @@ module hw_test(
 	output boot_mosi,
 	input boot_miso,
 
-	// Simulation-only, please ignore in synthesis
+	// Simulation-only; please ignore in synthesis
 	output in_use,
 
 	// Something physical
@@ -60,7 +62,7 @@ wire [7:0] config_a;
 wire [7:0] config_d;
 wire [7:0] spi_return=0;
 spi_gate spi(
-	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB),
+	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB), .MISO(MISO),
 	.config_clk(config_clk), .config_w(config_w),
 	.config_a(config_a), .config_d(config_d), .tx_data(spi_return)
 );
