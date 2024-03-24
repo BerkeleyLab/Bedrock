@@ -169,4 +169,5 @@ Up to eight clients can be attached to a Packet Badger instance.
 * Design notes: [rtefi_notes.txt](rtefi_notes.txt)
 * Memory addressing figure: [memory access diagram](doc/memory.svg)
 * Data path in construct.v: [data path diagram](doc/tx_path.svg)
+* SPI Boot Flash programming support: [flash.md](flash.md)
 * Status: [status.md](status.md)
