@@ -121,11 +121,17 @@ is transcribed from the source IP (although this means different things
 for ARP and IP), and the UDP destination port is transcribed from the
 source port.
 
-It is strongly recommended that UDP destination port numbers get configured
-to be < 1024.  Up to eight clients (UDP ports) are currently supported,
+Up to eight on-chip plug-in clients (UDP ports) are currently supported,
 and their default ports are numbered sequentially starting at 801.
 This can be overridden at build time with Verilog parameters, or
 at run time with a local configuration bus.
+
+It is strongly recommended that UDP destination port numbers get configured
+to be < 1024, to resist UDP loops.  Somehow this well-known (CA-1996-01:
+UDP Port Denial-of-Service Attack) possibility was rediscovered
+in 2024, and assigned CVE-2024-2169: Loop DoS.  Separating "services"
+(ports < 1024) from "clients" (ports > 1023) is Preventive measure 2
+listed in the Loop DoS advisory.
 
 ## Example "live" test run
 
