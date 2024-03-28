@@ -55,13 +55,6 @@
         "base_addr": 327690,
         "data_width": 1
     },
-    "gps_buf_reset": {
-        "access": "rw",
-        "addr_width": 0,
-        "sign": "unsigned",
-        "base_addr": 327691,
-        "data_width": 1
-    },
     "pps_config": {
         "access": "rw",
         "addr_width": 0,
@@ -69,47 +62,61 @@
         "base_addr": 327692,
         "data_width": 4
     },
-    "fmc_test_0": {
+    "fmc1_test_l": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327696,
         "data_width": 22
     },
-    "fmc_test_1": {
+    "fmc1_test_m": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327697,
         "data_width": 22
     },
-    "fmc_test_2": {
+    "fmc1_test_h": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327698,
-        "data_width": 22
+        "data_width": 24
     },
-    "fmc_test_3": {
+    "fmc2_test_l": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327699,
         "data_width": 22
     },
-    "fmc_test_4": {
+    "fmc2_test_m": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327700,
         "data_width": 22
     },
-    "fmc_test_5": {
+    "fmc2_test_h": {
         "access": "rw",
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327701,
-        "data_width": 22
+        "data_width": 24
+    },
+    "fmc2h_test_l": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327702,
+        "data_width": 24
+    },
+    "fmc2h_test_h": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327703,
+        "data_width": 24
     },
     "twi_prog": {
         "access": "rw",
@@ -141,10 +148,10 @@
     },
     "ctrace_out": {
         "access": "r",
-        "addr_width": 11,
+        "addr_width": 14,
         "sign": "unsigned",
         "base_addr": "0x60000",
-        "data_width": 16
+        "data_width": 20
     },
     "gps_buff": {
         "access": "r",

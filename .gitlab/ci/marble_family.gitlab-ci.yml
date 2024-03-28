@@ -1,7 +1,8 @@
 marble_sim:
   stage: test
   script:
-    - cd projects/test_marble_family && make all net_slave_check
+    - make -C projects/test_marble_family all net_slave_check
+    - make -C projects/test_marble_family/pps_lock
 
 .bitgen:
   stage: synthesis

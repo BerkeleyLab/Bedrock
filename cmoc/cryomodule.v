@@ -441,4 +441,7 @@ always @(posedge lb_clk) begin
 end
 assign lb_out = lb_out_r;
 
+`undef SAT
+`undef UNIFORM
+
 endmodule

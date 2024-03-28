@@ -1,6 +1,21 @@
 set outputDir ./_xilinx
 file mkdir $outputDir
 
+# experimental!
+proc get_gitid {} {
+    switch -glob -- [exec git describe --always --dirty] {
+        *-dirty      {return [string toupper [exec git rev-parse --short=24 HEAD]]0000000000000000}
+        default      {return [string toupper [exec git rev-parse HEAD]]}
+    }
+}
+# Print git hash in huge and nice way
+proc gitid_print {gitid_arg} {
+    puts "#[string repeat "-" 48]\n# gitid $gitid_arg\n#[string repeat "-" 48]"
+}
+# this old_commit value matches that in build_rom.py --placeholder_rev
+set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
+set new_commit [get_gitid]
+gitid_print $new_commit
 
 # Read in dependencies file
 set flist [lindex $argv 0]
@@ -35,10 +50,10 @@ add_files $file_data
 set_property top "marble_top" [current_fileset]
 set_property verilog_define [list "CHIP_FAMILY_7SERIES"] [current_fileset]
 
-# Get git commit ID
-set gitid [exec git rev-parse --short=8 --verify HEAD]
-set gitid_v 32'h$gitid
-set new_defs [list "GIT_32BIT_ID=$gitid_v" "REVC_1W"]
+# Get shorter git commit ID for verilog and bitfile filename
+set gitid_for_filename [exec git describe --always --abbrev=8 --dirty]
+set gitid_for_verilog 32'h[exec git rev-parse --short=8 HEAD]
+set new_defs [list "GIT_32BIT_ID=$gitid_for_verilog" "REVC_1W"]
 
 launch_runs synth_1
 wait_on_run synth_1
@@ -47,6 +62,8 @@ open_run synth_1
 # See UG908 Appendix A
 set_property BITSTREAM.CONFIG.SPI_BUSWIDTH  2  [current_design]
 set_property BITSTREAM.CONFIG.CONFIGRATE   33  [current_design]
+# Compress image
+set_property BITSTREAM.GENERAL.COMPRESS  TRUE  [current_design]
 
 launch_runs impl_1 -to_step route_design
 wait_on_run impl_1
@@ -69,10 +86,6 @@ open_run impl_1
 set my_proj_name "${build_id}.runs"
 project_rpt $my_proj_name
 
-# experimental!
-# this old_commit value matches that in build_rom.py --placeholder_rev
-set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
-set new_commit [string toupper [exec git rev-parse HEAD]]
 swap_gitid $old_commit $new_commit 16 0
 
-write_bitstream -force $build_id.$gitid.x.bit
+write_bitstream -force $build_id.$gitid_for_filename.x.bit

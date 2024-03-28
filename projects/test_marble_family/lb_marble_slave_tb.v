@@ -65,7 +65,7 @@ i2c_slave_model #(.I2C_ADR(SADR), .debug(0)) hw_slave(.scl(TWI_SCL), .sda(TWI_SD
 // One weird hack, even works in Verilator!
 always @(posedge clk) begin
 	if (slave.stop_sim & ~in_use & ~raw_l) begin
-		$display("hw_test_tb:  stopping based on localbus request");
+		$display("lb_marble_slave_tb:  stopping based on localbus request");
 		$finish(0);
 	end
 end

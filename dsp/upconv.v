@@ -36,7 +36,7 @@ wire signed [15:0] i2i, i2q;
 interp1 inti(.clk(clk), .x(d2i), .y(i2i));
 interp1 intq(.clk(clk), .x(d2q), .y(i2q));
 
-`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x : {x[old],{new{~x[old]}}})
+`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 reg signed [31:0] cosp=0, sinp=0;
 wire signed [17:0] cosp_msb = cosp[30:13];
 wire signed [17:0] sinp_msb = sinp[30:13];
@@ -52,5 +52,6 @@ assign out_d = sum2[16:1];
 
 assign cos_interp = i2i;
 assign sin_interp = i2q;
+`undef SAT
 
 endmodule

@@ -29,11 +29,11 @@ module freq_multi_count_fe #(
 // One Gray code counter for each input clock
 wire [gw-1:0] gray1[0:NF-1];
 genvar ix;
-generate for (ix=0; ix<NF; ix=ix+1)
+generate for (ix=0; ix<NF; ix=ix+1) begin : gray
 	simplest_gray #(.gw(gw))
 	// gray3_count
 	gc(.clk(unk_clk[ix]), .gray(gray1[ix]));
-endgenerate
+end endgenerate
 
 // Transfer those Gray codes to the measurement clock domain.
 // Note the dependence on clksel here.

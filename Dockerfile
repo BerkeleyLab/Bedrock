@@ -96,3 +96,21 @@ RUN apt-get update && \
     ./configure && \
     make -j$(nproc) && \
     make install
+
+# Add some configuration for Vivado here, so we don't break the cache
+RUN apt-get update && \
+    apt-get install -y \
+        x11-utils \
+        xvfb \
+        locales && \
+    rm -rf /var/lib/apt/lists/* && \
+    locale -a && \
+    cat /etc/locale.gen && \
+    localedef -i en_US -f UTF-8 en_US.UTF-8
+
+# Shady stuff to make cmake work with libidn12
+RUN apt-get update && \
+    apt-get install -y \
+        libidn12 && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -s libidn.so.12 /usr/lib/x86_64-linux-gnu/libidn.so.11

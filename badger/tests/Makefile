@@ -38,7 +38,6 @@ VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
 VVP_FLAGS = ${VVP_FLAGS_$@} ${VCD_ARGS_$@}
-YOSYS = yosys
 PERL = perl
 XCIRCUIT = xcircuit
 # XXX consider converting this to something more compatible with Bedrock's VIVADO_SYNTH.
@@ -210,14 +209,9 @@ hw_test_start: hw_test_tb tap-vpi.vpi
 	$(VVP) $<
 
 # =====
-# experimental check of CDC-correctness
-# not yet turned into a regression test
-hw_test_yosys.json: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v ../../build-tools/cdc_snitch_proc.ys
-	$(YOSYS) --version
-	$(YOSYS) -q -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
-# (I don't think yosys for-loop is actually buggy, just tediously slow, and in this case unnecessary)
-hw_test_cdc.txt: ../../build-tools/cdc_snitch.py hw_test_yosys.json
-	$(PYTHON) $^ -o $@
+# check of basic CDC-correctness
+hw_test_yosys.json: hw_test_skin.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v
+# exercise with make hw_test_cdc.txt
 
 # =====
 # experimental bitfiles, not for hardware
@@ -304,7 +298,7 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 # Verilator, slightly larger scope
 Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) spi_gate.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c crc8e_guts.vh crc_genguts.vh
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $(filter-out crc8e_guts.vh crc_genguts.vh, $^)
+	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -CFLAGS -Wno-logical-op -cc --exe $(filter-out crc8e_guts.vh crc_genguts.vh, $^)
 	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
 	mv obj_dir/$@ $@
 # TFTP server demo:
@@ -408,7 +402,7 @@ VCD_ARGS_selfmac.vcd = +packet_file=$(filter %selfmac_in.dat, $^)
 # =====
 # If you've kept your .gtkw files up to date, this target should do nothing.
 # Still learning how window managers affect [sst_width].
-# rtefi_sim.gtkw and hw_test.gtkw are oddball, only useful interactively.
+# rtefi_sim.gtkw and hw_test.gtkw are oddball, being only useful interactively.
 # The tail command gets rid of the non-reproducible GTKWave header.
 gtkw_refresh:
 	for f in *.gtkw; do if test $$f != rtefi_sim.gtkw && test $$f != hw_test.gtkw; then $(XVFB) make $${f%.gtkw}_view GTKW_OPT="-r gtkwave_nosplash.rc -S resave.tcl"; tail -n +9 $$f > temp_$$$$.gtkw && mv temp_$$$$.gtkw $$f; fi; done

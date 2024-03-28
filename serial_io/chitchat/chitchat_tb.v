@@ -50,7 +50,7 @@ module chitchat_tb;
    end
 
    always begin
-      cc_clk = ~cc_clk; #(CC_CLK_PERIOD/2);
+      #(CC_CLK_PERIOD/2); cc_clk = ~cc_clk;
    end
 
    // ----------------------

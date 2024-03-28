@@ -44,7 +44,7 @@ else if (SPIMODE=="chain") begin: no_passthrough
 	assign ss = ss_7823;
 	assign miso_7823 = miso;
 end
-else if (SPIMODE=="standalone") begin
+else if (SPIMODE=="standalone") begin: standalone
 	assign sclk = sclk_7823;
 	assign mosi = mosi_7823;
 	assign ss = ss_7823;

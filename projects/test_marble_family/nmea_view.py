@@ -36,8 +36,13 @@ def handle_gsv(gsv_state, a):
 
 
 def gps2dec(x):
-    dd, ff = x.split(".")
-    gdeg = int(dd[:-2]) + float(dd[-2:] + "." + ff)/60.0
+    gdeg = float('nan')
+    try:
+        dd, ff = x.split(".")
+        gdeg = int(dd[:-2]) + float(dd[-2:] + "." + ff)/60.0
+    except ValueError:
+        print("# gps2dec oddity (%s)" % x)
+        pass
     # print(x, gdeg)
     return gdeg
 
@@ -91,39 +96,52 @@ def nmea_line(gsv_state, ll, verbose=False):
     return gsv_state
 
 
-def poll_wait(interval):
+def poll_wait(interval, verbose=False):
     t1 = time()
     w = interval - t1 % interval
-    print("# sleeping %.3f" % w)
-    stdout.flush()
+    if verbose:
+        print("# sleeping %.3f" % w)
+        stdout.flush()
     sleep(w)
-    t2 = time()
-    print("# poll_wait from %.3f to %.3f" % (t1, t2))
+    if verbose:
+        t2 = time()
+        print("# poll_wait from %.3f to %.3f" % (t1, t2))
 
 
-def live_buffer(leep_dev, verbose=False):
+def live_buffer(leep_dev, old_cnt, verbose=False):
     if True:
-        leep_dev.reg_write([("gps_buf_reset", 1)])
-        while True:
-            stdout.flush()
-            sleep(1.8)
-            stat = leep_dev.reg_read(["gps_stat"])[0]
-            # last nibble (gps_pins) usually 6, sometimes 2
-            # middle nibble (pps_cnt) counts at 1 Hz
-            # the 0x100 bit (gps_buf_full) turns on about 3 seconds
-            #   after buffer reset
-            print("# gps_stat 0x%3.3x" % stat)
-            if stat & 0x100:
-                break
-    buff = leep_dev.reg_read(["gps_buff"])[0]
-    nmea = "".join([chr(x) for x in buff])
-    if False:
-        print("--")
+        stdout.flush()
+        sleep(0.1)
+        stat, s1 = leep_dev.reg_read(["gps_stat", "nmea_buf_status"])
+        # last nibble (gps_pins) usually 6, sometimes 2
+        # middle nibble (pps_cnt) counts at 1 Hz
+        # the 0x100 bit (gps_buf_full) turns on about 3 seconds
+        #   after buffer reset
+        if verbose:
+            print("# gps_stat 0x%3.3x  nmea_buf %d" % (stat, s1 >> 10))
+        if (s1 >> 10) == old_cnt:
+            if verbose:
+                print("# repeat ignored")
+            return old_cnt
+        # if True or (stat & 0x100):
+        #     break
+    s1, buff, s2 = leep_dev.reg_read(["nmea_buf_status", "gps_buff", "nmea_buf_status"])
+    nmea = "".join([chr(x) for x in buff])[:(s1 & 0x3ff)]
+    if verbose:
+        print("-- %d %d" % (s1 >> 10, s1 & 0x3ff))
         print(nmea)
-        print("--")
-    gsv_state = (0, 0, 0)
-    for ll in nmea.split('\n'):
-        gsv_state = nmea_line(gsv_state, ll, verbose=verbose)
+        print("-- %d %d" % (s2 >> 10, s2 & 0x3ff))
+    new_cnt = s1 >> 10
+    if new_cnt != (s2 >> 10):
+        print("# corrupted buffer skipped")
+    elif new_cnt == old_cnt:
+        print("# repeat ignored ???")
+    else:
+        gsv_state = (0, 0, 0)
+        print("# T=%.3f  %d-byte NMEA" % (time(), len(nmea)))
+        for ll in nmea.split('\n'):
+            gsv_state = nmea_line(gsv_state, ll, verbose=verbose)
+    return new_cnt
 
 
 if __name__ == "__main__":
@@ -132,9 +150,9 @@ if __name__ == "__main__":
     import sys
     parser = argparse.ArgumentParser(
         description="Utility to read GPS NMEA from Marble Ethernet")
-    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
-    parser.add_argument('-p', '--port', type=int, default=803, help='Port number')
-    parser.add_argument('-i', '--interval', type=float, default=60.0, help='Polling inteval (seconds)')
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
+    parser.add_argument('-i', '--interval', type=float, default=0.5, help='Polling inteval (seconds)')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
     parser.add_argument('--test', action='store_true', help="Test parsing data from stdin")
     args = parser.parse_args()
@@ -147,17 +165,18 @@ if __name__ == "__main__":
             print("Leep initialization error:", err)
             sys.exit(1)
         #
+        cnt_state = -1
         if args.interval > 0:
             while True:
                 try:
-                    poll_wait(args.interval)
-                    live_buffer(leep_dev, verbose=args.verbose)
+                    poll_wait(args.interval, args.verbose)
+                    cnt_state = live_buffer(leep_dev, cnt_state, verbose=args.verbose)
                 except KeyboardInterrupt:
                     print("\nExiting")
                     break
         else:
             try:
-                live_buffer(leep_dev, verbose=args.verbose)
+                cnt_state = live_buffer(leep_dev, cnt_state, verbose=args.verbose)
             except KeyboardInterrupt:
                 print("\nExiting")
                 pass

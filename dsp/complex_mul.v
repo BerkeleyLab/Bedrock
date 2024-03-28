@@ -79,6 +79,7 @@ always @(posedge clk) begin
 end
 assign z = zr[dw:1];
 assign z_all = mux_r;
+`undef SAT
 
 // This gate input isn't really used, but describes the length of this
 // pipeline to let users keep track of the data flow.

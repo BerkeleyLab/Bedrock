@@ -80,14 +80,17 @@ module marble_base (
 	input [31:0] lb_data_in,
 
 	// Something physical
-	output [131:0] fmc_test,
+	inout [191:0] fmc_test,
 	output ZEST_PWR_EN,
 	output [7:0] LED
 );
 
 parameter USE_I2CBRIDGE = 1;
 parameter MMC_CTRACE = 1;
+parameter GPS_CTRACE = 0;
+parameter use_ddr_pps = 0;
 parameter misc_config_default = 0;
+parameter default_enable_rx = 1;
 
 `ifdef VERILATOR
 parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4};  // 192.168.7.4
@@ -102,75 +105,51 @@ parameter [47:0] mac = 48'h12555500032d;
 `endif
 `endif
 
+// Basic clock setup
 wire tx_clk = vgmii_tx_clk;
 wire rx_clk = vgmii_rx_clk;
 
-// Configuration port
-wire config_clk = tx_clk;
-wire config_w, config_r;
-wire [7:0] config_a;
-wire [7:0] config_d;
-wire [7:0] spi_return;
-wire [3:0] spi_pins_debug;
-spi_gate spi(
-	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB), .MISO(MISO),
-	.config_clk(config_clk), .config_w(config_w), .config_r(config_r),
-	.config_a(config_a), .config_d(config_d), .tx_data(spi_return),
-	.spi_pins_debug(spi_pins_debug)
-);
-
-// Map generic configuration bus to application
-// 16-bit SPI word semantics:
-//   0 0 0 1 a a a a d d d d d d d d  ->  set MAC/IP config[a] = D
-//   0 0 1 0 0 0 0 0 x x x x x x x V  ->  set enable_rx to V
-//   0 0 1 0 0 0 1 0 x d d d d d d d  ->  set 7-bit mailbox page selector
-//   0 0 1 1 a a a a d d d d d d d d  ->  set UDP port config[a] = D
-//   0 1 0 0 a a a a d d d d d d d d  ->  mailbox read
-//   0 1 0 1 a a a a d d d d d d d d  ->  mailbox write
-parameter default_enable_rx = 1;
-reg enable_rx=default_enable_rx;  // special case initialization
-reg [6:0] mbox_page=0;
-always @(posedge config_clk) begin
-	if (config_w && (config_a == 8'h20)) enable_rx <= config_d[0];
-	if (config_w && (config_a == 8'h22)) mbox_page <= config_d[6:0];
-end
-wire config_s = config_w && (config_a[7:4] == 1);
-wire config_p = config_w && (config_a[7:4] == 3);
-wire config_mr = config_r && (config_a[7:4] == 4);
-wire config_mw = config_w && (config_a[7:4] == 5);
-wire [10:0] mbox_a = {mbox_page, config_a[3:0]};
-
-// Forward declarations
-wire [1:0] led_user_mode;
-wire l1, l2;
 // Local bus
+wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;  // outputs from rtefi_blob
 assign lb_clk = tx_clk;
-//wire [23:0] lb_addr;
-wire [31:0] lb_data_muxed;
-wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;
 assign lb_strobe = lb_control_strobe;
-assign lb_rd = lb_control_rd;
-assign lb_rd_valid = lb_control_rd_valid;
+wire config_clk = tx_clk;
 assign lb_write = lb_control_strobe & ~lb_control_rd;
+assign lb_rd_valid = lb_control_rd_valid;
+assign lb_rd = lb_control_rd;
 
-// Mailbox
-wire error;
-wire lb_mbox_sel = lb_addr[23:20] == 2;
-wire lb_mbox_wen = lb_mbox_sel & lb_write;
-// Local bus read-enable is a bit fragile, since we need to
-// match the latency configured deep inside Packet Badger's mem_gateway.
-reg lb_mbox_ren=0;
-always @(posedge lb_clk) begin
-	lb_mbox_ren <= lb_mbox_sel & lb_control_strobe & lb_control_rd;
-end
-wire [7:0] mbox_out1, mbox_out2;
-fake_dpram #(.aw(11), .dw(8)) xmem (
-	.clk(lb_clk),  // must be the same as config_clk
-	.addr1(mbox_a), .din1(config_d), .dout1(mbox_out1), .wen1(config_mw), .ren1(config_mr),
-	.addr2(lb_addr[10:0]), .din2(lb_data_out[7:0]), .dout2(mbox_out2), .wen2(lb_mbox_wen), .ren2(lb_mbox_ren),
-	.error(error)
+// Signals provided by mmc_mailbox
+wire [3:0] spi_pins_debug;
+wire enable_rx;
+wire [7:0] mbox_out2;
+wire config_s, config_p;
+wire [7:0] config_a, config_d;
+
+// Actual mmc_mailbox instance
+mmc_mailbox #(
+  .DEFAULT_ENABLE_RX(default_enable_rx)
+  ) mailbox_i (
+  .clk(config_clk), // input
+  // localbus
+  .lb_addr(lb_addr[10:0]), // input [10:0]
+  .lb_din(lb_data_out[7:0]), // input [7:0]
+  .lb_dout(mbox_out2), // output [7:0]
+  .lb_write(lb_write), // input
+  .lb_control_strobe(lb_control_strobe), // input
+  // SPI PHY
+  .sck(SCLK), // input
+  .ncs(CSB), // input
+  .pico(MOSI), // input
+  .poci(MISO), // output
+  // Config pins for badger (rtefi) interface
+  .config_s(config_s), // output
+  .config_p(config_p), // output
+  .config_a(config_a), // output [7:0]
+  .config_d(config_d), // output [7:0]
+  // Special pins
+  .enable_rx(enable_rx), // output
+  .spi_pins_debug(spi_pins_debug) // {MISO, din, sclk_d1, csb_d1};
 );
-assign spi_return = mbox_out1;  // data sent back to MMC vis SPI
 
 // Debugging hooks
 wire ibadge_stb, obadge_stb;
@@ -187,18 +166,26 @@ wire [31:0] lb_slave_data_read;
 wire [27:0] frequency_si570;
 freq_count freq_cnt_si570(.f_in(si570), .sysclk(lb_clk), .frequency(frequency_si570));
 
-//
+// Signals provided to lb_marble_slave
 wire [3:0] rx_category_rx, rx_category;
 wire rx_category_s_rx, rx_category_s;
+
+// Signals provided by lb_marble_slave
+wire [1:0] led_user_mode;
+wire l1, l2;
+
+// Actual lb_marble_slave instance
 lb_marble_slave #(
 	.USE_I2CBRIDGE(USE_I2CBRIDGE),
 	.MMC_CTRACE(MMC_CTRACE),
+	.GPS_CTRACE(GPS_CTRACE),
+	.use_ddr_pps(use_ddr_pps),
 	.misc_config_default(misc_config_default)
 ) slave(
 	.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
 	.data_out(lb_data_out), .data_in(lb_slave_data_read),
-	.clk62(clk62),
+	.aux_clk(aux_clk), .clk62(clk62),
 	.ibadge_clk(rx_clk),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
