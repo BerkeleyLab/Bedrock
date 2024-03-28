@@ -50,6 +50,10 @@ def hexfromba(ba):
 
 EXPERT = False  # not externally documented
 
+default_bp_bits = 5  # 101 = protect lower 1/4 (see Section 8.3, Table 41)
+# that makes sense now that our golden images are compressed to ~2 MB
+default_sr1 = 0x80 | (default_bp_bits << 2)  # Set SRWD bit.  This byte used to be 0x98, now 0x94
+
 # prefix
 MSG_PREFIX     = bafromhex(b'5201')            # 52 01
 CHK_PREFIX     = bafromhex(b'5200')            # 52 00
@@ -280,10 +284,9 @@ def set_block_protect(s, protect=True):
     good = True
     clear_status(s)
     status, cnf = read_status_config(s)
+    status1 = status & 0xE3  # first clear all BP bits in our copy
     if protect:
-        status1 = status | 0x1C  # attempt to force all BP bits to one
-    else:
-        status1 = status & 0xE3  # attempt to force all BP bits to zero
+        status1 = status1 | (default_bp_bits << 2)
 
     write_status(s, status1)
     time.sleep(0.3)  # empirically needed,
@@ -531,6 +534,7 @@ def main():
     parser.add_argument('--check_prog', action='store_true', help="Check if flash is writable")
     if EXPERT:
         parser.add_argument('--disable_wp', action='store_true', help="Disable Write-Protect mechanism")
+        parser.add_argument('--enable_wp', action='store_true', help="Enable Write-Protect mechanism")
         parser.add_argument('--status_write', type=lambda x: int(x, 0),
                             help='A value to be written to status register (Experts only)')
         parser.add_argument('--config_write', type=lambda x: int(x, 0),
@@ -609,6 +613,9 @@ def main():
     if EXPERT and args.disable_wp is not None:
         enable_prog(sock)
 
+    if EXPERT and args.enable_wp is not None:
+        enable_wp(sock)  # can be used to recover messed-up BP bits?
+
     if args.erase:
         remote_erase(sock, ad, args.erase)
 
@@ -629,8 +636,7 @@ def main():
         if (cnf != 0) and not EXPERT:
             print("Unexpected CONFIG, aborting")
             exit(1)
-        write_status(sock, 0x98, config=0x24)
-        # write_status(sock, 0x98, config=0x25)
+        write_status(sock, default_sr1, config=0x24)
     elif EXPERT and args.status_write is not None:
         write_status(sock, args.status_write, config=args.config_write)
 
