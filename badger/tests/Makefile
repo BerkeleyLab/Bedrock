@@ -212,7 +212,7 @@ hw_test_start: hw_test_tb tap-vpi.vpi
 
 # =====
 # check of basic CDC-correctness
-hw_test_yosys.json: hw_test_skin.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v
+hw_test_yosys.json: hw_test_skin.v $(HW_TEST_V)
 # exercise with make hw_test_cdc.txt
 
 # =====
