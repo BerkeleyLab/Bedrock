@@ -92,6 +92,9 @@ wire tx_mac_done;
 wire [15:0] rx_mac_data;
 wire rx_mac_hbank;
 wire [1:0] rx_mac_buf_status;
+// Placeholder
+wire rx_category_s=0;
+wire [3:0] rx_category=0;
 //
 lb_demo_slave slave(.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
@@ -100,6 +103,7 @@ lb_demo_slave slave(.clk(lb_clk), .addr(lb_addr),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
+	.rx_category_s(rx_category_s), .rx_category(rx_category),
 	.scratch_in(32'b0),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),

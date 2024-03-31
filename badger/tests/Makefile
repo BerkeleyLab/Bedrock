@@ -154,7 +154,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 
 # =====
 # Another tangent for another client
-LB_DEMO_V = lb_demo_slave.v freq_count.v fake_config_romx.v dpram.v
+LB_DEMO_V = lb_demo_slave.v freq_count.v fake_config_romx.v dpram.v multi_counter.v
 # LB_DEMO_V += badge_trace.v
 mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V) udp-vpi.vpi
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
