@@ -46,10 +46,12 @@ def run_test_vcxo(args):
     ppm = measure_1(chip, 0, dac=2, repeat=3, gps=False)
     oka1 = ppm[2] == -1e6
     print("off:  %.3f ppm  %s" % (ppm[2], "as expected" if oka1 else "what?"))
+    sys.stdout.flush()
     vcxo_en(chip, True)
     ppm = measure_1(chip, 0, dac=2, repeat=3, gps=False)
     oka2 = abs(ppm[2]) < 120
     print("on:   %.3f ppm  %s" % (ppm[2], "OK" if oka2 else "BAD"))
+    sys.stdout.flush()
 
     # Step 1: calibrate Ethernet Tx clock to GPS
     # Marble Y1  Taitien TXEAADSANF-25.000000
@@ -76,6 +78,7 @@ def run_test_vcxo(args):
     ppm = (float(raw) * (0.5**27) - 1.0) * 1e6
     ok_rx = abs(ppm) < 50
     print("Rx clock from Ethernet switch %+8.3f ppm  %s" % (ppm, "OK" if ok_rx else "BAD"))
+    sys.stdout.flush()
 
     # Step 4: calibrate auxiliary 20 MHz clock,
     # Marble Y3  IQD ECS-VXO-73-20.00
