@@ -92,9 +92,9 @@ wire tx_mac_done;
 wire [15:0] rx_mac_data;
 wire rx_mac_hbank;
 wire [1:0] rx_mac_buf_status;
-// Placeholder
-wire rx_category_s=0;
-wire [3:0] rx_category=0;
+//
+wire [3:0] rx_category_rx, rx_category;
+wire rx_category_s_rx, rx_category_s;
 //
 lb_demo_slave slave(.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
@@ -200,6 +200,16 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 );
 assign vgmii_tx_er=1'b0;
 assign in_use = blob_in_use | boot_busy;
+
+// For statistics-gathering purposes
+packet_categorize i_categorize(.clk(vgmii_rx_clk),
+	.strobe(rx_mac_status_s), .status(rx_mac_status_d),
+	.strobe_o(rx_category_s_rx), .category(rx_category_rx)
+);
+data_xdomain #(.size(4)) x_category(
+	.clk_in(vgmii_rx_clk), .gate_in(rx_category_s_rx), .data_in(rx_category_rx),
+	.clk_out(lb_clk), .gate_out(rx_category_s), .data_out(rx_category)
+);
 
 // Heartbeats and other LED
 reg [26:0] rx_heartbeat=0, tx_heartbeat=0;

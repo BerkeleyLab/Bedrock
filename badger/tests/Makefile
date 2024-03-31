@@ -201,7 +201,9 @@ VCD_ARGS_rtefi_pipe.vcd = +packet_file=$(filter %udp4.dat, $^)
 # =====
 # unified version of assembled pipeline and test peripherals,
 # configured for on-line (tap) testing
-hw_test_tb: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v tap-vpi.vpi
+
+HW_TEST_V = hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v packet_categorize.v data_xdomain.v flag_xdomain.v $(LB_DEMO_V) spi_gate.v
+hw_test_tb: $(HW_TEST_V) tap-vpi.vpi
 VFLAGS_hw_test_tb = -m ./tap-vpi
 hw_test.vcd: tap-vpi.vpi
 .PRECIOUS: hw_test.vcd  # work-around; better if vvp could exit with success
@@ -227,8 +229,7 @@ rtefi_blob.bit: $(RTEFI_V)
 # =====
 # Make a bitfile for an SP605 with Xilinx XST
 # first just a syntax check (sp605_gmii_test.v is empty)
-SYNTH_SOURCE_EXTRA = hw_test.v base_rx_mac.v spi_gate.v $(LB_DEMO_V) activity.v mac_compat_dpram.v
-SYNTH_SOURCE_SP605 = gmii_hw_test.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) sp605/gmii_clock_handle.v sp605/spartan6_clocks.v
+SYNTH_SOURCE_SP605 = gmii_hw_test.v $(HW_TEST_V) sp605/gmii_clock_handle.v sp605/spartan6_clocks.v
 sp605_gmii_test_tb: $(SYNTH_SOURCE_SP605) sp605/ODDR2.v
 sp605_gmii_test.bit: $(SYNTH_SOURCE_SP605) sp605/sp605_gmii.ucf
 	PART=xc6slx45t-fgg484-3 $(ISE_SYNTH) $(notdir $(basename $<)) $^
@@ -239,7 +240,7 @@ sp605_gmii_test_iobs: sp605_gmii_test.bit
 # =====
 # Make a bitfile for a KC705 with Xilinx Vivado
 # first just a syntax check (kc705_gmii_test.v is empty)
-SYNTH_SOURCE_KC705 = gmii_hw_test.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) kc705/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
+SYNTH_SOURCE_KC705 = gmii_hw_test.v $(HW_TEST_V) kc705/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
 kc705_gmii_test_tb: $(SYNTH_SOURCE_KC705) kc705/ODDR.v kc705/BUFG.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v
 kc705_gmii_test.d: $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
 	echo $^ | tr ' ' '\n' > $@
@@ -262,7 +263,7 @@ ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC
 	mv _xilinx/ac701_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
 # =====
-SYNTH_SOURCE_MARBLEM = rgmii_hw_test.v gmii_to_rgmii.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
+SYNTH_SOURCE_MARBLEM = rgmii_hw_test.v gmii_to_rgmii.v $(HW_TEST_V) marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
 marblem_rgmii_test.d: $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
 marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
@@ -296,7 +297,7 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 
 # =====
 # Verilator, slightly larger scope
-Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) spi_gate.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c crc8e_guts.vh crc_genguts.vh
+Vhw_test: $(HW_TEST_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c crc8e_guts.vh crc_genguts.vh
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -CFLAGS -Wno-logical-op -cc --exe $(filter-out crc8e_guts.vh crc_genguts.vh, $^)
 	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
@@ -359,7 +360,7 @@ rtefi_blob_tb: $(RTEFI_V)
 # =====
 # Experimental
 rtefi_blob_synth.v: $(RTEFI_V)
-hw_test_synth.v: $(SYNTH_SOURCE_EXTRA) $(RTEFI_V)
+hw_test_synth.v: $(HW_TEST_V)
 SYNTH_SOURCE_AC701X = rgmii_hw_test.v hw_test_synth.v kc705/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v
 ac701_rgmii_testx_tb: $(SYNTH_SOURCE_AC701X) kc705/ODDR.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v $(HOME)/share/yosys/xilinx/cells_sim.v
 # ac701_rgmii_testx_tb won't work until I have a viable RAMB18E1
