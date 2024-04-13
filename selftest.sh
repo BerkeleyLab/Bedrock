@@ -57,6 +57,9 @@ make -C badger/tests clean all
 # XXX skip bash tftp_test.sh && bash speed_check.sh, which need tap0 set up
 # by root.  See comments in badger/tests/tftp_test.sh.
 
+## board_support_test
+make -C board_support/bmb7_kintex jxj_gate_check
+
 ## chirp_test
 make -C dsp/chirp all checks
 

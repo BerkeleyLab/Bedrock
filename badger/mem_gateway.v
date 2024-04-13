@@ -54,6 +54,7 @@ module mem_gateway #(
 	output control_rd,
 	output control_write,
 	output control_rd_valid,
+	output control_prefill,
 	// length of control_pipe_rd is read_pipe_len+1, see above
 	output [read_pipe_len:0] control_pipe_rd,
 	output [31:0] data_out,
@@ -132,5 +133,13 @@ wire [7:0] xdata = osr[31:24];  // Data to be transmitted
 reg_delay #(.len(n_lat-read_pipe_len-5), .dw(8)) finale(.clk(clk),
 	.gate(1'b1), .reset(1'b0),
 	.din(xdata), .dout(odata));
+
+// Experimental - leading edge detect on raw_l
+reg raw_l_r=0, control_prefill_r;
+always @(posedge clk) begin
+	raw_l_r <= raw_l;
+	control_prefill_r <= raw_l & ~raw_l_r;
+end
+assign control_prefill = control_prefill_r;
 
 endmodule
