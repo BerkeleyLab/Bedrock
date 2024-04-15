@@ -100,6 +100,7 @@ class Zest(Module, AutoCSR):
             "board_support/zest_soc/zest_clk_map.v",
             "board_support/zest_soc/zest_spi_dio_pack.v",
             "dsp/freq_count.v",
+            "dsp/freq_gcount.v",
             "dsp/phase_diff.v",
             "dsp/flag_xdomain.v",
             "dsp/data_xdomain.v",
