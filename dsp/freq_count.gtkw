@@ -16,11 +16,11 @@ freq_count_tb.diff_stream_strobe
 @24
 freq_count_tb.frequency[27:0]
 @22
-freq_count_tb.mut.gray1[3:0]
-freq_count_tb.mut.gray3[3:0]
+freq_count_tb.mut.work.gray1[3:0]
+freq_count_tb.mut.work.gray3[3:0]
 @24
-freq_count_tb.mut.diff1[3:0]
-freq_count_tb.mut.refcnt[5:0]
-freq_count_tb.mut.accum[27:0]
+freq_count_tb.mut.work.diff1[3:0]
+freq_count_tb.mut.work.refcnt[5:0]
+freq_count_tb.mut.work.accum[27:0]
 [pattern_trace] 1
 [pattern_trace] 0
