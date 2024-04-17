@@ -13,7 +13,7 @@ module freq_gcount #(
 	// input clocks
 	input sysclk,  // timespec 8.0 ns
 	input f_in,  // unknown input
-	input g_in,  // gate
+	input g_in,  // gate (f_in clock domain)
 
 	// outputs in sysclk domain
 	output reg [freq_width-1:0] frequency,
