@@ -182,7 +182,7 @@ class CommentParser(Parser):
                         info[1],
                         this_mod,
                         info[5],
-                        clk_domain,
+                        port_clock,  # clk_domain,
                         cd_indexed,
                         True,
                         **attributes
@@ -204,7 +204,7 @@ class CommentParser(Parser):
                         info[1],
                         this_mod,
                         info[5],
-                        clk_domain,
+                        port_clock,  # clk_domain,
                         cd_indexed,
                         False,
                         **attributes
