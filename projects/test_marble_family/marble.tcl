@@ -1,7 +1,6 @@
 set outputDir ./_xilinx
 file mkdir $outputDir
 
-# TODO: update this with the one from lcls2 project!
 # Provision to source additional TCL scripts
 # Currently used for swap_gitid.tcl
 foreach aux_tcl [lrange $argv 2 end] {
@@ -9,9 +8,12 @@ foreach aux_tcl [lrange $argv 2 end] {
     source $aux_tcl
 }
 
+# git context information
+array set git_status [get_git_context]
+
 # this old_commit value matches that in build_rom.py --placeholder_rev
 set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
-set new_commit [generate_extended_git_id]
+set new_commit $git_status(full_id)
 git_id_print $new_commit
 
 # Read in dependencies file
@@ -41,8 +43,8 @@ set_property top "marble_top" [current_fileset]
 set_property verilog_define [list "CHIP_FAMILY_7SERIES"] [current_fileset]
 
 # Get shorter git commit ID for verilog and bitfile filename
-set gitid_for_filename [get_dirty_git_id 8]
-set gitid_for_verilog 32'h[get_git_id 8]
+set gitid_for_filename $git_status(short_id)$$git_status(suffix)
+set gitid_for_verilog 32'h$git_status(short_id)
 set new_defs [list "GIT_32BIT_ID=$gitid_for_verilog" "REVC_1W"]
 
 launch_runs synth_1
