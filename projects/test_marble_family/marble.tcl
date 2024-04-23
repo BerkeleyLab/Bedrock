@@ -80,13 +80,4 @@ swap_gitid $old_commit $new_commit 16 0
 
 write_bitstream -force $build_id.$gitid_for_filename.x.bit
 
-if {[is_project_dirty] == 1} {
-    puts "modified code; not coercing bitfile header timestamp"
-    exec mv $build_id.$gitid_for_filename.x.bit $build_id.$gitid_for_filename.bit
-} else {
-    set result_bit_stamp_mod [exec ./bit_stamp_mod -s [exec git log -1 --pretty=%ct] $build_id.$gitid_for_filename.bit < $build_id.$gitid_for_filename.x.bit]
-    puts $result_bit_stamp_mod
-    exec rm $build_id.$gitid_for_filename.x.bit
-    set result_sha256sum [exec sha256sum $build_id.$gitid_for_filename.bit]
-    puts $result_sha256sum
-}
+apply_bit_stamp_mod $build_id.$gitid_for_filename $git_status(dirty) $git_status(time)
