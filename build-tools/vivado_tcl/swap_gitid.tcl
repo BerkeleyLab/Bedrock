@@ -1,3 +1,5 @@
+# Functions related to Vivado and git
+
 # Revise config_romx git ID in-place using BRAM INIT_xx values
 # Absolutely depends on ROM contents that come out of bedrock/build-tools/build_rom.py
 # Two distinct cases:
@@ -19,6 +21,9 @@
 variable GITID_LENGTH 40
 variable INIT_LENGTH  69
 variable RECORD_MARKER 800A
+# Default string in case of missing git repo.  It's made to have sense
+# as 8 and 24 digits and to avoid to run bit_stamp_mod
+variable NO_GIT_RETURN_VAL "aaaaaaaaaaaaaaaaaaaaaaaa0000000000000000"
 
 # Comment about INIT_LENGTH: that's the length of the string Vivado uses
 # to describe the (partial) initial contents of a Xilinx block memory.
@@ -228,4 +233,120 @@ proc swap_gitid {old_commit new_commit rowwidth dry_run} {
     }
     puts OK
     return 1
+}
+
+##########################
+# On to functions that use info about the current git commit
+# to set file names and embedded gitid strings
+
+# Return full 40-digit commit id and timestamp as tcl array.
+# Recommend use -> array set array_name [get_full_git_id]
+proc get_full_git_id {} {
+    set id [get_dirty_git_id 40]
+    set time [get_git_timestamp]
+    return [list id $id time $time]
+}
+
+# Provide the timestamp of current git commit
+# sometimes called SOURCE_DATE_EPOCH
+proc get_git_timestamp {} {
+    if [catch {exec git log -1 --pretty=%ct} result] {
+        return 0
+    } else {
+        return $result
+    }
+}
+
+# Returns the N-digit git id sha ending with '-dirty' in case of local
+# modification (or the first N-digit of NO_GIT_RETURN_VAL in case it's
+# executed outside a git project)
+proc get_dirty_git_id {N} {
+    if [catch {exec git describe --always --abbrev=$N --dirty --exclude "*"} result] {
+        return [string range $::NO_GIT_RETURN_VAL 0 $N-1]-dirty
+    } else {
+        return $result
+    }
+}
+
+# Returns the N-digit git id sha or the first N-digit of NO_GIT_RETURN_VAL
+# in case it's executed outside a git project
+proc get_git_id {N} {
+    return [regsub {\-dirty} [get_dirty_git_id $N] ""]
+}
+
+# Utility for local modification presence check
+proc is_git_dirty {gitid} {
+    switch -glob -- $gitid {
+        *-dirty      {return 1}
+        default      {return 0}
+    }
+}
+
+# Generate 40 digits git commit id where the latest 16 digits
+# are zeros in case of local modification
+proc generate_extended_git_id {git_id dirtiness} {
+    if {[string length $git_id] < 40} {
+        error "generate_extended_git_id error: [
+            ]received a git id shorter than 40 digits!"
+    }
+    if {$dirtiness} {
+        return [string range $git_id 0 23]0000000000000000
+    } else {
+        return $git_id
+    }
+}
+
+# Print git hash in huge and colored way
+proc git_id_print {gitid_arg} {
+    set orange_color "\033\[93m"
+    set reset_color "\033\[0m"
+    puts "#[string repeat "-" 48]${orange_color}"
+    puts "  gitid $gitid_arg"
+    puts "${reset_color}#[string repeat "-" 48]"
+}
+
+# Primary access to the assembled info about this git repo
+proc get_git_context {} {
+    # single-source-of-truth
+    array set git_status [get_full_git_id]
+    # everything else derived from that
+    set git_id [string range $git_status(id) 0 39]
+    set git_id_short [string range $git_status(id) 0 7]
+    set git_dirty [is_git_dirty $git_status(id)]
+    set dirty_suffix ""
+    if {$git_dirty} {set dirty_suffix "-dirty"}
+    set new_commit [generate_extended_git_id $git_status(id) $git_dirty]
+    # return list is an array (recommend use of array set)
+    return [list short_id $git_id_short dirty $git_dirty suffix[
+        ] $dirty_suffix full_id $new_commit time $git_status(time)]
+}
+
+# function to handle get_git_context as list instead of an array
+# i.e. set git_as_list [array_to_list [get_git_context]]
+proc array_to_list {array_arg} {
+    array set array_tmp $array_arg
+    foreach key [array names array_tmp] {
+        lappend array_list $array_tmp($key)
+    }
+    return $array_list
+}
+
+# Convert $filename_base.x.bit to $filename_base.bit,
+# using bit_stamp_mod or not, as appropriate.
+proc apply_bit_stamp_mod {filename_base git_dirty source_stamp} {
+    if {! [file readable $filename_base.x.bit]} {
+        error "bitfile $filename_base.x.bit missing; no action taken"
+    }
+    if {$git_dirty} {
+        puts "modified code; not coercing bitfile header timestamp"
+    } elseif [file executable ./bit_stamp_mod] {
+        puts "pristine code; setting bitfile header timestamp to $source_stamp"
+        puts [exec ./bit_stamp_mod -s $source_stamp $filename_base.bit < $filename_base.x.bit]
+        file delete $filename_base.x.bit
+        puts [exec sha256sum $filename_base.bit]
+        return
+    } else {
+        puts "bit_stamp_mod not available; not coercing bitfile header timestamp"
+    }
+    file rename -force $filename_base.x.bit $filename_base.bit
 }
