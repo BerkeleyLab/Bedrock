@@ -233,16 +233,11 @@ from the requesting packet’s source MAC.  Likewise, the destination IP
 is transcribed from the source IP (although this means different things
 for ARP and IP), and the UDP destination port is transcribed from the
 source port.</p>
-<p>Up to eight on-chip plug-in clients (UDP ports) are currently supported,
+<p>It is strongly recommended that UDP destination port numbers get configured
+to be &lt; 1024.  Up to eight clients (UDP ports) are currently supported,
 and their default ports are numbered sequentially starting at 801.
 This can be overridden at build time with Verilog parameters, or
 at run time with a local configuration bus.</p>
-<p>It is strongly recommended that UDP destination port numbers get configured
-to be &lt; 1024, to resist UDP loops.  Somehow this well-known (CA-1996-01:
-UDP Port Denial-of-Service Attack) possibility was rediscovered
-in 2024, and assigned CVE-2024-2169: Loop DoS.  Separating “services”
-(ports &lt; 1024) from “clients” (ports &gt; 1023) is Preventive measure 2
-listed in the Loop DoS advisory.</p>
 </section>
 <section id="example-live-test-run">
 <h3>Example “live” test run<a class="headerlink" href="#example-live-test-run" title="Permalink to this heading"></a></h3>
@@ -285,7 +280,6 @@ Up to eight clients can be attached to a Packet Badger instance.</p>
 <li><p>Design notes: <a class="reference external" href="rtefi_notes.txt">rtefi_notes.txt</a></p></li>
 <li><p>Memory addressing figure: <a class="reference external" href="doc/memory.svg">memory access diagram</a></p></li>
 <li><p>Data path in construct.v: <a class="reference external" href="doc/tx_path.svg">data path diagram</a></p></li>
-<li><p>SPI Boot Flash programming support: <a class="reference external" href="flash.md">flash.md</a></p></li>
 <li><p>Status: <a class="reference external" href="status.md">status.md</a></p></li>
 </ul>
 </section>
