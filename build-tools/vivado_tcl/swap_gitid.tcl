@@ -306,8 +306,8 @@ proc git_id_print {gitid_arg} {
 proc orange_print {text} {
     set orange_color "\033\[93m"
     set reset_color "\033\[0m"
-    puts "${orange_color}"
-    puts "${text}"
+    puts -nonewline "${orange_color}"
+    puts -nonewline "${text}"
     puts "${reset_color}"
 }
 
