@@ -23,7 +23,7 @@ variable INIT_LENGTH  69
 variable RECORD_MARKER 800A
 # Default string in case of missing git repo.  It's made to have sense
 # as 8 and 24 digits and to avoid to run bit_stamp_mod
-variable NO_GIT_RETURN_VAL "no_gitid_sha_information__________-dirty"
+variable NO_GIT_RETURN_VAL "aaaaaaaaaaaaaaaaaaaaaaaa0000000000000000"
 
 # Comment about INIT_LENGTH: that's the length of the string Vivado uses
 # to describe the (partial) initial contents of a Xilinx block memory.
@@ -262,7 +262,7 @@ proc get_git_timestamp {} {
 # executed outside a git project)
 proc get_dirty_git_id {N} {
     if [catch {exec git describe --always --abbrev=$N --dirty --exclude "*"} result] {
-        return [string range $::NO_GIT_RETURN_VAL 0 $N-1]
+        return [string range $::NO_GIT_RETURN_VAL 0 $N-1]-dirty
     } else {
         return $result
     }
