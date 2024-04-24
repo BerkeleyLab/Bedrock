@@ -88,6 +88,9 @@ make -C homeless/freq_demo
 ## leep_test
 (cd projects/common && python3 -m unittest -v)
 
+## localbus
+make -C localbus
+
 ## make_docs
 make -C build-tools/make-demo clean check consistency
 

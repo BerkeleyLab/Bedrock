@@ -9,6 +9,7 @@ make -C dsp clean
 make -C dsp/feedforward clean
 make -C homeless/freq_demo clean
 make -C homeless clean
+make -C localbus clean
 make -C build-tools/make-demo spotless
 make -C projects/test_marble_family/pps_lock clean
 make -C projects/test_marble_family clean
