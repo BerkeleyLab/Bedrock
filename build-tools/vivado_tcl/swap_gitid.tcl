@@ -1,3 +1,5 @@
+# Functions related to Vivado and git
+
 # Revise config_romx git ID in-place using BRAM INIT_xx values
 # Absolutely depends on ROM contents that come out of bedrock/build-tools/build_rom.py
 # Two distinct cases:
@@ -19,7 +21,7 @@
 variable GITID_LENGTH 40
 variable INIT_LENGTH  69
 variable RECORD_MARKER 800A
-# Defaul string in case of missing git repo. It's made to have sense
+# Default string in case of missing git repo.  It's made to have sense
 # as 8 and 24 digits and to avoid to run bit_stamp_mod
 variable NO_GIT_RETURN_VAL "no_gitid_sha_information__________-dirty"
 
@@ -233,9 +235,12 @@ proc swap_gitid {old_commit new_commit rowwidth dry_run} {
     return 1
 }
 
+##########################
+# On to functions that use info about the current git commit
+# to set file names and embedded gitid strings
 
 # Return full 40-digit commit id and timestamp as tcl array.
-# Recommend use -> 'array set array_name [get_full_git_id]
+# Recommend use -> array set array_name [get_full_git_id]
 proc get_full_git_id {} {
     set id [get_dirty_git_id 40]
     set time [get_git_timestamp]
@@ -243,6 +248,7 @@ proc get_full_git_id {} {
 }
 
 # Provide the timestamp of current git commit
+# sometimes called SOURCE_DATE_EPOCH
 proc get_git_timestamp {} {
     if [catch {exec git log -1 --pretty=%ct} result] {
         return 0
@@ -268,7 +274,7 @@ proc get_git_id {N} {
     return [regsub {\-dirty} [get_dirty_git_id $N] ""]
 }
 
-# utility for local modification presence check
+# Utility for local modification presence check
 proc is_git_dirty {gitid} {
     switch -glob -- $gitid {
         *-dirty      {return 1}
@@ -300,7 +306,9 @@ proc git_id_print {gitid_arg} {
 proc orange_print {text} {
     set orange_color "\033\[93m"
     set reset_color "\033\[0m"
-    puts "${orange_color}${text}${reset_color}"
+    puts "${orange_color}"
+    puts "${text}"
+    puts "${reset_color}"
 }
 
 # Primary access to the assembled info about this git repo
@@ -319,7 +327,7 @@ proc get_git_context {} {
         ] $dirty_suffix full_id $new_commit time $git_status(time)]
 }
 
-# function to handle get_git_contex as list instead of an array
+# function to handle get_git_context as list instead of an array
 # i.e. set git_as_list [array_to_list [get_git_context]]
 proc array_to_list {array_arg} {
     array set array_tmp $array_arg

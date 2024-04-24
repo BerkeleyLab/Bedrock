@@ -43,7 +43,7 @@ set_property top "marble_top" [current_fileset]
 set_property verilog_define [list "CHIP_FAMILY_7SERIES"] [current_fileset]
 
 # Get shorter git commit ID for verilog and bitfile filename
-set gitid_for_filename $git_status(short_id)$$git_status(suffix)
+set gitid_for_filename $git_status(short_id)$git_status(suffix)
 set gitid_for_verilog 32'h$git_status(short_id)
 set new_defs [list "GIT_32BIT_ID=$gitid_for_verilog" "REVC_1W"]
 
