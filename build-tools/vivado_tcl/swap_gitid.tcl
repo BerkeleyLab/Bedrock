@@ -298,17 +298,11 @@ proc generate_extended_git_id {git_id dirtiness} {
 
 # Print git hash in huge and colored way
 proc git_id_print {gitid_arg} {
-    puts -nonewline "#[string repeat "-" 48]\n# "
-    orange_print "gitid $gitid_arg"
-    puts "#[string repeat "-" 48]"
-}
-
-proc orange_print {text} {
     set orange_color "\033\[93m"
     set reset_color "\033\[0m"
-    puts -nonewline "${orange_color}"
-    puts -nonewline "${text}"
-    puts "${reset_color}"
+    puts "#[string repeat "-" 48]${orange_color}"
+    puts "  gitid $gitid_arg"
+    puts "${reset_color}#[string repeat "-" 48]"
 }
 
 # Primary access to the assembled info about this git repo
