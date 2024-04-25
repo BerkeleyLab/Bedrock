@@ -326,9 +326,11 @@ ad5662_lock wr_dac(.clk(clk), .tick(wr_dac_tick),
 
 // Very basic pipelining of two-cycle read process
 reg [23:0] addr_r=0;
-reg do_rd_r=0;
+reg do_rd_r=0, do_rd_r2=0, do_rd_r3=0;
 always @(posedge clk) begin
 	do_rd_r <= do_rd;
+	do_rd_r2 <= do_rd_r;
+	do_rd_r3 <= do_rd_r2;
 	addr_r <= addr;
 end
 
@@ -346,6 +348,12 @@ reg [27:0] fmc2_test_in_h=0;
 reg [23:0] fmc2h_test_in_l=0;
 reg [23:0] fmc2h_test_in_h=0;
 
+// ==========================================
+// |          Localbus Reads                |
+// | NOTE: reverse_json.py reads this code  |
+// | to create the json describing the      |
+// | address map.                           |
+// ==========================================
 // First read cycle
 reg [31:0] reg_bank_0=0, dbg_mem_out=0;
 always @(posedge clk) if (do_rd) begin
@@ -394,8 +402,9 @@ always @(posedge clk) if (do_rd) begin
 end
 
 // Second read cycle
-// reverse_json.py doesn't have an address-offset feature, so put
-// (read-only) reg_bank_0 at 0.  That bumps (non-newad) direct writes
+// This code was written when reverse_json.py didn't have an
+// address-offset feature, so put (read-only) reg_bank_0 at 0.
+// That bumps (non-newad) direct writes
 // and corresponding mirror to a base address offset of 327680.
 // That offset has to be accounted for in static_regmap.json.
 reg [31:0] lb_data_in=0;
@@ -418,7 +427,14 @@ always @(posedge clk) if (do_rd_r) begin
 	endcase
 end
 
-// Direct writes
+// ==========================================
+// |          Direct Localbus Writes        |
+// | NOTE: this write logic is not          |
+// | automatically transcribed to json.     |
+// | If you want to see these in the json   |
+// | register description, list them in     |
+// | static_regmap.json.                    |
+// ==========================================
 reg [1:0] led_user_r=0;
 reg [7:0] misc_config = misc_config_default;
 reg [7:0] led_1_df=0, led_2_df=0;
@@ -477,7 +493,8 @@ end
 assign led_user_mode = led_user_r;
 assign led1 = l1;
 assign led2 = l2;
-assign data_in = lb_data_in;
+wire drive_data_in;
+assign data_in = drive_data_in ? lb_data_in : 32'bx;
 assign rx_mac_hbank = rx_mac_hbank_r;
 assign cfg_d02 = misc_config[0];
 assign mmc_int = misc_config[1];
@@ -507,16 +524,19 @@ end
 
 // Bus activity trace output
 `ifdef SIMULATE
-reg [1:0] sr=0;
+assign drive_data_in = do_rd_r3;
+reg [2:0] sr=0;
 reg [23:0] addr_rr=0;
 always @(posedge clk) begin
-	sr <= {sr[0:0], control_strobe & control_rd};
+	sr <= {sr[1:0], do_rd};
 	addr_rr <= addr_r;
 	if (control_strobe & ~control_rd)
 		$display("Localbus write r[%x] = %x", addr, data_out);
-	if (sr[1])
+	if (sr[2])
 		$display("Localbus read  r[%x] = %x", addr_rr, data_in);
 end
+`else
+assign drive_data_in = 1;  // Don't ask for trouble on hardware
 `endif
 
 `ifndef YOSYS
@@ -550,6 +570,5 @@ assign xadc_temp_dout=0;
 assign dna_high=0;
 assign dna_low=0;
 `endif
-
 
 endmodule

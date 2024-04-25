@@ -89,7 +89,7 @@ mmc_mailbox_tb: mmc_mailbox.v $(HOMELESS_DIR)/fake_dpram.v $(DSP_DIR)/dpram.v $(
 # =====
 # subset that is interesting to test live on network
 AD5662_V = ad5662_lock.v pps_lock.v pps_loop_filter.v ad5662.v
-LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v multi_counter.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
+LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v freq_gcount.v multi_counter.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
                     gps_test.v simpleuart.v fake_dpram.v xadc_tempmon.v dna.v
 lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v udp-vpi.vpi IDDR.v
 VFLAGS_lb_marble_slave_tb = -m ./udp-vpi
@@ -162,14 +162,12 @@ marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
 
 marble1.bit: marble.tcl marble1.d marble1_features bit_stamp_mod
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
-	G=marble1.$$(git rev-parse --short=8 --verify HEAD); if git diff | grep -q .; then echo "modified code; not coercing bitfile header timestamp"; mv $$G.x.bit $$G.bit; else ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) $$G.bit < $$G.x.bit && rm $$G.x.bit && sha256sum $$G.bit; fi
 
 marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
 	echo $^ | tr ' ' '\n' > $@
 
 marble2.bit: marble.tcl marble2.d marble2_features bit_stamp_mod
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
-	G=marble2.$$(git describe --always --abbrev=8 --dirty); if test $${G%-dirty} != $${G}; then echo "modified code; not coercing bitfile header timestamp"; mv $$G.x.bit $$G.bit; else ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) $$G.bit < $$G.x.bit && rm $$G.x.bit && sha256sum $$G.bit; fi
 
 # =====
 # bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'

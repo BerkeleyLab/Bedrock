@@ -1,21 +1,20 @@
 set outputDir ./_xilinx
 file mkdir $outputDir
 
-# experimental!
-proc get_gitid {} {
-    switch -glob -- [exec git describe --always --dirty] {
-        *-dirty      {return [string toupper [exec git rev-parse --short=24 HEAD]]0000000000000000}
-        default      {return [string toupper [exec git rev-parse HEAD]]}
-    }
+# Provision to source additional TCL scripts
+# Currently used for swap_gitid.tcl
+foreach aux_tcl [lrange $argv 2 end] {
+    puts "Sourcing $aux_tcl"
+    source $aux_tcl
 }
-# Print git hash in huge and nice way
-proc gitid_print {gitid_arg} {
-    puts "#[string repeat "-" 48]\n# gitid $gitid_arg\n#[string repeat "-" 48]"
-}
+
+# git context information
+array set git_status [get_git_context]
+
 # this old_commit value matches that in build_rom.py --placeholder_rev
 set old_commit [string toupper "da39a3ee5e6b4b0d3255bfef95601890afd80709"]
-set new_commit [get_gitid]
-gitid_print $new_commit
+set new_commit $git_status(full_id)
+git_id_print $new_commit
 
 # Read in dependencies file
 set flist [lindex $argv 0]
@@ -24,13 +23,6 @@ puts "Obtaining dependencies from $flist"
 # Read in build identifier
 set build_id [lindex $argv 1]
 puts "Building for $build_id"
-
-# Read in optional TCL script
-if { $argc == 3 } {
-   set aux_tcl [lindex $argv 2]
-   puts "Sourcing $aux_tcl"
-   source $aux_tcl
-}
 
 if { $build_id == "marble1" } {
    set part "xc7a100t-fgg484-2"
@@ -51,8 +43,8 @@ set_property top "marble_top" [current_fileset]
 set_property verilog_define [list "CHIP_FAMILY_7SERIES"] [current_fileset]
 
 # Get shorter git commit ID for verilog and bitfile filename
-set gitid_for_filename [exec git describe --always --abbrev=8 --dirty]
-set gitid_for_verilog 32'h[exec git rev-parse --short=8 HEAD]
+set gitid_for_filename $git_status(short_id)$git_status(suffix)
+set gitid_for_verilog 32'h$git_status(short_id)
 set new_defs [list "GIT_32BIT_ID=$gitid_for_verilog" "REVC_1W"]
 
 launch_runs synth_1
@@ -89,3 +81,5 @@ project_rpt $my_proj_name
 swap_gitid $old_commit $new_commit 16 0
 
 write_bitstream -force $build_id.$gitid_for_filename.x.bit
+
+apply_bit_stamp_mod $build_id.$gitid_for_filename $git_status(dirty) $git_status(time)
