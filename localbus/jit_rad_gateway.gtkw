@@ -1,0 +1,54 @@
+[timestart] 0
+[size] 1434 666
+[pos] -1 -1
+*-13.156817 1041 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] jit_rad_gateway_tb.
+[sst_width] 214
+[signals_width] 292
+[sst_expanded] 1
+[sst_vpaned_height] 175
+@28
+jit_rad_gateway_tb.p_running
+jit_rad_gateway_tb.rx_stb
+jit_rad_gateway_tb.rx_end
+@22
+jit_rad_gateway_tb.net_idata[7:0]
+@200
+-packet Rx
+@28
+jit_rad_gateway_tb.tx_end
+jit_rad_gateway_tb.tx_rdy
+@22
+jit_rad_gateway_tb.net_odata[7:0]
+@28
+jit_rad_gateway_tb.rx_slot[2:0]
+@22
+jit_rad_gateway_tb.rx_cmd[63:0]
+@420
+jit_rad_gateway_tb.rx_index
+@200
+-localbus
+@420
+jit_rad_gateway_tb.word
+@28
+jit_rad_gateway_tb.demo.lb_strobe
+jit_rad_gateway_tb.demo.lb_rd
+@22
+jit_rad_gateway_tb.demo.lb_addr[23:0]
+jit_rad_gateway_tb.demo.lb_dout[31:0]
+jit_rad_gateway_tb.demo.lb_din[31:0]
+@200
+-xfer
+@28
+jit_rad_gateway_tb.demo.xfer_snap
+jit_rad_gateway_tb.demo.xfer_strobe
+@22
+jit_rad_gateway_tb.demo.xfer_addr[3:0]
+jit_rad_gateway_tb.demo.reg_bank_6[31:0]
+@200
+-other
+@28
+jit_rad_gateway_tb.demo.lb_prefill
+jit_rad_gateway_tb.demo.lb_dynamic
+[pattern_trace] 1
+[pattern_trace] 0

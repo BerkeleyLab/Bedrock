@@ -21,7 +21,8 @@ resonant cavity, its Electrical and Mechanical modes, ADCs, Cables, Piezos etc.
 * cmoc: Verilog implementation of an RF controller, that connects to either a
 real world ADCs or simulated components within rtsim
 * [badger](badger): A real-time Ethernet/IP/UDP packet responder core in fabric
-* fpga_family: Several FPGA specific constraint files
+* fpga_family: Several FPGA specific constraint files and hooks for vendor-specific features
+* [localbus](localbus): Documentation and features related to the on-chip localbus that is widely used within bedrock
 * board_support: Several board specific pin mapping related files
 * projects: Instantiated projects that build and synthesize bit files that go on
 FPGAs sitting on various boards that talk various platforms
