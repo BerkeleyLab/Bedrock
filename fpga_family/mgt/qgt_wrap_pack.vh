@@ -28,7 +28,6 @@
                             output [(DWI/8)-1:0] gt``GTi``_rxdisperr_out,\
                             output [(DWI/8)-1:0] gt``GTi``_rxnotintable_out,\
                             output               gt``GTi``_rxbyteisaligned,\
-                            input                gt``GTi``_rxslide_in,\
                             `endif\
                             `ifdef GT``GTi``_DRP_EN\
                             input                gt``GTi``_drpclk_in,\
