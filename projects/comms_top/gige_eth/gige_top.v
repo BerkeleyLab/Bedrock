@@ -82,13 +82,13 @@ module gige_top (
    );
 
    // Status signals
-   wire gt_cpll_locked;
-   wire gt_txrx_resetdone;
+   wire [3:0] gt_cpll_locked;
+   wire [3:0] gt_txrx_resetdone;
 
    // Route 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
    // Ethernet clock managers
    mgt_eth_clks i_gt_eth_clks_tx (
-      .reset       (~gt_cpll_locked),
+      .reset       (~gt_cpll_locked[0]),
       .mgt_out_clk (gt0_tx_out_clk), // From transceiver
       .mgt_usr_clk (gt0_tx_usr_clk), // Buffered 62.5 MHz
       .gmii_clk    (gmii_tx_clk),     // Buffered 125 MHz
@@ -96,7 +96,7 @@ module gige_top (
    );
 
    mgt_eth_clks i_gt_eth_clks_rx (
-      .reset       (~gt_cpll_locked),
+      .reset       (~gt_cpll_locked[0]),
       .mgt_out_clk (gt0_rx_out_clk), // From transceiver
       .mgt_usr_clk (gt0_rx_usr_clk),
       .gmii_clk    (gmii_rx_clk),
@@ -158,7 +158,7 @@ module gige_top (
    // GT Ethernet to Local-Bus bridge
    // ---------------------------------
    wire rx_mon, tx_mon;
-   wire [6:0] an_status;
+   wire [8:0] an_status;
 
    wire lb_valid, lb_rnw, lb_renable;
    wire [C_LBUS_ADDR_WIDTH-1:0] lb_addr;
@@ -181,7 +181,7 @@ module gige_top (
       .cfg_valid     (1'b0),
       .cfg_addr      (5'b0),
       .cfg_wdata     (8'b0),
-
+      .cfg_reg       (8'b0),
       // Auto-Negotiation
       .an_disable    (1'b1), // Keep disabled while not connecting to SFP switch
       .an_status     (an_status),
@@ -253,7 +253,7 @@ wire [31:0] ctr_mem_out;
    always @(posedge lb_clk) hb_count <= hb_count + 1;
    assign heartbeat = hb_count[28]; // ~ 1 per second
 
-   assign LED = {gt_cpll_locked,
+   assign LED = {gt_cpll_locked[0],
                  heartbeat,
                  lbus_led,
                  an_status[0]};

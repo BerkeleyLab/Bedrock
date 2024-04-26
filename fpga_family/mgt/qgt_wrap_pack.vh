@@ -23,10 +23,21 @@
                             output               gt``GTi``_txfsm_resetdone_out,\
                             `ifdef GT``GTi``_8B10B_EN\
                             output [(DWI/8)-1:0] gt``GTi``_rxcharisk_out,\
+                            output [(DWI/8)-1:0] gt``GTi``_rxchariscomma_out,\
                             input  [(DWI/8)-1:0] gt``GTi``_txcharisk_in,\
                             output [(DWI/8)-1:0] gt``GTi``_rxdisperr_out,\
                             output [(DWI/8)-1:0] gt``GTi``_rxnotintable_out,\
                             output               gt``GTi``_rxbyteisaligned,\
+                            input                gt``GTi``_rxslide_in,\
+                            `endif\
+                            `ifdef GT``GTi``_DRP_EN\
+                            input                gt``GTi``_drpclk_in,\
+                            input  [(DWI-13):0]  gt``GTi``_drpaddr_in,\
+                            input  [(DWI-14):0]  gt``GTi``_drpdi_in,\
+                            output [(DWI-14):0]  gt``GTi``_drpdo_out,\
+                            input                gt``GTi``_drpen_in,\
+                            output               gt``GTi``_drprdy_out,\
+                            input                gt``GTi``_drpwe_in,\
                             `endif\
                             output [2:0]         gt``GTi``_rxbufstatus,\
                             output [1:0]         gt``GTi``_txbufstatus,
@@ -39,6 +50,10 @@
                        `undef GT1_8B10B_EN\
                        `undef GT2_8B10B_EN\
                        `undef GT3_8B10B_EN\
+                       `undef GT0_DRP_EN\
+                       `undef GT1_DRP_EN\
+                       `undef GT2_DRP_EN\
+                       `undef GT3_DRP_EN\
                        `undef GT0_PLL0\
                        `undef GT1_PLL0\
                        `undef GT2_PLL0\
@@ -67,6 +82,14 @@
                        `ifdef Q``Qi``_GT2_8B10B_EN `define GT2_8B10B_EN\
                        `endif\
                        `ifdef Q``Qi``_GT3_8B10B_EN `define GT3_8B10B_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT0_DRP_EN `define GT0_DRP_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT1_DRP_EN `define GT1_DRP_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT2_DRP_EN `define GT2_DRP_EN\
+                       `endif\
+                       `ifdef Q``Qi``_GT3_DRP_EN `define GT3_DRP_EN\
                        `endif\
                        `ifdef Q``Qi``_GT0_PLL0 `define GT0_PLL0\
                        `endif\
