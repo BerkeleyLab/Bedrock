@@ -1,0 +1,6 @@
+board_support_test:
+  before_script:
+    - cd board_support
+  stage: test
+  script:
+    - make -C bmb7_kintex jxj_gate_check
