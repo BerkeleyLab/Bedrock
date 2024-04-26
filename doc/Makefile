@@ -141,6 +141,8 @@ SRC_MD = \
    dsp/README.md \
    board_support/zest/README.md \
    board_support/bmb7_kintex/README.md \
+   localbus/README.md \
+   localbus/jit_rad.md \
    fpga_family/xilinx/README.md \
    build-tools/cdc_snitch.md \
    build-tools/newad.md

@@ -18,10 +18,10 @@ where cycle counts are well-defined and set at configuration/synthesis
 time, _not_ run-time.
 
 The key component held here is
-Just In Time Readout Across Domains - [jit_rad.md](jit_rad.md) for short.
+Just In Time Readout Across Domains - [jit_rad](jit_rad.md) for short.
 
 Also see 
 - [Lightweight Address Space Serialization](../badger/mem_gate.md)
-- Bus controller for Packet Badger [mem_gateway.v](../mem_gateway.v)
+- Bus controller for Packet Badger [mem_gateway.v](../badger/mem_gateway.v)
 - Bus controller for BMB7 and QF2-pre [jxj_gate.v](../board_support/bmb7_kintex/jxj_gate.v)
 - [Newad](../build-tools/newad.md)
