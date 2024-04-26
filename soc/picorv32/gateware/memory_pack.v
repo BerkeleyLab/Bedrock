@@ -64,7 +64,9 @@ initial begin
     end else begin
         $write("memory_pack: no init file given\n");
     end
-    $fflush();
+    `ifdef SIMULATE
+    $fflush();  // yosys, at least, doesn't like this
+    `endif
 end
 
 // --------------------------------------------------------------
