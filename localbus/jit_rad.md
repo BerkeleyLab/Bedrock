@@ -49,7 +49,7 @@ the soft core and network both need access to the cross-domain registers.
 
 jit_rad_gateway.v is the primary module of interest.
 It attaches to the main localbus with traditional signals:
-- lb_clk 
+- lb_clk
 - lb_addr
 - lb_strobe
 - lb_data (result)

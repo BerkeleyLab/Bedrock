@@ -1,5 +1,6 @@
 # Clean up after "selftest.sh"
 make -C badger/tests clean
+make -C board_support/bmb7_kintex clean
 make -C dsp/chirp clean
 PYTHONPATH=$PWD/build-tools make -C cmoc clean
 make -C cordic clean

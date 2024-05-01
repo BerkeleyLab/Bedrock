@@ -152,7 +152,7 @@ end
 reg lb_dynamic=0, app_dynamic=0;
 integer ix;
 reg [31:0] starter=22;
-initial for (ix=0; ix<16; ix=ix+1) aset[ix] = 3*ix+22; 
+initial for (ix=0; ix<16; ix=ix+1) aset[ix] = 3*ix+22;
 always @(posedge app_clk) begin
 	app_dynamic <= lb_dynamic;  // CDC
 	starter <= (starter << 1) | starter[31];
