@@ -15,6 +15,7 @@ module serializer_multichannel_tb;
    reg clk;
    integer cc, errors;
    integer seed_int;
+   integer sample_count=0;
    initial begin
       if ($test$plusargs("vcd")) begin
          $dumpfile("serializer_multichannel.vcd");
@@ -52,7 +53,6 @@ module serializer_multichannel_tb;
    reg [DWIDTH-1:0] d_in[NCHAN-1:0];
    wire [NCHAN*DWIDTH-1:0] d_in_flat;
    reg sample_in;
-   integer sample_count=0;
    integer count_on=0, count_max=0;
 
    always @(negedge clk) begin

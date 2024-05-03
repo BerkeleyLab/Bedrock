@@ -7,6 +7,8 @@ module gmii_link_tb;
    reg clk;
    integer cc;
    integer data_fail=0;
+   wire operate;  // from link negotiator
+   wire [8:0] an_status;
 
    initial begin
       if ($test$plusargs("vcd")) begin
@@ -30,7 +32,6 @@ module gmii_link_tb;
       $stop(0);
    end
 
-   wire operate;  // from link negotiator
    wire [9:0] gtx_txdata_10, gtx_rxdata_10; // communication channel looped back Tx to Rx
 
    // Results produced by the Rx side
@@ -39,7 +40,6 @@ module gmii_link_tb;
 
    // Debug/diagnostics
    wire [15:0] lacr_rx;
-   wire [8:0] an_status;
 
    // ----------------------
    // Stimulus

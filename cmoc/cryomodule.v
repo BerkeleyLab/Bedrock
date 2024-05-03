@@ -66,6 +66,19 @@ module cryomodule(
 	input lb_read,
 	output [31:0] lb_out
 );
+
+// Note that the following five parameters should all be in the range 0 to 255,
+// in order to be properly read out via config_data0, below.
+parameter circle_aw = 13; // each half of ping-pong buffer is 8K words
+// .. but also allows for testing
+// The next four parameters are all passed to vmod1
+parameter mode_count = 3;  // drives generate loop in cav_elec.v
+parameter mode_shift = 9;
+parameter n_mech_modes = 7;
+parameter df_scale = 9;
+parameter cavity_count = 2;
+parameter cavity_ln = 1;  // ceil(log2(cavity_count))
+
 wire [31:0] clk1x_data;
 wire [16:0] clk1x_addr;
 wire clk1x_write;
@@ -88,18 +101,6 @@ wire lb2_clk = clk1x;
 `AUTOMATIC_map
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 `define UNIFORM(x) ((~|(x)) | &(x))  // All 0's or all 1's
-
-// Note that the following five parameters should all be in the range 0 to 255,
-// in order to be properly read out via config_data0, below.
-parameter circle_aw = 13; // each half of ping-pong buffer is 8K words
-// .. but also allows for testing
-// The next four parameters are all passed to vmod1
-parameter mode_count = 3;  // drives generate loop in cav_elec.v
-parameter mode_shift = 9;
-parameter n_mech_modes = 7;
-parameter df_scale = 9;
-parameter cavity_count = 2;
-parameter cavity_ln = 1;  // ceil(log2(cavity_count))
 
 parameter n_cycles = n_mech_modes * 2;
 parameter interp_span = 4;  // ceil(log2(n_cycles))

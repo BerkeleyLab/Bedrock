@@ -104,6 +104,7 @@ reg signed [17:0] mag_test4 = 32000;
 // 2: Proportional/Integral feedback gain scaling (Amplitude)
 // 3: Proportional/Integral feedback gain scaling (Phase)
 
+integer control_cnt=0;
 always @(posedge clk) begin
 	state <= state+1;
 	if (test_type==0)
@@ -126,7 +127,6 @@ integer rc1=2, rc2=2, rc3=2;
 reg [31:0] lb_data, cd;
 reg [15:0] lb_addr, ca;
 reg lb_write=0;
-integer control_cnt=0;
 // Read register sets from configuration file and drive the local bus
 `ifdef SIMULATE
 always @(posedge lb_clk) begin

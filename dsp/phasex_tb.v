@@ -64,6 +64,7 @@ always @(posedge rclk) trig <= cc==12;
 // Readout process
 reg f=0, f1=0, done=0;
 reg [5:0] raddr=0;
+wire ready;
 always @(posedge rclk) begin
     f <= cc>150 && ready;
     if (&raddr) done <= 1;
@@ -72,7 +73,6 @@ always @(posedge rclk) begin
 end
 
 // Device under test
-wire ready;
 wire [15:0] dout;
 phasex #(.aw(6)) dut(
     .uclk1  (uclk1),

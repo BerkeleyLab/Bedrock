@@ -52,6 +52,7 @@ end
 (*mark_debug=DEBUG*) reg [(DATA_COUNT*DATA_WIDTH)-1:0] u, uOld = 0, yOld = 0;
 
 // MAC parameter input multiplexer
+reg [2:0] state = 0;
 wire [(DATA_COUNT*DATA_WIDTH)-1:0] parameterMux = (state == 1) ? u :
                                                   (state == 2) ? u :
                                                   (state == 3) ? uOld :
@@ -59,7 +60,6 @@ wire [(DATA_COUNT*DATA_WIDTH)-1:0] parameterMux = (state == 1) ? u :
 
 // Computation state machine
 (* ASYNC_REG="TRUE" *) reg reset_m, reset;
-reg [2:0] state = 0;
 reg enMAC = 0, ldMAC = 0;
 
 always @(posedge dataClk) begin
