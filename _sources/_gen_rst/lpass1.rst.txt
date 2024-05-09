@@ -31,11 +31,6 @@ Parameters
      - ?
      - 21
      - Actual k is 0.5**klog2; max 31
-   * - TRIM_SHIFT
-     - ?
-     - ?
-     - 2
-     - 
 
 Ports
 '''''
