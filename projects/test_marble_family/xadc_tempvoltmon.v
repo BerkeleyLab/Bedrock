@@ -117,7 +117,6 @@ module xadc_tempvoltmon #(
 
 `ifdef SIMULATE
   assign otemp = 1'b0;
-  assign drdy = 1'b1;
   fake_xadc fake_xadc_i (
     .RESET(rst),                 // 1-bit input: Active-high reset
     .DRDY(drdy),                 // 1-bit output: DRP data ready
