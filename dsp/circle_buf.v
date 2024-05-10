@@ -53,7 +53,8 @@ reg rbank=0;  // really complement
 // from the readout side
 wire flag_return;   // buffer request from readout side
 reg [aw-1:0] write_addr=0, save_addr=0, save_addr0=0;
-reg pend=0, run=1, wbank=0, flag_return_x=0;
+reg pend=0, run=1, wbank=0;
+(* ASYNC_REG = "TRUE" *) reg flag_return_x=0;
 wire change_req = wbank ^ flag_return_x;
 wire end_write_addr = &write_addr;
 reg record_type=1;
@@ -91,7 +92,7 @@ assign debug_stat={stb_in,boundary,btest,wbank,rbank,write_addr};
 // Handshake means "OK, I won't read bank foo"
 
 // readout side control logic
-reg flag_send_x=0;
+(* ASYNC_REG = "TRUE" *) reg flag_send_x=0;
 wire [aw-1:0] read0_addr = read_addr;  // cut down to current width
 wire end_read_addr = &read0_addr;
 assign enable = ~flag_send_x ^ rbank;

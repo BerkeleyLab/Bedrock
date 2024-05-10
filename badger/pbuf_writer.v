@@ -96,13 +96,15 @@ assign badge_stb = badge_stb_r;
 
 // MAC logic
 reg [10:0] mac_a0=0;
-reg mac_bank=0, rx_mac_hbank_r=1;
+reg mac_bank=0;
+(* ASYNC_REG = "TRUE" *) reg rx_mac_hbank_r0=1, rx_mac_hbank_r=1;
 wire bank_ready = mac_bank != rx_mac_hbank_r;
 assign rx_mac_buf_status = {rx_mac_hbank_r, mac_bank};
 reg mac_save=0, mac_stopping=0;
 reg mac_queue=0;
 always @(posedge clk) begin
-	rx_mac_hbank_r <= rx_mac_hbank;  // Likely clock domain crossing
+	rx_mac_hbank_r0 <= rx_mac_hbank;  // Likely clock domain crossing
+	rx_mac_hbank_r <= rx_mac_hbank_r0;  // one more for good luck
 	if (trig & bank_ready) mac_save <= 1;
 	if (trig) mac_a0 <= 4;
 	else if (post_cnt==1) mac_a0 <= 0;

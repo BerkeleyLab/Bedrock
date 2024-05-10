@@ -238,11 +238,11 @@ module negotiate(
                              an_state==AN_ACK, an_state==AN_IDLE, an_state==AN_LINK_OK};
 
    // Register comb signals in rx_clk before transferring to tx_clk
-   reg lacr_send_r=0; // lacr_send in the rx clock domain
-   reg send_ack_r=0;
-   reg send_breaklink_r=0;
-   reg operate_r=0;
-   reg [8:0] an_status_r=0;
+   (* ASYNC_REG = "TRUE" *) reg lacr_send_r=0; // lacr_send in the rx clock domain
+   (* ASYNC_REG = "TRUE" *) reg send_ack_r=0;
+   (* ASYNC_REG = "TRUE" *) reg send_breaklink_r=0;
+   (* ASYNC_REG = "TRUE" *) reg operate_r=0;
+   (* ASYNC_REG = "TRUE" *) reg [8:0] an_status_r=0;
    always @(posedge rx_clk) begin
        operate_r        <= n_operate;
        lacr_send_r      <= n_lacr_send;

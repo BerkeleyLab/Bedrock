@@ -50,8 +50,11 @@ test_tx_mac #(
 );
 
 // Move scanner_busy to tx_clk domain for use by precog
-reg scanner_busy_tx=0;
-always @(posedge tx_clk) scanner_busy_tx <= scanner_busy;
+(* ASYNC_REG = "TRUE" *) reg scanner_busy_tx0=0, scanner_busy_tx=0;
+always @(posedge tx_clk) begin
+	scanner_busy_tx0 <= scanner_busy;
+	scanner_busy_tx <= scanner_busy_tx0;
+end
 
 // Instantiate precog
 wire clear_to_send;
