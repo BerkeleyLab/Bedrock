@@ -78,7 +78,7 @@ reg [3:0] ifg_count=0;  // Inter-frame gap counter
 wire ifg_inc = ~(&ifg_count[3:2]);  // saturate at 12
 wire ifg_ok = ifg_count >= 10;  // slightly relaxed from spec of 12,
 // this configuration guarantees 11 non-data cycles between frames
-(* ASYNC_REG = "TRUE" *) reg enable_rx_r0=0, enable_rx_r=0;;
+(* ASYNC_REG = "TRUE" *) reg enable_rx_r0=0, enable_rx_r=0;
 always @(posedge clk) begin
 	enable_rx_r0 <= enable_rx;  // cross clock domains
 	enable_rx_r <= enable_rx_r0;  // one more for good luck
