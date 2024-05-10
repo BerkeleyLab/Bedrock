@@ -431,7 +431,7 @@ CLEAN += stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.o
 CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab udprtx
 CLEAN += cluster_run.out hw_test_cdc.txt hw_test_yosys.json
 CLEAN += $(RTEFI_CLEAN)
-CLEAN += *.html *.pdf *.log
-CLEAN_DIRS += obj_dir _xilinx
+CLEAN += *.html *.pdf *.log *.bit
+CLEAN_DIRS += obj_dir _xilinx .Xil
 # Actual "clean" rule in bottom_rules.mk
 include $(BUILD_DIR)/bottom_rules.mk
