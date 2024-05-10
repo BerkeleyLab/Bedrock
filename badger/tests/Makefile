@@ -244,7 +244,7 @@ SYNTH_SOURCE_KC705 = gmii_hw_test.v $(HW_TEST_V) kc705/gmii_clock_handle.v $(FPG
 kc705_gmii_test_tb: $(SYNTH_SOURCE_KC705) kc705/ODDR.v kc705/BUFG.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v
 kc705_gmii_test.d: $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-kc705_gmii_test.bit: kc705_gmii_test.tcl kc705_gmii_test.d $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
+kc705_gmii_test.bit: kc705_gmii_test.tcl kc705_gmii_test.d badger.tcl $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/kc705_gmii_test.runs/impl_1/gmii_hw_test.bit $@
 
@@ -258,7 +258,7 @@ ac701_rgmii_test.bit: $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.ucf
 	mv _xilinx/rgmii_hw_test.bit $@
 ac701_rgmii_test.d: $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.xdc
+ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d badger.tcl $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/ac701_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
@@ -266,7 +266,7 @@ ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC
 SYNTH_SOURCE_MARBLEM = rgmii_hw_test.v gmii_to_rgmii.v $(HW_TEST_V) marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
 marblem_rgmii_test.d: $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
+marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d badger.tcl $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/marblem_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
@@ -358,15 +358,16 @@ cluster_run.out: cluster_run.sh Vcluster
 rtefi_blob_tb: $(RTEFI_V)
 
 # =====
-# Experimental
+# Experimental, bitrotted
 rtefi_blob_synth.v: $(RTEFI_V)
 hw_test_synth.v: $(HW_TEST_V)
+YOSYS_SHARE = /usr/share/yosys
 SYNTH_SOURCE_AC701X = rgmii_hw_test.v hw_test_synth.v kc705/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v
-ac701_rgmii_testx_tb: $(SYNTH_SOURCE_AC701X) kc705/ODDR.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v $(HOME)/share/yosys/xilinx/cells_sim.v
+ac701_rgmii_testx_tb: $(SYNTH_SOURCE_AC701X) kc705/ODDR.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v $(YOSYS_SHARE)/xilinx/cells_sim.v
 # ac701_rgmii_testx_tb won't work until I have a viable RAMB18E1
 ac701_rgmii_testx.d: $(SYNTH_SOURCE_AC701X) ac701/ac701_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-ac701_rgmii_vtestx.bit: ac701_rgmii_testx.tcl ac701_rgmii_testx.d $(SYNTH_SOURCE_AC701X) ac701/ac701_rgmii.xdc
+ac701_rgmii_vtestx.bit: ac701_rgmii_testx.tcl ac701_rgmii_testx.d badger.tcl $(SYNTH_SOURCE_AC701X) ac701/ac701_rgmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/ac701_rgmii_testx.runs/impl_1/rgmii_hw_test.bit $@
 
