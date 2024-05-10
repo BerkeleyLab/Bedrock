@@ -10,15 +10,19 @@ double_inte Source File
    // 2 steps of CIC integration. Reset to 0
    // *** N.B: USES AN UNDOCUMENTED IMPLIED DIVIDE-BY-TWO
 
-   module double_inte(
+   module double_inte #(
+   	parameter dwi=16,  // data width in
+   	parameter dwo=28   // data width out
+   	// output is n bits more than the input, where 2^n should be
+   	// more than the cic factor^2.
+   	// In the case 47^2=2209, adding 12 bits is OK.
+   ) (
    	input clk,  // timespec 8.4 ns
    	input signed [dwi-1:0] in,  // possibly muxed
    	output signed [dwo-1:0] out,
    	input reset  // reset integrator to 0
    );
 
-   parameter dwi=16;  // data width in
-   parameter dwo=28;  // data width out n bits more the in, 2^n should be more than the cic factor^2 in sel case, 47^2=2209 adding 12 bit seems a little limited
 
    reg [1:0] reset_r = 0;
    always @(posedge clk) begin
