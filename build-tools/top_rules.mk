@@ -2,6 +2,7 @@
 GCC_FLAGS = -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
 	-Wshadow -Waggregate-return -Wmissing-prototypes -Wnested-externs \
 	-Wall -W -Wno-unused -Winline -Wwrite-strings -Wundef -pedantic
+GCC_FLAGS += -Wformat -Wformat-signedness
 CF_ALL = -Wall -O2 -fPIC -g -std=c99 -D_GNU_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
 LF_ALL = ${LDFLAGS_$@}
 

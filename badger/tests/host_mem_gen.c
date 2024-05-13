@@ -4,7 +4,7 @@
 
 #define AW (8)
 #define BUFLEN (1<<(AW))
-int16_t host_mem[BUFLEN];
+uint16_t host_mem[BUFLEN];
 
 /* Real-life packets can have embedded nuls, but just use
  * ASCII strings for these tests */
@@ -12,7 +12,7 @@ static void load_packet(const char s[], unsigned int base)
 {
 	size_t sl = strlen(s);
 	unsigned ix=base+1;
-	int16_t word=0;
+	uint16_t word=0;
 	host_mem[base] = sl;
 	for (unsigned jx=0; jx<sl; jx++) {
 		// Little-endian; see big_endian parameter in test_tx_mac.

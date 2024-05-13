@@ -25,7 +25,7 @@ static int ethernet_check(char *packet, unsigned len)
 	printf("\n");
 	if ((*p & 0xff) != 0xd5) {
 		printf("missing SFD (%2.2x %2.2x)\n",
-			packet[0], *p);
+			(unsigned) packet[0], (unsigned) *p);
 		return 2;
 	}
 	nout=packet+len-(p+5);
