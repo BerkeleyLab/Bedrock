@@ -158,7 +158,7 @@ void udp_receiver_r(struct udp_state *ust, int *in_octet, int *in_valid, int *in
 			fprintf(stderr, "udp_model: Rx %d udp bytes, source port %u\n", rc, ust->src_addr.sin_port);
 			if (0) {
 				for (unsigned jx=0; jx<ust->src_addrlen; jx++) {
-					fprintf(stderr, " %2.2x", ((char *) &(ust->src_addr))[jx]);
+					fprintf(stderr, " %2.2x", ((unsigned char *) &(ust->src_addr))[jx]);
 				}
 			}
 			inbuf->len = rc;
@@ -222,7 +222,7 @@ void udp_sender_r(struct udp_state *ust, int out_octet, int out_end)
 	struct pbuf *outbuf = ust->outbuf;  /* makes source look cleaner; maybe optimizes away */
 	int udp_model_debug = 0;  /* adjustable */
 	if (1) {
-		if (udp_model_debug) fprintf(stderr, "Trying to write %2.2x\n", out_octet);
+		if (udp_model_debug) fprintf(stderr, "Trying to write %2.2x\n", (unsigned) out_octet);
 		outbuf->buf[outbuf->cur] = out_octet;
 		if (outbuf->cur < ETH_MAXLEN) outbuf->cur++;
 		else fprintf(stderr, "Ethernet output packet too long\n");
@@ -235,7 +235,7 @@ void udp_sender_r(struct udp_state *ust, int out_octet, int out_end)
 		}
 		int rc = sendto(ust->udpfd, outbuf->buf, outbuf->cur, 0, (struct sockaddr *) &(ust->src_addr), ust->src_addrlen);
 		if (rc < 0) perror("sendto");
-		fprintf(stderr, "udp_model: Tx len %d, write rc=%d\n", outbuf->cur, rc);
+		fprintf(stderr, "udp_model: Tx len %u, write rc=%d\n", outbuf->cur, rc);
 		outbuf->cur=0;
 	}
 }

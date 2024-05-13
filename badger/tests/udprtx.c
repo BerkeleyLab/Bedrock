@@ -33,15 +33,16 @@ static unsigned udp_handle(char *data, unsigned data_len)
 	}
 	if (1) for (u=0; u<data_len; u++) {
 		unsigned want_d = sta ^ (u&0xff);
-		if ((data[u]&0xff) != want_d) {
-			printf("data[%u]=%2.2x!=%2.2x\n", u, data[u]&0xff, want_d);
+		unsigned actual_d = data[u]&0xff;
+		if (actual_d != want_d) {
+			printf("data[%u]=%2.2x!=%2.2x\n", u, actual_d, want_d);
 			fail++;
 		}
 		sta = NEXT(sta);
 	}
 	if (fail || PRINT_PER_RX_PACKET) printf("udp_handle  length=%u  key=%u  ", data_len, key);
 	if (fail) {
-		printf("%d FAIL\n", fail);
+		printf("%u FAIL\n", fail);
 	} else {
 		if (PRINT_PER_RX_PACKET) printf("PASS\n");
 	}
