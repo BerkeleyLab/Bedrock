@@ -68,6 +68,10 @@ module scanner (
 parameter handle_arp = 1;
 parameter handle_icmp = 1;
 
+// We need enable_rx in our own clk domain
+wire enable_rx_r;
+reg_tech_cdc enable_rx_cdc(.I(enable_rx), .C(clk), .O(enable_rx_r));
+
 // State machine mostly cribbed from head_rx.v
 wire [7:0] eth_octet = eth_in;
 wire eth_strobe = eth_in_s;
@@ -78,10 +82,7 @@ reg [3:0] ifg_count=0;  // Inter-frame gap counter
 wire ifg_inc = ~(&ifg_count[3:2]);  // saturate at 12
 wire ifg_ok = ifg_count >= 10;  // slightly relaxed from spec of 12,
 // this configuration guarantees 11 non-data cycles between frames
-(* ASYNC_REG = "TRUE" *) reg enable_rx_r0=0, enable_rx_r=0;
 always @(posedge clk) begin
-	enable_rx_r0 <= enable_rx;  // cross clock domains
-	enable_rx_r <= enable_rx_r0;  // one more for good luck
 	if (h_idle | h_preamble) ifg_count <= ifg_count + ifg_inc;
 	else ifg_count <= 0;
 	if (h_idle & eth_strobe) begin

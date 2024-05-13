@@ -154,7 +154,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 
 # =====
 # Another tangent for another client
-LB_DEMO_V = lb_demo_slave.v freq_count.v freq_gcount.v fake_config_romx.v dpram.v multi_counter.v
+LB_DEMO_V = lb_demo_slave.v freq_count.v freq_gcount.v fake_config_romx.v reg_tech_cdc.v dpram.v multi_counter.v
 # LB_DEMO_V += badge_trace.v
 mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V) udp-vpi.vpi
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
@@ -182,7 +182,7 @@ spi_flash_check: spi_flash.grab lorem_ipsum.txt
 
 # =====
 # scanner off-line test
-scanner_tb: offline.v scanner.v ones_chksum.v udp_port_cam.v crc8e_guts.v
+scanner_tb: offline.v scanner.v ones_chksum.v udp_port_cam.v reg_tech_cdc.v crc8e_guts.v
 stests.dat: packetgen.py
 	$(PYTHON) $< > $@
 scanner.vcd: stests.dat
@@ -380,7 +380,7 @@ test_tx.vcd: host_mem
 test_tx.out: test_tx_tb host_mem
 	$(VVP) $<
 precog_tb: precog.v
-mac_subset_tb: mac_subset.v test_tx_mac.v precog.v mac_compat_dpram.v
+mac_subset_tb: mac_subset.v test_tx_mac.v precog.v mac_compat_dpram.v reg_tech_cdc.v
 host_cmds.dat: host_cmds_gen mac_subset.gold
 	./host_cmds_gen $(filter %mac_subset.gold, $^)
 mac_subset.vcd: host_cmds.dat
