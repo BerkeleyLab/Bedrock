@@ -1,0 +1,29 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Thu May 16 17:56:30 2024
+[*]
+[dumpfile] "/home/chroot/bedrock/home/larry/work/bedrock/projects/test_marble_family/ltm_sync.vcd"
+[dumpfile_mtime] "Thu May 16 17:53:46 2024"
+[dumpfile_size] 2421
+[savefile] "/home/chroot/bedrock/home/larry/work/bedrock/projects/test_marble_family/ltm_sync.gtkw"
+[timestart] 0
+[size] 1000 600
+[pos] 2476 391
+*-11.040010 4772 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] ltm_sync_tb.
+[sst_width] 214
+[signals_width] 126
+[sst_expanded] 1
+[sst_vpaned_height] 152
+@800028
+ltm_sync_tb.ps_sync[2:0]
+@28
+(0)ltm_sync_tb.ps_sync[2:0]
+(1)ltm_sync_tb.ps_sync[2:0]
+(2)ltm_sync_tb.ps_sync[2:0]
+@24
+ltm_sync_tb.dut.state[4:0]
+@1001200
+-group_end
+[pattern_trace] 1
+[pattern_trace] 0
