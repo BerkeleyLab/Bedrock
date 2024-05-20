@@ -19,6 +19,7 @@ module lb_gateway #(
     output        lb_clk,
     output [23:0] lb_addr,
     output        lb_write,
+    output        lb_control_strobe,
     output        lb_read,
     output        lb_rvalid,
     output        lb_pre_rvalid,
@@ -52,6 +53,8 @@ mem_gateway #(
 
 assign lb_clk    = clk;
 assign lb_write  = control_strobe & ~control_rd;
+// Added to have same port configuration of the LCLS-II llrf
+assign lb_control_strobe  = control_strobe;
 assign lb_read   = |control_pipe_rd;
 assign lb_pre_rvalid = control_pipe_rd[read_pipe_len-1];
 
