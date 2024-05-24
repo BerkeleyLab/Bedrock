@@ -44,7 +44,7 @@ void print_stream(pcap_t *pbuf)
 		total++;
 		/* if (total > 80) break; */
 	}
-	printf("tests %d\n", total);
+	printf("tests %u\n", total);
 }
 
 int main(int argc, char *argv[])

@@ -9,11 +9,6 @@
 
 #define ETH_MAXLEN 1500   /* maximum line length */
 
-struct pbuf {
-	char buf[ETH_MAXLEN+12];
-	int cur, len;
-};
-
 static int ethernet_check(char *packet, unsigned len)
 {
 	char *p=packet;
@@ -50,17 +45,16 @@ static int ethernet_check(char *packet, unsigned len)
 static unsigned int readmemh(FILE *f, char *buff, size_t avail)
 {
 	size_t u;
-	int rc;
 	for (u=0; u<avail; u++) {
 		unsigned int h;
-		rc=fscanf(f, "%x", &h);
+		int rc = fscanf(f, "%x", &h);
 		if (rc!=1) break;
-		buff[u]=h;
+		buff[u] = h;
 	}
 	return u;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
 	FILE *f;
 	unsigned int l;
