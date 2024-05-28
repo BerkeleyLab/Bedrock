@@ -104,6 +104,7 @@ class Zest(Module, AutoCSR):
             "dsp/phase_diff.v",
             "dsp/flag_xdomain.v",
             "dsp/data_xdomain.v",
+            "dsp/reg_tech_cdc.v",
             "dsp/phaset.v",
             "dsp/dpram.v",
             "soc/picorv32/gateware/sfr_pack.v",

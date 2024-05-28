@@ -20,7 +20,7 @@ module negotiate(
    output reg        lacr_send,
    // mode control
    output reg        operate,
-   output reg [8:0]  an_status
+   output [8:0]      an_status
 );
    // 10 ms link_timer = 10e6/8
    parameter TIMER_TICKS = 1250000;
@@ -54,7 +54,6 @@ module negotiate(
      lacr_out=0;
      lacr_send=0;
      operate=0;
-     an_status=0;
    end
 
    wire an_rst;
@@ -238,11 +237,11 @@ module negotiate(
                              an_state==AN_ACK, an_state==AN_IDLE, an_state==AN_LINK_OK};
 
    // Register comb signals in rx_clk before transferring to tx_clk
-   reg lacr_send_r=0; // lacr_send in the rx clock domain
-   reg send_ack_r=0;
-   reg send_breaklink_r=0;
-   reg operate_r=0;
-   reg [8:0] an_status_r=0;
+   (* ASYNC_REG = "TRUE" *) reg lacr_send_r=0; // lacr_send in the rx clock domain
+   (* ASYNC_REG = "TRUE" *) reg send_ack_r=0;
+   (* ASYNC_REG = "TRUE" *) reg send_breaklink_r=0;
+   (* ASYNC_REG = "TRUE" *) reg operate_r=0;
+   (* ASYNC_REG = "TRUE" *) reg [8:0] an_status_r=0;
    always @(posedge rx_clk) begin
        operate_r        <= n_operate;
        lacr_send_r      <= n_lacr_send;
@@ -252,13 +251,15 @@ module negotiate(
    end
 
    reg send_ack=0, send_breaklink=0;
+   (* ASYNC_REG = "TRUE" *) reg [8:0] an_status_x=0;
    always @(posedge tx_clk) begin
       operate        <= operate_r;
       lacr_send      <= lacr_send_r;
       send_ack       <= send_ack_r;
       send_breaklink <= send_breaklink_r;
-      an_status      <= an_status_r;
+      an_status_x    <= an_status_r;
    end
+   assign an_status = an_status_x;
 
    // 16-bit Ethernet configuration register as documented in
    // Networking Protocol Fundamentals, by James Long

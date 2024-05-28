@@ -58,8 +58,11 @@ wire [(DATA_COUNT*DATA_WIDTH)-1:0] parameterMux = (state == 1) ? u :
                                                   (state == 3) ? uOld :
                                                   (state == 4) ? yOld : M_TDATA;
 
+// Move sysReset to our clock domain
+wire reset;
+reg_tech_cdc reset_cdc(.I(sysReset), .C(dataClk), .O(reset));
+
 // Computation state machine
-(* ASYNC_REG="TRUE" *) reg reset_m, reset;
 reg enMAC = 0, ldMAC = 0;
 
 always @(posedge dataClk) begin
@@ -67,8 +70,6 @@ always @(posedge dataClk) begin
 end
 
 always @(posedge dataClk) begin
-    reset_m <= sysReset;
-    reset   <= reset_m;
     if (reset) begin
         state <= 0;
         u <= 0;

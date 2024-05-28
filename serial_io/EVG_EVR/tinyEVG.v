@@ -62,8 +62,12 @@ localparam EVCODE_K28_5          = 8'hBC;
 
 localparam PPS_DEBOUNCE_TIMER_RELOAD = ((EVG_CLOCK_RATE/100000))-1;
 reg [$clog2(PPS_DEBOUNCE_TIMER_RELOAD+1)-1:0]ppsDebounceTimer = PPS_DEBOUNCE_TIMER_RELOAD;
-(*ASYNC_REG = "true"*) reg ppsMarker_m = 0;
-reg ppsMarker = 0, ppsMarker_delayed = 0, ppsMatch = 0;
+
+// Move ppsMarker_a to our clock domain
+wire ppsMarker;
+reg_async_cdc ppsMarker_cdc(.I(ppsMarker_a), .C(evgTxClk), .O(ppsMarker));
+
+reg ppsMarker_delayed = 0, ppsMatch = 0;
 reg [31:0] heartbeatCounter = EVG_CLOCK_RATE - 1;
 (* mark_debug = DEBUG *) reg heartbeatRequest = 0;
 
@@ -95,8 +99,6 @@ always @(posedge evgTxClk) begin
     end
 
     // Require PPS marker to be low for 10 us before detecting a rising edge
-    ppsMarker_m <= ppsMarker_a;
-    ppsMarker   <= ppsMarker_m;
     if (ppsMarker) begin
         if (!ppsMarker_delayed) begin
             ppsToggle <= !ppsToggle;
