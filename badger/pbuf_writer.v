@@ -94,15 +94,18 @@ assign mem_a = fpp;
 assign mem_d = pxd;
 assign badge_stb = badge_stb_r;
 
+// We need rx_mac_hbank in our own clk domain
+wire rx_mac_hbank_r;
+reg_tech_cdc rx_mac_hbank_cdc(.I(rx_mac_hbank), .C(clk), .O(rx_mac_hbank_r));
+
 // MAC logic
 reg [10:0] mac_a0=0;
-reg mac_bank=0, rx_mac_hbank_r=1;
+reg mac_bank=0;
 wire bank_ready = mac_bank != rx_mac_hbank_r;
 assign rx_mac_buf_status = {rx_mac_hbank_r, mac_bank};
 reg mac_save=0, mac_stopping=0;
 reg mac_queue=0;
 always @(posedge clk) begin
-	rx_mac_hbank_r <= rx_mac_hbank;  // Likely clock domain crossing
 	if (trig & bank_ready) mac_save <= 1;
 	if (trig) mac_a0 <= 4;
 	else if (post_cnt==1) mac_a0 <= 0;

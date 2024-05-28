@@ -1,7 +1,7 @@
 include ../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 
-BASE_V = jit_rad_gateway_demo.v jit_rad_gateway.v dpram.v flag_xdomain.v
+BASE_V = jit_rad_gateway_demo.v jit_rad_gateway.v dpram.v flag_xdomain.v reg_tech_cdc.v
 BADGER_V = $(BASE_V) mem_gateway.v reg_delay.v
 QF2_V = $(BASE_V) jxj_gate.v shortfifo.v
 

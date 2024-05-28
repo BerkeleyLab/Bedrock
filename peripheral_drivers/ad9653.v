@@ -96,9 +96,11 @@ lvds_dco #(.flip_dco(FLIP_DCO)) dco (
 wire [DWIDTH-1:0] d_p = ({D1PA,D0PA,D1PB,D0PB,D1PC,D0PC,D1PD,D0PD});
 wire [DWIDTH-1:0] d_n = ({D1NA,D0NA,D1NB,D0NB,D1NC,D0NC,D1ND,D0ND});
 wire idelay_inc_int = (1'b0);
-reg [DWIDTH-1:0] idelay_ld_div_0=0,idelay_ld_div_1=0;
+(* ASYNC_REG = "TRUE" *) reg [DWIDTH-1:0] idelay_ld_div_0=0;
+reg [DWIDTH-1:0] idelay_ld_div_1=0;
 reg [DWIDTH-1:0] idelay_ce_div_0=0,idelay_ce_div_1=0;
-reg [DWIDTH-1:0] bitslip_div_0=0,bitslip_div_1=0;
+(* ASYNC_REG = "TRUE" *) reg [DWIDTH-1:0] bitslip_div_0=0;
+reg [DWIDTH-1:0] bitslip_div_1=0;
 
 wire [DWIDTH-1:0] idelay_ld_div = idelay_ld_div_0 & ~idelay_ld_div_1;
 wire [DWIDTH-1:0] idelay_ce_div = idelay_ce_div_0 & ~idelay_ce_div_1;
@@ -106,7 +108,7 @@ wire [DWIDTH-1:0] bitslip_div = bitslip_div_0 & ~bitslip_div_1;
 wire [DWIDTH-1:0] clk_div;
 wire [DWIDTH-1:0] dco_clk;
 wire [DWIDTH-1:0] reset;
-reg [5*DWIDTH-1:0] idelay_value_in_r;
+(* ASYNC_REG = "TRUE" *) reg [5*DWIDTH-1:0] idelay_value_in_r=0;
 
 genvar ix;
 generate for (ix=0; ix < DWIDTH; ix=ix+1) begin: in_cell

@@ -154,7 +154,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 
 # =====
 # Another tangent for another client
-LB_DEMO_V = lb_demo_slave.v freq_count.v freq_gcount.v fake_config_romx.v dpram.v multi_counter.v
+LB_DEMO_V = lb_demo_slave.v freq_count.v freq_gcount.v fake_config_romx.v reg_tech_cdc.v dpram.v multi_counter.v
 # LB_DEMO_V += badge_trace.v
 mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V) udp-vpi.vpi
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
@@ -182,7 +182,7 @@ spi_flash_check: spi_flash.grab lorem_ipsum.txt
 
 # =====
 # scanner off-line test
-scanner_tb: offline.v scanner.v ones_chksum.v udp_port_cam.v crc8e_guts.v
+scanner_tb: offline.v scanner.v ones_chksum.v udp_port_cam.v reg_tech_cdc.v crc8e_guts.v
 stests.dat: packetgen.py
 	$(PYTHON) $< > $@
 scanner.vcd: stests.dat
@@ -244,7 +244,7 @@ SYNTH_SOURCE_KC705 = gmii_hw_test.v $(HW_TEST_V) kc705/gmii_clock_handle.v $(FPG
 kc705_gmii_test_tb: $(SYNTH_SOURCE_KC705) kc705/ODDR.v kc705/BUFG.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v
 kc705_gmii_test.d: $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-kc705_gmii_test.bit: kc705_gmii_test.tcl kc705_gmii_test.d $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
+kc705_gmii_test.bit: kc705_gmii_test.tcl kc705_gmii_test.d badger.tcl $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/kc705_gmii_test.runs/impl_1/gmii_hw_test.bit $@
 
@@ -258,7 +258,7 @@ ac701_rgmii_test.bit: $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.ucf
 	mv _xilinx/rgmii_hw_test.bit $@
 ac701_rgmii_test.d: $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.xdc
+ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d badger.tcl $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/ac701_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
@@ -266,7 +266,7 @@ ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC
 SYNTH_SOURCE_MARBLEM = rgmii_hw_test.v gmii_to_rgmii.v $(HW_TEST_V) marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
 marblem_rgmii_test.d: $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
+marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d badger.tcl $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/marblem_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
@@ -358,15 +358,16 @@ cluster_run.out: cluster_run.sh Vcluster
 rtefi_blob_tb: $(RTEFI_V)
 
 # =====
-# Experimental
+# Experimental, bitrotted
 rtefi_blob_synth.v: $(RTEFI_V)
 hw_test_synth.v: $(HW_TEST_V)
+YOSYS_SHARE = /usr/share/yosys
 SYNTH_SOURCE_AC701X = rgmii_hw_test.v hw_test_synth.v kc705/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v
-ac701_rgmii_testx_tb: $(SYNTH_SOURCE_AC701X) kc705/ODDR.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v $(HOME)/share/yosys/xilinx/cells_sim.v
+ac701_rgmii_testx_tb: $(SYNTH_SOURCE_AC701X) kc705/ODDR.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v $(YOSYS_SHARE)/xilinx/cells_sim.v
 # ac701_rgmii_testx_tb won't work until I have a viable RAMB18E1
 ac701_rgmii_testx.d: $(SYNTH_SOURCE_AC701X) ac701/ac701_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-ac701_rgmii_vtestx.bit: ac701_rgmii_testx.tcl ac701_rgmii_testx.d $(SYNTH_SOURCE_AC701X) ac701/ac701_rgmii.xdc
+ac701_rgmii_vtestx.bit: ac701_rgmii_testx.tcl ac701_rgmii_testx.d badger.tcl $(SYNTH_SOURCE_AC701X) ac701/ac701_rgmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/ac701_rgmii_testx.runs/impl_1/rgmii_hw_test.bit $@
 
@@ -379,7 +380,7 @@ test_tx.vcd: host_mem
 test_tx.out: test_tx_tb host_mem
 	$(VVP) $<
 precog_tb: precog.v
-mac_subset_tb: mac_subset.v test_tx_mac.v precog.v mac_compat_dpram.v
+mac_subset_tb: mac_subset.v test_tx_mac.v precog.v mac_compat_dpram.v reg_tech_cdc.v
 host_cmds.dat: host_cmds_gen mac_subset.gold
 	./host_cmds_gen $(filter %mac_subset.gold, $^)
 mac_subset.vcd: host_cmds.dat
@@ -431,7 +432,7 @@ CLEAN += stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.o
 CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab udprtx
 CLEAN += cluster_run.out hw_test_cdc.txt hw_test_yosys.json
 CLEAN += $(RTEFI_CLEAN)
-CLEAN += *.html *.pdf *.log
-CLEAN_DIRS += obj_dir _xilinx
+CLEAN += *.html *.pdf *.log *.bit
+CLEAN_DIRS += obj_dir _xilinx .Xil
 # Actual "clean" rule in bottom_rules.mk
 include $(BUILD_DIR)/bottom_rules.mk

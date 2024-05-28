@@ -86,12 +86,11 @@ fake_config_romx rom(
 
 // Remove any doubt about what clock domain these are in;
 // also keeps reverse_json.py happy.
-reg [0:0] tx_mac_done_r;
-reg [1:0] rx_mac_buf_status_r;
-always @(posedge clk) begin
-	tx_mac_done_r <= tx_mac_done;
-	rx_mac_buf_status_r <= rx_mac_buf_status;
-end
+reg [0:0] tx_mac_done_r=0;
+always @(posedge clk) tx_mac_done_r <= tx_mac_done;
+wire [1:0] rx_mac_buf_status_r;
+// Instance array to cover two bits of status
+reg_tech_cdc buf_status_cdc[1:0](.I(rx_mac_buf_status), .C(clk), .O(rx_mac_buf_status_r));
 
 // Crude uptime counter, that wraps every 9.77 hours
 reg led_tick=0;

@@ -52,8 +52,10 @@ reg rbank=0;  // really complement
 // Flow control is opposite that in decay_buf: the pacing happens
 // from the readout side
 wire flag_return;   // buffer request from readout side
+wire flag_return_x;  // and converted to the iclk domain
+reg_tech_cdc flag_return_cdc(.I(flag_return), .C(iclk), .O(flag_return_x));
 reg [aw-1:0] write_addr=0, save_addr=0, save_addr0=0;
-reg pend=0, run=1, wbank=0, flag_return_x=0;
+reg pend=0, run=1, wbank=0;
 wire change_req = wbank ^ flag_return_x;
 wire end_write_addr = &write_addr;
 reg record_type=1;
@@ -67,7 +69,6 @@ reg buf_transferred_r=0;
 wire btest= boundary | ( stb_in & end_write_addr );
 assign buf_transferred = buf_transferred_r;
 always @(posedge iclk) begin
-	flag_return_x <= flag_return;  // Clock domain crossing
 	if (eval_done_read) done_read[wbank] <= change_req;
 	//if (boundary|(stb_in&end_write_addr)) boundary_ok <= boundary;
 	if (btest) boundary_ok <= boundary;
@@ -91,13 +92,13 @@ assign debug_stat={stb_in,boundary,btest,wbank,rbank,write_addr};
 // Handshake means "OK, I won't read bank foo"
 
 // readout side control logic
-reg flag_send_x=0;
+wire flag_send_x;
+reg_tech_cdc flag_send_cdc(.I(flag_send), .C(oclk), .O(flag_send_x));
 wire [aw-1:0] read0_addr = read_addr;  // cut down to current width
 wire end_read_addr = &read0_addr;
 assign enable = ~flag_send_x ^ rbank;
 wire flip_buffer = stb_out & enable & (end_read_addr | ~auto_flip);
 always @(posedge oclk) begin
-	flag_send_x <= flag_send;  // Clock domain crossing
 	if (flip_buffer) rbank <= ~rbank;
 end
 assign flag_return = rbank;

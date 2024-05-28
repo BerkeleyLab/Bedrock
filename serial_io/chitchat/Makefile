@@ -12,7 +12,7 @@ all: targets
 targets: $(TGT_)
 checks: $(CHK_)
 
-SRCS = chitchat_txrx_wrap.v chitchat_tx.v chitchat_rx.v chitchat_pack.vh crc16.v shortfifo.v data_xdomain.v flag_xdomain.v
+SRCS = chitchat_txrx_wrap.v chitchat_tx.v chitchat_rx.v chitchat_pack.vh crc16.v shortfifo.v data_xdomain.v flag_xdomain.v reg_tech_cdc.v
 
 chitchat_tb: $(SRCS)
 chitchat_txrx_wrap_tb: $(SRCS)
