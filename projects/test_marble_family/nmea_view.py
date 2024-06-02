@@ -152,7 +152,7 @@ if __name__ == "__main__":
         description="Utility to read GPS NMEA from Marble Ethernet")
     parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
     parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
-    parser.add_argument('-i', '--interval', type=float, default=0.5, help='Polling inteval (seconds)')
+    parser.add_argument('-i', '--interval', type=float, default=0.5, help='Polling interval (seconds)')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
     parser.add_argument('--test', action='store_true', help="Test parsing data from stdin")
     args = parser.parse_args()

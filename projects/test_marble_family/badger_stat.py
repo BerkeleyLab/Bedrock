@@ -39,7 +39,7 @@ Packet Badger category semantics:
 As implemented in multi_counter.v and packet_categorize.v''')
     parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
     parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
-    parser.add_argument('-i', '--interval', type=float, default=2.0, help='Polling inteval (seconds, default 2)')
+    parser.add_argument('-i', '--interval', type=float, default=2.0, help='Polling interval (seconds, default 2)')
     parser.add_argument('-c', '--count', dest="count", default=0, type=int,
                         help='Number of polling cycles (default 0 means go forever)')
     args = parser.parse_args()

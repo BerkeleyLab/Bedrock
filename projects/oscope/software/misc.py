@@ -46,7 +46,7 @@ class Processing:
     '''
     A set of data processing functions for an Oscilloscope
     TODO:
-    1. Easily testable in itself. So add python unittests!
+    1. Easily testable in itself. So add python unit tests!
     '''
     max_val_freq, max_val = 0.0, 0.0
     stacked_fft = {}
