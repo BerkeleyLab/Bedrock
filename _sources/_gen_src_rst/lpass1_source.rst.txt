@@ -23,8 +23,7 @@ lpass1 Source File
 
    module lpass1 #(
       parameter dwi = 16,
-      parameter klog2 = 21, // Actual k is 0.5**klog2; max 31
-      parameter TRIM_SHIFT = 2
+      parameter klog2 = 21 // Actual k is 0.5**klog2; max 31
    ) (
       input clk,
       input [TRIM_SHIFT-1:0] trim_sh, // Move corner up in steps of 2x; Extra logic
@@ -32,6 +31,7 @@ lpass1 Source File
       input signed [dwi-1:0] din,
       output signed [dwi-1:0] dout
    );
+      localparam TRIM_SHIFT = 2;
       wire [4:0] full_sh = klog2 - trim_sh;
 
       reg signed [dwi+klog2-1:0] dout_r=0;

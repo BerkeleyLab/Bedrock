@@ -37,7 +37,7 @@ Parameters
      - ?
      - ?
      - 28
-     - data width out
+     - data width out n bits more the in, 2^n should be more than the cic factor^2 in sel case, 47^2=2209 adding 12 bit seems a little limited
 
 Ports
 '''''
