@@ -56,6 +56,10 @@ FMC2_CLK0_M2C_N  FMC2_CK_N[0]
 FMC2_CLK1_M2C_P  FMC2_CK_P[1]
 FMC2_CLK1_M2C_N  FMC2_CK_N[1]
 
+LTM_CLKIN0   LTM_CLKIN[0]
+LTM_CLKIN12  LTM_CLKIN[1]
+LTM_CLKIN3   LTM_CLKIN[2]
+
 # Literal output follows
 
 set_clock_groups -name async_clks -asynchronous \
