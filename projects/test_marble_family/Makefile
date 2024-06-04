@@ -41,11 +41,13 @@ vpath %.c $(BADGER_DIR)/tests $(BUILD_DIR)
 include $(HOMELESS_DIR)/freq_demo/freq_demo_rules.mk
 
 # This must go in front of include $(BADGER_DIR)/rules.mk
-all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check marble_base_lint gps_test_tb Vmarble_base
+all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check marble_base_lint gps_test_tb ltm_sync_tb Vmarble_base
 
 # =====
 # gps_test, too simple to need testing ... right
 gps_test_tb: gps_test.v simpleuart.v dpram.v
+
+ltm_sync_tb: ltm_sync.v
 
 # Packet Badger synthesizable code
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v spi_flash.v
@@ -104,7 +106,7 @@ net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_trx.dat
 	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py -a localhost -p 0 --sim --ramtest --stop --rlen=34
 
 # syntax-check only, with no actual test bench code
-MARBLE_BASE_V = marble_base.v packet_categorize.v data_xdomain.v flag_xdomain.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V) mmc_mailbox.v
+MARBLE_BASE_V = marble_base.v packet_categorize.v data_xdomain.v flag_xdomain.v ltm_sync.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V) mmc_mailbox.v
 marble_base_tb: $(MARBLE_BASE_V) IDDR.v
 VFLAGS_marble_base_tb =
 
