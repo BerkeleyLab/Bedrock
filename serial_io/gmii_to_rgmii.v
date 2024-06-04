@@ -1,5 +1,7 @@
 `timescale 1ns / 1ns
 
+// This version is written for Xilinx, and only tested on 7-series.
+// Please write compatible versions for other FPGA families.
 module gmii_to_rgmii #(
    parameter in_phase_tx_clk=0,
    parameter idelay_value=0,
@@ -41,6 +43,7 @@ wire rgmii_tx_clk_buf;
 wire rgmii_rx_ctl_ibuf;
 wire rgmii_rx_clk_buf;
 
+`ifndef SIMULATE
 OBUF rgmii_tx_ctl_obuf_i (
     .I(rgmii_tx_ctl_buf),
     .O(rgmii_tx_ctl)
@@ -274,4 +277,5 @@ generate for (k=0; k<4; k=k+1)
     end
 endgenerate
 
+`endif  // `ifndef SIMULATE
 endmodule
