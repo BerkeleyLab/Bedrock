@@ -10,4 +10,5 @@ int main(void){
     dval = read_zest_adc(ix);
     // printf("ADC chan %d hex : %#06x\n", ix, (uint16_t)dval);
   }
+  return 0;
 }
