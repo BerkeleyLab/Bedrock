@@ -65,7 +65,7 @@ reg [$clog2(PPS_DEBOUNCE_TIMER_RELOAD+1)-1:0]ppsDebounceTimer = PPS_DEBOUNCE_TIM
 
 // Move ppsMarker_a to our clock domain
 wire ppsMarker;
-reg_async_cdc ppsMarker_cdc(.I(ppsMarker_a), .C(evgTxClk), .O(ppsMarker));
+reg_tech_cdc ppsMarker_cdc(.I(ppsMarker_a), .C(evgTxClk), .O(ppsMarker));
 
 reg ppsMarker_delayed = 0, ppsMatch = 0;
 reg [31:0] heartbeatCounter = EVG_CLOCK_RATE - 1;
