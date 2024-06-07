@@ -1,0 +1,8 @@
+.. _jit_rad:
+
+-------
+localbus jit_rad
+-------
+
+.. mdinclude:: /home/runner/work/Bedrock/Bedrock/localbus/jit_rad.md
+
