@@ -1,0 +1,23 @@
+# grab-bag of other Verilog/HDL simulation tests
+
+cordic_test:
+  before_script:
+    - cd cordic && make clean
+  stage: test
+  script:
+    - make all
+
+freq_demo:
+  stage: test
+  script:
+    - make -C homeless/freq_demo
+    - make -C homeless all checks
+
+peripheral_test:
+  before_script:
+  stage: test
+  script:
+    - make -C peripheral_drivers
+    - make -C peripheral_drivers/idelay_scanner
+    - make -C peripheral_drivers/ds1822
+    - make -C peripheral_drivers/i2cbridge
