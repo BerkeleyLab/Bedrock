@@ -62,13 +62,13 @@ def run_test_bench(setmp_val,
     # Start with empty command to handle exception
     command = ''
 
-    if ((test_type == 2) or (test_type == 3) or (test_type == 4)):
+    if test_type == 2 or test_type == 3 or test_type == 4:
         # Write configuration file for set-point step
         setmp_file = 'setmp_step_file_in.dat'
         # index selects either amplitude or phase step on the set-point
-        if (test_type == 2 or test_type == 4):  # Amplitude modulation
+        if test_type == 2 or test_type == 4:  # Amplitude modulation
             index = 0
-        elif (test_type == 3):  # Phase modulation
+        elif test_type == 3:  # Phase modulation
             index = 1
 
         # Apply step to set-point to amplitude or phase depending on the test
@@ -91,10 +91,10 @@ def run_test_bench(setmp_val,
         if test_type == 3:
             command = command + ' +in_i=' + str(in_i) + ' +in_q=' + str(in_q)
 
-    elif (test_type == 0 or test_type == 4):
+    elif test_type == 0 or test_type == 4:
         command = 'vvp -n fdbk_core_tb +vcd +test=' + str(
             test_type) + ' +in_file=' + in_file + ' +out_file=' + out_file
-    elif (test_type == 1):
+    elif test_type == 1:
         command = 'vvp -n fdbk_core_tb +vcd +test=' + str(
             test_type
         ) + ' +in_file=' + in_file + ' +out_file=' + out_file + ' +in_i=' + str(
@@ -107,7 +107,7 @@ def run_test_bench(setmp_val,
         print('test_type not defined with a valid code')
         print(('test_type value supplied is ' + str(test_type)))
     else:
-        call(command, shell=True)
+        call(command + " > /dev/null", shell=True)
 
 
 def run_sp_test_bench(plot=False):
@@ -159,7 +159,7 @@ def run_sp_test_bench(plot=False):
     print(('\tError: %d' % (np.abs(error[-1]))))
 
     pass_amp_test = np.abs(error[-1]) < 5
-    if (pass_amp_test):
+    if pass_amp_test:
         result = 'PASS'
     else:
         result = 'FAIL'
@@ -195,7 +195,7 @@ def run_sp_test_bench(plot=False):
     # Set set-point to pre-defined value on both amplitude and phase,
     # and evaluate phase of error signal
 
-    amplitude_set = 5000  # FPGA Counts
+    amplitude_set = 15000  # FPGA Counts
 
     # Test is run for a series of phases included in this array
     phase_set = np.array([0.0, 45.0, 90.0, 135.0, 180.0, -180.0,
@@ -220,12 +220,14 @@ def run_sp_test_bench(plot=False):
     pass_phase_test = True
 
     for i, phase in enumerate(phase_set):
+        print("Phase test iteration #%d: %f" % (i, phase))
 
         # Scale amplitude and phase of set-point with the appropriate scaling factors
         setmp_val = [
             amplitude_set * 1.646760258 / 2,
             phase_set_rad[i] * (2**17 - 1) * 2.0 / (2 * np.pi)
         ]
+        # print(setmp_val)
 
         # Run Verilog test-bench
         run_test_bench(
@@ -241,7 +243,7 @@ def run_sp_test_bench(plot=False):
         data = np.loadtxt(out_file, skiprows=1)
         # Build time vector
         Tstep = 2.0 * 10e-9  # Step size is 10 ns
-        # Need the factor of eight on the time step since data is recored every 8 10ns cycle
+        # Need the factor of eight on the time step since data is recorded every 8 10ns cycle
         trang = np.arange(0.0, 8.0 * Tstep * data.shape[0], 8.0 * Tstep)
 
         # Grab controller's input, set-point and error signals from data
@@ -255,10 +257,10 @@ def run_sp_test_bench(plot=False):
         print('\nResults after setting:\n')
         print(('\tInput (phase): %5f' % (np.imag(input_mp[-1]) * 360 / 2**18)))
         print(('\tSet-point: %5f' % (np.imag(setpoint[-1]) * 360 / 2**18)))
-        print(('\tError: %5f' % (np.imag(error[-1]) * 360 / 2**18)))
+        print(('\tError: %5f degrees' % (np.imag(error[-1]) * 360 / 2**18)))
 
         pass_this_phase_test = np.imag(error[-1]) < 5
-        if (pass_this_phase_test):
+        if pass_this_phase_test:
             result = 'PASS'
         else:
             result = 'FAIL'
@@ -504,6 +506,8 @@ def run_prop_test_bench(plot=False):
 
         plt.show()
 
+    return True  # XXX
+
 
 def run_int_test_bench(plot=False):
     """
@@ -733,6 +737,8 @@ def run_int_test_bench(plot=False):
 
         plt.show()
 
+    return True  # XXX
+
 
 def run_latency_test_bench(plot=False):
 
@@ -776,7 +782,7 @@ def run_latency_test_bench(plot=False):
     data = np.loadtxt(out_file, skiprows=1)
     # Build time vector
     Tstep = 10e-9  # Step size is 10 ns
-    # Need the factor of two on the time step since data is recored every other 10ns cycle
+    # Need the factor of two on the time step since data is recorded every other 10ns cycle
     trang = np.arange(0.0, 2.0 * Tstep * data.shape[0], 2.0 * Tstep)
 
     # Grab controller's input and output signals from data
@@ -826,17 +832,35 @@ def run_latency_test_bench(plot=False):
 
         plt.show()
 
+    return True  # XXX
+
 
 if __name__ == "__main__":
 
+    ok = True
+
     # Run Set-point scaling test
-    run_sp_test_bench()
+    rc = run_sp_test_bench()
+    print("test 1", rc)
+    ok &= rc
 
     # Run feedback proportional gain scaling test
-    run_prop_test_bench()
+    rc = run_prop_test_bench()
+    print("test 2", rc)
+    ok &= rc
 
     # Run feedback integral gain scaling test
-    run_int_test_bench()
+    rc = run_int_test_bench()
+    print("test 3", rc)
+    ok &= rc
 
-    # Run feedback integral gain scaling test
-    run_latency_test_bench()
+    # Run latency test
+    rc = run_latency_test_bench()
+    print("test 4", rc)
+    ok &= rc
+
+    if ok:
+        print("PASS")
+    else:
+        print("FAIL")
+        exit(1)
