@@ -368,7 +368,9 @@ def run_prop_test_bench(plot=False):
                    ) / -setmp_step_val
     kp_text = r'$\rm k_{\rm p}$' + ' set to: %.1f, measured: %.1f' % (
         kp, np.real(kp_measured))
-    print(('\nKp: Set to %.3f, measured: %.3f' % (kp, np.real(kp_measured))))
+    ok1 = np.abs(np.real(kp_measured) / kp + 1) < 0.01
+    ll = (kp, np.real(kp_measured), "." if ok1 else "BAD")
+    print('\nKp: Set to %.3f, measured: %.3f  %s' % ll)
 
     if plot:
         plt.text(1.6, -60000, kp_text, verticalalignment='top', fontsize=30)
@@ -463,7 +465,9 @@ def run_prop_test_bench(plot=False):
                    ) / -setmp_step_val
     kp_text = r'$\rm k_{\rm p}$' + ' set to: %.1f, measured: %.1f' % (
         kp, np.imag(kp_measured))
-    print(('\nKp: Set to %.3f, measured: %.3f' % (kp, np.imag(kp_measured))))
+    ok2 = np.abs(np.imag(kp_measured) / kp + 1) < 0.01
+    ll = (kp, np.imag(kp_measured), "." if ok2 else "BAD")
+    print('\nKp: Set to %.3f, measured: %.3f  %s' % ll)
 
     if plot:
         plt.text(
@@ -506,7 +510,7 @@ def run_prop_test_bench(plot=False):
 
         plt.show()
 
-    return True  # XXX
+    return ok1 and ok2
 
 
 def run_int_test_bench(plot=False):
@@ -587,8 +591,10 @@ def run_int_test_bench(plot=False):
     limit_text = 'Lower limit set to %d , measured %.1f' % (-limit,
                                                             np.real(low_lim))
 
-    print(('\nKi: Set to %.6f, measured %.6f, factor %.4f' %
-           (ki * 1.646760258 / 2**14, np.real(ki_measured), ki / ki_measured)))
+    kifactor = ki / ki_measured
+    ok1 = np.abs(kifactor + 1) < 0.01
+    ll = (ki * 1.646760258 / 2**14, ki_measured, kifactor, "." if ok1 else "BAD")
+    print('\nKi: Set to %.6f, measured %.6f, factor %.4f  %s' % ll)
     print(limit_text)
 
     if plot:
@@ -690,8 +696,10 @@ def run_int_test_bench(plot=False):
     limit_text = 'Lower limit set to %d , measured %.1f' % (-limit,
                                                             np.imag(low_lim))
 
-    print(('\nKi: Set to %.6f, measured %.6f, factor %.4f' %
-           (ki * 1.646760258 / 2**14, ki_measured, ki / ki_measured)))
+    kifactor = ki / ki_measured
+    ok2 = np.abs(kifactor + 1) < 0.01
+    ll = (ki * 1.646760258 / 2**14, ki_measured, kifactor, "." if ok2 else "BAD")
+    print('\nKi: Set to %.6f, measured %.6f, factor %.4f  %s' % ll)
     print(limit_text)
 
     if plot:
@@ -737,7 +745,7 @@ def run_int_test_bench(plot=False):
 
         plt.show()
 
-    return True  # XXX
+    return ok1 and ok2
 
 
 def run_latency_test_bench(plot=False):
@@ -803,8 +811,9 @@ def run_latency_test_bench(plot=False):
     # latency_ns = latency_clks * Tstep * 1e9
 
     latency_text = 'Measured latency is %d clock cycles' % (latency_clks)
-    print(
-        ('\nLatency through fdbk_core is %d clock cycles\n' % (latency_clks)))
+    ok1 = latency_clks < 85
+    ll = (latency_clks, "." if ok1 else "BAD")
+    print('\nLatency through fdbk_core is %d clock cycles  %s\n' % ll)
 
     if plot:
         plt.text(
@@ -832,7 +841,7 @@ def run_latency_test_bench(plot=False):
 
         plt.show()
 
-    return True  # XXX
+    return ok1
 
 
 if __name__ == "__main__":
