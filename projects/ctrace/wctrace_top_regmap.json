@@ -1,0 +1,30 @@
+{
+    "ctrace_lb_dout": {
+        "access": "r",
+        "addr_width": 12,
+        "sign": "unsigned",
+        "base_addr": 0,
+        "data_width": 32
+    },
+    "ctrace_trigger": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 4096,
+        "data_width": 1
+    },
+    "ctrace_running": {
+        "access": "r",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 4097,
+        "data_width": 1
+    },
+    "ctrace_pc_mon": {
+        "access": "r",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 4098,
+        "data_width": 12
+    }
+}

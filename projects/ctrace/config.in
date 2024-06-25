@@ -1,0 +1,38 @@
+# TODO - decide on a suitable existing file format rather than this custom one
+
+# Generic Parameters (mandatory, or risk relying on an "unstable" default)
+F_CLK_IN=100_000_000
+CTRACE_AW=10
+CTRACE_DW=40
+CTRACE_TW=24
+
+# SCRAP-specific Parameters (omit if not using the SCRAP uart-based interface)
+    # Base memory location of the ctrace module
+    CTRACE_OFFSET=0x1000
+    # Address of the "start" trigger (relative to CTRACE_OFFSET)
+    CTRACE_START_ADDR=0
+    # Address of the "running" flag (relative to CTRACE_OFFSET)
+    CTRACE_RUNNING_ADDR=1
+    # Address of the "pcmon" read-only register (relative to CTRACE_OFFSET)
+    CTRACE_PCMON_ADDR=2
+
+# LEEP-specific Parameters (omit if not using LEEP protocol)
+    # Name of the RAM where data is read out
+    CTRACE_MEM          = ctrace_lb_dout
+    # Name of the "start" trigger
+    CTRACE_START_REG    = ctrace_trigger
+    # Name of the "running" flag
+    CTRACE_RUNNING_REG  = ctrace_running
+    # Name of the "pcmon" read-only register
+    CTRACE_PCMON_REG    = ctrace_pc_mon
+
+# Signals can be mapped in a few ways. The LHS is an index or range of
+# the wctrace 'data' input vector
+#   [index] = signal
+#   [high:low] = signal
+#   [high:low] = signal[high:low]
+# Unassigned indices will be assumed to be 0 (constant 1'b0)
+
+[0] = foo
+[3:1] = bar[7:5]
+[39:8] = baz
