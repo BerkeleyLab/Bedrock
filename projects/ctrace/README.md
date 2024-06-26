@@ -11,28 +11,53 @@ This deployment requires some hand-editing.
 
 ```sh
 # In one terminal, build and run the Verilator "live" model
-cd mimo_dsp
-make Vmem_gateway_wrap
-./Vmem_gateway_wrap +udp_port=3010
+make wctrace_live
+./wctrace_live +udp_port=3010
 
 # In another terminal, acquire 'scope traces with ctraceparser.py and save to "test.vcd"
-PYTHONPATH=../submodules/bedrock/projects/common python3 ctraceparser.py get leep://localhost:3010 -f test.vcd
+PYTHONPATH=../common python3 ctraceparser.py get leep://localhost:3010 c config.in -o test.vcd --runtime 1
 
 # View the resulting VCD file in gtkwave
 gtkwave test.vcd
 ```
 
 ## Customizing for your application
+The hand-editing mentioned above is to communicate the following to ctraceparser.py:
+  1. The wctrace parameters
+  2. The signals that are being logged
+  3. How to interact with wctrace (register names or addresses)
 
-The live demo above logs the waveforms, which are just 8 bits of a counter. To actually log
-useful data, we need to route the desired nets into ctrace.
+All the above is included in a single file which is passed to `ctraceparser.py` via the `-c` flag to the
+`get` subcommand.  The syntax of this file is super simple: see `config.in` for all the detail you'll need.
+The only magic is in the parsing of the signal assignments which can be declared in a few ways.
 
-```verilog
-// Add whatever nets you need to debug
-assign ctrace_data[0] = net_foo;
-assign ctrace_data[3:1] = net_bar[2:0];
+For a one-bit signal, we can assign it to any index of the input vector (any index from `0` to `DW-1`)
+where `DW` is the width of the `wctrace` `data` port.
+```
+# [index] = signal_name
+[0] = foo
 ```
 
-The names of these nets should be communicated to ctraceparser.py for easy debugging.
-We'll come up with an easy way to do this if we end up changing nets a lot.  For now,
-it can be hard-coded in [ctraceparser.py](./ctraceparser.py) by elaborating `Config.get()`
+We can similarly map just a single bit of a vector.
+```
+# [index] = signal_name[bit]
+[4] = bar[7]
+```
+
+Can map a range of input indices to a single vector (lengths are assumed to match).
+```
+# [index_high:index_low] = signal_name
+[7:4] = baz
+# Interprets as [7]=baz[3], [6]=baz[2], [5]=baz[1], [4]=baz[0]
+```
+
+Or map a range of input indices to slice of a vector (lengths must match).
+```
+# [index_high:index_low] = signal_name[index_high:index_low]
+[13:12] = baz[2:1]
+# Interprets as [13]=baz[2], [12]=baz[1]
+```
+
+__Note__: In all the above examples, the name of the signal can contain scope dereference
+(i.e. `top.my_module.dut.foo`).  In this case, the resulting VCD will group signals by
+scope in the expected way.

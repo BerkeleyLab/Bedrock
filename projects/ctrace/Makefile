@@ -8,13 +8,14 @@ TESTS_DIR=$(BADGER_DIR)/tests
 WCTRACE_SOURCES=wctrace.v $(DSP_DIR)/dpram.v
 WCTRACE_TOP_SOURCES=wctrace_top.v $(BADGER_DIR)/mem_gateway.v $(DSP_DIR)/reg_delay.v
 WCTRACE_LIVE_SOURCES=wctrace_live.cpp $(TESTS_DIR)/udp_model.c config_romx.v
+INC_DIRS=$(TESTS_DIR)
 
 all: wctrace_w2_check wctrace_w1_check wctrace_w0_check wctrace_n_check
 
-VFLAGS_wctrace_w2_tb=-DTEST_WIDE2
-VFLAGS_wctrace_w1_tb=-DTEST_WIDE1
-VFLAGS_wctrace_w0_tb=-DTEST_WIDE0
-VFLAGS_wctrace_n_tb=-DTEST_NORMAL
+VFLAGS_wctrace_w2_tb=-DTEST_WIDE2 -DWCTRACE_DEBUG
+VFLAGS_wctrace_w1_tb=-DTEST_WIDE1 -DWCTRACE_DEBUG
+VFLAGS_wctrace_w0_tb=-DTEST_WIDE0 -DWCTRACE_DEBUG
+VFLAGS_wctrace_n_tb=-DTEST_NORMAL -DWCTRACE_DEBUG
 
 .PHONY: wctrace_w2_check
 wctrace_w2_check: wctrace_w2_tb
@@ -51,11 +52,15 @@ wctrace_n_tb: wctrace_tb.v $(WCTRACE_SOURCES)
 config_romx.v: wctrace_top_regmap.json
 	$(PYTHON) $(BUILD_DIR)/build_rom.py --placeholder_rev -v $@ -j $< -d "wctrace live demo"
 
+VC_INCLUDES = $(foreach var,$(INC_DIRS),-CFLAGS -I$(var))
+
 .PHONY: wctrace_live
 wctrace_live: $(WCTRACE_TOP_SOURCES) $(WCTRACE_LIVE_SOURCES) $(WCTRACE_SOURCES)
-	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $^
+	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -Wno-UNUSEDSIGNAL $(VC_INCLUDES) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vwctrace_top.mk
-	mv obj_dir/$@ $@
+	mv obj_dir/Vwctrace_top $@
 
 CLEANS += wctrace_w2_tb wctrace_w1_tb wctrace_w0_tb wctrace_n_tb
+CLEANS += wctrace_live
 
+include $(BUILD_DIR)/bottom_rules.mk

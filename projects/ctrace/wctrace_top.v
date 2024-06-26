@@ -14,8 +14,9 @@ module wctrace_top (
 parameter n_lat=10;
 assign n_lat_expose = n_lat;
 
+// NOTE: These parameter assignments need to agree with "config.in"
 localparam AW = 12;
-localparam DW = 40;
+localparam DW = 20;
 localparam TW = 24;
 
 // Bus controller
@@ -46,11 +47,11 @@ config_romx rom (
   .clk(clk), .address(addr[10:0]), .data(config_rom_out)
 );
 
-wire [DW-1:0] data;
+wire [DW-1:0] trace_data;
 reg start=1'b0;
 wire running;
 wire [AW-1:0] pc_mon;
-wire [AW-1:0] wctrace_lb_addr;
+wire [AW-1:0] wctrace_lb_addr = addr[AW-1:0];
 wire [31:0] wctrace_lb_out;
 wctrace #(
   .AW(AW),
@@ -58,7 +59,7 @@ wctrace #(
   .TW(TW)
 ) wctrace_i (
   .clk(clk), // input
-  .data(data), // input [DW-1:0]
+  .data(trace_data), // input [DW-1:0]
   .start(start), // input
   .running(running), // output
   .pc_mon(pc_mon), // output [AW-1:0]
@@ -84,5 +85,21 @@ always @(posedge clk) begin
     16'h000???: lb_din <= wctrace_lb_out;
   endcase
 end
+
+// Fake data for wctrace
+reg [DW-5:0] counter=0;
+reg [3:0] strobes=4'h0;
+always @(posedge clk) begin
+  strobes <= 4'h0;
+  counter <= counter+1;
+  if (counter[3:0] == 4'h0) strobes[0] <= 1'b1;
+  if (counter[3:0] == 4'h2) strobes[1] <= 1'b1;
+  if (counter[3:0] == 4'h4) strobes[2] <= 1'b1;
+  if (counter[3:0] == 4'h8) strobes[3] <= 1'b1;
+end
+
+// NOTE: These signal assignments need to agree with "config.in"
+assign trace_data[DW-5:0] = counter;
+assign trace_data[DW-1-:4] = strobes;
 
 endmodule

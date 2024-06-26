@@ -7,6 +7,10 @@ import ctconf
 
 COMPRESS_GETLISTS = True
 
+_config = None
+def getConfig():
+    return _config
+
 class CtraceParser():
     @classmethod
     def handle_ignores(cls, signal_name):
@@ -62,12 +66,12 @@ class CtraceParser():
                 x = _int(x)
                 y = _int(y)
                 rval = max(x, y) - min(x, y) + 1
-                print(f"  {_range} => {rval}")
+                # print(f"  {_range} => {rval}")
                 return rval
             else:
-                print(f"  {_range} => 1")
+                # print(f"  {_range} => 1")
                 return 1
-        print(f"  {_range} => 0")
+        # print(f"  {_range} => 0")
         return 0
 
     @staticmethod
@@ -213,11 +217,11 @@ class CtraceParser():
                 if condA:
                     newbith = bith
                     newbitl = _bitl
-                    newshift = _shift   # TODO Yes?
+                    newshift = _shift
                 elif condB:
                     newbith = _bith
                     newbitl = bitl
-                    newshift = shift    # TODO Yes?
+                    newshift = shift
                 #else:
                 #    print(f"Don't merge {m} with {n}; {_shift} == {shift-_width}? {_shift} == {shift+_width}?")
                 if condA or condB:
@@ -255,7 +259,7 @@ class CtraceParser():
                 VCD file, and 'getList' is a list of bit positions and shifts used
                 in extracting the signal's value from the ctrace memory entries.
         """
-        print(f"signals = {signals}")
+        #print(f"signals = {signals}")
         top = "TOP"
         sig = "signals"
         dd = {
@@ -310,7 +314,7 @@ class CtraceParser():
             else:
                 #print("Adding {} ({}) to TOP".format(names[-1], ix))
                 dscope["signals"].append((ix, names[-1], width))
-        print(_signals)
+        #print(_signals)
         self._sigList = _signals
         return dd
 
@@ -361,7 +365,6 @@ class CtraceParser():
             "$version CtraceParser $end",
             "$timescale 1ns $end",
         ]
-        #print("\n".join(ss))
         putc += self._walkScopeDefine()
         putc += [
             "$enddefinitions $end",
@@ -377,7 +380,6 @@ class CtraceParser():
 
     def VCDEmitStep(self, v, time):
         """Write a signal line of the dumpvars section of the VCD file."""
-        #print(f"    -> 0x{v:x}")
         if self.first:
             putc = self.VCDMakeHeader(v)
             self.first = False
@@ -406,8 +408,8 @@ class CtraceParser():
         time = 0
         self.first = True
         self.old_vals = [None]*len(self._sigList)
-        print(f"len(self.wfm) = {len(self.wfm)}")
-        print(f"len(self._sigList) = {len(self._sigList)}")
+        # print(f"len(self.wfm) = {len(self.wfm)}")
+        # print(f"len(self._sigList) = {len(self._sigList)}")
         with open(ofile, 'w') as fd:
             for dt, v in self.wfm:
                 if dt == 0:
@@ -420,9 +422,10 @@ class CtraceParser():
 
     def splitTimeData(self, datum):
         """Split one entry from ctrace memory into time and data portions."""
+        datum = int(datum)
         time = (datum & self._timemask) >> self._timeshift
         data = (datum & self._datamask) >> self._datashift
-        #print(f"datum = 0x{datum:x}; time = 0x{time:x}, data = 0x{data:x}")
+        # print(f"datum = 0x{datum:x}; time = 0x{time:x}, data = 0x{data:x}")
         return time, data
 
     def parseDumpFile(self, delimiter=',', ishex=True):
@@ -451,9 +454,9 @@ class CtraceParser():
         processing (e.g. making into a VCD file)."""
         self.wfm = []
         _data = 0
-        print(f"len(dumplist) = {len(dumplist)}")
-        print(f"self._last_stage = {self._last_stage}")
-        print(f"self._total_stages = {self._total_stages}")
+        # print(f"len(dumplist) = {len(dumplist)}")
+        # print(f"self._last_stage = {self._last_stage}")
+        # print(f"self._total_stages = {self._total_stages}")
         for n in range(len(dumplist)):
             datum = dumplist[n]
             stage = n % self._total_stages
@@ -581,48 +584,6 @@ def test(s):
             __time, __data = splitTimeData(_data)
             print(f"    PARSE: stage {stage} _data = {_data:x}; time = {__time}; data = {__data}")
     return
-
-class Config():
-    # Generic
-    F_CLK_IN = 125.0e6
-    CTRACE_DW = 14
-    CTRACE_AW = 10
-    CTRACE_TW = 24
-    CTRACE_MEM_SIZE = (1<<10)
-    # SCRAP-specific
-    CTRACE_CHAN0 = 0
-    CTRACE_OFFSET = 0x1000
-    CTRACE_START_ADDR = 0
-    CTRACE_RUNNING_ADDR = 1
-    CTRACE_PCMON_ADDR = 2
-    # LEEP-specific
-    CTRACE_MEM = "ctrace_lb_dout"
-    CTRACE_START_REG = "ctrace_trigger"
-    CTRACE_RUNNING_REG = "ctrace_running"
-    CTRACE_PCMON_REG = "ctrace_pc_mon"
-
-    def __init__(self, filename=None):
-        if self.CTRACE_AW is not None:
-            self.CTRACE_MEM_SIZE = (1 << self.CTRACE_AW)
-        self._label_dict = {}
-        self.loadFile(filename)
-
-    def loadFile(self, filename):
-        if filename is None:
-            return
-        # TODO: decide on a file format and read here
-        # should be used to populate _label_dict as well as set the "CTRACE_" parameters
-        # and F_CLK_IN
-        return
-
-    def get(self, ch, default=None):
-        """Get the (str) signal label associated with (int) channel 'ch'."""
-        return self._label_dict.get(ch, default)
-
-
-_config = None
-def getConfig():
-    return _config
 
 PROTO_SCRAP = 0
 PROTO_LEEP = 1

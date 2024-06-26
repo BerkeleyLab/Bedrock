@@ -16,30 +16,46 @@ def _int(x):
     except ValueError:
         return None
 
+def _vint(x):
+    return _int(x.replace("_", ""))
+
 class Config():
     _paramdict = {
         # Generic
-        "F_CLK_IN": 125.0e6,
-        "CTRACE_DW": 14,
-        "CTRACE_AW": 10,
-        "CTRACE_TW": 24,
-        "CTRACE_MEM_SIZE": (1<<10),
+        "F_CLK_IN": (125.0e6, _vint),
+        "CTRACE_DW": (14, _vint),
+        "CTRACE_AW": (10, _vint),
+        "CTRACE_TW": (24, _vint),
+        "CTRACE_MEM_SIZE": ((1<<10), _vint),
         # SCRAP-specific
-        "CTRACE_CHAN0": 0,
-        "CTRACE_OFFSET": 0x1000,
-        "CTRACE_START_ADDR": 0,
-        "CTRACE_RUNNING_ADDR": 1,
-        "CTRACE_PCMON_ADDR": 2,
+        "CTRACE_CHAN0": (0, _vint),
+        "CTRACE_OFFSET": (0x1000, _vint),
+        "CTRACE_START_ADDR": (0, _vint),
+        "CTRACE_RUNNING_ADDR": (1, _vint),
+        "CTRACE_PCMON_ADDR": (2, _vint),
         # LEEP-specific
-        "CTRACE_MEM": "ctrace_lb_dout",
-        "CTRACE_START_REG": "ctrace_trigger",
-        "CTRACE_RUNNING_REG": "ctrace_running",
-        "CTRACE_PCMON_REG": "ctrace_pc_mon",
+        "CTRACE_MEM": ("ctrace_lb_dout", str),
+        "CTRACE_START_REG": ("ctrace_trigger", str),
+        "CTRACE_RUNNING_REG": ("ctrace_running", str),
+        "CTRACE_PCMON_REG": ("ctrace_pc_mon", str),
+    }
+    _simple_name_map = {
+        "AW": "CTRACE_AW",
+        "DW": "CTRACE_DW",
+        "TW": "CTRACE_TW",
+        "F_CLK": "F_CLK_IN",
+        "START_ADDR": "CTRACE_START_ADDR",
+        "RUNNING_ADDR": "CTRACE_RUNNING_ADDR",
+        "PCMON_ADDR": "CTRACE_PCMON_ADDR",
+        "START_REG": "CTRACE_START_REG",
+        "RUNNING_REG": "CTRACE_RUNNING_REG",
+        "PCMON_REG": "CTRACE_PCMON_REG",
     }
 
     def __init__(self, filename=None):
         # Apply default params
-        for pname, pval in self._paramdict.items():
+        for pname, plist in self._paramdict.items():
+            pval = plist[0]
             setattr(self, pname, pval)
         if self.CTRACE_AW is not None:
             self.CTRACE_MEM_SIZE = (1 << self.CTRACE_AW)
@@ -53,14 +69,16 @@ class Config():
         lines = {}
         nline = 0
         with open(filename, 'r') as fd:
-            line = True
-            while line:
-                line = fd.readline()
+            _line = True
+            while _line:
+                _line = fd.readline()
+                line = _line.strip()
                 nline += 1
-                if line.startswith("#") or (len(line.strip()) == 0):
+                if line.startswith("#") or (len(line) == 0):
                     continue
                 lines[nline] = line.strip()
         _pnames = [x for x in self._paramdict.keys()]
+        _pnames.extend([x for x in self._simple_name_map])
         # Parse lines
         for linenum, line in lines.items():
             fail = False
@@ -71,23 +89,26 @@ class Config():
             if fail:
                 raise Exception("Syntax error parsing {} [line {}]. Must be LHS = RHS".format(filename, linenum))
             if lhs.startswith("[") or lhs.isdigit():
+                # print(f"assignment: {line}")
                 # It's a signal assignment
-                # TODO - Handle signal assignments
                 assigns = AssignmentParser.parseAssignment(line)
                 for index, signal in assigns:
-                    print(f"{index} = {signal}")
+                    # print(f"{index} = {signal}")
                     self.signal_map[index] = signal
             else:
                 # It's a parameter
+                # print(f"parameter: {line}")
                 lhs = lhs.strip()
                 if lhs not in _pnames:
                     raise Exception("Invalid parameter {} (file {}, line {})".format(lhs, filename, linenum))
-                val = _int(rhs.replace("_", ""))
+                param_name = self._simple_name_map.get(lhs, lhs)
+                qualifier = self._paramdict[param_name][1]
+                val = qualifier(rhs.strip())
                 if val is None:
                     raise Exception("Invalid value {} (file {}, line {})".format(rhs, filename, linenum))
-                print("Param: {} = {}".format(lhs, val))
+                # print("Param: {} = {}".format(lhs, val))
                 # Accept the parameter
-                setattr(self, lhs, val)
+                setattr(self, param_name, val)
         return
 
     def get(self, ch, default=None):
