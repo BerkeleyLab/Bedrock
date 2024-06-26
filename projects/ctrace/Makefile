@@ -60,7 +60,8 @@ wctrace_live: $(WCTRACE_TOP_SOURCES) $(WCTRACE_LIVE_SOURCES) $(WCTRACE_SOURCES)
 	MAKEFLAGS="" make -C obj_dir -f Vwctrace_top.mk
 	mv obj_dir/Vwctrace_top $@
 
-CLEANS += wctrace_w2_tb wctrace_w1_tb wctrace_w0_tb wctrace_n_tb
-CLEANS += wctrace_live
+CLEAN += wctrace_w2_tb wctrace_w1_tb wctrace_w0_tb wctrace_n_tb
+CLEAN += wctrace_live
+CLEAN_DIRS += obj_dir
 
 include $(BUILD_DIR)/bottom_rules.mk
