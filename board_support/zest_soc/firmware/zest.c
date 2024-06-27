@@ -5,26 +5,28 @@
 #include "gpio.h"
 #include "timer.h"
 #include "spi.h"
-#include "print.h"
-#ifdef NONSTD_PRINTF
-#include "printf.h"
-#else
-#include <stdio.h>
-#endif
 #include "common.h"
 #include "iserdes.h"
 #include "sfr.h"
 #include "wfm.h"
+#include "awg.h"
+#include "print.h"
+#ifdef NONSTD_PRINTF
+    #include "printf.h"
+#else
+    #include <stdio.h>
+#endif
 
 uint32_t g_base_adc; //  = BASE_ZEST + ZEST_BASE2_ADC;
 uint32_t g_base_sfr; //  = BASE_ZEST + ZEST_BASE2_SFR;
 uint32_t g_base_spi; //  = BASE_ZEST + ZEST_BASE2_SPI;
 uint32_t g_base_wfm; //  = BASE_ZEST + ZEST_BASE2_WFM;
+uint32_t g_base_awg; //  = BASE_ZEST + ZEST_BASE2_AWG;
 
-static t_devinfo g_devinfo = {ZEST_DEV_ILLEGAL, 0, 0, 0, 0};
+static zest_devinfo_t g_devinfo = {ZEST_DEV_ILLEGAL, 0, 0, 0, 0};
 
 const char *zest_fcnt_names[] = {
-    "DSP_CLK", "ADC0_DIV", "ADC1_DIV", "DAC_DCO"
+    "ADC0_DIV", "ADC1_DIV", "DAC_DCO", "DSP_CLK"
 };
 const char *zest_phdiff_names[] = {
     "ADC0_DIV", "ADC1_DIV", "DAC_DCO"
@@ -51,14 +53,16 @@ uint32_t wait_ad7794_spi_ready(void) {
     return count;
 }
 
-uint16_t read_zest_fcnt(uint8_t ch) {
+uint32_t read_zest_fcnt(zest_freq_t ch) {
     SET_REG8(g_base_sfr + SFR_OUT_BYTE_FCLK_SEL, (ch & 0x3));
-    return GET_REG16(g_base_sfr + SFR_IN_BYTE_FCNT);
+    return GET_REG(g_base_sfr + (SFR_IN_REG_FCNT<<2));
 }
 
-uint16_t read_clk_div_ph(uint8_t ch) {
+int16_t read_clk_div_ph(zest_freq_t ch) {
+    uint16_t reg_val;
     SET_REG8(g_base_sfr + SFR_OUT_BYTE_PH_SEL, (ch & 0x3));
-    return GET_REG16(g_base_sfr + SFR_IN_BYTE_PCNT);
+    reg_val = GET_REG16(g_base_sfr + (SFR_IN_REG_PCNT<<2));
+    return (int16_t)(reg_val << (16 - PH_DIFF_DW));
 }
 
 uint16_t read_adc_waveform_sample(uint8_t ch) {
@@ -94,8 +98,8 @@ void gen_prbs9(uint16_t *buf, size_t len) {
 }
 
 void reset_ad9781(void) {
-    SET_SFR1(g_base_sfr, 0, SFR_OUT_BIT_DAC_RESET, 1);
-    SET_SFR1(g_base_sfr, 0, SFR_OUT_BIT_DAC_RESET, 0);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG0, SFR_OUT_BIT_DAC_RESET, 1);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG0, SFR_OUT_BIT_DAC_RESET, 0);
 }
 
 void set_ad9781_smp(uint8_t dly) {
@@ -110,13 +114,13 @@ bool get_ad9781_seek(void) {
     return read_zest_reg(ZEST_DEV_AD9781, 0x06) & 1;
 }
 
-bool align_ad9781(uint8_t exp_smp) {
-    // datasheet page 26
+bool align_ad9781(uint8_t* exp_smp) {
+    // datasheet page 26, allows multiple expected smp values
     bool seek, seek_pre;
     uint8_t smp=0, set=0, hld=0, smp_min=0;
     uint8_t v_set, v_hld;
     int diff, diff_min=32;
-    printf("AD9781 Alignment:\n");
+    printf("  %s: AD9781 Alignment:\n", __func__);
     for (smp=0; smp<32; smp++) {
         v_set = 15;
         v_hld = 15;
@@ -145,11 +149,103 @@ bool align_ad9781(uint8_t exp_smp) {
             smp_min = smp;
         }
     }
-    printf(" Found SMP value: %d.\n", smp_min);
+    printf("  %s: Found SMP value: %d.\n", __func__, smp_min);
     set_ad9781_smp(smp_min);
-    // validate against expected value, allow +-160ps error bar
-    diff = smp_min - exp_smp;
-    return (diff <= 1 && diff >= -1);
+    // validate against expected values, allow +-160ps error bar
+    for (uint8_t ix=0; ix<3; ix++) {
+        diff = smp_min - exp_smp[ix];
+        if (diff <= 1 && diff >= -1) {
+            printf("  %s: SMP matches expected: %d.\n", __func__, exp_smp[ix]);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool run_ad9781_bist(uint16_t bitres1_exp, uint16_t bitres2_exp) {
+    uint8_t bytes[2];
+    uint16_t bitres1, bitres2;
+     // clear BIST register
+    write_zest_reg(ZEST_DEV_AD9781, 0x1a, 0x20);
+    write_zest_reg(ZEST_DEV_AD9781, 0x1a, 0x00);
+    // enable BIST
+    write_zest_reg(ZEST_DEV_AD9781, 0x1a, 0x80);
+    // send known data series
+    awg_trigger(g_base_awg);
+    // perform BIST read
+    write_zest_reg(ZEST_DEV_AD9781, 0x1a, 0xc0);
+    // read rising edge sum
+    bytes[0] = read_zest_reg(ZEST_DEV_AD9781, 0x1b);
+    bytes[1] = read_zest_reg(ZEST_DEV_AD9781, 0x1c);
+    bitres1 = bytes[1] << 8 | bytes[0];
+    // read falling edge sum
+    bytes[0] = read_zest_reg(ZEST_DEV_AD9781, 0x1d);
+    bytes[1] = read_zest_reg(ZEST_DEV_AD9781, 0x1e);
+    bitres2 = bytes[1] << 8 | bytes[0];
+    printf("  %s: bitres: 0x%x, 0x%x\n", __func__, bitres1, bitres2);
+    return (bitres1 == bitres1_exp) && (bitres2 == bitres2_exp);
+}
+
+bool check_ad9781_bist(void) {
+    bool pass = true;
+    // the "simple sum"
+    // mentioned in the AD9781 data sheet is a misprint; actually some
+    // undocumented but deterministic function, possibly LFSR-like.
+    // References:
+    // https://ez.analog.com/data_converters/high-speed_dacs/f/q-a/23105/ad9781-bist
+    // https://github.com/analogdevicesinc/linux/blob/main/drivers/iio/frequency/ad9783.c#L371
+
+    // uint16_t buf[] = {1,0};      // get 0xfffb
+    // uint16_t buf[] = {2,0};      // get 0xfff7
+    // uint16_t buf[] = {1,1};      // get 0x080c
+    // uint16_t buf[] = {2,1};      // get 0x0814
+    // uint16_t buf[] = {2,2};      // get 0x0818
+    // uint16_t buf[] = {0x1000,0}; // get 0xbfff
+
+    // Generate PRBS9 series
+    // expect 0c7bb, given data samples:
+    // b668 7787 fc1e f8b9 904a 768f 3e6c 548e
+    // 36ae 2622 108 c272 ac37 a6e4 50ad 3f64
+    // 96fc 9a99 80c6 51a5 fd16 3acb 3c7d d06b
+    uint16_t bitres_exp = 0xc7bb;
+    uint16_t buf[24];
+    uint8_t len = sizeof(buf) / sizeof(uint16_t);
+    gen_prbs9(buf, len);
+
+    SET_REG16(g_base_awg + AWG_CFG_ADDR + AWG_CFG_BYTE_AWG_LEN, len);
+    awg_write_dma(g_base_awg, buf, len);
+    // optionally readback and check
+    debug_printf("  %s: DAC awg samples (hex):\n", __func__);
+    for (size_t addr=0; addr<len; addr++) {
+        debug_printf(" %x", GET_REG(g_base_awg + (addr<<2)));
+    }
+    debug_printf("\n");
+
+    // BIST only works in unsigned binary mode:
+    // unsigned binary mode
+    write_zest_reg(ZEST_DEV_AD9781, 0x2, 0x80);
+
+    // select awg data source
+    SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC0_SRCSEL, 1);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC1_SRCSEL, 1);
+
+    // test case 1: PRBS on dac0, zero on dac1
+    SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC0_ENABLE, 1);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC1_ENABLE, 0);
+    pass &= run_ad9781_bist(bitres_exp, 0);
+
+    // test case 2: PRBS on dac0, zero on dac1
+    SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC0_ENABLE, 0);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC1_ENABLE, 1);
+    pass &= run_ad9781_bist(0, bitres_exp);
+
+    // select dsp data source
+    SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC0_SRCSEL, 0);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC1_SRCSEL, 0);
+
+    // two's complement binary mode
+    write_zest_reg(ZEST_DEV_AD9781, 0x2, 0x0);
+    return pass;
 }
 
 void reset_ad7794(void) {
@@ -173,7 +269,7 @@ uint32_t read_ad7794_channel(uint8_t ch) {
     return SPI_GET_DAT(g_base_spi) & 0xffffff;
 }
 
-void init_zest_spi(uint8_t dev) {
+void init_zest_spi(zest_dev_t dev) {
     uint8_t addr_len = 0;
     uint8_t data_len = 0;
 
@@ -225,7 +321,7 @@ void init_zest_spi(uint8_t dev) {
     g_devinfo.data_mask = (1 << data_len) - 1;
 }
 
-void write_zest_reg(uint8_t dev, uint32_t addr, uint32_t val) {
+void write_zest_reg(zest_dev_t dev, uint32_t addr, uint32_t val) {
     uint32_t inst=0;
     if (dev != g_devinfo.dev) {
         init_zest_spi(dev);
@@ -260,7 +356,7 @@ void write_zest_reg(uint8_t dev, uint32_t addr, uint32_t val) {
 	SPI_SET_DAT_BLOCK( g_base_spi, inst );
 }
 
-uint32_t read_zest_reg(uint8_t dev, uint32_t addr) {
+uint32_t read_zest_reg(zest_dev_t dev, uint32_t addr) {
     uint32_t inst;
 
     if (dev != g_devinfo.dev) {
@@ -295,14 +391,14 @@ uint32_t read_zest_reg(uint8_t dev, uint32_t addr) {
 	return SPI_GET_DAT( g_base_spi ) & g_devinfo.data_mask;
 }
 
-void write_zest_regs(uint8_t dev, const t_reg32 *regmap, size_t len) {
+void write_zest_regs(zest_dev_t dev, const t_reg32 *regmap, size_t len) {
     while ( len-- > 0 ){
         write_zest_reg(dev, regmap->addr, regmap->data);
         regmap++;
     }
 }
 
-bool check_zest_regs(uint8_t dev, const t_init_data *p_data) {
+bool check_zest_regs(zest_dev_t dev, const zest_init_data_t *p_data) {
     bool pass = true;
     uint32_t temp;
     size_t len = p_data->len;
@@ -318,8 +414,8 @@ bool check_zest_regs(uint8_t dev, const t_init_data *p_data) {
     return pass;
 }
 
-bool check_zest_freq(uint8_t ch, uint16_t fcnt_exp) {
-    uint16_t fcnt;
+bool check_zest_freq(zest_freq_t ch, uint32_t fcnt_exp) {
+    uint32_t fcnt;
     DELAY_MS(2);
 
     fcnt = read_zest_fcnt(ch);
@@ -330,37 +426,62 @@ bool check_zest_freq(uint8_t ch, uint16_t fcnt_exp) {
 }
 
 void sync_zest_clocks(void) {
-    // XXX needs test
     write_zest_reg(ZEST_DEV_LMK01801,  5, 0x2049UL);
     DELAY_MS(5);
 }
 
-void init_zest_clocks(t_init_data *p_data) {
+void init_zest_clocks(zest_init_data_t *p_data) {
     write_zest_regs(ZEST_DEV_LMK01801, p_data->regmap, p_data->len);
     sync_zest_clocks();
+    reset_zest_pll();
 }
 
 void reset_zest_bufr(uint8_t ch) {
-    const uint8_t addr[] = {SFR_WST_BIT_BUFR_A_RST, SFR_WST_BIT_BUFR_B_RST};
-    SET_SFR1(g_base_sfr, 0, addr[ch], 1);
-    SET_SFR1(g_base_sfr, 0, addr[ch], 0);
+    const uint8_t addr[] = {SFR_OUT_BIT_BUFR_A_RST, SFR_OUT_BIT_BUFR_B_RST};
+    SET_SFR1(g_base_sfr, SFR_OUT_REG0, addr[ch], 1);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG0, addr[ch], 0);
 }
 
-bool check_div_clk_phase(uint8_t ch, uint8_t center) {
+void reset_zest_pll(void) {
+    SET_SFR1(g_base_sfr, SFR_OUT_REG0, SFR_OUT_BIT_DSPCLK_RST, 1);
+    DELAY_MS(5);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG0, SFR_OUT_BIT_DSPCLK_RST, 0);
+    DELAY_MS(5);
+}
+
+bool check_zest_pll(void) {
+    return GET_SFR1(g_base_sfr, 0, SFR_IN_BIT_DSPCLK_LOCKED);
+}
+
+bool check_div_clk_phase(uint8_t ch, int8_t center) {
     // dsp_clk and one of div_clk phase diff should be within small margin of
-    // four edges   :  0.0,   0.5,  1.0,  1.5,  2.0  UI (div_clk cycle, wrap)
-    // cnt is 8 bit :    0,    64,  128,  192,  255 cnt
-    // 0.5 edge is aligned, with 0.4 margin for div_clk
-    uint16_t ph_cnt;
-    ph_cnt = read_clk_div_ph(ch) >> 5;  // 13bit to 8bit
-    printf("    Phase %8s clk: %#4x", zest_phdiff_names[ch], ph_cnt);
-    print_dec_fix(ph_cnt, 7, 3);
-    print_str(" UI\n");
-    // return (ph_cnt > 128*0.3 && ph_cnt < 128*0.7);
-    return (ph_cnt > center*0.6 && ph_cnt < center*1.4);
+    // four edges   :  0.0,  0.25,  0.5, -0.25  UI (div_clk cycle, wrap)
+    // cnt is 8 bit :    0,    64,  128,  -64 cnt
+    // 0.25 edge is aligned, with +-0.125 margin
+    int16_t ph_cnt;
+    ph_cnt = read_clk_div_ph(ch) >> 8;
+    printf("    Phase %8s clk: %6d  ", zest_phdiff_names[ch], ph_cnt);
+    print_dec_fix(ph_cnt, 8, 3);
+    printf(" UI.\n");
+    ph_cnt -= center;
+    return (ph_cnt > -32 && ph_cnt < 32);
 }
 
-bool align_adc_clk_phase(uint8_t ch, uint8_t center) {
+bool align_dsp_clk_phase(int8_t center) {
+    for (uint8_t ix=0; ix<16; ix++) {
+        if (check_div_clk_phase(ZEST_FREQ_DAC_DCO, center)) {
+            printf("  Phase DSP clk aligned. retry = %d.\n", ix);
+            return true;
+        } else{
+            reset_zest_pll();
+            DELAY_MS(3);
+        }
+    }
+    printf(" dsp clk align failed.\n");
+    return false;
+}
+
+bool align_adc_clk_phase(uint8_t ch, int8_t center) {
     for (uint8_t ix=0; ix<128; ix++) {
         if (check_div_clk_phase(ch, center)) {
             printf("  Phase %8s clk aligned. retry = %d.\n", zest_phdiff_names[ch], ix);
@@ -417,6 +538,7 @@ void select_zest_addr(uint32_t base) {
     g_base_sfr = base + ZEST_BASE2_SFR;
     g_base_spi = base + ZEST_BASE2_SPI;
     g_base_wfm = base + ZEST_BASE2_WFM;
+    g_base_awg = base + ZEST_BASE2_AWG;
 }
 
 void read_amc7823_adcs(void) {
@@ -490,28 +612,30 @@ void dump_zest_dac_regs(void) {
     }
 }
 
-bool init_zest(uint32_t base, t_zest_init *init_data) {
+bool init_zest(uint32_t base, zest_init_t *init_data) {
     bool pass=true;
     bool p = true;
     size_t ix;
     select_zest_addr(base);
 
-    t_init_data *p_lmk01801_data = &(init_data->lmk01801_data);
-    t_init_data *p_ad9653_data = &(init_data->ad9653_data);
-    t_init_data *p_ad9781_data = &(init_data->ad9781_data);
-    t_init_data *p_ad7794_data = &(init_data->ad7794_data);
-    t_init_data *p_amc7823_data = &(init_data->amc7823_data);
-    uint16_t *fcnt_exp = init_data->fcnt_exp;
-    uint8_t *phs_center = init_data->phs_center;
+    zest_init_data_t *p_lmk01801_data = &(init_data->lmk01801_data);
+    zest_init_data_t *p_ad9653_data = &(init_data->ad9653_data);
+    zest_init_data_t *p_ad9781_data = &(init_data->ad9781_data);
+    zest_init_data_t *p_ad7794_data = &(init_data->ad7794_data);
+    zest_init_data_t *p_amc7823_data = &(init_data->amc7823_data);
+    uint32_t *fcnt_exp = init_data->fcnt_exp;
+    int8_t *phs_center = init_data->phs_center;
+    uint8_t *ad9781_smp = init_data->ad9781_smp;
 
     // enable PWR_EN
-    SET_SFR1(g_base_sfr, 0, SFR_OUT_BIT_PWR_ENB, 0);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG0, SFR_OUT_BIT_PWR_ENB, 0);
 
     //------------------------------
     // LMK01801 init (CLK)
     //------------------------------
     init_zest_clocks(p_lmk01801_data);
-    p &= check_zest_freq(0, fcnt_exp[0]); pass &= p;
+    p &= check_zest_pll(); pass &= p;
+    p &= check_zest_freq(ZEST_FREQ_DSP_CLK, fcnt_exp[ZEST_FREQ_DSP_CLK]); pass &= p;
     printf("==== ZEST DSP CLK Freq====  : %s.\n", p?"PASS":"FAIL");
 
     //------------------------------
@@ -561,19 +685,27 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     printf("==== ZEST AMC7823     ====  : %s.\n", p?"PASS":"FAIL");
 
     //------------------------------
+    // Align DAC_DCO_CLK and dsp_clk
+    //------------------------------
+    p = check_zest_freq(ZEST_FREQ_DAC_DCO, fcnt_exp[ZEST_FREQ_DAC_DCO]); pass &= p;
+    printf("  Clock %s Freq Check: %s.\n",
+        zest_fcnt_names[ZEST_FREQ_DAC_DCO], p?"PASS":"FAIL");
+    p = align_dsp_clk_phase(phs_center[ZEST_FREQ_DAC_DCO]); pass &= p;
+    printf("  Clock %s Phase Check: %s.\n",
+        zest_phdiff_names[ZEST_FREQ_DAC_DCO], p?"PASS":"FAIL");
+
+    //------------------------------
     // Align clk_div
     //------------------------------
     p = true;
-    for (ix=0; ix<3; ix++) {
-        p = check_zest_freq(ix+1, fcnt_exp[ix+1]); pass &= p;
-        printf("  Clk DIV freq  %d Check: %s.\n", ix, p?"PASS":"FAIL");
+    for (ix=0; ix<2; ix++) {
+        p = check_zest_freq(ix, fcnt_exp[ix]); pass &= p;
+        printf("  Clock %s Freq Check: %s.\n",
+            zest_fcnt_names[ix], p?"PASS":"FAIL");
         p = align_adc_clk_phase(ix, phs_center[ix]); pass &= p;
-        printf("  Clk DIV phase %d Check: %s.\n", ix, p?"PASS":"FAIL");
+        printf("  Clock %s Phase Check: %s.\n",
+            zest_phdiff_names[ix], p?"PASS":"FAIL");
     }
-    p = check_zest_freq(3, fcnt_exp[3]); pass &= p;
-    printf("  DAC DCO freq  %d Check: %s.\n", ix, p?"PASS":"FAIL");
-    p = check_div_clk_phase(2, phs_center[2]); pass &= p;
-    printf("  DAC DCO phase %d Check: %s.\n", ix, p?"PASS":"FAIL");
 
     //------------------------------
     // ADC LVDS init
@@ -586,14 +718,16 @@ bool init_zest(uint32_t base, t_zest_init *init_data) {
     // ADC PN9 validation
     //------------------------------
     p = check_adc_prbs9(); pass &= p;
-    printf("==== ZEST ADC PN9 Check====  : %s.\n", p?"PASS":"FAIL");
+    printf("==== ZEST ADC PN9 Check==== : %s.\n", p?"PASS":"FAIL");
 
     //------------------------------
-    // DAC SMP alignment
+    // DAC SMP alignment and BIST
     //------------------------------
-    p = align_ad9781(phs_center[3]); pass &= p;
-    printf("==== ZEST DAC SMP Check====  : %s.\n", p?"PASS":"FAIL");
-    printf("==== Overall Zest INIT ====  : %s.\n", pass?"PASS":"FAIL");
+    p = align_ad9781(ad9781_smp); pass &= p;
+    printf("==== ZEST DAC SMP Check==== : %s.\n", p?"PASS":"FAIL");
+    p = check_ad9781_bist(); pass &= p;
+    printf("==== ZEST DAC BIST Check=== : %s.\n", p?"PASS":"FAIL");
+    printf("==== Overall Zest INIT ==== : %s.\n", pass?"PASS":"FAIL");
     return pass;
 }
 
@@ -621,9 +755,8 @@ bool check_adc_prbs9(void) {
         for (ix=0; ix<64-8; ix++) {
             if (pn_buf[ix] == wfm_buf[0]) {
                 // See gen_prbs9() for starting point of 1504
-                // 1e3/(500 * 11 / 48) / 8 = 1.096 ns per bit
+                // 1e3 / DSP_FREQ_MHZ / 8 is about 1.1 ns per bit
                 printf("  ADC %d: Found PN9 offset=%d\n", ch, ix+1504);
-                        // (int)(1.1*(ix + 1504)));
                 for (size_t iy=1; iy<8; iy++) {
                     pass &= pn_buf[ix+iy] == wfm_buf[iy];
                 }
@@ -656,11 +789,12 @@ void test_adc_pn9(uint8_t len) {
     write_zest_reg(ZEST_DEV_AD9653_BOTH, 0x14, 0x07); // two's comp
 }
 
-bool init_zest_dbg(uint32_t base) {
+bool init_zest_dbg(uint32_t base, zest_init_t *init_data) {
     bool pass=true;
+    // uint32_t fcnt;
     select_zest_addr(base);
 
-    // t_init_data *p_ad9653_data = &(init_data->ad9653_data);
+    // zest_init_data_t *p_ad9653_data = &(init_data->ad9653_data);
     // printf("Reset BUFR 0: ");
     // reset_zest_bufr(0);
     // printf("Reset BUFR 1: ");
@@ -670,6 +804,11 @@ bool init_zest_dbg(uint32_t base) {
 
     // test_adc_pn9(8);
     // check_adc_prbs9();
-    align_ad9781(12);
+    // align_ad9781(12);
+    // uint32_t *fcnt_exp = init_data->fcnt_exp;
+    // check_zest_freq(0, fcnt_exp[0]);
+    // fcnt = read_zest_fcnt(0);
+    // print_udec_fix(fcnt*125, FCNT_WIDTH, 3);
+    check_ad9781_bist();
     return pass;
 }
