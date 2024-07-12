@@ -88,11 +88,10 @@ void gen_prbs9(uint16_t *buf, size_t len) {
     uint16_t p = 0xce17;
     uint16_t start = 0x016c;
     uint16_t sr = start;
-    uint8_t newbit;
     for (size_t ix = 1; ix <= len*16; ix++) {
         p = ((p << 1) | ((sr>>8) & 1));
         if (ix % 16 == 0) buf[ix/16-1] = p; // store result
-        newbit = (((sr >> 8) ^ (sr >> 4)) & 1);
+        uint8_t newbit = (((sr >> 8) ^ (sr >> 4)) & 1);
         sr = ((sr << 1) | newbit) & 0x1ff;
     }
 }
@@ -116,17 +115,16 @@ bool get_ad9781_seek(void) {
 
 bool align_ad9781(uint8_t* exp_smp) {
     // datasheet page 26, allows multiple expected smp values
-    bool seek, seek_pre;
-    uint8_t smp=0, set=0, hld=0, smp_min=0;
-    uint8_t v_set, v_hld;
+    bool seek, seek_pre=0;
+    uint8_t smp=0, smp_min=0;
     int diff, diff_min=32;
     printf("  %s: AD9781 Alignment:\n", __func__);
     for (smp=0; smp<32; smp++) {
-        v_set = 15;
-        v_hld = 15;
+        uint8_t v_set = 15;
+        uint8_t v_hld = 15;
         set_ad9781_smp(smp);
         debug_printf(" SMP%3d HLD: ", smp);
-        for (hld=0; hld<16; hld++) {
+        for (uint8_t hld=0; hld<16; hld++) {
             set_ad9781_set_hld(0, hld);
             seek = get_ad9781_seek();
             if (hld > 0 && (seek_pre ^ seek)) v_hld = hld;
@@ -135,7 +133,7 @@ bool align_ad9781(uint8_t* exp_smp) {
         }
         debug_printf("%3d\n", v_hld);
         debug_printf("        SET: ");
-        for (set=0; set<16; set++) {
+        for (uint8_t set=0; set<16; set++) {
             set_ad9781_set_hld(set, 0);
             seek = get_ad9781_seek();
             if (set > 0 && (seek_pre ^ seek)) v_set = set;
@@ -400,12 +398,11 @@ void write_zest_regs(zest_dev_t dev, const t_reg32 *regmap, size_t len) {
 
 bool check_zest_regs(zest_dev_t dev, const zest_init_data_t *p_data) {
     bool pass = true;
-    uint32_t temp;
     size_t len = p_data->len;
     t_reg32 *regmap = p_data->regmap;
 
     while ( len-- > 0 ){
-        temp = read_zest_reg(dev, regmap->addr);
+        uint32_t temp = read_zest_reg(dev, regmap->addr);
         pass &= regmap->data == temp;
         debug_printf("SPI_Check: (%#06x, %#08x) %s\n",
                 regmap->addr, temp, pass? "PASS": "FAIL");
@@ -504,13 +501,12 @@ bool init_zest_adcs(uint32_t base, int8_t bitslip_want) {
     // IDELAY scan and ISERDES bitslip alignment process
     uint8_t idelay;
     int bitslips;
-    uint32_t ch_base;
     // 1010 0001 1001 1100, AD9653 DS Table 13, when 0xD=00001100
     uint8_t test_pat[] = {0x9c, 0xa1};  // bytewise
     // uint8_t test_pat[] = {0x16, 0xca};   // bitwise
 
     for (uint8_t chan=0; chan < 2*4; chan++) {
-        ch_base = base + (chan << 16);
+        uint32_t ch_base = base + (chan << 16);
         printf("  ADC %d \n", chan);
         iserdes_reset(ch_base);
 
@@ -548,14 +544,14 @@ void read_amc7823_adcs(void) {
     // ADC7: Volt = 3.3/2 V   regx*2.5
     // ADC8: Temp = 25  C   regx*2.6*0.61 - 273
     uint16_t adc_vals[9];
-    size_t ix;
+    unsigned int ix;
     for (ix=0; ix<9; ix++) {
         adc_vals[ix] = read_zest_reg(ZEST_DEV_AMC7823, ix);
     }
 
     printf("ZEST AMC7823 ADC:\n");
     for (ix=0; ix<9; ix++) {
-        printf("  ADC %d Val: %#06x", ix, adc_vals[ix]);
+        printf("  ADC %u Val: %#06x", ix, adc_vals[ix]);
         if (ix == 8) {
             // printf(" Temp: %.3f [C]\n", (adc_vals[ix] & 0xfff) * 2.6 * 0.61 - 273);
             printf(" Temp:");
@@ -572,7 +568,7 @@ void read_amc7823_adcs(void) {
 
 void read_ad7794_adcs(void) {
     uint32_t adc_vals[6];
-    size_t ix;
+    unsigned int ix;
     printf("ZEST AD7794 ADC:\n");
     for (ix=0; ix<6; ix++) {
         adc_vals[ix] = read_ad7794_channel(ix);
@@ -588,12 +584,11 @@ void dump_zest_adc_regs(void) {
      0x000, 0x001, 0x002, 0x005, 0x008, 0x009, 0x00b, 0x00c,
      0x00d, 0x010, 0x014, 0x015, 0x016, 0x018, 0x019, 0x01a,
      0x01b, 0x01c, 0x021, 0x022, 0x100, 0x101, 0x102, 0x109};
-    uint32_t temp;
 
     for (size_t ix=0; ix<2; ix++) {
         debug_printf("Dump ADC%d registers:\n", ix);
         for (size_t i=0; i<sizeof(addrs)/sizeof(addrs[0]); i++) {
-            temp = read_zest_reg(g_zest_adcs[ix], addrs[i]);
+            uint32_t temp = read_zest_reg(g_zest_adcs[ix], addrs[i]);
             debug_printf("  ADC Reg Dump: (%#06x, %#08x)\n", addrs[i], temp);
         }
     }
@@ -603,19 +598,18 @@ void dump_zest_dac_regs(void) {
     uint32_t addrs[] = {
         0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
         0x0f, 0x10, 0x11, 0x12, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
-    uint32_t temp;
 
     debug_printf("Dump DAC registers:\n");
     for (size_t i=0; i<sizeof(addrs)/sizeof(addrs[0]); i++) {
-        temp = read_zest_reg(ZEST_DEV_AD9781, addrs[i]);
+        uint32_t temp = read_zest_reg(ZEST_DEV_AD9781, addrs[i]);
         debug_printf("  DAC Reg Dump: (%#04x, %#08x)\n", addrs[i], temp);
     }
 }
 
 bool init_zest(uint32_t base, zest_init_t *init_data) {
     bool pass=true;
-    bool p = true;
-    size_t ix;
+    bool p=true;
+    unsigned int ix;
     select_zest_addr(base);
 
     zest_init_data_t *p_lmk01801_data = &(init_data->lmk01801_data);
@@ -697,7 +691,6 @@ bool init_zest(uint32_t base, zest_init_t *init_data) {
     //------------------------------
     // Align clk_div
     //------------------------------
-    p = true;
     for (ix=0; ix<2; ix++) {
         p = check_zest_freq(ix, fcnt_exp[ix]); pass &= p;
         printf("  Clock %s Freq Check: %s.\n",
@@ -735,7 +728,7 @@ bool check_adc_prbs9(void) {
     bool pass=true;
     uint16_t wfm_buf[16];
     uint16_t pn_buf[64];
-    size_t ix;
+    unsigned int ix;
 
     gen_prbs9(pn_buf, 64);
     for (ix=0; ix<64; ix++) {
@@ -756,7 +749,7 @@ bool check_adc_prbs9(void) {
             if (pn_buf[ix] == wfm_buf[0]) {
                 // See gen_prbs9() for starting point of 1504
                 // 1e3 / DSP_FREQ_MHZ / 8 is about 1.1 ns per bit
-                printf("  ADC %d: Found PN9 offset=%d\n", ch, ix+1504);
+                printf("  ADC %d: Found PN9 offset=%u\n", ch, ix+1504);
                 for (size_t iy=1; iy<8; iy++) {
                     pass &= pn_buf[ix+iy] == wfm_buf[iy];
                 }
@@ -781,8 +774,8 @@ void test_adc_pn9(uint8_t len) {
         trigger_waveform(g_base_wfm);
         printf("ADC chan %d waveform:\n", ch);
         read_adc_waveform(wfm_buf, len);
-        for (size_t ix=0; ix<len; ix++) {
-            printf("  ix %2d, dout: %#06x\n",ix, wfm_buf[ix]);
+        for (unsigned int ix=0; ix<len; ix++) {
+            printf("  ix %2u, dout: %#06x\n",ix, wfm_buf[ix]);
         }
     }
     write_zest_reg(ZEST_DEV_AD9653_BOTH, 0xd, 0x0);   // normal ADC

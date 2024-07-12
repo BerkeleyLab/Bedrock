@@ -142,8 +142,8 @@ bool get_ina219_data(uint8_t i2c_addr, t_ina219_data *data) {
     bool ret = true;
     uint16_t regs[4];
 
-    for (size_t i=1; i<5; i++) {
-        ret &= i2c_read_word(i2c_addr, i, regs+i-1);
+    for (unsigned int i=0; i<4; i++) {
+        ret &= i2c_read_word(i2c_addr, i+1U, regs+i);
     }
     data->vshunt_uV = (int16_t)regs[0] * 10;
     data->vbus_mV = (regs[1] >> 3) * 4;
@@ -163,7 +163,7 @@ void print_xadc_data(uint16_t *data, uint8_t *chans, size_t len) {
     uint16_t scale=1;
     const char * name = "Temp   ";
     const char * unit = " V";
-    for (size_t i=0; i<len; i++) {
+    for (unsigned int i=0; i<len; i++) {
         print_str("XADC   ");
         switch (chans[i]) {
             case XADC_CHAN_TEMP:
@@ -188,7 +188,7 @@ void print_xadc_data(uint16_t *data, uint8_t *chans, size_t len) {
                 unit = " V";
                 break;
             default:
-                printf("  XADC chan %d: %#x\n", i, data[i]);
+                printf("  XADC chan %u: %#x\n", i, data[i]);
         }
         printf("%8s:", name);
         print_dec_fix( data[i]*scale, 12, 2 );
@@ -221,14 +221,14 @@ void print_marble_status(void) {
     get_pca9555_data(I2C_ADR_PCA9555_SFP, &pca9555[0]);
     get_pca9555_data(I2C_ADR_PCA9555_MISC, &pca9555[1]);
 
-    for (size_t i=0; i<2; i++) {
-        printf("INA219 FMC%1d:\n", i+1);
+    for (unsigned int i=0; i<2; i++) {
+        printf("INA219 FMC%1u:\n", i+1U);
         // printf("Vshunt:  %6d uV\n", ina219[i].vshunt_uV);
         printf("power:   %6d mW\n", ina219[i].power_uW / 1000);
         printf("Vbus:    %6d mV\n", ina219[i].vbus_mV);
         printf("current: %6d mA\n", ina219[i].curr_uA / 1000);
 
-        printf("PCA9555 %1d:\n", i+1);
+        printf("PCA9555 %1u:\n", i+1U);
         printf("P0:      %#09b\n", pca9555[i].p0_val);
         printf("P1:      %#09b\n", pca9555[i].p1_val);
     }
