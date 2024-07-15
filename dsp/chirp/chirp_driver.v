@@ -12,7 +12,8 @@ module chirp_driver #(
    parameter AMP_WI = 20,
    parameter PH_WI = 32,
    parameter LEN_WI = 32,
-   parameter CHIRP_RATE = 8
+   parameter CHIRP_RATE = 8,
+   parameter CORDIC_WI = 18
 ) (
    input                         clk,
    input                         chirp_start, // Edge-triggered
@@ -33,7 +34,6 @@ module chirp_driver #(
    output [2:0]                  chirp_error
 );
 
-   localparam CORDIC_WI = 18;
    localparam CORDIC_STAGE = 20;
 
    wire chirp_gate;

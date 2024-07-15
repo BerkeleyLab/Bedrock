@@ -53,7 +53,7 @@ class c_ad7794(object):
     # Communications Register Definition
     # @param read R/W. 0 = write operation. 1 = read operation
     # @param addr Register Address Bits
-    # @param cread Continuous Read. 1 enables functionallity
+    # @param cread Continuous Read. 1 enables functionality
     def cmd(self, read=1, addr=0x1e, cread=0):
         result = (read << 6) + (addr << 3) + (cread << 2)
         return result

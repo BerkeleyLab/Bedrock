@@ -43,16 +43,18 @@ int main(int argc, char *argv[])
 	char idata[200];
 	if (argc < 2) {
 		fprintf(stderr, "Usage: %s mac_subset.gold\n", argv[0]);
+		fprintf(stderr, "  always writes to host_cmds.dat\n");
 		return 1;
 	}
 	FILE *fin = fopen(argv[1], "r");
 	if (!fin) {
-		perror("mac_subset.gold");
+		perror(argv[1]);
 		return 1;
 	}
 	FILE *fout = fopen("host_cmds.dat", "w");
 	if (!fout) {
 		perror("host_cmds.dat");
+		fclose(fin);
 		return 1;
 	}
 	while (fgets(idata, sizeof(idata), fin)) {

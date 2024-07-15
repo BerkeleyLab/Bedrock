@@ -23,7 +23,9 @@
 
 // TODO: Potentially parameterize input and output signal widths
 //     : Rename Ref_i/q to Setpoint_i/q
-module non_iq_interleaved_piloop (
+module non_iq_interleaved_piloop #(
+	parameter KW = 18 // Bit-width of PI gains
+) (
 	// Everything here is in one clock domain, matches ADC
 	input clk,
 	input feedback_enable,
@@ -50,7 +52,6 @@ initial begin
 	pi_out_q=0;
 end
 
-parameter KW = 18; // Bit-width of PI gains
 // Assuming K's are w bits wide
 
 // Universal definition; note: old and new are msb numbers, not bit widths.

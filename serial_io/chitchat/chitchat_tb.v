@@ -61,6 +61,7 @@ module chitchat_tb;
 
    integer cnt_off = MAX_OFF;
    integer cnt_on = 0;
+   wire [1:0]  gtx_k;
    always @(posedge cc_clk) begin
       if (tx_transmit_en) begin
          if (cnt_on == 0)
@@ -99,7 +100,6 @@ module chitchat_tb;
 
    wire [15:0] local_frame_counter;
    wire [15:0] gtx_d;
-   wire [1:0]  gtx_k;
    wire [15:0] rx_frame_counter;
 
    wire        rx_valid;

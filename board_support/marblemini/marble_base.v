@@ -82,6 +82,7 @@ module marble_base (
 	// Something physical
 	inout [191:0] fmc_test,
 	output ZEST_PWR_EN,
+	output [2:0] ps_sync,
 	output [7:0] LED
 );
 
@@ -173,6 +174,7 @@ wire rx_category_s_rx, rx_category_s;
 // Signals provided by lb_marble_slave
 wire [1:0] led_user_mode;
 wire l1, l2;
+wire [4:0] ps_sync_config;
 
 // Actual lb_marble_slave instance
 lb_marble_slave #(
@@ -204,6 +206,7 @@ lb_marble_slave #(
 	.allow_mmc_eth_config(allow_mmc_eth_config),
 	.fmc_test(fmc_test),
 	.gps(GPS), .ext_config(ext_config), .frequency_si570(frequency_si570),
+	.ps_sync_config(ps_sync_config),
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
 );
 
@@ -367,6 +370,9 @@ always @(posedge tx_clk) begin
 	if (~clk_locked) phy_rb <= 0;
 end
 assign phy_rstn = phy_rb;
+
+ltm_sync ltm_sync_i(.clk(tx_clk),
+	.ps_config(ps_sync_config), .ps_sync(ps_sync));
 
 // One weird hack, even works in Verilator!
 `ifndef YOSYS

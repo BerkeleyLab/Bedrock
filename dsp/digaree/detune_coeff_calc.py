@@ -5,7 +5,7 @@ from matplotlib import pyplot
 
 
 class rf_waveforms:
-    # Default waveform dump format; can be overriden at class construction time
+    # Default waveform dump format; can be overridden at class construction time
     DAT_FMT = ["FWD_I", "FWD_Q",
                "REV_I", "REV_Q",
                "CAV_I", "CAV_Q",
@@ -46,7 +46,7 @@ class digaree_coeff:
         self.fir_g = fir_gain      # pre-scaling for dV/dt
 
     def compute(self, wvf, plot=False, verbose=False):
-        print("ERROR: This method must be overriden by a coefficient calculation method")
+        print("ERROR: This method must be overridden by a coefficient calculation method")
         exit(1)
 
     """
@@ -96,13 +96,13 @@ Data is assumed to be in GDR mode, which is both good and bad:
 simpler math, but need an externally-provided bandwidth.
 Only needs/uses forward and cavity signals.
 
-Depends on microphonics to make large variations in the imginary part
+Depends on microphonics to make large variations in the imaginary part
 of the complex state parameter, while the real part (based on Q_L) is
 relatively constant on these time scales.  With GDR mode holding the
 cavity voltage fixed, the forward wave can be rotated and scaled to give
 that state parameter.
 
-Has been tested when ths system is parasiting off another controller.
+Has been tested when this system is parasiting off another controller.
 It will be useful for in-situ correction of cable drift during long
 CW GDR runs, which would otherwise introduce tune angle drift.
 """
@@ -268,7 +268,7 @@ if __name__ == "__main__":
                         choices=["cw", "pulse"], help="Coeff calculation mode")
     parser.add_argument("-f", "--datafile", dest="datafile", default=None, required=True,
                         help="IQ data input file")
-    parser.add_argument("-v", "--verbose", action="store_true", dest="verbose", help="Verbode mode")
+    parser.add_argument("-v", "--verbose", action="store_true", dest="verbose", help="Verbose mode")
     parser.add_argument("-p", "--plot", action="store_true", dest="plot", help="Plot")
 
     args = parser.parse_args()

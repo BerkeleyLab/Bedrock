@@ -123,7 +123,7 @@ class MarbleI2C():
     u39_port1_dir = 0b01110011
     u39_port1_out = 0b00000000  # No clkmux rst, LEDs off
 
-    # U2 (ADDN4600) MGT clock multiplexer
+    # U2 (ADN4600) MGT clock multiplexer
     u2_xpt_config = 0x40  # XPT Configuration register
 
     @staticmethod
@@ -318,7 +318,7 @@ class MarbleI2C():
 
     # ============= U2 MGT Clock Multiplexer Helper Functions =================
     def U2_select_clock(self, in_ch, out_ch):
-        """Configure U2 MGT clock mux to route input channge in_ch to output channel
+        """Configure U2 MGT clock mux to route input channel in_ch to output channel
         out_ch.
         Params:
             int in_ch:  Input channel (0-7)

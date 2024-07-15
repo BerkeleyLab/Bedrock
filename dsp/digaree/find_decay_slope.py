@@ -67,7 +67,7 @@ if __name__ == "__main__":
     parser = ArgumentParser(description="Approximate bandwidth and detune from decay waveform")
     parser.add_argument("-f", "--datafile", dest="datafile", default=None, required=True,
                         help="IQ data input file")
-    parser.add_argument("-v", "--verbose", action="store_true", dest="verbose", help="Verbode mode")
+    parser.add_argument("-v", "--verbose", action="store_true", dest="verbose", help="Verbose mode")
 
     args = parser.parse_args()
 

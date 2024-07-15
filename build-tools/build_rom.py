@@ -11,7 +11,7 @@ def chunk(li, flag=1):
     '''
     l: list of 16-bit ints
     flag: type
-    Each chunk has an ID that preceeds it
+    Each chunk has an ID that precedes it
     ID is 16-bit {2 bits: type, 14 bits: length of the chunk}
     '''
     chunk_size = len(li)

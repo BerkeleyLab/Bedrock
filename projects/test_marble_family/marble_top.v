@@ -80,6 +80,11 @@ module marble_top(
 `endif
 	// output ZEST_PWR_EN,
 
+`ifdef MARBLE_V2
+	// Special for LTM4673 synchronization -- untested
+	output [2:0] LTM_CLKIN,
+`endif
+
 `ifdef MARBLE_MINI
 	// J15 TMDS 0, 1, 2, CLK
 	output [3:0] TMDS_P,
@@ -318,6 +323,7 @@ localparam C_GPS_CTRACE = 0;
 // vestiges of CERN FMC tester support
 wire old_scl1, old_scl2, old_sda1, old_sda2;
 
+wire [2:0] ps_sync;
 wire [7:0] leds;
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
@@ -346,7 +352,7 @@ marble_base #(
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
-	.GPS(Pmod2[3:0]), .ext_config(ext_config), .LED(leds)
+	.GPS(Pmod2[3:0]), .ext_config(ext_config), .ps_sync(ps_sync), .LED(leds)
 );
 `ifndef SIMULATE
 // Verilator can't handle this, says
@@ -362,6 +368,9 @@ assign LD17 = leds[1];
 wire tmds_enable = ext_config[0];
 tmds_test tmds_test(.clk(test_clk), .enable(tmds_enable),
 	.tmds_p(TMDS_P), .tmds_n(TMDS_N));
+`endif
+`ifdef MARBLE_V2
+assign LTM_CLKIN = ps_sync;
 `endif
 
 // Give the network the option of turning off the 20 MHz VCXO

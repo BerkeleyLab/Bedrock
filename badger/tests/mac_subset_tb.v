@@ -64,6 +64,7 @@ reg [15:0] host_wdata;
 
 // Host bus driven from file
 reg wval, wait_mode=0;
+wire done;
 always @(posedge clk) begin
 	host_write <= 0;
 	case (1)
@@ -97,7 +98,6 @@ mac_compat_dpram #(
 );
 
 // DUT
-wire done;
 wire [7:0] mac_data;
 wire strobe_s, strobe_l;
 mac_subset #(.mac_aw(mac_aw), .latency(latency), .stretch(stretch), .ifg(ifg)) mac(

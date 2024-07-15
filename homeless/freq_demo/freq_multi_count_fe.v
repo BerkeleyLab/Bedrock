@@ -37,14 +37,16 @@ end endgenerate
 
 // Transfer those Gray codes to the measurement clock domain.
 // Note the dependence on clksel here.
-reg [gw-1:0] gray2[0:NF-1];
-reg [gw-1:0] gray3=0, gray4=0;
+(* ASYNC_REG = "TRUE" *) reg [gw-1:0] gray2[0:NF-1], gray3[0:NF-1];
+reg [gw-1:0] gray4=0;
 integer jx;
-initial for (jx=0; jx<NF; jx=jx+1) gray2[jx] = 0;
+initial for (jx=0; jx<NF; jx=jx+1) begin gray2[jx] = 0; gray3[jx] = 0; end
 always @(posedge refclk) begin
-	for (jx=0; jx<NF; jx=jx+1) gray2[jx] <= gray1[jx];  // cross domains here
-	gray3 <= gray2[clksel];  // multiplexing step
-	gray4 <= gray3;  // probably useless pipeline stage
+	for (jx=0; jx<NF; jx=jx+1) begin
+		gray2[jx] <= gray1[jx];  // cross domains here
+		gray3[jx] <= gray2[jx];  // satisfy metastability rules
+	end
+	gray4 <= gray3[clksel];  // multiplexing step
 end
 
 // Figure out how many unk_clk edges happened in the last refclk period,

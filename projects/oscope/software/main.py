@@ -109,10 +109,10 @@ class GUIGraph:
             with open(settings_file, 'r') as jf:
                 oscope_state = json.load(jf)
         except IOError as e:
-            Logger.warning(f'{e} occured while reading settings_file, loading default settings')
+            Logger.warning(f'{e} occurred while reading settings_file, loading default settings')
             oscope_state = GUIGraph.oscope_default_state
         except json.JSONDecodeError as e:
-            Logger.warning(f'{e} occured while reading settings_file, loading default settings')
+            Logger.warning(f'{e} occurred while reading settings_file, loading default settings')
             oscope_state = GUIGraph.oscope_default_state
         return oscope_state
 

@@ -147,7 +147,7 @@ def find_dff(mod, ofile):
 # recursively calls itself
 def list_domains(ix):
     if ix == "1" or ix == "0" or ix == "x" or ix == "z":
-        return []  # without complaint, since this is a known csae
+        return []  # without complaint, since this is a known case
     if ix in active_nets:  # already got here
         return []
     active_nets[ix] = True

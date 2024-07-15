@@ -50,8 +50,8 @@ test_tx_mac #(
 );
 
 // Move scanner_busy to tx_clk domain for use by precog
-reg scanner_busy_tx=0;
-always @(posedge tx_clk) scanner_busy_tx <= scanner_busy;
+wire scanner_busy_tx;
+reg_tech_cdc scanner_busy_cdc(.I(scanner_busy), .C(tx_clk), .O(scanner_busy_tx));
 
 // Instantiate precog
 wire clear_to_send;

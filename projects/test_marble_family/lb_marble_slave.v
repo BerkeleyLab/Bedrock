@@ -68,6 +68,7 @@ module lb_marble_slave #(
 	output [3:0] ext_config,
 	// Output to hardware
 	inout [191:0] fmc_test,
+	output [4:0] ps_sync_config,
 	output [1:0] led_user_mode,
 	output led1,  // PWM
 	output led2  // PWM
@@ -232,12 +233,11 @@ config_romx rom(
 
 // Remove any doubt about what clock domain these are in;
 // also keeps reverse_json.py happy.
-reg [0:0] tx_mac_done_r;
-reg [1:0] rx_mac_buf_status_r;
-always @(posedge clk) begin
-	tx_mac_done_r <= tx_mac_done;
-	rx_mac_buf_status_r <= rx_mac_buf_status;
-end
+reg [0:0] tx_mac_done_r=0;
+always @(posedge clk) tx_mac_done_r <= tx_mac_done;
+wire [1:0] rx_mac_buf_status_r;
+// Instance array to cover two bits of status
+reg_tech_cdc buf_status_cdc[1:0](.I(rx_mac_buf_status), .C(clk), .O(rx_mac_buf_status_r));
 
 // Crude uptime counter, that wraps every 9.77 hours
 reg led_tick=0;
@@ -447,6 +447,7 @@ reg rx_mac_hbank_r=1;
 // decoding corresponds to mirror readback, see notes above
 wire local_write = control_strobe & ~control_rd & (addr[23:16]==5);
 reg stop_sim=0;  // clearly only useful in simulation
+reg [4:0] ps_sync_config_r=0;
 reg [71:0] fmc1_test_r=0;
 reg [71:0] fmc2_test_r=0;
 reg [47:0] fmc2h_test_r=0;
@@ -463,6 +464,7 @@ always @(posedge clk) if (local_write) case (addr[4:0])
 	// 10: ctrace_start
 	// 11: unused
 	// 12: pps_config_write
+	13: ps_sync_config_r <= data_out;
 	16: fmc1_test_r[21:0] <= data_out;
 	17: fmc1_test_r[43:22] <= data_out;
 	18: fmc1_test_r[71:44] <= data_out;
@@ -506,6 +508,7 @@ assign mmc_int = misc_config[1];
 assign allow_mmc_eth_config = misc_config[2];
 assign zest_pwr_en = misc_config[3];
 assign ext_config = misc_config[7:4];
+assign ps_sync_config = ps_sync_config_r;
 
 // 3-state
 genvar ix;
