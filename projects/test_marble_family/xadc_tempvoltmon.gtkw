@@ -1,0 +1,38 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Mon Jul 15 19:07:42 2024
+[*]
+[dumpfile] "/home/ldoolitt/llrf/git/bedrock/projects/test_marble_family/xadc_tempvoltmon.vcd"
+[dumpfile_mtime] "Mon Jul 15 19:07:22 2024"
+[dumpfile_size] 1001
+[savefile] "/home/ldoolitt/llrf/git/bedrock/projects/test_marble_family/xadc_tempvoltmon.gtkw"
+[timestart] 0
+[size] 1077 607
+[pos] -1 -1
+*-7.934139 265 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] xadc_tempvoltmon_tb.
+[treeopen] xadc_tempvoltmon_tb.xadc_tempvoltmon_i.
+[sst_width] 360
+[signals_width] 205
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.clk
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.rst
+@22
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.temp_out[15:0]
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.vccint_out[15:0]
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.vccaux_out[15:0]
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.vbram_out[15:0]
+@28
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.read
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.otemp
+@200
+-internals
+@24
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.addr_cnt[1:0]
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.udcnt[2:0]
+@22
+xadc_tempvoltmon_tb.xadc_tempvoltmon_i.data_out[15:0]
+[pattern_trace] 1
+[pattern_trace] 0

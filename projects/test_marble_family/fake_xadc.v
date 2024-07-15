@@ -22,6 +22,10 @@ localparam ADDR_VCCINT = 7'h1;
 localparam ADDR_VCCAUX = 7'h2;
 localparam ADDR_VBRAM = 7'h6;
 
+wire [15:0] test_temp   = 16'h9773; // ~25degC
+wire [15:0] test_vccint = 16'h0123;
+wire [15:0] test_vccaux = 16'h4567;
+wire [15:0] test_vbram  = 16'h89ab;
 reg [15:0] mem [0:MEM_SIZE-1];
 integer N;
 initial begin
@@ -30,10 +34,10 @@ initial begin
     mem[N] = 16'h0000;
   end
   // Assign some dummy values to known slots
-  mem[ADDR_INT_TEMP] = 16'h9773; // ~25degC
-  mem[ADDR_VCCINT]   = 16'h0123; // ???
-  mem[ADDR_VCCAUX]   = 16'h4567;
-  mem[ADDR_VBRAM]    = 16'h89ab;
+  mem[ADDR_INT_TEMP] = test_temp;
+  mem[ADDR_VCCINT]   = test_vccint;
+  mem[ADDR_VCCAUX]   = test_vccaux;
+  mem[ADDR_VBRAM]    = test_vbram;
 end
 
 reg [15:0] dout=0;
