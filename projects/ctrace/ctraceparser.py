@@ -721,7 +721,7 @@ def main():
     parser = argparse.ArgumentParser("Host-side interaction with (w)ctrace module.")
     parser.set_defaults(handler=lambda args: None)
     subparsers = parser.add_subparsers(help="Subcommands")
-    parserGet = subparsers.add_parser("get", help="Get ")
+    parserGet = subparsers.add_parser("get", help="Get ctrace memory and generate VCD file")
     devhelp = "Device to interface with. E.g.\n  leep://$IP[:$PORT]\n  scrap:/dev/ttyUSB3\n  scrap:$IP:$PORT"
     parserGet.add_argument('dest', help=devhelp)
     parserGet.add_argument('-c', '--config', default=None, help="Configuration file.")
