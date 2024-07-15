@@ -1,11 +1,3 @@
-[*]
-[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
-[*] Mon Jul 15 19:07:42 2024
-[*]
-[dumpfile] "/home/ldoolitt/llrf/git/bedrock/projects/test_marble_family/xadc_tempvoltmon.vcd"
-[dumpfile_mtime] "Mon Jul 15 19:07:22 2024"
-[dumpfile_size] 1001
-[savefile] "/home/ldoolitt/llrf/git/bedrock/projects/test_marble_family/xadc_tempvoltmon.gtkw"
 [timestart] 0
 [size] 1077 607
 [pos] -1 -1
