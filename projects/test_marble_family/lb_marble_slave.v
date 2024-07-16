@@ -561,7 +561,8 @@ xadc_tempmon #(
 // 7-Series Device DNA Readout
 // ----------------------------------
 dna dna_inst0 (
-  .clk                                (clk62),
+  .dna_clk                            (clk62),
+  .lb_clk                             (clk),
   .rst                                (1'b0),
   .start                              (1'b1),
   .done                               (),
