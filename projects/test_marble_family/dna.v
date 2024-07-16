@@ -21,9 +21,6 @@ module dna (
   reg xdomain_gate=1'b0;
 
 `ifdef SIMULATE
-  assign dna_msb = r_dna[63:32];
-  assign dna_lsb = r_dna[31:0];
-  // reg [63:0] r_dna = 64'h4b696e7465782d37;
   assign din = dout;
   reg [63:0] r_dna_int = 64'hb4b73a32bc169ba5;
   reg [63:0] r_dout;
@@ -95,12 +92,12 @@ module dna (
 
 // ===== Cross DNA vector from dna_clk domain to lb_clk domain =====
 localparam DXSIZE = 57;
-wire [DXSIZE-1:0] dna_dclk = r_dna[63:7];
 reg [DXSIZE-1:0] dna_lbclk=0; // Waste of a register?
 /*
 -  assign dna_msb = {7'h00, r_dna[63:39]};
 -  assign dna_lsb = r_dna[38:7];
 */
+wire [DXSIZE-1:0] dna_dclk = r_dna[63:7];
 assign dna_msb = {7'h00, dna_lbclk[56:32]};
 assign dna_lsb = dna_lbclk[31:0];
 
