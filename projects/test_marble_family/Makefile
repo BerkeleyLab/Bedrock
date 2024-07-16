@@ -92,7 +92,7 @@ mmc_mailbox_tb: mmc_mailbox.v $(HOMELESS_DIR)/fake_dpram.v $(DSP_DIR)/dpram.v $(
 # subset that is interesting to test live on network
 AD5662_V = ad5662_lock.v pps_lock.v pps_loop_filter.v ad5662.v
 LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v reg_tech_cdc.v freq_count.v freq_gcount.v multi_counter.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
-                    gps_test.v simpleuart.v fake_dpram.v xadc_tempmon.v dna.v
+                    gps_test.v simpleuart.v fake_dpram.v xadc_tempmon.v dna.v data_xdomain.v flag_xdomain.v
 lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v udp-vpi.vpi IDDR.v
 VFLAGS_lb_marble_slave_tb = -m ./udp-vpi
 net_slave_run: lb_marble_slave_tb udp-vpi.vpi
