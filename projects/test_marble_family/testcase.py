@@ -320,8 +320,8 @@ if __name__ == "__main__":
     # import importlib
     parser = argparse.ArgumentParser(
         description="Utility for working with i2cbridge attached to Packet Badger")
-    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
-    parser.add_argument('-p', '--port', type=int, default=0, help='UDP Port number')
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='UDP Port number (default 803)')
     parser.add_argument('-m', '--marble', type=int, default=1, help='Select the carrier board, Marble or Marble-Mini')
     parser.add_argument('--sim', action='store_true', help='simulation context')
     parser.add_argument('--ramtest', action='store_true', help='RAM test program')

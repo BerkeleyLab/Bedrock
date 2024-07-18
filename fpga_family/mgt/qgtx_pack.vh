@@ -30,13 +30,22 @@
                           .gt0_cplllock_out            (gt``GTi``_pll_locked),\
                           .gt0_cplllockdetclk_in       (drpclk_in),\
                           .gt0_cpllreset_in            (1'b0),\
-                          .gt0_drpaddr_in              (9'b0),\
                           .gt0_drpclk_in               (drpclk_in),\
+                          `ifdef GT``GTi``_DRP_EN\
+                          .gt0_drpaddr_in              (gt``GTi``_drpaddr_in),\
+                          .gt0_drpdi_in                (gt``GTi``_drpdi_in),\
+                          .gt0_drpdo_out               (gt``GTi``_drpdo_out),\
+                          .gt0_drpen_in                (gt``GTi``_drpen_in),\
+                          .gt0_drprdy_out              (gt``GTi``_drprdy_out),\
+                          .gt0_drpwe_in                (gt``GTi``_drpwe_in),\
+                          `else\
+                          .gt0_drpaddr_in              (9'b0),\
                           .gt0_drpdi_in                (16'b0),\
                           .gt0_drpdo_out               (),\
                           .gt0_drpen_in                (1'b0),\
                           .gt0_drprdy_out              (),\
                           .gt0_drpwe_in                (1'b0),\
+                          `endif\
                           .gt0_dmonitorout_out         (),\
                           .gt0_eyescanreset_in         (1'b0),\
                           .gt0_rxuserrdy_in            (gt``GTi``_rxusrrdy_in),\

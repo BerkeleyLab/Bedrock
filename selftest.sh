@@ -3,7 +3,7 @@
 # Collected and cleaned up from scattered .gitlab* .yml files.
 # Running this script is possibly easier than fussing with Docker,
 # and definitely gives more test coverage than typing "make" in whatever
-# directory you're developing in.  Measured execution time is under
+# directory you're developing in.  Measured execution time is about
 # three minutes on decent hardware (Ryzen 5 PRO 5650GE).
 
 # Can be run as an unprivileged user on a pretty basic Debian Bookworm
@@ -36,6 +36,8 @@ python3 --version
 iverilog -V
 verilator --version
 yosys -V
+echo 'puts "tclsh [info patchlevel]"' | tclsh
+flake8 --version
 if [ "$1" = "more" ]; then
 python3 -c 'import nmigen; print("nmigen found")'
 riscv64-unknown-elf-gcc --version
@@ -44,10 +46,19 @@ fi
 # Don't want any graphics coming out of this by accident
 unset DISPLAY
 
+# The following tests are listed in the (alphabetical) order that they
+# appear on a gitlab pipeline status page
+
+## badger_cdc
+make -C badger/tests hw_test_cdc.txt
+
 ## badger_test
 make -C badger/tests clean all
 # XXX skip bash tftp_test.sh && bash speed_check.sh, which need tap0 set up
 # by root.  See comments in badger/tests/tftp_test.sh.
+
+## board_support_test
+make -C board_support/bmb7_kintex jxj_gate_check
 
 ## chirp_test
 make -C dsp/chirp all checks
@@ -77,11 +88,18 @@ make -C homeless/freq_demo
 ## leep_test
 (cd projects/common && python3 -m unittest -v)
 
+## localbus
+make -C localbus
+
 ## make_docs
 make -C build-tools/make-demo clean check consistency
 
+## marble_cdc
+make -C projects/test_marble_family marble_base_cdc.txt
+
 ## marble_sim
 make -C projects/test_marble_family all net_slave_check
+make -C projects/test_marble_family/pps_lock
 
 ## oscope_top_test
 # optional, since it requires nmigen==0.2 (nmigen is not in Debian)

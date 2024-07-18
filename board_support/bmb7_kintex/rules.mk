@@ -6,6 +6,8 @@ VFLAGS += -I. -y.
 
 TEST_BENCH = jxj_gate_tb
 
+jxj_gate_tb: $(DSP_DIR)/shortfifo.v
+
 TGT_ := $(TEST_BENCH)
 
 NO_CHECK =

@@ -52,7 +52,7 @@ def get_qrcode(results):
         ss = symbol.data
         # print(ord(ss[0]), ord(ss[1]), ord(ss[-1]))
         while len(ss) > 1 and ord(ss[0]) > 127:
-            # Unicde 65279: Zero Width No-Break Space
+            # Unicode 65279: Zero Width No-Break Space
             print("Discarding leading %d" % ord(ss[0]))
             ss = ss[1:]
         m = re.search(r'LBNL DIGITIZER V1.\d SN +(\d+)', ss)
@@ -68,8 +68,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(
         description="Utility for auto-configuring Zest serial number")
-    parser.add_argument('-a', '--addr', default=None, help='IP address')
-    parser.add_argument('-p', '--port', type=int, default=803, help='Port number')
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
     parser.add_argument('-c', '--camera', type=str, default='/dev/video0', help='Camera device')
     parser.add_argument('-w', '--write', action='store_true', help='Write to eeprom')
     args = parser.parse_args()

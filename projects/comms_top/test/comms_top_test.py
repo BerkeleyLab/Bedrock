@@ -241,7 +241,6 @@ parser.add_argument('-cf', '--cfile', default=None, help='Command file')
 args = parser.parse_args()
 
 UDPSock = socket(AF_INET, SOCK_DGRAM)
-UDPSock.bind(("0.0.0.0", 0))
 UDPSock.settimeout(2)
 
 print("Targeting %s:%s" % (args.target, args.port))

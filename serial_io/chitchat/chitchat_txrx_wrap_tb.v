@@ -64,10 +64,10 @@ module chitchat_txrx_wrap_tb;
       end
    end
 
-   always begin cc_clk     = ~cc_clk;     #(CC_CLK_PERIOD/2); end
-   always begin gtx_tx_clk = ~gtx_tx_clk; #(GTX_TX_CLK_PERIOD/2); end
-   always begin gtx_rx_clk = ~gtx_rx_clk; #(GTX_RX_CLK_PERIOD/2); end
-   always begin lb_clk     = ~lb_clk;     #(LB_CLK_PERIOD/2); end
+   always begin #(CC_CLK_PERIOD/2);     cc_clk     = ~cc_clk;     end
+   always begin #(GTX_TX_CLK_PERIOD/2); gtx_tx_clk = ~gtx_tx_clk; end
+   always begin #(GTX_RX_CLK_PERIOD/2); gtx_rx_clk = ~gtx_rx_clk; end
+   always begin #(LB_CLK_PERIOD/2);     lb_clk     = ~lb_clk;     end
 
    assign tx_clk = cc_clk;
    assign rx_clk = lb_clk; // RX clock normally lb_clk
@@ -81,6 +81,7 @@ module chitchat_txrx_wrap_tb;
 
    integer cnt_off = MAX_OFF;
    integer cnt_on = 0;
+   wire [1:0]  gtx_k;
    always @(posedge tx_clk) begin
       if (tx_transmit_en) begin
          if (cnt_on == 0)
@@ -148,7 +149,6 @@ module chitchat_txrx_wrap_tb;
 
    wire [15:0] local_frame_counter;
    wire [15:0] gtx_d;
-   wire [1:0]  gtx_k;
    wire [15:0] rx_frame_counter;
    wire [15:0] txrx_latency;
 
@@ -331,7 +331,7 @@ module chitchat_txrx_wrap_tb;
             $display("%t, ERROR: Version comparison failed", $time);
             fail <= 1;
          end
-         if (rx_location != scb_location) begin
+         if (tx_transmit_en & (rx_location != scb_location)) begin
             $display("%t, ERROR: Location comparison failed", $time);
             fail <= 1;
          end

@@ -38,7 +38,6 @@ VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
 VVP_FLAGS = ${VVP_FLAGS_$@} ${VCD_ARGS_$@}
-YOSYS = yosys
 PERL = perl
 XCIRCUIT = xcircuit
 # XXX consider converting this to something more compatible with Bedrock's VIVADO_SYNTH.
@@ -155,7 +154,7 @@ speed_test.out: speed_test_tb udp-vpi.vpi xfer1
 
 # =====
 # Another tangent for another client
-LB_DEMO_V = lb_demo_slave.v freq_count.v fake_config_romx.v dpram.v
+LB_DEMO_V = lb_demo_slave.v freq_count.v freq_gcount.v fake_config_romx.v reg_tech_cdc.v dpram.v multi_counter.v
 # LB_DEMO_V += badge_trace.v
 mem_gateway_tb: mem_gateway.v client_sub.v reg_delay.v $(LB_DEMO_V) udp-vpi.vpi
 VFLAGS_mem_gateway_tb = -m ./udp-vpi
@@ -183,7 +182,7 @@ spi_flash_check: spi_flash.grab lorem_ipsum.txt
 
 # =====
 # scanner off-line test
-scanner_tb: offline.v scanner.v ones_chksum.v udp_port_cam.v crc8e_guts.v
+scanner_tb: offline.v scanner.v ones_chksum.v udp_port_cam.v reg_tech_cdc.v crc8e_guts.v
 stests.dat: packetgen.py
 	$(PYTHON) $< > $@
 scanner.vcd: stests.dat
@@ -202,7 +201,9 @@ VCD_ARGS_rtefi_pipe.vcd = +packet_file=$(filter %udp4.dat, $^)
 # =====
 # unified version of assembled pipeline and test peripherals,
 # configured for on-line (tap) testing
-hw_test_tb: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v tap-vpi.vpi
+
+HW_TEST_V = hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v packet_categorize.v data_xdomain.v flag_xdomain.v $(LB_DEMO_V) spi_gate.v
+hw_test_tb: $(HW_TEST_V) tap-vpi.vpi
 VFLAGS_hw_test_tb = -m ./tap-vpi
 hw_test.vcd: tap-vpi.vpi
 .PRECIOUS: hw_test.vcd  # work-around; better if vvp could exit with success
@@ -210,21 +211,16 @@ hw_test_start: hw_test_tb tap-vpi.vpi
 	$(VVP) $<
 
 # =====
-# experimental check of CDC-correctness
-# not yet turned into a regression test
-hw_test_yosys.json: hw_test.v $(RTEFI_V) mac_compat_dpram.v activity.v base_rx_mac.v $(LB_DEMO_V) spi_gate.v ../../build-tools/cdc_snitch_proc.ys
-	$(YOSYS) --version
-	nn=$$$$; $(YOSYS) -p "read_verilog -DBUGGY_FORLOOP $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@" > yosys.$$nn.log || exit 1 && grep "Warning" yosys.$$nn.log || echo "No Warnings!"
-# (I don't think yosys for-loop is actually buggy, just tediously slow, and in this case unnecessary)
-hw_test_cdc.txt: ../../build-tools/cdc_snitch.py hw_test_yosys.json
-	$(PYTHON) $^ > $@
-	@tail -n 1 $@
+# check of basic CDC-correctness
+hw_test_yosys.json: hw_test_skin.v $(HW_TEST_V)
+# exercise with make hw_test_cdc.txt
 
 # =====
 # experimental bitfiles, not for hardware
+# summarizes fabric footprints based on XST synthesizing for Spartan-6
 bits: scanner.bit construct.bit xformer.bit ethernet_crc_add.bit udp_port_cam_wrap.bit rtefi_blob.bit
-	(cd _xilinx && for f in $(basename $^); do echo $$f; grep "Slice LUT" $${f}_map.mrp; done)
-scanner.bit: ones_chksum.v udp_port_cam.v crc8e_guts.v
+	cd _xilinx && for f in $(basename $^); do echo $$f; grep "Slice LUT" $${f}_map.mrp; done
+scanner.bit: ones_chksum.v udp_port_cam.v crc8e_guts.v reg_tech_cdc.v
 construct.bit: ones_chksum.v construct_tx_table.v
 xformer.bit: hack_icmp_cksum.v reg_delay.v
 ethernet_crc_add.bit: crc8e_guts.v
@@ -234,8 +230,7 @@ rtefi_blob.bit: $(RTEFI_V)
 # =====
 # Make a bitfile for an SP605 with Xilinx XST
 # first just a syntax check (sp605_gmii_test.v is empty)
-SYNTH_SOURCE_EXTRA = hw_test.v base_rx_mac.v spi_gate.v $(LB_DEMO_V) activity.v mac_compat_dpram.v
-SYNTH_SOURCE_SP605 = gmii_hw_test.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) sp605/gmii_clock_handle.v sp605/spartan6_clocks.v
+SYNTH_SOURCE_SP605 = gmii_hw_test.v $(HW_TEST_V) sp605/gmii_clock_handle.v sp605/spartan6_clocks.v
 sp605_gmii_test_tb: $(SYNTH_SOURCE_SP605) sp605/ODDR2.v
 sp605_gmii_test.bit: $(SYNTH_SOURCE_SP605) sp605/sp605_gmii.ucf
 	PART=xc6slx45t-fgg484-3 $(ISE_SYNTH) $(notdir $(basename $<)) $^
@@ -246,11 +241,11 @@ sp605_gmii_test_iobs: sp605_gmii_test.bit
 # =====
 # Make a bitfile for a KC705 with Xilinx Vivado
 # first just a syntax check (kc705_gmii_test.v is empty)
-SYNTH_SOURCE_KC705 = gmii_hw_test.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) kc705/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
+SYNTH_SOURCE_KC705 = gmii_hw_test.v $(HW_TEST_V) kc705/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
 kc705_gmii_test_tb: $(SYNTH_SOURCE_KC705) kc705/ODDR.v kc705/BUFG.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v
 kc705_gmii_test.d: $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-kc705_gmii_test.bit: kc705_gmii_test.tcl kc705_gmii_test.d $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
+kc705_gmii_test.bit: kc705_gmii_test.tcl kc705_gmii_test.d badger.tcl $(SYNTH_SOURCE_KC705) kc705/kc705_gmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/kc705_gmii_test.runs/impl_1/gmii_hw_test.bit $@
 
@@ -264,15 +259,15 @@ ac701_rgmii_test.bit: $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.ucf
 	mv _xilinx/rgmii_hw_test.bit $@
 ac701_rgmii_test.d: $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.xdc
+ac701_rgmii_vtest.bit: ac701_rgmii_test.tcl ac701_rgmii_test.d badger.tcl $(SYNTH_SOURCE_AC701) ac701/ac701_rgmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/ac701_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
 # =====
-SYNTH_SOURCE_MARBLEM = rgmii_hw_test.v gmii_to_rgmii.v $(RTEFI_V) $(SYNTH_SOURCE_EXTRA) marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
+SYNTH_SOURCE_MARBLEM = rgmii_hw_test.v gmii_to_rgmii.v $(HW_TEST_V) marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
 marblem_rgmii_test.d: $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
+marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d badger.tcl $(SYNTH_SOURCE_MARBLEM) marble/marblem_rgmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/marblem_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
@@ -303,9 +298,9 @@ Vrtefi_blob: $(RTEFI_V) rtefi_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 
 # =====
 # Verilator, slightly larger scope
-Vhw_test: hw_test.v base_rx_mac.v mac_compat_dpram.v activity.v $(LB_DEMO_V) spi_gate.v $(RTEFI_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c crc8e_guts.vh crc_genguts.vh
+Vhw_test: $(HW_TEST_V) hw_test_sim.cpp ethernet_model.c tap_alloc.c crc32.c crc8e_guts.vh crc_genguts.vh
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -cc --exe $(filter-out crc8e_guts.vh crc_genguts.vh, $^)
+	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -CFLAGS -Wno-logical-op -cc --exe $(filter-out crc8e_guts.vh crc_genguts.vh, $^)
 	MAKEFLAGS="" make -C obj_dir -f Vhw_test.mk
 	mv obj_dir/$@ $@
 # TFTP server demo:
@@ -364,15 +359,16 @@ cluster_run.out: cluster_run.sh Vcluster
 rtefi_blob_tb: $(RTEFI_V)
 
 # =====
-# Experimental
+# Experimental, bitrotted
 rtefi_blob_synth.v: $(RTEFI_V)
-hw_test_synth.v: $(SYNTH_SOURCE_EXTRA) $(RTEFI_V)
+hw_test_synth.v: $(HW_TEST_V)
+YOSYS_SHARE = /usr/share/yosys
 SYNTH_SOURCE_AC701X = rgmii_hw_test.v hw_test_synth.v kc705/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v
-ac701_rgmii_testx_tb: $(SYNTH_SOURCE_AC701X) kc705/ODDR.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v $(HOME)/share/yosys/xilinx/cells_sim.v
+ac701_rgmii_testx_tb: $(SYNTH_SOURCE_AC701X) kc705/ODDR.v kc705/IBUFGDS.v kc705/MMCME2_BASE.v $(YOSYS_SHARE)/xilinx/cells_sim.v
 # ac701_rgmii_testx_tb won't work until I have a viable RAMB18E1
 ac701_rgmii_testx.d: $(SYNTH_SOURCE_AC701X) ac701/ac701_rgmii.xdc
 	echo $^ | tr ' ' '\n' > $@
-ac701_rgmii_vtestx.bit: ac701_rgmii_testx.tcl ac701_rgmii_testx.d $(SYNTH_SOURCE_AC701X) ac701/ac701_rgmii.xdc
+ac701_rgmii_vtestx.bit: ac701_rgmii_testx.tcl ac701_rgmii_testx.d badger.tcl $(SYNTH_SOURCE_AC701X) ac701/ac701_rgmii.xdc
 	$(SYNTH_VIVADO) $<
 	mv _xilinx/ac701_rgmii_testx.runs/impl_1/rgmii_hw_test.bit $@
 
@@ -385,7 +381,7 @@ test_tx.vcd: host_mem
 test_tx.out: test_tx_tb host_mem
 	$(VVP) $<
 precog_tb: precog.v
-mac_subset_tb: mac_subset.v test_tx_mac.v precog.v mac_compat_dpram.v
+mac_subset_tb: mac_subset.v test_tx_mac.v precog.v mac_compat_dpram.v reg_tech_cdc.v
 host_cmds.dat: host_cmds_gen mac_subset.gold
 	./host_cmds_gen $(filter %mac_subset.gold, $^)
 mac_subset.vcd: host_cmds.dat
@@ -409,7 +405,7 @@ VCD_ARGS_selfmac.vcd = +packet_file=$(filter %selfmac_in.dat, $^)
 # =====
 # If you've kept your .gtkw files up to date, this target should do nothing.
 # Still learning how window managers affect [sst_width].
-# rtefi_sim.gtkw and hw_test.gtkw are oddball, only useful interactively.
+# rtefi_sim.gtkw and hw_test.gtkw are oddball, being only useful interactively.
 # The tail command gets rid of the non-reproducible GTKWave header.
 gtkw_refresh:
 	for f in *.gtkw; do if test $$f != rtefi_sim.gtkw && test $$f != hw_test.gtkw; then $(XVFB) make $${f%.gtkw}_view GTKW_OPT="-r gtkwave_nosplash.rc -S resave.tcl"; tail -n +9 $$f > temp_$$$$.gtkw && mv temp_$$$$.gtkw $$f; fi; done
@@ -437,7 +433,7 @@ CLEAN += stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.o
 CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab udprtx
 CLEAN += cluster_run.out hw_test_cdc.txt hw_test_yosys.json
 CLEAN += $(RTEFI_CLEAN)
-CLEAN += *.html *.pdf *.log
-CLEAN_DIRS += obj_dir _xilinx
+CLEAN += *.html *.pdf *.log *.bit
+CLEAN_DIRS += obj_dir _xilinx .Xil
 # Actual "clean" rule in bottom_rules.mk
 include $(BUILD_DIR)/bottom_rules.mk

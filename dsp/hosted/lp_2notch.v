@@ -44,6 +44,7 @@ wire [22:0] y_sum = y1+y2+y3;
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 reg [21:0] y_out=0;
 always @(posedge clk) y_out <= `SAT(y_sum, 22, 21);
+`undef SAT
 
 // Very stupid extra delay, only here to keep historical I-Q relationship.
 // XXX get rid of this!

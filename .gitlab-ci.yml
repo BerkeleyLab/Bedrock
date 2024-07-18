@@ -8,7 +8,7 @@ stages:
 variables:
   XILINX_VIVADO: /non-free/Xilinx/Vivado/2020.2
   CI_REGISTRY: mohs.dhcp.lbl.gov
-  CONTAINER_IMAGE: $CI_REGISTRY/testing_base_bullseye
+  CONTAINER_IMAGE: $CI_REGISTRY/testing_base_bookworm
   # CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
@@ -22,8 +22,12 @@ services:
 #    entrypoint: ["dockerd-entrypoint.sh"]
 
 include:
+  - local: .gitlab/ci/badger.gitlab-ci.yml
   - local: .gitlab/ci/build.gitlab-ci.yml
+  - local: .gitlab/ci/board_support.gitlab-ci.yml
+  - local: .gitlab/ci/docs.gitlab-ci.yml
   - local: .gitlab/ci/serial_io.gitlab-ci.yml
+  - local: .gitlab/ci/other_hdl.gitlab-ci.yml
   - local: .gitlab/ci/soc.gitlab-ci.yml
   - local: .gitlab/ci/oscope.gitlab-ci.yml
   - local: .gitlab/ci/cmoc.gitlab-ci.yml
@@ -32,93 +36,13 @@ include:
   - local: .gitlab/ci/marble_family.gitlab-ci.yml
   - local: .gitlab/ci/swap_gitid.gitlab-ci.yml
   - local: .gitlab/ci/cdc_check.gitlab-ci.yml
+  - local: .gitlab/ci/localbus.gitlab-ci.yml
 
 leep_test:
   script:
     - cd projects/common && python3 -m unittest -v
 
-cordic_test:
-  before_script:
-    - cd cordic && make clean
-  stage: test
-  script:
-    - make all
-
-freq_demo:
-  stage: test
-  script:
-    - make -C homeless/freq_demo
-    - make -C homeless all checks
-
-make_docs:
-  before_script:
-    - cd build-tools/make-demo && make clean
-  stage: test
-  script:
-    - make check consistency
-
 flake8:
-  stage: synthesis
+  stage: test
   script:
     - find . -name "*.py" -exec flake8 {} +
-
-badger_test:
-  before_script:
-    - cd badger/tests && make clean && sh ./tap-setup.sh
-  stage: test
-  script:
-    - make && bash tftp_test.sh && bash speed_check.sh
-
-peripheral_test:
-  before_script:
-  stage: test
-  script:
-    - make -C peripheral_drivers
-    - make -C peripheral_drivers/idelay_scanner
-    - make -C peripheral_drivers/ds1822
-    - make -C peripheral_drivers/i2cbridge
-
-badger_ac701:
-  stage: synthesis
-  before_script:
-    - cd badger/tests && ls /non-free
-  script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make ac701_rgmii_vtest.bit
-  artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
-    expire_in: 2 days
-    paths:
-      - badger/tests
-      - badger/tests/ac701_rgmii_vtest.bit
-
-badger_ac701_run:
-  stage: program
-  tags:
-    - deploy
-  dependencies:
-    - badger_ac701
-  script:
-    - cd badger/tests && test -r ac701_rgmii_vtest.bit && sh teststand_ac701.sh
-
-sphinx_docs:
-  stage: docs
-  before_script: |
-    apt-get update
-    apt-get install -y \
-        imagemagick \
-        ghostscript \
-        xvfb \
-        gtkwave \
-        texlive-binaries
-    python3 -m pip install \
-        sphinx==5.0.2 \
-        sphinx_rtd_theme \
-        numpy \
-        m2r2==0.3.2
-    sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
-        -e '/pattern="PDF"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
-        -e '/pattern="EPS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
-        -e '/<\/policymap>/i \  <policy domain="coder" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP}" \/>' \
-    /etc/ImageMagick-*/policy.xml
-  script:
-    - make -C doc html

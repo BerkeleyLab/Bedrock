@@ -25,6 +25,7 @@ module patt_gen_tb;
 
    integer SEED;
    integer tx_cnt=0;
+   reg     pgen_disable = 1;
 
    initial begin
       if ($test$plusargs("vcd")) begin
@@ -56,7 +57,6 @@ module patt_gen_tb;
    // ----------------------
    // Generate stimulus
    // ----------------------
-   reg         pgen_disable = 1;
    wire [4:0]  pgen_rate;
    wire        pgen_test_mode;
    wire [2:0]  pgen_inc_step;
@@ -69,6 +69,7 @@ module patt_gen_tb;
    integer rand_setup;
 
    // Generate a random setup and wait for match
+   wire    rx_match;
    always @(posedge cc_clk) begin
       if (match_tout==0 || (match_cnt >= MATCH_THRES)) begin
          if (match_tout==0 && pgen_disable==0) begin
@@ -100,7 +101,6 @@ module patt_gen_tb;
    wire        tx_valid;
    wire [15:0] tx_data;
    wire [15:0] rx_data;
-   wire        rx_match;
    wire [15:0] rx_err_cnt;
 
    patt_gen #(

@@ -127,6 +127,7 @@ always @(posedge clk) begin
 	sat_result <= `SAT(sum_result,36,35);
 	clip_r <= ~(~|sum_result[36:35] | &sum_result[36:35]);
 end
+`undef SAT
 
 assign ab_in = sat_result;
 assign position = sat_result[35:18];

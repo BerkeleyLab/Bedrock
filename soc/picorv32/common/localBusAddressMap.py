@@ -37,7 +37,7 @@ def gen_addrmap(regmap):
 
 def write_addrmap(addrmap, ifname, ofname):
     """
-    Iterate through all sorted keys of the addrmap dict and genereate #define strings
+    Iterate through all sorted keys of the addrmap dict and generate #define strings
     """
     hf = """// Automatically generated register map of the local bus
 // Source:    {0}

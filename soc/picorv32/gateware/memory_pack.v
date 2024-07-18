@@ -58,9 +58,15 @@ integer i;
 reg [31:0] memory[0:_BLOCK_RAM_SIZE-1];
 initial begin
     for (i=0; i<_BLOCK_RAM_SIZE; i=i+1) memory[i] = 32'h00000000;
-    $readmemh(MEM_INIT, memory);
-    $write("memory_pack: 0x%x words, %s\n", _BLOCK_RAM_SIZE, MEM_INIT);
-    // $fflush();
+    if (MEM_INIT != "") begin
+        $readmemh(MEM_INIT, memory);
+        $write("memory_pack: 0x%x words, %s\n", _BLOCK_RAM_SIZE, MEM_INIT);
+    end else begin
+        $write("memory_pack: no init file given\n");
+    end
+    `ifdef SIMULATE
+    $fflush();  // yosys, at least, doesn't like this
+    `endif
 end
 
 // --------------------------------------------------------------

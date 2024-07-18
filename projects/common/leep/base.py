@@ -113,9 +113,9 @@ class DeviceBase(object):
         # build a regexp
         # from a list of name fragments
         fragments = self.instance + instance + [name]
-        # match when consecutive fragments are seperated by
+        # match when consecutive fragments are separated by
         #  1. a single '_'.  ['A', 'B'] matches 'A_B'.
-        #  2. two '_' with anything inbetween.  'A_blah_B' or 'A_x_y_z_B'.
+        #  2. two '_' with anything in between.  'A_blah_B' or 'A_x_y_z_B'.
         regx = r'_(?:.*_)?'.join([re.escape(str(i)) for i in fragments])
         R = re.compile('^.*%s$' % regx)
 
@@ -200,7 +200,7 @@ class DeviceBase(object):
 
         ;param bool tag: Whether to use the tag mechanism to wait for a update
         :param float timeout: How long to wait for an acquisition.
-                              Seperate from the communications timeout.
+                              Separate from the communications timeout.
         :param list instance: List of instance identifiers.
         """
         raise NotImplementedError

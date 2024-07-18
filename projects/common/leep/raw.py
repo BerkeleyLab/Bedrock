@@ -146,6 +146,10 @@ class LEEPDevice(DeviceBase):
         else:
             self.rfs = True
 
+    def close(self):
+        self.sock.close()
+        super(LEEPDevice, self).close()
+
     @print_reg
     def reg_write(self, ops, instance=[]):
 
@@ -162,7 +166,7 @@ class LEEPDevice(DeviceBase):
             if isinstance(base_addr, (bytes, unicode)):
                 base_addr = int(base_addr, 0)
 
-            value = numpy.asarray(value, dtype='I')
+            value = numpy.array(value).astype('I')
 
             if L > 1:
                 _log.debug('reg_write %s <- %s ...', name, value[:10])
@@ -547,7 +551,7 @@ class LEEPDevice(DeviceBase):
                 raise RomError("Truncated ROM Descriptor")
 
             if type == 1:
-                blob = blob.tobytes()
+                blob = blob.tobytes().decode()
                 self.size_desc = size
                 if self.descript is None:
                     self.descript = blob

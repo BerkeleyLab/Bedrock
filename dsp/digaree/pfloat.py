@@ -3,7 +3,7 @@
 # sim1, and with a natural (floating-point, SI unit-based) numpy calculation.
 
 # When run without any arguments, it writes the init_run2.dat file with
-# the constants needed for ths sim1 run.
+# the constants needed for the sim1 run.
 # When run with 1 argument, the filename of the acquired waveforms,
 # does the numpy calculation.
 # When run with 2 arguments, the second is the filename with sim1 output,

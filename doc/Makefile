@@ -141,7 +141,10 @@ SRC_MD = \
    dsp/README.md \
    board_support/zest/README.md \
    board_support/bmb7_kintex/README.md \
+   localbus/README.md \
+   localbus/jit_rad.md \
    fpga_family/xilinx/README.md \
+   build-tools/cdc_snitch.md \
    build-tools/newad.md
 
 SRC_SVG = \
@@ -151,7 +154,10 @@ SRC_SVG = \
   badger/doc/tx_path.svg \
   badger/doc/precog_upg.svg \
   peripheral_drivers/i2cbridge/i2c_chunk.svg \
-  peripheral_drivers/i2cbridge/blocks.svg
+  peripheral_drivers/i2cbridge/blocks.svg \
+  build-tools/cdc_BAD.svg \
+  build-tools/cdc_OK1.svg \
+  build-tools/cdc_OKX.svg
 
 DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR) $(HOMELESS_DIR)
 VFLAGS     += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS)) -y$(AUTOGEN_DIR)

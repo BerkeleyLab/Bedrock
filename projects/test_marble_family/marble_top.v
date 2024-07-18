@@ -6,6 +6,10 @@
 module marble_top(
 	input GTPREFCLK_P,
 	input GTPREFCLK_N,
+`ifdef MARBLE_V2
+	input DDR_REF_CLK_P,
+	input DDR_REF_CLK_N,
+`endif
 	input SYSCLK_P,
 
 	// SI570 clock inputs
@@ -66,7 +70,20 @@ module marble_top(
 	inout [33:0] FMC1_LA_N,
 	inout [33:0] FMC2_LA_P,
 	inout [33:0] FMC2_LA_N,
+`ifdef MARBLE_V2
+	inout [1:0] FMC1_CK_P,
+	inout [1:0] FMC1_CK_N,
+	inout [1:0] FMC2_CK_P,
+	inout [1:0] FMC2_CK_N,
+	inout [23:0] FMC2_HA_P,
+	inout [23:0] FMC2_HA_N,
+`endif
 	// output ZEST_PWR_EN,
+
+`ifdef MARBLE_V2
+	// Special for LTM4673 synchronization -- untested
+	output [2:0] LTM_CLKIN,
+`endif
 
 `ifdef MARBLE_MINI
 	// J15 TMDS 0, 1, 2, CLK
@@ -85,6 +102,29 @@ module marble_top(
 
 `include "marble_features_params.vh"
 
+`ifndef MARBLE_V2
+wire [1:0] FMC1_CK_P;
+wire [1:0] FMC1_CK_N;
+wire [1:0] FMC2_CK_P;
+wire [1:0] FMC2_CK_N;
+wire [23:0] FMC2_HA_P;
+wire [23:0] FMC2_HA_N;
+`endif
+
+// Only Marble V2 has DDR ref clk
+wire ddrrefclk_unbuf, ddrrefclk;
+generate
+if (C_CARRIER_REV == "v2") begin
+IBUFDS ddri_125(.I(DDR_REF_CLK_P), .IB(DDR_REF_CLK_N), .O(ddrrefclk_unbuf));
+// Vivado fails, with egregiously useless error messages,
+// if you don't put this BUFG in the chain to the MMCM.
+BUFG ddrg_125(.I(ddrrefclk_unbuf), .O(ddrrefclk));
+end
+endgenerate
+
+// For Marblemini, GTPREFCLKs are routed directly to MGTCLK pins,
+// so using them does not depend on the clock switch configuration
+// either
 wire gtpclk0, gtpclk;
 // Gateway GTP refclk to fabric
 IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0));
@@ -118,11 +158,55 @@ wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
 
 // You really want to set this define.
 // It's only valid to leave it off when C_USE_RGMII_IDELAY is 0.
-// Maybe useful if you're exploring parameter space or
-// have problems with the Xilinx DNA readout.
+// It might be useful to not define it if you're exploring parameter space
+// or have problems with the Xilinx DNA readout.
 `define USE_IDELAYCTRL
 
-`ifdef USE_GTPCLK
+// Sanity check for C_SYSCLK_SRC
+generate
+if (C_SYSCLK_SRC != "gtp_ref_clk" &&
+    C_SYSCLK_SRC != "ddr_ref_clk" &&
+    C_SYSCLK_SRC != "sys_clk") begin
+    C_SYSCLK_SRC_parameter_has_an_invalid_value();
+end
+endgenerate
+
+// If using ddr_ref_clk it must be a v2
+generate
+if (C_SYSCLK_SRC == "ddr_ref_clk" &&
+    C_CARRIER_REV != "v2") begin
+    C_SYSCLK_SRC_ddr_ref_clk_can_only_be_used_with_a_Marble_v2();
+end
+endgenerate
+
+generate
+// this configuration is probably bit-rotted
+if (C_SYSCLK_SRC == "sys_clk") begin
+wire SYSCLK_N = 0;
+gmii_clock_handle clocks(
+	.sysclk_p(SYSCLK_P),
+	.sysclk_n(SYSCLK_N),
+	.reset(pll_reset),
+	.clk_eth(tx_clk),
+	.clk_eth_90(tx_clk90),
+	.clk_locked(clk_locked)
+);
+assign test_clk=0;
+end
+else begin
+
+wire clk125;
+// Use GTPREFCLK_P
+if (C_SYSCLK_SRC == "gtp_ref_clk") begin
+assign clk125 = gtpclk;
+end
+// Use DDR_REF_CLK_P, preferred because it does not depend
+// on the ADN4600 clock switch configuration. Only available
+// on Marble v2
+else if (C_SYSCLK_SRC == "ddr_ref_clk") begin
+assign clk125 = ddrrefclk;
+end
+
 xilinx7_clocks #(
 	.DIFF_CLKIN("BYPASS"),
 	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
@@ -134,7 +218,7 @@ xilinx7_clocks #(
 	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
 `endif
 ) clocks_i(
-	.sysclk_p (gtpclk),
+	.sysclk_p (clk125),
 	.sysclk_n (1'b0),
 	.reset    (pll_reset),
 	.clk_out0 (tx_clk),
@@ -143,19 +227,9 @@ xilinx7_clocks #(
 	.clk_out3f(test_clk),  // not buffered, straight from MMCM
 	.locked   (clk_locked)
 );
-`else
-// this configuration is probably bit-rotted
-wire SYSCLK_N = 0;
-gmii_clock_handle clocks(
-	.sysclk_p(SYSCLK_P),
-	.sysclk_n(SYSCLK_N),
-	.reset(pll_reset),
-	.clk_eth(tx_clk),
-	.clk_eth_90(tx_clk90),
-	.clk_locked(clk_locked)
-);
-assign test_clk=0;
-`endif
+end
+endgenerate
+
 `ifdef USE_IDELAYCTRL
 assign clk200 = clk_out1;
 reg bad_slow_clock=0;
@@ -228,6 +302,8 @@ assign idelay_ce = 0;
 assign idelay_clk = 0;
 assign idelay_value_in = 0;
 
+// Maybe this cruft could be eliminated if the corresponding yaml defs
+// were rejiggered to be parameters.
 `ifdef USE_I2CBRIDGE
 localparam C_USE_I2CBRIDGE = 1;
 `else
@@ -238,14 +314,25 @@ localparam C_MMC_CTRACE = 1;
 `else
 localparam C_MMC_CTRACE = 0;
 `endif
+`ifdef GPS_CTRACE
+localparam C_GPS_CTRACE = 1;
+`else
+localparam C_GPS_CTRACE = 0;
+`endif
 
+// vestiges of CERN FMC tester support
+wire old_scl1, old_scl2, old_sda1, old_sda2;
+
+wire [2:0] ps_sync;
 wire [7:0] leds;
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
 marble_base #(
 	.USE_I2CBRIDGE(C_USE_I2CBRIDGE),
 	.MMC_CTRACE(C_MMC_CTRACE),
+	.GPS_CTRACE(C_GPS_CTRACE),
 	.default_enable_rx(C_DEFAULT_ENABLE_RX),
+	.use_ddr_pps(1),
 	.misc_config_default(C_MISC_CONFIG_DEFAULT)
 ) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
@@ -259,17 +346,13 @@ marble_base #(
 	.aux_clk(SYSCLK_P), .clk62(clk62), .cfg_clk(cfg_clk),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
-	.twi_scl({dum_scl, FMC2_LA_P[2], FMC1_LA_P[2], TWI_SCL}),
-	.twi_sda({dum_sda, FMC2_LA_N[2], FMC1_LA_N[2], TWI_SDA}),
-	.fmc_test({
-		FMC2_LA_P[33:3], FMC2_LA_P[1:0],
-		FMC2_LA_N[33:3], FMC2_LA_N[1:0],
-		FMC1_LA_P[33:3], FMC1_LA_P[1:0],
-		FMC1_LA_N[33:3], FMC1_LA_N[1:0]}),
+	.twi_scl({dum_scl, old_scl1, old_scl2, TWI_SCL}),
+	.twi_sda({dum_sda, old_sda1, old_sda2, TWI_SDA}),
+	.fmc_test({FMC2_HA_P, FMC2_HA_N, FMC2_CK_P, FMC2_CK_N, FMC2_LA_P, FMC2_LA_N, FMC1_CK_P, FMC1_CK_N, FMC1_LA_P, FMC1_LA_N}),
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
-	.GPS(Pmod2[3:0]), .ext_config(ext_config), .LED(leds)
+	.GPS(Pmod2[3:0]), .ext_config(ext_config), .ps_sync(ps_sync), .LED(leds)
 );
 `ifndef SIMULATE
 // Verilator can't handle this, says
@@ -285,6 +368,9 @@ assign LD17 = leds[1];
 wire tmds_enable = ext_config[0];
 tmds_test tmds_test(.clk(test_clk), .enable(tmds_enable),
 	.tmds_p(TMDS_P), .tmds_n(TMDS_N));
+`endif
+`ifdef MARBLE_V2
+assign LTM_CLKIN = ps_sync;
 `endif
 
 // Give the network the option of turning off the 20 MHz VCXO

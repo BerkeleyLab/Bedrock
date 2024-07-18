@@ -12,13 +12,14 @@ module mgt_eth_clks #(
    input  mgt_out_clk,
    output mgt_usr_clk,
    output gmii_clk,
+   output gmii_clk90,
    output pll_lock
 );
 
 `ifndef SIMULATE
 
    wire mgt_out_clk_buf;
-   wire mgt_usr_clk_l, gmii_clk_l;
+   wire mgt_usr_clk_l, gmii_clk_l, gmii_clk90_l;
 
    /* -- This is being included automatically by the Transceiver Wizard
    // Buffer for input clock (required for Kintex7, not required for Virtex7)
@@ -31,11 +32,12 @@ module mgt_eth_clks #(
    // Instantiate wizard-generated clock management module
    // Configured by mgt_eth_clk.tcl
    mgt_eth_mmcm i_mgt_eth_mmcm (
-      .clk_in   (mgt_out_clk),
-      .reset    (reset),
-      .mgt_clk  (mgt_usr_clk_l),
-      .gmii_clk (gmii_clk_l),
-      .locked   (pll_lock)
+      .clk_in     (mgt_out_clk),
+      .reset      (reset),
+      .mgt_clk    (mgt_usr_clk_l),
+      .gmii_clk   (gmii_clk_l),
+      .gmii_clk90 (gmii_clk90_l),
+      .locked     (pll_lock)
    );
 
    // Buffer clock management outputs
@@ -48,8 +50,10 @@ module mgt_eth_clks #(
 
    if(GMII_CLK_BUF == 0) begin
       BUFG i_gmii_clk_buf (.I (gmii_clk_l), .O (gmii_clk));
+      BUFG i_gmii_clk90_buf (.I (gmii_clk90_l), .O (gmii_clk90));
    end else begin
       BUFH i_gmii_clk_buf (.I (gmii_clk_l), .O (gmii_clk));
+      BUFH i_gmii_clk90_buf (.I (gmii_clk90_l), .O (gmii_clk90));
    end
    endgenerate
 
@@ -64,6 +68,7 @@ module mgt_eth_clks #(
 
    assign pll_lock    = 1;
    assign gmii_clk    = gmii_clk_l;
+   assign gmii_clk90  = gmii_clk_l;
    assign mgt_usr_clk = mgt_usr_clk_l;
 `endif
 

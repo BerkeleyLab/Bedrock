@@ -4,7 +4,7 @@ include $(PICORV_DIR)/rules.mk
 
 BLOCK_RAM_SIZE = 512
 SRC_V   = memory2_pack.v mpack.v munpack.v picorv32.v pico_pack.v sfr_pack.v
-SRC_V  += wfm_pack.v flag_xdomain.v dpram.v
+SRC_V  += wfm_pack.v flag_xdomain.v dpram.v reg_tech_cdc.v
 CFLAGS += -DSIMULATION
 OBJS   += startup.o
 

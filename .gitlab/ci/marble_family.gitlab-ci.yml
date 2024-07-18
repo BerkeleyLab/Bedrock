@@ -1,7 +1,8 @@
 marble_sim:
   stage: test
   script:
-    - cd projects/test_marble_family && make all net_slave_check
+    - make -C projects/test_marble_family all net_slave_check
+    - make -C projects/test_marble_family/pps_lock
 
 .bitgen:
   stage: synthesis
@@ -19,7 +20,9 @@ marble_mini_synth:
     paths:
       - projects/test_marble_family/marble*.bit
       - projects/test_marble_family/vivado.log
-      - projects/test_marble_family/_xilinx/marble1.runs/impl_1/marble_top_utilization_placed.rpt
+      - projects/test_marble_family/_xilinx/marble1.runs/*.rpt
+      - projects/test_marble_family/_xilinx/marble1.runs/synth_1/marble_top_*.rpt
+      - projects/test_marble_family/_xilinx/marble1.runs/impl_1/marble_top_*.rpt
 
 marble_mini_run:
   stage: program
@@ -40,7 +43,9 @@ marble_v2_synth:
     paths:
       - projects/test_marble_family/marble*.bit
       - projects/test_marble_family/vivado.log
-      - projects/test_marble_family/_xilinx/marble2.runs/impl_1/marble_top_utilization_placed.rpt
+      - projects/test_marble_family/_xilinx/marble2.runs/*.rpt
+      - projects/test_marble_family/_xilinx/marble2.runs/synth_1/marble_top_*.rpt
+      - projects/test_marble_family/_xilinx/marble2.runs/impl_1/marble_top_*.rpt
 
 marble_run:
   stage: program

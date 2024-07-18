@@ -1,0 +1,27 @@
+[timestart] 4
+[size] 1000 600
+[pos] -1 -1
+*-11.396951 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.jit_rad_gateway_demo.
+[treeopen] TOP.jit_rad_gateway_demo.xfer_bank_6.
+[sst_width] 214
+[signals_width] 134
+[sst_expanded] 1
+[sst_vpaned_height] 152
+@28
+TOP.raw_l
+TOP.raw_s
+TOP.jit_rad_gateway_demo.xfer_bank_6.lb_prefill
+TOP.jit_rad_gateway_demo.xfer_bank_6.lb_strobe
+TOP.jit_rad_gateway_demo.xfer_bank_6.buffer.lb_pending
+TOP.jit_rad_gateway_demo.xfer_bank_6.buffer.lb_running
+TOP.jit_rad_gateway_demo.xfer_bank_6.lb_error
+@24
+TOP.jit_rad_gateway_demo.err_cnt[9:0]
+TOP.jit_rad_gateway_demo.pack_cnt[9:0]
+@28
+TOP.jit_rad_gateway_demo.write_dynamic
+TOP.jit_rad_gateway_demo.write_stop
+[pattern_trace] 1
+[pattern_trace] 0

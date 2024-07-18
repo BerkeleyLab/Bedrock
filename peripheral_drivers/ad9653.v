@@ -1,4 +1,15 @@
-module ad9653 (
+module ad9653 #(
+	parameter DWIDTH=8,
+	parameter BANK_CNT=1,
+	parameter BANK_CNT_WIDTH=$clog2(BANK_CNT)+1,
+	parameter [DWIDTH*BANK_CNT_WIDTH-1:0] BANK_SEL=0,
+	parameter SPIMODE="passthrough",
+	parameter dbg = "true",
+	parameter [DWIDTH-1:0] FLIP_D=0,
+	parameter FLIP_DCO=0,
+	parameter FLIP_FRAME=0,
+	parameter INFER_IOBUF=0
+) (
 	input                 D0NA,
 	input                 D0NB,
 	input                 D0NC,
@@ -50,25 +61,6 @@ module ad9653 (
 	input                 mmcm_psincdec,
 	output                mmcm_psdone
 );
-parameter DWIDTH=8;
-parameter BANK_CNT=1;
-parameter BANK_CNT_WIDTH=clog2(BANK_CNT)+1;
-function integer clog2;
-	input integer value;
-	integer local_value;
-	begin
-		local_value = value-1;
-		for (clog2=0; local_value>0; clog2=clog2+1)
-			local_value = local_value>>1;
-	end
-endfunction
-parameter [DWIDTH*BANK_CNT_WIDTH-1:0] BANK_SEL=0;
-parameter SPIMODE="passthrough";
-parameter dbg = "true";
-parameter [DWIDTH-1:0] FLIP_D=0;
-parameter FLIP_DCO=0;
-parameter FLIP_FRAME=0;
-parameter INFER_IOBUF=0;
 
 assign PDWN = pdwn_in;
 
@@ -104,9 +96,11 @@ lvds_dco #(.flip_dco(FLIP_DCO)) dco (
 wire [DWIDTH-1:0] d_p = ({D1PA,D0PA,D1PB,D0PB,D1PC,D0PC,D1PD,D0PD});
 wire [DWIDTH-1:0] d_n = ({D1NA,D0NA,D1NB,D0NB,D1NC,D0NC,D1ND,D0ND});
 wire idelay_inc_int = (1'b0);
-reg [DWIDTH-1:0] idelay_ld_div_0=0,idelay_ld_div_1=0;
+(* ASYNC_REG = "TRUE" *) reg [DWIDTH-1:0] idelay_ld_div_0=0;
+reg [DWIDTH-1:0] idelay_ld_div_1=0;
 reg [DWIDTH-1:0] idelay_ce_div_0=0,idelay_ce_div_1=0;
-reg [DWIDTH-1:0] bitslip_div_0=0,bitslip_div_1=0;
+(* ASYNC_REG = "TRUE" *) reg [DWIDTH-1:0] bitslip_div_0=0;
+reg [DWIDTH-1:0] bitslip_div_1=0;
 
 wire [DWIDTH-1:0] idelay_ld_div = idelay_ld_div_0 & ~idelay_ld_div_1;
 wire [DWIDTH-1:0] idelay_ce_div = idelay_ce_div_0 & ~idelay_ce_div_1;
@@ -114,7 +108,7 @@ wire [DWIDTH-1:0] bitslip_div = bitslip_div_0 & ~bitslip_div_1;
 wire [DWIDTH-1:0] clk_div;
 wire [DWIDTH-1:0] dco_clk;
 wire [DWIDTH-1:0] reset;
-reg [5*DWIDTH-1:0] idelay_value_in_r;
+(* ASYNC_REG = "TRUE" *) reg [5*DWIDTH-1:0] idelay_value_in_r=0;
 
 genvar ix;
 generate for (ix=0; ix < DWIDTH; ix=ix+1) begin: in_cell

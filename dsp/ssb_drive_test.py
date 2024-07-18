@@ -41,7 +41,7 @@ with open(fname, 'r') as f:
         dat = [float(x)/(2**15) for x in f.readlines()]
 
 
-if if_out > 0.5*f_samp:  # Second nyquist zone
+if if_out > 0.5*f_samp:  # Second Nyquist zone
     if_out = f_samp - if_out
 
 dat = dat[300:300+npt]

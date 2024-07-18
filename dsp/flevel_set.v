@@ -41,6 +41,8 @@ always @(posedge clk) begin
 	time_err_r <= ~i_gate | ~q_gate;
 end
 
+`undef SAT
+
 assign o_data = sum2[16:1];
 assign o_gate = 1'b1;
 assign o_trig = 1'b0;

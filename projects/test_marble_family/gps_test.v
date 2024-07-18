@@ -11,7 +11,7 @@ module gps_test #(
 	input [9:0] lb_addr,
 	output [7:0] lb_dout,
 	output buf_full,
-	input buf_reset,
+	output [13:0] buf_status,
 	output [dw:0] f_read,
 	output [3:0] pps_cnt
 );
@@ -43,16 +43,32 @@ simpleuart simpleuart(
 	.b_busy(busy_unused)
 );
 
-// Don't over-think NMEA buffer before we see something
-reg [9:0] buf_waddr=0;
+// Ping-pong buffer for NMEA messages, flipping the buffer
+// at the rising edge of the PPS signal.
+// NMEA messages are sent in the interval between pps signals,
+// both conceptually and empirically.  I've never seen one of
+// those messages longer than 475 bytes, but size the buffer
+// to allow for more than 512, just in case.
+// Even 2 x 1024 x 8 still fits in a single 7-series block RAM.
+reg [9:0] buf_waddr=0, buf_filled=0;
+reg [3:0] buf_cnt=0;
+wire buf_sel=buf_cnt[0];  // ping-pong
+wire pps_edge;  // single-cycle, computed below
 assign buf_full = &buf_waddr;
 always @(posedge clk) begin
 	if (nmea_valid & ~buf_full) buf_waddr <= buf_waddr+1;
-	if (buf_reset) buf_waddr <= 0;
+	if (pps_edge) begin
+		buf_waddr <= 0;
+		buf_filled <= buf_waddr;
+		buf_cnt <= buf_cnt+1;
+	end
 end
-dpram #(.aw(10), .dw(8)) dpram(
-	.clka(clk), .addra(buf_waddr), .dina(nmea_data), .wena(nmea_valid),
-	.clkb(clk), .addrb(lb_addr), .doutb(lb_dout));
+dpram #(.aw(11), .dw(8)) dpram(
+	.clka(clk), .addra({buf_sel, buf_waddr}), .dina(nmea_data), .wena(nmea_valid),
+	.clkb(clk), .addrb({~buf_sel, lb_addr}), .doutb(lb_dout));
+assign buf_status = {buf_cnt, buf_filled};  // 4 bits + 10 bits = 14 bits
+// Rule is that if buf_cnt changes while you read the buffer,
+// the data is corrupted and must be discarded (in software).
 
 // At least 27-bit frequency counter
 // Has to register a little more than 125M
@@ -81,5 +97,6 @@ always @(posedge clk) begin
 end
 assign f_read = {f_read_ovf, f_read_r};
 assign pps_cnt = pps_cnt_r;
+assign pps_edge = pps_tick;
 
 endmodule

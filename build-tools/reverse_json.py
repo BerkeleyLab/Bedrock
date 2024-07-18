@@ -106,6 +106,11 @@ for line in f.read().split('\n'):
         m1 = re.search(r"\s*//\s*reverse_json_offset\s*:\s*(\d+)\s*", line)
         if m1:
             address_offset = int(m1.group(1))
+    # All other directives are ignored if they're on a pure // comment line.
+    # Yes, we can still get confused by /* */ comments, `ifdef, and generate.
+    if re.search(r"^\s*//", line):
+        continue
+    #
     if "4'h" in line and ": reg_bank_" in line:
         m1 = re.search(r"4'h(\w):\s*reg_bank_(\w)\s*<=\s*(\S+);", line)
         if m1:

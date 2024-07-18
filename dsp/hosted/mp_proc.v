@@ -107,8 +107,6 @@ assign setmp_addr = {1'b0, ~state[0]};
 assign coeff_addr = {~state2[1],state2[0]};
 assign   lim_addr = {state6[2],state4[0]};
 
-`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
-
 reg [7:0] stb=0;
 always @(posedge clk) stb <= {stb[6:0],sync};
 

@@ -10,8 +10,6 @@ import ast
 
 from collections import defaultdict
 
-import numpy
-
 from . import open
 from . import RomError
 
@@ -27,9 +25,10 @@ def readwrite(args, dev):
             dev.reg_write([(name, val)])
         else:
             value, = dev.reg_read((name,))
-            if isinstance(value, (list, numpy.ndarray)):
+            try:
+                _ = iter(value)
                 print("%s \t%s" % (name, ' '.join(['%x' % v for v in value])))
-            else:
+            except TypeError:
                 print("%s \t%08x" % (name, value))
 
 
@@ -100,6 +99,10 @@ def dumpjson(args, dev):
 
 def dumpgitid(args, dev):
     print(dev.codehash)
+
+
+def dumpdescript(args, dev):
+    print(dev.descript)
 
 
 def dumpdrv(args, dev):
@@ -208,6 +211,7 @@ def getargs():
     P.add_argument('-i', '--inst', action='append', default=[])
     P.add_argument('dest', metavar="URI",
                    help="Server address.  ca://Prefix or leep://host[:port]")
+    P.set_defaults(func=lambda args, dev: None)
 
     SP = P.add_subparsers()
 
@@ -242,6 +246,9 @@ def getargs():
 
     S = SP.add_parser('gitid', help='print gitid')
     S.set_defaults(func=dumpgitid)
+
+    S = SP.add_parser('descript', help='print descript')
+    S.set_defaults(func=dumpdescript)
 
     S = SP.add_parser('drvinfo', help='print drive info json (ca:// only)')
     S.set_defaults(func=dumpdrv)

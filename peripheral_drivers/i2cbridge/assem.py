@@ -497,7 +497,7 @@ class I2CAssembler(i2c_assem):
         Params:
             int address : The explicit program counter value to pad up to.
         Gotchas:
-            address must be > current program counter.  Use with no arg (addres=None)
+            address must be > current program counter.  Use with no arg (address=None)
             to avoid this pitfall (pads up to next nearest multiple of 32).
         Returns: program counter after pad"""
         address = int(address)
