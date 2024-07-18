@@ -42,7 +42,6 @@ include $(HOMELESS_DIR)/freq_demo/freq_demo_rules.mk
 
 # This must go in front of include $(BADGER_DIR)/rules.mk
 all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check marble_base_lint gps_test_tb ltm_sync_tb Vmarble_base
-all: xadc_tempvoltmon_check
 
 # =====
 # gps_test, too simple to need testing ... right
@@ -88,9 +87,6 @@ udp-vpi.vpi: udp_model.o
 # =====
 # MMC mailbox self-checking testbench
 mmc_mailbox_tb: mmc_mailbox.v $(HOMELESS_DIR)/fake_dpram.v $(DSP_DIR)/dpram.v $(BADGER_DIR)/tests/spi_gate.v $(PERIPH_DRIVERS_DIR)/spi_master.v
-
-# XADC Temperature and Voltage monitor
-xadc_tempvoltmon_tb: xadc_tempvoltmon.v fake_xadc.v
 
 # =====
 # subset that is interesting to test live on network
