@@ -115,11 +115,11 @@ no_multiple_drivers_check: marble_base_tb
 	$(AWK) '$$NF=="drivers" && $$(NF-1)>1 {print $$0; code=1}BEGIN{code=0}END{exit(code)}' $<
 	@echo "PASS"
 
-marble_base_lint: $(MARBLE_BASE_V) IDDR.v
+marble_base_lint: $(MARBLE_BASE_V) fake_xadc.v IDDR.v
 	$(VERILATOR) --lint-only -DSIMULATE $(VLATOR_LINT_IGNORE) $^
 
 # You'd better have a verilator in the v5 series!
-marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
+marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) fake_xadc.v $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
 	$(VERILATOR) --lint-only --timing $(VLATOR_LINT_IGNORE) -DSIMULATE -y $(FPGA_FAMILY_DIR)/xilinx $(filter-out marble2_features, $^)
 
 # =====
@@ -145,7 +145,7 @@ read_trx.dat: read_trx.py
 # Build a testbench with Verilator that can be put on the (simulated) network as 192.168.7.4
 # marble_base.v is over in board_support/marblemini, but most of the infrastructure,
 # including lb_marble_slave.v, is here.
-Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
+Vmarble_base: $(MARBLE_BASE_V) fake_xadc.v marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -DSIMULATE -cc -CFLAGS -Wno-logical-op --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmarble_base.mk USER_CPPFLAGS="-I $(BADGER_DIR)/tests"
