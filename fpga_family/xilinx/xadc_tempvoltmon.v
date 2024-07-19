@@ -8,7 +8,10 @@
  *    status registers.  An averaging of 16 is applied to all channels.  All
  *    other control register settings are ignored.
  *
- *    Status register 0x00 holds the internal temperature
+ *    Status register 0x00 holds the internal temperature at C_BASEADDR+0x200
+ *    Status register 0x01 holds the Vccint voltage at C_BASEADDR+0x204
+ *    Status register 0x02 holds the Vccaux voltage at C_BASEADDR+0x208
+ *    Status register 0x06 holds the Vbram voltage at C_BASEADDR+0x218
  *
  *    DRP (Dynamic Reconfiguration Port) Timing:
  *      DEN should assert for only 1 DCLK duration
@@ -20,24 +23,40 @@
  *      DRDY asserted indicates valid data on DO
  */
 
-module xadc_tempmon #(
+module xadc_tempvoltmon #(
   parameter SYSCLK_FREQ_HZ = 100000000,
-  parameter UPDATE_FREQ_HZ = 2
+  parameter UPDATE_FREQ_HZ = 8
   )(
   input wire clk,           // System clock
   input wire rst,           // High-true reset to XADC core
-  output reg [15:0] dout,   // Data out
+  output wire [15:0] temp_out, // Temperature out
+  output wire [15:0] vccint_out, // Vccint voltage out
+  output wire [15:0] vccaux_out, // Vccaux voltage out
+  output wire [15:0] vbram_out, // Vbram voltage out
   output wire read,         // High pulse on read
   output wire otemp         // Over-temp alarm
   );
 
   localparam UDCNT_MAX = SYSCLK_FREQ_HZ/UPDATE_FREQ_HZ - 1;
-  localparam UDCNT_WIDTH = $clog2(UDCNT_MAX);
+  localparam UDCNT_WIDTH = $clog2(SYSCLK_FREQ_HZ/UPDATE_FREQ_HZ);
   localparam ADDR_INT_TEMP = 7'h0;
+  localparam ADDR_VCCINT = 7'h1;
+  localparam ADDR_VCCAUX = 7'h2;
+  localparam ADDR_VBRAM = 7'h6;
 
   // Conversion-start signal; not used in default mode.
   reg convst;
   reg [UDCNT_WIDTH-1:0] udcnt;
+
+  // The addresses to read
+  reg [6:0] addrs [0:3];
+  reg [1:0] addr_cnt=0;
+  // Data output registers will not become RAM due to assignments
+  reg [15:0] douts [0:3];
+  assign temp_out   = douts[0];
+  assign vccint_out = douts[1];
+  assign vccaux_out = douts[2];
+  assign vbram_out  = douts[3];
 
   // Implement bus-master
   reg [6:0] daddr;
@@ -51,8 +70,16 @@ module xadc_tempmon #(
   assign read = den;
 
   initial begin
+    addrs[0] = ADDR_INT_TEMP;
+    addrs[1] = ADDR_VCCINT;
+    addrs[2] = ADDR_VCCAUX;
+    addrs[3] = ADDR_VBRAM;
+    douts[0] = 0;
+    douts[1] = 0;
+    douts[2] = 0;
+    douts[3] = 0;
     udcnt = {UDCNT_WIDTH{1'b0}};
-    daddr = ADDR_INT_TEMP;   // Always reading from addr 0
+    daddr = ADDR_INT_TEMP;
     data_in = 16'h0;
     den = 1'b0;
     dwe = 1'b0;     // Always reading for now
@@ -63,7 +90,15 @@ module xadc_tempmon #(
     if (rst) begin
       udcnt <= 0;
     end else begin
-      if (drdy) dout <= data_out;
+      if (drdy) begin
+        douts[addr_cnt] <= data_out;
+        addr_cnt <= addr_cnt + 1;
+        if (addr_cnt == 3) begin
+          daddr <= addrs[0];
+        end else begin
+          daddr <= addrs[addr_cnt+1];
+        end
+      end
       if (udcnt == UDCNT_MAX) begin
         udcnt <= 0;
       end else begin
@@ -72,17 +107,26 @@ module xadc_tempmon #(
     end
   end
 
-  // DEN should change on falling edge since it is latched on rising edge
-  // and should only be 1-clk long according to specs
-  always @(negedge clk) begin
+  // DEN is a strobe and should change on falling edge since it is latched on rising edge
+  // I don't know if this is true... highly non-standard.  I'll go with
+  // posedge until proven it doesn't work.
+  always @(posedge clk) begin
     if (udcnt == UDCNT_MAX) den <= 1'b1;
     else den <= 1'b0;
   end
 
 `ifdef SIMULATE
-  assign data_out = 16'h9773; // ~25degC
   assign otemp = 1'b0;
-  assign drdy = 1'b1;
+  fake_xadc fake_xadc_i (
+    .RESET(rst),                 // 1-bit input: Active-high reset
+    .DRDY(drdy),                 // 1-bit output: DRP data ready
+    .DCLK(clk),                  // 1-bit input: DRP clock
+    .DO(data_out),               // 16-bit output: DRP output data bus
+    .DADDR(daddr),               // 7-bit input: DRP address bus
+    .DEN(den),                   // 1-bit input: DRP enable signal
+    .DI(data_in),                // 16-bit input: DRP input data bus
+    .DWE(dwe)                    // 1-bit input: DRP write enable
+  );
 `else
 
   XADC #(

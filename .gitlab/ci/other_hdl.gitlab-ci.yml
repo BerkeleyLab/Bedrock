@@ -14,10 +14,14 @@ freq_demo:
     - make -C homeless all checks
 
 peripheral_test:
-  before_script:
   stage: test
   script:
     - make -C peripheral_drivers
     - make -C peripheral_drivers/idelay_scanner
     - make -C peripheral_drivers/ds1822
     - make -C peripheral_drivers/i2cbridge
+
+xilinx_test:
+  stage: test
+  script:
+    - make -C fpga_family/xilinx

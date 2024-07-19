@@ -134,6 +134,9 @@ fi
 ## swap_gitid_test
 (cd build-tools/vivado_tcl && tclsh test_swap_gitid.tcl)
 
+## xilinx_test
+make -C fpga_family/xilinx
+
 ## flake8
 find . -name "*.py" -exec flake8 {} +
 
