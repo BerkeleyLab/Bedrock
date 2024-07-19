@@ -80,8 +80,13 @@ wire [7:0] ibadge_out, obadge_out;
 
 // XADC Internal Temperature Monitor
 wire [15:0] xadc_temp_dout;
-wire [31:0] xadc_internal_temperature;
-assign xadc_internal_temperature = {16'h0000, xadc_temp_dout};
+wire [15:0] xadc_vccint_dout;
+wire [15:0] xadc_vccaux_dout;
+wire [15:0] xadc_vbram_dout;
+wire [31:0] xadc_internal_temperature = {16'h0000, xadc_temp_dout};
+wire [31:0] xadc_vccint = {16'h0000, xadc_vccint_dout};
+wire [31:0] xadc_vccaux = {16'h0000, xadc_vccaux_dout};
+wire [31:0] xadc_vbram = {16'h0000, xadc_vbram_dout};
 
 // Device DNA
 wire [31:0] dna_high;
@@ -386,9 +391,9 @@ always @(posedge clk) if (do_rd) begin
 		4'h2: reg_bank_1 <= dna_low;
 		4'h3: reg_bank_1 <= nmea_buf_status;
 		4'h4: reg_bank_1 <= aux_freq;
-		//  xxxx15  unused
-		//  xxxx16  unused
-		//  xxxx17  unused
+		4'h5: reg_bank_1 <= xadc_vccint;
+		4'h6: reg_bank_1 <= xadc_vccaux;
+		4'h7: reg_bank_1 <= xadc_vbram;
 		4'h8: reg_bank_1 <= fmc1_test_in_l;
 		4'h9: reg_bank_1 <= fmc1_test_in_m;
 		4'ha: reg_bank_1 <= fmc1_test_in_h;
@@ -546,13 +551,16 @@ assign drive_data_in = 1;  // Don't ask for trouble on hardware
 // ----------------------------------
 // XADC Internal Temperature Monitor
 // ----------------------------------
-xadc_tempmon #(
+xadc_tempvoltmon #(
   .SYSCLK_FREQ_HZ(125000000),
   .UPDATE_FREQ_HZ(2000)  // Update freq doesn't matter much; higher freq means smaller counter.
-  ) xadc_tempmon_inst0 (
+  ) xadc_tempvoltmon_inst0 (
   .clk                                (clk),
   .rst                                (1'b0),            // High-true reset to XADC core
-  .dout                               (xadc_temp_dout),  // Data out
+  .temp_out                           (xadc_temp_dout),  // Temperature out
+  .vccint_out                         (xadc_vccint_dout),// Vccint voltage out
+  .vccaux_out                         (xadc_vccaux_dout),  // Vccaux voltage out
+  .vbram_out                          (xadc_vbram_dout),  // Vbram voltage out
   .read                               (),                // High pulse on read
   .otemp                              ()                 // Over-temp alarm
   );
@@ -570,6 +578,9 @@ dna dna_inst0 (
   );
 `else
 assign xadc_temp_dout=0;
+assign xadc_vccint_dout=0;
+assign xadc_vccaux_dout=0;
+assign xadc_vbram_dout=0;
 assign dna_high=0;
 assign dna_low=0;
 `endif
