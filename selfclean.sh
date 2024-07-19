@@ -24,3 +24,4 @@ make -C serial_io clean
 make -C serial_io/chitchat clean
 make -C serial_io/EVG_EVR clean
 make -C soc/picorv32/test clean
+make -C fpga_family/xilinx clean
