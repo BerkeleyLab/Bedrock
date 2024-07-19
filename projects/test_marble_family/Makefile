@@ -41,7 +41,7 @@ vpath %.c $(BADGER_DIR)/tests $(BUILD_DIR)
 include $(HOMELESS_DIR)/freq_demo/freq_demo_rules.mk
 
 # This must go in front of include $(BADGER_DIR)/rules.mk
-all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check marble_base_lint gps_test_tb ltm_sync_tb Vmarble_base
+all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check marble_base_lint gps_test_tb ltm_sync_tb Vmarble_base dna_check
 
 # =====
 # gps_test, too simple to need testing ... right
@@ -209,6 +209,8 @@ marble2_hwtest: udprtx
 	./udprtx ${MARBLE_IP} 100000 8  # should take under 3 seconds
 	$(PYTHON) testcase.py -a ${MARBLE_IP} --trx --si570
 	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = ${ZEST_SN}
+
+dna_tb: dna_tb.v dna.v data_xdomain.v flag_xdomain.v reg_tech_cdc.v
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc

@@ -56,13 +56,11 @@ module dna (
   reg [6:0] bcnt=0;
   assign read = bcnt == 7'h0;
   reg r_done=1, r_start_0=0, r_start_1=0;
-  assign done = r_done;
   wire start_re = r_start_0 && ~r_start_1;
 
   always @(posedge dna_clk) begin
     xdomain_gate <= 1'b0;
     if (rst) begin
-      r_done <= 1;
       bcnt <= 7'h0;
       r_start_0 <= 0;
       r_start_1 <= 0;
@@ -114,8 +112,22 @@ data_xdomain #(
   .data_out(data_out) // output [size-1:0]
 );
 
+wire done_lb0;
+flag_xdomain flag_xdomain_done (
+  .clk1(dna_clk), // input
+  .flagin_clk1(r_done), // input
+  .clk2(lb_clk), // input
+  .flagout_clk2(done_lb0) // output
+);
+reg done_lb1=1'b0, done_lb2=1'b0;
+assign done = done_lb2;
+
 always @(posedge lb_clk) begin
-  if (gate_out) begin
+  done_lb1 <= done_lb0;
+  done_lb2 <= done_lb1;
+  if (rst) begin
+    r_done <= 1'b1;
+  end else if (gate_out) begin
     dna_lbclk <= data_out;
   end
 end
