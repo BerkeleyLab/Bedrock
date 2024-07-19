@@ -76,8 +76,11 @@ def doLeep(ipaddr, port):
         dev = leep.open(addr, timeout=5.0)
         regs = []
         for regname in rmap.keys():
-            if has_register(dev, regname):
-                regs.append(regname)
+            try:
+                if has_register(dev, regname):
+                    regs.append(regname)
+            except RuntimeError:
+                pass
         rvals = dev.reg_read(regs)
         for n in range(len(rvals)):
             regname = regs[n]
