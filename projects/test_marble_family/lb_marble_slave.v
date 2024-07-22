@@ -446,6 +446,7 @@ reg [4:0] ps_sync_config_r=0;
 reg [71:0] fmc1_test_r=0;
 reg [71:0] fmc2_test_r=0;
 reg [47:0] fmc2h_test_r=0;
+reg dna_rst=0;  // debugging hook
 always @(posedge clk) if (local_write) case (addr[4:0])
 	1: led_user_r <= data_out;
 	2: led_1_df <= data_out;
@@ -468,12 +469,14 @@ always @(posedge clk) if (local_write) case (addr[4:0])
 	21: fmc2_test_r[71:44] <= data_out;
 	22: fmc2h_test_r[23:0] <= data_out;
 	23: fmc2h_test_r[47:24] <= data_out;
+	// 24: dna_rst
 endcase
 //
 always @(posedge clk) begin
 	wr_dac_send <= local_write & (addr[4:0] == 9);
 	ctrace_start <= local_write & (addr[4:0] == 10);
 	pps_config_write <= local_write & (addr[4:0] == 12);
+	dna_rst <= local_write & (addr[4:0] == 24);
 end
 
 // Mirror memory
@@ -563,7 +566,7 @@ xadc_tempmon #(
 dna dna_inst0 (
   .dna_clk                            (clk62),
   .lb_clk                             (clk),
-  .rst                                (1'b0),
+  .rst                                (dna_rst),
   .start                              (1'b1),
   .done                               (),
   .dna_msb                            (dna_high),
