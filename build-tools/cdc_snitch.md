@@ -55,10 +55,11 @@ So `cdc_snitch` ignores what goes on inside dual-port memories.
 
 ## I/O
 
-Each input is placed in its own domain, and outputs are not checked for errors.
+Each top-level input port is placed in its own domain,
+and output ports are not checked for errors.
 This may or may not represent the demands of a specific use case.
-We have written shells around the logic-under-test, that adds
-input and output registers, defining the domain of each signal.
+We have written shells around the logic-under-test, that add
+input and output registers to define the domain of each I/O signal.
 If an input _does_ represent a physical pin, the own-domain rule
 will give reasonable results.  Such a design will normally capture
 the input in a simple register (placed by the synthesizer in the I/O cell),
@@ -74,7 +75,7 @@ with the Real Work instantiated as a portable Verilog module on the inside.
 You would then point `cdc_snitch` at that inner layer.
 
 Of course, `cdc_snitch` itself doesn't know or care what language
-you feed into yosys.  Verilog and SystemVerilog are OK with yosys-0.23.
+you feed into yosys.  Verilog and a limited subset of SystemVerilog are OK with yosys-0.23.
 
 ## Tool flow
 
@@ -109,7 +110,9 @@ Besides [cdc_snitch.py](cdc_snitch.py) and its associated yosys command script
 See [CDC detection with yosys](https://github.com/YosysHQ/yosys/discussions/3956),
 a discussion started (with prototype code) on Sep 25, 2023.
 
-This code is definitely useful in its current state.
+This utility is definitely useful in its current state, and is deployed
+in a [CI](https://en.wikipedia.org/wiki/Continuous_integration) context
+for production HDL code.
 We welcome suggestions for or work on improvements.
 
 We're still looking for a permanent name for the attribute marking
