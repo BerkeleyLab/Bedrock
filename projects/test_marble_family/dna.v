@@ -5,13 +5,8 @@
  *          provided to the DNA_PORT module is <100MHz (10ns min period).
  */
 
-`define CLKTEST
-
 module dna (
-  input wire lb_clk,
-`ifndef CLKTEST
-  input wire dna_clk,
-`endif
+  input wire clk,
   input wire rst,
   input wire start,
   output wire done,
@@ -22,16 +17,11 @@ module dna (
   reg [63:0] r_dna;
   reg shift=0;
   wire read, din, dout;
-  reg xdomain_gate=1'b0;
 
   // generate a slowed-down "clock" for the benefit of the DNA_PORT primitive
-`ifdef CLKTEST
   reg [1:0] clk_div=0;
-  always @(posedge lb_clk) clk_div <= clk_div+1;
+  always @(posedge clk) clk_div <= clk_div+1;
   wire dna_clk = clk_div[1];  // 1/4 the rate
-`else
-  reg [1:0] clk_div=2'b11;
-`endif
 
 `ifdef SIMULATE
   assign din = dout;
@@ -71,16 +61,13 @@ module dna (
   reg r_done=1, r_start_0=0, r_start_1=0;
   wire start_re = r_start_0 && ~r_start_1;
 
-//  always @(posedge dna_clk) begin
-  always @(posedge lb_clk) begin
-    xdomain_gate <= 1'b0;
+  always @(posedge clk) begin
     if (rst) begin
       bcnt <= 7'h0;
       r_start_0 <= 0;
       r_start_1 <= 0;
       r_dna <= 64'h0;
     end else if (clk_div==2'b11) begin
-    //end else begin
       r_start_1 <= r_start_0;
       r_start_0 <= start;
       if (r_done) begin
@@ -93,7 +80,6 @@ module dna (
         r_dna <= {r_dna[62:0], dout};
         if (bcnt == 7'd63) begin
           r_done <= 1;
-          xdomain_gate <= 1'b1;
           bcnt <= 7'h0;
         end else begin
           r_done <= 0;
@@ -103,55 +89,14 @@ module dna (
     end
   end
 
-// ===== Cross DNA vector from dna_clk domain to lb_clk domain =====
-localparam DXSIZE = 57;
-reg [DXSIZE-1:0] dna_lbclk=0; // Waste of a register?
 /*
--  assign dna_msb = {7'h00, r_dna[63:39]};
--  assign dna_lsb = r_dna[38:7];
-*/
+localparam DXSIZE = 57;
 wire [DXSIZE-1:0] dna_dclk = r_dna[63:7];
-`ifdef CLKTEST
 assign dna_msb = {7'h00, dna_dclk[56:32]};
 assign dna_lsb = dna_dclk[31:0];
+*/
+assign dna_msb = {7'h00, r_dna[63:39]};
+assign dna_lsb = r_dna[38:7];
 assign done = r_done;
-
-`else
-assign dna_msb = {7'h00, dna_lbclk[56:32]};
-assign dna_lsb = dna_lbclk[31:0];
-
-wire gate_out;
-wire [DXSIZE-1:0] data_out;
-data_xdomain #(
-  .size(DXSIZE)
-) data_xdomain_i (
-  .clk_in(dna_clk), // input
-  .gate_in(xdomain_gate), // input
-  .data_in(dna_dclk), // input [size-1:0]
-  .clk_out(lb_clk), // input
-  .gate_out(gate_out), // output
-  .data_out(data_out) // output [size-1:0]
-);
-
-wire done_lb0;
-flag_xdomain flag_xdomain_done (
-  .clk1(dna_clk), // input
-  .flagin_clk1(r_done), // input
-  .clk2(lb_clk), // input
-  .flagout_clk2(done_lb0) // output
-);
-reg done_lb1=1'b0, done_lb2=1'b0;
-assign done = done_lb2;
-
-always @(posedge lb_clk) begin
-  done_lb1 <= done_lb0;
-  done_lb2 <= done_lb1;
-  if (rst) begin
-    r_done <= 1'b1;
-  end else if (gate_out) begin
-    dna_lbclk <= data_out;
-  end
-end
-`endif
 
 endmodule
