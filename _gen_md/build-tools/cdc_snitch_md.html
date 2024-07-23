@@ -173,10 +173,11 @@ So <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span
 </section>
 <section id="i-o">
 <h3>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading"></a></h3>
-<p>Each input is placed in its own domain, and outputs are not checked for errors.
+<p>Each top-level input port is placed in its own domain,
+and output ports are not checked for errors.
 This may or may not represent the demands of a specific use case.
-We have written shells around the logic-under-test, that adds
-input and output registers, defining the domain of each signal.
+We have written shells around the logic-under-test, that add
+input and output registers to define the domain of each I/O signal.
 If an input <em>does</em> represent a physical pin, the own-domain rule
 will give reasonable results.  Such a design will normally capture
 the input in a simple register (placed by the synthesizer in the I/O cell),
@@ -191,7 +192,7 @@ our designs to put such constructions in an outer chip-specific layer,
 with the Real Work instantiated as a portable Verilog module on the inside.
 You would then point <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span></code> at that inner layer.</p>
 <p>Of course, <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span></code> itself doesn’t know or care what language
-you feed into yosys.  Verilog and SystemVerilog are OK with yosys-0.23.</p>
+you feed into yosys.  Verilog and a limited subset of SystemVerilog are OK with yosys-0.23.</p>
 </section>
 <section id="tool-flow">
 <h3>Tool flow<a class="headerlink" href="#tool-flow" title="Permalink to this heading"></a></h3>
@@ -226,7 +227,9 @@ If the design includes any such “BAD” registers, the makefile rule for
 <h3>Discussion<a class="headerlink" href="#discussion" title="Permalink to this heading"></a></h3>
 <p>See <a class="reference external" href="https://github.com/YosysHQ/yosys/discussions/3956">CDC detection with yosys</a>,
 a discussion started (with prototype code) on Sep 25, 2023.</p>
-<p>This code is definitely useful in its current state.
+<p>This utility is definitely useful in its current state, and is deployed
+in a <a class="reference external" href="https://en.wikipedia.org/wiki/Continuous_integration">CI</a> context
+for production HDL code.
 We welcome suggestions for or work on improvements.</p>
 <p>We’re still looking for a permanent name for the attribute marking
 intentional CDC registers, to replace the placeholder <code class="docutils literal notranslate"><span class="pre">magic_cdc</span></code>.
