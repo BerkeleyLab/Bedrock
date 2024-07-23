@@ -30,9 +30,12 @@ reg start=1'b0;
 wire done;
 wire [31:0] dna_msb;
 wire [31:0] dna_lsb;
+`define CLKTEST
 dna dna_i (
   .lb_clk(lb_clk), // input
+`ifndef CLKTEST
   .dna_clk(dna_clk), // input
+`endif
   .rst(rst), // input
   .start(start), // input
   .done(done), // output
@@ -49,8 +52,8 @@ initial begin
   target_msb = dna_i.r_dna_int[63:39];
   #TICK start = 1'b1;
   #(4*TICK) `wait_timeout(~done);
-  `wait_timeout(done);
-  #TICK;
+  #(100*TICK) `wait_timeout(done);
+  #(100*TICK);
   if (to) begin
     $display("ERROR: Timed out waiting for DNA readout.");
     $stop(0);

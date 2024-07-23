@@ -5,9 +5,13 @@
  *          provided to the DNA_PORT module is <100MHz (10ns min period).
  */
 
+`define CLKTEST
+
 module dna (
   input wire lb_clk,
+`ifndef CLKTEST
   input wire dna_clk,
+`endif
   input wire rst,
   input wire start,
   output wire done,
@@ -19,6 +23,15 @@ module dna (
   reg shift=0;
   wire read, din, dout;
   reg xdomain_gate=1'b0;
+
+  // generate a slowed-down "clock" for the benefit of the DNA_PORT primitive
+`ifdef CLKTEST
+  reg [1:0] clk_div=0;
+  always @(posedge lb_clk) clk_div <= clk_div+1;
+  wire dna_clk = clk_div[1];  // 1/4 the rate
+`else
+  reg [1:0] clk_div=2'b11;
+`endif
 
 `ifdef SIMULATE
   assign din = dout;
@@ -46,7 +59,7 @@ module dna (
     .SIM_DNA_VALUE(57'h000006789998212)  // Specifies a sample 57-bit DNA value for simulation
   ) DNA_PORT_inst (
     .DOUT(dout),   // 1-bit output: DNA output data.
-    .CLK(dna_clk), // 1-bit input: Clock input.
+    .CLK(dna_clk), // 1-bit input: Clock input (output of a DFF)
     .DIN(din),     // 1-bit input: User data input pin.
     .READ(read),   // 1-bit input: Active high load DNA, active low read input.
     .SHIFT(shift)  // 1-bit input: Active high shift enable input.
@@ -58,14 +71,16 @@ module dna (
   reg r_done=1, r_start_0=0, r_start_1=0;
   wire start_re = r_start_0 && ~r_start_1;
 
-  always @(posedge dna_clk) begin
+//  always @(posedge dna_clk) begin
+  always @(posedge lb_clk) begin
     xdomain_gate <= 1'b0;
     if (rst) begin
       bcnt <= 7'h0;
       r_start_0 <= 0;
       r_start_1 <= 0;
       r_dna <= 64'h0;
-    end else begin
+    end else if (clk_div==2'b11) begin
+    //end else begin
       r_start_1 <= r_start_0;
       r_start_0 <= start;
       if (r_done) begin
@@ -76,7 +91,7 @@ module dna (
       end else begin  // if ~r_done
         shift <= 1;
         r_dna <= {r_dna[62:0], dout};
-        if (bcnt == 7'd64) begin
+        if (bcnt == 7'd63) begin
           r_done <= 1;
           xdomain_gate <= 1'b1;
           bcnt <= 7'h0;
@@ -96,6 +111,12 @@ reg [DXSIZE-1:0] dna_lbclk=0; // Waste of a register?
 -  assign dna_lsb = r_dna[38:7];
 */
 wire [DXSIZE-1:0] dna_dclk = r_dna[63:7];
+`ifdef CLKTEST
+assign dna_msb = {7'h00, dna_dclk[56:32]};
+assign dna_lsb = dna_dclk[31:0];
+assign done = r_done;
+
+`else
 assign dna_msb = {7'h00, dna_lbclk[56:32]};
 assign dna_lsb = dna_lbclk[31:0];
 
@@ -131,5 +152,6 @@ always @(posedge lb_clk) begin
     dna_lbclk <= data_out;
   end
 end
+`endif
 
 endmodule
