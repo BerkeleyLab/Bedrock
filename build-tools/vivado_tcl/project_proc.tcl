@@ -91,6 +91,15 @@ proc project_create {platform_name project_name} {
         set project_cfgmem_size "none"
         set project_cfgrate "none"
     }
+    if [regexp "lbl208" $platform_name] {
+        set platform "lbl208"
+        set project_part "xczu47dr-ffvg1517-1-e"
+        set project_spi_buswidth "none"
+        set project_cfgmem_interface "none"
+        set project_cfgmem_size "none"
+        set project_cfgrate "none"
+    }
+
     # planahead
     #
     if {$platform eq "ml605"} {
