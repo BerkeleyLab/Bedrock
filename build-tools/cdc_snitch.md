@@ -96,10 +96,70 @@ design errors that led to the "BAD" registers.
 If the design includes any such "BAD" registers, the makefile rule for
 `foo_cdc.txt` will fail, as would be used for a regression test.
 
+## Reading the output
+
+It's recommended to save the output of `cdc_snitch.py` in a file by
+using the `-o` flag.
+Call the result `foo_cdc.txt`, consistent with the make rule above.
+That will usually be a big file!  But it is text, and can be understood
+as described here.
+
+Ideally, the BAD count is zero, and you don't need to look at `foo_cdc.txt`.
+Otherwise, the best way to start is with
+```
+grep BAD foo_cdc.txt
+```
+Giving one line per DFF that falls in the BAD category described above.
+Each of those lines will look something like
+```
+BAD  31049 dsp.reg_bank_2[0]:D clk lb_clk inputs ( 8 x lb_clk, 3 x dsp_clk, 1 x dsp.evr_rx_out_clk )
+```
+Here `dsp.reg_bank_2[0]:D` tells you that the offending path is the D input
+to the 0 element of word full of DFF named (by yosys) as `dsp.reg_bank_2`.
+Each net often has many different possible names, but you should be able to
+find the `reg_bank_2` signal in instance `dsp` in your code.
+
+Then it says `clk lb_clk` identifying the clock to the DFF.
+Finally `inputs ( 8 x lb_clk, 3 x dsp_clk, 1 x dsp.evr_rx_out_clk )`
+is a count of signals per clock domain feeding the logic.
+The goal is to reduce these inputs to a single clock domain,
+as described in case OK1 above.
+
+To dive deeper, using that same example, read the whole `foo_cdc.txt`
+file with `less` or your favorite text editor.  Now search for the
+line discovered above with `grep`.  It is followed by more information
+about that BAD DFF input.
+```
+BAD  31049 dsp.reg_bank_2[0]:D clk lb_clk inputs ( 8 x lb_clk, 3 x dsp_clk, 1 x dsp.evr_rx_out_clk )
+  tree 31049 from 397 clk lb_clk name lb_addr_r[0]
+  tree 31049 from 398 clk lb_clk name lb_addr_r[1]
+  tree 31049 from 399 clk lb_clk name lb_addr_r[2]
+  tree 31049 from 400 clk lb_clk name lb_addr_r[3]
+  tree 31049 from 18908 clk lb_clk name dsp.fcnt_dsp_clk.work.frequency[0]
+  tree 31049 from 28493 clk lb_clk name dsp.timing.evr_timestamp_valid
+  tree 31049 from 28547 clk dsp_clk name dsp.evr_live_pps_tick[0]
+  tree 31049 from 29201 clk dsp_clk name dsp.timing.i_oc_sync.data_out[0]
+  tree 31049 from 29265 clk dsp_clk name dsp.timing.i_oc_sync.data_out[32]
+  tree 31049 from 29529 clk dsp.evr_rx_out_clk name dsp.timing.i_evrAROC.evrSROCsynced
+  tree 31049 from 29536 clk lb_clk name dsp.timing.i_evcnt_sync.data_out[0]
+  tree 31049 from 29724 clk lb_clk name dsp.timing.fcnt_evr_clk.work.frequency[0]
+```
+Now instead of just a count, you can see each input to the logic cloud
+identified by name and clock domain.  So `lb_addr_r[0]` comes from the
+lb\_clk domain, and `dsp.evr_live_pps_tick[0]` comes from the dsp\_clk domain.
+
+Now the real work begins: now that you know how and where good CDC hygiene
+has been broken, you should fix it!  For simple command and status bits,
+it's often enough to just capture them (with the OK1 topology drawn above)
+into the domain in which they are used.  Other cases may be harder to
+accomplish without continuing the already-present (in the BAD net)
+risk of data corruption.  [Gray codes](https://en.wikipedia.org/wiki/Gray_code)
+are often helpful, as are digital logic design textbooks. Good luck!
+
 ## Dependencies
 
-Besides [cdc_snitch.py](cdc_snitch.py) and its associated yosys command script
-[cdc_snitch_proc.ys](cdc_snitch_proc.ys), you need:
+Besides [cdc\_snitch.py](cdc_snitch.py) and its associated yosys command script
+[cdc\_snitch\_proc.ys](cdc_snitch_proc.ys), you need:
 
 * [yosys](https://yosyshq.net/yosys/) 0.23 or higher
 * python3
@@ -128,3 +188,11 @@ results match that of the final (normally vendor-specific) synthesis.
 We use yosys's "techmap" step, that creates gate-level cells for registers
 with a type name based around "DFF".  We don't currently check for
 DFF with asynchronous inputs, that are unlikely to be correctly handled.
+
+Besides `cdc_snitch`, vendor tools often come with CDC analysis.
+For example, Vivado `report_cdc`.
+On the plus side, they will "understand" vendor-specific primitives,
+and so can cover more of your design.  On the down side, they will
+push using vendor-supplied IP, that will keep your design from being
+easily portable to other chip families.
+Having two CDC analysis tools is better than one!
