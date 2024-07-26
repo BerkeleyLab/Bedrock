@@ -8,17 +8,20 @@ import ctconf
 COMPRESS_GETLISTS = True
 
 _config = None
+
+
 def getConfig():
     return _config
 
-class CtraceParser():
+
+class CtraceParser:
     @classmethod
     def handle_ignores(cls, signal_name):
         """Ignore any constant '0' or '1' signals."""
         ignores = {
             "0": "ZERO",
             "1": "ONE",
-            "[01]\[\d+\]" : "ZERO", # Matches 0/1 followed by an index (e.g. 0[5])
+            r"[01]\[\d+\]": "ZERO",  # Matches 0/1 followed by an index (e.g. 0[5])
         }
         ignore = False
         # Handle replacements/ignores
@@ -33,16 +36,16 @@ class CtraceParser():
     def _id(ix):
         """Convert an index to an identifier string"""
         if ix < 26:
-            return chr(ord('a')+ix)
+            return chr(ord("a") + ix)
         else:
             iy = (ix // 26) - 1
             ix = ix % 26
-            return chr(ord('a')+iy) + chr(ord('a')+ix)
+            return chr(ord("a") + iy) + chr(ord("a") + ix)
 
     @staticmethod
     def _getRoot(name):
         """Return the signal name without any anteceding bit/range selection."""
-        res = "([a-zA-z_.]+)(\[[0-9:]+\]?)"
+        res = r"([a-zA-z_.]+)(\[[0-9:]+\]?)"
         _match = re.match(res, name)
         if _match:
             groups = _match.groups()
@@ -57,12 +60,12 @@ class CtraceParser():
         yields width 8) rather than Python rules where the high index is not included.
         """
         srange = str(_range)
-        res = "\[([0-9:]+)\]?"
+        res = r"\[([0-9:]+)\]?"
         _match = re.match(res, srange)
         if _match:
             srng = _match.groups()[0]
-            if ':' in srng:
-                x, y = srng.split(':')
+            if ":" in srng:
+                x, y = srng.split(":")
                 x = _int(x)
                 y = _int(y)
                 rval = max(x, y) - min(x, y) + 1
@@ -80,7 +83,7 @@ class CtraceParser():
         by string 'srange', returns the extended range as a string.  Otherwise, returns
         None. By 'extends' we mean that for range=[high:low], index is high+1 or low-1.
         """
-        res = "\[([0-9:]+)\]"
+        res = r"\[([0-9:]+)\]"
         _match = re.match(res, sindex)
         if not _match:
             return None
@@ -88,12 +91,12 @@ class CtraceParser():
         _match = re.match(res, srange)
         if (i is not None) and _match:
             srng = _match.groups()[0]
-            #print(f"match: i = {i}")
-            if ':' in srng:
-                x, y = srng.split(':')
+            # print(f"match: i = {i}")
+            if ":" in srng:
+                x, y = srng.split(":")
                 x = _int(x)
                 y = _int(y)
-                #print(f"x = {x}, y = {y}")
+                # print(f"x = {x}, y = {y}")
                 _min = min(x, y)
                 _max = max(x, y)
                 if i == _min - 1:
@@ -102,8 +105,8 @@ class CtraceParser():
                     return "[{}:{}]".format(i, _min)
             else:
                 x = _int(srng)
-                #print(f"x = {x}")
-                if abs(i-x) == 1:
+                # print(f"x = {x}")
+                if abs(i - x) == 1:
                     return "[{}:{}]".format(max(i, x), min(i, x))
         return None
 
@@ -117,7 +120,7 @@ class CtraceParser():
         result = 0
         for arg in args:
             valih, valil, shift = arg
-            mask = (1 << (valih+1)) - 1
+            mask = (1 << (valih + 1)) - 1
             result += ((val & mask) >> valil) << shift
         return result
 
@@ -126,36 +129,35 @@ class CtraceParser():
         """Get the index (as an int) represented by string 'sindex' in the form '[x]' where
         'x' is the resulting index."""
         srange = str(sindex)
-        res = "\[([0-9]+)\]"
+        res = r"\[([0-9]+)\]"
         _match = re.match(res, srange)
         if _match:
             ix = _int(_match.groups()[0])
             return ix
         return 0
 
-
-    def __init__(self, signals = [], timebits = 24, mtime = 64, dw=None, wide=False):
+    def __init__(self, signals=[], timebits=24, mtime=64, dw=None, wide=False):
         self.signals = signals
         self.sigdict = self._mkSigDict(signals)
-        #import jbrowse
-        #print(jbrowse.strDict(self.sigdict))
-        if dw != None:
-            self.dw=dw
+        # import jbrowse
+        # print(jbrowse.strDict(self.sigdict))
+        if dw is not None:
+            self.dw = dw
         else:
             self.dw = len(self.signals)
         self.tw = timebits
         # mtime is the time delay to assume if a dt of 0 is parsed from the data
         self.mtime = mtime
         self.ignores = []
-        self._timemask = ((1<<(self.dw + self.tw))-1) << self.dw
+        self._timemask = ((1 << (self.dw + self.tw)) - 1) << self.dw
         self._timeshift = self.dw
-        self._datamask = (1<<self.dw)-1
+        self._datamask = (1 << self.dw) - 1
         self._datashift = 0
         self._wide = wide
         self._buswidth = self.dw + self.tw
         self._last_stage = math.ceil(self._buswidth / 32) - 1
         self._stage_width = math.ceil(math.log2(self._last_stage + 1))
-        self._total_stages = (1 << self._stage_width)
+        self._total_stages = 1 << self._stage_width
 
     def _doMergeSignals(self, signals):
         """Perform one round of merging signals with identical names and adjacent bounds
@@ -164,17 +166,16 @@ class CtraceParser():
         _signals = []
         didMerge = False
         for signame, sigwidth, _id, getList in signals:
-            #print(f"\nConsidering {signame}")
+            # print(f"\nConsidering {signame}")
             thisRoot, thisRange = self._getRoot(signame)
             n = 0
             result = None
-            root = None
             _getList = []
             while n < len(_signals):
                 _signame, _w, _id, _getList = _signals[n]
                 thatRoot, thatRange = self._getRoot(_signame)
                 if thisRoot == thatRoot:
-                    #print(f"  Hit {thisRoot} with {_signame}")
+                    # print(f"  Hit {thisRoot} with {_signame}")
                     result = self._extends(thatRange, thisRange)
                     if result is not None:
                         break
@@ -184,10 +185,10 @@ class CtraceParser():
                 _width = self._width(result)
                 getList.extend(_getList)
                 _signals[n] = [thisRoot + result, _width, None, getList]
-                #print(f"  Extending {_signame} with {result}, width = {_width}")
+                # print(f"  Extending {_signame} with {result}, width = {_width}")
                 didMerge = True
             else:
-                #print(f"  Adding unique signal {signame}")
+                # print(f"  Adding unique signal {signame}")
                 # Add the signal
                 _signals.append([signame, sigwidth, None, getList])
         return didMerge, _signals
@@ -204,16 +205,20 @@ class CtraceParser():
             if getList[n] is None:
                 continue
             bith, bitl, shift = getList[n]
-            width = bith-bitl + 1
+            width = bith - bitl + 1
             newEntry = getList[n]
-            for m in range(n+1, len(getList)):
+            for m in range(n + 1, len(getList)):
                 if getList[m] is None:
                     continue
                 _bith, _bitl, _shift = getList[m]
-                _width = (_bith-_bitl) + 1
+                _width = (_bith - _bitl) + 1
                 # Conditions for merging?
-                condA = (_bith == bitl-1) and (shift == _shift+_width) # _ is just below
-                condB = (_bitl == bith+1) and (_shift == shift+width) # _ is just above
+                condA = (_bith == bitl - 1) and (
+                    shift == _shift + _width
+                )  # _ is just below
+                condB = (_bitl == bith + 1) and (
+                    _shift == shift + width
+                )  # _ is just above
                 if condA:
                     newbith = bith
                     newbitl = _bitl
@@ -222,10 +227,10 @@ class CtraceParser():
                     newbith = _bith
                     newbitl = bitl
                     newshift = shift
-                #else:
+                # else:
                 #    print(f"Don't merge {m} with {n}; {_shift} == {shift-_width}? {_shift} == {shift+_width}?")
                 if condA or condB:
-                    #print(f"merging {m} with {n}; {_shift} == {shift-_width}? {_shift} == {shift+_width}?")
+                    # print(f"merging {m} with {n}; {_shift} == {shift-_width}? {_shift} == {shift+_width}?")
                     # modify in place
                     didMerge = True
                     newEntry = (newbith, newbitl, newshift)
@@ -259,12 +264,10 @@ class CtraceParser():
                 VCD file, and 'getList' is a list of bit positions and shifts used
                 in extracting the signal's value from the ctrace memory entries.
         """
-        #print(f"signals = {signals}")
-        top = "TOP"
-        sig = "signals"
+        # print(f"signals = {signals}")
         dd = {
-            "signals" : [],
-            "scopes" : {},
+            "signals": [],
+            "scopes": {},
         }
         _signals = []
         self.ignores = []
@@ -289,7 +292,7 @@ class CtraceParser():
             minShift = min(shifts)
             for m in range(len(getList)):
                 bith, bitl, shift = getList[m]
-                getList[m] = (bith, bitl, shift-minShift)
+                getList[m] = (bith, bitl, shift - minShift)
             if COMPRESS_GETLISTS:
                 # Compress the getList as much as possible
                 merged = True
@@ -307,14 +310,14 @@ class CtraceParser():
                     if scope in dscope["scopes"].keys():
                         dscope = dscope["scopes"][scope]
                     else:
-                        dscope["scopes"][scope] = {"signals" : [], "scopes" : {}}
+                        dscope["scopes"][scope] = {"signals": [], "scopes": {}}
                         dscope = dscope["scopes"][scope]
-                #print("Adding {} ({}) to {} ===> {}".format(names[-1], ix, scope, dscope))
+                # print("Adding {} ({}) to {} ===> {}".format(names[-1], ix, scope, dscope))
                 dscope["signals"].append((ix, names[-1], width))
             else:
-                #print("Adding {} ({}) to TOP".format(names[-1], ix))
+                # print("Adding {} ({}) to TOP".format(names[-1], ix))
                 dscope["signals"].append((ix, names[-1], width))
-        #print(_signals)
+        # print(_signals)
         self._sigList = _signals
         return dd
 
@@ -322,14 +325,16 @@ class CtraceParser():
         """Walk the scope dict generated by _mkSigDict() and define scopes and signals
         in VCD format."""
         ss = ["$scope module TOP $end"]
-        dscope = self.sigdict.copy() # We'll do a destructive walk
+        dscope = self.sigdict.copy()  # We'll do a destructive walk
         parents = []
         scopename = "TOP"
-        while dscope != None:
+        while dscope is not None:
             for ix, name, width in dscope["signals"]:
                 ignore, name = self.handle_ignores(name)
                 if not ignore:
-                    ss.append("$var wire {} {:s} {:s} $end".format(width, self._id(ix), name))
+                    ss.append(
+                        "$var wire {} {:s} {:s} $end".format(width, self._id(ix), name)
+                    )
                 else:
                     self.ignores.append(ix)
             # Done with these signals, so clobber them
@@ -353,9 +358,11 @@ class CtraceParser():
                     # Remove the parsed scope from the dict
                     try:
                         dscope["scopes"].pop(scopename)
-                        #print("popped {} from {}".format(scopename, dscope))
+                        # print("popped {} from {}".format(scopename, dscope))
                     except KeyError:
-                        print("key {} not found in {}".format(scopename, dscope["scopes"]))
+                        print(
+                            "key {} not found in {}".format(scopename, dscope["scopes"])
+                        )
                     scopename = new_scopename
         return ss
 
@@ -376,7 +383,7 @@ class CtraceParser():
             self.old_vals[n] = val
             putc.append("b{:b} {:s}".format(val, _id))
         putc.append("$end")
-        return '\n'.join(putc)
+        return "\n".join(putc)
 
     def VCDEmitStep(self, v, time):
         """Write a signal line of the dumpvars section of the VCD file."""
@@ -392,7 +399,7 @@ class CtraceParser():
                 self.old_vals[n] = val
                 if (old_val is None) or (val != old_val):
                     putc.append("b{:b} {:s}".format(val, _id))
-            putc = '\n'.join(putc)
+            putc = "\n".join(putc)
         putc += "\n#{:d}\n".format(int(time))
         return putc
 
@@ -403,21 +410,18 @@ class CtraceParser():
         t_step = float(time_step_ns)  # ns tick in simulation
         if ofile is None:
             ofile = sys.stdout
-        old_v = None
-        old_vbin = ["" for ix in range(self.dw)]
         time = 0
         self.first = True
-        self.old_vals = [None]*len(self._sigList)
+        self.old_vals = [None] * len(self._sigList)
         # print(f"len(self.wfm) = {len(self.wfm)}")
         # print(f"len(self._sigList) = {len(self._sigList)}")
-        with open(ofile, 'w') as fd:
+        with open(ofile, "w") as fd:
             for dt, v in self.wfm:
                 if dt == 0:
                     dt = self.mtime
                 time += dt
-                putc = self.VCDEmitStep(v, time*t_step)
+                putc = self.VCDEmitStep(v, time * t_step)
                 fd.write(putc)
-                old_v = v
         return
 
     def splitTimeData(self, datum):
@@ -428,7 +432,7 @@ class CtraceParser():
         # print(f"datum = 0x{datum:x}; time = 0x{time:x}, data = 0x{data:x}")
         return time, data
 
-    def parseDumpFile(self, delimiter=',', ishex=True):
+    def parseDumpFile(self, delimiter=",", ishex=True):
         """Parse input plaintext file.
         Data is assumed to be separated by 'delimiter'.
         If 'ishex', data is interpreted as hexadecimal,
@@ -438,9 +442,9 @@ class CtraceParser():
             base = 16
         else:
             base = 10
-        with open(self.ifile, 'r') as fd:
+        with open(self.ifile, "r") as fd:
             line = fd.readline()
-            #for line in f.read().split('\n'):
+            # for line in f.read().split('\n'):
             while line:
                 data = line.split(delimiter)
                 for datum in data:
@@ -463,18 +467,20 @@ class CtraceParser():
             if stage == 0:
                 _data = datum
             elif stage <= self._last_stage:
-                _data += datum << (stage*32)
+                _data += datum << (stage * 32)
             if stage == self._last_stage:
                 time, data = self.splitTimeData(_data)
                 self.wfm.append([time, data])
         if storeFile is not None:
             import pickle
-            with open(storeFile, 'wb') as fd:
+
+            with open(storeFile, "wb") as fd:
                 storedict = {}
                 storedict["signals"] = signals
                 storedict["data"] = dumplist
                 pickle.dump(storedict, fd)
         return
+
 
 def _int(x):
     try:
@@ -485,6 +491,7 @@ def _int(x):
         return int(x, 16)
     except ValueError:
         return None
+
 
 def test_mkSigDict(argv):
     signals = [
@@ -497,12 +504,13 @@ def test_mkSigDict(argv):
     CtraceParser(signals)
     return
 
+
 def test_doMergeGetList():
     # Let's say we have the following:
     #           LSb                              MSb
     #   mem = [vec[4], vec[5], vec[1], vec[2], vec[3]]
     getList = [
-        #(h, l, s)
+        # (h, l, s)
         (0, 0, 4),
         (1, 1, 5),
         (2, 2, 1),
@@ -518,19 +526,22 @@ def test_doMergeGetList():
     print(f"DONE:  {getList}")
     return
 
+
 def testVCDMake(argv):
     if len(argv) > 1:
         import pickle
+
         fname = argv[1]
-        with open(fname, 'rb') as fd:
+        with open(fname, "rb") as fd:
             testdict = pickle.load(fd)
         signals = testdict["signals"]
         testdata = testdict["data"]
-        wide=True
+        wide = True
         dw = 40
     else:
         from d import signals, testdata
-        wide=True
+
+        wide = True
         dw = None
     ctp = CtraceParser(signals, timebits=24, mtime=100, dw=dw, wide=wide)
     ctp.parseDump(testdata)
@@ -539,9 +550,11 @@ def testVCDMake(argv):
     print("Wrote to {}".format(outfname))
     return True
 
+
 def picklePy(fname):
     import pickle
-    with open(fname, 'rb') as fd:
+
+    with open(fname, "rb") as fd:
         testdict = pickle.load(fd)
     signals = testdict["signals"]
     testdata = testdict["data"]
@@ -549,26 +562,38 @@ def picklePy(fname):
     print(f"testdata={testdata}")
     return
 
+
 def test(s):
     dw = _int(s)
     tw = 24
-    _timemask = ((1<<(dw + tw))-1) << dw
+    _timemask = ((1 << (dw + tw)) - 1) << dw
     _timeshift = dw
-    _datamask = (1<<dw)-1
+    _datamask = (1 << dw) - 1
     _datashift = 0
+
     def splitTimeData(datum):
         """Split one entry from ctrace memory into time and data portions."""
         time = (datum & _timemask) >> _timeshift
         data = (datum & _datamask) >> _datashift
         return time, data
+
     _buswidth = dw + tw
     _last_stage = math.ceil(_buswidth / 32) - 1
     _stage_width = math.ceil(math.log2(_last_stage + 1))
-    _total_stages = (1 << _stage_width)
-    print(f"buswidth = {_buswidth}; last_stage = {_last_stage}; stage_width = {_stage_width}; total_stages = {_total_stages}")
+    _total_stages = 1 << _stage_width
+    print(
+        f"buswidth = {_buswidth}; last_stage = {_last_stage}; stage_width = {_stage_width};" +
+        f" total_stages = {_total_stages}"
+    )
     data = [
-        0x01020304, 0x05060708, 0x090a0b0c, 0x0d0e0f00,
-        0x11121314, 0x15161718, 0x191a1b1c, 0x1d1e1f10,
+        0x01020304,
+        0x05060708,
+        0x090A0B0C,
+        0x0D0E0F00,
+        0x11121314,
+        0x15161718,
+        0x191A1B1C,
+        0x1D1E1F10,
     ]
     _data = 0
     for n in range(len(data)):
@@ -578,24 +603,29 @@ def test(s):
             _data = datum
             print(f"  {n}: {stage}: _data = datum = {_data:x}")
         elif stage < _last_stage:
-            _data += datum << (stage*32)
+            _data += datum << (stage * 32)
             print(f"  {n}: {stage}: _data += datum << 32 = {_data:x}")
         if stage == _last_stage:
             __time, __data = splitTimeData(_data)
-            print(f"    PARSE: stage {stage} _data = {_data:x}; time = {__time}; data = {__data}")
+            print(
+                f"    PARSE: stage {stage} _data = {_data:x}; time = {__time}; data = {__data}"
+            )
     return
+
 
 PROTO_SCRAP = 0
 PROTO_LEEP = 1
+
+
 def _parseProtocol(s):
     # Test for explicit protocol
-    if ':' in s:
-        splits = s.split(':')
+    if ":" in s:
+        splits = s.split(":")
         proto = splits[0].lower()
         if proto == "scrap":
-            return PROTO_SCRAP, ''.join(splits[1:])
+            return PROTO_SCRAP, "".join(splits[1:])
         elif proto == "udp":
-            return PROTO_SCRAP, ''.join(splits)
+            return PROTO_SCRAP, "".join(splits)
         elif proto == "leep" or proto == "ca":
             return PROTO_LEEP, s
     # Serial devices go to SCRAP
@@ -604,13 +634,15 @@ def _parseProtocol(s):
     # IPs go to LEEP by default (unless prepended with 'scrap' or 'udp')
     return PROTO_LEEP, s
 
+
 def _mkFilename(fname, dest):
     if fname is not None:
         return fname
-    fname = fname.replace('.', '')
-    fname = dest.replace(':', '.')
-    fname = fname.replace('/', '_')
+    fname = fname.replace(".", "")
+    fname = dest.replace(":", ".")
+    fname = fname.replace("/", "_")
     return fname + ".vcd"
+
 
 def getCtraceMem(dev, size, proto=PROTO_LEEP):
     config = getConfig()
@@ -621,15 +653,18 @@ def getCtraceMem(dev, size, proto=PROTO_LEEP):
     ctrace_offset = config.CTRACE_OFFSET
     if proto == PROTO_SCRAP:
         success, rdata = dev.read(ctrace_offset, size, aw=0, dw=2, extended=True)
-    else: # proto == PROTO_LEEP
-        rdata, = dev.reg_read((config.CTRACE_MEM,))
-        rdata = rdata[:size] # LEEP will read the full memory, we'll return only the valid part
+    else:  # proto == PROTO_LEEP
+        (rdata,) = dev.reg_read((config.CTRACE_MEM,))
+        rdata = rdata[
+            :size
+        ]  # LEEP will read the full memory, we'll return only the valid part
     return rdata
+
 
 def runCtrace(dev, runtime=10, proto=PROTO_LEEP):
     import time
+
     config = getConfig()
-    ctrace_chan0 = config.CTRACE_CHAN0
     # Start ctrace
     print("Running ctrace...")
     if proto == PROTO_SCRAP:
@@ -637,7 +672,7 @@ def runCtrace(dev, runtime=10, proto=PROTO_LEEP):
         if not success:
             print("Failed to start ctrace")
             return None
-    else: # proto == PROTO_LEEP
+    else:  # proto == PROTO_LEEP
         dev.reg_write([(config.CTRACE_START_REG, 1)])
     # Wait for ctrace to complete
     wait = int(runtime)
@@ -648,8 +683,8 @@ def runCtrace(dev, runtime=10, proto=PROTO_LEEP):
                 print("SCRAP read failed aboring.")
                 return False
             rdata = rdata[0]
-        else: # proto == PROTO_LEEP
-            rdata, = dev.reg_read((config.CTRACE_RUNNING_REG,))
+        else:  # proto == PROTO_LEEP
+            (rdata,) = dev.reg_read((config.CTRACE_RUNNING_REG,))
         if not rdata:
             break
         time.sleep(1.0)
@@ -668,10 +703,11 @@ def runCtrace(dev, runtime=10, proto=PROTO_LEEP):
         if not success:
             print("SCRAP read failed aboring.")
             return None
-    else: # proto == PROTO_LEEP
-        rdata, = dev.reg_read((config.CTRACE_PCMON_REG,))
+    else:  # proto == PROTO_LEEP
+        (rdata,) = dev.reg_read((config.CTRACE_PCMON_REG,))
         mem_size = rdata
     return mem_size
+
 
 def doScope(dev, ofile, run=True, runtime=10, proto=PROTO_LEEP):
     config = getConfig()
@@ -696,49 +732,64 @@ def doScope(dev, ofile, run=True, runtime=10, proto=PROTO_LEEP):
     data = getCtraceMem(dev, size=readout_size, proto=proto)
     ctp = CtraceParser(signals, dw=config.CTRACE_DW, timebits=config.CTRACE_TW)
     ctp.parseDump(data, signals=signals)
-    time_step_ns = 1.0e9/config.F_CLK_IN
+    time_step_ns = 1.0e9 / config.F_CLK_IN
     ctp.VCDMake(ofile, time_step_ns=time_step_ns)
     print(f"Ctrace waveforms written to {ofile}")
     return True
+
 
 def doGet(args):
     proto, dest = _parseProtocol(args.dest)
     filename = _mkFilename(args.outfile, dest)
     if proto == PROTO_LEEP:
         import leep
+
         dev = leep.open(dest, timeout=args.timeout)
         return doScope(dev, filename, run=True, runtime=args.runtime, proto=PROTO_LEEP)
     elif proto == PROTO_SCRAP:
         import scrap
+
         dev = scrap.SCRAPDevice(dest, silent=True)
         return doScope(dev, filename, run=True, runtime=args.runtime, proto=PROTO_SCRAP)
     else:
         raise Exception("Unsupported protocol {}".format(proto))
     return
 
+
 def main():
     import argparse
+
     parser = argparse.ArgumentParser("Host-side interaction with (w)ctrace module.")
     parser.set_defaults(handler=lambda args: None)
     subparsers = parser.add_subparsers(help="Subcommands")
-    parserGet = subparsers.add_parser("get", help="Get ctrace memory and generate VCD file")
+    parserGet = subparsers.add_parser(
+        "get", help="Get ctrace memory and generate VCD file"
+    )
     devhelp = "Device to interface with. E.g.\n  leep://$IP[:$PORT]\n  scrap:/dev/ttyUSB3\n  scrap:$IP:$PORT"
-    parserGet.add_argument('dest', help=devhelp)
-    parserGet.add_argument('-c', '--config', default=None, help="Configuration file.")
-    parserGet.add_argument('-o', '--outfile', default=None, help="Output VCD file name.")
-    parserGet.add_argument('-t', '--timeout', type=float, default=5.0)
-    parserGet.add_argument('--runtime', default=10, type=float, help="Time (in seconds) to wait for ctrace to complete.")
+    parserGet.add_argument("dest", help=devhelp)
+    parserGet.add_argument("-c", "--config", default=None, help="Configuration file.")
+    parserGet.add_argument(
+        "-o", "--outfile", default=None, help="Output VCD file name."
+    )
+    parserGet.add_argument("-t", "--timeout", type=float, default=5.0)
+    parserGet.add_argument(
+        "--runtime",
+        default=10,
+        type=float,
+        help="Time (in seconds) to wait for ctrace to complete.",
+    )
     parserGet.set_defaults(handler=doGet)
     args = parser.parse_args()
     global _config
     _config = ctconf.Config(args.config)
     return args.handler(args)
 
+
 if __name__ == "__main__":
-    #testVCDMake(sys.argv)
-    #picklePy(sys.argv[1])
-    #print(CtraceParser._getRoot(sys.argv[1]))
-    #test_mkSigDict(sys.argv)
-    #test(sys.argv[1])
-    #test_doMergeGetList()
+    # testVCDMake(sys.argv)
+    # picklePy(sys.argv[1])
+    # print(CtraceParser._getRoot(sys.argv[1]))
+    # test_mkSigDict(sys.argv)
+    # test(sys.argv[1])
+    # test_doMergeGetList()
     main()

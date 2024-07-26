@@ -61,7 +61,7 @@ wctrace_live: $(WCTRACE_TOP_SOURCES) $(WCTRACE_LIVE_SOURCES) $(WCTRACE_SOURCES)
 	mv obj_dir/Vwctrace_top $@
 
 CLEAN += wctrace_w2_tb wctrace_w1_tb wctrace_w0_tb wctrace_n_tb
-CLEAN += wctrace_live
+CLEAN += wctrace_live config_romx.v
 CLEAN_DIRS += obj_dir
 
 include $(BUILD_DIR)/bottom_rules.mk

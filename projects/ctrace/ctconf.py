@@ -2,9 +2,10 @@
 
 import re
 
-SYNTAX_VERILOG=0
-SYNTAX_PYTHON=1
-SYNTAX_ANY=0xf
+SYNTAX_VERILOG = 0
+SYNTAX_PYTHON = 1
+SYNTAX_ANY = 0xF
+
 
 def _int(x):
     try:
@@ -16,17 +17,19 @@ def _int(x):
     except ValueError:
         return None
 
+
 def _vint(x):
     return _int(x.replace("_", ""))
 
-class Config():
+
+class Config:
     _paramdict = {
         # Generic
         "F_CLK_IN": (125.0e6, _vint),
         "CTRACE_DW": (14, _vint),
         "CTRACE_AW": (10, _vint),
         "CTRACE_TW": (24, _vint),
-        "CTRACE_MEM_SIZE": ((1<<10), _vint),
+        "CTRACE_MEM_SIZE": ((1 << 10), _vint),
         # SCRAP-specific
         "CTRACE_CHAN0": (0, _vint),
         "CTRACE_OFFSET": (0x1000, _vint),
@@ -58,7 +61,7 @@ class Config():
             pval = plist[0]
             setattr(self, pname, pval)
         if self.CTRACE_AW is not None:
-            self.CTRACE_MEM_SIZE = (1 << self.CTRACE_AW)
+            self.CTRACE_MEM_SIZE = 1 << self.CTRACE_AW
         self._label_dict = {}
         self.signal_map = {}
         self.loadFile(filename)
@@ -68,7 +71,7 @@ class Config():
             return
         lines = {}
         nline = 0
-        with open(filename, 'r') as fd:
+        with open(filename, "r") as fd:
             _line = True
             while _line:
                 _line = fd.readline()
@@ -87,7 +90,11 @@ class Config():
             except ValueError:
                 fail = True
             if fail:
-                raise Exception("Syntax error parsing {} [line {}]. Must be LHS = RHS".format(filename, linenum))
+                raise Exception(
+                    "Syntax error parsing {} [line {}]. Must be LHS = RHS".format(
+                        filename, linenum
+                    )
+                )
             if lhs.startswith("[") or lhs.isdigit():
                 # print(f"assignment: {line}")
                 # It's a signal assignment
@@ -100,12 +107,20 @@ class Config():
                 # print(f"parameter: {line}")
                 lhs = lhs.strip()
                 if lhs not in _pnames:
-                    raise Exception("Invalid parameter {} (file {}, line {})".format(lhs, filename, linenum))
+                    raise Exception(
+                        "Invalid parameter {} (file {}, line {})".format(
+                            lhs, filename, linenum
+                        )
+                    )
                 param_name = self._simple_name_map.get(lhs, lhs)
                 qualifier = self._paramdict[param_name][1]
                 val = qualifier(rhs.strip())
                 if val is None:
-                    raise Exception("Invalid value {} (file {}, line {})".format(rhs, filename, linenum))
+                    raise Exception(
+                        "Invalid value {} (file {}, line {})".format(
+                            rhs, filename, linenum
+                        )
+                    )
                 # print("Param: {} = {}".format(lhs, val))
                 # Accept the parameter
                 setattr(self, param_name, val)
@@ -115,16 +130,17 @@ class Config():
         """Get the (str) signal label associated with (int) channel 'ch'."""
         return self.signal_map.get(ch, default)
 
-class AssignmentParser():
-    LHS_TYPE_INDEX=0
-    LHS_TYPE_RANGE=1
 
-    RHS_TYPE_INDEX=0
-    RHS_TYPE_SIGNAL=1
-    RHS_TYPE_SIGNAL_INDEX=2
-    RHS_TYPE_SIGNAL_RANGE=3
-    RHS_TYPE_BITMAP=4
-    RHS_TYPE_SIGNAL_INDEX_RANGE=5
+class AssignmentParser:
+    LHS_TYPE_INDEX = 0
+    LHS_TYPE_RANGE = 1
+
+    RHS_TYPE_INDEX = 0
+    RHS_TYPE_SIGNAL = 1
+    RHS_TYPE_SIGNAL_INDEX = 2
+    RHS_TYPE_SIGNAL_RANGE = 3
+    RHS_TYPE_BITMAP = 4
+    RHS_TYPE_SIGNAL_INDEX_RANGE = 5
 
     ASSIGN_TYPE_0 = (LHS_TYPE_INDEX, RHS_TYPE_INDEX)
     ASSIGN_TYPE_1 = (LHS_TYPE_INDEX, RHS_TYPE_SIGNAL)
@@ -135,18 +151,26 @@ class AssignmentParser():
     ASSIGN_TYPE_6 = (LHS_TYPE_RANGE, RHS_TYPE_SIGNAL_RANGE)
     ASSIGN_TYPE_7 = (LHS_TYPE_RANGE, RHS_TYPE_BITMAP)
     ASSIGN_TYPE_8 = (LHS_TYPE_RANGE, RHS_TYPE_SIGNAL_INDEX_RANGE)
-    ASSIGN_TYPE = (ASSIGN_TYPE_0, ASSIGN_TYPE_1, ASSIGN_TYPE_2, ASSIGN_TYPE_3,
-                   ASSIGN_TYPE_4, ASSIGN_TYPE_5, ASSIGN_TYPE_6, ASSIGN_TYPE_7,
-                   ASSIGN_TYPE_8)
-    reVLitHit = "([^\[\]:,.\s+-]+)"
-    reVLitDec = "([0-9_]+)?"
-    reVLitBase = "(\d+)?\s*('[hHbBdD])\s*([0-9a-fA-F_]+)"
-    reVIndices = "^\[?\s*"+reVLitHit+"\s*([+\-]?)\s*:\s*"+reVLitHit+"\s*\]?$"
-    reVIndex = "^\[?\s*"+reVLitHit+"\s*\]?$"
+    ASSIGN_TYPE = (
+        ASSIGN_TYPE_0,
+        ASSIGN_TYPE_1,
+        ASSIGN_TYPE_2,
+        ASSIGN_TYPE_3,
+        ASSIGN_TYPE_4,
+        ASSIGN_TYPE_5,
+        ASSIGN_TYPE_6,
+        ASSIGN_TYPE_7,
+        ASSIGN_TYPE_8,
+    )
+    reVLitHit = r"([^\[\]:,.\s+-]+)"
+    reVLitDec = r"([0-9_]+)?"
+    reVLitBase = r"(\d+)?\s*('[hHbBdD])\s*([0-9a-fA-F_]+)"
+    reVIndices = r"^\[?\s*" + reVLitHit + r"\s*([+\-]?)\s*:\s*" + reVLitHit + r"\s*\]?$"
+    reVIndex = r"^\[?\s*" + reVLitHit + r"\s*\]?$"
 
-    rePyLit = "(0b[01]+|0x[0-9a-fA-F]+|[0-9]+)"
-    rePyIndices = "^\[?\s*"+rePyLit+"\s*(:)\s*"+rePyLit+"\s*\]?$"
-    rePyIndex = "^\[?\s*"+rePyLit+"\s*\]?$"
+    rePyLit = r"(0b[01]+|0x[0-9a-fA-F]+|[0-9]+)"
+    rePyIndices = r"^\[?\s*" + rePyLit + r"\s*(:)\s*" + rePyLit + r"\s*\]?$"
+    rePyIndex = r"^\[?\s*" + rePyLit + r"\s*\]?$"
 
     @classmethod
     def parseLiteral(cls, string, syntax=SYNTAX_ANY):
@@ -156,14 +180,14 @@ class AssignmentParser():
             # Verilog first, then Python
             restrs = (cls.reVLitDec, cls.rePyLit)
         elif syntax == SYNTAX_PYTHON:
-            restrs = (cls.rePyLit, )
+            restrs = (cls.rePyLit,)
         else:
-            restrs = (cls.reVLitDec, )
+            restrs = (cls.reVLitDec,)
         for restr in restrs:
-            _match = re.match("^" + restr+ "$", string)
+            _match = re.match("^" + restr + "$", string)
             if _match:
                 val = _match.groups()[0]
-                val = _int(val.replace('_',''))
+                val = _int(val.replace("_", ""))
                 return (None, None, val)
         if syntax == SYNTAX_PYTHON:
             return None
@@ -172,20 +196,20 @@ class AssignmentParser():
         if _match:
             groups = _match.groups()
             size, base, val = groups
-            #print(f"size = {size}, base = {base}, val = {val}")
+            # print(f"size = {size}, base = {base}, val = {val}")
             if size not in (None, ""):
                 size = _int(size)
-                if size < 1: # Invalid size
+                if size < 1:  # Invalid size
                     return None
             else:
                 size = None
             if base not in (None, ""):
                 base = base.lower()
-                if base[-1] == 'h':
+                if base[-1] == "h":
                     nbase = 16
-                elif base[-1] == 'b':
+                elif base[-1] == "b":
                     nbase = 2
-                elif base[-1] == 'd':
+                elif base[-1] == "d":
                     nbase = 10
                 try:
                     val = int(val, nbase)
@@ -193,7 +217,7 @@ class AssignmentParser():
                     return None
             else:
                 base = None
-                val = int(size+val)
+                val = int(size + val)
             return (size, base, val)
         return None
 
@@ -201,15 +225,15 @@ class AssignmentParser():
     def splitIndices(cls, string, syntax=SYNTAX_VERILOG):
         if syntax == SYNTAX_ANY:
             rens = (cls.rePyIndices, cls.reVIndices)
-            ren  = (cls.rePyIndex, cls.reVIndex)
+            ren = (cls.rePyIndex, cls.reVIndex)
         elif syntax == SYNTAX_PYTHON:
             rens = (cls.rePyIndices,)
-            ren  = (cls.rePyIndex,)
+            ren = (cls.rePyIndex,)
         else:
             rens = (cls.reVIndices,)
-            ren  = (cls.reVIndex,)
-        #reIndices = "^\[?\s*([x0-9a-fA-F]+)\s*([+\-]?)\s*:\s*([x0-9a-fA-F]+)\s*\]?$"
-        #reIndex = "^\[?\s*([x0-9a-fA-F]+)\s*\]?$"
+            ren = (cls.reVIndex,)
+        # reIndices = "^\[?\s*([x0-9a-fA-F]+)\s*([+\-]?)\s*:\s*([x0-9a-fA-F]+)\s*\]?$"
+        # reIndex = "^\[?\s*([x0-9a-fA-F]+)\s*\]?$"
         _match = None
         for rx in rens:
             _match = re.match(rx, string)
@@ -217,7 +241,7 @@ class AssignmentParser():
                 break
         if _match:
             groups = _match.groups()
-            #print(f"splitting {string}: groups = {groups}")
+            # print(f"splitting {string}: groups = {groups}")
             i0 = cls.parseLiteral(groups[0], syntax=syntax)
             if i0 is not None:
                 i0 = i0[-1]
@@ -234,10 +258,10 @@ class AssignmentParser():
                 hi = None
             elif inc == "-":
                 hi = i0
-                low = hi-i1+1
+                low = hi - i1 + 1
             elif inc == "+":
                 low = i0
-                hi = low+i1-1
+                hi = low + i1 - 1
             else:
                 low = min(i0, i1)
                 hi = max(i0, i1)
@@ -267,37 +291,37 @@ class AssignmentParser():
         if False:
             _match = cls.parseLiteral(string, syntax=syntax)
             if _match is not None:
-                #print(f"0: _match = {_match}")
+                # print(f"0: _match = {_match}")
                 size, base, val = _match
                 low, hi = None, None
-                #if size is not None:
+                # if size is not None:
                 #    low = 0
                 #    hi = low + size - 1
                 return (string, low, hi)
         # Next see if it's a signal with an optional range
-        reSigRange = "^\s*([a-zA-Z_~`][a-zA-Z_0-9.`]*)(\[[^\]]+\])?$"
+        reSigRange = r"^\s*([a-zA-Z_~`][a-zA-Z_0-9.`]*)(\[[^\]]+\])?$"
         _match = re.match(reSigRange, string)
         if _match:
             groups = _match.groups()
-            #print(f"1: groups = {groups}")
+            # print(f"1: groups = {groups}")
             name = groups[0]
-            name = name.replace('`', '')  # Remove any macro backticks
+            name = name.replace("`", "")  # Remove any macro backticks
             indices = groups[1]
             if indices is not None:
-                #print(f"splitting: {indices}")
+                # print(f"splitting: {indices}")
                 low, hi = cls.splitIndices(indices, syntax=syntax)
             else:
                 low = None
                 hi = None
             return (name, low, hi)
-        #print(f"No match on string {string}")
+        # print(f"No match on string {string}")
         return None
 
     @staticmethod
     def vetRange(vLo, vHi, sLo, sHi):
         if sLo is None and sHi is None:
             return True
-        if vHi-vLo == sHi-sLo:
+        if vHi - vLo == sHi - sLo:
             return True
         return False
 
@@ -306,7 +330,7 @@ class AssignmentParser():
         # Try index
         _match = cls.parseLiteral(string, syntax=SYNTAX_ANY)
         if _match is not None:
-            #size, base, val = _match
+            # size, base, val = _match
             val = _match[2]
             if debug:
                 print(f"LHS_TYPE_INDEX: val = {val}")
@@ -326,12 +350,12 @@ class AssignmentParser():
         #   Index (Python constant)
         _match = cls.parseLiteral(string, syntax=SYNTAX_PYTHON)
         if _match is not None:
-            #print(f"_match = {_match}")
-            #size, base, val = _match
+            # print(f"_match = {_match}")
+            # size, base, val = _match
             val = _match[2]
             if debug:
                 print(f"RHS_TYPE_INDEX: val = {val}")
-            return (cls.RHS_TYPE_INDEX, val) # TODO - what else?
+            return (cls.RHS_TYPE_INDEX, val)  # TODO - what else?
         #   Signal, Signal + index, Signal + range
         _match = cls.getSignalRange(string, syntax=SYNTAX_ANY)
         if _match is not None:
@@ -347,7 +371,7 @@ class AssignmentParser():
                 typeStr = "RHS_TYPE_SIGNAL_RANGE"
             if debug:
                 print(f"{typeStr} name = {name}, low = {low}, hi = {hi}")
-            return (type_, name, low, hi) # TODO - what else?
+            return (type_, name, low, hi)  # TODO - what else?
         #   Bitmap (Verilog constant)
         _match = cls.parseLiteral(string, syntax=SYNTAX_VERILOG)
         if _match is not None:
@@ -372,9 +396,9 @@ class AssignmentParser():
 
     @classmethod
     def getAssignmentType(cls, string, debug=False):
-        if not '=' in string:
+        if "=" not in string:
             return None
-        lhs, rhs = string.split('=')
+        lhs, rhs = string.split("=")
         _lhs = cls.LHSgetType(lhs.strip(), debug=debug)
         _rhs = cls.RHSgetType(rhs.strip(), debug=debug)
         if None in (_lhs, _rhs):
@@ -394,7 +418,7 @@ class AssignmentParser():
         handler = cls.getHandler(_type)
         assignments = handler(*baggage)
         if assignments is not None:
-            return assignments # (ch_index, signal_label)
+            return assignments  # (ch_index, signal_label)
         return None
 
     @classmethod
@@ -404,19 +428,20 @@ class AssignmentParser():
                 return BaggageHandlers.get(n)
         return None
 
-class BaggageHandlers():
+
+class BaggageHandlers:
     # Set to 1 to allow, 0 to disallow
     type_mask = (
-        0, # Type 0: Single channel index = single signal index
-        1, # Type 1: Single index = wire signal
-        1, # Type 2: Single index = an element of an array
-        0, # Type 3: Range channel indices = same signal index
-        1, # Type 4: Range indicies = same signal
-        0, # Type 5: Range indicies = same element of an array
-        1, # Type 6: Range indices = range of an array
-        0, # Type 7: Range channel indices = static bit map
-        0, # Type 8: Range channel indices = Range signal indices
-        )
+        0,  # Type 0: Single channel index = single signal index
+        1,  # Type 1: Single index = wire signal
+        1,  # Type 2: Single index = an element of an array
+        0,  # Type 3: Range channel indices = same signal index
+        1,  # Type 4: Range indicies = same signal
+        0,  # Type 5: Range indicies = same element of an array
+        1,  # Type 6: Range indices = range of an array
+        0,  # Type 7: Range channel indices = static bit map
+        0,  # Type 8: Range channel indices = Range signal indices
+    )
 
     @classmethod
     def get(cls, assign_type):
@@ -461,7 +486,7 @@ class BaggageHandlers():
         return None
 
     @classmethod
-    def vetSigIndex(n, config=None):
+    def vetSigIndex(cls, n, config=None):
         if n is None:
             return None
         if config is None:
@@ -481,7 +506,7 @@ class BaggageHandlers():
         # If file has been parsed, try to find the label in that dict
         if parseDict is not None:
             for index, entry in parseDict.items():
-                if label==entry:
+                if label == entry:
                     return index
         # If we get here, we didn't find the label. Try to find it using the application file (_sels.py)
         return None
@@ -540,7 +565,7 @@ class BaggageHandlers():
         ch_index = cls.vetChIndex(lhs_baggage[0])
         if ch_index is None:
             return None
-        sig_name, i0, i1 = rhs_baggage # name, low, hi
+        sig_name, i0, i1 = rhs_baggage  # name, low, hi
         assert i0 == i1, f"LOGICAL ASERTION ERROR: i0 {i0} somehow != i1 {i1}"
         signal = f"{sig_name}[{i0}]"
         return [(ch_index, signal)]
@@ -560,7 +585,7 @@ class BaggageHandlers():
         if sig_index is None:
             return None
         assignments = []
-        for ch_index in range(ch_index_lo, ch_index_hi+1):
+        for ch_index in range(ch_index_lo, ch_index_hi + 1):
             assignments.append((ch_index, sig_index))
         return assignments
 
@@ -576,7 +601,7 @@ class BaggageHandlers():
         sig_name = rhs_baggage[0]
         assignments = []
         sig_index = 0
-        for ch_index in range(ch_index_lo, ch_index_hi+1):
+        for ch_index in range(ch_index_lo, ch_index_hi + 1):
             signal = f"{sig_name}[{sig_index}]"
             assignments.append((ch_index, signal))
             sig_index += 1
@@ -592,7 +617,7 @@ class BaggageHandlers():
         if rval is None:
             return None
         ch_index_lo, ch_index_hi = rval
-        sig_name, i0, i1 = rhs_baggage # name, low, hi
+        sig_name, i0, i1 = rhs_baggage  # name, low, hi
         assert i0 == i1, f"LOGICAL ASERTION ERROR: i0 {i0} somehow != i1 {i1}"
         signal = f"{sig_name}[{i0}]"
         sig_index = cls._getIndex(signal)
@@ -600,7 +625,7 @@ class BaggageHandlers():
             print(f"Could not find index of signal {signal}")
             return None
         assignments = []
-        for ch_index in range(ch_index_lo, ch_index_hi+1):
+        for ch_index in range(ch_index_lo, ch_index_hi + 1):
             assignments.append((ch_index, sig_index))
         return assignments
 
@@ -613,9 +638,9 @@ class BaggageHandlers():
         if rval is None:
             return None
         ch_index_lo, ch_index_hi = rval
-        sig_name, i0, i1 = rhs_baggage # name, low, hi
+        sig_name, i0, i1 = rhs_baggage  # name, low, hi
         assignments = []
-        for offset in range(ch_index_hi-ch_index_lo+1):
+        for offset in range(ch_index_hi - ch_index_lo + 1):
             ch_index = ch_index_lo + offset
             sig_range_index = i0 + offset
             signal = f"{sig_name}[{sig_range_index}]"
@@ -628,7 +653,7 @@ class BaggageHandlers():
         """Type 7: Range channel indices = static bit map"""
         if not cls.type_mask[7]:
             return None
-        rval = unpackVetLHSRange(lhs_baggage)
+        rval = cls.unpackVetLHSRange(lhs_baggage)
         if rval is None:
             return None
         ch_index_lo, ch_index_hi = rval
@@ -639,7 +664,7 @@ class BaggageHandlers():
             print("Need both 1'b0 and 1'b1 mapped to assignments to use bitmap feature")
             return None
         assignments = []
-        for offset in range(ch_index_hi-ch_index_lo+1):
+        for offset in range(ch_index_hi - ch_index_lo + 1):
             ch_index = ch_index_lo + offset
             if (bitmap >> offset) & 1:
                 assignments.append((ch_index, index_1b1))
@@ -656,28 +681,33 @@ class BaggageHandlers():
         if rval is None:
             return None
         ch_index_lo, ch_index_hi = rval
-        sig_i0, sig_i1 = rhs_baggage # low, hi
+        sig_i0, sig_i1 = rhs_baggage  # low, hi
         # Ensure ranges are same length
         if abs(sig_i1 - sig_i0) != abs(ch_index_hi - ch_index_lo):
-            print("Ranges are not equal in length: [{}:{}]=[{}:{}]".format(
-                ch_index_lo, ch_index_hi, sig_i1, sig_i0))
+            print(
+                "Ranges are not equal in length: [{}:{}]=[{}:{}]".format(
+                    ch_index_lo, ch_index_hi, sig_i1, sig_i0
+                )
+            )
             return []
         sig_lo = min(sig_i0, sig_i1)
-        sig_hi = max(sig_i0, sig_i1)
         assignments = []
-        for offset in range(ch_index_hi-ch_index_lo+1):
+        for offset in range(ch_index_hi - ch_index_lo + 1):
             ch_index = ch_index_lo + offset
             sig_index = sig_lo + offset
             assignments.append((ch_index, sig_index))
         return assignments
 
+
 def testConfigFile():
     import sys
+
     if len(sys.argv) < 2:
         print("gimme file")
         return
-    cfg = Config(sys.argv[1])
+    Config(sys.argv[1])
     return
+
 
 if __name__ == "__main__":
     testConfigFile()
