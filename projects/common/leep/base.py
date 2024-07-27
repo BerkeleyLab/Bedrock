@@ -27,11 +27,19 @@ def print_reg(fcn):
             if len(regs) and isinstance(regs[0], str):
                 # it's a read operation
                 for reg in regs:
-                    print('reading register {}'.format(reg))
+                    try:
+                        reg = "from address 0x{:x}".format(reg)
+                    except ValueError:
+                        reg = "register {}".format(reg)
+                    print('reading {}'.format(reg))
             else:
                 # it's a write operation, 'regs' is now a tuple, not str
                 for reg, val in regs:
-                    print('writing {} to register {}'.format(val, reg))
+                    try:
+                        reg = "address 0x{:x}".format(reg)
+                    except ValueError:
+                        reg = "register {}".format(reg)
+                    print('writing {} to {}'.format(val, reg))
         return fcn(*args, **kwargs)
     return wrapper
 

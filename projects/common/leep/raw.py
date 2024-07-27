@@ -105,6 +105,16 @@ def yscale_rfs(wave_samp_per=1):
         raise RuntimeError("yscale_rfs(%s) %s" % (wave_samp_per, e))
 
 
+def _int(s):
+    bases = (2, 16, 10)
+    for base in bases:
+        try:
+            return int(s, base)
+        except ValueError:
+            pass
+    return None
+
+
 class LEEPDevice(DeviceBase):
     backend = 'leep'
     init_rom_addr = 0x800
@@ -132,10 +142,12 @@ class LEEPDevice(DeviceBase):
 
         self._readrom()
 
-        try:
-            app_string = self.regmap["__metadata__"]["application"]
-        except KeyError:
-            app_string = "Unknown"
+        app_string = "Unknown"
+        if self.regmap is not None:
+            try:
+                app_string = self.regmap["__metadata__"]["application"]
+            except KeyError:
+                pass
         self.rfs = False
         self.resctrl = False
         self.injector = False
@@ -150,6 +162,26 @@ class LEEPDevice(DeviceBase):
         self.sock.close()
         super(LEEPDevice, self).close()
 
+    def _decode(self, reg, instance=[]):
+        """Returns (name, addr, len, infodict)"""
+        info = { # Default info dict
+            "addr_width": 0, # TODO enable variable read size
+            "data_width": 32,
+            "sign": "unsigned",
+        }
+        _reg = _int(reg)
+        if _reg is not None:
+            return "0x{:x}".format(_reg), _reg, 1, info
+        if instance is not None:
+            print(f"Looking for {reg}, type(reg) = {type(reg)}") # KEEF
+            name = self.expand_regname(reg, instance=instance)
+        info = self.get_reg_info(name, instance=None)
+        size = 2**info.get('addr_width', 0)
+        base_addr = info['base_addr']
+        if isinstance(base_addr, (bytes, unicode)):
+            base_addr = int(base_addr, 0)
+        return reg, base_addr, size, info
+
     @print_reg
     def reg_write(self, ops, instance=[]):
 
@@ -157,17 +189,8 @@ class LEEPDevice(DeviceBase):
 
         addrs, values = [], []
         for name, value in ops:
-            if instance is not None:
-                name = self.expand_regname(name, instance=instance)
-            info = self.get_reg_info(name, instance=None)
-            L = 2**info.get('addr_width', 0)
-
-            base_addr = info['base_addr']
-            if isinstance(base_addr, (bytes, unicode)):
-                base_addr = int(base_addr, 0)
-
+            name, base_addr, L = self._decode(name, instance)[:3]
             value = numpy.array(value).astype('I')
-
             if L > 1:
                 _log.debug('reg_write %s <- %s ...', name, value[:10])
                 assert value.ndim == 1 and value.shape[0] == L, \
@@ -192,15 +215,8 @@ class LEEPDevice(DeviceBase):
         addrs = []
         lens = []
         for name in names:
-            if instance is not None:
-                name = self.expand_regname(name, instance=instance)
-            info = self.get_reg_info(name, instance=None)
-            L = 2**info.get('addr_width', 0)
-
+            name, base_addr, L, info = self._decode(name, instance)
             lens.append((info, L))
-            base_addr = info['base_addr']
-            if isinstance(base_addr, (bytes, str, unicode)):
-                base_addr = int(base_addr, 0)
             addrs.extend(range(base_addr, base_addr + L))
 
         raw = self.exchange(addrs)
@@ -585,20 +601,25 @@ class LEEPDevice(DeviceBase):
         self.descript = None
         self.codehash = None
         self.jsonhash = None
-        self.regmap = None
+        self.regmap   = None
+        self._has_rom = False
 
         # Try to read ROM at both addresses before raising error
         try:
             _log.debug("Trying with init_addr %d", self.init_rom_addr)
             self.the_rom = self._trysize(self.init_rom_addr)
         except (RuntimeError, ValueError, RomError):
+            self.the_rom = []
             _log.debug("Trying with max_addr %d", self.max_rom_addr)
             try:
                 self.the_rom = self._trysize(self.max_rom_addr)
             except RomError as e:
-                _log.error("raw.py: %s. Quitting." % str(e))
-                raise
+                self.the_rom = []
+                _log.error("raw.py: {}. Register name decoding disabled.".format(str(e)))
             except (RuntimeError, ValueError):
-                msg = "Could not read ROM using either start addresses"
-                raise ValueError(msg)
-        _log.debug("ROM was successfully read")
+                self.the_rom = []
+                _log.debug("Could not read ROM using either start addresses")
+        if len(self.the_rom) > 0:
+            _log.debug("ROM was successfully read")
+            self._has_rom = True
+        return
