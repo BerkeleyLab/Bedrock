@@ -164,8 +164,8 @@ class LEEPDevice(DeviceBase):
 
     def _decode(self, reg, instance=[]):
         """Returns (name, addr, len, infodict)"""
-        info = { # Default info dict
-            "addr_width": 0, # TODO enable variable read size
+        info = {  # Default info dict
+            "addr_width": 0,  # TODO enable variable read size
             "data_width": 32,
             "sign": "unsigned",
         }
@@ -173,7 +173,6 @@ class LEEPDevice(DeviceBase):
         if _reg is not None:
             return "0x{:x}".format(_reg), _reg, 1, info
         if instance is not None:
-            print(f"Looking for {reg}, type(reg) = {type(reg)}") # KEEF
             name = self.expand_regname(reg, instance=instance)
         info = self.get_reg_info(name, instance=None)
         size = 2**info.get('addr_width', 0)
