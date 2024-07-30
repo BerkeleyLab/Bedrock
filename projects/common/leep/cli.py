@@ -24,7 +24,10 @@ def readwrite(args, dev):
             val = ast.literal_eval(val)
             dev.reg_write([(name, val)])
         else:
-            value, = dev.reg_read((name,))
+            name, _col, size = pair.partition(':')
+            if not len(size):
+                size = None
+            value, = dev.reg_read_size(((name, size),))
             try:
                 _ = iter(value)
                 print("%s \t%s" % (name, ' '.join(['%x' % v for v in value])))

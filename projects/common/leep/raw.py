@@ -209,14 +209,23 @@ class LEEPDevice(DeviceBase):
 
         self.exchange(addrs, values)
 
-    @print_reg
-    def reg_read(self, names, instance=[]):
+    def reg_read_size(self, name_sizes, instance=[]):
+        """'name_sizes' is iterable of (name, size) where 'name' can be either
+        a string reg name or an int address, and 'size' can be an int number of
+        elements of 'data_width' to read, or None.  If 'size' is None, then (2**aw)
+        elements will be read (where 'aw' is the 'addr_width' of the register).
+        If 'name' is an address (int) then a 'size' of None implies 'size' 1."""
         addrs = []
         lens = []
-        for name in names:
+        print(f"name_sizes = {name_sizes}")
+        for name, size in name_sizes:
             name, base_addr, L, info = self._decode(name, instance)
-            lens.append((info, L))
-            addrs.extend(range(base_addr, base_addr + L))
+            if size is None:
+                size = L
+            else:
+                size = int(size)
+            lens.append((info, size))
+            addrs.extend(range(base_addr, base_addr + size))
 
         raw = self.exchange(addrs)
 
@@ -236,13 +245,19 @@ class LEEPDevice(DeviceBase):
                 data[neg] |= mask
                 # cast to signed
                 data = data.astype('i4')
-            _log.debug('reg_read %s -> %s ...', names[i], data[:10])
+            _log.debug('reg_read %s -> %s ...', name_sizes[i][0], data[:10])
             # unwrap scalar from ndarray
-            if info.get('addr_width', 0) == 0:
+            # if info.get('addr_width', 0) == 0: # TODO - does this break anything?
+            if L <= 1:
                 data = data[0]
             ret.append(data)
 
         return ret
+
+    @print_reg
+    def reg_read(self, names, instance=[]):
+        name_sizes = [(name, None) for name in names]
+        return self.reg_read_size(name_sizes, instance)
 
     def set_decimate(self, dec, instance=[]):
         if self.rfs:
