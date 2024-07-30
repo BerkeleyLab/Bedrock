@@ -106,11 +106,16 @@ def yscale_rfs(wave_samp_per=1):
 
 
 def _int(s):
+    try:
+        # Catch actual ints
+        return int(s)
+    except ValueError:
+        pass
     bases = (2, 16, 10)
     for base in bases:
         try:
             return int(s, base)
-        except ValueError:
+        except (TypeError, ValueError):
             pass
     return None
 
@@ -172,9 +177,9 @@ class LEEPDevice(DeviceBase):
         _reg = _int(reg)
         if _reg is not None:
             return "0x{:x}".format(_reg), _reg, 1, info
-        if instance is not None:
-            name = self.expand_regname(reg, instance=instance)
-        info = self.get_reg_info(name, instance=None)
+        if len(instance):
+            reg = self.expand_regname(reg, instance=instance)
+        info = self.get_reg_info(reg, instance=None)
         size = 2**info.get('addr_width', 0)
         base_addr = info['base_addr']
         if isinstance(base_addr, (bytes, unicode)):
@@ -182,18 +187,27 @@ class LEEPDevice(DeviceBase):
         return reg, base_addr, size, info
 
     @print_reg
-    def reg_write(self, ops, instance=[]):
+    def reg_write_offset(self, ops, instance=[]):
 
         assert isinstance(ops, (list, tuple))
 
         addrs, values = [], []
-        for name, value in ops:
-            name, base_addr, L = self._decode(name, instance)[:3]
+        for op in ops:
+            name, value = op[:2]
+            offset = 0
+            if len(op) > 2:
+                offset = op[2]
+            name, base_addr, size = self._decode(name, instance)[:3]
             value = numpy.array(value).astype('I')
-            if L > 1:
+            if offset > 0:
+                assert value.ndim == 0, "Writes with offset currently only support scalars."
+                _log.debug('reg_write %s <- %s', name, value)
+                addrs.append(base_addr + offset)
+                values.append(value)
+            elif size > 1:
                 _log.debug('reg_write %s <- %s ...', name, value[:10])
-                assert value.ndim == 1 and value.shape[0] == L, \
-                    ('must write whole register', value.shape, L)
+                assert value.ndim == 1 and value.shape[0] == size, \
+                    ('must write whole register', value.shape, size)
                 # array register
                 for A, V in enumerate(value, base_addr):
                     addrs.append(A)
@@ -209,22 +223,31 @@ class LEEPDevice(DeviceBase):
 
         self.exchange(addrs, values)
 
+    def reg_write(self, ops, instance=[]):
+        return self.reg_write_offset([(op[0], op[1], 0) for op in ops], instance=instance)
+
     def reg_read_size(self, name_sizes, instance=[]):
-        """'name_sizes' is iterable of (name, size) where 'name' can be either
-        a string reg name or an int address, and 'size' can be an int number of
-        elements of 'data_width' to read, or None.  If 'size' is None, then (2**aw)
-        elements will be read (where 'aw' is the 'addr_width' of the register).
+        """'name_sizes' is iterable of (name, size, offset) where:
+            'name' can be either a string reg name or an int address
+            'size' can be an int number of elements of 'data_width' to read, or None.
+            'offset' can be int positive address offset or None (alias of 0)
+        If 'size' is None, then (2**aw) elements will be read (where 'aw' is the
+        'addr_width' of the register).
         If 'name' is an address (int) then a 'size' of None implies 'size' 1."""
         addrs = []
         lens = []
-        for name, size in name_sizes:
+        for name_size in name_sizes:
+            name, size = name_size[:2]
+            offset = 0
+            if len(name_size) > 2:
+                offset = name_size[2]
             name, base_addr, L, info = self._decode(name, instance)
             if size is None:
                 size = L
             else:
                 size = int(size)
             lens.append((info, size))
-            addrs.extend(range(base_addr, base_addr + size))
+            addrs.extend(range(base_addr + offset, base_addr + offset + size))
 
         raw = self.exchange(addrs)
 
@@ -246,7 +269,8 @@ class LEEPDevice(DeviceBase):
                 data = data.astype('i4')
             _log.debug('reg_read %s -> %s ...', name_sizes[i][0], data[:10])
             # unwrap scalar from ndarray
-            # if info.get('addr_width', 0) == 0: # TODO - does this break anything?
+            # if info.get('addr_width', 0) == 0:
+            # TODO - does this break anything?
             if L <= 1:
                 data = data[0]
             ret.append(data)

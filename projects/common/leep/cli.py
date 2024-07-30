@@ -7,6 +7,7 @@ import sys
 import tempfile
 import shutil
 import ast
+import re
 
 from collections import defaultdict
 
@@ -17,22 +18,85 @@ from . import RomError
 _log = logging.getLogger(__name__)
 
 
+def _int(s):
+    return int(ast.literal_eval(s))
+
+
+def parseTransaction(xact):
+    """
+    Parse transaction string from CLI.  Returns (str/int reg, int offset, int/None size, int/None write_val)
+    If 'reg' is type int, it is an explicit base address.
+        If 'size' is None, size = 1
+    If 'reg' is type str, it is a register name (supposedly).
+        If 'size' is None, size = 2**aw (where 'aw' is the 'addr_width' from the romx JSON)
+    If 'write_val' is None, it's a read transaction, else it's a write of value 'write_val'
+    Viable formats for a transaction (read/write) in string form:
+        Example                 Implied Transaction
+        -------------------------------------------
+        regname                 Read from named register (str) 'regname'
+        regaddr                 Read from explicit address (int) 'regaddr'
+        regname=val             Write (int) 'val' to named register (str) 'regname'
+        regaddr=val             Write (int) 'val' to explicit address (int) 'regaddr'
+        regname+offset          Read from address = romx['regname']['base_addr'] + (int) 'offset'
+        regaddr+offset          Read from address = (int) 'regaddr' + (int) 'offset'
+        regname:size            Read (int) 'size' elements starting from address romx['regname']['base_addr']
+        regaddr:size            Read (int) 'size' elements starting from (int) 'regaddr'
+        regname+offset=val      Write (int) 'val' to address romx['regname']['base_addr'] + (int) 'offset'
+        regaddr+offset=val      Write (int) 'val' to address (int) 'regaddr' + (int) 'offset'
+        regname+offset:size     Read (int) 'size' elements starting from address romx['regname']['base_addr'] + \
+                                (int) 'offset'
+        regaddr+offset:size     Read (int) 'size' elements starting from (int) 'regaddr' + (int) 'offset'
+    I'm not sure what use case the "regaddr+offset" syntax supports, but it does no harm to include it.
+    NOTE! Deliberately not supporting "regname-offset" (negative offsets) as it's use case is unclear
+    and a '_' to '-' typo could potentially collide with legitimate transactions.
+    NOTE! Does not support multi-value writes (e.g. "regname:size=val")
+    """
+    restr = r"(\w+)\s*([=+:])?\s*([0-9a-fA-Fx]+)?\s*([=:])?\s*([0-9a-fA-Fx]+)?"
+    _match = re.match(restr, xact)
+    offset = 0
+    wval = None
+    size = None
+    if _match:
+        groups = _match.groups()
+        regstr = groups[0]  # Always starts with 'regname' or 'regaddr'
+        if groups[1] == '=':
+            wval = groups[2]
+        elif groups[1] == '+':
+            offset = _int(groups[2])
+        elif groups[1] == ':':
+            size = _int(groups[2])
+        if groups[3] == '=':
+            if groups[1] == '=':
+                raise Exception("Malformed transaction: {}".format(xact))
+            wval = groups[4]
+        elif groups[3] == ':':
+            if size is not None:
+                raise Exception("Malformed transaction: {}".format(xact))
+            size = _int(groups[4])
+    else:
+        raise Exception("Failed to match: {}".format(xact))
+    try:
+        reg = _int(regstr)
+    except ValueError:
+        reg = regstr
+    if wval is not None:
+        # deliberately raise exception if wval is malformed
+        wval = _int(wval)
+    return (reg, offset, size, wval)
+
+
 def readwrite(args, dev):
-    for pair in args.reg:
-        name, _eq, val = pair.partition('=')
-        if len(val):
-            val = ast.literal_eval(val)
-            dev.reg_write([(name, val)])
+    for xact in args.reg:
+        reg, offset, size, wval = parseTransaction(xact)
+        if wval is not None:
+            dev.reg_write_offset([(reg, wval, offset)])
         else:
-            name, _col, size = pair.partition(':')
-            if not len(size):
-                size = None
-            value, = dev.reg_read_size(((name, size),))
+            value, = dev.reg_read_size(((reg, size, offset),))
             try:
                 _ = iter(value)
-                print("%s \t%s" % (name, ' '.join(['%x' % v for v in value])))
+                print("%s \t%s" % (reg, ' '.join(['%x' % v for v in value])))
             except TypeError:
-                print("%s \t%08x" % (name, value))
+                print("%s \t%08x" % (reg, value))
 
 
 def listreg(args, dev):
