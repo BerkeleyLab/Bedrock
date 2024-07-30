@@ -14,20 +14,23 @@ This deployment requires some hand-editing.
 make wctrace_live
 ./wctrace_live +udp_port=3010
 
-# In another terminal, acquire 'scope traces with ctraceparser.py and save to "test.vcd"
-PYTHONPATH=../common python3 ctraceparser.py get leep://localhost:3010 c config.in -o test.vcd --runtime 1
+# In another terminal, acquire 'scope traces with ctracer.py and save to "test.vcd"
+PYTHONPATH=../common python3 ctracer.py get leep://localhost:3010 -c config.in -o test.vcd --runtime 1
+
+# Optionally include a generated clk of net name "dclk" in your VCD as well (can substantially increase file size)
+PYTHONPATH=../common python3 ctracer.py get leep://localhost:3010 -c config.in -o test.vcd --runtime 1 --clk dclk
 
 # View the resulting VCD file in gtkwave
 gtkwave test.vcd
 ```
 
 ## Customizing for your application
-The hand-editing mentioned above is to communicate the following to ctraceparser.py:
+The hand-editing mentioned above is to communicate the following to ctracer.py:
   1. The wctrace parameters
   2. The signals that are being logged
   3. How to interact with wctrace (register names or addresses)
 
-All the above is included in a single file which is passed to `ctraceparser.py` via the `-c` flag to the
+All the above is included in a single file which is passed to `ctracer.py` via the `-c` flag to the
 `get` subcommand.  The syntax of this file is super simple: see `config.in` for all the detail you'll need.
 The only magic is in the parsing of the signal assignments which can be declared in a few ways.
 
