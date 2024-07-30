@@ -217,7 +217,6 @@ class LEEPDevice(DeviceBase):
         If 'name' is an address (int) then a 'size' of None implies 'size' 1."""
         addrs = []
         lens = []
-        print(f"name_sizes = {name_sizes}")
         for name, size in name_sizes:
             name, base_addr, L, info = self._decode(name, instance)
             if size is None:
