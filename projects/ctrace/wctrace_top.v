@@ -75,6 +75,7 @@ always @(posedge clk) begin
   if (control_strobe & (~control_rd)) begin
     casez (addr[15:0])
       16'h1000: start <= data_out[0];
+      default: /* do nothing */;
     endcase
   end
   // Reads
@@ -83,6 +84,7 @@ always @(posedge clk) begin
     16'h1002: lb_din <= {{32-AW{1'b0}}, pc_mon};
     16'h1001: lb_din <= {31'h00000000, running};
     16'h000???: lb_din <= wctrace_lb_out;
+    default: lb_din <= 32'hdeadbeef;
   endcase
 end
 
