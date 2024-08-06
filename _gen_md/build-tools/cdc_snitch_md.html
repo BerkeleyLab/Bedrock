@@ -173,11 +173,10 @@ So <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span
 </section>
 <section id="i-o">
 <h3>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading"></a></h3>
-<p>Each top-level input port is placed in its own domain,
-and output ports are not checked for errors.
+<p>Each input is placed in its own domain, and outputs are not checked for errors.
 This may or may not represent the demands of a specific use case.
-We have written shells around the logic-under-test, that add
-input and output registers to define the domain of each I/O signal.
+We have written shells around the logic-under-test, that adds
+input and output registers, defining the domain of each signal.
 If an input <em>does</em> represent a physical pin, the own-domain rule
 will give reasonable results.  Such a design will normally capture
 the input in a simple register (placed by the synthesizer in the I/O cell),
@@ -192,7 +191,7 @@ our designs to put such constructions in an outer chip-specific layer,
 with the Real Work instantiated as a portable Verilog module on the inside.
 You would then point <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span></code> at that inner layer.</p>
 <p>Of course, <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span></code> itself doesn’t know or care what language
-you feed into yosys.  Verilog and a limited subset of SystemVerilog are OK with yosys-0.23.</p>
+you feed into yosys.  Verilog and SystemVerilog are OK with yosys-0.23.</p>
 </section>
 <section id="tool-flow">
 <h3>Tool flow<a class="headerlink" href="#tool-flow" title="Permalink to this heading"></a></h3>
@@ -213,62 +212,6 @@ design errors that led to the “BAD” registers.
 If the design includes any such “BAD” registers, the makefile rule for
 <code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code> will fail, as would be used for a regression test.</p>
 </section>
-<section id="reading-the-output">
-<h3>Reading the output<a class="headerlink" href="#reading-the-output" title="Permalink to this heading"></a></h3>
-<p>It’s recommended to save the output of <code class="docutils literal notranslate"><span class="pre">cdc_snitch.py</span></code> in a file by
-using the <code class="docutils literal notranslate"><span class="pre">-o</span></code> flag.
-Call the result <code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code>, consistent with the make rule above.
-That will usually be a big file!  But it is text, and can be understood
-as described here.</p>
-<p>Ideally, the BAD count is zero, and you don’t need to look at <code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code>.
-Otherwise, the best way to start is with</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">grep</span> <span class="n">BAD</span> <span class="n">foo_cdc</span><span class="o">.</span><span class="n">txt</span>
-</pre></div>
-</div>
-<p>Giving one line per DFF that falls in the BAD category described above.
-Each of those lines will look something like</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BAD</span>  <span class="mi">31049</span> <span class="n">dsp</span><span class="o">.</span><span class="n">reg_bank_2</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">D</span> <span class="n">clk</span> <span class="n">lb_clk</span> <span class="n">inputs</span> <span class="p">(</span> <span class="mi">8</span> <span class="n">x</span> <span class="n">lb_clk</span><span class="p">,</span> <span class="mi">3</span> <span class="n">x</span> <span class="n">dsp_clk</span><span class="p">,</span> <span class="mi">1</span> <span class="n">x</span> <span class="n">dsp</span><span class="o">.</span><span class="n">evr_rx_out_clk</span> <span class="p">)</span>
-</pre></div>
-</div>
-<p>Here <code class="docutils literal notranslate"><span class="pre">dsp.reg_bank_2[0]:D</span></code> tells you that the offending path is the D input
-to the 0 element of word full of DFF named (by yosys) as <code class="docutils literal notranslate"><span class="pre">dsp.reg_bank_2</span></code>.
-Each net often has many different possible names, but you should be able to
-find the <code class="docutils literal notranslate"><span class="pre">reg_bank_2</span></code> signal in instance <code class="docutils literal notranslate"><span class="pre">dsp</span></code> in your code.</p>
-<p>Then it says <code class="docutils literal notranslate"><span class="pre">clk</span> <span class="pre">lb_clk</span></code> identifying the clock to the DFF.
-Finally <code class="docutils literal notranslate"><span class="pre">inputs</span> <span class="pre">(</span> <span class="pre">8</span> <span class="pre">x</span> <span class="pre">lb_clk,</span> <span class="pre">3</span> <span class="pre">x</span> <span class="pre">dsp_clk,</span> <span class="pre">1</span> <span class="pre">x</span> <span class="pre">dsp.evr_rx_out_clk</span> <span class="pre">)</span></code>
-is a count of signals per clock domain feeding the logic.
-The goal is to reduce these inputs to a single clock domain,
-as described in case OK1 above.</p>
-<p>To dive deeper, using that same example, read the whole <code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code>
-file with <code class="docutils literal notranslate"><span class="pre">less</span></code> or your favorite text editor.  Now search for the
-line discovered above with <code class="docutils literal notranslate"><span class="pre">grep</span></code>.  It is followed by more information
-about that BAD DFF input.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">BAD</span>  <span class="mi">31049</span> <span class="n">dsp</span><span class="o">.</span><span class="n">reg_bank_2</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">D</span> <span class="n">clk</span> <span class="n">lb_clk</span> <span class="n">inputs</span> <span class="p">(</span> <span class="mi">8</span> <span class="n">x</span> <span class="n">lb_clk</span><span class="p">,</span> <span class="mi">3</span> <span class="n">x</span> <span class="n">dsp_clk</span><span class="p">,</span> <span class="mi">1</span> <span class="n">x</span> <span class="n">dsp</span><span class="o">.</span><span class="n">evr_rx_out_clk</span> <span class="p">)</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">397</span> <span class="n">clk</span> <span class="n">lb_clk</span> <span class="n">name</span> <span class="n">lb_addr_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">398</span> <span class="n">clk</span> <span class="n">lb_clk</span> <span class="n">name</span> <span class="n">lb_addr_r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">399</span> <span class="n">clk</span> <span class="n">lb_clk</span> <span class="n">name</span> <span class="n">lb_addr_r</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">400</span> <span class="n">clk</span> <span class="n">lb_clk</span> <span class="n">name</span> <span class="n">lb_addr_r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">18908</span> <span class="n">clk</span> <span class="n">lb_clk</span> <span class="n">name</span> <span class="n">dsp</span><span class="o">.</span><span class="n">fcnt_dsp_clk</span><span class="o">.</span><span class="n">work</span><span class="o">.</span><span class="n">frequency</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">28493</span> <span class="n">clk</span> <span class="n">lb_clk</span> <span class="n">name</span> <span class="n">dsp</span><span class="o">.</span><span class="n">timing</span><span class="o">.</span><span class="n">evr_timestamp_valid</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">28547</span> <span class="n">clk</span> <span class="n">dsp_clk</span> <span class="n">name</span> <span class="n">dsp</span><span class="o">.</span><span class="n">evr_live_pps_tick</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">29201</span> <span class="n">clk</span> <span class="n">dsp_clk</span> <span class="n">name</span> <span class="n">dsp</span><span class="o">.</span><span class="n">timing</span><span class="o">.</span><span class="n">i_oc_sync</span><span class="o">.</span><span class="n">data_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">29265</span> <span class="n">clk</span> <span class="n">dsp_clk</span> <span class="n">name</span> <span class="n">dsp</span><span class="o">.</span><span class="n">timing</span><span class="o">.</span><span class="n">i_oc_sync</span><span class="o">.</span><span class="n">data_out</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">29529</span> <span class="n">clk</span> <span class="n">dsp</span><span class="o">.</span><span class="n">evr_rx_out_clk</span> <span class="n">name</span> <span class="n">dsp</span><span class="o">.</span><span class="n">timing</span><span class="o">.</span><span class="n">i_evrAROC</span><span class="o">.</span><span class="n">evrSROCsynced</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">29536</span> <span class="n">clk</span> <span class="n">lb_clk</span> <span class="n">name</span> <span class="n">dsp</span><span class="o">.</span><span class="n">timing</span><span class="o">.</span><span class="n">i_evcnt_sync</span><span class="o">.</span><span class="n">data_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-  <span class="n">tree</span> <span class="mi">31049</span> <span class="kn">from</span> <span class="mi">29724</span> <span class="n">clk</span> <span class="n">lb_clk</span> <span class="n">name</span> <span class="n">dsp</span><span class="o">.</span><span class="n">timing</span><span class="o">.</span><span class="n">fcnt_evr_clk</span><span class="o">.</span><span class="n">work</span><span class="o">.</span><span class="n">frequency</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>Now instead of just a count, you can see each input to the logic cloud
-identified by name and clock domain.  So <code class="docutils literal notranslate"><span class="pre">lb_addr_r[0]</span></code> comes from the
-lb_clk domain, and <code class="docutils literal notranslate"><span class="pre">dsp.evr_live_pps_tick[0]</span></code> comes from the dsp_clk domain.</p>
-<p>Now the real work begins: now that you know how and where good CDC hygiene
-has been broken, you should fix it!  For simple command and status bits,
-it’s often enough to just capture them (with the OK1 topology drawn above)
-into the domain in which they are used.  Other cases may be harder to
-accomplish without continuing the already-present (in the BAD net)
-risk of data corruption.  <a class="reference external" href="https://en.wikipedia.org/wiki/Gray_code">Gray codes</a>
-are often helpful, as are digital logic design textbooks. Good luck!</p>
-</section>
 <section id="dependencies">
 <h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading"></a></h3>
 <p>Besides <a class="reference external" href="cdc_snitch.py">cdc_snitch.py</a> and its associated yosys command script
@@ -283,9 +226,7 @@ are often helpful, as are digital logic design textbooks. Good luck!</p>
 <h3>Discussion<a class="headerlink" href="#discussion" title="Permalink to this heading"></a></h3>
 <p>See <a class="reference external" href="https://github.com/YosysHQ/yosys/discussions/3956">CDC detection with yosys</a>,
 a discussion started (with prototype code) on Sep 25, 2023.</p>
-<p>This utility is definitely useful in its current state, and is deployed
-in a <a class="reference external" href="https://en.wikipedia.org/wiki/Continuous_integration">CI</a> context
-for production HDL code.
+<p>This code is definitely useful in its current state.
 We welcome suggestions for or work on improvements.</p>
 <p>We’re still looking for a permanent name for the attribute marking
 intentional CDC registers, to replace the placeholder <code class="docutils literal notranslate"><span class="pre">magic_cdc</span></code>.
@@ -299,13 +240,6 @@ results match that of the final (normally vendor-specific) synthesis.
 We use yosys’s “techmap” step, that creates gate-level cells for registers
 with a type name based around “DFF”.  We don’t currently check for
 DFF with asynchronous inputs, that are unlikely to be correctly handled.</p>
-<p>Besides <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span></code>, vendor tools often come with CDC analysis.
-For example, Vivado <code class="docutils literal notranslate"><span class="pre">report_cdc</span></code>.
-On the plus side, they will “understand” vendor-specific primitives,
-and so can cover more of your design.  On the down side, they will
-push using vendor-supplied IP, that will keep your design from being
-easily portable to other chip families.
-Having two CDC analysis tools is better than one!</p>
 </section>
 </section>
 </section>
