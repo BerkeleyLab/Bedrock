@@ -4,6 +4,7 @@ make -C board_support/bmb7_kintex clean
 make -C dsp/chirp clean
 PYTHONPATH=$PWD/build-tools make -C cmoc clean
 make -C cordic clean
+make -C projects/ctrace clean
 make -C dsp/digaree clean
 make -C dsp/hosted clean
 make -C dsp clean
