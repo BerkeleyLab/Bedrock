@@ -69,6 +69,9 @@ PYTHONPATH=$PWD/build-tools make -C cmoc all checks
 ## cordic_test
 make -C cordic clean all
 
+## ctrace_test
+make -C projects/ctrace
+
 ## digaree_test
 make -C dsp/digaree
 

@@ -10,7 +10,7 @@ WCTRACE_TOP_SOURCES=wctrace_top.v $(BADGER_DIR)/mem_gateway.v $(DSP_DIR)/reg_del
 WCTRACE_LIVE_SOURCES=wctrace_live.cpp $(TESTS_DIR)/udp_model.c config_romx.v
 INC_DIRS=$(TESTS_DIR)
 
-all: wctrace_w2_check wctrace_w1_check wctrace_w0_check wctrace_n_check
+all: wctrace_w2_check wctrace_w1_check wctrace_w0_check wctrace_n_check wctrace_live
 
 VFLAGS_wctrace_w2_tb=-DTEST_WIDE2 -DWCTRACE_DEBUG
 VFLAGS_wctrace_w1_tb=-DTEST_WIDE1 -DWCTRACE_DEBUG
@@ -54,7 +54,6 @@ config_romx.v: wctrace_top_regmap.json
 
 VC_INCLUDES = $(foreach var,$(INC_DIRS),-CFLAGS -I$(var))
 
-.PHONY: wctrace_live
 wctrace_live: $(WCTRACE_TOP_SOURCES) $(WCTRACE_LIVE_SOURCES) $(WCTRACE_SOURCES)
 	$(VERILATOR) --trace $(VLATOR_LINT_IGNORE) -Wno-UNUSEDSIGNAL $(VC_INCLUDES) -cc --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vwctrace_top.mk
