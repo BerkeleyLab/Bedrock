@@ -37,6 +37,7 @@ include:
   - local: .gitlab/ci/swap_gitid.gitlab-ci.yml
   - local: .gitlab/ci/cdc_check.gitlab-ci.yml
   - local: .gitlab/ci/localbus.gitlab-ci.yml
+  - local: .gitlab/ci/ctrace.gitlab-ci.yml
 
 leep_test:
   script:
