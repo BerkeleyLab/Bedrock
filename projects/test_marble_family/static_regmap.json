@@ -125,6 +125,13 @@
         "base_addr": 327703,
         "data_width": 24
     },
+    "dna_rst": {
+        "access": "rw",
+        "addr_width": 0,
+        "sign": "unsigned",
+        "base_addr": 327704,
+        "data_width": 1
+    },
     "twi_prog": {
         "access": "rw",
         "addr_width": 10,

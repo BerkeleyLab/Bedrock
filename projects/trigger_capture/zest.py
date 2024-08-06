@@ -99,6 +99,8 @@ class Zest(Module, AutoCSR):
             "board_support/zest_soc/zest.v",
             "board_support/zest_soc/zest_clk_map.v",
             "board_support/zest_soc/zest_spi_dio_pack.v",
+            "board_support/zest_soc/zest_dac_interp.v",
+            "fpga_family/xilinx/xilinx7_clocks.v",
             "dsp/freq_count.v",
             "dsp/freq_gcount.v",
             "dsp/phase_diff.v",
@@ -107,6 +109,7 @@ class Zest(Module, AutoCSR):
             "dsp/reg_tech_cdc.v",
             "dsp/phaset.v",
             "dsp/dpram.v",
+            "soc/picorv32/gateware/awg_pack.v",
             "soc/picorv32/gateware/sfr_pack.v",
             "soc/picorv32/gateware/munpack.v",
             "soc/picorv32/gateware/mpack.v",
@@ -189,16 +192,15 @@ class Zest(Module, AutoCSR):
                       # TODO: Maybe have reset have an affect here?
                       source.valid.eq(1)]
 
-        platform.add_period_constraint(clk_to_fpga, 8.7)
-        # platform.add_period_constraint(clk_to_fpga_dummy, 8.7)
-        platform.add_period_constraint(platform.lookup_request("ZEST_CLK_TO_FPGA", 1).p, 8.7)
+        platform.add_period_constraint(clk_to_fpga, 4.3)
+        # platform.add_period_constraint(clk_to_fpga_dummy, 4.3)
+        platform.add_period_constraint(platform.lookup_request("ZEST_CLK_TO_FPGA", 1).p, 4.3)
         platform.add_period_constraint(platform.lookup_request("ZEST_ADC_DCO", 0).p, 1e9/500e6)
         platform.add_period_constraint(platform.lookup_request("ZEST_ADC_DCO", 1).p, 1e9/500e6)
-        platform.add_period_constraint(platform.lookup_request("ZEST_DAC_DCO",    loose=True).p, 8.7)
+        platform.add_period_constraint(platform.lookup_request("ZEST_DAC_DCO",    loose=True).p, 4.3)
 
         self.specials += Instance("zest",
-                                  # parameter PH_DIFF_ADV = 4693,  // ADV: 500*11/48 / 200/2*(1<<14) = 4693
-                                  p_PH_DIFF_ADV = int(117.29 / 200/2*(1<<14)),
+                                  p_DSP_FREQ_MHZ=117.29,
                                   p_BASE_ADDR=self.BASE_ADDR,
                                   o_ADC_PDWN=self.ADC_PDWN,
                                   o_ADC_CSB_0=self.ADC_CSB_0,

@@ -11,7 +11,7 @@ echo "Reading kintex 7 DNA for $IP"
 python3 -m leep.cli leep://$IP:803 reg dna_high dna_low
 echo "Connect Digilent 8 LED board to PMOD J12 and check if all them blink at different rate"
 python3 -m leep.cli leep://$IP:803 reg led_user_mode=2
-tt=$(mktemp quick_XXXXXX)
+tt=$(mktemp /tmp/quick_XXXXXX)
 python3 -m spi_test --ip $IP --udp 804 --otp --pages=1 --dump $tt
 hexdump $tt | head -n 2
 rm $tt

@@ -47,11 +47,9 @@ bool iserdes_center_idelay(uint32_t base, uint8_t pattern) {
 
 // return n_bitslip or -1 for failure
 int iserdes_align_bits(uint32_t base, uint8_t pattern) {
-    bool aligned=false;
-
-	iserdes_reset(base);
+    iserdes_reset(base);
     for (int cnt=0; cnt<16; cnt++) {
-        aligned = iserdes_center_idelay(base, pattern);
+        bool aligned = iserdes_center_idelay(base, pattern);
         if (!aligned)
             iserdes_bitslip(base);
         else

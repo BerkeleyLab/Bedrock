@@ -41,7 +41,7 @@ vpath %.c $(BADGER_DIR)/tests $(BUILD_DIR)
 include $(HOMELESS_DIR)/freq_demo/freq_demo_rules.mk
 
 # This must go in front of include $(BADGER_DIR)/rules.mk
-all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check marble_base_lint gps_test_tb ltm_sync_tb Vmarble_base
+all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check marble_base_lint gps_test_tb ltm_sync_tb Vmarble_base dna_check
 
 # =====
 # gps_test, too simple to need testing ... right
@@ -92,8 +92,8 @@ mmc_mailbox_tb: mmc_mailbox.v $(HOMELESS_DIR)/fake_dpram.v $(DSP_DIR)/dpram.v $(
 # subset that is interesting to test live on network
 AD5662_V = ad5662_lock.v pps_lock.v pps_loop_filter.v ad5662.v
 LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v reg_tech_cdc.v freq_count.v freq_gcount.v multi_counter.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
-                    gps_test.v simpleuart.v fake_dpram.v xadc_tempmon.v dna.v
-lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v udp-vpi.vpi IDDR.v
+                    gps_test.v simpleuart.v fake_dpram.v xadc_tempvoltmon.v dna.v
+lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v fake_xadc.v udp-vpi.vpi IDDR.v
 VFLAGS_lb_marble_slave_tb = -m ./udp-vpi
 net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=8030 +vcd
@@ -107,7 +107,7 @@ net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_trx.dat
 
 # syntax-check only, with no actual test bench code
 MARBLE_BASE_V = marble_base.v packet_categorize.v data_xdomain.v flag_xdomain.v ltm_sync.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V) mmc_mailbox.v
-marble_base_tb: $(MARBLE_BASE_V) IDDR.v
+marble_base_tb: $(MARBLE_BASE_V) fake_xadc.v IDDR.v
 VFLAGS_marble_base_tb =
 
 .PHONY: no_multiple_drivers_check
@@ -115,11 +115,11 @@ no_multiple_drivers_check: marble_base_tb
 	$(AWK) '$$NF=="drivers" && $$(NF-1)>1 {print $$0; code=1}BEGIN{code=0}END{exit(code)}' $<
 	@echo "PASS"
 
-marble_base_lint: $(MARBLE_BASE_V) IDDR.v
+marble_base_lint: $(MARBLE_BASE_V) fake_xadc.v IDDR.v
 	$(VERILATOR) --lint-only -DSIMULATE $(VLATOR_LINT_IGNORE) $^
 
 # You'd better have a verilator in the v5 series!
-marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
+marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) fake_xadc.v $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
 	$(VERILATOR) --lint-only --timing $(VLATOR_LINT_IGNORE) -DSIMULATE -y $(FPGA_FAMILY_DIR)/xilinx $(filter-out marble2_features, $^)
 
 # =====
@@ -145,7 +145,7 @@ read_trx.dat: read_trx.py
 # Build a testbench with Verilator that can be put on the (simulated) network as 192.168.7.4
 # marble_base.v is over in board_support/marblemini, but most of the infrastructure,
 # including lb_marble_slave.v, is here.
-Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
+Vmarble_base: $(MARBLE_BASE_V) fake_xadc.v marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
 	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -DSIMULATE -cc -CFLAGS -Wno-logical-op --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmarble_base.mk USER_CPPFLAGS="-I $(BADGER_DIR)/tests"
@@ -209,6 +209,8 @@ marble2_hwtest: udprtx
 	./udprtx ${MARBLE_IP} 100000 8  # should take under 3 seconds
 	$(PYTHON) testcase.py -a ${MARBLE_IP} --trx --si570
 	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = ${ZEST_SN}
+
+dna_tb: dna_tb.v dna.v
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc

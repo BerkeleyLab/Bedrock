@@ -23,9 +23,9 @@ check:
 
 fv:
 	# Formal verification of some components
-	(cd fv/ && sby f_pack.sby)
-	(cd fv/ && sby fifo.sby)
-	(cd fv/ && sby shortfifo.sby)
+	cd fv && sby f_pack.sby
+	cd fv && sby fifo.sby
+	cd fv && sby shortfifo.sby
 
 clean:
 	$(MAKE) -C ./badger_loopback clean

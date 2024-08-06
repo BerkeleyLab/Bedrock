@@ -42,7 +42,6 @@ void init(void)
 
 int main(void)
 {
-    uint8_t ret;
     uint16_t tempBuff[5];
 
     init();
@@ -97,7 +96,7 @@ int main(void)
     uint8_t i=0;
     g_printTo = P_UART | P_LCD;
     while(1) {
-        ret = i2c_read_regs(I2C_ADR_SFP_2, 96, (uint8_t*)tempBuff, 10);
+        uint8_t ret = i2c_read_regs(I2C_ADR_SFP_2, 96, (uint8_t*)tempBuff, 10);
         if(!ret) {
             print_str("I2C error");
             return -1;
