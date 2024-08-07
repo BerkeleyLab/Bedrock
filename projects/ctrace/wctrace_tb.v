@@ -32,11 +32,15 @@ wire to = ~(|r_timeout);
 `define CHECK(bus, data) if (bus != data) begin $display("[%x] Miss: %x != %x", lb_addr, bus, data); pass <= 1'b0; end
 
 localparam AW = 10;
+reg [AW-1:0] lb_addr=0;
+wire [31:0] lb_out;
+reg pass=1'b1;
 
 reg readback=1'b0;
 
 `ifdef TEST_WIDE2
 localparam DW = 104;
+reg [DW-1:0] data=0;
 localparam TW = 24;
 // Four randomly generated test patterns (no special meaning here)
 localparam [DW-1:0] DATA0 = 104'hc37b15f763c1c86d2a5180d393;
@@ -124,6 +128,7 @@ end
 `else
  `ifdef TEST_WIDE1
 localparam DW = 72;
+reg [DW-1:0] data=0;
 localparam TW = 24;
 localparam [DW-1:0] DATA0 = 72'h98765432123456789a;
 localparam [DW-1:0] DATA1 = 72'h98765432cecee6789a;
@@ -205,6 +210,7 @@ end
  `else
   `ifdef TEST_WIDE0
 localparam DW = 40;
+reg [DW-1:0] data=0;
 localparam TW = 24;
 localparam [DW-1:0] DATA0 = 40'h123456789a;
 localparam [DW-1:0] DATA1 = 40'hcecee6789a;
@@ -262,6 +268,7 @@ end
   `else
    `ifdef TEST_NORMAL
 localparam DW = 8;
+reg [DW-1:0] data=0;
 localparam TW = 24;
 localparam [DW-1:0] DATA0 = 8'h9a;
 localparam [DW-1:0] DATA1 = 8'hce;
@@ -302,12 +309,9 @@ end
  `endif // TEST_WIDE1
 `endif // TEST_WIDE2
 
-reg [DW-1:0] data=0;
 reg start=1'b0;
 wire running;
 wire [AW-1:0] pc_mon;
-reg [AW-1:0] lb_addr=0;
-wire [31:0] lb_out;
 wctrace #(
   .AW(AW)
   ,.DW(DW)
@@ -323,7 +327,6 @@ wctrace #(
   .lb_out(lb_out) // output [31:0]
 );
 
-reg pass=1'b1;
 // =========== Stimulus =============
 initial begin
   #TICK      start = 1'b1;
