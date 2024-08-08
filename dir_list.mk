@@ -16,3 +16,4 @@ PERIPH_DRIVERS_DIR = $(BEDROCK_DIR)peripheral_drivers
 PROJECTS_DIR       = $(BEDROCK_DIR)projects
 SERIAL_IO_DIR      = $(BEDROCK_DIR)serial_io
 PICORV_DIR         = $(BEDROCK_DIR)soc/picorv32
+LOCALBUS_DIR       = $(BEDROCK_DIR)localbus

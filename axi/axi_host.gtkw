@@ -1,0 +1,62 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Thu Aug  8 19:03:50 2024
+[*]
+[dumpfile] "axi_host.vcd"
+[savefile] "axi_host.gtkw"
+[timestart] 0
+[size] 1920 1001
+[pos] -1 -1
+*-8.700000 130 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] axi_host_tb.
+[treeopen] axi_host_tb.axi_delay_i.
+[sst_width] 273
+[signals_width] 174
+[sst_expanded] 1
+[sst_vpaned_height] 291
+@28
+axi_host_tb.axi_aclk
+axi_host_tb.axi_delay_i.s_axi_rvalid
+axi_host_tb.m_axi_rvalid
+@22
+axi_host_tb.axi_delay_i.s_axi_araddr[15:0]
+axi_host_tb.axi_delay_i.m_axi_araddr[15:0]
+@28
+axi_host_tb.axi_delay_i.s_axi_arvalid
+axi_host_tb.m_axi_arvalid
+axi_host_tb.axi_delay_i.s_axi_rready
+axi_host_tb.axi_delay_i.m_axi_rready
+@22
+axi_host_tb.axi_delay_i.m_axi_rdata[31:0]
+axi_host_tb.axi_delay_i.s_axi_rdata[31:0]
+axi_host_tb.axi_delay_i.s_axi_wdata[31:0]
+axi_host_tb.axi_delay_i.m_axi_wdata[31:0]
+@200
+-axi_dummy
+@22
+axi_host_tb.axi_dummy_i.s_axi_wdata[31:0]
+axi_host_tb.axi_dummy_i.s_axi_awaddr[15:0]
+@28
+axi_host_tb.axi_dummy_i.s_axi_awvalid
+@22
+axi_host_tb.axi_dummy_i.s_axi_wstrb[3:0]
+@28
+axi_host_tb.axi_dummy_i.axi_wready
+axi_host_tb.axi_dummy_i.aw_en
+axi_host_tb.axi_dummy_i.s_axi_bready
+axi_host_tb.axi_dummy_i.axi_awready
+axi_host_tb.axi_dummy_i.s_axi_awvalid
+axi_host_tb.axi_dummy_i.axi_bvalid
+axi_host_tb.axi_dummy_i.axi_wready
+axi_host_tb.axi_dummy_i.s_axi_wvalid
+axi_host_tb.axi_dummy_i.ha_reg_wren
+@22
+axi_host_tb.axi_dummy_i.w_reg_sel[5:0]
+@200
+-axi_host
+@28
+axi_host_tb.axi_host_i.m_axi_wready
+@29
+axi_host_tb.axi_host_i.busy
+[pattern_trace] 1
+[pattern_trace] 0

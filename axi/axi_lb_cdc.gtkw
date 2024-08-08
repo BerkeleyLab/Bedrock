@@ -1,0 +1,76 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Thu Aug  8 20:52:51 2024
+[*]
+[dumpfile] "axi_lb_cdc.vcd"
+[savefile] "axi_lb_cdc.gtkw"
+[timestart] 213
+[size] 1920 1001
+[pos] -1 -1
+*-3.600000 257 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] axi_lb_cdc_tb.
+[sst_width] 273
+[signals_width] 198
+[sst_expanded] 1
+[sst_vpaned_height] 296
+@28
+axi_lb_cdc_tb.axi_aclk
+axi_lb_cdc_tb.lb_clk
+@200
+-host
+@28
+axi_lb_cdc_tb.axi_host_i.wnr
+@22
+axi_lb_cdc_tb.axi_host_i.addr[15:0]
+@28
+axi_lb_cdc_tb.axi_host_i.start
+axi_lb_cdc_tb.axi_host_i.start_re
+@22
+axi_lb_cdc_tb.axi_host_i.rdata[31:0]
+@28
+axi_lb_cdc_tb.axi_host_i.state[1:0]
+axi_lb_cdc_tb.axi_lb_cdc_i.s_axi_arvalid
+axi_lb_cdc_tb.axi_lb_cdc_i.s_axi_arready
+axi_lb_cdc_tb.axi_lb_cdc_i.s_axi_awvalid
+axi_lb_cdc_tb.axi_lb_cdc_i.s_axi_wready
+axi_lb_cdc_tb.axi_lb_cdc_i.s_axi_wvalid
+axi_lb_cdc_tb.axi_lb_cdc_i.s_axi_bready
+axi_lb_cdc_tb.axi_lb_cdc_i.s_axi_bvalid
+@200
+-axi
+@28
+axi_lb_cdc_tb.axi_lb_cdc_i.read_trigger
+axi_lb_cdc_tb.axi_lb_cdc_i.write_trigger
+@22
+axi_lb_cdc_tb.axi_lb_cdc_i.s_axi_rdata[31:0]
+axi_lb_cdc_tb.axi_host_i.m_axi_rdata[31:0]
+axi_lb_cdc_tb.axi_host_i.rdata_r[31:0]
+@28
+axi_lb_cdc_tb.axi_lb_cdc_i.axi_rdata_ren
+axi_lb_cdc_tb.axi_lb_cdc_i.s_axi_rvalid
+@200
+-lb
+@28
+axi_lb_cdc_tb.axi_lb_cdc_i.lb_wnr_addr_wdata_ren
+axi_lb_cdc_tb.axi_lb_cdc_i.h_lb_readstart
+axi_lb_cdc_tb.axi_lb_cdc_i.p_lb_readstart
+@23
+axi_lb_cdc_tb.axi_lb_cdc_i.h_lb_addr[15:0]
+@22
+axi_lb_cdc_tb.axi_lb_cdc_i.lb_addr[15:0]
+axi_lb_cdc_tb.axi_lb_cdc_i.h_lb_rdata[31:0]
+@28
+axi_lb_cdc_tb.axi_lb_cdc_i.lb_rdata_wstb
+@200
+-dummy
+@28
+axi_lb_cdc_tb.lb_dummy_i.lb_wen
+@22
+axi_lb_cdc_tb.lb_dummy_i.lb_addr[15:0]
+axi_lb_cdc_tb.lb_dummy_i.lb_din[31:0]
+axi_lb_cdc_tb.lb_dummy_i.lb_dout[31:0]
+@28
+axi_lb_cdc_tb.axi_host_i.start_re
+axi_lb_cdc_tb.axi_host_i.state[1:0]
+[pattern_trace] 1
+[pattern_trace] 0
