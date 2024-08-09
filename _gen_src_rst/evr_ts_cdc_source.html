@@ -86,10 +86,10 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 3</span><span class="c1">// Time delay is one evr_clk plus one-to-two usr_clk cycles.</span>
 <span class="linenos"> 4</span><span class="c1">// Yes, that&#39;s the inevitable clock-domain-crossing jitter.</span>
 <span class="linenos"> 5</span><span class="c1">//</span>
-<span class="linenos"> 6</span><span class="c1">// The Gray code scheme fails at the time when ts_tcks gets</span>
-<span class="linenos"> 7</span><span class="c1">// reset to zero by the evr_pps event.  As a workaround, the</span>
-<span class="linenos"> 8</span><span class="c1">// first _two_ values of the output usr_tcks get set forced to zero,</span>
-<span class="linenos"> 9</span><span class="c1">// every time usr_secs is updated.</span>
+<span class="linenos"> 6</span><span class="c1">// The Gray code scheme fails at the time when ts_tcks gets reset to zero by the evr_pps event.</span>
+<span class="linenos"> 7</span><span class="c1">// As a workaround, the first _two_ values of the output usr_tcks are forced to zero, every time usr_secs is updated.</span>
+<span class="linenos"> 8</span><span class="c1">//</span>
+<span class="linenos"> 9</span><span class="c1">// Obligatory xkcd: https://xkcd.com/2867/</span>
 <span class="linenos">10</span><span class="k">module</span><span class="w"> </span><span class="n">evr_ts_cdc</span><span class="p">(</span>
 <span class="linenos">11</span><span class="w">    </span><span class="k">input</span><span class="w"> </span><span class="n">evr_clk</span><span class="p">,</span>
 <span class="linenos">12</span><span class="w">    </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">ts_secs</span><span class="p">,</span>
@@ -134,10 +134,10 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">51</span><span class="c1">// At this point usr_sec2 is right, and usr_bin is (almost always) right,</span>
 <span class="linenos">52</span><span class="c1">// but there is a chance they will not roll over at the same time.</span>
 <span class="linenos">53</span><span class="c1">// That means you can get usr_bin as 0 or 1 with the old value of usr_sec2</span>
-<span class="linenos">54</span><span class="c1">// for a cycle, or usr_sec2 updated to the new value a cycle before usr_bin</span>
-<span class="linenos">55</span><span class="c1">// jumps back to 0 or 1.  But my test bench isn&#39;t good enough to show it.</span>
+<span class="linenos">54</span><span class="c1">// for a cycle, or usr_sec2 updated to the new value a cycle before usr_bin jumps back to 0 or 1.</span>
+<span class="linenos">55</span><span class="c1">// My test bench is (sadly) not good enough to show the effect.</span>
 <span class="linenos">56</span><span class="c1">// Eliminating that potential glitch isn&#39;t easy, and seems guaranteed to have side effects.</span>
-<span class="linenos">57</span><span class="c1">// The approach below zeros out the data from _both_ possibly corrupt edges.</span>
+<span class="linenos">57</span><span class="c1">// The approach below zeros out the tcks data from _both_ possibly corrupt edges.</span>
 <span class="linenos">58</span><span class="kt">reg</span><span class="w"> </span><span class="n">pps_grab1</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">59</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">usr_bin2</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">60</span><span class="kt">wire</span><span class="w"> </span><span class="n">pps_zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pps_grab</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">pps_grab1</span><span class="p">;</span>

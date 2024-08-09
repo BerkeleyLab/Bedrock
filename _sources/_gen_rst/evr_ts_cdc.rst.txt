@@ -11,10 +11,10 @@ Description
 |  Time delay is one evr_clk plus one-to-two usr_clk cycles.
 |  Yes, that's the inevitable clock-domain-crossing jitter.
 | 
-|  The Gray code scheme fails at the time when ts_tcks gets
-|  reset to zero by the evr_pps event.  As a workaround, the
-|  first _two_ values of the output usr_tcks get set forced to zero,
-|  every time usr_secs is updated.
+|  The Gray code scheme fails at the time when ts_tcks gets reset to zero by the evr_pps event.
+|  As a workaround, the first _two_ values of the output usr_tcks are forced to zero, every time usr_secs is updated.
+| 
+|  Obligatory xkcd: https://xkcd.com/2867/
 
 Pinout
 ''''''
