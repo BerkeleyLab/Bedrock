@@ -9,11 +9,13 @@ include $(BUILD_DIR)/top_rules.mk
 
 vpath %.v $(DSP_DIR)
 
-all: NMEAtest_check tinyEVR_check evrSROC_check
+all: NMEAtest_check tinyEVR_check evrSROC_check evr_ts_cdc_tb
 
 tinyEVR_tb: tinyEVR.v
 
 evrSROC_tb: evrSROC.v reg_tech_cdc.v
+
+evr_ts_cdc_tb: evr_ts_cdc.v tinyEVR.v
 
 NMEAtest: NMEAtest.o NMEA.o
 
