@@ -22,14 +22,15 @@ wire ppsMarker, timestampValid;
 wire [63:0] timestamp;
 wire [EVSTROBE_COUNT:1] evStrobe;
 
-tinyEVR #(.EVSTROBE_COUNT(EVSTROBE_COUNT))
-  tinyEVR (.evrRxClk(evrClk),
-           .evrRxWord(evrRxWord),
-           .evrCharIsK(evrCharIsK),
-           .ppsMarker(ppsMarker),
-           .timestampValid(timestampValid),
-           .timestamp(timestamp),
-           .evStrobe(evStrobe));
+tinyEVR #(.EVSTROBE_COUNT(EVSTROBE_COUNT)) tinyEVR (
+    .evrRxClk(evrClk),
+    .evrRxWord(evrRxWord),
+    .evrCharIsK(evrCharIsK),
+    .ppsMarker(ppsMarker),
+    .timestampValid(timestampValid),
+    .timestamp(timestamp),
+    .evStrobe(evStrobe)
+);
 
 wire [31:0] ts_secs, ts_tcks;
 assign {ts_secs, ts_tcks} = timestamp;
@@ -48,8 +49,44 @@ evr_ts_cdc dut(
     .usr_secs(usr_secs), .usr_tcks(usr_tcks)
 );
 
-integer i;
 reg fail=0;
+
+// Check for unexpected tcks transitions
+reg [31:0] usr_secs_r=0, usr_tcks_r=0;
+wire jump = usr_secs != usr_secs_r;
+reg jump_r=0;
+always @(posedge usr_clk) begin
+    usr_secs_r <= usr_secs;
+    usr_tcks_r <= usr_tcks;
+    jump_r <= jump;
+end
+integer dt;
+always @(negedge usr_clk) begin
+    dt = usr_tcks-usr_tcks_r;
+    if (($time>100) & ~jump & ~jump_r & (dt < 1 || dt > 2)) begin
+        $display("%d %d %d", $time, dt, usr_secs-usr_secs_r);
+        fail = 1;
+    end
+    if ((jump | jump_r) & (usr_tcks!=0)) begin
+        $display("%d %d %d", $time, dt, usr_secs-usr_secs_r);
+        fail = 1;
+    end
+end
+
+// Check for jitter
+// Claim is "Time delay is one evr_clk plus one-to-two usr_clk cycles"
+// For this test bench, that's 8 + (1 to 2)*10 = 18 to 28 ns.
+integer edge_t;
+integer del, min_del=10000, max_del=0;
+always @(posedge ppsMarker) edge_t = $time;
+always @(posedge jump) begin
+    del = $time-edge_t;
+    // $display("%d - %d = %d", $time, edge_t, $time-edge_t);
+    if (del < min_del) min_del = del;
+    if (del > max_del) max_del = del;
+end
+
+integer i;
 initial
 begin
     if ($test$plusargs("vcd")) begin
@@ -80,6 +117,9 @@ begin
       sendEvent(EVCODE_SECONDS_MARKER);
       #1100 ;
     end
+    $display("delay span %d to %d ns", min_del, max_del);
+    if (min_del < 18) fail=1;
+    if (max_del > 28) fail=1;
     if (fail) begin
       $display("FAIL");
       $stop(0);

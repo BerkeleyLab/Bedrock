@@ -9,7 +9,7 @@ include $(BUILD_DIR)/top_rules.mk
 
 vpath %.v $(DSP_DIR)
 
-all: NMEAtest_check tinyEVR_check evrSROC_check evr_ts_cdc_tb
+all: NMEAtest_check tinyEVR_check evrSROC_check evr_ts_cdc_check
 
 tinyEVR_tb: tinyEVR.v
 
@@ -28,6 +28,6 @@ NMEAtest_check: NMEAtest
         '$$GPRMC,010455.000,A,3754.7666,N,12201.4667,W,0.01,0.00,220420,,,D*7C'\
         '$$GPGSV,1,1,00*79'
 
-CLEAN += NMEAtest NMEAtest.o NMEA.o tinyEVR_tb evrSROC_tb
+CLEAN += NMEAtest NMEAtest.o NMEA.o tinyEVR_tb evrSROC_tb evr_ts_cdc_tb
 
 include $(BUILD_DIR)/bottom_rules.mk
