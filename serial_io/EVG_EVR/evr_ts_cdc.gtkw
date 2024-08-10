@@ -1,0 +1,80 @@
+[timestart] 8140
+[size] 1199 598
+[pos] -1 -1
+*-5.148555 8200 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] evr_ts_cdc_tb.
+[sst_width] 214
+[signals_width] 240
+[sst_expanded] 1
+[sst_vpaned_height] 151
+@28
+evr_ts_cdc_tb.evrClk
+@22
+evr_ts_cdc_tb.ts_secs[31:0]
+@24
+evr_ts_cdc_tb.ts_tcks[31:0]
+@28
+evr_ts_cdc_tb.ppsMarker
+@22
+evr_ts_cdc_tb.usr_secs[31:0]
+@24
+evr_ts_cdc_tb.usr_tcks[31:0]
+@200
+-DUT
+@28
+evr_ts_cdc_tb.dut.usr_clk
+@c00024
+evr_ts_cdc_tb.dut.ts_tgray[31:0]
+@28
+(0)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(1)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(2)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(3)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(4)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(5)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(6)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(7)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(8)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(9)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(10)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(11)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(12)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(13)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(14)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(15)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(16)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(17)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(18)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(19)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(20)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(21)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(22)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(23)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(24)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(25)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(26)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(27)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(28)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(29)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(30)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+(31)evr_ts_cdc_tb.dut.ts_tgray[31:0]
+@1401204
+-group_end
+@29
+evr_ts_cdc_tb.dut.pps_toggle
+@28
+evr_ts_cdc_tb.dut.pps_cap0
+@24
+evr_ts_cdc_tb.dut.usr_tgray[31:0]
+evr_ts_cdc_tb.dut.usr_bin[31:0]
+@28
+evr_ts_cdc_tb.dut.pps_grab
+@22
+evr_ts_cdc_tb.dut.usr_sec1[31:0]
+evr_ts_cdc_tb.dut.usr_sec2[31:0]
+@28
+evr_ts_cdc_tb.dut.pps_zero
+@24
+evr_ts_cdc_tb.dut.usr_bin2[31:0]
+[pattern_trace] 1
+[pattern_trace] 0
