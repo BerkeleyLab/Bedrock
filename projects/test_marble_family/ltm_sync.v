@@ -21,7 +21,7 @@ module ltm_sync(
 //   divide clock input (supposedly 125 MHz) by ps_config to get
 //   a base rate 7.81 MHz to 4.03 MHz,
 //   designed for nominal 5.95 MHz with ps_config == 21.
-//   Sync bits are further divded down from there, as given below.
+//   Sync bits are further divided down from there, as given below.
 // LTM4673 data sheet asks for +/-30% of the nominal 600 kHz and 1 MHz.
 // With ps_config == 21, we give it 595 kHz and 992 kHz.
 reg [4:0] ps_sync_count=0;
