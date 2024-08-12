@@ -1,7 +1,7 @@
 module zest #(
     parameter [7:0] BASE_ADDR = 8'h05,
     parameter DSP_FREQ_MHZ = 119.0,
-    parameter FCNT_WIDTH = 16,  // to speed up simulaiton. 125M / 2**16 = 1.9kHz update rate.
+    parameter FCNT_WIDTH = 16,  // to speed up simulation. 125M / 2**16 = 1.9kHz update rate.
     parameter PH_DIFF_DW = 13,
     parameter real DAC_INTERP_COEFF_R = 1.0,
     localparam integer  N_ADC = 2,
@@ -444,7 +444,7 @@ zest_dac_interp #(.DW(14)) dac_interp_b (
     .dout           (dac1_in_data)
 );
 
-// DMA to generate arbitary waveform for DAC BIST
+// DMA to generate arbitrary waveform for DAC BIST
 wire [13:0] awg_out_data;
 wire awg_out_valid;
 
