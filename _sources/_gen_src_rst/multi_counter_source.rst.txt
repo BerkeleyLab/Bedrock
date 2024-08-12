@@ -47,7 +47,7 @@ multi_counter Source File
    	.addrb(read_addr), .doutb(read_data)
    );
 
-   // For simulation purposes, we have to assume both dpram instances
+   // For simulation purposes, we have to assume both dpram intances
    // have their memory plane initialized to zero.
 
    endmodule
