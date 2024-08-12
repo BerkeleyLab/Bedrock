@@ -1,7 +1,8 @@
 // verilog tasks for simulations
 // see (Memory gateway timing)[]bedrock/badger/doc/mem_gateway.svg]
 
-localparam LB_READ_DELAY = 3;
+// requires defining:
+// localparam LB_READ_DELAY = 3;
 
 reg lb_write=0, lb_read=0, lb_prefill=0;
 reg [17:0] lb_addr=0;
