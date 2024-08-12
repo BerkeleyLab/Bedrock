@@ -1,4 +1,4 @@
 axi:
   stage: test
   script:
-    - make -C axi
+    - make -C axi all clean
