@@ -1,0 +1,4 @@
+axi:
+  stage: test
+  script:
+    - make -C axi
