@@ -1,0 +1,4 @@
+ctrace_test:
+  stage: test
+  script:
+    - make -C projects/ctrace

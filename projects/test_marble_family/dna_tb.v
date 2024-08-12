@@ -48,6 +48,7 @@ initial begin
   #TICK start = 1'b1;
   #(4*TICK) `wait_timeout(~done);
   #(4*TICK) `wait_timeout(done);
+  #(4*TICK);  // settling time
   if (to) begin
     $display("ERROR: Timed out waiting for DNA readout.");
     $stop(0);
