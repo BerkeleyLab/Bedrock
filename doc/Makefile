@@ -53,6 +53,7 @@ SRC = \
    double_inte_smp.v \
    double_inte.v \
    dpram.v \
+   evr_ts_cdc.v \
    fchan_subset.v \
    fdownconvert.v \
    fifo.v \
@@ -159,7 +160,7 @@ SRC_SVG = \
   build-tools/cdc_OK1.svg \
   build-tools/cdc_OKX.svg
 
-DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR) $(HOMELESS_DIR)
+DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR) $(HOMELESS_DIR) $(SERIAL_IO_DIR)/EVG_EVR
 VFLAGS     += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS)) -y$(AUTOGEN_DIR)
 
 vpath %.v $(DIRS)

@@ -39,7 +39,7 @@ dpram #(.aw(aw), .dw(dw)) mirror(
 	.addrb(read_addr), .doutb(read_data)
 );
 
-// For simulation purposes, we have to assume both dpram intances
+// For simulation purposes, we have to assume both dpram instances
 // have their memory plane initialized to zero.
 
 endmodule

@@ -9,7 +9,7 @@ module reg_tech_cdc(
     output O
 );
 
-// Probably OK to stack up various vendor-specific attribues here.
+// Probably OK to stack up various vendor-specific attributes here.
 // If incompatibilities are discovered, maybe they can be addressed
 // with preprocessor magic.
 // Worst-case, you can make a pin-compatible module that

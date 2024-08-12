@@ -7,7 +7,7 @@
 // 2:  ARP for us
 // 3:  not MAC-addressed for us
 // 4:  packet type is not IP
-// 5:  other unrecongized
+// 5:  other unrecognized
 // 6:  ICMP
 // 7:  not used
 // 8-15:  UDP to a configured port
