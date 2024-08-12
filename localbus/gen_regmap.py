@@ -41,13 +41,13 @@ def gen_addrmap(regmap, cut_off_aw=5):
 
 def write_addrmap(addrmap, ifname, ofname, adrw=18):
     hf = header.format(
-            os.path.abspath(ifname),
-            datetime.datetime.now().strftime("%D, %T"))
+        os.path.abspath(ifname),
+        datetime.datetime.now().strftime("%D, %T"))
 
     # header = ofname.replace('.', '_').upper()
     for addr in sorted(addrmap.keys()):
         hf += "localparam [{:d}:0] {:32s} = {:d}'h{:05x};\n".format(
-                adrw-1, addrmap[addr].upper(), adrw, addr)
+            adrw-1, addrmap[addr].upper(), adrw, addr)
 
     with open(ofname, "w") as f:
         f.write(hf)
