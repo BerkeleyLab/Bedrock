@@ -16,11 +16,13 @@ task lb_write_task (
 );
     begin
         @ (posedge lb_clk);
-        lb_addr  = addr;
-        lb_wdata = data;
-        lb_write = 1'b1;
+        lb_addr  <= addr;
+        lb_wdata <= data;
+        lb_write <= 1'b1;
         @ (posedge lb_clk);
-        lb_write = 1'b0;
+        lb_write <= 1'b0;
+        lb_wdata <= {32{1'bx}};
+        @ (posedge lb_clk);
     end
 endtask
 
@@ -30,15 +32,15 @@ task lb_read_task (
 );
     begin
         @ (posedge lb_clk);
-        lb_addr = addr;
-        lb_read = 1'b1;
-        // repeat (4 + LB_READ_DELAY) @ (posedge lb_clk);    // badger timing
-        repeat (0 + LB_READ_DELAY) @ (posedge lb_clk);
-        lb_rvalid = 1'b1;
+        lb_addr <= addr;
+        lb_read <= 1'b1;
+        repeat (1 + LB_READ_DELAY) @ (posedge lb_clk);
+        lb_rvalid <= 1'b1;
+        @ (posedge lb_clk);
         data = lb_rdata;
         // $display("time: %g Read ack: ADDR 0x%x DATA 0x%x", $time, addr, lb_rdata);
+        lb_read <= 1'b0;
+        lb_rvalid <= 1'b0;
         @ (posedge lb_clk);
-        lb_read = 1'b0;
-        lb_rvalid = 1'b0;
     end
 endtask
