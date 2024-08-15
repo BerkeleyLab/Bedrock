@@ -157,6 +157,7 @@ lb_dummy #(
 // =========== Stimulus =============
 localparam STEP = 2*AXI_CLK_HALFPERIOD;
 integer N;
+real timestamp;
 wire [31:0] M = (N<<4); // clobber scheme
 integer errors=0;
 initial begin
@@ -181,7 +182,10 @@ initial begin
             errors = errors + 1;
           end
   end
-  #STEP   $display("Writing 64 registers");
+          $display("  Completed in %.2f cycles.", (($realtime-STEP)/STEP) - 1);
+          $display("    %.2f cycles per transaction.", (($realtime-STEP)/STEP)/64);
+          timestamp = $realtime;
+          $display("Writing 64 registers");
   for (N=0; N<64; N=N+1) begin
     #STEP wnr = 1'b1;
           addr = N[AXI_ADDR_WIDTH-1:0];
@@ -203,7 +207,10 @@ initial begin
             errors = errors + 1;
           end
   end
-  #STEP   $display("Reading clobbered registers");
+          $display("  Completed in %.2f cycles.", (($realtime-timestamp)/STEP));
+          $display("    %.2f cycles per transaction.", (($realtime-timestamp)/STEP)/64);
+          timestamp = $realtime;
+          $display("Reading clobbered registers");
   for (N=0; N<64; N=N+1) begin
     #STEP wnr = 1'b0;
           addr = N[AXI_ADDR_WIDTH-1:0];
@@ -224,7 +231,9 @@ initial begin
             errors = errors + 1;
           end
   end
-  #STEP   if (errors == 0) begin
+          $display("  Completed in %.2f cycles.", (($realtime-timestamp)/STEP));
+          $display("    %.2f cycles per transaction.", (($realtime-timestamp)/STEP)/64);
+          if (errors == 0) begin
             $display("PASS");
             $finish(0);
           end else begin

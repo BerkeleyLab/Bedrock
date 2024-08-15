@@ -9,6 +9,10 @@ localparam LB_PIPELINE_NSTAGES = 0;
 localparam AXI_CLK_HALFPERIOD = 5;
 // 500 MHz
 localparam LB_CLK_HALFPERIOD = 1;
+localparam STEP = 2*AXI_CLK_HALFPERIOD;
+
+localparam LONGEST_PERIOD = AXI_CLK_HALFPERIOD > LB_CLK_HALFPERIOD ?
+                            2*AXI_CLK_HALFPERIOD : 2*LB_CLK_HALFPERIOD;
 
 reg axi_aclk=1'b0;
 always #AXI_CLK_HALFPERIOD axi_aclk <= ~axi_aclk;
@@ -31,7 +35,7 @@ always @(posedge axi_aclk) begin
 end
 wire to = ~(|timeout_r);
 
-`define wait_timeout(sig) timeout_r = TOSET; #10 wait ((to) || sig)
+`define wait_timeout(sig) timeout_r = TOSET; #STEP wait ((to) || sig)
 
 localparam AXI_ADDR_WIDTH = 16;
 localparam AXI_DATA_WIDTH = 32;
@@ -163,8 +167,8 @@ lb_dummy #(
 );
 
 // =========== Stimulus =============
-localparam STEP = 2*AXI_CLK_HALFPERIOD;
 integer N;
+real timestamp;
 wire [31:0] M = (N<<4); // clobber scheme
 integer errors=0;
 initial begin
@@ -189,7 +193,10 @@ initial begin
             errors = errors + 1;
           end
   end
-  #STEP   $display("Writing 64 registers");
+          $display("  Completed in %.2f cycles of the slower clock.", ($realtime-STEP)/LONGEST_PERIOD);
+          $display("    %.2f cycles per transaction.", (($realtime-STEP)/LONGEST_PERIOD)/64);
+          timestamp = $realtime;
+          $display("Writing 64 registers");
   for (N=0; N<64; N=N+1) begin
     #STEP wnr = 1'b1;
           addr = N[AXI_ADDR_WIDTH-1:0];
@@ -211,7 +218,10 @@ initial begin
             errors = errors + 1;
           end
   end
-  #STEP   $display("Reading clobbered registers");
+          $display("  Completed in %.2f cycles of the slower clock.", ($realtime-timestamp)/LONGEST_PERIOD);
+          $display("    %.2f cycles per transaction.", (($realtime-timestamp)/LONGEST_PERIOD)/64);
+          timestamp = $realtime;
+          $display("Reading clobbered registers");
   for (N=0; N<64; N=N+1) begin
     #STEP wnr = 1'b0;
           addr = N[AXI_ADDR_WIDTH-1:0];
@@ -232,14 +242,15 @@ initial begin
             errors = errors + 1;
           end
   end
-  #STEP   if (errors == 0) begin
+          $display("  Completed in %.2f cycles of the slower clock.", ($realtime-timestamp)/LONGEST_PERIOD);
+          $display("    %.2f cycles per transaction.", (($realtime-timestamp)/LONGEST_PERIOD)/64);
+          if (errors == 0) begin
             $display("PASS");
             $finish(0);
           end else begin
             $display("FAIL: %d errors", errors);
             $stop(0);
           end
-
 end
 
 endmodule

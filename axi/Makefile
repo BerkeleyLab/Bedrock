@@ -3,7 +3,7 @@ include ../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 
 .PHONY: all
-all: axi_host_check axi_lb_check axi_lb_cdc_check
+all: axi_host_check axi_lb_check axi_lb_cdc_check axi_channel_xdomain_check axi_cdc_check
 
 axi_host_tb: axi_host_tb.v axi_host.v axi_dummy.v axi_delay.v
 	$(VERILOG_TB)

@@ -226,7 +226,7 @@ initial begin
             errors = errors + 1;
           end
   end
-          $display("  Completed in %.2f cycles of the slower clock.", (($realtime-STEP)/STEP) - 1);
+          $display("  Completed in %.2f cycles.", (($realtime-STEP)/STEP) - 1);
           $display("    %.2f cycles per transaction.", (($realtime-STEP)/STEP)/64);
           timestamp = $realtime;
           $display("Writing all 64 registers");
@@ -251,7 +251,7 @@ initial begin
             errors = errors + 1;
           end
   end
-          $display("  Completed in %.2f cycles of the slower clock.", (($realtime-timestamp)/STEP));
+          $display("  Completed in %.2f cycles.", (($realtime-timestamp)/STEP));
           $display("    %.2f cycles per transaction.", (($realtime-timestamp)/STEP)/64);
           timestamp = $realtime;
           $display("Reading clobbered registers");
@@ -275,7 +275,7 @@ initial begin
             errors = errors + 1;
           end
   end
-          $display("  Completed in %.2f cycles of the slower clock.", (($realtime-timestamp)/STEP) - 1);
+          $display("  Completed in %.2f cycles.", (($realtime-timestamp)/STEP) - 1);
           $display("    %.2f cycles per transaction.", (($realtime-timestamp)/STEP)/64);
           if (errors == 0) begin
             $display("PASS");
