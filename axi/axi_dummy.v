@@ -4,9 +4,7 @@
  * Registers are initialized with 0x100 | addr (i.e. 0x100-0x1ff)
  */
 
-// TODO - This current incarnation registers too much and takes 4 cycles to
-//        complete a read transaction and 3 cycles for a write transaction.
-//        I should be able to take 1 cycle off of both of those.
+// TODO - I'm getting double "rvalid" pulses out of this thing.  Why?
 
 module axi_dummy #(
   // AXI4LITE Parameters

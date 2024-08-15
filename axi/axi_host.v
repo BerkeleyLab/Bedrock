@@ -99,7 +99,6 @@ assign busy = busy_d;
 reg [7:0] response_counter=8'h00;
 reg [1:0] resp=2'b00;
 
-// TODO - Implement standards-compliant host protocol
 always @(posedge m_axi_aclk) begin
   //busy_d <= state != STATE_IDLE;
   start_d <= start;
@@ -107,7 +106,7 @@ always @(posedge m_axi_aclk) begin
   timeout_r <= 1'b0;
   if (~m_axi_aresetn) begin
     // Bus signals; must be driven low in reset
-    arvalid <= 1'b1;
+    arvalid <= 1'b0;
     wvalid <= 1'b0;
     awvalid <= 1'b0;
     rvalid_r <= 1'b0;

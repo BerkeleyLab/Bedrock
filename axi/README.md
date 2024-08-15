@@ -12,6 +12,12 @@ Some notes about the modules:
      valid for every transaction).  The AXI-to-localbus modules (`axi_lb.v` and `axi_lb_cdc.v`)
      discard the WSTRB signal (assume all bytes of WDATA are valid for every transaction).
      The test peripheral (`axi_dummy.v`) respects WSTRB.
+  6. The clock-domain-crossing `axi_cdc.v` stretches a transaction to extend the handshake across
+     the domain boundary.  This works for all clock ratios, but could be optimized for a given
+     ratio by simply stretching pulses as required.  By quasi-Monte-Carlo methods, this stretched
+     handshake circuit adds an average of 4 cycles to each transaction (cycles being measured
+     relative to the slower clock) which translates to a roughly 50% performance penalty compared
+     to the single-domain solution.
 
 __NOTE__: Some tests (`axi_lb*_tb.v`) critically depend on the pre-loaded values stored in `lb_dummy.v`,
 so there is a bit of cross-dependency here.

@@ -1,17 +1,27 @@
 `timescale 1ns/1ns
 
-module axi_host_tb;
+module axi_cdc_tb;
 
-localparam DELAY_PIPELINE_NSTAGES = 0;
-localparam AXI_ACLK_HALFPERIOD = 5;
-localparam STEP = 2*AXI_ACLK_HALFPERIOD;
-reg axi_aclk=1'b1;
-always #AXI_ACLK_HALFPERIOD axi_aclk <= ~axi_aclk;
+`define FAST_M
+localparam DELAY_PIPELINE_NSTAGES = 3;
+`ifdef FAST_M
+localparam S_AXI_ACLK_HALFPERIOD = 3;
+localparam M_AXI_ACLK_HALFPERIOD = 2;
+`else
+localparam S_AXI_ACLK_HALFPERIOD = 2;
+localparam M_AXI_ACLK_HALFPERIOD = 3;
+`endif
+localparam STEP = 2*S_AXI_ACLK_HALFPERIOD;
+localparam LONGEST_PERIOD = S_AXI_ACLK_HALFPERIOD > M_AXI_ACLK_HALFPERIOD ?
+                            2*S_AXI_ACLK_HALFPERIOD : 2*M_AXI_ACLK_HALFPERIOD;
+reg s_axi_aclk=1'b1, m_axi_aclk=1'b1;
+always #S_AXI_ACLK_HALFPERIOD s_axi_aclk <= ~s_axi_aclk;
+always #M_AXI_ACLK_HALFPERIOD m_axi_aclk <= ~m_axi_aclk;
 
 // VCD dump file for gtkwave
 initial begin
   if ($test$plusargs("vcd")) begin
-    $dumpfile("axi_host.vcd");
+    $dumpfile("axi_cdc.vcd");
     $dumpvars();
   end
 end
@@ -19,7 +29,7 @@ end
 localparam TOW = 12;
 localparam TOSET = {TOW{1'b1}};
 reg [TOW-1:0] timeout_r=0;
-always @(posedge axi_aclk) begin
+always @(posedge s_axi_aclk) begin
   if (timeout_r > 0) timeout_r <= timeout_r - 1;
 end
 wire to = ~(|timeout_r);
@@ -53,7 +63,7 @@ wire [1:0] axi_rresp;
 wire axi_rvalid;
 wire axi_rready;
 // AXI4LITE signals from delay to device
-wire m_axi_aresetn;
+wire m_axi_aresetn = axi_aresetn;
 wire [C_M_AXI_ADDR_WIDTH-1:0] m_axi_awaddr;
 wire [2:0] m_axi_awprot;
 wire m_axi_awvalid;
@@ -90,7 +100,7 @@ axi_host #(
   .DEFAULT_XACT_TIMING(DEFAULT_XACT_TIMING),
   .RESPONSE_TIMEOUT(RESPONSE_TIMEOUT)
 ) axi_host_i (
-  .m_axi_aclk(axi_aclk), // input
+  .m_axi_aclk(s_axi_aclk), // input
   .m_axi_aresetn(axi_aresetn), // output
   .m_axi_awaddr(axi_awaddr), // output [C_M_AXI_ADDR_WIDTH-1:0]
   .m_axi_awprot(axi_awprot), // output [2:0]
@@ -121,13 +131,12 @@ axi_host #(
   .timeout(timeout) // output
 );
 
-axi_delay #(
-  .NSTAGES(DELAY_PIPELINE_NSTAGES),
+axi_cdc #(
   .C_AXI_DATA_WIDTH(C_M_AXI_DATA_WIDTH),
   .C_AXI_ADDR_WIDTH(C_M_AXI_ADDR_WIDTH)
-) axi_delay_i (
+) axi_cdc_i (
   // AXI4LITE Ports from Host
-  .s_axi_aclk(axi_aclk), // input
+  .s_axi_aclk(s_axi_aclk), // input
   .s_axi_aresetn(axi_aresetn), // input
   .s_axi_awaddr(axi_awaddr), // input [C_AXI_ADDR_WIDTH-1 : 0]
   .s_axi_awprot(axi_awprot), // input [2 : 0]
@@ -149,8 +158,8 @@ axi_delay #(
   .s_axi_rvalid(axi_rvalid), // output
   .s_axi_rready(axi_rready), // input
   // AXI4LITE Ports to device
-  .m_axi_aclk(), // output
-  .m_axi_aresetn(m_axi_aresetn), // output
+  .m_axi_aclk(m_axi_aclk), // input
+  .m_axi_aresetn(m_axi_aresetn), // input
   .m_axi_awaddr(m_axi_awaddr), // output [C_AXI_ADDR_WIDTH-1 : 0]
   .m_axi_awprot(m_axi_awprot), // output [2 : 0]
   .m_axi_awvalid(m_axi_awvalid), // output
@@ -176,7 +185,7 @@ axi_dummy #(
   .C_S_AXI_DATA_WIDTH(C_M_AXI_DATA_WIDTH),
   .C_S_AXI_ADDR_WIDTH(C_M_AXI_ADDR_WIDTH)
 ) axi_dummy_i (
-  .s_axi_aclk(axi_aclk), // input
+  .s_axi_aclk(m_axi_aclk), // input
   .s_axi_aresetn(m_axi_aresetn), // input
   .s_axi_awaddr(m_axi_awaddr), // input [C_M_AXI_ADDR_WIDTH:0]
   .s_axi_awprot(m_axi_awprot), // input [2:0]
@@ -222,12 +231,12 @@ initial begin
             $finish();
           end
           if (rdata != {{C_M_AXI_DATA_WIDTH-9{1'b0}}, 1'b1, N[7:0]}) begin
-            $display("ERROR! Readback %x != %x", rdata[8:0], {1'b1, N[7:0]});
+            $display("ERROR! Readback %x != %x (N = %d)", rdata[8:0], {1'b1, N[7:0]}, N);
             errors = errors + 1;
           end
   end
-          $display("  Completed in %.2f cycles of the slower clock.", (($realtime-STEP)/STEP) - 1);
-          $display("    %.2f cycles per transaction.", (($realtime-STEP)/STEP)/64);
+          $display("  Completed in %.2f cycles of the slower clock.", ($realtime-STEP)/LONGEST_PERIOD);
+          $display("    %.2f cycles per transaction.", (($realtime-STEP)/LONGEST_PERIOD)/64);
           timestamp = $realtime;
           $display("Writing all 64 registers");
   for (N=0; N<256; N=N+4) begin
@@ -251,8 +260,8 @@ initial begin
             errors = errors + 1;
           end
   end
-          $display("  Completed in %.2f cycles of the slower clock.", (($realtime-timestamp)/STEP));
-          $display("    %.2f cycles per transaction.", (($realtime-timestamp)/STEP)/64);
+          $display("  Completed in %.2f cycles of the slower clock.", ($realtime-timestamp)/LONGEST_PERIOD);
+          $display("    %.2f cycles per transaction.", (($realtime-timestamp)/LONGEST_PERIOD)/64);
           timestamp = $realtime;
           $display("Reading clobbered registers");
   for (N=0; N<256; N=N+4) begin
@@ -275,8 +284,8 @@ initial begin
             errors = errors + 1;
           end
   end
-          $display("  Completed in %.2f cycles of the slower clock.", (($realtime-timestamp)/STEP) - 1);
-          $display("    %.2f cycles per transaction.", (($realtime-timestamp)/STEP)/64);
+          $display("  Completed in %.2f cycles of the slower clock.", ($realtime-timestamp)/LONGEST_PERIOD);
+          $display("    %.2f cycles per transaction.", (($realtime-timestamp)/LONGEST_PERIOD)/64);
           if (errors == 0) begin
             $display("PASS");
             $finish(0);
