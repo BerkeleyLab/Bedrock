@@ -21,7 +21,7 @@ axi_lb_cdc_tb: axi_lb_cdc_tb.v axi_lb_cdc.v axi_host.v axi_delay.v $(DSP_DIR)/fi
 
 axi_channel_xdomain_tb: axi_channel_xdomain_tb.v axi_channel_xdomain.v channel_consumer.v channel_producer.v
 
-CLEAN+=axi_lb_cdc_tb axi_lb_tb axi_host_tb
-CLEAN+=axi_lb_cdc.vcd axi_lb.vcd axi_host.vcd
+CLEAN+=axi_lb_cdc_tb axi_lb_tb axi_host_tb axi_cdc_tb axi_channel_xdomain_tb
+CLEAN+=axi_lb_cdc.vcd axi_lb.vcd axi_host.vcd axi_cdc.vcd axi_channel_xdomain.vcd
 
 include $(BUILD_DIR)/bottom_rules.mk
