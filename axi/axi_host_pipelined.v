@@ -1,9 +1,11 @@
-/* Simple AXI4LITE bus controller interface
-*/
+/* AXI4LITE bus controller supporting pipelined transactions, so a new
+ * transaction can be initiated before the prior was completed as long
+ * as the corresponding busy signal is deasserted.
+ */
 
 //`define CHATTER_AXI_HOST
 
-module axi_host #(
+module axi_host_pipelined #(
    parameter C_M_AXI_ADDR_WIDTH = 16
   ,parameter C_M_AXI_DATA_WIDTH = 32
   ,parameter [7:0] RESPONSE_TIMEOUT = 8'hff
@@ -31,17 +33,25 @@ module axi_host #(
   ,input  m_axi_rvalid  // asserts that m_axi_rdata and m_axi_rresp are valid
   ,output m_axi_rready  // controller is ready for read data
   // Bespoke host interface
-  ,input  wnr
+  // read_stb is strobe starting a read transaction
+  ,input  read_stb
+  // write_stb is strobe starting a write transaction
+  ,input  write_stb
   ,input  [C_M_AXI_ADDR_WIDTH-1:0] addr
   ,input  [C_M_AXI_DATA_WIDTH-1:0] wdata
   ,output [C_M_AXI_DATA_WIDTH-1:0] rdata
-  ,input  start
+  // ~busy_r means we can accept another read transaction
+  ,output busy_r
+  // ~busy_w means we can accept another read transaction
+  ,output busy_w
   // busy means a transaction is still in progress (awaiting a response)
   ,output busy
   // rvalid is strobe indicating when a read response is received
   ,output rvalid
   // timeout is strobe indicating transaction timed out
   ,output timeout
+  // The 2-bit RRESP or BRESP value
+  ,output reg [1:0] resp=2'b00
 );
 
 reg timeout_r=1'b0;
@@ -51,14 +61,12 @@ reg rvalid_r=1'b0;
 assign rvalid = rvalid_r;
 reg [C_M_AXI_DATA_WIDTH-1:0] rdata_r=0;
 assign rdata = rdata_r;
-
 reg [C_M_AXI_ADDR_WIDTH-1:0] awaddr=0;
 assign m_axi_awaddr = awaddr;
 reg [2:0] awprot=0;
 assign m_axi_awprot = awprot;
 reg awvalid=1'b0;
 assign m_axi_awvalid = awvalid;
-
 reg [C_M_AXI_DATA_WIDTH-1:0] axi_wdata=0;
 assign m_axi_wdata = axi_wdata;
 localparam STROBE_WIDTH = C_M_AXI_DATA_WIDTH/8;
@@ -68,38 +76,22 @@ reg [STROBE_WIDTH-1:0] wstrb=0;
 assign m_axi_wstrb = wstrb;
 reg wvalid=1'b0;
 assign m_axi_wvalid = wvalid;
-
 reg bready=1'b0;
 assign m_axi_bready = bready;
-
 reg [C_M_AXI_ADDR_WIDTH-1:0] araddr=0;
 assign m_axi_araddr = araddr;
 reg [2:0] arprot=3'h0;
 assign m_axi_arprot = arprot;
 reg arvalid=1'b0;
 assign m_axi_arvalid = arvalid;
-
-reg start_d=1'b0, start_d2=1'b0;
-wire start_re = start_d & ~start_d2;
-reg wnr_r=1'b0;
-reg [C_M_AXI_ADDR_WIDTH-1:0] addr_r=0;
-reg [C_M_AXI_DATA_WIDTH-1:0] wdata_r=0;
-
 reg rready=1'b0;
 assign m_axi_rready = rready;
 
-localparam [1:0] STATE_IDLE=2'b00,
-                 STATE_ASSERTING=2'b01,
-                 STATE_WAIT_RESPONSE=2'b10,
-                 STATE_FORBIDDEN=2'b11;
-reg [1:0] state=STATE_IDLE;
-reg busy_d=1'b0;
-// Note: the 'busy' signal is logically equivalent to: state != STATE_IDLE
-// but is implemented as a simple register to avoid the edge-sensitivity
-// in simulations that use the signal to indicate data validity.
-assign busy = busy_d;
+assign busy_r = arvalid;
+assign busy_w = wvalid | awvalid;
+reg awaiting_bresp=1'b0, awaiting_rdata=1'b0;
+assign busy = awaiting_bresp | awaiting_rdata;
 reg [7:0] response_counter=8'h00;
-reg [1:0] resp=2'b00;
 
 always @(posedge m_axi_aclk or negedge m_axi_aresetn) begin
   if (~m_axi_aresetn) begin
@@ -108,21 +100,22 @@ always @(posedge m_axi_aclk or negedge m_axi_aresetn) begin
     wvalid <= 1'b0;
     awvalid <= 1'b0;
     rvalid_r <= 1'b0;
-    bready <= 1'b0;
     // These signals can have any value in reset
     resp <= 2'b00;
+    bready <= 1'b0;
     rready <= 1'b0;
     // Status variables
     timeout_r <= 1'b0;
+    awaiting_bresp <= 1'b0;
+    awaiting_rdata <= 1'b0;
   end else begin
-    //busy_d <= state != STATE_IDLE;
-    start_d <= start;
-    start_d2 <= start_d;
     timeout_r <= 1'b0;
     rvalid_r <= 1'b0;
     // ======================================= Handshakes =========================================
     // =================== Write Address Channel: AWVALID AWREADY AWADDR AWPROT ===================
-    if (awvalid & m_axi_awready) awvalid <= 1'b0;
+    if (awvalid & m_axi_awready) begin
+      awvalid <= 1'b0;
+    end
     // ====================== Write Data Channel: WVALID WREADY WDATA WSTRB =======================
     if (wvalid & m_axi_wready) begin
       wvalid <= 1'b0;
@@ -130,76 +123,78 @@ always @(posedge m_axi_aclk or negedge m_axi_aresetn) begin
     end
     // ==================== Read Address Channel: ARVALID ARREADY ARADDR ARPROT ===================
     if (arvalid & m_axi_arready) arvalid <= 1'b0;
-    if (state == STATE_IDLE) begin
-      busy_d <= 1'b0;
-      arvalid <= 1'b0;
-      wvalid <= 1'b0;
-      awvalid <= 1'b0;
-      rready <= 1'b0;
-      bready <= 1'b0;
-      if (start_re) begin
-        busy_d <= 1'b1;
-        state <= STATE_ASSERTING;
-        addr_r <= addr;
-        wdata_r <= wdata;
-        wnr_r <= wnr;
+    if (awaiting_bresp | awaiting_rdata) begin
+      if (response_counter == RESPONSE_TIMEOUT) begin
+        timeout_r <= 1'b1;
+        awaiting_bresp <= 1'b0;
+        awaiting_rdata <= 1'b0;
+        wvalid <= 1'b0;
+        awvalid <= 1'b0;
+        arvalid <= 1'b0;
+        bready <= 1'b0;
+        rready <= 1'b0;
+      end else begin
+        response_counter <= response_counter+1;
       end
-    end else if (state == STATE_ASSERTING) begin
-      state <= STATE_WAIT_RESPONSE;
-      response_counter <= 8'h00;
-      if (wnr_r) begin
+    end
+    if (awaiting_bresp) begin
+      // ====================== Write Response Channel: BVALID BREADY BRESP =======================
+      if (bready && m_axi_bvalid) begin
+        resp <= m_axi_bresp;
+        awaiting_bresp <= 1'b0;
+      end
+    //end else begin
+    end
+      // Look for a write start strobe
+      if (write_stb) begin
+        response_counter <= 0;
         // ================= Write Address Channel: AWVALID AWREADY AWADDR AWPROT =================
         // assert AWADDR, AWVALID, and AWPROT
-        awaddr <= addr_r;
+        awaddr <= addr;
         awvalid <= 1'b1;
         awprot <= 3'h0; // Privileged
         // ==================== Write Data Channel: WVALID WREADY WDATA WSTRB =====================
         // assert WDATA, WVALID, and WSTRB
-        axi_wdata <= wdata_r;
+        axi_wdata <= wdata;
         wvalid <= 1'b1;
         wstrb <= STROBE_ALL;
         // ===================== Write Response Channel: BVALID BREADY BRESP ======================
         bready <= 1'b1;
-      end else begin
-        // ================== Read Address Channel: ARVALID ARREADY ARADDR ARPROT =================
-        // assert ARADDR, ARVALID, and ARPROT
-        araddr <= addr_r;
-        arvalid <= 1'b1;
-        arprot <= 3'h0; // Privileged
-        // ===================== Read Data Channel: RVALID RREADY RDATA RRESP =====================
-        rready <= 1'b1;
+        awaiting_bresp <= 1'b1;
       end
-    end else begin // state == STATE_WAIT_RESPONSE
-      if (response_counter == RESPONSE_TIMEOUT) begin
-        timeout_r <= 1'b1;
-        state <= STATE_IDLE;
-        busy_d <= 1'b0;
-      end else begin
-        response_counter <= response_counter+1;
-      end
-      // ====================== Read Data Channel: RVALID RREADY RDATA RRESP ======================
-      if (rready && m_axi_rvalid) begin
-        rdata_r <= m_axi_rdata;
-        rvalid_r <= 1'b1;
-        resp <= m_axi_rresp;
-        state <= STATE_IDLE;
-        busy_d <= 1'b0;
-      end
-      // ====================== Write Response Channel: BVALID BREADY BRESP =======================
-      if (bready && m_axi_bvalid) begin
-        resp <= m_axi_bresp;
-        state <= STATE_IDLE;
-        busy_d <= 1'b0;
-      end
+    //end
+    // ====================== Read Data Channel: RVALID RREADY RDATA RRESP ======================
+    if (rready && m_axi_rvalid) begin
+      rdata_r <= m_axi_rdata;
+      rvalid_r <= 1'b1;
+      resp <= m_axi_rresp;
+      awaiting_rdata <= 1'b0;
     end
+    //end else begin
+    //end
+    // Look for a read start strobe
+    if (~arvalid & read_stb) begin
+      response_counter <= 0;
+      // ================== Read Address Channel: ARVALID ARREADY ARADDR ARPROT =================
+      // assert ARADDR, ARVALID, and ARPROT
+      araddr <= addr;
+      arvalid <= 1'b1;
+      arprot <= 3'h0; // Privileged
+      // ===================== Read Data Channel: RVALID RREADY RDATA RRESP =====================
+      rready <= 1'b1;
+      awaiting_rdata <= 1'b1;
+    end
+    //end
   end
 end
 
 `ifdef CHATTER_AXI_HOST
   always @(posedge m_axi_aclk) begin
-    if (start_re) begin
-      if (wnr) $display("start_re: WRITE addr = 0x%x; data = 0x%x", addr, wdata);
-      else $display("start_re: READ addr = 0x%x", addr);
+    if (read_stb) begin
+      $display("READ addr = 0x%x", addr);
+    end
+    if (write_stb) begin
+      $display("WRITE addr = 0x%x; data = 0x%x", addr, wdata);
     end
   end
 `endif

@@ -28,7 +28,6 @@ wire to = ~(|timeout_r);
 
 localparam C_M_AXI_ADDR_WIDTH = 16;
 localparam C_M_AXI_DATA_WIDTH = 32;
-localparam DEFAULT_XACT_TIMING = 17;
 localparam RESPONSE_TIMEOUT = 255;
 
 // AXI4LITE signals from Host to delay
@@ -87,11 +86,10 @@ wire timeout;
 axi_host #(
   .C_M_AXI_ADDR_WIDTH(C_M_AXI_ADDR_WIDTH),
   .C_M_AXI_DATA_WIDTH(C_M_AXI_DATA_WIDTH),
-  .DEFAULT_XACT_TIMING(DEFAULT_XACT_TIMING),
   .RESPONSE_TIMEOUT(RESPONSE_TIMEOUT)
 ) axi_host_i (
   .m_axi_aclk(axi_aclk), // input
-  .m_axi_aresetn(axi_aresetn), // output
+  .m_axi_aresetn(axi_aresetn), // input
   .m_axi_awaddr(axi_awaddr), // output [C_M_AXI_ADDR_WIDTH-1:0]
   .m_axi_awprot(axi_awprot), // output [2:0]
   .m_axi_awvalid(axi_awvalid), // output

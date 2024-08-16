@@ -207,7 +207,7 @@ assign m_axi_arready  = axi_arready;
 assign m_axi_rresp  = axi_rresp;
 assign m_axi_rvalid  = axi_rvalid;
 
-always @(posedge axi_clk) begin
+always @(posedge axi_clk or negedge s_axi_aresetn) begin
   if (s_axi_aresetn == 1'b0) begin
     // Must be driven low
     axi_awready <= 1'b0;

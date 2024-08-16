@@ -1,22 +1,35 @@
-`timescale 1ns/1ns
+`timescale 1ns/100ps
 
 module axi_cdc_tb;
 
-`define FAST_M
-localparam DELAY_PIPELINE_NSTAGES = 3;
-`ifdef FAST_M
-localparam S_AXI_ACLK_HALFPERIOD = 3;
+localparam XACT_CYCLES = 8;
+// See mem_gate.md's note about MTU-limited single-beat transactions
+localparam N_XACTS = 183;
+localparam FIFO_AW = $clog2(N_XACTS);
+// The number of cycles to delay before "opening" the read FIFO.
+// Higher latency supports slower clocks on the "M" side.
+localparam LATENCY_CYCLES = 640;
+
+localparam S_AXI_ACLK_HALFPERIOD = 4;
 localparam M_AXI_ACLK_HALFPERIOD = 2;
-`else
-localparam S_AXI_ACLK_HALFPERIOD = 2;
-localparam M_AXI_ACLK_HALFPERIOD = 3;
-`endif
+reg [9:0] m_axi_aclk_halfperiod = M_AXI_ACLK_HALFPERIOD;
+
 localparam STEP = 2*S_AXI_ACLK_HALFPERIOD;
 localparam LONGEST_PERIOD = S_AXI_ACLK_HALFPERIOD > M_AXI_ACLK_HALFPERIOD ?
                             2*S_AXI_ACLK_HALFPERIOD : 2*M_AXI_ACLK_HALFPERIOD;
 reg s_axi_aclk=1'b1, m_axi_aclk=1'b1;
 always #S_AXI_ACLK_HALFPERIOD s_axi_aclk <= ~s_axi_aclk;
-always #M_AXI_ACLK_HALFPERIOD m_axi_aclk <= ~m_axi_aclk;
+reg ghz_clk = 1'b1;
+always #0.5 ghz_clk <= ~ghz_clk;
+reg [9:0] ghz_counter=0;
+always @(posedge ghz_clk) begin
+  if (ghz_counter == m_axi_aclk_halfperiod) begin
+    ghz_counter <= 0;
+    m_axi_aclk <= ~m_axi_aclk;
+  end else begin
+    ghz_counter <= ghz_counter + 1;
+  end
+end
 
 // VCD dump file for gtkwave
 initial begin
@@ -38,10 +51,9 @@ wire to = ~(|timeout_r);
 
 localparam C_M_AXI_ADDR_WIDTH = 16;
 localparam C_M_AXI_DATA_WIDTH = 32;
-localparam DEFAULT_XACT_TIMING = 17;
 localparam RESPONSE_TIMEOUT = 255;
 
-// AXI4LITE signals from Host to delay
+// AXI4LITE signals from Host to CDC
 reg axi_aresetn=1'b1;
 wire [C_M_AXI_ADDR_WIDTH-1:0] axi_awaddr;
 wire [2:0] axi_awprot;
@@ -85,23 +97,23 @@ wire m_axi_rvalid;
 wire m_axi_rready;
 
 // Host control signals
-reg wnr=1'b0;
+wire read_stb, write_stb;
 reg [C_M_AXI_ADDR_WIDTH-1:0] addr=0;
 reg [C_M_AXI_DATA_WIDTH-1:0] wdata=0;
 wire [C_M_AXI_DATA_WIDTH-1:0] rdata;
-reg start=1'b0;
 wire busy;
+wire busy_r, busy_w;
 wire rvalid;
 wire timeout;
+wire [1:0] resp;
 
-axi_host #(
+axi_host_pipelined #(
   .C_M_AXI_ADDR_WIDTH(C_M_AXI_ADDR_WIDTH),
   .C_M_AXI_DATA_WIDTH(C_M_AXI_DATA_WIDTH),
-  .DEFAULT_XACT_TIMING(DEFAULT_XACT_TIMING),
   .RESPONSE_TIMEOUT(RESPONSE_TIMEOUT)
-) axi_host_i (
+) axi_host_pipelined_i (
   .m_axi_aclk(s_axi_aclk), // input
-  .m_axi_aresetn(axi_aresetn), // output
+  .m_axi_aresetn(axi_aresetn), // input
   .m_axi_awaddr(axi_awaddr), // output [C_M_AXI_ADDR_WIDTH-1:0]
   .m_axi_awprot(axi_awprot), // output [2:0]
   .m_axi_awvalid(axi_awvalid), // output
@@ -121,20 +133,26 @@ axi_host #(
   .m_axi_rresp(axi_rresp), // input [1:0]
   .m_axi_rvalid(axi_rvalid), // input
   .m_axi_rready(axi_rready), // output
-  .wnr(wnr), // input
+  .read_stb(read_stb), // input
+  .write_stb(write_stb), // input
   .addr(addr), // input [C_M_AXI_ADDR_WIDTH-1:0]
   .wdata(wdata), // input [C_M_AXI_DATA_WIDTH-1:0]
   .rdata(rdata), // output [C_M_AXI_DATA_WIDTH-1:0]
-  .start(start), // input
+  .busy_r(busy_r), // output
+  .busy_w(busy_w), // output
   .busy(busy), // output
   .rvalid(rvalid), // output
-  .timeout(timeout) // output
+  .timeout(timeout), // output
+  .resp(resp) // output
 );
 
+reg read_enable=1'b1;
 axi_cdc #(
   .C_AXI_DATA_WIDTH(C_M_AXI_DATA_WIDTH),
-  .C_AXI_ADDR_WIDTH(C_M_AXI_ADDR_WIDTH)
+  .C_AXI_ADDR_WIDTH(C_M_AXI_ADDR_WIDTH),
+  .FIFO_AW(FIFO_AW)
 ) axi_cdc_i (
+  .s_read_enable(read_enable),
   // AXI4LITE Ports from Host
   .s_axi_aclk(s_axi_aclk), // input
   .s_axi_aresetn(axi_aresetn), // input
@@ -208,84 +226,220 @@ axi_dummy #(
   .s_axi_rready(m_axi_rready) // input
 );
 
+localparam XACT_TIMER_W = $clog2(XACT_CYCLES);
+reg [XACT_TIMER_W-1:0] xact_timer=XACT_CYCLES;
+reg reset=1'b1;
+reg read_mask=1'b0;
+reg write_mask=1'b0;
+wire trig = xact_timer == 1;
+wire pre_trig = xact_timer == 0;
+assign read_stb = trig & read_mask;
+assign write_stb = trig & write_mask;
+always @(posedge s_axi_aclk) begin
+  if ((xact_timer == XACT_CYCLES-1) | reset) xact_timer <= 0;
+  else xact_timer <= xact_timer + 1;
+end
+// ========= Xact Counter ===========
+reg [4:0] outstanding_xacts=0;
+reg m_axi_rvalid_d=1'b0;
+wire m_axi_rvalid_re = m_axi_rvalid & ~m_axi_rvalid_d;
+reg m_axi_arvalid_d=1'b0;
+wire m_axi_arvalid_re = m_axi_arvalid & ~m_axi_arvalid_d;
+always @(posedge m_axi_aclk) begin
+  m_axi_rvalid_d <= m_axi_rvalid;
+  m_axi_arvalid_d <= m_axi_arvalid;
+  if (m_axi_arvalid_re & m_axi_rvalid_re) begin
+    outstanding_xacts <= outstanding_xacts; // +1-1
+  end else if (m_axi_arvalid_re) begin
+    outstanding_xacts <= outstanding_xacts + 1;
+  end else if (m_axi_rvalid_re) begin
+    outstanding_xacts <= outstanding_xacts - 1;
+  end
+end
+
 // =========== Stimulus =============
-integer N;
+integer N, lastN=0;
 real timestamp;
 wire [31:0] M = (N<<4); // clobber scheme
+wire [31:0] lastM = (lastN<<4); // clobber scheme
 integer errors=0;
-initial begin
-  #STEP   $display("Reading all 64 registers");
-  for (N=0; N<256; N=N+4) begin
-    #STEP wnr = 1'b0;
-          addr = N[C_M_AXI_ADDR_WIDTH-1:0];
-          start = 1'b1;
-    `wait_timeout(busy);
-          start = 1'b0;
-          if (to) begin
-            $display("ERROR! Timeout waiting for busy on read %x", addr);
-            $finish();
-          end
-    `wait_timeout(~busy);
-          if (to) begin
-            $display("ERROR! Timeout waiting for ~busy after read %x", addr);
-            $finish();
-          end
-          if (rdata != {{C_M_AXI_DATA_WIDTH-9{1'b0}}, 1'b1, N[7:0]}) begin
-            $display("ERROR! Readback %x != %x (N = %d)", rdata[8:0], {1'b1, N[7:0]}, N);
-            errors = errors + 1;
-          end
+integer phase=0;
+reg break=1'b0;
+always @(posedge s_axi_aclk) begin
+  if (phase == 0) begin
+    if (rvalid) begin
+      if (rdata != {{C_M_AXI_DATA_WIDTH-9{1'b0}}, 1'b1, lastN[7:0]}) begin
+        $display("ERROR! Readback %x != %x", rdata[8:0], {1'b1, lastN[7:0]});
+        errors = errors + 1;
+        break = 1'b1;
+      end
+      lastN <= lastN+4;
+    end
+  //end else if (phase == 1) begin
+  end else if (phase == 2) begin
+    if (rvalid) begin
+      if (rdata[11:0] != lastM[11:0]) begin
+        $display("ERROR! Readback %x != %x", rdata[11:0], lastM[11:0]);
+        errors = errors + 1;
+        break = 1'b1;
+      end
+      lastN <= lastN+4;
+    end
   end
-          $display("  Completed in %.2f cycles of the slower clock.", ($realtime-STEP)/LONGEST_PERIOD);
-          $display("    %.2f cycles per transaction.", (($realtime-STEP)/LONGEST_PERIOD)/64);
+end
+
+// Keep an average of the time between 'rvalid' pulses
+integer clk_count=0;
+integer last_clk_count=0;
+integer count_min=32'h7fffffff;
+integer count_max=0;
+integer sum=0;
+integer rvalid_counts=0;
+reg reset_stats=1'b0;
+always @(posedge s_axi_aclk) begin
+  if (reset_stats) begin
+    clk_count <= 0;
+    rvalid_counts <= 0;
+    sum <= 0;
+    read_enable <= 1'b0;
+    last_clk_count <= 0;
+  end else begin
+    clk_count <= clk_count + 1;
+    if (read_enable & rvalid) begin
+      if ((clk_count-last_clk_count) < count_min) count_min <= clk_count - last_clk_count;
+      if ((clk_count-last_clk_count) > count_max) count_max <= clk_count - last_clk_count;
+      rvalid_counts <= rvalid_counts + 1;
+      sum <= sum + (clk_count-last_clk_count);
+      last_clk_count <= clk_count;
+    end
+  end
+  if (~read_enable && (clk_count == LATENCY_CYCLES-1)) begin
+    read_enable <= 1'b1;
+    clk_count <= 0;
+    last_clk_count <= 0;
+  end
+end
+
+
+integer MCLK_HALFPERIOD=2;
+integer READOUT_LIMIT=1;
+integer WRITE_LIMIT=1;
+initial begin
+  @(posedge s_axi_aclk) $display("==== Readout Speed Limit Test ====");
+          reset = 1'b0;
+          reset_stats = 1'b1;
+  wait (trig);
+  for (MCLK_HALFPERIOD=2; (MCLK_HALFPERIOD<50) && ~break; MCLK_HALFPERIOD=MCLK_HALFPERIOD+1) begin
+          lastN = 0;
+          m_axi_aclk_halfperiod = MCLK_HALFPERIOD[9:0];
+          `wait_timeout(~busy);
+          `wait_timeout(outstanding_xacts==0);
+          $display("f(m_clk) = %.02f MHz", 1000.0/(2*MCLK_HALFPERIOD));
+    @(posedge s_axi_aclk) reset = 1'b1;
+    @(posedge s_axi_aclk) reset = 1'b0;
+          //read_enable = 1'b0;
+          reset_stats = 1'b0;
+    for (N=0; (N<4*N_XACTS) && ~break; N=N+4) begin
+          addr = N[C_M_AXI_ADDR_WIDTH-1:0];
+          read_mask = 1'b1;
+      `wait_timeout(busy_r);
+          //$display("%t: N = %d", $time, N);
+          if (to) begin
+            $display("  ERROR! Timeout waiting for busy_r %x", addr);
+            break=1'b1;
+          end
+      `wait_timeout(pre_trig);
+          if (to) begin
+            $display("  ERROR! Timeout waiting for ~busy_r %x", addr);
+            break=1'b1;
+          end
+          if (busy_r) begin
+            $display("  Limit reached. Can't keep up with XACT_CYCLES = %d", XACT_CYCLES[3:0]);
+            break=1'b1;
+          end
+    end // for (N...)
+          read_mask = 1'b0;
+          //read_enable = 1'b1;
+    `wait_timeout(lastN == 4*N_XACTS);
+          $display("rvalid average clock cycles: %.02f (%d, %d)", $itor(sum)/rvalid_counts, count_min, count_max);
+          reset_stats = 1'b1;
+          if (sum > rvalid_counts*XACT_CYCLES) break = 1'b1;
+  end // for (MCLK_HALFPERIOD...)
+          //$display("  Completed in %.2f cycles of the slower clock.", ($realtime-STEP)/LONGEST_PERIOD);
+          //$display("    %.2f cycles of the bus clock.", ($realtime-STEP)/(2*S_AXI_ACLK_HALFPERIOD));
+          //$display("    %.2f bus cycles per transaction.", (($realtime-STEP)/(2*S_AXI_ACLK_HALFPERIOD))/64);
+          read_mask = 1'b0;
+          `wait_timeout(~busy);
+          if (break) begin
+            READOUT_LIMIT = MCLK_HALFPERIOD-1;
+          end else begin
+            READOUT_LIMIT = MCLK_HALFPERIOD;
+          end
+          $display("Readout minimum frequency: %.02f MHz", 1000.0/(2*READOUT_LIMIT));
+          $finish();
+  @(posedge s_axi_aclk) $display("==== Write Speed Limit Test ====");
           timestamp = $realtime;
-          $display("Writing all 64 registers");
-  for (N=0; N<256; N=N+4) begin
-    #STEP wnr = 1'b1;
+          phase = phase + 1;
+          break = 1'b0;
+  for (MCLK_HALFPERIOD=2; (MCLK_HALFPERIOD<50) && ~break; MCLK_HALFPERIOD=MCLK_HALFPERIOD+1) begin
+          lastN = 0;
+          m_axi_aclk_halfperiod = MCLK_HALFPERIOD[9:0];
+          `wait_timeout(~busy);
+          `wait_timeout(outstanding_xacts==0);
+          $display("f(m_clk) = %.02f MHz", 1000.0/(2*MCLK_HALFPERIOD));
+    @(posedge s_axi_aclk) reset = 1'b1;
+    @(posedge s_axi_aclk) reset = 1'b0;
+    for (N=0; (N<256) && ~break; N=N+4) begin
           addr = N[C_M_AXI_ADDR_WIDTH-1:0];
           wdata = M;
-          start = 1'b1;
-    `wait_timeout(busy);
-          start = 1'b0;
+          write_mask = 1'b1;
+      `wait_timeout(busy_w);
           if (to) begin
-            $display("ERROR! Timeout waiting for busy on write %x", addr);
-            $finish();
+            $display("ERROR! Timeout waiting for busy_w %x", addr);
+            break=1'b1;
           end
-    `wait_timeout(~busy);
+      `wait_timeout(pre_trig);
           if (to) begin
-            $display("ERROR! Timeout waiting for ~busy after write %x", addr);
-            $finish();
+            $display("ERROR! Timeout waiting for ~busy_w %x", addr);
+            break=1'b1;
           end
-          if (timeout) begin
-            $display("ERROR! Timeout on write %x", addr);
-            errors = errors + 1;
+          if (busy_w) begin
+            $display("  Limit reached. Can't keep up with XACT_CYCLES = %d", XACT_CYCLES[3:0]);
+            break=1'b1;
           end
-  end
-          $display("  Completed in %.2f cycles of the slower clock.", ($realtime-timestamp)/LONGEST_PERIOD);
-          $display("    %.2f cycles per transaction.", (($realtime-timestamp)/LONGEST_PERIOD)/64);
+    end // for (N...)
+  end // for (MCLK_HALFPERIOD...)
+          write_mask = 1'b0;
+          `wait_timeout(lastN == 256);
+          `wait_timeout(~busy);
+          if (break) begin
+            WRITE_LIMIT = MCLK_HALFPERIOD-1;
+          end else begin
+            WRITE_LIMIT = MCLK_HALFPERIOD;
+          end
+          $display("Write minimum frequency: %.02f MHz", 1000.0/(2*WRITE_LIMIT));
+          $finish();
+
+  // TODO - Perform write and readback to confirm data gets through
           timestamp = $realtime;
           $display("Reading clobbered registers");
   for (N=0; N<256; N=N+4) begin
-    #STEP wnr = 1'b0;
           addr = N[C_M_AXI_ADDR_WIDTH-1:0];
-          start = 1'b1;
-    `wait_timeout(busy);
-          start = 1'b0;
+    #STEP read_mask = 1'b1;
+    `wait_timeout(busy_r);
           if (to) begin
-            $display("ERROR! Timeout waiting for busy on read %x", addr);
-            $finish();
+            $display("ERROR! Timeout waiting for busy_r %x", addr);
+            $stop(0);
           end
-    `wait_timeout(~busy);
+    `wait_timeout(~busy_r);
           if (to) begin
-            $display("ERROR! Timeout waiting for ~busy after read %x", addr);
-            $finish();
-          end
-          if (rdata[11:0] != M[11:0]) begin
-            $display("ERROR! Readback %x != %x", rdata[11:0], M[11:0]);
-            errors = errors + 1;
+            $display("ERROR! Timeout waiting for ~busy_r %x", addr);
+            $stop(0);
           end
   end
           $display("  Completed in %.2f cycles of the slower clock.", ($realtime-timestamp)/LONGEST_PERIOD);
           $display("    %.2f cycles per transaction.", (($realtime-timestamp)/LONGEST_PERIOD)/64);
+          `wait_timeout(~busy);
           if (errors == 0) begin
             $display("PASS");
             $finish(0);

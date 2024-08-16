@@ -4,8 +4,6 @@
  * Registers are initialized with 0x100 | addr (i.e. 0x100-0x1ff)
  */
 
-// TODO - I'm getting double "rvalid" pulses out of this thing.  Why?
-
 module axi_dummy #(
   // AXI4LITE Parameters
   parameter integer C_S_AXI_DATA_WIDTH  = 32,
@@ -112,7 +110,7 @@ end
 // and the peripheral is ready to accept the read address.
 wire [HA_REG_AW-1:0] r_reg_sel = s_axi_araddr[ADDR_LSB+HA_REG_AW-1:ADDR_LSB];
 wire ha_reg_rden = ~axi_rvalid & axi_arready & s_axi_arvalid;
-always @(posedge s_axi_aclk) begin
+always @(posedge s_axi_aclk or negedge s_axi_aresetn) begin
   if (s_axi_aresetn == 1'b0) begin
     axi_rdata  <= 0;
   end else begin
@@ -138,7 +136,7 @@ assign s_axi_rresp   = axi_rresp;
 assign s_axi_rvalid  = axi_rvalid;
 
 // Latching data here
-always @(posedge s_axi_aclk) begin
+always @(posedge s_axi_aclk or negedge s_axi_aresetn) begin
   if (s_axi_aresetn == 1'b0) begin
     // Must be driven low
     axi_awready <= 1'b0;

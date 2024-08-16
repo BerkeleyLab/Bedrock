@@ -2,9 +2,10 @@
 
 module axi_channel_xdomain_tb;
 
+localparam FIFO_AW = 2;
 localparam CLKA_HALFPERIOD = 5;
 localparam CLKB_HALFPERIOD = 2;
-localparam TICK = 2*CLKA_HALFPERIOD;
+localparam STEP = 2*CLKA_HALFPERIOD;
 reg clka=1'b1;
 always #CLKA_HALFPERIOD clka <= ~clka;
 reg clkb=1'b1;
@@ -25,7 +26,7 @@ always @(posedge clka) begin
   if (r_timeout > 0) r_timeout <= r_timeout - 1;
 end
 wire to = ~(|r_timeout);
-`define wait_timeout(sig) r_timeout = TOSET; #TICK wait ((to) || sig)
+`define wait_timeout(sig) r_timeout = TOSET; #STEP wait ((to) || sig)
 
 localparam WIDTH = 16;
 
@@ -47,7 +48,8 @@ channel_producer #(
 );
 
 axi_channel_xdomain #(
-  .WIDTH(WIDTH)
+  .WIDTH(WIDTH),
+  .FIFO_AW(FIFO_AW)
 ) axi_channel_xdomain_atob (
   .clka(clka), // input
   .dataa(dataa), // input [WIDTH-1:0]
@@ -56,7 +58,8 @@ axi_channel_xdomain #(
   .clkb(clkb), // input
   .datab(datab), // output [WIDTH-1:0]
   .validb(validb), // output
-  .readyb(readyb) // input
+  .readyb(readyb), // input
+  .enb(1'b1) // input
 );
 
 wire [WIDTH-1:0] datab_latched, dataa_latched;
@@ -85,7 +88,8 @@ channel_producer #(
 );
 
 axi_channel_xdomain #(
-  .WIDTH(WIDTH)
+  .WIDTH(WIDTH),
+  .FIFO_AW(FIFO_AW)
 ) axi_channel_xdomain_btoa (
   .clka(clkb), // input
   .dataa(datac), // input [WIDTH-1:0]
@@ -94,7 +98,8 @@ axi_channel_xdomain #(
   .clkb(clka), // input
   .datab(datad), // output [WIDTH-1:0]
   .validb(validd), // output
-  .readyb(readyd) // input
+  .readyb(readyd), // input
+  .enb(1'b1) // input
 );
 
 channel_consumer #(
@@ -121,8 +126,8 @@ end
 initial begin
   for (N=0; N<4; N=N+1) begin
   @(posedge clka) send <= 1'b0;
-  @(posedge clka) send_data <= send_list[N];
-        send <= 1'b1;
+                  send_data <= send_list[N];
+  @(posedge clka) send <= 1'b1;
   @(posedge clka) send <= 1'b0;
         `wait_timeout(datab_latched_valid);
         if (to) begin
