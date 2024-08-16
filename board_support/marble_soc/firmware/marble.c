@@ -192,7 +192,7 @@ bool set_si570_info(si570_info_t *info, marble_init_byte_t *p_data) {
         regmap++;
     }
     // Unfreeze DCO
-    ret &= i2c_write_regs(info->i2c_addr, 137, &reg_unfreeze_dco, 1);
+    ret &= i2c_write_regs(info->i2c_addr, 137, &reg_unfreeze_dco, 0);
     // Assert NewFreq bit
     ret &= i2c_write_regs(info->i2c_addr, 135, &reg_newfreq, 1);
     return ret;
