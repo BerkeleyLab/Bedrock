@@ -2,6 +2,7 @@
 #include "i2c_soft.h"
 #include "sfr.h"
 #include "xadc.h"
+#include "timer.h"
 #include "localbus.h"
 #include "settings.h"
 #include "print.h"
@@ -193,6 +194,13 @@ bool set_si570_info(si570_info_t *info, marble_init_byte_t *p_data) {
     }
     // Unfreeze DCO
     ret &= i2c_write_regs(info->i2c_addr, 137, &reg_unfreeze_dco, 1);
+
+    // The process of freezing and unfreezing the DCO will
+    // cause the output clock to momentarily stop and start at
+    // any arbitrary point during a clock cycle. This process
+    // can take up to 10 ms.
+    DELAY_MS(20);
+
     // Assert NewFreq bit
     ret &= i2c_write_regs(info->i2c_addr, 135, &reg_newfreq, 1);
     return ret;
