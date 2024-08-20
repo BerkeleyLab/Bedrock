@@ -282,9 +282,8 @@ bool check_ad9781_bist(void);
 /***************************************************************************//**
  * @brief Test function.
  * @param base              - base address
- * @param zest_init_data    - pointer to init register data.
  * @return pass             - true if all validation passes
 *******************************************************************************/
-bool init_zest_dbg(uint32_t base, zest_init_t *init_data);
+bool init_zest_dbg(uint32_t base);
 
 #endif
