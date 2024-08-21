@@ -93,7 +93,7 @@ module wfm_tb;
     // N_CH=2, CH1: 16'hdead, CH0: 16'beaf
     reg [31:0] adc_out_data= {16'hdead, 16'hbeaf};
     always @(posedge dsp_clk) begin
-        adc_out_data <= ~adc_out_data;
+        if (dut.counting) adc_out_data <= ~adc_out_data;
     end
     // --------------------------------------------------------------
     //  wfm_pack module
@@ -123,8 +123,8 @@ module wfm_tb;
     // Read CH1 and check data
     // wfm.c: SET_REG8(config_addr + WFM_CFG_BYTE_CHAN_SEL, 1);
     always @(posedge mem_clk) if (mem_read_stb) begin
-        if (v_addr % 2 == 0) pass &= (v_rdata == ~16'hdead);
-        if (v_addr % 2 == 1) pass &= (v_rdata == 16'hdead);
+        if (v_addr % 2 == 0) pass &= (v_rdata == 16'hdead);
+        if (v_addr % 2 == 1) pass &= (v_rdata == ~16'hdead);
         $display("Time: %g ns: addr: 0x%x, data : 0x%x %s\n", $time, v_addr, v_rdata, pass ? "PASS":"FAIL");
     end
 endmodule
