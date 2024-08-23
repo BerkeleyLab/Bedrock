@@ -14,6 +14,7 @@ wire_info = {}
 addr_found = {}
 name_found = {}
 fail = 0
+verbose = False  # can we have a command-line switch to control this?
 
 # Bugs:
 #   brittle to variations in Verilog code formatting
@@ -117,7 +118,8 @@ for line in f.read().split('\n'):
             alias = None
             m1a = re.search(r";\s*//\s*alias:\s*(\w+)", line)
             if m1a:
-                # stderr.write('INFO: alias "%s"\n' % m1a.group(1))
+                if verbose:
+                    stderr.write('INFO: alias "%s"\n' % m1a.group(1))
                 alias = m1a.group(1)
             tbank = m1.group(2)
             if bank_state == "=armed=":
@@ -131,7 +133,8 @@ for line in f.read().split('\n'):
     if "default" in line and ": reg_bank_" in line:
         m1 = re.search(r"default:\s*reg_bank_(\w)\s*<=\s*32'h", line)
         if m1:
-            # stderr.write('INFO: default %s\n' % line)
+            if verbose:
+                stderr.write('INFO: default %s\n' % line)
             tbank = m1.group(1)
             if bank_state != tbank:
                 stderr.write(ehead + ' bank %s assignment found in bank %s stanza\n' % (tbank, bank_state))
@@ -149,11 +152,21 @@ for line in f.read().split('\n'):
         if m2:
             memorize(m2.group)
     if any(x in line for x in ["parameter", "localparam"]):
-        m3 = re.search(r"\b(?:parameter|localparam)\s+(\w+)\s*=\s*(\d+);", line)
+        # This logic can handle parameter as a statement, or in the header of a module.
+        # It does get tripped up by the _last_ parameter of a module,
+        # that doesn't have a trailing comma.
+        m3 = re.search(r"\b(?:parameter|localparam)\s+(\w+)\s*=\s*(\d+)[;,]", line)
         if m3:
             p, v = m3.group(1), int(m3.group(2))
             param_db[p] = v
-            # stderr.write('INFO: found parameter "%s" with value %d\n' % (p, v))
+            if verbose:
+                stderr.write('INFO: found parameter "%s" with value %d\n' % (p, v))
+        m3 = re.search(r"\b(?:parameter|localparam)\s+integer\s+(\w+)\s*=\s*(\d+)[;,]", line)
+        if m3:
+            p, v = m3.group(1), int(m3.group(2))
+            param_db[p] = v
+            if verbose:
+                stderr.write('INFO: found parameter "%s" with value %d\n' % (p, v))
     if "endcase" in line:
         bank_state = None
     if "case" in line and "addr" in line:
