@@ -37,7 +37,8 @@ def udp_fragmenter_description(dw):
 
 class UDPFragmenterPacketizer(Packetizer):
     def __init__(self, dw=8):
-        Packetizer.__init__(self,
+        Packetizer.__init__(
+            self,
             udp_fragmenter_description(dw),
             eth_udp_user_description(dw),
             fragmenter_header)
@@ -82,10 +83,10 @@ class UDPFragmenter(Module):
         counter_ce = Signal()
         self.sync += \
             If(counter_reset,
-                counter.eq(0)
-            ).Elif(counter_ce,
-                counter.eq(counter + ww)
-            )
+               counter.eq(0)
+               ).Elif(counter_ce,
+                      counter.eq(counter + ww)
+                      )
         bytes_in_fragment = Signal(16, reset=0)
 
         self.submodules.fsm = fsm = FSM(reset_state="IDLE")
@@ -96,7 +97,7 @@ class UDPFragmenter(Module):
                       sink.connect(packetizer.sink, omit={"length"}),
                       # TODO
                       source.length.eq(sink.length)
-                   ).Else(
+                      ).Else(
                        sink.ready.eq(0),
                        source.length.eq(UDP_FRAG_MTU + 8),
                        counter_reset.eq(1),
@@ -107,8 +108,8 @@ class UDPFragmenter(Module):
                        NextValue(bytes_in_fragment, UDP_FRAG_MTU),
                        NextState("FRAGMENTED_PACKET_SEND")
                    )
+                   )
                 )
-            )
 
         fsm.act("FRAGMENTED_PACKET_SEND",
                 sink.connect(packetizer.sink, omit={"length"}),
@@ -116,7 +117,7 @@ class UDPFragmenter(Module):
                 source.length.eq(bytes_in_fragment + 8),
                 If(sink.valid & packetizer.sink.ready,
                    counter_ce.eq(1)
-                ),
+                   ),
                 If(counter == (bytes_in_fragment - ww),
                    NextValue(fragment_offset,
                              fragment_offset + (bytes_in_fragment >> 3)),
@@ -124,11 +125,11 @@ class UDPFragmenter(Module):
                    If(((fragment_offset << 3) + counter + ww) == sink.length,
                       NextValue(fragment_offset, 0),
                       NextState("IDLE")
-                   ).Else(
+                      ).Else(
                        counter_ce.eq(0),
                        NextState("NEXT_FRAGMENT"))
+                   )
                 )
-        )
 
         fsm.act("NEXT_FRAGMENT",
                 counter_ce.eq(0),
@@ -139,14 +140,14 @@ class UDPFragmenter(Module):
                 counter_reset.eq(1),
                 If((sink.length - (fragment_offset << 3)) > UDP_FRAG_MTU,
                     NextValue(bytes_in_fragment, UDP_FRAG_MTU),
-                ).Else(
+                   ).Else(
                     NextValue(bytes_in_fragment,
                               sink.length - (fragment_offset << 3)),
                     NextValue(mf, 0),
                 ),
                 NextValue(fragment_id, fragment_id + 1),
                 NextState("FRAGMENTED_PACKET_SEND")
-        )
+                )
 
 
 class Counter(Module):
@@ -206,7 +207,7 @@ class DataPipeWithoutBypass(Module, AutoCSR):
             If(adc_source.valid,
                adc_data.eq(Cat(adc_data[adc_dw:], adc_source.data)),
                word_count.eq(word_count + 1)
-            ),
+               ),
             word_count_d.eq(word_count),
         ]
 
@@ -221,16 +222,16 @@ class DataPipeWithoutBypass(Module, AutoCSR):
             If(self.fifo_load.re & self.fifo_load.storage,
                fifo_counter.eq(0),
                load_fifo.eq(1)
-            ),
+               ),
             If(load_fifo & adc_source.valid,
                self.fifo_full.status.eq(0),
                self.fifo_error.status.eq(~dram_fifo.dram_fifo.ctrl.writable),
                fifo_counter.eq(fifo_counter + 1)
-            ),
+               ),
             If((fifo_counter == fifo_size - 1) & adc_source.valid,
                load_fifo.eq(0),
                self.fifo_full.status.eq(1)
-            ),
+               ),
         ]
 
         # fifo --> stride converter
@@ -244,9 +245,9 @@ class DataPipeWithoutBypass(Module, AutoCSR):
         self.sync += [
             If(dram_fifo.source.valid & dram_fifo.source.ready,
                receive_count.eq(receive_count + 1)
-            ).Elif(read_from_dram_fifo == 0,
-                   receive_count.eq(0)
-            )
+               ).Elif(read_from_dram_fifo == 0,
+                      receive_count.eq(0)
+                      )
         ]
         # --> udp fragmenter -->
         self.submodules.udp_fragmenter = udp_fragmenter = UDPFragmenter(udp_port.dw)
@@ -315,16 +316,16 @@ class DataPipe(Module, AutoCSR):
             If(self.fifo_load.re & self.fifo_load.storage,
                fifo_counter.eq(0),
                load_fifo.eq(1)
-            ),
+               ),
             If(load_fifo & adcs.source.valid,
                self.fifo_full.status.eq(0),
                self.fifo_error.status.eq(~dram_fifo.dram_fifo.ctrl.writable),
                fifo_counter.eq(fifo_counter + 1)
-            ),
+               ),
             If((fifo_counter == fifo_size - 1) & adcs.source.valid,
                load_fifo.eq(0),
                self.fifo_full.status.eq(1)
-            ),
+               ),
         ]
 
         self.comb += [
@@ -344,9 +345,9 @@ class DataPipe(Module, AutoCSR):
         self.sync += [
             If(dram_fifo.source.valid & dram_fifo.source.ready,
                receive_count.eq(receive_count + 1)
-            ).Elif(read_from_dram_fifo == 0,
-                   receive_count.eq(0)
-            )
+               ).Elif(read_from_dram_fifo == 0,
+                      receive_count.eq(0)
+                      )
         ]
         # --> udp fragmenter -->
         self.submodules.udp_fragmenter = udp_fragmenter = UDPFragmenter(udp_port.dw)
