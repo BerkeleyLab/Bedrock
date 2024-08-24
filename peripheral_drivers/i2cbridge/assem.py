@@ -211,21 +211,24 @@ class I2CAssembler(i2c_assem):
             try:
                 data.append(next(prog_iter))
             except StopIteration:
-                raise I2C_Assembler_Exception("Corrupted program detected. " +
+                raise I2C_Assembler_Exception(
+                    "Corrupted program detected. " +
                     "Program terminates before read (rd) instruction is completed")
         elif op_code == cls.o_wr:
             for n in range(n_code):
                 try:
                     data.append(next(prog_iter))
                 except StopIteration:
-                    raise I2C_Assembler_Exception("Corrupted program detected. " +
+                    raise I2C_Assembler_Exception(
+                        "Corrupted program detected. " +
                         "Program terminates before write (wr) instruction is completed")
         elif op_code == cls.o_wx:
             for n in range(n_code):
                 try:
                     data.append(next(prog_iter))
                 except StopIteration:
-                    raise I2C_Assembler_Exception("Corrupted program detected. " +
+                    raise I2C_Assembler_Exception(
+                        "Corrupted program detected. " +
                         "Program terminates before write-multi (wx) instruction is completed")
         # All other op_code values have no data
         return (op_code, n_code, data)
@@ -249,7 +252,8 @@ class I2CAssembler(i2c_assem):
         while rval is not None:
             op_code, n_code, data = rval
             if loop_end:    # Should not be any code after a backwards jump
-                raise I2C_Assembler_Exception(f"Instruction [{op_code:03b}:{n_code:05b}] " +
+                raise I2C_Assembler_Exception(
+                    f"Instruction [{op_code:03b}:{n_code:05b}] " +
                     f"at address {pc} is unreachable.")
             if op_code == self.o_oo:
                 if n_code == self.n_oo_bf:  # buffer_flip
@@ -279,14 +283,16 @@ class I2CAssembler(i2c_assem):
                 if backwards_jumped:
                     prnt(f"  After a backwards jump (srx_after_jump = {srx_after_jump})")
                     if not srx_after_jump:
-                        raise I2C_Assembler_Exception(f"Program address 0x{pc:03x}: Must use set_resx() after " +
+                        raise I2C_Assembler_Exception(
+                            f"Program address 0x{pc:03x}: Must use set_resx() after " +
                             "a backwards jump before any read operations for consistent address of results.")
             pc = iprog.tell()
             prnt(f"pc = {pc:03x}")
             rval = self._get_next_instruction(iprog)
         if has_read and not has_buffer_flip:
             if not self._advanced_mode:
-                raise I2C_Assembler_Exception("Program has read operation but no buffer flip found." +
+                raise I2C_Assembler_Exception(
+                    "Program has read operation but no buffer flip found." +
                     " Result buffer is unreadable.  Use 'advanced mode' to suppress this exception.")
         prnt("Program good")
         return

@@ -102,7 +102,8 @@ class BaseSoC(SoCCore):
         platform = marble.Platform()
 
         # SoCCore ----------------------------------------------------------------------------------
-        SoCCore.__init__(self, platform, sys_clk_freq,
+        SoCCore.__init__(
+            self, platform, sys_clk_freq,
             ident          = "LiteX SoC on Marble",
             **kwargs)
 
