@@ -35,7 +35,7 @@ jit_rad_gateway_demo demo(.lb_clk(lb_clk), .app_clk(app_clk),
 	.net_odata(net_odata), .tx_rdy(tx_rdy), .tx_end(tx_end), .tx_stb(1'b1)
 );
 
-// packet geneartion logic
+// packet generation logic
 // No burst, especially since jxj_gate doesn't do that.
 // This should be turned into a module so it can be shared
 // with simulations of the non-QF2 configuration.

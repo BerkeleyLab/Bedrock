@@ -23,7 +23,7 @@
 /* verilator lint_off CASEOVERLAP */
 /* verilator lint_off CASEINCOMPLETE */
 
-`timescale 1 ns / 1 ps
+`timescale 1 ns / 1 ns
 // `default_nettype none
 // `define DEBUGNETS
 // `define DEBUGREGS

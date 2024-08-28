@@ -232,7 +232,7 @@ bool check_ad9781_bist(void) {
     SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC1_ENABLE, 0);
     pass &= run_ad9781_bist(bitres_exp, 0);
 
-    // test case 2: PRBS on dac0, zero on dac1
+    // test case 2: PRBS on dac1, zero on dac0
     SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC0_ENABLE, 0);
     SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC1_ENABLE, 1);
     pass &= run_ad9781_bist(0, bitres_exp);
@@ -782,26 +782,11 @@ void test_adc_pn9(uint8_t len) {
     write_zest_reg(ZEST_DEV_AD9653_BOTH, 0x14, 0x07); // two's comp
 }
 
-bool init_zest_dbg(uint32_t base, zest_init_t *init_data) {
+bool init_zest_dbg(uint32_t base) {
     bool pass=true;
     // uint32_t fcnt;
     select_zest_addr(base);
 
-    // zest_init_data_t *p_ad9653_data = &(init_data->ad9653_data);
-    // printf("Reset BUFR 0: ");
-    // reset_zest_bufr(0);
-    // printf("Reset BUFR 1: ");
-    // reset_zest_bufr(1);
-    // printf("ZEST ADC init : ");
-    // write_zest_regs(ZEST_DEV_AD9653_BOTH, p_ad9653_data->regmap, p_ad9653_data->len);
-
-    // test_adc_pn9(8);
-    // check_adc_prbs9();
-    // align_ad9781(12);
-    // uint32_t *fcnt_exp = init_data->fcnt_exp;
-    // check_zest_freq(0, fcnt_exp[0]);
-    // fcnt = read_zest_fcnt(0);
-    // print_udec_fix(fcnt*125, FCNT_WIDTH, 3);
     check_ad9781_bist();
     return pass;
 }
