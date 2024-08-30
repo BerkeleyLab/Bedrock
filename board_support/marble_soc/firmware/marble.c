@@ -113,15 +113,15 @@ void get_qsfp_info(qsfp_info_t *qsfp_param) {
     qsfp_param->voltage = (int16_t)(buf[0] << 8 | buf[1]) / 10;  // mV
     marble_i2c_read(qsfp_param->i2c_addr, 42, buf, 8);
     for (i=0; i < 4; i++) {
-        qsfp_param->bias_current[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) * 2;  // µA
+        qsfp_param->bias_current[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) * 2;  // microA
     }
     marble_i2c_read(qsfp_param->i2c_addr, 50, buf, 8);
     for (i=0; i < 4; i++) {
-        qsfp_param->tx_power[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) / 10; // µW
+        qsfp_param->tx_power[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) / 10; // microW
     }
     marble_i2c_read(qsfp_param->i2c_addr, 34, buf, 8);
     for (i=0; i < 4; i++) {
-        qsfp_param->rx_power[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) / 10; // µW
+        qsfp_param->rx_power[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) / 10; // microW
     }
 }
 
@@ -283,6 +283,8 @@ void print_marble_status(void) {
         printf(" %s: I0         :      %#12X\n",__func__,  pca9555[i].i0_val);
         printf(" %s: I1         :      %#12X\n",__func__,  pca9555[i].i1_val);
     }
+// MICRO SIGN  https://en.wikipedia.org/wiki/%CE%9C#Character_encodings
+#define MICRO "\u00b5"
     for (unsigned i=0; i<2; i++) {
         if (qsfp[i].module_present) {
             printf(" %s: QSFP%1u Vendor  :   %.16s\n",  __func__, i+1, qsfp[i].vendor_name);
@@ -292,11 +294,11 @@ void print_marble_status(void) {
             printf(" %s: QSFP%1u Temp    :   %8d C\n",  __func__, i+1, qsfp[i].temperature);
             printf(" %s: QSFP%1u Volt    :   %8d mV\n", __func__, i+1, qsfp[i].voltage);
             for (unsigned j=0; j < 4; j++) {
-                printf(" %s: QSFP%1u TxBias %u:   %8d µA\n", __func__,
+                printf(" %s: QSFP%1u TxBias %u:   %8d " MICRO "A\n", __func__,
                         i+1, j, qsfp[i].bias_current[j]);
-                printf(" %s: QSFP%1u TxPwr  %u:   %8d µW\n", __func__,
+                printf(" %s: QSFP%1u TxPwr  %u:   %8d " MICRO "W\n", __func__,
                         i+1, j, qsfp[i].tx_power[j]);
-                printf(" %s: QSFP%1u RxPwr  %d:   %8u µW\n", __func__,
+                printf(" %s: QSFP%1u RxPwr  %d:   %8u " MICRO "W\n", __func__,
                         i+1, j, qsfp[i].rx_power[j]);
             }
         }

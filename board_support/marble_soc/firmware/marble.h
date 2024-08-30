@@ -106,11 +106,11 @@ typedef struct qsfp_info_t {
     int16_t temperature;
     /** Internally measured voltage, LSB 0.1 mV. Page 00h Byte 26-27 */
     uint16_t voltage;
-    /** Tx bias current, LSB 2 µA, Page 00h Byte 42-49 */
+    /** Tx bias current, LSB 2 microA, Page 00h Byte 42-49 */
     uint16_t bias_current[4];
-    /** Rx power, LSB 0.1 µW, Page 00h Byte 34-41 */
+    /** Rx power, LSB 0.1 microW, Page 00h Byte 34-41 */
     uint16_t rx_power[4];
-    /** Tx power, LSB 0.1 µW, Page 00h Byte 50-57 */
+    /** Tx power, LSB 0.1 microW, Page 00h Byte 50-57 */
     uint16_t tx_power[4];
     /** Page 00h Byte 148-163 */
     unsigned char vendor_name[16];
