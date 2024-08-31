@@ -3,7 +3,7 @@
 module cryomodule_badger_tb;
 
 // based mostly on aggregate_tb.v
-parameter [31:0] ip = 32'd3232237316;  // 192.168.7.4
+parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4};  // 192.168.7.4
 parameter [47:0] mac = 48'h112233445566;
 
 // Buffer memory to hold a packet read from a file
@@ -40,6 +40,7 @@ reg [7:0] eth_in=0, eth_in_=0;
 reg eth_in_s=0, eth_in_s_=0;
 wire [7:0] eth_out;
 wire eth_out_s;
+wire thinking;  // hook to make things run efficiently
 
 reg eth_out_s1=0, ok_to_print=1;
 integer ci;
@@ -48,7 +49,7 @@ always @(posedge clk) begin
 	ci = cc % (data_len+150);
 	if (use_tap) begin
 		// Access to Linux tap interface, see tap-vpi.c
-		if (cc > 4) $tap_io(eth_out, eth_out_s, eth_in_, eth_in_s_);
+		if (cc > 4) $tap_io(eth_out, eth_out_s, eth_in_, eth_in_s_, thinking);
 		eth_in <= eth_in_;
 		eth_in_s <= eth_in_s_;
 	end else if ((ci>=100) & (ci<(100+data_len))) begin
