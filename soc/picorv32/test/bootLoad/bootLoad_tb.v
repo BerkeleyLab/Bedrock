@@ -122,6 +122,8 @@ module bootloader_tb;
     reg  [31:0] _startup_adr_arr[0:0];
     wire [31:0] _startup_adr = _startup_adr_arr[0];
     reg  [ 7:0] hexData      [0:255];
+    reg [1:0] jx;
+    integer start_time, delay, dok;
 
     //--------------------
     // The test sequence
@@ -168,26 +170,37 @@ module bootloader_tb;
         uart_read_task("!");
         uart_read_task("!");
         //-------------------
-        // Test timeout
+        // Test timeout or timeout bypass
         //-------------------
+        for (jx=0; jx<2; jx=jx+1) begin
         $display("\n<reset>");
         @ (posedge mem_clk);
         reset <= 1;
         repeat (10) @(posedge mem_clk);
         reset <= 0;
         $display("---------------------");
-        $display(" Testing timeout");
+        $display(" Testing timeout %d", jx);
         $display("---------------------");
         // Sync sequence: ok
         uart_read_task("o");
         uart_read_task("o");
         uart_read_task("k");
         uart_read_task("\n");
+        // exercise new (Aug 2024) feature of being able to bypass timeout
+        if (jx==1) uart_write_task("q");
+        start_time = $time;
         // The user program should start talking after the timeout
         uart_read_task("!");
+        delay = $time - start_time;
+        // Be very lenient, to avoid failure with past or future gcc versions
+        if (jx == 0) dok = (delay > 20000 && delay < 90000);
+        if (jx == 1) dok = (delay < 4000);
+        $display("\nmeasured delay %d ticks %s", delay, dok ? " OK" : "BAD");
+        pass &= dok;
         uart_read_task("!");
         uart_read_task("!");
         $write("\n");
+        end
         #500
         if (pass) begin
             $display("PASS");
