@@ -22,6 +22,15 @@ def _int(s):
     return int(ast.literal_eval(s))
 
 
+def _expandWriteVals(ss):
+    """Convert string 'n,m,l,k,...' into list of ints [n, m, l, k, ...]
+    Raise Exception if not all items separated by commas can be interpreted as integers."""
+    if ',' not in ss:
+        return [_int(ss)]
+    vals = [_int(x) for x in ss.split(',')]
+    return vals
+
+
 def parseTransaction(xact):
     """
     Parse transaction string from CLI.  Returns (str/int reg, int offset, int/None size, int/None write_val)
@@ -37,21 +46,28 @@ def parseTransaction(xact):
         regaddr                 Read from explicit address (int) 'regaddr'
         regname=val             Write (int) 'val' to named register (str) 'regname'
         regaddr=val             Write (int) 'val' to explicit address (int) 'regaddr'
+        regname=val0,...,valN   Write (int) 'val0' through 'valN' to consecutive addresses beginning at the
+                                address of named register (str) 'regname'
+        regaddr=val0,...,valN   Write (int) 'val0' through 'valN' to consecutive addresses beginning at
+                                address (int) 'regaddr'
         regname+offset          Read from address = romx['regname']['base_addr'] + (int) 'offset'
         regaddr+offset          Read from address = (int) 'regaddr' + (int) 'offset'
         regname:size            Read (int) 'size' elements starting from address romx['regname']['base_addr']
         regaddr:size            Read (int) 'size' elements starting from (int) 'regaddr'
         regname+offset=val      Write (int) 'val' to address romx['regname']['base_addr'] + (int) 'offset'
+        regname+offset=val0,...,valN    Write (int) 'val0' through 'valN' to consecutive addresses beginning at
+                                        address romx['regname']['base_addr'] + (int) 'offset'
         regaddr+offset=val      Write (int) 'val' to address (int) 'regaddr' + (int) 'offset'
+        regaddr+offset=val0,...,valN    Write (int) 'val0' through 'valN' to consecutive addresses beginning at
+                                        address (int) 'regaddr'
         regname+offset:size     Read (int) 'size' elements starting from address romx['regname']['base_addr'] + \
                                 (int) 'offset'
         regaddr+offset:size     Read (int) 'size' elements starting from (int) 'regaddr' + (int) 'offset'
     I'm not sure what use case the "regaddr+offset" syntax supports, but it does no harm to include it.
     NOTE! Deliberately not supporting "regname-offset" (negative offsets) as it's use case is unclear
     and a '_' to '-' typo could potentially collide with legitimate transactions.
-    NOTE! Does not support multi-value writes (e.g. "regname:size=val")
     """
-    restr = r"(\w+)\s*([=+:])?\s*([0-9a-fA-Fx]+)?\s*([=:])?\s*([0-9a-fA-Fx]+)?"
+    restr = r"(\w+)\s*([=+:])?\s*([0-9a-fA-Fx,\-]+)?\s*([=:])?\s*([0-9a-fA-Fx,\-]+)?"
     _match = re.match(restr, xact)
     offset = 0
     wval = None
@@ -60,7 +76,7 @@ def parseTransaction(xact):
         groups = _match.groups()
         regstr = groups[0]  # Always starts with 'regname' or 'regaddr'
         if groups[1] == '=':
-            wval = groups[2]
+            wval = _expandWriteVals(groups[2])
         elif groups[1] == '+':
             offset = _int(groups[2])
         elif groups[1] == ':':
@@ -68,7 +84,7 @@ def parseTransaction(xact):
         if groups[3] == '=':
             if groups[1] == '=':
                 raise Exception("Malformed transaction: {}".format(xact))
-            wval = groups[4]
+            wval = _expandWriteVals(groups[4])
         elif groups[3] == ':':
             if size is not None:
                 raise Exception("Malformed transaction: {}".format(xact))
@@ -79,24 +95,26 @@ def parseTransaction(xact):
         reg = _int(regstr)
     except ValueError:
         reg = regstr
-    if wval is not None:
-        # deliberately raise exception if wval is malformed
-        wval = _int(wval)
+    if size is None:
+        if wval is None:
+            size = 1
+        else:
+            size = 0
     return (reg, offset, size, wval)
 
 
 def readwrite(args, dev):
     for xact in args.reg:
-        reg, offset, size, wval = parseTransaction(xact)
-        if wval is not None:
-            dev.reg_write_offset([(reg, wval, offset)])
+        reg, offset, size, wvals = parseTransaction(xact)
+        if wvals is not None:
+            dev.reg_write_offset([(reg, wvals, offset)])
         else:
             value, = dev.reg_read_size(((reg, size, offset),))
             try:
                 _ = iter(value)
                 print("%s \t%s" % (reg, ' '.join(['%x' % v for v in value])))
             except TypeError:
-                print("%s \t%08x" % (reg, value))
+                print("%s \t%x" % (reg, value))
 
 
 def listreg(args, dev):

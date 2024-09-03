@@ -200,14 +200,17 @@ class LEEPDevice(DeviceBase):
             name, base_addr, size = self._decode(name, instance)[:3]
             value = numpy.array(value).astype('I')
             if offset > 0:
-                assert value.ndim == 0, "Writes with offset currently only support scalars."
+                # assert value.ndim == 0, "Writes with offset currently only support scalars."
                 _log.debug('reg_write %s <- %s', name, value)
-                addrs.append(base_addr + offset)
-                values.append(value)
+                # addrs.append(base_addr + offset)
+                # values.append(value)
+                for A, V in enumerate(value, base_addr+offset):
+                    addrs.append(A)
+                    values.append(V)
             elif size > 1:
                 _log.debug('reg_write %s <- %s ...', name, value[:10])
-                assert value.ndim == 1 and value.shape[0] == size, \
-                    ('must write whole register', value.shape, size)
+                # assert value.ndim == 1 and value.shape[0] == size, \
+                #    ('must write whole register', value.shape, size)
                 # array register
                 for A, V in enumerate(value, base_addr):
                     addrs.append(A)
@@ -530,6 +533,7 @@ class LEEPDevice(DeviceBase):
                            msg[:2], reply[:2])
                 continue
             elif (msg[2::2] != reply[2::2]).any():
+                print(f"  msg[2::2] = {msg[2::2]}\n  reply[2::2] = {reply[2::2]}")
                 _log.error('reply addresses are out of order')
                 continue
 
@@ -550,6 +554,10 @@ class LEEPDevice(DeviceBase):
             values = [None] * len(addrs)
         else:
             values = list(values)
+
+        if len(values) > len(addrs):
+            base = addrs[0]
+            addrs = [base+n for n in range(len(values))]
 
         ret = numpy.zeros(len(addrs), be32)
         for i in range(0, len(addrs), 127):
