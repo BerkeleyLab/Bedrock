@@ -38,6 +38,7 @@ include:
   - local: .gitlab/ci/cdc_check.gitlab-ci.yml
   - local: .gitlab/ci/localbus.gitlab-ci.yml
   - local: .gitlab/ci/ctrace.gitlab-ci.yml
+  - local: .gitlab/ci/leep.gitlab-ci.yml
 
 leep_test:
   script:
