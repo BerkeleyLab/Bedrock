@@ -513,8 +513,8 @@ class LEEPDevice(DeviceBase):
         values_preamble = numpy.array(values)
         self._checkrom(values, True)
         if self.size_rom != 0:
-            total_rom_size = (self.hash_descriptor_size
-                              + self.size_desc + self.size_rom)
+            total_rom_size = (self.hash_descriptor_size +
+                              self.size_desc + self.size_rom)
             stop_addr = end_addr + total_rom_size - self.preamble_max_size
             values_json = self.exchange(range(end_addr, stop_addr))
             preamble_json = numpy.concatenate((values_preamble, values_json))

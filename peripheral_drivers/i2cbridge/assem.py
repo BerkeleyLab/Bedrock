@@ -312,7 +312,7 @@ class I2CAssembler(i2c_assem):
         self._check_pc()
         return None
 
-    def read(self, dadr, madr, dlen, addr_bytes=1, reg_name = None):
+    def read(self, dadr, madr, dlen, addr_bytes=1, reg_name=None):
         """Add an I2C read transaction to the program.
         Params:
             int dadr : Device I2C Address

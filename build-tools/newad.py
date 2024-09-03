@@ -89,9 +89,9 @@ def generate_addresses(
         bitwidth = gch[k][0]
         register_array_size = 1 << gch[k][0]
         if (
-            gen_mirror
-            and mirror_base == -1
-            and register_array_size <= MIN_MIRROR_ARRAY_SIZE
+            gen_mirror and
+            mirror_base == -1 and
+            register_array_size <= MIN_MIRROR_ARRAY_SIZE
         ):
             mirror_base = base
             mirror_bit_len = mirror_size.bit_length()
@@ -267,9 +267,9 @@ def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror, use_yos
     # Below only applies for modules with genvar constructions
     if modname in vfile_parser.self_map:
         obuf.write(
-            "`define AUTOMATIC_map "
-            + " ".join(vfile_parser.self_map[modname] if modname in vfile_parser.self_map else [])
-            + "\n"
+            "`define AUTOMATIC_map " +
+            " ".join(vfile_parser.self_map[modname] if modname in vfile_parser.self_map else []) +
+            "\n"
         )
     if fo:
         with open(fo, "w") as fd:
