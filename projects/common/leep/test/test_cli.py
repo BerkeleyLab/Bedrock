@@ -237,9 +237,9 @@ def test_parseTransaction():
     dd = {
         # CLI string: result (reg, offset, read_size, write_vals)
         # regname                 Read from named register (str) 'regname'
-        "foo": ("foo", 0, 1, None),
+        "foo": ("foo", 0, None, None),
         # regaddr                 Read from explicit address (int) 'regaddr'
-        "0x100": (0x100, 0, 1, None),
+        "0x100": (0x100, 0, None, None),
         # regname=val             Write (int) 'val' to named register (str) 'regname'
         "foo=42": ("foo", 0, 0, 42),
         "bar=0x42": ("bar", 0, 0, 0x42),
@@ -255,9 +255,9 @@ def test_parseTransaction():
         #                         address (int) 'regaddr'
         "0x4000=1,-1,0,42,0x10": (0x4000, 0, 0, [1, -1, 0, 42, 0x10]),
         # regname+offset          Read from address = romx['regname']['base_addr'] + (int) 'offset'
-        "BINGO+100": ("BINGO", 100, 1, None),
+        "BINGO+100": ("BINGO", 100, None, None),
         # regaddr+offset          Read from address = (int) 'regaddr' + (int) 'offset'
-        "0x100+100": (0x100, 100, 1, None),
+        "0x100+100": (0x100, 100, None, None),
         # regname:size            Read (int) 'size' elements starting from address romx['regname']['base_addr']
         "_reg_:32": ("_reg_", 0, 32, None),
         # regaddr:size            Read (int) 'size' elements starting from (int) 'regaddr'

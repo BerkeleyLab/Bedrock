@@ -97,7 +97,7 @@ def parseTransaction(xact):
         reg = regstr
     if size is None:
         if wval is None:
-            size = 1
+            size = None
         else:
             size = 0
     return (reg, offset, size, wval)
