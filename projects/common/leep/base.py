@@ -26,12 +26,35 @@ def print_reg(fcn):
             regs = args[1]
             if len(regs) and isinstance(regs[0], str):
                 # it's a read operation
-                for reg in regs:
-                    print('reading register {}'.format(reg))
+                for n in range(len(regs)):
+                    reg = regs[n][0]
+                    if len(regs) > 1:
+                        offset = regs[n][1]
+                    try:
+                        reg = "from address 0x{:x}".format(reg)
+                    except ValueError:
+                        reg = "register {}".format(reg)
+                    if offset is not None and offset != 0:
+                        offsetstr = " (offset {})".format(offset)
+                    else:
+                        offsetstr = ""
+                    print('reading {}{}'.format(reg, offsetstr))
             else:
                 # it's a write operation, 'regs' is now a tuple, not str
-                for reg, val in regs:
-                    print('writing {} to register {}'.format(val, reg))
+                offset = 0
+                for n in range(len(regs)):
+                    reg, val = regs[n][:2]
+                    if len(regs) > 2:
+                        offset = regs[n][2]
+                    try:
+                        reg = "address 0x{:x}".format(reg)
+                    except ValueError:
+                        reg = "register {}".format(reg)
+                    if offset is not None and offset != 0:
+                        offsetstr = " (offset {})".format(offset)
+                    else:
+                        offsetstr = ""
+                    print('writing {} to {}{}'.format(val, reg, offsetstr))
         return fcn(*args, **kwargs)
     return wrapper
 
