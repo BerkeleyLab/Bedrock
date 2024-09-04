@@ -89,7 +89,7 @@ make -C homeless all checks
 make -C homeless/freq_demo
 
 ## leep_test
-(cd projects/common && python3 -m unittest -v)
+(cd projects/common && PYTHONPATH=../../build-tools python3 -m unittest -v)
 
 ## localbus
 make -C localbus

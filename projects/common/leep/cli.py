@@ -26,7 +26,7 @@ def _expandWriteVals(ss):
     """Convert string 'n,m,l,k,...' into list of ints [n, m, l, k, ...]
     Raise Exception if not all items separated by commas can be interpreted as integers."""
     if ',' not in ss:
-        return [_int(ss)]
+        return _int(ss)
     vals = [_int(x) for x in ss.split(',')]
     return vals
 

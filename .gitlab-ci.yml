@@ -42,7 +42,7 @@ include:
 
 leep_test:
   script:
-    - cd projects/common && python3 -m unittest -v
+    - cd projects/common && PYTHONPATH=../../build-tools python3 -m unittest -v
 
 flake8:
   stage: test
