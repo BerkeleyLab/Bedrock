@@ -202,7 +202,6 @@ class LEEPDevice(DeviceBase):
                 value = [value]
             value = numpy.array(value).astype('I')
             _log.debug('reg_write %s <- %s', name, value)
-            print(f"  value = {value}; type(value) = {type(value)}")
             for A, V in enumerate(value, base_addr+offset):
                 addrs.append(A)
                 values.append(V)
