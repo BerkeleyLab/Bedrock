@@ -198,28 +198,14 @@ class LEEPDevice(DeviceBase):
             if len(op) > 2:
                 offset = op[2]
             name, base_addr, size = self._decode(name, instance)[:3]
+            if not hasattr(value, '__len__'):
+                value = [value]
             value = numpy.array(value).astype('I')
-            if offset > 0:
-                # assert value.ndim == 0, "Writes with offset currently only support scalars."
-                _log.debug('reg_write %s <- %s', name, value)
-                # addrs.append(base_addr + offset)
-                # values.append(value)
-                for A, V in enumerate(value, base_addr+offset):
-                    addrs.append(A)
-                    values.append(V)
-            elif size > 1:
-                _log.debug('reg_write %s <- %s ...', name, value[:10])
-                # assert value.ndim == 1 and value.shape[0] == size, \
-                #    ('must write whole register', value.shape, size)
-                # array register
-                for A, V in enumerate(value, base_addr):
-                    addrs.append(A)
-                    values.append(V)
-            else:
-                assert value.ndim == 0, 'scalar register'
-                _log.debug('reg_write %s <- %s', name, value)
-                addrs.append(base_addr)
-                values.append(value)
+            _log.debug('reg_write %s <- %s', name, value)
+            print(f"  value = {value}; type(value) = {type(value)}")
+            for A, V in enumerate(value, base_addr+offset):
+                addrs.append(A)
+                values.append(V)
 
         addrs = numpy.asarray(addrs)
         values = numpy.asarray(values)
