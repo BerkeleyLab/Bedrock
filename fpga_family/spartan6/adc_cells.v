@@ -41,7 +41,9 @@ module adc_cells(
    wire        adc_iddr2_rst=1'b0;
    wire        adc_iddr2_set=1'b0;
    wire        adc_iddr2_ce=1'b1;
-   // IDDR2 primitive of sp6, refer to http://www.xilinx.com/support/documentation/sw_manuals/xilinx13_4/spartan6_hdl.pdf, page 56 for ddr_alignment
+   // IDDR2 primitive of sp6
+   // Refer to http://www.xilinx.com/support/documentation/sw_manuals/xilinx13_4/spartan6_hdl.pdf
+   // page 56 for ddr_alignment
    genvar ix;
    generate
       for (ix=0; ix<width; ix=ix+1) begin: in_cell

@@ -224,11 +224,14 @@ always @(posedge clk) begin
 	sync_d2 <= sync_d;
 
 	// Write aligned input, set-point and error signals onto file (set-point scaling test)
-	if (out_file != 0 && sync_d2 && (test_type==0 || test_type==1)) $fwrite(out_file," %d %d %d %d %d %d\n", setmp_d2, setmp_d, in_mp_d2, in_mp_d, mp_err_d, mp_err);
+	if (out_file != 0 && sync_d2 && (test_type==0 || test_type==1))
+		$fwrite(out_file," %d %d %d %d %d %d\n", setmp_d2, setmp_d, in_mp_d2, in_mp_d, mp_err_d, mp_err);
 
 	// Write aligned input and output signals onto file (feedback gain scaling test)
-	if (out_file != 0 && ~iq && (test_type==2 || test_type==3)) $fwrite(out_file," %d %d %d %d %d %d\n", setmp_d, setmp, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
-	if (out_file != 0 && ~iq && test_type==4) $fwrite(out_file," %d %d %d %d %d %d\n", in1_d, in1, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
+	if (out_file != 0 && ~iq && (test_type==2 || test_type==3))
+		$fwrite(out_file," %d %d %d %d %d %d\n", setmp_d, setmp, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
+	if (out_file != 0 && ~iq && test_type==4)
+		$fwrite(out_file," %d %d %d %d %d %d\n", in1_d, in1, out_xy_d, out_xy, m_err_scaling, p_err_scaling);
 	if (sync_d) count_syncs <= count_syncs + 1'b1;
 end
 `endif

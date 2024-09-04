@@ -40,22 +40,28 @@ module cim_12x #(
 // Snapshots double-integrator outputs at times flagged by "sample", then shifts the results out on the next twelve cycles.
 wire signed [dw-1:0] s01;  wire g01;
 wire signed [dw-1:0] s03;  wire g03;
-mon_2chan #(.dwi(16), .rwi(dw)) mon01(.clk(clk), .adcf(adca), .mcos(cosa), .msin(sina), .samp(sample), .s_in(s03), .s_out(s01), .g_in(g03), .g_out(g01), .reset(reset));
+mon_2chan #(.dwi(16), .rwi(dw)) mon01(.clk(clk), .adcf(adca), .mcos(cosa), .msin(sina),
+    .samp(sample), .s_in(s03), .s_out(s01), .g_in(g03), .g_out(g01), .reset(reset));
 
 wire signed [dw-1:0] s05;  wire g05;
-mon_2chan #(.dwi(16), .rwi(dw)) mon03(.clk(clk), .adcf(adcb), .mcos(cosa), .msin(sina), .samp(sample), .s_in(s05), .s_out(s03), .g_in(g05), .g_out(g03), .reset(reset));
+mon_2chan #(.dwi(16), .rwi(dw)) mon03(.clk(clk), .adcf(adcb), .mcos(cosa), .msin(sina),
+    .samp(sample), .s_in(s05), .s_out(s03), .g_in(g05), .g_out(g03), .reset(reset));
 
 wire signed [dw-1:0] s07;  wire g07;
-mon_2chan #(.dwi(16), .rwi(dw)) mon05(.clk(clk), .adcf(adcc), .mcos(cosa), .msin(sina), .samp(sample), .s_in(s07), .s_out(s05), .g_in(g07), .g_out(g05), .reset(reset));
+mon_2chan #(.dwi(16), .rwi(dw)) mon05(.clk(clk), .adcf(adcc), .mcos(cosa), .msin(sina),
+    .samp(sample), .s_in(s07), .s_out(s05), .g_in(g07), .g_out(g05), .reset(reset));
 
 wire signed [dw-1:0] s09;  wire g09;
-mon_2chiq #(.dwi(16), .rwi(dw)) mon07(.clk(clk), .iqd(inm),  .scale(scale), .iqs(iqs),  .samp(sample), .s_in(s09), .s_out(s07), .g_in(g09), .g_out(g07), .reset(reset));
+mon_2chiq #(.dwi(16), .rwi(dw)) mon07(.clk(clk), .iqd(inm),  .scale(scale), .iqs(iqs),
+    .samp(sample), .s_in(s09), .s_out(s07), .g_in(g09), .g_out(g07), .reset(reset));
 
 wire signed [dw-1:0] s11;  wire g11;
-mon_2chiq #(.dwi(16), .rwi(dw)) mon09(.clk(clk), .iqd(outm), .scale(scale), .iqs(iqs),  .samp(sample), .s_in(s11), .s_out(s09), .g_in(g11), .g_out(g09), .reset(reset));
+mon_2chiq #(.dwi(16), .rwi(dw)) mon09(.clk(clk), .iqd(outm), .scale(scale), .iqs(iqs),
+    .samp(sample), .s_in(s11), .s_out(s09), .g_in(g11), .g_out(g09), .reset(reset));
 
 wire signed [dw-1:0] s13;  wire g13;
-mon_2chan #(.dwi(16), .rwi(dw)) mon11(.clk(clk), .adcf(adcx), .mcos(cosb), .msin(sinb), .samp(sample), .s_in(s13), .s_out(s11), .g_in(g13), .g_out(g11), .reset(reset));
+mon_2chan #(.dwi(16), .rwi(dw)) mon11(.clk(clk), .adcf(adcx), .mcos(cosb), .msin(sinb),
+    .samp(sample), .s_in(s13), .s_out(s11), .g_in(g13), .g_out(g11), .reset(reset));
 
 // terminate the chain
 assign s13 = {dw{`FILL_BIT}};
