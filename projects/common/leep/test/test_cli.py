@@ -241,13 +241,13 @@ def test_parseTransaction():
         # regaddr                 Read from explicit address (int) 'regaddr'
         "0x100": (0x100, 0, 1, None),
         # regname=val             Write (int) 'val' to named register (str) 'regname'
-        "foo=42": ("foo", 0, 0, [42]),
-        "bar=0x42": ("bar", 0, 0, [0x42]),
-        "foo_baz=0b100": ("foo_baz", 0, 0, [0b100]),
+        "foo=42": ("foo", 0, 0, 42),
+        "bar=0x42": ("bar", 0, 0, 0x42),
+        "foo_baz=0b100": ("foo_baz", 0, 0, 0b100),
         # regaddr=val             Write (int) 'val' to explicit address (int) 'regaddr'
-        "0x123=100": (0x123, 0, 0, [100]),
-        "123=0xabc": (123, 0, 0, [0xabc]),
-        "0b1010=-10": (0b1010, 0, 0, [-10]),
+        "0x123=100": (0x123, 0, 0, 100),
+        "123=0xabc": (123, 0, 0, 0xabc),
+        "0b1010=-10": (0b1010, 0, 0, -10),
         # regname=val0,...,valN   Write (int) 'val0' through 'valN' to consecutive addresses beginning at the
         #                         address of named register (str) 'regname'
         "reg_foo=1,2,3,4,5": ("reg_foo", 0, 0, [1, 2, 3, 4, 5]),
@@ -263,12 +263,12 @@ def test_parseTransaction():
         # regaddr:size            Read (int) 'size' elements starting from (int) 'regaddr'
         "0:0xff": (0, 0, 0xff, None),
         # regname+offset=val      Write (int) 'val' to address romx['regname']['base_addr'] + (int) 'offset'
-        "bandit+0x100=5000": ("bandit", 0x100, 0, [5000]),
+        "bandit+0x100=5000": ("bandit", 0x100, 0, 5000),
         # regname+offset=val0,...,valN    Write (int) 'val0' through 'valN' to consecutive addresses beginning at
         #                                 address romx['regname']['base_addr'] + (int) 'offset'
         "status+0x20=50,40,0x30": ("status", 0x20, 0, [50, 40, 0x30]),
         # regaddr+offset=val      Write (int) 'val' to address (int) 'regaddr' + (int) 'offset'
-        "128+0xc0=-1000": (128, 0xc0, 0, [-1000]),
+        "128+0xc0=-1000": (128, 0xc0, 0, -1000),
         # regaddr+offset=val0,...,valN    Write (int) 'val0' through 'valN' to consecutive addresses beginning at
         #                                 address (int) 'regaddr'
         "0x128+0xc0=1,0,1,0,2": (0x128, 0xc0, 0, [1, 0, 1, 0, 2]),
