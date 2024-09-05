@@ -49,7 +49,7 @@ typedef struct marble_init_t {
     marble_init_byte_t pca9555_qsfp_data;   // u34
     marble_init_byte_t pca9555_misc_data;   // u39
     marble_init_byte_t adn4600_data;
-    marble_init_byte_t si570_data;
+    uint64_t si570_freq_hz;
 } marble_init_t;
 
 typedef struct ina219_info_t {
@@ -138,6 +138,8 @@ typedef struct si570_info_t {
     uint64_t rfreq;
     uint8_t hs_div;
     uint8_t n1;
+    uint64_t f_reset_hz;
+    uint64_t f_dco_hz;
     uint64_t f_out_hz;
 } si570_info_t;
 
@@ -244,12 +246,26 @@ bool set_adn4600_info(adn4600_info_t *info, marble_init_byte_t *p_data);
  */
 bool get_si570_info(si570_info_t *info);
 
+
 /**
- * Write SI570 registers
+ * Reset SI570
  * @param info pointer to si570_info_t struct
- * @param p_data pointer to marble_init_byte_t struct
  */
-bool set_si570_info(si570_info_t *info, marble_init_byte_t *p_data);
+bool reset_si570(si570_info_t *info);
+
+/**
+ * Calculate SI570 registers from si570_info, and write
+ * @param info pointer to si570_info_t struct
+ * @param f1_hz new frequency in Hz
+ */
+bool calc_si570_regs(si570_info_t *info, uint64_t f1_hz);
+
+/**
+ * Write SI570 registers from si570_info
+ * @param info pointer to si570_info_t struct
+ * @param f1_hz new frequency in Hz
+ */
+bool set_si570_regs(si570_info_t *info, uint64_t f1_hz);
 
 /**
  * Poll marble board device info including ina219, pca9555, qsfp
