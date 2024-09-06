@@ -488,10 +488,10 @@ class I2CAssembler(i2c_assem):
         if n is None:
             n = (self._pc()//32)+1  # ceil(pc/32)
         n = int(n)
-        if (n < self._pc()//32):
+        if n < self._pc()//32:
             raise I2C_Assembler_Exception(f"Cannot pad to index {n} which corresponds to an address earlier than" +
                                           " the current program counter value {self._pc()}")
-        elif (n > self._INDEX_MAX):
+        elif n > self._INDEX_MAX:
             raise I2C_Assembler_Exception(f"Program counter index {n} exceeds maximum {self._INDEX_MAX}")
         self._program += super().pad(n, self._pc())
         self._check_pc()

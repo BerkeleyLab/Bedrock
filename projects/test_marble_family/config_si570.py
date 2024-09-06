@@ -37,11 +37,11 @@ def decode_settings(mbox, verbose):
     i2c_addr = mbox[96]
     config = mbox[97]
     start_freq = int.from_bytes(bytes(mbox[98:102]), 'big')  # 4 bytes, MSB-first, unused
-    if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff) or (pcb_rev == 0xdeadbeef)):
+    if (i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff) or (pcb_rev == 0xdeadbeef):
         print("SI570 settings not configured through MMC,using default for {:s} v1.{:d}".format(board_name, marble_rev))
         start_freq = 0
         # use default values if it's a marble v1.2, v1.3 or marble_mini
-        if (marble_rev == 2 or marble_rev == 3 or board == 2):
+        if marble_rev == 2 or marble_rev == 3 or board == 2:
             i2c_addr = 0xee
             polarity = 0
             start_addr = 0x0d
@@ -50,7 +50,7 @@ def decode_settings(mbox, verbose):
             polarity = 0
             start_addr = 0x07
     # check the [7:6] bits of the config value is either 2'b01 or 2'b10, to make sure it valid
-    elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
+    elif ((config >> 6) == 1) ^ ((config >> 6) == 2):
         start_addr = 0x0d if (config & 0x02) else 0x07
         polarity = config & 0x01
     else:
@@ -166,7 +166,7 @@ def hw_write_prog(si570_addr, start_addr, reg):
 # check if the final output frequency is <= 50 ppm
 def check(fin):
     ppm = ((fin)*(1/args.new_freq) - 1.0)*1e6
-    if (abs(ppm) >= 50):
+    if abs(ppm) >= 50:
         raise ValueError('SI570 final frequency measurement is not correct, out of spec by %i ppm' % ppm)
 
 
@@ -212,7 +212,7 @@ def config_si570(addr, verbose):
     if args.new_freq:
         si570_addr, config_addr, fxtal, default = compute_si570(addr, "Measured", verbose)
         # if first measured frequency and new output frequency are < 10 ppm don't change/update
-        if (abs(((default)*(1/args.new_freq) - 1.0)*1e6) < 10):
+        if abs(((default)*(1/args.new_freq) - 1.0)*1e6) < 10:
             pass
         else:
             print("#######################################")
