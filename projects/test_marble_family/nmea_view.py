@@ -8,7 +8,7 @@ sats = []
 
 
 # helpful hints at
-# http://aprs.gids.nl/nmea/#gsv
+# https://aprs.gids.nl/nmea/#gsv
 def handle_gsv(gsv_state, a):
     global sats
     s_nmsg, s_imsg, s_nsat = gsv_state
@@ -70,7 +70,7 @@ def nmea_line(gsv_state, ll, verbose=False):
         if aa[0] == "GPGSV":
             gsv_state = handle_gsv(gsv_state, aa[1:])
         if aa[0] == "GPGGA" and len(aa) > 6:
-            # helpful hints at http://aprs.gids.nl/nmea/#gga
+            # helpful hints at https://aprs.gids.nl/nmea/#gga
             # note the weird time format: "060534.000" means
             # 06:05:34.000 Z
             # note the weird lat/lon format: "3752.6812 N" means
@@ -82,7 +82,7 @@ def nmea_line(gsv_state, ll, verbose=False):
             pl = utc_time, lat, aa[3], lon, aa[5]
             print("GPS time  %s  coordinates %.6f %s, %.6f %s" % pl)
         if aa[0] == "GPRMC" and len(aa) > 9:
-            # helpful hints at http://aprs.gids.nl/nmea/#rmc
+            # helpful hints at https://aprs.gids.nl/nmea/#rmc
             # same weird formats as above, plus date "111222" means 2022-12-11
             gt = aa[1]
             utc_time = gt[0:2] + ":" + gt[2:4] + ":" + gt[4:] + " Z"

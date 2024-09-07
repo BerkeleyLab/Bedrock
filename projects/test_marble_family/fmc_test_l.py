@@ -105,7 +105,7 @@ fmc_n = {
 
 def tobin(x, count=8):
     # Integer to binary; count is number of bits
-    # Props to W.J. van der Laan in http://code.activestate.com/recipes/219300/
+    # Props to W.J. van der Laan in https://code.activestate.com/recipes/219300/
     return list(map(lambda y: (x >> y) & 1, range(count-1, -1, -1)))
 
 

@@ -54,7 +54,7 @@ With below ADC clock domain can be set to 100MHz
 
 LMK dividers in zest_setup.py for zest are set to divide the below 1400MHz down to 100MHz [This can be changed Inside zest_setup.py .. good luck]
 For waveforms, using Si***_loader from:
-https://github.com/yetifrisstlama/Si5xx-5x7-EVV_autoloader
+https://github.com/michael-betz/Si5xx-5x7-EVV_autoloader
 ```
 python setFreq.py -p /dev/ttyUSB2 156.25e6 1400e6
 ```

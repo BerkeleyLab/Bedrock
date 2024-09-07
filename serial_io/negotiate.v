@@ -263,7 +263,7 @@ module negotiate(
 
    // 16-bit Ethernet configuration register as documented in
    // Networking Protocol Fundamentals, by James Long
-   // and http://grouper.ieee.org/groups/802/3/z/public/presentations/nov1996/RTpcs8b_sum5.pdf
+   // and https://grouper.ieee.org/groups/802/3/z/public/presentations/nov1996/RTpcs8b_sum5.pdf
    reg  FD=1;   // Full Duplex capable
    wire HD=0;   // Half Duplex capable
    wire PS1=0;  // Pause 1

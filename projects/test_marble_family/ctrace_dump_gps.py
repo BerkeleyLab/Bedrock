@@ -5,7 +5,7 @@ from datetime import datetime
 def tobin(x, count=8):
     # Integer to binary; count is number of bits
     # Some credit to W.J. van der Laan in
-    # http://code.activestate.com/recipes/219300/
+    # https://code.activestate.com/recipes/219300/
     return [(x >> y) & 1 for y in range(count-1, -1, -1)]
 
 

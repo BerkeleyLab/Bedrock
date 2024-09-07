@@ -33,7 +33,7 @@ initial begin
 end
 
 // four-bit Gray code counter on the input signal
-// http://en.wikipedia.org/wiki/Gray_code
+// https://en.wikipedia.org/wiki/Gray_code
 localparam gw=4;
 reg [gw-1:0] gray1=0;
 

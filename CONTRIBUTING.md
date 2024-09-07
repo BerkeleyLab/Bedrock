@@ -121,7 +121,7 @@ We're not the first group to deal with this topic. The following are
 useful resources:
 
 1. [Linux kernel coding style guide](https://www.kernel.org/doc/html/v4.10/process/coding-style.html) many of the concepts it discusses have general applicability.
-2. [Google python guide](http://google.github.io/styleguide/pyguide.html) and [PEP8](https://www.python.org/dev/peps/pep-0008/)
+2. [Google python guide](https://google.github.io/styleguide/pyguide.html) and [PEP8](https://www.python.org/dev/peps/pep-0008/)
 3. [GNU Coding Standards: Makefile Conventions](https://www.gnu.org/prep/standards/html_node/Makefile-Conventions.html)
 
 Please spell-check your code, comments, and documentation.

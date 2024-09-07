@@ -1,5 +1,5 @@
 // Simplest possible Gray code counter with parameterized width
-// http://en.wikipedia.org/wiki/Gray_code
+// https://en.wikipedia.org/wiki/Gray_code
 module simplest_gray #(
 	parameter gw=4
 ) (

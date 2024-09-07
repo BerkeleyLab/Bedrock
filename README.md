@@ -35,7 +35,7 @@ A few comments regarding the codebase
 We are on an active lookout for other methods, if they're actually better for us.
 3. iverilog is used for simulation. We are slowly starting to use [Verilator](https://www.veripool.org/wiki/verilator) as well
 (see badger)
-4. Xilinx tools are used for synthesis, and starting to support [YoSys](http://www.clifford.at/yosys/) (again see badger)
+4. Xilinx tools are used for synthesis, and starting to support [YoSys](https://yosyshq.net/yosys/) (again see badger)
 5. This repository is connected to Gitlab CI. All simulation based tests run
 automatically upon every commit on the continuous integration server. This helps
 us move faster (without breaking things).  A helpful subset of those tests

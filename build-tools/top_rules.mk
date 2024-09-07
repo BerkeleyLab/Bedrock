@@ -218,7 +218,7 @@ EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
 COMMA := ,
 
-# http://www.graphviz.org/content/dot-language
+# https://graphviz.org/doc/info/lang.html
 # apt-get install graphviz
 %.ps:   %.dot
 	dot -Tps $< -o $@

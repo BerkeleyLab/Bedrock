@@ -208,7 +208,7 @@ def make_html(fname, param_list, port_list):
         print(hdata["implement_html"] + "\n")
     if True:
         print("<p>")
-        print("A <a href=\"http://gtkwave.sourceforge.net/\">GTKWave</a>-generated")
+        print("A <a href=\"https://gtkwave.sourceforge.net/\">GTKWave</a>-generated")
         print("timing diagram showing {} is shown here:"
               .format(hdata["timing_html"]))
         print("<p><img src=\"{}_timing.png\" alt=\"timing diagram\">\n"
@@ -319,7 +319,7 @@ def make_rst(fname, param_list, port_list, mod_comment_list, with_timing=None):
         print("")
         print("A `GTKWave`_-generated timing diagram is shown below:")
         print("")
-        print(".. _`GTKWave`: http://gtkwave.sourceforge.net/")
+        print(".. _`GTKWave`: https://gtkwave.sourceforge.net/")
         print("")
         print(".. _fig:{}_timing:".format(fbase))
         print(".. figure:: {}_timing.png".format(fbase))

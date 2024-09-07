@@ -2,7 +2,7 @@
 
 Many bedrock components revolve around or depend on an on-chip
 [localbus](https://en.wikipedia.org/wiki/Local_bus).
-Speficially a stripped-down lightweight bus reminiscent
+Specifically a stripped-down lightweight bus reminiscent
 of a VME A24 bus.
 
 In a given clock domain, expect

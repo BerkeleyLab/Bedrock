@@ -139,7 +139,7 @@ Demonstrating both Packet Badger functionality, and the test framework's
 ability to attach the simulation to the host's Ethernet subsystem.
 
 Your development machine needs to provide a traditional unix-y environment,
-e.g., make, cc, python, awk, cmp.  Also some version of [Icarus Verilog](http://iverilog.icarus.com/); see [status.md](status.md) for more details.
+e.g., make, cc, python, awk, cmp.  Also some version of [Icarus Verilog](https://steveicarus.github.io/iverilog/); see [status.md](status.md) for more details.
 
 In one shell session (Linux terminal), try:
 

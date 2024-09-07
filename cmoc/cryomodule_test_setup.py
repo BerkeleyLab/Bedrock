@@ -3,7 +3,7 @@ import sys
 from math import pi, sqrt, log
 from numpy import exp as cexp
 from numpy import ceil
-# http://stackoverflow.com/questions/14132789/python-relative-imports-for-the-billionth-time
+# https://stackoverflow.com/questions/14132789/relative-imports-for-the-billionth-time
 # Leaves me with only one choice ... :(
 # Since I don't want to modify shell variables
 sys.path.append(

@@ -12,7 +12,7 @@ from grok_iam import check_row
 
 def tobin(x, count=8):
     # Integer to binary; count is number of bits
-    # Credit to W.J. van der Laan in http://code.activestate.com/recipes/219300/
+    # Credit to W.J. van der Laan in https://code.activestate.com/recipes/219300/
     return "".join([str((x >> y) & 1) for y in range(count-1, -1, -1)])
 
 
