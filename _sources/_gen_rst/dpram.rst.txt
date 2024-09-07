@@ -91,7 +91,7 @@ Timing Diagram
 
 A `GTKWave`_-generated timing diagram is shown below:
 
-.. _`GTKWave`: http://gtkwave.sourceforge.net/
+.. _`GTKWave`: https://gtkwave.sourceforge.net/
 
 .. _fig:dpram_timing:
 .. figure:: dpram_timing.png

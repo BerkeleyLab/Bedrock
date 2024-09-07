@@ -115,7 +115,7 @@ Timing Diagram
 
 A `GTKWave`_-generated timing diagram is shown below:
 
-.. _`GTKWave`: http://gtkwave.sourceforge.net/
+.. _`GTKWave`: https://gtkwave.sourceforge.net/
 
 .. _fig:biquad_timing:
 .. figure:: biquad_timing.png

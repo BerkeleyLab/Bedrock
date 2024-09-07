@@ -133,7 +133,7 @@ Timing Diagram
 
 A `GTKWave`_-generated timing diagram is shown below:
 
-.. _`GTKWave`: http://gtkwave.sourceforge.net/
+.. _`GTKWave`: https://gtkwave.sourceforge.net/
 
 .. _fig:xy_pi_clip_timing:
 .. figure:: xy_pi_clip_timing.png

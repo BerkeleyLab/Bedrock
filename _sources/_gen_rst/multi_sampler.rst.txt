@@ -119,7 +119,7 @@ Timing Diagram
 
 A `GTKWave`_-generated timing diagram is shown below:
 
-.. _`GTKWave`: http://gtkwave.sourceforge.net/
+.. _`GTKWave`: https://gtkwave.sourceforge.net/
 
 .. _fig:multi_sampler_timing:
 .. figure:: multi_sampler_timing.png

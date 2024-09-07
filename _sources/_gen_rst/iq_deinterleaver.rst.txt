@@ -87,7 +87,7 @@ Timing Diagram
 
 A `GTKWave`_-generated timing diagram is shown below:
 
-.. _`GTKWave`: http://gtkwave.sourceforge.net/
+.. _`GTKWave`: https://gtkwave.sourceforge.net/
 
 .. _fig:iq_deinterleaver_timing:
 .. figure:: iq_deinterleaver_timing.png
