@@ -19,7 +19,7 @@ CCSPECS = -specs=picolibc.specs
 CLFLAGS = -march=rv32imc -mabi=ilp32 -ffreestanding -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) -nostartfiles $(CCSPECS)
 CFLAGS  = -std=c99 -Os -Wall -Wextra -Wundef -Wstrict-prototypes $(CLFLAGS)
 LDFLAGS = $(CLFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,--defsym,BLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE),--gc-sections,--no-relax -T$(filter %.lds, $^)
-# --no-relax is a workaround for https://github.com/riscv/riscv-binutils-gdb/issues/144
+# --no-relax is a workaround for https://github.com/riscvarchive/riscv-binutils-gdb/issues/144
 # --verbose=3,-M for verbose linker output / debugging
 
 %.lst: %.elf

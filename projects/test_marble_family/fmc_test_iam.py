@@ -1,5 +1,5 @@
 # PoC Marble FMC tester based on IAM Electronic FPGA Mezzanine Card (FMC) Loopback Module
-# https://www.iamelectronic.com/shop/produkt/fpga-mezzanine-card-fmc-loopback-module
+# https://www.iamelectronic.com/shop/produkt/fpga-mezzanine-card-fmc-loopback-module/
 # Still doesn't cover LA_1 to GBTCLK0_M2C or LA_18 to GBTCLK1_M2C (HPC)
 
 import sys

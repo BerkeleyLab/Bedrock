@@ -15,7 +15,7 @@ set_property -dict {PACKAGE_PIN U15 IOSTANDARD HSTL_I_18} [get_ports {RGMII_TXD[
 set_property -dict {PACKAGE_PIN T18 IOSTANDARD HSTL_I_18} [get_ports {RGMII_TXD[2]}]
 set_property -dict {PACKAGE_PIN T17 IOSTANDARD HSTL_I_18} [get_ports {RGMII_TXD[3]}]
 
-# https://www.xilinx.com/support/answers/53092.html
+# https://adaptivesupport.amd.com/s/article/53092
 set_property IOB TRUE [get_ports {RGMII_TXD[*]}]
 set_property IOB TRUE [get_ports RGMII_TX_CTRL]
 set_property IOB TRUE [get_ports {RGMII_RXD[*]}]

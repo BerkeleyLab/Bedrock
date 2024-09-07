@@ -6,7 +6,7 @@
 ////  Authors: Richard Herveille (richard@asics.ws) www.asics.ws ////
 ////           John Sheahan (jrsheahan@optushome.com.au)         ////
 ////                                                             ////
-////  Downloaded from: https://www.opencores.org/projects/i2c/   ////
+////  Downloaded from: https://opencores.org/projects/i2c/       ////
 ////                                                             ////
 /////////////////////////////////////////////////////////////////////
 ////                                                             ////

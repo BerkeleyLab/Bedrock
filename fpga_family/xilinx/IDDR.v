@@ -1,6 +1,6 @@
 // trivial substitute for xilinx unisim models
 // for more info refer to
-// https://www.xilinx.com/support/documentation/user_guides/ug471_7Series_SelectIO.pdf
+// https://docs.amd.com/go/en-US/ug471_7Series_SelectIO
 
 module IDDR #(
     parameter DDR_CLK_EDGE="SAME_EDGE_PIPELINED"

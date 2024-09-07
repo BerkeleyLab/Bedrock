@@ -17,7 +17,7 @@
 # Same gcc version, in fact!  Slightly different configuration.
 #
 # I tried to peek at
-#   https://github.com/riscv/riscv-gnu-toolchain
+#   https://github.com/riscv-collab/riscv-gnu-toolchain
 # but that's kind of obfuscated.
 #   http://www.ifp.illinois.edu/~nakazato/tips/xgcc.html
 # is more to-the-point, but out-of-date (2007).

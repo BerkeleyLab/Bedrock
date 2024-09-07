@@ -1,5 +1,5 @@
 # Mapping functions to support CERN's OHWR FMC Carrier Tester board
-# https://www.ohwr.org/project/fmc-conn-tester/wikis/home
+# https://ohwr.org/project/fmc-conn-tester/-/wikis/home
 # a703f7f70230f579a87bd9c17df9f9591a629c91d9f8a5fc84de695a3bcf9ae3  EDA-02327-V1-0_sch.pdf
 # specifically its connectivity between the LA bank and I2C port expanders
 

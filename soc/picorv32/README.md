@@ -26,7 +26,7 @@ An open-source system on a chip based on the [PicoRV32](https://github.com/Yosys
    * build and install `picolibc` into `/usr/local/picolibc` following its building [instructions](https://github.com/picolibc/picolibc/blob/main/doc/build.md):
 ```bash
 mkdir -p /usr/local/picolibc
-git clone https://github.com/picolibc/picolibc.git
+git clone https://github.com/picolibc/picolibc
 cd picolibc
 mkdir build-riscv64-unknown-elf
 cd build-riscv64-unknown-elf
@@ -78,7 +78,7 @@ Within each project directory, use `make` to synthesize a bitstream file.
 
 Use `make system_config` to program the FPGA with a bitstream file, using `xc3sprog` or
 Digilent Adept2, which is available from
-[digilent](https://reference.digilentinc.com/reference/software/adept/start?redirect=1#software_downloads).
+[digilent](https://digilent.com/reference/software/adept/start).
 
 ## Reload CPU program without re-synthesizing
 

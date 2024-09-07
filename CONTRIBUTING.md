@@ -105,7 +105,7 @@ a git commit ID (or similar) instead.
 PDF and object files often take extra effort to make reproducible.
 
 FPGA bitfiles are not typically shown to be reproducible, but Xilinx
-[acknowledges](https://support.xilinx.com/s/article/61599) that is a
+[acknowledges](https://adaptivesupport.amd.com/s/article/61599) that is a
 reasonable goal (they call it "repeatable").
 Our toolchain has demonstrated this working in at least couple of cases.
 
@@ -164,7 +164,7 @@ to represent logical indentation level has advantages; people's setting of tab
 width can systematically and locally adjust the visual indentation level. Just
 like Wikipedia's English vs. American spelling policy, don't gratuitously
 change the tab vs. spaces convention of a file.  See also
-[Silicon Valley - S03E06 - Tabs versus Spaces](https://www.youtube.com/watch?v=SsoOG6ZeyUI) (2:50).
+[Silicon Valley - S03E06 - Tabs versus Spaces](https://www.youtube.com/watch?v=cowtgmZuai0) (2:01).
 
 Special case for python files:
   No tabs, per [PEP8](https://www.python.org/dev/peps/pep-0008/)
