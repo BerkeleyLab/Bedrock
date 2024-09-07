@@ -26,7 +26,7 @@ set_property -dict {PACKAGE_PIN K26 IOSTANDARD LVCMOS25} [get_ports {GMII_TXD[5]
 set_property -dict {PACKAGE_PIN L30 IOSTANDARD LVCMOS25} [get_ports {GMII_TXD[6]}]
 set_property -dict {PACKAGE_PIN J28 IOSTANDARD LVCMOS25} [get_ports {GMII_TXD[7]}]
 
-# https://adaptivesupport.amd.com/s/article/53092
+# https://adaptivesupport.amd.com/s/article/53092?language=en_US
 set_property IOB TRUE [get_ports GMII_TXD[*]]
 set_property IOB TRUE [get_ports GMII_TX_EN]
 set_property IOB TRUE [get_ports GMII_RXD[*]]

@@ -20,6 +20,7 @@
 #   https://github.com/riscv-collab/riscv-gnu-toolchain
 # but that's kind of obfuscated.
 #   http://www.ifp.illinois.edu/~nakazato/tips/xgcc.html
+#   (link is dead, but document can be found at archive.org)
 # is more to-the-point, but out-of-date (2007).
 # The numbered flow below is straight from nakazato.
 # This script is meant to be as short, sweet, and concrete as possible.

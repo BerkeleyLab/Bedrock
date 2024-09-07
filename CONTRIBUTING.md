@@ -105,7 +105,7 @@ a git commit ID (or similar) instead.
 PDF and object files often take extra effort to make reproducible.
 
 FPGA bitfiles are not typically shown to be reproducible, but Xilinx
-[acknowledges](https://adaptivesupport.amd.com/s/article/61599) that is a
+[acknowledges](https://adaptivesupport.amd.com/s/article/61599?language=en_US) that is a
 reasonable goal (they call it "repeatable").
 Our toolchain has demonstrated this working in at least couple of cases.
 
