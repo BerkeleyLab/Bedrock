@@ -41,10 +41,9 @@ def ponder_int(s):
                 # stderr.write('p, pv, o = %s, %d, %d\n' % (p, pv, o))
                 return pv - o
             else:
-                stderr.write('ERROR: parameter %s not found?\n' % p)
+                stderr.write('ERROR: parameter %s not found? (%s)\n' % (p, s))
         else:
-            stderr.write("ERROR: Couldn't" + ' understand "%s", using 31\n' %
-                         s)
+            stderr.write("ERROR: Couldn't" + ' understand "%s", using 31\n' % s)
     return r
 
 
@@ -149,6 +148,10 @@ for line in f.read().split('\n'):
             memorize(m2.group)
     if "input" in line:
         m2 = re.search(r"\binput\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", line)
+        if m2:
+            memorize(m2.group)
+    if "output" in line:
+        m2 = re.search(r"\boutput\s+(signed)?\s*\[([^:]+):0\]\s*(\w+)", line)
         if m2:
             memorize(m2.group)
     if any(x in line for x in ["parameter", "localparam"]):
