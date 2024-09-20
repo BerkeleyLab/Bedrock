@@ -20,4 +20,19 @@ reg sync2_clk2=0;
 always @(posedge clk2) sync2_clk2 <= sync1_clk2;
 assign flagout_clk2 = sync2_clk2 ^ sync1_clk2;
 
+// Step 4: (simulation-only) complain if this module is abused
+// Too many people wire data_xdomain's .gate_in(1'b1) without understanding
+// how the logic is supposed to work.
+`ifdef SIMULATE
+reg old_flagin=0, warning_sent=0;
+always @(posedge clk1) begin
+	old_flagin <= flagin_clk1;
+	if (flagin_clk1 & old_flagin & ~warning_sent) begin
+		// Don't actually crash, at least not for now.
+		$display("XXXX  Warning: flag_xdomain module abuse in %m  XXXX");
+		warning_sent <= 1;
+	end
+end
+`endif
+
 endmodule
