@@ -103,7 +103,22 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">20</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk2</span><span class="p">)</span><span class="w"> </span><span class="n">sync2_clk2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">sync1_clk2</span><span class="p">;</span>
 <span class="linenos">21</span><span class="k">assign</span><span class="w"> </span><span class="n">flagout_clk2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sync2_clk2</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">sync1_clk2</span><span class="p">;</span>
 <span class="linenos">22</span>
-<span class="linenos">23</span><span class="k">endmodule</span>
+<span class="linenos">23</span><span class="c1">// Step 4: (simulation-only) complain if this module is abused</span>
+<span class="linenos">24</span><span class="c1">// Too many people wire data_xdomain&#39;s .gate_in(1&#39;b1) without understanding</span>
+<span class="linenos">25</span><span class="c1">// how the logic is supposed to work.</span>
+<span class="linenos">26</span><span class="no">`ifdef</span><span class="w"> </span><span class="n">SIMULATE</span>
+<span class="linenos">27</span><span class="kt">reg</span><span class="w"> </span><span class="n">old_flagin</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">warning_sent</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">28</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk1</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">29</span><span class="w">     </span><span class="n">old_flagin</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">flagin_clk1</span><span class="p">;</span>
+<span class="linenos">30</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">flagin_clk1</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">old_flagin</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">warning_sent</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">31</span><span class="w">             </span><span class="c1">// Don&#39;t actually crash, at least not for now.</span>
+<span class="linenos">32</span><span class="w">             </span><span class="nb">$display</span><span class="p">(</span><span class="s">&quot;XXXX  Warning: flag_xdomain module abuse in %m  XXXX&quot;</span><span class="p">);</span>
+<span class="linenos">33</span><span class="w">             </span><span class="n">warning_sent</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span>
+<span class="linenos">34</span><span class="w">     </span><span class="k">end</span>
+<span class="linenos">35</span><span class="k">end</span>
+<span class="linenos">36</span><span class="no">`endif</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span><span class="k">endmodule</span>
 </pre></div>
 </div>
 </section>
