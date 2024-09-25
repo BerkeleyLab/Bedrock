@@ -113,8 +113,8 @@ module chitchat_txrx_wrap_tb;
       if (tx_transmit_en)
          val_cnt <= val_cnt + 1;
    end
-   assign tx_valid0 = (val_cnt!=0 & (val_cnt % valid_period)==0);
-   assign tx_valid1 = (val_cnt!=0 & (val_cnt % valid_period)==5);
+   assign tx_valid0 = (val_cnt!=0) & ((val_cnt % valid_period)==0) & tx_transmit_en;
+   assign tx_valid1 = (val_cnt!=0) & ((val_cnt % valid_period)==5) & tx_transmit_en;
 
 
    reg  [7:0]  tx_data=0;
