@@ -32,6 +32,8 @@ CLEAN_DIRS += _xilinx
 CLEAN_DIRS += ./.Xil
 CLEAN_DIRS += ./obj_dir
 
+VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
+
 vpath %.v $(DSP_DIR)
 
 include $(BS_HARDWARE_DIR)/rules.mk

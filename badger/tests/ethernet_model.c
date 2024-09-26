@@ -62,7 +62,7 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 	static int sleepctr=0;
 	static int sleepmax=1;
 	char in_txt[15], out_txt[15];
-	int ethernet_model_debug = 0;  /* adjustable */
+	const int ethernet_model_debug = 0;  /* adjustable */
 
 	if (out_valid) {
 		sprintf(out_txt, "0x%2.2x", (unsigned int)(out_octet&0xff));

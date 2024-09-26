@@ -1,6 +1,7 @@
 include ../dir_list.mk
 
 vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BADGER_DIR)
+vpath %.c ../badger/tests
 
 .PHONY: all
 all: targets
@@ -56,7 +57,12 @@ $(AUTOGEN_DIR)/config_romx.v:
 
 VFLAGS_DEP += -y $(BADGER_DIR)
 
-cryomodule_badger_tb.v: $(RTEFI_V) $(AUTOGEN_DIR)/config_romx.v cordicg_b22.v cryomodule_auto
+VFLAGS_cryomodule_badger_tb = -m ./tap-vpi
+
+cryomodule_badger_tb: $(RTEFI_V) $(AUTOGEN_DIR)/config_romx.v cordicg_b22.v cryomodule_auto tap-vpi.vpi
+
+CFLAGS_tap-vpi.o = $(VPI_CFLAGS) -D_POSIX_C_SOURCE=200809L
+tap-vpi.vpi: ethernet_model.o tap_alloc.o crc32.o
 
 CLEAN += $(RTEFI_CLEAN)
 
@@ -82,6 +88,7 @@ endif
 # endif
 
 CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd
+CLEAN += *.o tap-vpi.vpi
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cryomodule_in.dat cryomodule_p.dat cryomodule.dat $(RTEFI_CLEAN)
 CLEAN_DIRS += _xilinx
 include $(BUILD_DIR)/bottom_rules.mk

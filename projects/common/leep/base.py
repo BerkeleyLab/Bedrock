@@ -26,12 +26,35 @@ def print_reg(fcn):
             regs = args[1]
             if len(regs) and isinstance(regs[0], str):
                 # it's a read operation
-                for reg in regs:
-                    print('reading register {}'.format(reg))
+                for n in range(len(regs)):
+                    reg = regs[n][0]
+                    if len(regs) > 1:
+                        offset = regs[n][1]
+                    try:
+                        reg = "from address 0x{:x}".format(reg)
+                    except ValueError:
+                        reg = "register {}".format(reg)
+                    if offset is not None and offset != 0:
+                        offsetstr = " (offset {})".format(offset)
+                    else:
+                        offsetstr = ""
+                    print('reading {}{}'.format(reg, offsetstr))
             else:
                 # it's a write operation, 'regs' is now a tuple, not str
-                for reg, val in regs:
-                    print('writing {} to register {}'.format(val, reg))
+                offset = 0
+                for n in range(len(regs)):
+                    reg, val = regs[n][:2]
+                    if len(regs) > 2:
+                        offset = regs[n][2]
+                    try:
+                        reg = "address 0x{:x}".format(reg)
+                    except ValueError:
+                        reg = "register {}".format(reg)
+                    if offset is not None and offset != 0:
+                        offsetstr = " (offset {})".format(offset)
+                    else:
+                        offsetstr = ""
+                    print('writing {} to {}{}'.format(val, reg, offsetstr))
         return fcn(*args, **kwargs)
     return wrapper
 
@@ -113,9 +136,9 @@ class DeviceBase(object):
         # build a regexp
         # from a list of name fragments
         fragments = self.instance + instance + [name]
-        # match when consecutive fragments are seperated by
+        # match when consecutive fragments are separated by
         #  1. a single '_'.  ['A', 'B'] matches 'A_B'.
-        #  2. two '_' with anything inbetween.  'A_blah_B' or 'A_x_y_z_B'.
+        #  2. two '_' with anything in between.  'A_blah_B' or 'A_x_y_z_B'.
         regx = r'_(?:.*_)?'.join([re.escape(str(i)) for i in fragments])
         R = re.compile('^.*%s$' % regx)
 
@@ -200,7 +223,7 @@ class DeviceBase(object):
 
         ;param bool tag: Whether to use the tag mechanism to wait for a update
         :param float timeout: How long to wait for an acquisition.
-                              Seperate from the communications timeout.
+                              Separate from the communications timeout.
         :param list instance: List of instance identifiers.
         """
         raise NotImplementedError

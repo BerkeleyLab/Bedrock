@@ -1,6 +1,6 @@
 // DAC3283 Dual-Channel, 16-Bit, 800 MSPS, Digital-to-Analog Converter
 // LVDS PHY interface
-// [1]: http://www.ti.com/lit/ds/symlink/dac3283.pdf
+// [1]: https://www.ti.com/lit/ds/symlink/dac3283.pdf
 
 module dac3283 #(
     parameter [7:0] BASE_ADDR = 8'h0,

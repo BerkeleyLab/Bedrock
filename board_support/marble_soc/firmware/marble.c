@@ -1,21 +1,59 @@
 #include <stdbool.h>
-// printf() here uses %b format, not compatible with stdio
-#include "printf.h"
-#include "print.h"
 #include "i2c_soft.h"
-#include "marble.h"
 #include "sfr.h"
 #include "xadc.h"
+#include "timer.h"
+#include "localbus.h"
 #include "settings.h"
+#include "print.h"
+#ifdef NONSTD_PRINTF
+    #include "printf.h"
+#else
+    #include <stdio.h>
+#endif
+#include "marble.h"
 
-t_ina219_conf ina219_conf;
+marble_dev_t marble = {
+    .variant = MARBLE_VAR_UNKNOWN,
+    .pca9555_qsfp ={
+        .i2c_mux_sel = I2C_SEL_APPL, .i2c_addr = I2C_ADR_PCA9555_QSFP, .refdes = "U34", .name="QSFP"},
+    .pca9555_misc ={
+        .i2c_mux_sel = I2C_SEL_APPL, .i2c_addr = I2C_ADR_PCA9555_MISC, .refdes = "U39", .name="MISC"},
+    .ina219_12v = {
+        .i2c_mux_sel = I2C_SEL_APPL, .i2c_addr = I2C_ADR_INA219_12V, .refdes = "U57", .name="12V",
+        .rshunt_mOhm = 27, .current_lsb_uA = 100},
+    .ina219_fmc1 = {
+        .i2c_mux_sel = I2C_SEL_APPL, .i2c_addr = I2C_ADR_INA219_FMC1, .refdes = "U17", .name="FMC1",
+        .rshunt_mOhm = 82, .current_lsb_uA = 10},
+    .ina219_fmc2 = {
+        .i2c_mux_sel = I2C_SEL_APPL, .i2c_addr = I2C_ADR_INA219_FMC2, .refdes = "U32", .name="FMC2",
+        .rshunt_mOhm = 82, .current_lsb_uA = 10},
+    .qsfp1 = {
+        .module_present = false, .page_select = 0,
+        .i2c_mux_sel=I2C_SEL_QSFP1, .i2c_addr=I2C_ADR_QSFP},
+    .qsfp2 = {
+        .module_present = false, .page_select = 0,
+        .i2c_mux_sel = I2C_SEL_QSFP2, .i2c_addr = I2C_ADR_QSFP},
+    .adn4600 = {
+        .i2c_mux_sel = I2C_SEL_CLK, .i2c_addr = I2C_ADR_ADN4600},
+    .si570 = {
+        .f_reset_hz = 0, .rfreq = 0ULL,
+        .i2c_mux_sel = I2C_SEL_APPL, .i2c_addr = I2C_ADR_SI570_NBB}
+};
 
-uint8_t i2c_mux_set( uint8_t ch ){
-    return i2c_write_regs( I2C_ADR_PCA9548, ch, 0, 0 );
+static bool marble_i2c_write(uint8_t i2c_addr, uint8_t reg_addr, const uint8_t *data, uint16_t len) {
+    return i2c_write_regs(i2c_addr, reg_addr, (uint8_t *)data, len);
 }
 
-static uint16_t reorder_bytes(uint16_t a)
-{
+static bool marble_i2c_read(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *data, uint16_t len) {
+    return i2c_read_regs(i2c_addr, reg_addr, data, len);
+}
+
+bool marble_i2c_mux_set( uint8_t ch ) {
+    return i2c_write_regs(I2C_ADR_PCA9548, ch, 0, 0);
+}
+
+static uint16_t reorder_bytes(uint16_t a) {
 	uint16_t ret = ((a >> 8) & 0xff) | ((a & 0xff) << 8);
 	return ret;
 }
@@ -56,202 +94,396 @@ bool i2c_write_regmap_word(uint8_t i2c_addr, t_reg16 *regmap, size_t len) {
     return ret;
 }
 
-bool init_i2c_app_devices(uint8_t *ina219_addr, size_t len) {
-    bool ret = true;
-    ret &= i2c_mux_set(I2C_SEL_APP);
+void get_qsfp_info(qsfp_info_t *qsfp_param) {
+    unsigned short i=0;
+    unsigned char buf[8];
 
-    // ----------------------------- INA219 -----------------------------
-    // VBUS_MAX = 12V
-    // VSHUNT_MAX = 0.08    (PGA = /8, +-320mV @ config=0x399f)
-    // RSHUNT = 0.082       ( 1/3 for I2C_ADR_INA219_12V )
-    // 1. Determine max current
-    //   MaxPossible_I = VSHUNT_MAX / RSHUNT = 0.96A
-    // 2. Determine max expected current at 12V
-    //   MaxExpected_I = 0.25A    (700mA @ VSS1P8V, 450mA @ VSS3P3V, 150mA @ VPP1P8V)
-    // 3. Calculate possible range of LSBs (Min = 15-bit, Max = 12-bit)
-    //   MinimumLSB = MaxExpected_I/32767 = 7.63e-6     (7.6uA per bit)
-    //   MaximumLSB = MaxExpected_I/4096  = 61.0e-5      ( 61uA per bit)
-    // 4. Choose an LSB between the min and max values
-    //    (Preferably a roundish number close to MinLSB)
-    //   CurrentLSB = 1e-5 A (10uA per bit)
-    // 5. Compute the calibration register
-    //   Cal = trunc (0.04096 / (CurrentLSB * RSHUNT)) = 49950 (0xc31e)
-    // 6. Calculate the power LSB
-    //   PowerLSB = 20 * CurrentLSB = 2e-4 (200uW per bit)
-    // 7. Compute the maximum current and shunt voltage values before overflow
-    //   Max_Current = CurrentLSB * 32767 = 0.32767 A before overflow
-    //   Max_Current_Before_Overflow = min(Max_Current, MaxPossible_I)
-    //   Max_ShuntVoltage = Max_Current_Before_Overflow * RSHUNT = 0.02687V
-    //   Max_ShuntVoltage_Before_Overflow = min(Max_ShuntVoltage, VSHUNT_MAX)
-    // 8. Compute the Maximum Power
-    //   MaximumPower = Max_Current_Before_Overflow * VBUS_MAX = 0.328 * 12V = 3.9W
-    t_reg16 ina219_regmap[] = {
-        {0, 0x399f},
-        {5, 0xc31e}  // cal
-    };
-    for (size_t ix=0; ix<len; ix++) {
-        ret &= i2c_write_regmap_word(
-                ina219_addr[ix], ina219_regmap,
-                sizeof(ina219_regmap) / sizeof(ina219_regmap[0]));
+    marble_i2c_mux_set(qsfp_param->i2c_mux_sel);
+   /* Map upper memory page 00h to bytes 128-255*/
+    marble_i2c_write(qsfp_param->i2c_addr, 127, &qsfp_param->page_select, 1);
+
+    marble_i2c_read(qsfp_param->i2c_addr, 148, qsfp_param->vendor_name, 16);
+    marble_i2c_read(qsfp_param->i2c_addr, 168, qsfp_param->part_num, 16);
+    marble_i2c_read(qsfp_param->i2c_addr, 196, qsfp_param->serial_num, 16);
+
+    marble_i2c_read(qsfp_param->i2c_addr, 3, &qsfp_param->chan_stat_los, 1);
+    marble_i2c_read(qsfp_param->i2c_addr, 22, buf, 2);
+    qsfp_param->temperature = (uint16_t)(buf[0] << 8 | buf[1]) >> 8;  // C
+    marble_i2c_read(qsfp_param->i2c_addr, 26, buf, 2);
+    qsfp_param->voltage = (int16_t)(buf[0] << 8 | buf[1]) / 10;  // mV
+    marble_i2c_read(qsfp_param->i2c_addr, 42, buf, 8);
+    for (i=0; i < 4; i++) {
+        qsfp_param->bias_current[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) * 2;  // microA
     }
-    ina219_conf.current_lsb_uA = 10;
-    ina219_conf.power_lsb_uW = 200;
-
-    return ret;
-}
-
-bool init_i2c_marblemini_sfp(void) {
-    bool ret = true;
-    ret &= i2c_mux_set(I2C_SEL_APP);
-    // ----------------------------- PCA9555 -----------------------------
-    // U34
-    // P0[7:0] = [[LOS, DEF0, TX_DIS, TX_FAULT] for SFP_4,1]
-    // P1[7:0] = [[LOS, DEF0, TX_DIS, TX_FAULT] for SFP_2,3]
-    t_reg8 pca9555_u34_regmap[] = {
-        {2, 0x20},  //enable TX1
-        {3, 0x22},  //disable TX
-        {4, 0},
-        {5, 0},
-        {6, 0xdd},
-        {7, 0xdd}
-    };
-    // U39
-    // P0[7:4] = CFG_WP_B, THERM, FANFAIL, ALERT
-    // P0[3:0] = EN_CON_JTAG, EN_USB_JTAG, NC, SI570_OE
-    // P1[7:4] = SFP1_RS, SFP1_RS, SFP1_RS, SFP1_RS,
-    // P1[3:0] = LD11, LD12, NC, NC
-    t_reg8 pca9555_u39_regmap[] = {
-        {2, 0xff},  // LED on
-        {3, 0xff},
-        {4, 0},
-        {5, 0x0c},  // invert LD polarity
-        {6, 0x7c},  // 0x70?
-        {7, 0x03}
-    };
-
-    ret &= i2c_write_regmap_byte(
-            I2C_ADR_PCA9555_SFP, pca9555_u34_regmap,
-            sizeof(pca9555_u34_regmap) / sizeof(pca9555_u34_regmap[0]));
-    ret &= i2c_write_regmap_byte(
-            I2C_ADR_PCA9555_MISC, pca9555_u39_regmap,
-            sizeof(pca9555_u39_regmap) / sizeof(pca9555_u39_regmap[0]));
-    return ret;
-}
-
-bool get_ina219_data(uint8_t i2c_addr, t_ina219_data *data) {
-    bool ret = true;
-    uint16_t regs[4];
-
-    for (size_t i=1; i<5; i++) {
-        ret &= i2c_read_word(i2c_addr, i, regs+i-1);
+    marble_i2c_read(qsfp_param->i2c_addr, 50, buf, 8);
+    for (i=0; i < 4; i++) {
+        qsfp_param->tx_power[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) / 10; // microW
     }
-    data->vshunt_uV = (int16_t)regs[0] * 10;
-    data->vbus_mV = (regs[1] >> 3) * 4;
-    data->power_uW = regs[2] * ina219_conf.power_lsb_uW;
-    data->curr_uA = (int16_t)regs[3] * ina219_conf.current_lsb_uA;
-    return ret;
+    marble_i2c_read(qsfp_param->i2c_addr, 34, buf, 8);
+    for (i=0; i < 4; i++) {
+        qsfp_param->rx_power[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) / 10; // microW
+    }
 }
 
-bool get_pca9555_data(uint8_t i2c_addr, t_pca9555_data *data) {
+bool get_ina219_info(ina219_info_t *info) {
     bool ret = true;
-    ret &= i2c_read_regs(i2c_addr, 0, &(data->p0_val), 1);
-    ret &= i2c_read_regs(i2c_addr, 1, &(data->p1_val), 1);
+    uint16_t regs[5];
+    ret &= marble_i2c_mux_set(info->i2c_mux_sel);
+
+    for (size_t i=0; i<5; i++) {
+        ret &= i2c_read_word(info->i2c_addr, i, regs+i);
+    }
+
+    info->vshunt_uV = (int16_t)regs[1] * 100;
+    info->vbus_mV = (regs[2] >> 3) * 4;
+    info->power_uW = regs[3] * info->current_lsb_uA * 20;  // eqn (3)
+    info->curr_uA = (int16_t)regs[4] * info->current_lsb_uA;
     return ret;
 }
 
-void print_xadc_data(uint16_t *data, uint8_t *chans, size_t len) {
-    uint16_t scale=1;
-    const char * name = "Temp   ";
-    const char * unit = " V";
-    for (size_t i=0; i<len; i++) {
-        print_str("XADC   ");
-        switch (chans[i]) {
-            case XADC_CHAN_TEMP:
-                // temp = data[i] * 503.975 / 4096 - 273.15;
-                scale = 504; // UG480 Equation 2-6, 503.975
-                data[i] -= 2220; // K to C, 273.15 * 4096 / 503.975
-                unit = "degC";
-                break;
-            case XADC_CHAN_VCCINT:
-                name = "VCCINT ";
-                scale = 3;  // UG480 Equation 2-7
-                unit = " V";
-                break;
-            case XADC_CHAN_VCCAUX:
-                name = "VCCAUX ";
-                scale = 3;  // UG480 Equation 2-7
-                unit = " V";
-                break;
-            case XADC_CHAN_VCCBRAM:
-                name = "VCCBRAM";
-                scale = 3;  // UG480 Equation 2-7
-                unit = " V";
-                break;
-            default:
-                printf("  XADC chan %d: %#x\n", i, data[i]);
+bool get_pca9555_info(pca9555_info_t *info) {
+    bool ret = true;
+    ret &= marble_i2c_mux_set(info->i2c_mux_sel);
+
+    ret &= marble_i2c_read(info->i2c_addr, 0, &(info->i0_val), 1);
+    ret &= marble_i2c_read(info->i2c_addr, 1, &(info->i1_val), 1);
+    return ret;
+}
+
+bool get_adn4600_info(adn4600_info_t *info) {
+    bool ret = true;
+    ret &= marble_i2c_mux_set(info->i2c_mux_sel);
+    for (unsigned ix=0; ix<8; ix++) {
+        ret &= marble_i2c_read(info->i2c_addr, 0x50+ix, &info->xpt_status[ix], 1);
+    }
+    return ret;
+}
+
+bool reset_si570(si570_info_t *info) {
+    bool ret = true;
+    uint8_t reg_135 = (1<<7);
+    ret &= marble_i2c_mux_set(info->i2c_mux_sel);
+    // reset si570 to read default registers, corresponding to f_reset_hz
+    i2c_write_regs(info->i2c_addr, 135, &reg_135, 1);
+    DELAY_MS(10);
+    info->f_out_hz = info->f_reset_hz;
+
+    // calculate f_xtal_hz
+    ret &= get_si570_info(info);
+    debug_printf(" %s: SI570 f_xtal:  %12lu kHz\n", __func__, marble.si570.f_xtal_hz / 1000);
+    debug_printf(" %s: SI570 f_out :  %12lu kHz\n", __func__, marble.si570.f_out_hz / 1000);
+    return ret;
+}
+
+bool get_si570_info(si570_info_t *info) {
+    bool ret = true;
+    unsigned char *regs = &info->regs[0];
+
+    ret &= marble_i2c_mux_set(info->i2c_mux_sel);
+    for (unsigned ix=0; ix<6; ix++) {
+        ret &= marble_i2c_read(info->i2c_addr, info->start_addr+ix, regs+ix, 1);
+    }
+    info->hs_div = (regs[0] >> 5) + 4;
+    info->n1 = (((regs[0] & 0x1f) << 2) | (regs[1] >> 6)) + 1;
+    info->rfreq = ((uint64_t)(regs[1] & 0x3f) << 32)
+                    + ((uint64_t)regs[2] << 24)
+                    + ((uint64_t)regs[3] << 16)
+                    + ((uint64_t)regs[4] << 8) + (uint64_t)regs[5];
+    info->f_dco_hz = info->f_out_hz * info->hs_div * info->n1;
+    info->f_xtal_hz = info->f_dco_hz * (1 << 28) / info->rfreq;
+    return ret;
+}
+
+bool calc_si570_dividers(si570_info_t *info, uint64_t f1_hz) {
+    uint8_t hs_divs[] = {11, 9, 7, 6, 5, 4};
+    uint64_t fdco;
+    uint8_t n1;
+    for (uint8_t i=0; i<65; i++) {
+        n1 = (i==0) ? 1 : i * 2;
+        for (uint8_t j=0; j<6; j++) {
+            fdco = f1_hz * n1 * hs_divs[j];
+            if (fdco > 5670000000) break;
+            if (fdco > 4850000000) {
+                info->hs_div = hs_divs[j];
+                info->n1 = n1;
+                info->f_dco_hz = fdco;
+                info->rfreq = fdco * (1 << 28) / info->f_xtal_hz;
+                debug_printf(" %s: SI570 HSDIV:  %12u\n", __func__, marble.si570.hs_div);
+                debug_printf(" %s: SI570 N1   :  %12u\n", __func__, marble.si570.n1);
+                debug_printf(" %s: SI570 f_dco:  %12lu MHz\n", __func__, marble.si570.f_dco_hz / 1000000);
+                debug_printf(" %s: SI570 rfreq:  %12u\n", __func__, marble.si570.rfreq);
+                return true;
+            }
         }
-        printf("%8s:", name);
-        print_dec_fix( data[i]*scale, 12, 2 );
-        printf(" %s\n", unit);
     }
+    printf(" %s: Failed to find valid si570 dividers.\n", __func__);
+    return false;
 }
 
-void get_xadc_data(void) {
-    bool busy=true;
-    uint8_t chans[] = { XADC_CHAN_TEMP, XADC_CHAN_VCCINT, XADC_CHAN_VCCAUX, XADC_CHAN_VCCBRAM };
-    uint16_t data[4];
-    size_t len = sizeof(chans)/sizeof(chans[0]);
+bool calc_si570_regs(si570_info_t *info, uint64_t f1_hz) {
+    bool ret = true;
+    unsigned char *regs = &info->regs[0];
+    ret &= reset_si570(info);
+    ret &= calc_si570_dividers(info, f1_hz);
+    uint8_t n1 = info->n1 - 1;
+    uint8_t hs_div = info->hs_div - 4;
+    regs[0] = (hs_div << 5) | ((n1 & 0x7C) >> 2);       // reg 7: hs_div[2:0], n1[6:2]
+    regs[1] = ((n1 & 3) << 6) | (info->rfreq >> 32);    // reg 8: n1[1:0] rfreq[37:32]
+    regs[2] = (info->rfreq >> 24) & 0xff;               // reg 9: rfreq[31:24]
+    regs[3] = (info->rfreq >> 16) & 0xff;               // reg 10: rfreq[23:16]
+    regs[4] = (info->rfreq >> 8) & 0xff;                // reg 11: rfreq[15:8]
+    regs[5] = info->rfreq & 0xff;                       // reg 12: rfreq[7:0]
+    return ret;
+}
 
-    while (busy) {
-        busy = GET_SFR1(BASE_XADC + XADC_BASE2_SFR, 0, SFR_BIT_BUSY);
+bool set_si570_regs(si570_info_t *info, uint64_t f1_hz) {
+    bool ret = true;
+    unsigned char *regs = &info->regs[0];
+
+    uint8_t reg_freeze_dco = (1<<4);
+    uint8_t reg_unfreeze_dco = 0;
+    uint8_t reg_newfreq = (1<<6);
+
+    ret &= marble_i2c_mux_set(info->i2c_mux_sel);
+    // freeze DCO
+    ret &= i2c_write_regs(info->i2c_addr, 137, &reg_freeze_dco, 1);
+
+    for (unsigned ix=0; ix<6; ix++) {
+        ret &= marble_i2c_write(info->i2c_addr, info->start_addr+ix, regs+ix, 1);
     }
-    for (size_t i=0; i < len; i++) {
-        data[i] = (GET_REG(BASE_XADC + (chans[i]<<2))) >> 4;
+    // Unfreeze DCO
+    ret &= i2c_write_regs(info->i2c_addr, 137, &reg_unfreeze_dco, 1);
+
+    // Assert NewFreq bit
+    ret &= i2c_write_regs(info->i2c_addr, 135, &reg_newfreq, 1);
+
+    // The process of freezing and unfreezing the DCO will
+    // cause the output clock to momentarily stop and start at
+    // any arbitrary point during a clock cycle. This process
+    // can take up to 10 ms.
+    DELAY_MS(20);
+    if (ret) info->f_out_hz = f1_hz;
+    return ret;
+}
+
+bool set_ina219_info(ina219_info_t *info, marble_init_word_t *p_data) {
+    bool ret = true;
+    ret &= marble_i2c_mux_set(info->i2c_mux_sel);
+    ret &= i2c_write_regmap_word(
+            info->i2c_addr, p_data->regmap, p_data->len);
+    return ret;
+}
+
+bool set_pca9555_info(pca9555_info_t *info, marble_init_byte_t *p_data) {
+    bool ret = true;
+    ret &= marble_i2c_mux_set(info->i2c_mux_sel);
+    ret &= i2c_write_regmap_byte(
+            info->i2c_addr, p_data->regmap, p_data->len);
+    return ret;
+}
+
+bool set_adn4600_info(adn4600_info_t *info, marble_init_byte_t *p_data) {
+    bool ret = true;
+    ret &= marble_i2c_mux_set(info->i2c_mux_sel);
+    ret &= i2c_write_regmap_byte(
+        info->i2c_addr, p_data->regmap, p_data->len);
+    return ret;
+}
+
+bool get_marble_info(marble_dev_t *marble) {
+    bool ret = true;
+
+    ret &= get_adn4600_info(&marble->adn4600);
+    ret &= get_ina219_info(&marble->ina219_12v);
+    ret &= get_ina219_info(&marble->ina219_fmc1);
+    ret &= get_ina219_info(&marble->ina219_fmc2);
+    ret &= get_pca9555_info(&marble->pca9555_qsfp);
+    ret &= get_pca9555_info(&marble->pca9555_misc);
+    marble->qsfp1.module_present = (marble->pca9555_qsfp.i0_val & 0x20) == 0;
+    marble->qsfp2.module_present = (marble->pca9555_qsfp.i1_val & 0x20) == 0;
+    if (marble->qsfp1.module_present) {
+        get_qsfp_info(&marble->qsfp1);
     }
-    print_xadc_data(data, chans, len);
+    if (marble->qsfp2.module_present) {
+        get_qsfp_info(&marble->qsfp2);
+    }
+
+    ret &= get_si570_info(&marble->si570);
+    return ret;
 }
 
 void print_marble_status(void) {
-    t_ina219_data ina219[2];
-    i2c_mux_set(I2C_SEL_APP);
-    get_ina219_data(I2C_ADR_INA219_FMC1, &ina219[0]);
-    get_ina219_data(I2C_ADR_INA219_FMC2, &ina219[1]);
+    ina219_info_t ina219[3] = {marble.ina219_fmc1, marble.ina219_fmc2, marble.ina219_12v};
+    pca9555_info_t pca9555[2] = {marble.pca9555_qsfp, marble.pca9555_misc};
+    qsfp_info_t qsfp[2] = {marble.qsfp1, marble.qsfp2};
 
-    t_pca9555_data pca9555[2];
-    get_pca9555_data(I2C_ADR_PCA9555_SFP, &pca9555[0]);
-    get_pca9555_data(I2C_ADR_PCA9555_MISC, &pca9555[1]);
-
-    for (size_t i=0; i<2; i++) {
-        printf("INA219 FMC%1d:\n", i+1);
-        // printf("Vshunt:  %6d uV\n", ina219[i].vshunt_uV);
-        printf("power:   %6d mW\n", ina219[i].power_uW / 1000);
-        printf("Vbus:    %6d mV\n", ina219[i].vbus_mV);
-        printf("current: %6d mA\n", ina219[i].curr_uA / 1000);
-
-        printf("PCA9555 %1d:\n", i+1);
-        printf("P0:      %#09b\n", pca9555[i].p0_val);
-        printf("P1:      %#09b\n", pca9555[i].p1_val);
+    switch (marble.variant) {
+        case MARBLE_VAR_MARBLE_V1_4:
+            printf(" %s: Marble Variant 1.4\n", __func__);
+            break;
+        case MARBLE_VAR_MARBLE_V1_3:
+            printf(" %s: Marble Variant 1.3\n", __func__);
+            break;
+        case MARBLE_VAR_MARBLE_V1_2:
+            printf(" %s: Marble Variant 1.2\n", __func__);
+            break;
+        case MARBLE_VAR_UNKNOWN:
+        default:
+            printf(" %s: Marble Variant Unknown\n", __func__);
+            break;
     }
-    // get_xadc_data();
+
+    for (unsigned ix=0; ix<8; ix++) {
+        printf(" %s: ADN4600: IN%1u -> OUT%1u\n", __func__, marble.adn4600.xpt_status[ix], ix);
+    }
+
+    // si570 register dump
+    for (unsigned ix=0; ix<6; ix++) {
+        printf(" %s: SI570: addr = %1u, val = %#04x \n",
+            __func__, marble.si570.start_addr+ix, marble.si570.regs[ix]);
+    }
+    printf(" %s: SI570 HSDIV :  %12u\n", __func__, marble.si570.hs_div);
+    printf(" %s: SI570 N1    :  %12u\n", __func__, marble.si570.n1);
+    printf(" %s: SI570 f_xtal:  %12lu kHz\n", __func__, marble.si570.f_xtal_hz / 1000);
+    printf(" %s: SI570 f_out :  %12lu kHz\n", __func__, marble.si570.f_out_hz / 1000);
+
+    for (unsigned i=0; i<3; i++) {
+        printf(" %s: INA219 %.4s, %.4s:\n", __func__, ina219[i].refdes, ina219[i].name);
+        printf(" %s: Vshunt     :  %12d mV\n",  __func__, ina219[i].vshunt_uV / 1000);
+        printf(" %s: Power      :  %12d mW\n",  __func__, ina219[i].power_uW / 1000);
+        printf(" %s: Vbus       :  %12d mV\n",  __func__, ina219[i].vbus_mV);
+        printf(" %s: Current    :  %12ld mA\n", __func__, ina219[i].curr_uA / 1000);
+    }
+    for (unsigned i=0; i<2; i++) {
+        printf(" %s: PCA9555 %.4s, %.4s:\n",  __func__, pca9555[i].refdes, pca9555[i].name);
+        printf(" %s: I0         :      %#12X\n",__func__,  pca9555[i].i0_val);
+        printf(" %s: I1         :      %#12X\n",__func__,  pca9555[i].i1_val);
+    }
+// MICRO SIGN  https://en.wikipedia.org/wiki/%CE%9C#Character_encodings
+#define MICRO "\u00b5"
+    for (unsigned i=0; i<2; i++) {
+        if (qsfp[i].module_present) {
+            printf(" %s: QSFP%1u Vendor  :   %.16s\n",  __func__, i+1, qsfp[i].vendor_name);
+            printf(" %s: QSFP%1u Part    :   %.16s\n",  __func__, i+1, qsfp[i].part_num);
+            printf(" %s: QSFP%1u Serial  :   %.16s\n",  __func__, i+1, qsfp[i].serial_num);
+            printf(" %s: QSFP%1u TXRX_LOS:   %#8X\n",   __func__, i+1, qsfp[i].chan_stat_los);
+            printf(" %s: QSFP%1u Temp    :   %8d C\n",  __func__, i+1, qsfp[i].temperature);
+            printf(" %s: QSFP%1u Volt    :   %8d mV\n", __func__, i+1, qsfp[i].voltage);
+            for (unsigned j=0; j < 4; j++) {
+                printf(" %s: QSFP%1u TxBias %u:   %8d " MICRO "A\n", __func__,
+                        i+1, j, qsfp[i].bias_current[j]);
+                printf(" %s: QSFP%1u TxPwr  %u:   %8d " MICRO "W\n", __func__,
+                        i+1, j, qsfp[i].tx_power[j]);
+                printf(" %s: QSFP%1u RxPwr  %d:   %8u " MICRO "W\n", __func__,
+                        i+1, j, qsfp[i].rx_power[j]);
+            }
+        }
+    }
 }
 
-bool init_marblemini(void) {
-    bool ret = true;
-    // XXX 0x42 address not present on marblemini
-    uint8_t ina219_addr [] = {
-        I2C_ADR_INA219_FMC1,
-        I2C_ADR_INA219_FMC2};
-    ret &= init_i2c_app_devices(ina219_addr, 2);
-    ret &= init_i2c_marblemini_sfp();
-    return ret;
+// Set Marble variants, by init data
+static void set_marble_variant(marble_init_t *init_data) {
+    int8_t mb4_pcb_rev;
+
+    if (init_data->marble_variant == MARBLE_VAR_UNKNOWN) {
+#ifdef LB_MARBLE_SPI_MBOX
+// Optional MMC Mailbox support, when marble.variant is MARBLE_VAR_UNKNOWN:
+//    Read `MB4_PCB_REV` from mmc_mailbox.v through localbus, if gateware supports.
+// Refer to mailbox content at:
+// https://gitlab.lbl.gov/hdl-libraries/marble_mmc/-/blob/master/doc/mailbox.md
+        // MB4_PCB_REV is at page 4 (page size is 16), offset 8
+        mb4_pcb_rev = read_lb_reg(LB_MARBLE_SPI_MBOX + 4*16 + 8);
+        if ((mb4_pcb_rev >> 4) == 0x1) {
+            marble.variant = mb4_pcb_rev & 0xf;
+            printf(" %s: Found MMC Mailbox. mb4_pcb_rev = %x\n", __func__, mb4_pcb_rev);
+        } else {
+            printf(" %s: Invalid MMC Mailbox reading: mb4_pcb_rev = %x\n", __func__, mb4_pcb_rev);
+        }
+#endif
+    } else { // known Marble variant
+        marble.variant = init_data->marble_variant;
+    }
 }
 
-bool init_marble(void) {
-    bool ret = true;
-    // XXX 0x40 address not present on marble
-    uint8_t ina219_addr [] = {
-        I2C_ADR_INA219_12V,
-        I2C_ADR_INA219_FMC2};
-    ret &= init_i2c_app_devices(ina219_addr, 2);
-    return ret;
+// look up si570 for i2c address:
+// https://tools.skyworksinc.com/TimingUtility/timing-part-number-search-results.aspx
+// https://www.skyworksinc.com/-/media/SkyWorks/SL/documents/public/data-sheets/Si570-71.pdf
+static void configure_si570_nbb_i2c(void) {
+        // 570NBB001808DGR, 20ppm
+        marble.si570.i2c_addr = I2C_ADR_SI570_NBB;
+        marble.si570.start_addr = 7;
+        marble.si570.f_reset_hz = 270000000ULL;
+}
+
+static void configure_si570_ncb_i2c(void) {
+        // 570NCB000933DG, 7ppm
+        marble.si570.i2c_addr = I2C_ADR_SI570_NCB;
+        marble.si570.start_addr = 13;
+        marble.si570.f_reset_hz = 125000000ULL;
+}
+
+static void configure_marble_variant(void) {
+    switch (marble.variant) {
+    case MARBLE_VAR_MARBLE_V1_4:
+        configure_si570_nbb_i2c();
+        break;
+
+    case MARBLE_VAR_MARBLE_V1_3:
+    case MARBLE_VAR_MARBLE_V1_2:
+        configure_si570_ncb_i2c();
+        break;
+
+    // Auto-determine Marble variants,
+    // to support a project with mixed hardware versions
+    case MARBLE_VAR_UNKNOWN:
+    default:
+        // in case mmc mailbox is not available, test i2c address for si570
+        // reset si570 to read f_xtal_hz
+        configure_si570_nbb_i2c();
+        if (get_si570_info(&marble.si570)) {
+            printf(" %s: Found SI570 NBB (Marble 1.4)\n", __func__);
+            marble.variant = MARBLE_VAR_MARBLE_V1_4;
+            break;
+        }
+
+        configure_si570_ncb_i2c();
+        if (get_si570_info(&marble.si570)) {
+            printf(" %s: Found SI570 NCB (Marble 1.3).\n", __func__);
+            marble.variant = MARBLE_VAR_MARBLE_V1_3;
+            break;
+        }
+        printf(" %s: Failed to determine Marble variant).\n", __func__);
+        break;
+    }
+}
+
+bool init_marble(marble_init_t *init_data)
+{
+    bool p = true;
+    bool pass = true;
+
+    printf("--===========  Marble Init  =============--\n");
+
+    set_marble_variant(init_data);
+    configure_marble_variant();
+
+    p = calc_si570_regs(&marble.si570, init_data->si570_freq_hz); pass &= p;
+    p &= set_si570_regs(&marble.si570, init_data->si570_freq_hz); pass &= p;
+    printf("==== SI570 init  ====   : %s.\n", p?"PASS":"FAIL");
+
+    p = set_ina219_info(&marble.ina219_fmc1, &init_data->ina219_fmc1_data);  pass &= p;
+    p &= set_ina219_info(&marble.ina219_fmc2, &init_data->ina219_fmc2_data); pass &= p;
+    p &= set_ina219_info(&marble.ina219_12v, &init_data->ina219_12v_data);   pass &= p;
+    printf("==== INA219 init  ====  : %s.\n", p?"PASS":"FAIL");
+
+    p = set_pca9555_info(&marble.pca9555_qsfp, &init_data->pca9555_qsfp_data);  pass &= p;
+    p &= set_pca9555_info(&marble.pca9555_misc, &init_data->pca9555_misc_data); pass &= p;
+    printf("==== PCA9555 init ====  : %s.\n", p?"PASS":"FAIL");
+
+    p = set_adn4600_info(&marble.adn4600, &init_data->adn4600_data); pass &= p;
+    printf("==== ADN4600 init ====  : %s.\n", p?"PASS":"FAIL");
+
+    pass &= get_marble_info(&marble);
+    print_marble_status();
+    return pass;
 }

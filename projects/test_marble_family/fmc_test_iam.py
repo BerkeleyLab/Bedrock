@@ -1,5 +1,5 @@
 # PoC Marble FMC tester based on IAM Electronic FPGA Mezzanine Card (FMC) Loopback Module
-# https://www.iamelectronic.com/shop/produkt/fpga-mezzanine-card-fmc-loopback-module
+# https://www.iamelectronic.com/shop/produkt/fpga-mezzanine-card-fmc-loopback-module/
 # Still doesn't cover LA_1 to GBTCLK0_M2C or LA_18 to GBTCLK1_M2C (HPC)
 
 import sys
@@ -12,7 +12,7 @@ from grok_iam import check_row
 
 def tobin(x, count=8):
     # Integer to binary; count is number of bits
-    # Credit to W.J. van der Laan in http://code.activestate.com/recipes/219300/
+    # Credit to W.J. van der Laan in https://code.activestate.com/recipes/219300/
     return "".join([str((x >> y) & 1) for y in range(count-1, -1, -1)])
 
 

@@ -69,6 +69,9 @@ PYTHONPATH=$PWD/build-tools make -C cmoc all checks
 ## cordic_test
 make -C cordic clean all
 
+## ctrace_test
+make -C projects/ctrace
+
 ## digaree_test
 make -C dsp/digaree
 
@@ -86,7 +89,10 @@ make -C homeless all checks
 make -C homeless/freq_demo
 
 ## leep_test
-(cd projects/common && python3 -m unittest -v)
+(cd projects/common && PYTHONPATH=../../build-tools python3 -m unittest -v)
+
+## leep_test2
+make -C projects/common/leep
 
 ## localbus
 make -C localbus
@@ -133,6 +139,9 @@ fi
 
 ## swap_gitid_test
 (cd build-tools/vivado_tcl && tclsh test_swap_gitid.tcl)
+
+## xilinx_test
+make -C fpga_family/xilinx
 
 ## flake8
 find . -name "*.py" -exec flake8 {} +

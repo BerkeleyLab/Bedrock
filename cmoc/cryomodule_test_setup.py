@@ -3,7 +3,7 @@ import sys
 from math import pi, sqrt, log
 from numpy import exp as cexp
 from numpy import ceil
-# http://stackoverflow.com/questions/14132789/python-relative-imports-for-the-billionth-time
+# https://stackoverflow.com/questions/14132789/relative-imports-for-the-billionth-time
 # Leaves me with only one choice ... :(
 # Since I don't want to modify shell variables
 sys.path.append(
@@ -174,7 +174,7 @@ def fix(x, b, msg, opt=None):
 # prefix and name are used to give a helpful comment
 def set_reg(offset, prefix, name, regmap):
     val = globals()[name]  # globals() or locals()?
-    if (type(val) is list):
+    if type(val) is list:
         for i, v in enumerate(val):
             print(offset + regmap[name] + i, v, "#",
                   prefix + name + "[" + str(i) + "]")
@@ -321,7 +321,7 @@ def push_seed(addr, hf):
         hf.update(chr(jx).encode('utf-8'))
 
 
-if (prng_seed is not None):
+if prng_seed is not None:
     from hashlib import sha1
     print("# PRNG subsystem seed is '%s'" % prng_seed)
     hf = sha1()
@@ -413,6 +413,6 @@ print("555 600    # Add delay of 600 cycles")
 print("%d 1    # Flip the circle buffer" % (0x13800))
 print("%d 1    # Flip the circle buffer" % (0x13801))
 
-if (error_cnt > 0):
+if error_cnt > 0:
     print("# %d scaling errors found" % error_cnt)
     exit(1)

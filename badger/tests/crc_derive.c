@@ -10,11 +10,10 @@
 static unsigned long crc_eval( unsigned int order, unsigned long poly, unsigned long crc,
 	unsigned int width, unsigned long inword)
 {
-	unsigned int bit, u;
 	unsigned long mask_c = 1UL << (order-1);
 	unsigned long mask_d = 1UL << (width-1);
-	for (u=0; u<width; u++) {
-		bit = ((crc&mask_c)!=0) ^ ((inword&mask_d)!=0);
+	for (unsigned int u=0; u<width; u++) {
+		unsigned int bit = ((crc&mask_c)!=0) ^ ((inword&mask_d)!=0);
 		if (0) printf("u=%u crc=%lx inword=%lx bit=%u poly=%lx\n",
 			u, crc, inword, bit, poly);
 		inword = inword << 1;

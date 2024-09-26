@@ -1,6 +1,6 @@
 Zest is a dual LPC FMC mezzanine board with 8 ADCs and 2 DACs.
 
-Full information about the Zest hardware is at: https://github.com/BerkeleyLab/zest
+Full information about the Zest hardware is at: https://github.com/BerkeleyLab/Zest
 
 ### Using zest_setup.py
 

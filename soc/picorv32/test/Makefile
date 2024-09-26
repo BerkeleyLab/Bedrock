@@ -18,12 +18,14 @@ check:
 	$(MAKE) -C ./sram
 	$(MAKE) -C ./memio
 	$(MAKE) -C ../project/cmod_a7/sim
+	$(MAKE) -C ./wfm
+	$(MAKE) -C ./awg
 
 fv:
 	# Formal verification of some components
-	(cd fv/ && sby f_pack.sby)
-	(cd fv/ && sby fifo.sby)
-	(cd fv/ && sby shortfifo.sby)
+	cd fv && sby f_pack.sby
+	cd fv && sby fifo.sby
+	cd fv && sby shortfifo.sby
 
 clean:
 	$(MAKE) -C ./badger_loopback clean
@@ -41,6 +43,8 @@ clean:
 	$(MAKE) -C ./xadc      clean
 	$(MAKE) -C ./sram      clean
 	$(MAKE) -C ./memio     clean
-	$(MAKE) -C ./zest     clean
+	$(MAKE) -C ./zest      clean
 	$(MAKE) -C ../project/cmod_a7/sim clean
+	$(MAKE) -C ./wfm       clean
+	$(MAKE) -C ./awg       clean
 	rm -rf fv/f_pack_sfr_pack fv/f_pack_uart_pack fv/fifo/ fv/shortfifo/

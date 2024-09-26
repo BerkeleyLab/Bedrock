@@ -258,7 +258,7 @@ if [ "$arch" = "s6" ]; then
 else
     case "$PART" in
         # LLRF46 needs -g StartUpClk:CClk per page 1 of
-        # http://www.dimtel.com/_media/support/llrf4/packet46.pdf
+        # https://www.dimtel.com/_media/support/llrf4/packet46.pdf
         # otherwise the DAC outputs get messed up.
         xc6slx*) BG_OPT="-g StartUpClk:CClk" ;;
         *)       BG_OPT="-g StartUpClk:JtagClk" ;;

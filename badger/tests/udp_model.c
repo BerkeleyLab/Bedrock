@@ -110,7 +110,7 @@ void udp_receiver(int *in_octet, int *in_valid, int *in_count, int thinking)
 
 struct udp_state *udp_setup_r(unsigned short udp_port_, int badger_client_)
 {
-	struct udp_state *ust = US_P calloc(sizeof (struct udp_state), 1);
+	struct udp_state *ust = US_P calloc(1, sizeof (struct udp_state));
 	ust->sleepctr=0;
 	ust->sleepmax=10;
 	fprintf(stderr, "udp_receiver initializing UDP port %u. Interface mode: ", udp_port_);
@@ -121,8 +121,8 @@ struct udp_state *udp_setup_r(unsigned short udp_port_, int badger_client_)
 	}
 	ust->badger_client = badger_client_;
 	/* following could be combined by making second argument to calloc a 2? */
-	struct pbuf *inbuf  = ust->inbuf  = PBUF_P calloc(sizeof(struct pbuf), 1);
-	struct pbuf *outbuf = ust->outbuf = PBUF_P calloc(sizeof(struct pbuf), 1);
+	struct pbuf *inbuf  = ust->inbuf  = PBUF_P calloc(1, sizeof(struct pbuf));
+	struct pbuf *outbuf = ust->outbuf = PBUF_P calloc(1, sizeof(struct pbuf));
 	if (!inbuf || !outbuf) {
 		perror("calloc");
 		exit(1);
@@ -140,7 +140,7 @@ struct udp_state *udp_setup_r(unsigned short udp_port_, int badger_client_)
 void udp_receiver_r(struct udp_state *ust, int *in_octet, int *in_valid, int *in_count, int thinking)
 {
 	int val = 0;
-	int udp_model_debug = 0;  /* adjustable */
+	const int udp_model_debug = 0;  /* adjustable */
 	struct pbuf *inbuf = ust->inbuf;  /* makes source look cleaner; maybe optimizes away */
 
 	if (inbuf->cur == inbuf->len) {
@@ -220,7 +220,7 @@ void udp_sender(int out_octet, int out_end)
 void udp_sender_r(struct udp_state *ust, int out_octet, int out_end)
 {
 	struct pbuf *outbuf = ust->outbuf;  /* makes source look cleaner; maybe optimizes away */
-	int udp_model_debug = 0;  /* adjustable */
+	const int udp_model_debug = 0;  /* adjustable */
 	if (1) {
 		if (udp_model_debug) fprintf(stderr, "Trying to write %2.2x\n", (unsigned) out_octet);
 		outbuf->buf[outbuf->cur] = out_octet;

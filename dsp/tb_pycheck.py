@@ -6,7 +6,7 @@ def fraction_to_ph_acc(rational_fraction, bits_h=20, bits_l=12):
     '''
     Converts a rational fraction [num/den] to what is needed by dsp/ph_acc.v
 
-    The function determines the fixed point phase step that an FGPA phase
+    The function determines the fixed point phase step that an FPGA phase
     generator rotates by every clock cycle (of the sampling clock). The
     rotation is implemented as an adder. The frequency being generated is a
     `rational_fraction` of the ADC clock frequency. The ADC Clock takes a
@@ -47,7 +47,7 @@ def fraction_to_ph_acc(rational_fraction, bits_h=20, bits_l=12):
 def get_cols_from_line(filename, comment='#'):
     '''
     Find the first commented line, return the strings in the line that are
-    seperated by spaces as a list
+    separated by spaces as a list
     '''
     with open(filename, 'r') as f:
         for line in f.readlines():

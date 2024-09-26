@@ -91,21 +91,29 @@ t_reg32 regmap_amc7823[] = {
     { (1<<6) | 0xd, 0x8010}, // # PWR Down: only enable ADC and PREFB
 };
 
-// DSP_CLK, ADC0_DIV, ADC1_DIV, DAC_DCO
-// uint16_t fcnt_exp = 61494; // 117.29 / 125 * (1<<16);
+#ifndef DSP_FREQ_MHZ
+    #define DSP_FREQ_MHZ 117.29
+#endif
+#define FCNT_EXP DSP_FREQ_MHZ * (1<<16) / 125
+
+// ADC0_DIV, ADC1_DIV, DAC_DCO, DSP_CLK
 uint16_t fcnt_exp[4] = {
-    61494,
-    61494,
-    61494,
-    61494
+    FCNT_EXP,
+    FCNT_EXP,
+    FCNT_EXP * 2,
+    FCNT_EXP
 };
 
-// ADC0_DIV, ADC1_DIV, DAC_DCO, AD9781_SMP
-uint8_t phs_center[4] = {
-    70, 64, 64, 12
+// ADC0_DIV, ADC1_DIV, DAC_DCO
+int8_t phs_center[] = {
+    70, 64, 64
 };
 
-const t_zest_init zest_init_data = {
+uint8_t ad9781_smp[] = {
+    12, 12, 12
+};
+
+const zest_init_t zest_init_data = {
     {
         sizeof(regmap_lmk01801) / sizeof(regmap_lmk01801[0]),
         regmap_lmk01801
@@ -127,5 +135,6 @@ const t_zest_init zest_init_data = {
         regmap_amc7823
     },
     fcnt_exp,
-    phs_center
+    phs_center,
+    ad9781_smp
 };

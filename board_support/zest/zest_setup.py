@@ -727,7 +727,7 @@ class c_zest:
         HLD += 1
         while HLD < 16:
             SEEK = self.seeksethldsmp(SET, HLD, SMP)
-            if (SEEK != SEEK_000):
+            if SEEK != SEEK_000:
                 HLD_TIME = HLD
                 break
             HLD += 1
@@ -743,7 +743,7 @@ class c_zest:
         SET += 1
         while SET < 16:
             SEEK = self.seeksethldsmp(SET, HLD, SMP)
-            if (SEEK != SEEK_000):
+            if SEEK != SEEK_000:
                 SET_TIME = SET
                 break
             SET += 1
@@ -766,7 +766,7 @@ class c_zest:
             HLD += 1
             while HLD < 16:
                 SEEK = self.seeksethldsmp(SET, HLD, SMP)
-                if (SEEK != SEEK_SMP):
+                if SEEK != SEEK_SMP:
                     HLD_OK = HLD
                     break
                 HLD += 1
@@ -778,7 +778,7 @@ class c_zest:
             SET += 1
             while SET < 16:
                 SEEK = self.seeksethldsmp(SET, HLD, SMP)
-                if (SEEK != SEEK_SMP):
+                if SEEK != SEEK_SMP:
                     SET_OK = SET
                     break
                 SET += 1

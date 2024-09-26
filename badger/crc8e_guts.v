@@ -7,7 +7,7 @@ module crc8e_guts(
 	output [7:0] d_out,
 	output zero
 );
-// http://en.wikipedia.org/wiki/Cyclic_redundancy_check
+// https://en.wikipedia.org/wiki/Cyclic_redundancy_check
 parameter wid=32;
 parameter init=32'hffffffff;
 

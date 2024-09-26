@@ -52,7 +52,7 @@ def get_qrcode(results):
         ss = symbol.data
         # print(ord(ss[0]), ord(ss[1]), ord(ss[-1]))
         while len(ss) > 1 and ord(ss[0]) > 127:
-            # Unicde 65279: Zero Width No-Break Space
+            # Unicode 65279: Zero Width No-Break Space
             print("Discarding leading %d" % ord(ss[0]))
             ss = ss[1:]
         m = re.search(r'LBNL DIGITIZER V1.\d SN +(\d+)', ss)

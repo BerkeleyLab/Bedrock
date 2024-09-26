@@ -3,7 +3,7 @@
 // Based on, and mostly compatible with, OpenCores (Rudolf Usselmann)
 // generic_fifo_dc_gray (Universal FIFO Dual Clock, gray encoded),
 // downloaded from:
-//    http://www.opencores.org/cores/generic_fifos/
+//    https://opencores.org/projects/generic_fifos
 // This version drops the rst and clr inputs, as befits my FPGA needs,
 // and neglects to provide wr_level and rd_level outputs.  It is also
 // coded in a more compact style.

@@ -36,11 +36,11 @@ module ads62 #(
 wire [32:0] packed_del_ret, packed_mon_ret;
 assign mem_packed_ret = packed_del_ret | packed_mon_ret;
 
-wire [14:0] sig_p  = { clk_ab_p, inB_p, inA_p };  //differential DDR signals
+wire [14:0] sig_p  = { clk_ab_p, inB_p, inA_p };  // differential DDR signals
 wire [14:0] sig_n  = { clk_ab_n, inB_n, inA_n };  // ...
-wire [14:0] sig_se;                       //single ended DDR signals
-wire [13:0] sig_del;                      //delayed DDR signals
-wire [27:0] sdrSamples;                   //samples, [27:14] chB, [13:0] chA
+wire [14:0] sig_se;                       // single ended DDR signals
+wire [13:0] sig_del;                      // delayed DDR signals
+wire [27:0] sdrSamples;                   // samples, [27:14] chB, [13:0] chA
 assign { outB, outA } = sdrSamples;
 
 // For each differential DDR LVDS lane + the clk_ab lane
@@ -73,11 +73,11 @@ generate for (i=0; i<=14; i=i+1) begin: lane
 end endgenerate
 
 //---------------------------------------------
-// Adjustable IDELAYS (on Reg0)
+// Adjustable IDELAYs (on Reg0)
 //---------------------------------------------
 idelays_pack #(
     .BASE_ADDR     ( BASE_ADDR     ),
-    .BASE2_ADDR    ( BASE2_OFFSET  ),   //Takes one BASE2 slot
+    .BASE2_ADDR    ( BASE2_OFFSET  ),   // Takes one BASE2 slot
     .SIZE          ( 14 )   // 14 data lanes, no idelay for the clock
 ) idels_inst (
     .in            (sig_se[13:0]),
@@ -137,11 +137,11 @@ sfr_pack #(
     .mem_packed_ret ( packed_mon_ret ),
     .sfRegsOut      (),
     .sfRegsIn       ( {
-        4'h0, clkAbFreqCnt,                  //reg2,[27:0]
-        2'h0, sdrSamplesPingPongClk[42+:14], //reg1,  hi16
-        2'h0, sdrSamplesPingPongClk[28+:14], //reg1, low16
-        2'h0, sdrSamplesPingPongClk[14+:14], //reg0,  hi16
-        2'h0, sdrSamplesPingPongClk[ 0+:14]  //reg0, low16
+        4'h0, clkAbFreqCnt,                  // reg2,[27:0]
+        2'h0, sdrSamplesPingPongClk[42+:14], // reg1,  hi16
+        2'h0, sdrSamplesPingPongClk[28+:14], // reg1, low16
+        2'h0, sdrSamplesPingPongClk[14+:14], // reg0,  hi16
+        2'h0, sdrSamplesPingPongClk[ 0+:14]  // reg0, low16
     } ),
     .sfRegsWrStr    ()
 );

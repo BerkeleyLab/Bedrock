@@ -102,7 +102,8 @@ class BaseSoC(SoCCore):
         platform = marble.Platform()
 
         # SoCCore ----------------------------------------------------------------------------------
-        SoCCore.__init__(self, platform, sys_clk_freq,
+        SoCCore.__init__(
+            self, platform, sys_clk_freq,
             ident          = "LiteX SoC on Marble",
             **kwargs)
 
@@ -163,7 +164,7 @@ class BaseSoC(SoCCore):
         if with_etherbone:
             self.add_etherbone(phy=self.ethphy, buffer_depth=255)
 
-        # System I2C (behing multiplexer) ----------------------------------------------------------
+        # System I2C (behind multiplexer) ----------------------------------------------------------
         i2c_pads = platform.request('i2c_fpga')
         self.submodules.i2c = I2CMaster(i2c_pads)
         self.add_csr("i2c")

@@ -18,7 +18,7 @@ all: targets gmii_to_rgmii_lint
 targets: $(TGT_)
 checks: $(CHK_)
 
-SRCS = patt_gen.v data_xdomain.v flag_xdomain.v multi_sampler.v
+SRCS = patt_gen.v data_xdomain.v flag_xdomain.v reg_tech_cdc.v multi_sampler.v
 patt_gen_tb : $(SRCS)
 
 dec_8b10b_tb: dec_8b10b.v

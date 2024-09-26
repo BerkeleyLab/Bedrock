@@ -15,7 +15,7 @@
 
 /*
  JESD204B subclass1 deterministic latency
- http://www.ti.com/lit/ml/slap159/slap159.pdf
+ https://www.ti.com/lit/ml/slap159/slap159.pdf
     ADC: ADS54J60
     * LMFS: 4 2 1 1
     * ceil(17/F) <= K <= min(32, floor(1024/F))

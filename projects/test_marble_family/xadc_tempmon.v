@@ -38,7 +38,6 @@ module xadc_tempmon #(
   // Conversion-start signal; not used in default mode.
   reg convst;
   reg [UDCNT_WIDTH-1:0] udcnt;
-  reg udclk;
 
   // Implement bus-master
   reg [6:0] daddr;
@@ -52,7 +51,6 @@ module xadc_tempmon #(
   assign read = den;
 
   initial begin
-    udclk = 1'b0;
     udcnt = {UDCNT_WIDTH{1'b0}};
     daddr = ADDR_INT_TEMP;   // Always reading from addr 0
     data_in = 16'h0;
@@ -130,35 +128,35 @@ module xadc_tempmon #(
   XADC_inst (
     // ALARMS: 8-bit (each) output: ALM, OT
     .ALM(alm),                   // 8-bit output: Output alarm for temp, Vccint, Vccaux and Vccbram
-    .OT(otemp),                     // 1-bit output: Over-Temperature alarm
+    .OT(otemp),                  // 1-bit output: Over-Temperature alarm
     // Dynamic Reconfiguration Port (DRP): 16-bit (each) output: Dynamic Reconfiguration Ports
-    .DO(data_out),                     // 16-bit output: DRP output data bus
+    .DO(data_out),               // 16-bit output: DRP output data bus
     .DRDY(drdy),                 // 1-bit output: DRP data ready
     // STATUS: 1-bit (each) output: XADC status ports
     .BUSY(busy),                 // 1-bit output: ADC busy output
-    //.CHANNEL(adc_channel),           // 5-bit output: Channel selection outputs
+    //.CHANNEL(adc_channel),     // 5-bit output: Channel selection outputs
     .EOC(eoc),                   // 1-bit output: End of Conversion
     .EOS(eos),                   // 1-bit output: End of Sequence
-    //.JTAGBUSY(JTAGBUSY),         // 1-bit output: JTAG DRP transaction in progress output
-    //.JTAGLOCKED(JTAGLOCKED),     // 1-bit output: JTAG requested DRP port lock
-    //.JTAGMODIFIED(JTAGMODIFIED), // 1-bit output: JTAG Write to the DRP has occurred
-    //.MUXADDR(MUXADDR),           // 5-bit output: External MUX channel decode
+    //.JTAGBUSY(JTAGBUSY),       // 1-bit output: JTAG DRP transaction in progress output
+    //.JTAGLOCKED(JTAGLOCKED),   // 1-bit output: JTAG requested DRP port lock
+    //.JTAGMODIFIED(JTAGMODIFIED)// 1-bit output: JTAG Write to the DRP has occurred
+    //.MUXADDR(MUXADDR),         // 5-bit output: External MUX channel decode
     // Auxiliary Analog-Input Pairs: 16-bit (each) input: VAUXP[15:0], VAUXN[15:0]
-    //.VAUXN(VAUXN),               // 16-bit input: N-side auxiliary analog input
-    //.VAUXP(VAUXP),               // 16-bit input: P-side auxiliary analog input
+    //.VAUXN(VAUXN),             // 16-bit input: N-side auxiliary analog input
+    //.VAUXP(VAUXP),             // 16-bit input: P-side auxiliary analog input
     // CONTROL and CLOCK: 1-bit (each) input: Reset, conversion start and clock inputs
     .CONVST(convst),             // 1-bit input: Convert start input
     // === We don't need the precision of CONVSTCLK and would rather trigger from general logic
-    //.CONVSTCLK(CONVSTCLK),       // 1-bit input: Convert start input
-    .RESET(rst),               // 1-bit input: Active-high reset
+    //.CONVSTCLK(CONVSTCLK),     // 1-bit input: Convert start input
+    .RESET(rst),                 // 1-bit input: Active-high reset
     // Dedicated Analog Input Pair: 1-bit (each) input: VP/VN
-    //.VN(VN),                     // 1-bit input: N-side analog input
-    //.VP(VP),                     // 1-bit input: P-side analog input
+    //.VN(VN),                   // 1-bit input: N-side analog input
+    //.VP(VP),                   // 1-bit input: P-side analog input
     // Dynamic Reconfiguration Port (DRP): 7-bit (each) input: Dynamic Reconfiguration Ports
     .DADDR(daddr),               // 7-bit input: DRP address bus
-    .DCLK(clk),                 // 1-bit input: DRP clock
+    .DCLK(clk),                  // 1-bit input: DRP clock
     .DEN(den),                   // 1-bit input: DRP enable signal
-    .DI(data_in),                     // 16-bit input: DRP input data bus
+    .DI(data_in),                // 16-bit input: DRP input data bus
     .DWE(dwe)                    // 1-bit input: DRP write enable
   );
   // End of XADC_inst instantiation

@@ -33,7 +33,7 @@ initial begin
 end
 
 // four-bit Gray code counter on the input signal
-// http://en.wikipedia.org/wiki/Gray_code
+// https://en.wikipedia.org/wiki/Gray_code
 localparam gw=4;
 reg [gw-1:0] gray1=0;
 
@@ -49,7 +49,7 @@ wire [gw-1:0] gray_next = bin2 ^ {1'b0, bin2[gw-1:1]};  // binary to Gray
 always @(posedge f_in) if (g_in) gray1 <= gray_next;
 
 // transfer that Gray code to the measurement clock domain
-reg [gw-1:0] gray2=0, gray3=0;
+(* ASYNC_REG = "TRUE" *) reg [gw-1:0] gray2=0, gray3=0;
 always @(posedge sysclk) begin
 	gray2 <= gray1;
 	gray3 <= gray2;

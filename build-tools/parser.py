@@ -109,7 +109,7 @@ class Parser:
     def consider_port(self, p, fd):
         # 5-element list is (input/output) (signed/None) lsb msb name
         if p.direction == "output":
-            # TODO: Another idiosyncracy, moved to an attribute as per new spec
+            # TODO: Another idiosyncrasy, moved to an attribute as per new spec
             bp = re.sub("_addr$", "", p.name)
             fd.write("// found output address in module %s, base=%s\n" % (p.module, bp))
             self.use_ram[p.module + ":" + bp] = "[%s:%s]" % p.downto

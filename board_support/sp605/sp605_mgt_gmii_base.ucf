@@ -1,10 +1,10 @@
 # Xilinx SP605 (Spartan-6 XC6SLX45T-FGG484)
-# as documented in ug526.pdf
-# http://www.xilinx.com/support/documentation/sp605.htm
+# as documented in UG526
+# https://docs.amd.com/v/u/en-US/ug526
 
 # Table 1-9: Ethernet PHY Connections
 # Connections to Marvell 88E1111 shown in comments
-# http://www.marvell.com/products/tranceivers/alaska_gigabit_ethernet_transceivers/Alaska_88E1111-002.pdf
+# https://www.marvell.com/content/dam/marvell/en/public-collateral/transceivers/marvell-phys-transceivers-alaska-88e1111-datasheet.pdf
 
 ##------- Pin Constraints -------
 
