@@ -243,6 +243,8 @@ bool check_ad9781_bist(void) {
 
     // two's complement binary mode
     write_zest_reg(ZEST_DEV_AD9781, 0x2, 0x0);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC0_ENABLE, 1);
+    SET_SFR1(g_base_sfr, SFR_OUT_REG1, SFR_OUT_BIT_DAC1_ENABLE, 1);
     return pass;
 }
 
