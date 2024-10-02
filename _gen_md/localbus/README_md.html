@@ -142,8 +142,15 @@ where cycle counts are well-defined and set at configuration/synthesis
 time, <em>not</em> run-time.</p>
 <p>The key component held here is
 Just In Time Readout Across Domains - <a class="reference external" href="jit_rad.md">jit_rad</a> for short.</p>
+<p>Also</p>
+<ul class="simple">
+<li><p>localbus.vh, a helper for cycle-accurate bus simulations</p></li>
+<li><p>gen_regmap.py</p></li>
+<li><p>the much-maligned tgen</p></li>
+</ul>
 <p>Also see</p>
 <ul class="simple">
+<li><p><a class="reference external" href="../badger/doc/mem_gateway.svg">Memory gateway timing</a></p></li>
 <li><p><a class="reference external" href="../badger/mem_gate.md">Lightweight Address Space Serialization</a></p></li>
 <li><p>Bus controller for Packet Badger <a class="reference external" href="../badger/mem_gateway.v">mem_gateway.v</a></p></li>
 <li><p>Bus controller for BMB7 and QF2-pre <a class="reference external" href="../board_support/bmb7_kintex/jxj_gate.v">jxj_gate.v</a></p></li>
