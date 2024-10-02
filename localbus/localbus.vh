@@ -1,8 +1,8 @@
 // verilog tasks for simulations
-// see (Memory gateway timing)[]bedrock/badger/doc/mem_gateway.svg]
+// see (Memory gateway timing)[bedrock/badger/doc/mem_gateway.svg]
 
-// requires defining:
-// localparam LB_ADW = 18;
+// a verilog program that includes this file must first make declarations like:
+// localparam LB_ADW = 24;
 // localparam LB_READ_DELAY = 3;
 
 reg lb_write=0, lb_read=0, lb_prefill=0;

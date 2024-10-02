@@ -1,6 +1,6 @@
 include ../dir_list.mk
 
-vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BADGER_DIR)
+vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BEDROCK_DIR)/localbus $(BADGER_DIR)
 vpath %.c ../badger/tests
 
 .PHONY: all
@@ -11,14 +11,14 @@ include $(BADGER_DIR)/rules.mk
 
 NEWAD_ARGS += -y
 
-TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb rf_controller_tb
+TEST_BENCH = xy_pi_clip_tb fdbk_core_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb rf_controller_tb
 
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include rules.mk
 
 TGT_ := $(TEST_BENCH)
 
-NO_CHECK = tgen_check cryomodule_badger_check rf_controller_check
+NO_CHECK = cryomodule_badger_check rf_controller_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 NO_LINT = $(NO_CHECK)
 LNT_ = $(filter-out $(NO_LINT), $(TEST_BENCH:%_tb=%_lint))

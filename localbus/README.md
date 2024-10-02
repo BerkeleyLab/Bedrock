@@ -20,7 +20,13 @@ time, _not_ run-time.
 The key component held here is
 Just In Time Readout Across Domains - [jit_rad](jit_rad.md) for short.
 
+Also
+- localbus.vh, a helper for cycle-accurate bus simulations
+- gen_regmap.py
+- the much-maligned tgen
+
 Also see
+- [Memory gateway timing](../badger/doc/mem_gateway.svg)
 - [Lightweight Address Space Serialization](../badger/mem_gate.md)
 - Bus controller for Packet Badger [mem_gateway.v](../badger/mem_gateway.v)
 - Bus controller for BMB7 and QF2-pre [jxj_gate.v](../board_support/bmb7_kintex/jxj_gate.v)
