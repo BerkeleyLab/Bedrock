@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tgen Source File &mdash; Bedrock  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Bedrock
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../general-docs.html">General Docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bedrock-modules.html">Bedrock Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rtsim-module.html">RTSIM Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dsp-digaree-module.html">DSP Digaree Module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Bedrock</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">tgen Source File</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_gen_src_rst/tgen_source.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This documentation is a work in progress.
+Expect to see errors and unfinished things.</p>
+</div>
+<section id="tgen-source-file">
+<span id="tgen-source"></span><h1>tgen Source File<a class="headerlink" href="#tgen-source-file" title="Permalink to this heading"></a></h1>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
+<span class="linenos">  2</span>
+<span class="linenos">  3</span><span class="c1">// Timing generator</span>
+<span class="linenos">  4</span><span class="c1">// Interposes in and passes-through a local register write bus</span>
+<span class="linenos">  5</span><span class="c1">// One-cycle delay from input bus to output bus</span>
+<span class="linenos">  6</span><span class="c1">// Controlling bus has priority for access to the controlled bus.</span>
+<span class="linenos">  7</span><span class="c1">// Output &quot;collision&quot; when a function generator write gets lost.</span>
+<span class="linenos">  8</span><span class="c1">// That&#39;s a single-cycle output, which needs to be latched and/or</span>
+<span class="linenos">  9</span><span class="c1">// counted by whoever instantiates this module.</span>
+<span class="linenos"> 10</span>
+<span class="linenos"> 11</span><span class="c1">// The dual-port ram holding the program is part of the local bus</span>
+<span class="linenos"> 12</span><span class="c1">// address space, defined by an external address decoder that supplies</span>
+<span class="linenos"> 13</span><span class="c1">// the dests_write port signal.  The size of that memory is defined</span>
+<span class="linenos"> 14</span><span class="c1">// by the pcw parameter.</span>
+<span class="linenos"> 15</span>
+<span class="linenos"> 16</span><span class="c1">// After filling the table, toggle bank_next to make it take effect.</span>
+<span class="linenos"> 17</span><span class="c1">// In theory, you should then wait for that new bank_next value to</span>
+<span class="linenos"> 18</span><span class="c1">// propagate to bank_stat before writing anything else to the table.</span>
+<span class="linenos"> 19</span><span class="c1">// That&#39;s only of real concern if trig inputs are rare.</span>
+<span class="linenos"> 20</span>
+<span class="linenos"> 21</span><span class="c1">// Features:</span>
+<span class="linenos"> 22</span><span class="c1">// Each set of four addresses means:</span>
+<span class="linenos"> 23</span><span class="c1">//    time delay</span>
+<span class="linenos"> 24</span><span class="c1">//    address to write</span>
+<span class="linenos"> 25</span><span class="c1">//    lower half-word of data</span>
+<span class="linenos"> 26</span><span class="c1">//    upper half-word of data</span>
+<span class="linenos"> 27</span><span class="c1">// time delay is in units of (clock cycles * 2^tgen_gran), applied _after_ the</span>
+<span class="linenos"> 28</span><span class="c1">// register write.</span>
+<span class="linenos"> 29</span><span class="c1">// Each operation takes four cycles by itself; the delay cycle count adds to</span>
+<span class="linenos"> 30</span><span class="c1">// this pedestal.</span>
+<span class="linenos"> 31</span><span class="c1">// An address of zero ends the program and resets the state to pc=0,</span>
+<span class="linenos"> 32</span><span class="c1">// which restarts when an external trig is supplied.</span>
+<span class="linenos"> 33</span>
+<span class="linenos"> 34</span><span class="c1">// runs at 150 MHz in Spartan-6 using 93 slice LUTs and one BRAM.</span>
+<span class="linenos"> 35</span>
+<span class="linenos"> 36</span><span class="c1">// Larry Doolittle, LBNL, 2014</span>
+<span class="linenos"> 37</span>
+<span class="linenos"> 38</span><span class="k">module</span><span class="w"> </span><span class="n">tgen</span><span class="w"> </span><span class="p">#(</span>
+<span class="linenos"> 39</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">aw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">17</span><span class="p">,</span>
+<span class="linenos"> 40</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">tgen_gran</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0</span><span class="w">   </span><span class="c1">// tick extension</span>
+<span class="linenos"> 41</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos"> 42</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span><span class="w">  </span><span class="c1">// timespec 6.66 ns</span>
+<span class="linenos"> 43</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">trig</span><span class="p">,</span>
+<span class="linenos"> 44</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="n">collision</span><span class="p">,</span>
+<span class="linenos"> 45</span><span class="w">     </span><span class="c1">// Controlling bus</span>
+<span class="linenos"> 46</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">lb_data</span><span class="p">,</span>
+<span class="linenos"> 47</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">lb_write</span><span class="p">,</span>
+<span class="linenos"> 48</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">lb_addr</span><span class="p">,</span>
+<span class="linenos"> 49</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">dests_write</span><span class="p">,</span>
+<span class="linenos"> 50</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">addr_padding</span><span class="p">,</span>
+<span class="linenos"> 51</span><span class="w">     </span><span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">external</span><span class="w"> </span><span class="o">*</span><span class="p">)</span>
+<span class="linenos"> 52</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">bank_next</span><span class="p">,</span><span class="w">  </span><span class="c1">// external</span>
+<span class="linenos"> 53</span><span class="w">     </span><span class="c1">// optional monitoring</span>
+<span class="linenos"> 54</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">3</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">status</span><span class="p">,</span>
+<span class="linenos"> 55</span><span class="w">     </span><span class="c1">// These two are not actually used, but they trigger magic from newad</span>
+<span class="linenos"> 56</span><span class="w">     </span><span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">external</span><span class="w"> </span><span class="o">*</span><span class="p">)</span>
+<span class="linenos"> 57</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">delay_pc_XXX</span><span class="p">,</span><span class="w"> </span><span class="c1">// external</span>
+<span class="linenos"> 58</span><span class="w">     </span><span class="p">(</span><span class="o">*</span><span class="w"> </span><span class="n">external</span><span class="w"> </span><span class="o">*</span><span class="p">)</span>
+<span class="linenos"> 59</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">9</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">delay_pc_XXX_addr</span><span class="p">,</span><span class="w"> </span><span class="c1">// external</span>
+<span class="linenos"> 60</span><span class="w">     </span><span class="c1">// Controlled bus</span>
+<span class="linenos"> 61</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">lbo_data</span><span class="p">,</span>
+<span class="linenos"> 62</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="n">lbo_write</span><span class="p">,</span>
+<span class="linenos"> 63</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">lbo_addr</span>
+<span class="linenos"> 64</span><span class="p">);</span>
+<span class="linenos"> 65</span>
+<span class="linenos"> 66</span><span class="k">localparam</span><span class="w"> </span><span class="n">pcw</span><span class="o">=</span><span class="mh">10</span><span class="p">;</span><span class="w">  </span><span class="c1">// Set delay_pc_XXX_addr width above to pcw</span>
+<span class="linenos"> 67</span><span class="k">assign</span><span class="w"> </span><span class="n">delay_pc_XXX_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 68</span><span class="c1">// Counters</span>
+<span class="linenos"> 69</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">pcw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">pc</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 70</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">subcycle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pc</span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">];</span>
+<span class="linenos"> 71</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">+</span><span class="nl">tgen_gran:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">timer</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 72</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">new_timer</span><span class="p">;</span><span class="w">  </span><span class="c1">// comes from RAM</span>
+<span class="linenos"> 73</span><span class="kt">reg</span><span class="w"> </span><span class="n">mem_zero</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// comes from RAM</span>
+<span class="linenos"> 74</span><span class="kt">wire</span><span class="w"> </span><span class="n">zero_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">subcycle</span><span class="o">==</span><span class="mh">3</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">mem_zero</span><span class="p">;</span>
+<span class="linenos"> 75</span><span class="kt">wire</span><span class="w"> </span><span class="n">trig1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trig</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">pc</span><span class="o">==</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 76</span><span class="kt">reg</span><span class="w"> </span><span class="n">trig1d</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 77</span><span class="kt">reg</span><span class="w"> </span><span class="n">did_work</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 78</span><span class="kt">wire</span><span class="w"> </span><span class="n">increment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">pc</span><span class="o">==</span><span class="mh">0</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">trig1d</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">subcycle</span><span class="o">!=</span><span class="mh">0</span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">timer</span><span class="o">==</span><span class="mh">0</span><span class="p">);</span>
+<span class="linenos"> 79</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos"> 80</span><span class="w">     </span><span class="n">trig1d</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">trig1</span><span class="p">;</span>
+<span class="linenos"> 81</span><span class="w">     </span><span class="n">pc</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">pc</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">increment</span><span class="p">;</span>
+<span class="linenos"> 82</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">zero_addr</span><span class="p">)</span><span class="w"> </span><span class="n">pc</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 83</span><span class="w">     </span><span class="n">timer</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">(</span><span class="n">subcycle</span><span class="o">==</span><span class="mh">1</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">(</span><span class="n">new_timer</span><span class="o">&lt;&lt;</span><span class="n">tgen_gran</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">timer</span><span class="o">-</span><span class="p">(</span><span class="n">subcycle</span><span class="o">==</span><span class="mh">0</span><span class="p">);</span>
+<span class="linenos"> 84</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig1</span><span class="p">)</span><span class="w"> </span><span class="n">did_work</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 85</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">pc</span><span class="p">[</span><span class="mh">2</span><span class="p">])</span><span class="w"> </span><span class="n">did_work</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span>
+<span class="linenos"> 86</span><span class="k">end</span>
+<span class="linenos"> 87</span>
+<span class="linenos"> 88</span><span class="c1">// Atomic flip between banks</span>
+<span class="linenos"> 89</span><span class="c1">// OK for bank_next to be in some other clock domain</span>
+<span class="linenos"> 90</span><span class="kt">reg</span><span class="w"> </span><span class="n">bank</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">bank_prev</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">work_prev</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos"> 91</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">trig1</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos"> 92</span><span class="w">     </span><span class="n">bank</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">bank_next</span><span class="p">;</span>
+<span class="linenos"> 93</span><span class="w">     </span><span class="n">bank_prev</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">bank</span><span class="p">;</span>
+<span class="linenos"> 94</span><span class="w">     </span><span class="n">work_prev</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">did_work</span><span class="p">;</span>
+<span class="linenos"> 95</span><span class="k">end</span>
+<span class="linenos"> 96</span>
+<span class="linenos"> 97</span><span class="c1">// DPRAM</span>
+<span class="linenos"> 98</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">mem_out</span><span class="p">;</span>
+<span class="linenos"> 99</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="nl">pcw:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">addra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">bank</span><span class="p">,</span><span class="w"> </span><span class="n">lb_addr</span><span class="p">[</span><span class="n">pcw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]};</span>
+<span class="linenos">100</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="nl">pcw:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">addrb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="o">~</span><span class="n">bank</span><span class="p">,</span><span class="w"> </span><span class="n">pc</span><span class="p">};</span>
+<span class="linenos">101</span><span class="n">dpram</span><span class="w"> </span><span class="p">#(.</span><span class="n">dw</span><span class="p">(</span><span class="mh">16</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">aw</span><span class="p">(</span><span class="n">pcw</span><span class="o">+</span><span class="mh">1</span><span class="p">))</span><span class="w"> </span><span class="n">dests</span><span class="p">(.</span><span class="n">clka</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">clkb</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
+<span class="linenos">102</span><span class="w">     </span><span class="p">.</span><span class="n">addra</span><span class="p">(</span><span class="n">addra</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">dina</span><span class="p">(</span><span class="n">lb_data</span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]),</span><span class="w"> </span><span class="p">.</span><span class="n">wena</span><span class="p">(</span><span class="n">dests_write</span><span class="p">),</span>
+<span class="linenos">103</span><span class="w">     </span><span class="p">.</span><span class="n">addrb</span><span class="p">(</span><span class="n">addrb</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">doutb</span><span class="p">(</span><span class="n">mem_out</span><span class="p">));</span>
+<span class="linenos">104</span>
+<span class="linenos">105</span><span class="c1">// Data path for DPRAM read results</span>
+<span class="linenos">106</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">mem_out1</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">mem_out2</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">107</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">108</span><span class="w">     </span><span class="n">mem_out1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">mem_out</span><span class="p">;</span>
+<span class="linenos">109</span><span class="w">     </span><span class="n">mem_out2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">mem_out1</span><span class="p">;</span>
+<span class="linenos">110</span><span class="w">     </span><span class="n">mem_zero</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">mem_out</span><span class="o">==</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">111</span><span class="k">end</span>
+<span class="linenos">112</span><span class="k">assign</span><span class="w"> </span><span class="n">new_timer</span><span class="o">=</span><span class="n">mem_out</span><span class="p">;</span>
+<span class="linenos">113</span><span class="kt">reg</span><span class="w"> </span><span class="n">write_cycle</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">114</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">our_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">write_cycle</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="n">mem_out1</span><span class="p">,</span><span class="n">mem_out</span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">32</span><span class="mi">&#39;d0</span><span class="p">;</span>
+<span class="linenos">115</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">our_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">write_cycle</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">mem_out2</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">16</span><span class="mi">&#39;d0</span><span class="p">;</span>
+<span class="linenos">116</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="n">write_cycle</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">subcycle</span><span class="o">==</span><span class="mh">3</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">mem_zero</span><span class="p">;</span>
+<span class="linenos">117</span>
+<span class="linenos">118</span><span class="c1">// Now merge the two streams</span>
+<span class="linenos">119</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">lbo_data_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">120</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">lbo_addr_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">121</span><span class="kt">reg</span><span class="w"> </span><span class="n">lbo_write_r</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">collision_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">122</span><span class="kt">wire</span><span class="w"> </span><span class="n">write_thru</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lb_write</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">dests_write</span><span class="p">;</span>
+<span class="linenos">123</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">124</span><span class="w">     </span><span class="n">lbo_data_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">write_thru</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">lb_data</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">our_data</span><span class="p">;</span>
+<span class="linenos">125</span><span class="w">     </span><span class="n">lbo_addr_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">write_thru</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">lb_addr</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="n">addr_padding</span><span class="p">,</span><span class="w"> </span><span class="n">our_addr</span><span class="p">};</span>
+<span class="linenos">126</span><span class="w">     </span><span class="n">lbo_write_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">write_thru</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">write_cycle</span><span class="p">;</span>
+<span class="linenos">127</span><span class="w">     </span><span class="n">collision_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">write_thru</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">write_cycle</span><span class="p">;</span>
+<span class="linenos">128</span><span class="k">end</span>
+<span class="linenos">129</span>
+<span class="linenos">130</span><span class="c1">// Output ports</span>
+<span class="linenos">131</span><span class="k">assign</span><span class="w"> </span><span class="n">lbo_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbo_addr_r</span><span class="p">;</span>
+<span class="linenos">132</span><span class="k">assign</span><span class="w"> </span><span class="n">lbo_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbo_data_r</span><span class="p">;</span>
+<span class="linenos">133</span><span class="k">assign</span><span class="w"> </span><span class="n">lbo_write</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lbo_write_r</span><span class="p">;</span>
+<span class="linenos">134</span><span class="k">assign</span><span class="w"> </span><span class="n">collision</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">collision_r</span><span class="p">;</span>
+<span class="linenos">135</span><span class="k">assign</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">work_prev</span><span class="p">,</span><span class="w"> </span><span class="n">bank_prev</span><span class="p">,</span><span class="w"> </span><span class="n">bank</span><span class="p">,</span><span class="w"> </span><span class="n">bank_next</span><span class="p">};</span>
+<span class="linenos">136</span>
+<span class="linenos">137</span><span class="k">endmodule</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, LBNL ATG.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

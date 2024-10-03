@@ -1,0 +1,149 @@
+.. _tgen:
+
+tgen
+====
+
+Description
+'''''''''''
+
+| 
+|  Timing generator
+|  Interposes in and passes-through a local register write bus
+|  One-cycle delay from input bus to output bus
+|  Controlling bus has priority for access to the controlled bus.
+|  Output "collision" when a function generator write gets lost.
+|  That's a single-cycle output, which needs to be latched and/or
+|  counted by whoever instantiates this module.
+| 
+|  The dual-port ram holding the program is part of the local bus
+|  address space, defined by an external address decoder that supplies
+|  the dests_write port signal.  The size of that memory is defined
+|  by the pcw parameter.
+| 
+|  After filling the table, toggle bank_next to make it take effect.
+|  In theory, you should then wait for that new bank_next value to
+|  propagate to bank_stat before writing anything else to the table.
+|  That's only of real concern if trig inputs are rare.
+| 
+|  Features:
+|  Each set of four addresses means:
+|     time delay
+|     address to write
+|     lower half-word of data
+|     upper half-word of data
+|  time delay is in units of (clock cycles * 2^tgen_gran), applied _after_ the
+|  register write.
+|  Each operation takes four cycles by itself; the delay cycle count adds to
+|  this pedestal.
+|  An address of zero ends the program and resets the state to pc=0,
+|  which restarts when an external trig is supplied.
+| 
+|  runs at 150 MHz in Spartan-6 using 93 slice LUTs and one BRAM.
+| 
+|  Larry Doolittle, LBNL, 2014
+| 
+
+Pinout
+''''''
+
+.. _fig:tgen_block:
+.. figure:: tgen_block.png
+    :alt: Schematic symbol
+
+Parameters
+''''''''''
+
+.. list-table:: tgen_param_table
+   :header-rows: 1
+
+   * - Name
+     - Min
+     - Max
+     - Default
+     - Description
+   * - aw
+     - ?
+     - ?
+     - 17
+     - 
+   * - tgen_gran
+     - ?
+     - ?
+     - 0
+     - tick extension
+
+Ports
+'''''
+
+.. list-table:: tgen_port_table
+   :header-rows: 1
+
+   * - Signal
+     - Direction
+     - Description
+   * - clk
+     - Input
+     - timespec 6.66 ns
+   * - trig
+     - Input
+     - 
+   * - collision
+     - Output
+     - 
+   * - lb_data[31:0]
+     - Input
+     - 
+   * - lb_write
+     - Input
+     - 
+   * - lb_addr[aw-1:0]
+     - Input
+     - 
+   * - dests_write
+     - Input
+     - 
+   * - addr_padding[aw-17:0]
+     - Input
+     - 
+   * - bank_next
+     - Input
+     - external
+   * - status[3:0]
+     - Output
+     - 
+   * - delay_pc_XXX[31:0]
+     - Input
+     - external
+   * - delay_pc_XXX_addr[9:0]
+     - Output
+     - external
+   * - lbo_data[31:0]
+     - Output
+     - 
+   * - lbo_write
+     - Output
+     - 
+   * - lbo_addr[aw-1:0]
+     - Output
+     - 
+
+Implementation and use
+''''''''''''''''''''''
+
+The `portable`_ `Verilog`_
+implementation can be found in :ref:`tgen_source`
+
+.. _`portable`: https://en.wikipedia.org/wiki/Software_portability
+.. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
+
+Timing Diagram
+''''''''''''''
+
+A `GTKWave`_-generated timing diagram is shown below:
+
+.. _`GTKWave`: https://gtkwave.sourceforge.net/
+
+.. _fig:tgen_timing:
+.. figure:: tgen_timing.png
+    :alt: Timing diagram
+
