@@ -140,14 +140,30 @@ we specifically reject any idea of wait states and handshake.
 Our use case covers real-time on-chip communication,
 where cycle counts are well-defined and set at configuration/synthesis
 time, <em>not</em> run-time.</p>
-<p>The key component held here is
-Just In Time Readout Across Domains - <a class="reference external" href="jit_rad.md">jit_rad</a> for short.</p>
-<p>Also</p>
+<p>Components held here are</p>
 <ul class="simple">
+<li><p>Just In Time Readout Across Domains - <a class="reference external" href="jit_rad.md">jit_rad</a> for short.</p></li>
 <li><p>localbus.vh, a helper for cycle-accurate bus simulations</p></li>
 <li><p>gen_regmap.py</p></li>
-<li><p>the much-maligned tgen</p></li>
+<li><p>the much-maligned tgen, a general-purpose real-time write sequencer,
+constructed as a localbus interposer;
+has support in leep as assemble_tgen() and tgen_reg_sequence()</p></li>
 </ul>
+<p>As the jit_rad documentation explains, it’s easy to shift the <em>write</em>
+side of a localbus to a different clock domain.  Throughput is not affected,
+and the additional latency and jitter are typically irrelevant
+compared to what goes on in the software and LASS host computer.
+Here are the typical few lines of Verilog we use to accomplish this
+clock domain shift (extracted from cmoc/cryomodule.v):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wire</span> <span class="p">[</span><span class="mi">31</span><span class="p">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">clk1x_data</span><span class="p">;</span>
+<span class="n">wire</span> <span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">0</span><span class="p">]</span> <span class="n">clk1x_addr</span><span class="p">;</span>
+<span class="n">wire</span> <span class="n">clk1x_write</span><span class="p">;</span>
+<span class="o">//</span> <span class="n">Transfer</span> <span class="n">local</span> <span class="n">bus</span> <span class="n">to</span> <span class="n">clk1x</span> <span class="n">domain</span>
+<span class="n">data_xdomain</span> <span class="c1">#(.size(32+17)) lb_to_1x(</span>
+<span class="o">.</span><span class="n">clk_in</span><span class="p">(</span><span class="n">lb_clk</span><span class="p">),</span> <span class="o">.</span><span class="n">gate_in</span><span class="p">(</span><span class="n">lb_write</span><span class="p">),</span> <span class="o">.</span><span class="n">data_in</span><span class="p">({</span><span class="n">lb_addr</span><span class="p">,</span><span class="n">lb_data</span><span class="p">}),</span>
+<span class="o">.</span><span class="n">clk_out</span><span class="p">(</span><span class="n">clk1x</span><span class="p">),</span> <span class="o">.</span><span class="n">gate_out</span><span class="p">(</span><span class="n">clk1x_write</span><span class="p">),</span> <span class="o">.</span><span class="n">data_out</span><span class="p">({</span><span class="n">clk1x_addr</span><span class="p">,</span><span class="n">clk1x_data</span><span class="p">}));</span>
+</pre></div>
+</div>
 <p>Also see</p>
 <ul class="simple">
 <li><p><a class="reference external" href="../badger/doc/mem_gateway.svg">Memory gateway timing</a></p></li>
