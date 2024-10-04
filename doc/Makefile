@@ -26,6 +26,10 @@ GEN_DIR = _gen_rst
 GEN_MD_DIR = _gen_md
 GEN_SRC_DIR = _gen_src_rst
 
+# Works for now, but is an indication that our makefiles need work
+VCD_ARGS = $(VCD_ARGS_$@)
+VCD_ARGS_tgen.vcd = +tgen_seq=../localbus/tgen_seq.dat
+
 # No need to specify directory for each of these, thanks to the magic of make's vpath.
 SRC = \
    afterburner.v \
@@ -97,6 +101,7 @@ SRC = \
    serializer_multichannel.v \
    serialize.v \
    shortfifo.v \
+   tgen.v \
    timestamp.v \
    tt800.v \
    upconv.v \
@@ -160,7 +165,7 @@ SRC_SVG = \
   build-tools/cdc_OK1.svg \
   build-tools/cdc_OKX.svg
 
-DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR) $(HOMELESS_DIR) $(SERIAL_IO_DIR)/EVG_EVR
+DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR) $(HOMELESS_DIR) $(SERIAL_IO_DIR)/EVG_EVR $(BEDROCK_DIR)/localbus
 VFLAGS     += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS)) -y$(AUTOGEN_DIR)
 
 vpath %.v $(DIRS)
@@ -302,5 +307,5 @@ clean::
 include $(BUILD_DIR)/bottom_rules.mk
 
 CLEAN += $(SRC_RST) $(RST) $(BLOCK_EPS) $(BLOCK_PNG) $(TIMING_PNG) $(GEN_TB) $(addsuffix *, $(DEP_TB)) $(VCD) \
-		 cordicg_b22.v *_tb *.out
+		 cordicg_b22.v *_tb *.out *.pdf
 CLEAN_DIRS += $(GEN_DIR) $(GEN_SRC_DIR) $(GEN_MD_DIR)
