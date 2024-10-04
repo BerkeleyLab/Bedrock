@@ -9,6 +9,7 @@ vpath %.v $(DSP_DIR) $(BADGER_DIR) $(BOARD_SUPPORT_DIR)/bmb7_kintex
 vpath %.c $(BADGER_DIR)/tests
 
 all: jit_rad_gateway_demo_badger jit_rad_gateway_demo_qf2 jit_rad_gateway_demo_cdc.txt Vjit_rad_gateway_demo jit_rad_gateway_check
+all: tgen_tb
 
 jit_rad_gateway_demo_badger: $(BADGER_V)
 	$(VERILOG) $(V_TB) -o $@ $^
@@ -34,6 +35,8 @@ Vjit_rad_gateway_demo: $(BADGER_V) xfer_sim.cpp udp_model.c
 live: Vjit_rad_gateway_demo
 	./Vjit_rad_gateway_demo +udp_port=3010 +trace
 # see README.md for suggestions for what to do with "make live"
+
+tgen_tb: tgen.v dpram.v
 
 clean:
 	rm -f jit_rad_gateway_demo_badger jit_rad_gateway_demo_qf2
