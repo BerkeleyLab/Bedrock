@@ -3,33 +3,35 @@ module cmoc_top(
 	input       GTPREFCLK_N,
 	input       SYSCLK_P,
 
-	// RGMII
+	// RGMII Tx port
 	output [3:0] RGMII_TXD,
 	output       RGMII_TX_CTRL,
 	output       RGMII_TX_CLK,
+
+	// RGMII Rx port
 	input [3:0]  RGMII_RXD,
 	input       RGMII_RX_CTRL,
 	input       RGMII_RX_CLK,
 
 	// SPI boot flash programming port
 	// BOOT_CCLK treated specially in 7-series
-	output       BOOT_CS_B,
+	output      BOOT_CS_B,
 	input       BOOT_MISO,
-	output       BOOT_MOSI,
-	output       CFG_D02, // hope R209 is DNF
+	output      BOOT_MOSI,
+	output      CFG_D02, // hope R209 is DNF
 
-	// One I2C bus, everything gatewayed through a TCA9548
-	output       TWI_SCL,
+	// One I2C bus, with everything gatewayed through a TCA9548
+	output      TWI_SCL,
 	inout       TWI_SDA,
-	output       TWI_RST,
+	output      TWI_RST,
 	input       TWI_INT,
 
 	// SPI pins connected to microcontroller
 	input       SCLK,
 	input       CSB,
 	input       MOSI,
-	output       MISO,
-	output       MMC_INT,
+	output      MISO,
+	output      MMC_INT,
 
 	// White Rabbit DAC
 	output       WR_DAC_SCLK,
@@ -61,7 +63,7 @@ BUFG passg_125(.I(gtpclk0), .O(gtpclk));
 
 parameter in_phase_tx_clk = 1;
 // Standardized interface, hardware-dependent implementation
-wire tx_clk, tx_clk90;
+wire tx_clk, tx_clk90, clk62;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
 
@@ -92,6 +94,7 @@ gmii_clock_handle clocks(
 	.clk_locked(clk_locked)
 );
 `endif
+assign clk62 = 0;  // Ignore dna primitive at least for now
 
 // Double-data-rate conversion
 wire vgmii_tx_clk, vgmii_tx_clk90, vgmii_rx_clk;
@@ -121,9 +124,11 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 );
 
 wire BOOT_CCLK;
+wire cfg_clk;  // Just for fun, so we can measure its frequency
 `ifndef SIMULATE
-STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0));
+STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
 `else // !`ifndef SIMULATE
+   assign cfg_clk = 0;
    assign BOOT_CCLK = tx_clk;
 `endif // !`ifndef SIMULATE
 
@@ -139,6 +144,15 @@ wire [33:0] FMC1_LA_P;
 wire [33:0] FMC1_LA_N;
 wire [33:0] FMC2_LA_P;
 wire [33:0] FMC2_LA_N;
+wire [1:0] FMC1_CK_P;
+wire [1:0] FMC1_CK_N;
+wire [1:0] FMC2_CK_P;
+wire [1:0] FMC2_CK_N;
+wire [23:0] FMC2_HA_P;
+wire [23:0] FMC2_HA_N;
+
+// vestiges of CERN FMC tester support
+wire old_scl1, old_scl2, old_sda1, old_sda2;
 
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
@@ -151,11 +165,12 @@ marble_base #(.USE_I2CBRIDGE(1)) base(
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
-	.aux_clk(SYSCLK_P), .GPS(4'b0),
+	.aux_clk(SYSCLK_P), .clk62(clk62), .cfg_clk(cfg_clk),
+	.GPS(4'b0),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
-	.twi_scl({dum_scl, FMC2_LA_P[2] , FMC1_LA_P[2], TWI_SCL}),
-	.twi_sda({dum_sda, FMC2_LA_N[2], FMC1_LA_N[2], TWI_SDA}),
+	.twi_scl({dum_scl, old_scl1, old_scl2, TWI_SCL}),
+	.twi_sda({dum_sda, old_sda1, old_sda2, TWI_SDA}),
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.lb_clk(lb_clk),
 	.lb_addr(lb_addr),
@@ -166,10 +181,8 @@ marble_base #(.USE_I2CBRIDGE(1)) base(
 	.lb_data_out(lb_data_out),
 	.lb_data_in(lb_din),
 	.fmc_test({
-		FMC2_LA_P[33:3], FMC2_LA_P[1:0],
-		FMC2_LA_N[33:3], FMC2_LA_N[1:0],
-		FMC1_LA_P[33:3], FMC1_LA_P[1:0],
-		FMC1_LA_N[33:3], FMC1_LA_N[1:0]}),
+		FMC2_HA_P, FMC2_HA_N, FMC2_CK_P, FMC2_CK_N, FMC2_LA_P, FMC2_LA_N,
+		FMC1_CK_P, FMC1_CK_N, FMC1_LA_P, FMC1_LA_N}),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
 	.LED(LED)

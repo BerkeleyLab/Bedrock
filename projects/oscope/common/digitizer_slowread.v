@@ -67,15 +67,14 @@ timestamp ts(.clk(adc_clk), .aux_trig(1'b0), .slow_op(slow_op), .slow_snap(slow_
 // the buffer, tag_old shows it at the begin-time of the buffer.  Not perfect
 // because of non-boxcar filtering and sloppy pipelining.
 reg [7:0] tag_old=0;
-`define SLOW_SR_LEN 17*16
-`define SLOW_SR_DATA { \
-	U3DA_min, U3DA_max, U3DB_min, U3DB_max, U3DC_min, U3DC_max, U3DD_min, U3DD_max, \
-	U2DA_min, U2DA_max, U2DB_min, U2DB_max, U2DC_min, U2DC_max, U2DD_min, U2DD_max, \
+parameter sr_length = 17*16;
+wire [sr_length-1:0] slow_sr_data = {
+	U3DA_min, U3DA_max, U3DB_min, U3DB_max, U3DC_min, U3DC_max, U3DD_min, U3DD_max,
+	U2DA_min, U2DA_max, U2DB_min, U2DB_max, U2DC_min, U2DC_max, U2DD_min, U2DD_max,
 	tag_now, tag_old }
-parameter sr_length = `SLOW_SR_LEN;
 reg [sr_length-1:0] slow_read=0;
 always @(posedge adc_clk) if (slow_op) begin
-	slow_read <= slow_snap ? `SLOW_SR_DATA : {slow_read[sr_length-9:0],timestamp_out};
+	slow_read <= slow_snap ? slow_sr_data : {slow_read[sr_length-9:0],timestamp_out};
 	if (slow_snap) tag_old <= tag_now;
 end
 

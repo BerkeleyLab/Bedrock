@@ -69,6 +69,7 @@ module rf_controller (
 	input [7:0] tag, // external
 	`AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 
