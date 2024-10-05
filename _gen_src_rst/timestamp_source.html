@@ -184,9 +184,9 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">101</span><span class="c1">// Making an explicit copy like this avoids a warning when dw != 8</span>
 <span class="linenos">102</span><span class="k">assign</span><span class="w"> </span><span class="n">shift_out</span><span class="o">=</span><span class="n">snap_out</span><span class="p">;</span>
 <span class="linenos">103</span>
-<span class="linenos">104</span><span class="c1">// More-or-less equivalent to</span>
-<span class="linenos">105</span><span class="c1">// define SLOW_SR_DATA { time1, time2, time3, time4, atime1, atime2, atime3, atime4 }</span>
-<span class="linenos">106</span><span class="c1">// but uses far fewer resources</span>
+<span class="linenos">104</span><span class="c1">// More-or-less equivalent to adding</span>
+<span class="linenos">105</span><span class="c1">//   { time1, time2, time3, time4, atime1, atime2, atime3, atime4 }</span>
+<span class="linenos">106</span><span class="c1">// to slow_sr_data, but uses far fewer resources</span>
 <span class="linenos">107</span>
 <span class="linenos">108</span><span class="k">endmodule</span>
 </pre></div>
