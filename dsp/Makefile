@@ -1,4 +1,5 @@
 include ../dir_list.mk
+VERILOG_AUTOGEN += "cordicg_b22.v"
 .PHONY: all
 all: targets
 include $(BUILD_DIR)/top_rules.mk
