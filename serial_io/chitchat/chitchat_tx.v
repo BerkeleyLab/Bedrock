@@ -69,7 +69,7 @@ module chitchat_tx #(
    wire [15:0] crc_pad           = 0;
 
    // extra_data
-   reg  [127:0] tx_extra_data_fix         = 0;
+   reg  [255:0] tx_extra_data_fix         = 0;
    reg  [15:0]  tx_extra_word_r           = 0;
 
    always @(posedge clk) begin
