@@ -39,7 +39,7 @@ module chitchat_rx #(
    output [31:0] rx_data0,
    output [31:0] rx_data1,
 	output        rx_extra_data_valid,
-	output [127:0] rx_extra_data,
+	output [255:0] rx_extra_data,
    output [15:0] rx_frame_counter,
    output [15:0] rx_loopback_frame_counter
 );
@@ -130,11 +130,11 @@ module chitchat_rx #(
    reg [31:0] rx_data0_r;
    reg [31:0] rx_data1_r;
    reg rx_extra_data_valid_r;
-	reg [127:0] rx_extra_data_r;
+	reg [255:0] rx_extra_data_r;
 
    reg [15:0] rx_extra_data_tmp = 0;
-   reg [2:0] extra_word_cnt = 0;
-   reg [2:0] extra_word_cnt_dly = 0;
+   reg [3:0] extra_word_cnt = 0;
+   reg [3:0] extra_word_cnt_dly = 0;
    reg [15:0] rx_frame_counter_r = 0;
    reg [15:0] rx_loopback_frame_counter_r;
 
@@ -173,7 +173,7 @@ module chitchat_rx #(
       end
       if (word_count==9) begin
          rx_extra_data_tmp <= gtx_d;
-         extra_word_cnt <= rx_frame_counter_r[2:0];
+         extra_word_cnt <= rx_frame_counter_r[3:0];
       end
          if (word_count==WORD_FRAME_CNT-1) last <= 1; // Last word (CRC)
    end
@@ -183,19 +183,27 @@ module chitchat_rx #(
       rx_extra_data_valid_r <= 1'b0;
       if (extra_word_cnt != extra_word_cnt_dly) begin
          case (extra_word_cnt)
-         // use the received farme_counter to rebuilt the 64 bit
+         // use the received frame_counter to rebuilt the 256 bit
          // at count 7 the new value are registered to output
-            3'h0: begin
+            4'h0: begin
                  rx_extra_data_valid_r    <= 1'b1;
                  rx_extra_data_r[15:0]    <= rx_extra_data_tmp;
                  end
-            3'h1: rx_extra_data_r[31:16]   <= rx_extra_data_tmp;
-            3'h2: rx_extra_data_r[47:32]   <= rx_extra_data_tmp;
-            3'h3: rx_extra_data_r[63:48]   <= rx_extra_data_tmp;
-            3'h4: rx_extra_data_r[79:64]   <= rx_extra_data_tmp;
-            3'h5: rx_extra_data_r[95:80]   <= rx_extra_data_tmp;
-            3'h6: rx_extra_data_r[111:96]  <= rx_extra_data_tmp;
-            3'h7: rx_extra_data_r[127:112] <= rx_extra_data_tmp;
+            4'h1: rx_extra_data_r[31:16]   <= rx_extra_data_tmp;
+            4'h2: rx_extra_data_r[47:32]   <= rx_extra_data_tmp;
+            4'h3: rx_extra_data_r[63:48]   <= rx_extra_data_tmp;
+            4'h4: rx_extra_data_r[79:64]   <= rx_extra_data_tmp;
+            4'h5: rx_extra_data_r[95:80]   <= rx_extra_data_tmp;
+            4'h6: rx_extra_data_r[111:96]  <= rx_extra_data_tmp;
+            4'h7: rx_extra_data_r[127:112] <= rx_extra_data_tmp;
+            4'h8: rx_extra_data_r[143:128] <= rx_extra_data_tmp;
+            4'h9: rx_extra_data_r[159:144] <= rx_extra_data_tmp;
+            4'ha: rx_extra_data_r[175:160] <= rx_extra_data_tmp;
+            4'hb: rx_extra_data_r[191:176] <= rx_extra_data_tmp;
+            4'hc: rx_extra_data_r[207:192] <= rx_extra_data_tmp;
+            4'hd: rx_extra_data_r[223:208] <= rx_extra_data_tmp;
+            4'he: rx_extra_data_r[239:224] <= rx_extra_data_tmp;
+            4'hf: rx_extra_data_r[255:240] <= rx_extra_data_tmp;
             //default:
          endcase
       end

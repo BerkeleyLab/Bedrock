@@ -29,7 +29,7 @@ module chitchat_tx #(
    input  [2:0]  tx_location, // ID of a particular transmitter
    input  [31:0] tx_data0,
    input  [31:0] tx_data1,
-   input  [127:0] tx_extra_data, //16B of extra data transmitted 2 Byte per frame according to local_frame_counter[2:0]
+   input  [255:0] tx_extra_data, // 32B of extra data transmitted 2 Byte per frame according to local_frame_counter[3:0]
    input  [15:0] tx_loopback_frame_counter, // intended from chitchat_rx
 
    output [15:0] local_frame_counter,
@@ -90,20 +90,28 @@ module chitchat_tx #(
 
    // Extra data serialization in the frame
    always @(posedge clk) begin
-	// there are 8 word available and the frame counter 3 LSB are used to populatre them
-	case(frame_counter[2:0])
+	// there are 16 word available and the frame counter 4 LSB are used to populatre them
+	case(frame_counter[3:0])
 	  // memorize the pulseid at the beginning of the slot if is valid
-	  3'h0: begin
+	  4'h0: begin
 		tx_extra_word_r      <= tx_extra_data[15:0];
 		tx_extra_data_fix    <= tx_extra_data;
 	   end
-	   3'h1: tx_extra_word_r <= tx_extra_data_fix[31:16];
-	   3'h2: tx_extra_word_r <= tx_extra_data_fix[47:32];
-	   3'h3: tx_extra_word_r <= tx_extra_data_fix[63:48];
-	   3'h4: tx_extra_word_r <= tx_extra_data_fix[79:64];
-	   3'h5: tx_extra_word_r <= tx_extra_data_fix[95:80];
-	   3'h6: tx_extra_word_r <= tx_extra_data_fix[111:96];
-	   3'h7: tx_extra_word_r <= tx_extra_data_fix[127:112];
+	   4'h1: tx_extra_word_r <= tx_extra_data_fix[31:16];
+	   4'h2: tx_extra_word_r <= tx_extra_data_fix[47:32];
+	   4'h3: tx_extra_word_r <= tx_extra_data_fix[63:48];
+	   4'h4: tx_extra_word_r <= tx_extra_data_fix[79:64];
+	   4'h5: tx_extra_word_r <= tx_extra_data_fix[95:80];
+	   4'h6: tx_extra_word_r <= tx_extra_data_fix[111:96];
+	   4'h7: tx_extra_word_r <= tx_extra_data_fix[127:112];
+      4'h8: tx_extra_word_r <= tx_extra_data_fix[143:128];
+      4'h9: tx_extra_word_r <= tx_extra_data_fix[159:144];
+      4'ha: tx_extra_word_r <= tx_extra_data_fix[175:160];
+      4'hb: tx_extra_word_r <= tx_extra_data_fix[191:176];
+      4'hc: tx_extra_word_r <= tx_extra_data_fix[207:192];
+      4'hd: tx_extra_word_r <= tx_extra_data_fix[223:208];
+      4'he: tx_extra_word_r <= tx_extra_data_fix[239:224];
+      4'hf: tx_extra_word_r <= tx_extra_data_fix[255:240];
 	   //default: tx_extra_word_r ;
 	 endcase
   end
