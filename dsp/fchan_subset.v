@@ -46,7 +46,11 @@ always @(posedge clk) begin
     else if (a_gate|a_trig) live <= a_trig ? keep_use : {live[len-2:0],1'b0};
 end
 
-assign o_data = a_data;
+// Allow for a_dw >= o_dw or a_dw < o_dw by creating a sign-extended copy of a_data
+// with maximum width (max(a_dw, o_dw)).
+localparam max_dw = a_dw > o_dw ? a_dw : o_dw;
+wire signed [max_dw-1:0] a_data_wide = {{max_dw-a_dw{a_data[a_dw-1]}}, a_data};
+assign o_data = a_data_wide[o_dw-1:0];
 assign o_gate = a_gate & live[len-1];
 assign o_trig = a_trig;
 

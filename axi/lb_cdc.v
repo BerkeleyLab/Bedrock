@@ -84,6 +84,7 @@ fifo_2c #(
 );
 
 wire [DW:0] b2a_din, b2a_dout;
+wire lbb_rstb_w, lbb_wstb_w, lbb_ren_w, lbb_wen_w;
 assign b2a_din = {lbb_ren_w, lbb_rdata};
 assign {rdata_rnw, lba_rdata} = b2a_dout;
 fifo_2c #(
@@ -102,22 +103,32 @@ fifo_2c #(
   .empty(b2a_empty) // output
 );
 
-wire lbb_rstb_w, lbb_wstb_w, lbb_ren_w, lbb_wen_w;
-assign {lbb_rstb_w, lbb_wstb_w, lbb_ren_w, lbb_wen_w, lbb_addr_w, lbb_wdata_w} = a2b_dout;
-assign lbb_wen  = lbb_wen_w  & a2b_re;
-assign lbb_ren  = lbb_ren_w  & ren;
-assign lbb_wstb = lbb_wstb_w & a2b_re;
-assign lbb_rstb = lbb_rstb_w & a2b_re;
 reg [AW-1:0] lbb_addr_r=0;
 reg [DW-1:0] lbb_wdata_r=0;
-//assign lbb_addr = lbb_addr_w;
-//assign lbb_wdata = lbb_wdata_w;
-assign lbb_addr = lbb_addr_r;
-assign lbb_wdata = lbb_wdata_r;
 
+`define LB_CDC_REG_TEST
+`ifdef LB_CDC_REG_TEST
+reg lbb_rstb_w=1'b0, lbb_wstb_w=1'b0, lbb_ren_w=1'b0, lbb_wen_w=1'b0;
+always @(posedge lbb_clk) begin
+  if (a2b_re) begin
+    {lbb_rstb_w, lbb_wstb_w, lbb_ren_w, lbb_wen_w, lbb_addr_r, lbb_wdata_r} <= a2b_dout;
+  end
+end
+`else
+assign {lbb_rstb_w, lbb_wstb_w, lbb_ren_w, lbb_wen_w, lbb_addr_w, lbb_wdata_w} = a2b_dout;
 always @(posedge lbb_clk) begin
   lbb_addr_r <= lbb_addr_w;
   lbb_wdata_r <= lbb_wdata_w;
 end
+
+`endif
+assign lbb_wen  = lbb_wen_w  & a2b_re;
+assign lbb_ren  = lbb_ren_w  & ren;
+assign lbb_wstb = lbb_wstb_w & a2b_re;
+assign lbb_rstb = lbb_rstb_w & a2b_re;
+//assign lbb_addr = lbb_addr_w;
+//assign lbb_wdata = lbb_wdata_w;
+assign lbb_addr = lbb_addr_r;
+assign lbb_wdata = lbb_wdata_r;
 
 endmodule

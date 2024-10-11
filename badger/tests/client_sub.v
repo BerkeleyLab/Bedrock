@@ -31,14 +31,22 @@ reg [7:0] in_stream[0:msg_len-1];  // file contents
 initial begin
 	log = $test$plusargs("log");
 	if (!$value$plusargs("packet_file=%s", packet_file)) packet_file="xfer1";
+`ifndef CLIENT_SUB_NO_UDP
 	if (!$value$plusargs("udp_port=%d", udp_port))  udp_port=0;
 	if (udp_port!=0) $udp_init(udp_port, badger_client);
+`else
+	if ($value$plusargs("udp_port=%d", udp_port)) begin
+		$display("ERROR! client_sub.v: Using '+udp_port' when CLIENT_SUB_NO_UDP is defined.");
+		$stop(0);
+	end
+`endif
 	else $readmemh(packet_file, in_stream);
 	if (!$value$plusargs("data_len=%d", data_len)) data_len=msg_len;
 	// Run forever (until interrupt) when connected to UDP socket
 	for (cc=0; (udp_port!=0) || (cc<sim_length); cc=cc+1) begin
 		clk_r=0; #4;
 		clk_r=1; #4;
+		if (cc == sim_length-1) $finish(0);
 	end
 end
 assign clk = clk_r;
@@ -58,7 +66,9 @@ always @(posedge clk) begin
 	payload <= 0;
 	payload_short <= 0;
 	if (udp_port!=0 && cc>30) begin
+`ifndef CLIENT_SUB_NO_UDP
 		$udp_in(udp_idata, udp_iflag, udp_count, thinking);
+`endif
 		oxd <= udp_idata;
 		payload <= udp_iflag;
 		payload_short <= udp_iflag && udp_count>0;
@@ -92,9 +102,11 @@ wire opack_complete = udp_oflag & ~ txg;
 always @(posedge clk) begin
 	udp_odata <= txd;
 	udp_oflag <= txg;
+`ifndef CLIENT_SUB_NO_UDP
 	if ((udp_port!=0) & udp_oflag) begin
 		$udp_out(udp_odata, opack_complete);
 	end
+`endif
 end
 
 // Option to print output
