@@ -37,6 +37,8 @@ const uint8_t g_zest_adcs[] = {
     ZEST_DEV_AD9653B
 };
 
+zest_status_t zest = {0};
+
 bool get_spi_ready(void) {
     return !CHECK_BIT(SPI_GET_STATUS(g_base_spi), BIT_CIPO);
 }
@@ -366,7 +368,7 @@ uint32_t read_zest_reg(zest_dev_t dev, uint32_t addr) {
     switch (dev) {
         case ZEST_DEV_LMK01801:
             // Not supported
-            printf("read_zest_reg:  LMK01801 reading not supported.\n");
+            debug_printf("read_zest_reg:  LMK01801 reading not supported.\n");
             return 0;
         case ZEST_DEV_AD9653A:
         case ZEST_DEV_AD9653B:
@@ -384,7 +386,7 @@ uint32_t read_zest_reg(zest_dev_t dev, uint32_t addr) {
                     << g_devinfo.data_len;
             break;
         default:
-            printf("read_zest_reg:  Invalid Device.\n");
+            debug_printf("read_zest_reg:  Invalid Device.\n");
             return 0;
     }
 	SPI_SET_DAT_BLOCK( g_base_spi, inst );
@@ -539,44 +541,55 @@ void select_zest_addr(uint32_t base) {
     g_base_awg = base + ZEST_BASE2_AWG;
 }
 
-void read_amc7823_adcs(void) {
+void get_zest_status(zest_status_t *zest) {
+    for (size_t ix=0; ix<4; ix++) {
+        zest->zest_frequencies[ix] = read_zest_fcnt(ix);
+    }
+    for (size_t ix=0; ix<3; ix++) {
+        zest->zest_phases[ix] = read_clk_div_ph(ix);
+    }
+    for (size_t ix=0; ix<9; ix++) {
+        zest->amc7823_adcs[ix] = read_zest_reg(ZEST_DEV_AMC7823, ix);
+    }
+    for (size_t ix=0; ix<6; ix++) {
+        zest->ad7794_adcs[ix] = read_ad7794_channel(ix);
+    }
+}
+
+void print_zest_status(void) {
+    printf("ZEST Frequencies:\n");
+    for (size_t ix=0; ix<4; ix++) {
+        printf("  Fclk %8s: ", zest_fcnt_names[ix]);
+        print_udec_fix(zest.zest_frequencies[ix]*125, FCNT_WIDTH, 3);
+        printf(" MHz\n");
+    }
+
     // AM7823 ADC, 12 bits:
     // ADC5: LO   = +2  dBm regx*2.5
     // ADC6: Curr = 0.7 A   regx*2.5
     // ADC7: Volt = 3.3/2 V   regx*2.5
     // ADC8: Temp = 25  C   regx*2.6*0.61 - 273
-    uint16_t adc_vals[9];
-    unsigned int ix;
-    for (ix=0; ix<9; ix++) {
-        adc_vals[ix] = read_zest_reg(ZEST_DEV_AMC7823, ix);
-    }
-
     printf("ZEST AMC7823 ADC:\n");
-    for (ix=0; ix<9; ix++) {
-        printf("  ADC %u Val: %#06x", ix, adc_vals[ix]);
+    for (size_t ix=0; ix<9; ix++) {
+        printf("  ADC %u Val: %#06x", ix, zest.amc7823_adcs[ix]);
         if (ix == 8) {
-            // printf(" Temp: %.3f [C]\n", (adc_vals[ix] & 0xfff) * 2.6 * 0.61 - 273);
+            // printf(" Temp: %.3f [C]\n", (adc_vals[ix] & 0xfff) * 2.6 * 0.61 - 273) / 0x3ff;
             printf(" Temp:");
-            print_dec_fix((adc_vals[ix] & 0xfff)*50 - 8736, 5, 3);
+            print_dec_fix((zest.amc7823_adcs[ix] & 0xfff)*50 - 8736, 5, 3);
             printf("[C]\n");
         } else {
             // printf(" Volt: %.3f [V]\n", (adc_vals[ix] & 0xfff) * 2.5 / 0xfff);
             printf(" Volt:");
-            print_dec_fix((adc_vals[ix] & 0xfff) * 2.5, 12, 3);
+            print_dec_fix((zest.amc7823_adcs[ix] & 0xfff) * 2.5, 12, 3);
             printf("[V]\n");
         }
     }
-}
 
-void read_ad7794_adcs(void) {
-    uint32_t adc_vals[6];
-    unsigned int ix;
     printf("ZEST AD7794 ADC:\n");
-    for (ix=0; ix<6; ix++) {
-        adc_vals[ix] = read_ad7794_channel(ix);
-        printf("  AIN %u: %#x", ix+1, adc_vals[ix]);
+    for (size_t ix=0; ix<6; ix++) {
+        printf("  AIN %u: %#x", ix+1, zest.ad7794_adcs[ix]);
         printf(" Volt:");
-        print_dec_fix((adc_vals[ix]) * 1.17, 24, 3); // internal 1.17V ref
+        print_dec_fix((zest.ad7794_adcs[ix]) * 1.17, 24, 3); // internal 1.17V ref
         printf("[V]\n");
     }
 }

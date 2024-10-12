@@ -35,7 +35,7 @@ marble_dev_t marble = {
         .module_present = false, .page_select = 0,
         .i2c_mux_sel = I2C_SEL_QSFP2, .i2c_addr = I2C_ADR_QSFP},
     .adn4600 = {
-        .i2c_mux_sel = I2C_SEL_CLK, .i2c_addr = I2C_ADR_ADN4600},
+        .i2c_mux_sel = I2C_SEL_CLK, .i2c_addr = I2C_ADR_ADN4600, .refdes = "U2"},
     .si570 = {
         .f_reset_hz = 0, .rfreq = 0ULL,
         .i2c_mux_sel = I2C_SEL_APPL, .i2c_addr = I2C_ADR_SI570_NBB}
@@ -108,20 +108,20 @@ void get_qsfp_info(qsfp_info_t *qsfp_param) {
 
     marble_i2c_read(qsfp_param->i2c_addr, 3, &qsfp_param->chan_stat_los, 1);
     marble_i2c_read(qsfp_param->i2c_addr, 22, buf, 2);
-    qsfp_param->temperature = (uint16_t)(buf[0] << 8 | buf[1]) >> 8;  // C
+    qsfp_param->temperature = (int16_t)(buf[0] << 8 | buf[1]) >> 8;  // C
     marble_i2c_read(qsfp_param->i2c_addr, 26, buf, 2);
-    qsfp_param->voltage = (int16_t)(buf[0] << 8 | buf[1]) / 10;  // mV
+    qsfp_param->voltage = (uint16_t)(buf[0] << 8 | buf[1]) / 10;  // mV
     marble_i2c_read(qsfp_param->i2c_addr, 42, buf, 8);
     for (i=0; i < 4; i++) {
-        qsfp_param->bias_current[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) * 2;  // microA
+        qsfp_param->bias_current[i] = (uint16_t)(buf[2*i] << 8 | buf[2*i+1]) * 2;  // microA
     }
     marble_i2c_read(qsfp_param->i2c_addr, 50, buf, 8);
     for (i=0; i < 4; i++) {
-        qsfp_param->tx_power[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) / 10; // microW
+        qsfp_param->tx_power[i] = (uint16_t)(buf[2*i] << 8 | buf[2*i+1]) / 10; // microW
     }
     marble_i2c_read(qsfp_param->i2c_addr, 34, buf, 8);
     for (i=0; i < 4; i++) {
-        qsfp_param->rx_power[i] = (int16_t)(buf[2*i] << 8 | buf[2*i+1]) / 10; // microW
+        qsfp_param->rx_power[i] = (uint16_t)(buf[2*i] << 8 | buf[2*i+1]) / 10; // microW
     }
 }
 
@@ -368,11 +368,11 @@ void print_marble_status(void) {
             printf(" %s: QSFP%1u Serial  :   %.16s\n",  __func__, i+1, qsfp[i].serial_num);
             printf(" %s: QSFP%1u TXRX_LOS:   %#8X\n",   __func__, i+1, qsfp[i].chan_stat_los);
             printf(" %s: QSFP%1u Temp    :   %8d C\n",  __func__, i+1, qsfp[i].temperature);
-            printf(" %s: QSFP%1u Volt    :   %8d mV\n", __func__, i+1, qsfp[i].voltage);
+            printf(" %s: QSFP%1u Volt    :   %8u mV\n", __func__, i+1, qsfp[i].voltage);
             for (unsigned j=0; j < 4; j++) {
-                printf(" %s: QSFP%1u TxBias %u:   %8d " MICRO "A\n", __func__,
+                printf(" %s: QSFP%1u TxBias %u:   %8u " MICRO "A\n", __func__,
                         i+1, j, qsfp[i].bias_current[j]);
-                printf(" %s: QSFP%1u TxPwr  %u:   %8d " MICRO "W\n", __func__,
+                printf(" %s: QSFP%1u TxPwr  %u:   %8u " MICRO "W\n", __func__,
                         i+1, j, qsfp[i].tx_power[j]);
                 printf(" %s: QSFP%1u RxPwr  %d:   %8u " MICRO "W\n", __func__,
                         i+1, j, qsfp[i].rx_power[j]);

@@ -3,6 +3,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define MARBLE_VAR_MARBLE_V1_2 0
+#define MARBLE_VAR_MARBLE_V1_3 1
+#define MARBLE_VAR_MARBLE_V1_4 2
+#define MARBLE_VAR_UNKNOWN     3
+
 typedef union _DataDword {
     uint32_t value;
     unsigned char bytes[4];
@@ -33,16 +38,8 @@ typedef struct {
     t_reg8 *regmap;
 } marble_init_byte_t;
 
-// # marble_v1_2 = 0, marble_v1_3 = 1, marble_v1_4 = 2 and so on..
-typedef enum {
-    MARBLE_VAR_MARBLE_V1_2,
-    MARBLE_VAR_MARBLE_V1_3,
-    MARBLE_VAR_MARBLE_V1_4,
-    MARBLE_VAR_UNKNOWN
-} MARBLE_VAR;
-
 typedef struct marble_init_t {
-    MARBLE_VAR marble_variant;
+    uint8_t marble_variant;
     marble_init_word_t ina219_fmc1_data;
     marble_init_word_t ina219_fmc2_data;
     marble_init_word_t ina219_12v_data;
@@ -51,6 +48,7 @@ typedef struct marble_init_t {
     marble_init_byte_t adn4600_data;
     uint64_t si570_freq_hz;
     bool enable_evr_gtx;
+    bool enable_poll_status;
 } marble_init_t;
 
 typedef struct ina219_info_t {
@@ -83,9 +81,7 @@ typedef struct adn4600_info_t {
     const uint8_t i2c_mux_sel;
     const uint8_t i2c_addr;
     /** schematic refdes */
-    const unsigned char refdes[4];
-    /** function name */
-    const unsigned char name[4];
+    const unsigned char refdes[6];
     uint8_t xpt_status[8];
 } adn4600_info_t;
 
@@ -130,18 +126,18 @@ typedef struct si570_info_t {
     const uint8_t i2c_mux_sel;
     /** I2C device address */
     uint8_t i2c_addr;
-    /** start address */
-    uint8_t start_addr;
+    unsigned char regs[6];
     /** f_xtal, fixed,  0.09 ppb */
     uint64_t f_xtal_hz;
-    unsigned char regs[6];
     /** 38-bit fractional multiplier  */
     uint64_t rfreq;
-    uint8_t hs_div;
-    uint8_t n1;
     uint64_t f_reset_hz;
     uint64_t f_dco_hz;
     uint64_t f_out_hz;
+    /** start address */
+    uint8_t start_addr;
+    uint8_t hs_div;
+    uint8_t n1;
 } si570_info_t;
 
 /**
@@ -149,7 +145,7 @@ typedef struct si570_info_t {
  * @brief Structure holding marble board info
  */
 typedef struct marble_dev_t {
-    MARBLE_VAR variant;
+    uint8_t variant;
     ina219_info_t ina219_12v;
     ina219_info_t ina219_fmc1;
     ina219_info_t ina219_fmc2;
