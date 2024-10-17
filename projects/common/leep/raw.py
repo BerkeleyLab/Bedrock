@@ -112,10 +112,13 @@ def _int(s):
     except ValueError:
         pass
     if hasattr(s, 'startswith'):
-        if s.startswith('0x'):
-            return int(s, 16)
-        elif s.startswith('0b'):
-            return int(s, 2)
+        try:
+            if s.startswith('0x'):
+                return int(s, 16)
+            elif s.startswith('0b'):
+                return int(s, 2)
+        except ValueError:
+            pass
     return None
 
 
