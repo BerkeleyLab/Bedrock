@@ -39,7 +39,7 @@ live: Vjit_rad_gateway_demo
 tgen_tb: tgen.v dpram.v
 
 clean:
-	rm -f jit_rad_gateway_demo_badger jit_rad_gateway_demo_qf2
+	rm -f jit_rad_gateway_demo_badger jit_rad_gateway_demo_qf2 *_tb
 	rm -f jit_rad_gateway_demo_cdc.txt jit_rad_gateway_demo_yosys.json
 	rm -f Vjit_rad_gateway_demo xfer_demo.vcd jit_rad_gateway_tb *.vcd
 	rm -rf obj_dir
