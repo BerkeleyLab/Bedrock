@@ -111,11 +111,13 @@ def _int(s):
         return int(s)
     except ValueError:
         pass
-    bases = (2, 16, 10)
-    for base in bases:
+    if hasattr(s, 'startswith'):
         try:
-            return int(s, base)
-        except (TypeError, ValueError):
+            if s.startswith('0x'):
+                return int(s, 16)
+            elif s.startswith('0b'):
+                return int(s, 2)
+        except ValueError:
             pass
     return None
 

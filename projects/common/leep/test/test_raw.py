@@ -189,3 +189,29 @@ class TestRaw(unittest.TestCase):
             self.assertEqual(self.serv.data[101], 0xdeadbeef)
             self.assertEqual(self.serv.data[102], 0x12345679)
             self.assertEqual(self.serv.data[103], 0xdeadbeef)
+
+
+def test_raw_int():
+    from leep.raw import _int
+    tests = {
+        "foo": None,
+        "123": 123,
+        "0x100": 0x100,
+        "0b1000": 0b1000,
+        "0xreg": None,
+        "0bentry": None,
+    }
+    for key, val in tests.items():
+        if val != _int(key):
+            raise Exception("Test failed _int({}) = {} != {}".format(key, _int(key), val))
+    return True
+
+
+def doTests():
+    test_raw_int()
+    print("PASS")
+    return
+
+
+if __name__ == "__main__":
+    doTests()
