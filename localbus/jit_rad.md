@@ -1,7 +1,7 @@
 # jit_rad: Just In Time Readback Across Domains
 
-Demo of an idea for efficiently making data from another clock domain
-available to local bus readout, without violating CDC checks
+A module for efficiently making data from another clock domain
+available to local bus readout, without violating CDC rules
 
 The simple localbus used in bedrock and lcls2_llrf makes a lot of things
 easy at the Verilog source level, with minimal FPGA fabric footprint.
@@ -15,13 +15,13 @@ to begin with, that's not a problem.
 
 Reading results from clock domains other than the primary is harder, because
 the memory gateway requires a synthesis-time choice of the exact number of
-clock cycles latency.  Our typical practice is to just ignore CDC problems,
+clock cycles latency.  One typical practice is to just ignore CDC problems,
 and hope that registers in domain B are not corrupted when read in domain A.
-This module attempts to address that design flaw.
+Converting such code to use this module will address that design flaw.
 
 We have a fair amount of warning at the beginning of a LASS UDP packet
 before any actual read cycles happen.  Our strategy is to copy 16 words
-from the app_clk domain into a 16x32 (distributed) dpram.  Then those
+from the app_clk domain into a 16x32 dpram.  Then those
 data are trivially available to read out in the local bus domain.
 
 In a QF2-pre, we get about 300 ns warning, because cycles are slow (20 ns),
@@ -35,7 +35,7 @@ Unlike the existing (broken CDC) case, it's not possible to repeatedly
 poll a signal within the same packet.  Well, you can, but you're guaranteed
 to get the same answer each time.  Unlike our slow-readout scheme, the
 data read is not a single-time atomic snapshot.  On the plus side,
-its hardware footprint is pretty small, and I claim it can be dropped in
+its hardware footprint is pretty small, and it has been dropped in
 to lcls2_llrf without requiring any changes to high-level code.
 
 If you really want or need atomic capture, a hook is provided that lets you
@@ -69,18 +69,19 @@ The other ports are
 - xfer_snap (supporting atomic capture use cases)
 - lb_error (output bit which might detect violations in the timing assumptions).
 
-A full demo of this system is in jit_rad_gateway_demo.v.  That consists
-of a production local bus controller (jxj_gate or mem_gateway, preprocessor-
-selectable), an instantiation of jit_rad_gateway, the external multiplexer
-in the xfer_clk domain, and some minimal localbus implementation so you can
-see activity.
+A full demo of this system is in jit_rad_gateway_demo.v.  That consists of
+a production local bus controller (jxj_gate or mem_gateway,
+preprocessor-selectable), an instantiation of jit_rad_gateway,
+the external multiplexer in the xfer_clk domain,
+and some minimal localbus implementation so you can see activity.
 
 A Verilator driver for jit_rad_gateway_demo is in xfer_sim.cpp, that can
 put the simulated chip on a live localhost UDP socket.  A WIP iverilog
 test bench is in jit_rad_gateway_tb.v.
 
-Most of the other files here (besides this one, and the Makefile) are copies
-of files from scattered locations in bedrock, maybe with a few mods.
+This Verilog program depends on a few files from other parts of bedrock,
+as listed in the Makefile: dpram.v flag_xdomain.v reg_tech_cdc.v.
+The testbench additionally depends on files from Packet Badger.
 
 ## Prerequisites and usage
 
@@ -119,7 +120,6 @@ gtkwave xfer_demo.vcd xfer_demo.gtkw
 
 # To do:
 
-- clean up this documentation
+- expand and clean up this documentation
 - document acceptable relationship between lb_clk and app_clk
 - finish up the regression check
-- test it out for real in lcls2_llrf
