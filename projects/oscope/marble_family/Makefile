@@ -6,7 +6,8 @@ XILINX_TOOL := VIVADO
 
 
 include ../../../dir_list.mk
-OSCOPE_COMMON_DIR=../common
+OSCOPE_COMMON_DIR = ../common
+MARBLE_FAMILY_DIR = ../../test_marble_family
 
 APP_NAME = oscope
 
@@ -16,7 +17,7 @@ include $(BUILD_DIR)/newad_top_rules.mk
 include $(OSCOPE_COMMON_DIR)/rules.mk
 
 
-VFLAGS_DEP += -y$(DSP_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(BOARD_SUPPORT_DIR)/zest -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/iserdes -y$(ISERDES_DIR) -y$(XILINX_DIR) -y$(SERIAL_IO_DIR) -y. -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/idelay_scanner -y$(OSCOPE_COMMON_DIR) -y$(HOMELESS_DIR) -y$(BADGER_DIR) -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y../../test_marble_family/ -y../../test_marble_family/pps_lock -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y$(HOMELESS_DIR)/freq_demo -DSIMULATE
+VFLAGS_DEP += -y$(DSP_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(BOARD_SUPPORT_DIR)/zest -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/iserdes -y$(SERIAL_IO_DIR) -y. -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/idelay_scanner -y$(OSCOPE_COMMON_DIR) -y$(HOMELESS_DIR) -y$(BADGER_DIR) -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y$(MARBLE_FAMILY_DIR) -y$(MARBLE_FAMILY_DIR)/pps_lock -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y$(HOMELESS_DIR)/freq_demo -DSIMULATE
 
 LB_AW = 23
 NEWAD_DIRS += $(OSCOPE_COMMON_DIR)
@@ -47,9 +48,32 @@ zest_connector.csv: remap_gen.py
 system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)/$(HARDWARE)/pin_map.csv zest_connector.csv oscope_rules.csv
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
-oscope_top.sv: $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) application_top_auto $(AUTOGEN_DIR)/moving_average.v oscope_marble2_features
+oscope_top.sv: $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) $(AUTOGEN_DIR)/application_top_auto.vh $(AUTOGEN_DIR)/addr_map_application_top.vh $(AUTOGEN_DIR)/moving_average.v oscope_marble2_features
 
 oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v
+
+# =====
+# highly experimental and still somewhat messy
+# sv2v not supplied; see https://github.com/zachjs/sv2v
+UPPER_SV = oscope_top.sv $(OSCOPE_COMMON_DIR)/application_top.sv $(BOARD_SUPPORT_DIR)/zest/zest_cfg_if.sv $(BOARD_SUPPORT_DIR)/zest/zest_if.sv $(BOARD_SUPPORT_DIR)/zest/zest_wrap.sv $(OSCOPE_COMMON_DIR)/digitizer_config.sv
+oscope_prep.v: $(AUTOGEN_DIR)/application_top_auto.vh $(AUTOGEN_DIR)/addr_map_application_top.vh oscope_marble2_features
+	sv2v -DSIMULATE -DVERILATOR -I $(AUTOGEN_DIR) $(UPPER_SV) > $@
+	wc -l $@
+oscope_pure_v.d: oscope_prep.v $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) $(AUTOGEN_DIR)/moving_average.v
+	$(VERILOG) -Wno-timescale -o /dev/null $< -y$(AUTOGEN_DIR) $(VFLAGS_DEP) -M$@.$$$$ && sort -u < $@.$$$$ | tr '\n' ' ' | sed -e 's/^/oscope_pure_v_check oscope_prep_yosys.json oscope_pure_v.d: /' -e 's/ $$//' > $@ && rm $@.$$$$
+# might try to disable this include if we're "just" doing a make clean
+include oscope_pure_v.d
+.PHONY: oscope_pure_v_check
+# default VERILATOR includes -Wall, and I don't want that (yet?)
+# dependencies from oscope_pure_v.d
+oscope_pure_v_check:
+	verilator --lint-only -Wno-WIDTH -Wno-TIMESCALEMOD -Wno-PINMISSING -Wno-CASEINCOMPLETE -DSIMULATE $^
+OSCOPE_PURE_V = $(shell cat oscope_pure_v.d)
+YOSYS_JSON_OPTION += -DSIMULATE
+# most dependencies from oscope_pure_v.d
+oscope_prep_yosys.json: $(FPGA_FAMILY_DIR)/xilinx/IBUFGDS.v
+# exercise with make oscope_prep_cdc.txt
+# =====
 
 $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
 	$(PYTHON) $< -v $@ -j $(APP_NAME)_regmap.json
@@ -71,12 +95,13 @@ $(APP_NAME)_regmap.json: $(AUTOGEN_DIR)/regmap_application_top.json scalar_$(APP
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/shorten_names.py -o $@ -i $(APP_NAME)_regmap_long.json
 
 download:
-	openocd -f ../../test_marble_family/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 oscope_top.bit; exit"
+	openocd -f $(MARBLE_FAMILY_DIR)/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 oscope_top.bit; exit"
 
 
 include $(BUILD_DIR)/bottom_rules.mk
 CLEAN += *.bit *.bin *.prm $(APP_NAME)_regmap*.json scalar_$(APP_NAME)_regmap.json *_features*.json *_features*.vh oscope_marble*_features
-CLEAN += system_top.xdc zest_connector.csv $(RTEFI_CLEAN)
+CLEAN += system_top.xdc zest_connector.csv $(RTEFI_CLEAN) foo.gtkw
+CLEAN += oscope_prep.v oscope_prep_yosys.json oscope_prep_cdc.txt oscope_pure_v.d
 CLEAN_DIRS +=  _xilinx .Xil
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
