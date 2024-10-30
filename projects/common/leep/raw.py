@@ -179,7 +179,7 @@ class LEEPDevice(DeviceBase):
         _reg = _int(reg)
         if _reg is not None:
             return "0x{:x}".format(_reg), _reg, 1, info
-        if len(instance):
+        if instance is not None:
             reg = self.expand_regname(reg, instance=instance)
         info = self.get_reg_info(reg, instance=None)
         size = 2**info.get('addr_width', 0)
