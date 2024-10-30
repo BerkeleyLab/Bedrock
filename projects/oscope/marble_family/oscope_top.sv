@@ -149,9 +149,12 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 );
 
 wire BOOT_CCLK;
+wire cfg_clk;  // Just for fun, so we can measure its frequency
 `ifndef SIMULATE
-STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0));
-`endif // `ifndef SIMULATE
+STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
+`else
+assign cfg_clk = 0;
+`endif
 
 // Placeholders
 wire ZEST_PWR_EN;
@@ -170,14 +173,6 @@ wire [7:0] LED;
 assign Pmod1 = LED;
 assign LD16 = 1;
 assign LD17 = 1;
-
-wire BOOT_CCLK;
-wire cfg_clk;  // Just for fun, so we can measure its frequency
-`ifndef SIMULATE
-STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
-`else
-assign cfg_clk = 0;
-`endif
 
 // vestiges of CERN FMC tester support
 wire old_scl1, old_scl2, old_sda1, old_sda2;
