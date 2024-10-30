@@ -416,6 +416,7 @@ class Parser:
 
         for port, (net_info, port_info) in parsed_mod['external_nets'].items():
             signal_type = net_info['attributes']['signal_type'] if 'signal_type' in net_info['attributes'] else None
+            port_cd = net_info['attributes']['cd'] if 'cd' in net_info['attributes'] else clk_domain
             signed = 'signed' if 'signed' in net_info else None
             direction = port_info['direction'] if 'direction' in port_info else None
             p = Port(port,
@@ -425,7 +426,7 @@ class Parser:
                      signed,
                      this_mod,
                      signal_type,
-                     clk_domain,
+                     port_cd,
                      cd_indexed,
                      port_info != {},
                      **attributes)
@@ -441,7 +442,7 @@ class Parser:
                          None,
                          this_mod,
                          'plus-we-VOID',
-                         clk_domain,
+                         port_cd,
                          cd_indexed,
                          port_info != {},
                          **attributes)
