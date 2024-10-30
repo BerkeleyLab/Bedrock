@@ -60,9 +60,9 @@ oscope_prep.v: $(AUTOGEN_DIR)/application_top_auto.vh $(AUTOGEN_DIR)/addr_map_ap
 	sv2v -DSIMULATE -DVERILATOR -I $(AUTOGEN_DIR) $(UPPER_SV) > $@
 	wc -l $@
 oscope_pure_v.d: oscope_prep.v $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) $(AUTOGEN_DIR)/moving_average.v
-	$(VERILOG) -Wno-timescale -o /dev/null $< -y$(AUTOGEN_DIR) $(VFLAGS_DEP) -M$@.$$$$ && sort -u < $@.$$$$ | tr '\n' ' ' | sed -e 's/^/oscope_pure_v_check oscope_prep_yosys.json oscope_pure_v.d: /' -e 's/ $$//' > $@ && rm $@.$$$$
-# might try to disable this include if we're "just" doing a make clean
-include oscope_pure_v.d
+	$(VERILOG) -Wno-timescale -o /dev/null $< -y$(AUTOGEN_DIR) $(VFLAGS_DEP) -M$@.$$$$ && sort -u < $@.$$$$ | tr '\n' ' ' | sed -e 's/^/oscope_pure_v_check oscope_prep_yosys.json: /' -e 's/ $$//' > $@ && rm $@.$$$$
+# make this dependency file first, explicitly, if you are doing sv2v/cdc_snitch work
+-include oscope_pure_v.d
 .PHONY: oscope_pure_v_check
 # default VERILATOR includes -Wall, and I don't want that (yet?)
 # dependencies from oscope_pure_v.d
