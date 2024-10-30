@@ -96,6 +96,7 @@ module digitizer_config(
 	// lb_clk domain, but only because I flag_xdomain to adc_clk
 	(* external, signal_type="single-cycle" *)
 	input rawadc_trig,  // external single-cycle
+	// newad-force clk1x domain
 	(* external *)
 	input [9:0] adc_downsample_ratio,  // external
 
@@ -219,6 +220,12 @@ assign clk_status = clk_status_r;
 flag_xdomain rawadc_trig_xdomain (.clk1(lb_clk), .flagin_clk1(rawadc_trig),
 	.clk2(adc_clk), .flagout_clk2(rawadc_trig_x));
 
+// One more clock-domain change, so idelay_scanner can run in pure lb_clk domain
+wire [127:0] permuted_data;  // from banyan_mem
+wire [15:0] scanner_adc_val = permuted_data[15:0];
+reg [15:0] scanner_adc_val_r=0;
+always @(posedge lb_clk) scanner_adc_val_r <= scanner_adc_val;
+
 // 16 idelay registers mapped to lb_addr 112-127
 // See idelay_base in static_oscope_regmap.json
 wire scan_running;
@@ -227,8 +234,6 @@ wire [4:0] hw_data;
 wire hw_strobe;
 wire [7:0] scanner_banyan_mask;
 wire [2:0] scanner_adc_num;  // not used
-wire [127:0] permuted_data;  // from banyan_mem
-wire [15:0] scanner_adc_val = permuted_data[15:0];
 wire lb_idelay_write = lb_strobe & ~lb_rd & (lb_addr[23:4] == 20'h19007);
 idelay_scanner #(.use_decider(1)) scanner(
 	.lb_clk(lb_clk), .lb_addr(lb_addr[3:0]), .lb_data(lb_dout[4:0]),
@@ -240,7 +245,7 @@ idelay_scanner #(.use_decider(1)) scanner(
 	.debug_sel(scanner_debug[4]), .debug_addr(scanner_debug[3:0]),
 	.hw_addr(hw_addr), .hw_data(hw_data), .hw_strobe(hw_strobe),
 	.banyan_mask(scanner_banyan_mask), .adc_num(scanner_adc_num),
-	.adc_clk(adc_clk), .adc_val(scanner_adc_val)
+	.adc_clk(lb_clk), .adc_val(scanner_adc_val_r)
 );
 
 // process the output hw_ bus from idelay_scanner, sending to IDELAYE2
@@ -336,7 +341,9 @@ assign phase_status_U3 = 0;
 
 `define CONFIG_BANYAN
 `ifdef CONFIG_BANYAN
-// Banyan-routed memory, simple one-shot fill for now
+// Banyan-routed memory, that features a simple one-shot fill.
+// Use rawadc_trig for a direct asynchronous fill, or rawadc_trig_req
+// to start filling at the next external trigger (ext_trig).
 parameter banyan_aw = 14;  // 8 blocks of RAM, each 16K x 16
 reg banyan_run=0, banyan_run_d=0;
 wire rollover, full;
