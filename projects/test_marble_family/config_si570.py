@@ -16,7 +16,7 @@ import testcase
 from time import sleep
 
 
-def decode_settings(mbox, verbose):
+def decode_settings(mbox, verbose=False):
     for page in range(7):
         subset = mbox[page*16:page*16+16]
         if verbose:
@@ -170,7 +170,7 @@ def check(fin, new_freq):
         raise ValueError('SI570 final frequency measurement is not correct, out of spec by %i ppm' % ppm)
 
 
-def compute_si570(addr, key, verbose, debug):
+def compute_si570(addr, key, verbose=False, debug=False):
     mbox = addr.reg_read(["spi_mbox"])[0]
     # using keyword just to keep print consistent
     _, si570_addr, polarity, config_addr, _ = decode_settings(mbox, verbose)
@@ -208,7 +208,7 @@ def compute_si570(addr, key, verbose, debug):
     return si570_addr, config_addr, fxtal, default
 
 
-def config_si570(addr, new_freq, verbose, debug):
+def config_si570(addr, new_freq, verbose=False, debug=False):
     if new_freq:
         si570_addr, config_addr, fxtal, default = compute_si570(addr, "Measured", verbose, debug)
         # if first measured frequency and new output frequency are < 10 ppm don't change/update
