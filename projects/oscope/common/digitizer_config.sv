@@ -45,22 +45,15 @@ module digitizer_config(
 	output [1:0]  clk_status,
 
 	// software-settable
+	// adc_clk domain
 	(* external *)
 	input [31:0] periph_config,    // external
 	(* external *)
 	input [15:0] bitslip,          // external
 	(* external *)
-	input [1:0] U15_spi_read_and_start_r,  // external
-	//input        U15_spi_read_r,   // external
-	(* external *)
 	input [31:0] U15_spi_data_addr_r,   // external
-	//input [15:0] U15_spi_addr_r,   // external
-	(* external *)
-	input [1:0] U18_spi_read_and_start_r,  // external
-	//input        U18_spi_read_r,   // external
 	(* external *)
 	input [31:0] U18_spi_data_addr_r,   // external
-	//input  [7:0] U18_spi_addr_r,   // external
 	(* external *)
 	input        U2_clk_reset_r,   // external
 	(* external *)
@@ -77,30 +70,36 @@ module digitizer_config(
 	input        mmcm_reset_r,       // external
 	(* external *)
 	input        idelayctrl_reset_r, // external
+
 	// lb_clk domain
-	(* external *)
+	// newad-force lb domain
+	(* external, cd="lb" *)
+	input [1:0] U15_spi_read_and_start_r,  // external
+	(* external, cd="lb" *)
+	input [1:0] U18_spi_read_and_start_r,  // external
+	(* external, cd="lb" *)
 	input [7:0] banyan_mask, // external
-	(* external, signal_type="single-cycle" *)
+	(* external, signal_type="single-cycle", cd="lb" *)
 	input phasex_trig, // external single-cycle
-	(* external, signal_type="we-strobe" *)
+	(* external, signal_type="we-strobe", cd="lb" *)
 	input llspi_we,  // external we-strobe
 	input llspi_re,  // -- external strobe
-	(* external, signal_type="we-strobe" *)
+	(* external, signal_type="we-strobe", cd="lb" *)
 	input clk_status_we,  // external we-strobe
-	(* external *)
+	(* external, cd="lb" *)
 	input [4:0] scanner_debug, // external
 	input autoset_enable,  // -- external
 	input scan_trigger,  // -- external single-cycle
-	(* external, signal_type="we-strobe" *)
+	(* external, signal_type="we-strobe", cd="lb" *)
 	input scan_trigger_we,  // external we-strobe
 	// lb_clk domain, but only because I flag_xdomain to adc_clk
-	(* external, signal_type="single-cycle" *)
+	(* external, signal_type="single-cycle", cd="lb" *)
 	input rawadc_trig,  // external single-cycle
+
+	// adc_clk domain
 	// newad-force clk1x domain
 	(* external *)
 	input [9:0] adc_downsample_ratio,  // external
-
-	// adc_clk domain
 	(* external *)
 	input [9:0] sync_ad7794_cset,  // external
 	(* external *)

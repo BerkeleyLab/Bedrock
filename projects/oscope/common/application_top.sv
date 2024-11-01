@@ -55,10 +55,11 @@ module application_top(
 // Needs placing before usage of any top-level registers
 wire clk1x_clk, clk2x_clk, lb4_clk;
 
-(* external, signal_type="single-cycle" *) reg [0:0] lamp_test_trig = 0;  // top-level single-cycle
+// Note: the syntax for these top-level registers is not quite compatible with "old" newad
 (* external *) reg [31:0] icc_cfg = 0;             // top-level
-(* external *) reg [7:0] tag_now = 0;              // top-level
 (* external *) reg [1:0] domain_jump_realign = 0;  // top-level
+// newad-force clk1x domain
+(* external, cd="clk1x" *) reg [7:0] tag_now = 0;  // top-level
 
 `AUTOMATIC_decode
 
@@ -207,14 +208,24 @@ wire [31:0] hello_1 = "o wo";
 wire [31:0] hello_2 = "rld!";
 wire [31:0] hello_3 = 32'h0d0a0d0a;
 wire [31:0] ffffffff = 32'hffffffff;
-wire [31:0] U2dout_lsb = zif_cfg.U2_dout[31:0];
-wire [31:0] U2dout_msb = zif_cfg.U2_dout[63:32];
-wire [31:0] U3dout_lsb = zif_cfg.U3_dout[31:0];
-wire [31:0] U3dout_msb = zif_cfg.U3_dout[63:32];
 wire [19:0] idelay_value_out_U2_lsb = zif_cfg.U2_idelay_value_out[19:0];
 wire [19:0] idelay_value_out_U2_msb = zif_cfg.U2_idelay_value_out[39:20];
 wire [19:0] idelay_value_out_U3_lsb = zif_cfg.U3_idelay_value_out[19:0];
 wire [19:0] idelay_value_out_U3_msb = zif_cfg.U3_idelay_value_out[39:20];
+
+// Only useful if the ADC data is static, which is the plan when
+// configured to emit a test pattern during initial setup.
+// Maybe just get rid of this, and use the real data capture in banyan memory.
+reg [31:0] U2dout_lsb = 0;
+reg [31:0] U2dout_msb = 0;
+reg [31:0] U3dout_lsb = 0;
+reg [31:0] U3dout_msb = 0;
+always @(posedge lb_clk) begin
+	U2dout_lsb <= zif_cfg.U2_dout[31:0];
+	U2dout_msb <= zif_cfg.U2_dout[63:32];
+	U3dout_lsb <= zif_cfg.U3_dout[31:0];
+	U3dout_msb <= zif_cfg.U3_dout[63:32];
+end
 
 // Very basic pipelining of read process
 reg [23:0] lb_addr_r=0;
@@ -327,8 +338,8 @@ always @(posedge lb_clk) begin
 end
 
 wire rawadc_trig_x;
-(* lb_automatic *)
-digitizer_config digitizer_config // auto
+(* lb_automatic, cd="clk1x" *)
+digitizer_config digitizer_config // auto clk1x
   (
    .lb_clk(lb_clk),
    .lb_strobe(lb_strobe),
