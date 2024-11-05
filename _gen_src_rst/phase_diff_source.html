@@ -150,10 +150,9 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">67</span>
 <span class="linenos">68</span><span class="c1">// Build 32-bit status word for rclk domain, assuming dw == 14</span>
 <span class="linenos">69</span><span class="kt">wire</span><span class="w"> </span><span class="n">err_ff</span><span class="p">;</span><span class="w">  </span><span class="n">reg_tech_cdc</span><span class="w"> </span><span class="n">err_cdc</span><span class="p">(.</span><span class="n">I</span><span class="p">(</span><span class="n">err_r</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">C</span><span class="p">(</span><span class="n">rclk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">O</span><span class="p">(</span><span class="n">err_ff</span><span class="p">));</span>
-<span class="linenos">70</span><span class="c1">// TODO: Automate the bitwidth based on DW</span>
-<span class="linenos">71</span><span class="k">assign</span><span class="w"> </span><span class="n">status_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">err_ff</span><span class="p">,</span><span class="w"> </span><span class="n">vfreq_out</span><span class="p">,</span><span class="w"> </span><span class="mh">4</span><span class="mb">&#39;b0</span><span class="p">,</span><span class="w"> </span><span class="n">phdiff_out</span><span class="p">};</span>
-<span class="linenos">72</span><span class="c1">// 32 = 1 + 14 + 4 + 13</span>
-<span class="linenos">73</span><span class="k">endmodule</span>
+<span class="linenos">70</span><span class="k">assign</span><span class="w"> </span><span class="n">status_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">err_ff</span><span class="p">,</span><span class="w"> </span><span class="n">vfreq_out</span><span class="p">,</span><span class="w"> </span><span class="mh">4</span><span class="mb">&#39;b0</span><span class="p">,</span><span class="w"> </span><span class="n">phdiff_out</span><span class="p">};</span>
+<span class="linenos">71</span><span class="c1">// 32 = 1 + 14 + 4 + 13</span>
+<span class="linenos">72</span><span class="k">endmodule</span>
 </pre></div>
 </div>
 </section>
