@@ -204,18 +204,6 @@ Expect to see errors and unfinished things.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>order1</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>1</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>order2</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>1</p></td>
-<td></td>
-</tr>
 <tr class="row-even"><td><p>dw</p></td>
 <td><p>?</p></td>
 <td><p>?</p></td>
@@ -231,19 +219,7 @@ Expect to see errors and unfinished things.</p>
 <tr class="row-even"><td><p>delta</p></td>
 <td><p>?</p></td>
 <td><p>?</p></td>
-<td><p>33</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>ext_div1_en</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>0</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>ext_div2_en</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>0</p></td>
+<td><p>16</p></td>
 <td></td>
 </tr>
 </tbody>
@@ -264,41 +240,37 @@ Expect to see errors and unfinished things.</p>
 <td><p>Input</p></td>
 <td><p>unknown clock 1</p></td>
 </tr>
-<tr class="row-odd"><td><p>ext_div1</p></td>
-<td><p>Input</p></td>
-<td><p>external divider on uclk1</p></td>
-</tr>
-<tr class="row-even"><td><p>uclk2</p></td>
+<tr class="row-odd"><td><p>uclk2</p></td>
 <td><p>Input</p></td>
 <td><p>unknown clock 2</p></td>
 </tr>
-<tr class="row-odd"><td><p>ext_div2</p></td>
+<tr class="row-even"><td><p>uclk2g</p></td>
 <td><p>Input</p></td>
-<td><p>external divider on uclk2</p></td>
+<td></td>
 </tr>
-<tr class="row-even"><td><p>sclk</p></td>
+<tr class="row-odd"><td><p>sclk</p></td>
 <td><p>Input</p></td>
 <td><p>sampling clock</p></td>
 </tr>
-<tr class="row-odd"><td><p>rclk</p></td>
+<tr class="row-even"><td><p>rclk</p></td>
 <td><p>Input</p></td>
 <td><p>readout clock (data transfer, local bus)</p></td>
 </tr>
-<tr class="row-even"><td><p>dval</p></td>
+<tr class="row-odd"><td><p>err</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>phdiff_out[dw-2:0]</p></td>
+<tr class="row-even"><td><p>phdiff_out[dw-2:0]</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>vfreq_out[dw-1:0]</p></td>
+<tr class="row-odd"><td><p>vfreq_out[dw-1:0]</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>locked</p></td>
+<tr class="row-even"><td><p>status_out[31:0]</p></td>
 <td><p>Output</p></td>
-<td></td>
+<td><p>see below, will break if dw is not 14</p></td>
 </tr>
 </tbody>
 </table>

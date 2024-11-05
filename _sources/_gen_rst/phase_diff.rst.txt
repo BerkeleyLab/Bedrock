@@ -27,16 +27,6 @@ Parameters
      - Max
      - Default
      - Description
-   * - order1
-     - ?
-     - ?
-     - 1
-     - 
-   * - order2
-     - ?
-     - ?
-     - 1
-     - 
    * - dw
      - ?
      - ?
@@ -50,17 +40,7 @@ Parameters
    * - delta
      - ?
      - ?
-     - 33
-     - 
-   * - ext_div1_en
-     - ?
-     - ?
-     - 0
-     - 
-   * - ext_div2_en
-     - ?
-     - ?
-     - 0
+     - 16
      - 
 
 Ports
@@ -75,22 +55,19 @@ Ports
    * - uclk1
      - Input
      - unknown clock 1
-   * - ext_div1
-     - Input
-     - external divider on uclk1
    * - uclk2
      - Input
      - unknown clock 2
-   * - ext_div2
+   * - uclk2g
      - Input
-     - external divider on uclk2
+     - 
    * - sclk
      - Input
      - sampling clock
    * - rclk
      - Input
      - readout clock (data transfer, local bus)
-   * - dval
+   * - err
      - Output
      - 
    * - phdiff_out[dw-2:0]
@@ -99,9 +76,9 @@ Ports
    * - vfreq_out[dw-1:0]
      - Output
      - 
-   * - locked
+   * - status_out[31:0]
      - Output
-     - 
+     - see below, will break if dw is not 14
 
 Implementation and use
 ''''''''''''''''''''''
