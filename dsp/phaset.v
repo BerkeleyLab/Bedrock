@@ -8,6 +8,7 @@
 `timescale 1ns / 1ns
 
 module phaset #(
+	parameter order=1,
 	parameter dw=14,
 	parameter adv=3861,
 	parameter delta=16
@@ -20,7 +21,10 @@ module phaset #(
 );
 
 // _Still_ draw analogy to the AD9901
-reg div=0; always @(posedge uclk) if (uclkg) div <= ~div;
+// Generalize to a Johnson counter
+reg [order-1:0] ishr=0;
+always @(posedge uclk) if (uclkg) ishr <= (ishr << 1) | {{order-1{1'b0}},~ishr[order-1]};
+wire div = ishr[0];
 wire capture;  reg_tech_cdc capture_cdc(.I(div), .C(sclk), .O(capture));
 
 // Test bench fails for some initial phase_r values between 14900 and 15050.

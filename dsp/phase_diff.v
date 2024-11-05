@@ -4,6 +4,8 @@
 module phase_diff #(
 	// Default parameters tuned for LCLS-II LLRF Digitizer,
 	// where unknown clocks are 94.286 MHz and sampling clock is 200 MHz.
+    parameter order1=1,
+	parameter order2=1,
 	parameter dw=14,
 	parameter adv=3861,
 	parameter delta=16
@@ -27,10 +29,10 @@ module phase_diff #(
 // Two phase trackers
 wire [dw-1:0] phaset_out1, phaset_out2;
 wire fault1, fault2;
-phaset #(.dw(dw), .adv(adv), .delta(delta)) track1(
+phaset #(.order(order1), .dw(dw), .adv(adv), .delta(delta)) track1(
 	.uclk(uclk1), .uclkg(1'b1), .sclk(sclk),
 	.phase(phaset_out1), .fault(fault1));
-phaset #(.dw(dw), .adv(adv), .delta(delta)) track2(
+phaset #(.order(order2), .dw(dw), .adv(adv), .delta(delta)) track2(
 	.uclk(uclk2), .uclkg(uclk2g), .sclk(sclk),
 	.phase(phaset_out2), .fault(fault2));
 
