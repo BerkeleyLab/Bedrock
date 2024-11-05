@@ -67,7 +67,6 @@ data_xdomain #(.size(dw)) xdom2(  // inefficient
 
 // Build 32-bit status word for rclk domain, assuming dw == 14
 wire err_ff;  reg_tech_cdc err_cdc(.I(err_r), .C(rclk), .O(err_ff));
-// TODO: Automate the bitwidth based on DW
 assign status_out = {err_ff, vfreq_out, 4'b0, phdiff_out};
 // 32 = 1 + 14 + 4 + 13
 endmodule

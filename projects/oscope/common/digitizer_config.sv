@@ -320,9 +320,9 @@ assign zif_cfg.U2_dco_clk_in = zif_cfg.U2_dco_clk_out;
 `define CONFIG_PHASE_DIFF
 `ifdef CONFIG_PHASE_DIFF
 // Measure the phases of the two BUFR outputs relative to adc_clk (U2's BUFR after MMCM and BUFG)
-phase_diff phase_diff_U2(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U2_clk_div_bufr), .uclk2g(1'b1), .sclk(clk200),
+phase_diff #(.delta(33)) phase_diff_U2(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U2_clk_div_bufr), .uclk2g(1'b1), .sclk(clk200),
 	.rclk(lb_clk), .status_out(phase_status_U2));
-phase_diff phase_diff_U3(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U3_clk_div_bufr), .uclk2g(1'b1), .sclk(clk200),
+phase_diff #(.delta(33)) phase_diff_U3(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U3_clk_div_bufr), .uclk2g(1'b1), .sclk(clk200),
 	.rclk(lb_clk), .status_out(phase_status_U3));
 `else
 assign phase_status_U2 = 0;
