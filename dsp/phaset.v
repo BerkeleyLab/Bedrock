@@ -24,8 +24,7 @@ module phaset #(
 // Generalize to a Johnson counter
 reg [order-1:0] ishr=0;
 always @(posedge uclk) if (uclkg) ishr <= (ishr << 1) | {{order-1{1'b0}},~ishr[order-1]};
-wire div = ishr[0];
-wire capture;  reg_tech_cdc capture_cdc(.I(div), .C(sclk), .O(capture));
+wire capture;  reg_tech_cdc capture_cdc(.I(ishr[0]), .C(sclk), .O(capture));
 
 // Test bench fails for some initial phase_r values between 14900 and 15050.
 // In that case the fault output signals the problem.

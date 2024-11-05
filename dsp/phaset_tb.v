@@ -44,7 +44,7 @@ phaset #(.dw(14), .adv(3862), .delta(16)) track(
 // itself) will also toggle the msb of phaset_out.  That bit should therefore
 // be ignored.  To exercise this feature,
 // make phaset_view VCD_ARGS_phaset.vcd=+glitch
-initial @(cc==3000) if (glitch) track.div = ~track.div;
+initial @(cc==3000) if (glitch) track.ishr[0] = ~track.ishr[0];
 
 // Unwrapped phase
 integer phase_unw=0, phase_diff, phase0;
