@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module phasex_tb;
+module phase_diff_tb;
 
 parameter FREQ1          =   238.0;         // MHz
 parameter F_RATIO        =   2;
@@ -25,8 +25,8 @@ wire signed [DW-1:0] phase_diff;
 
 initial begin
     if ($test$plusargs("vcd")) begin
-        $dumpfile("phasex.vcd");
-        $dumpvars(5,phasex_tb);
+        $dumpfile("phase_diff.vcd");
+        $dumpvars(5,phase_diff_tb);
     end
     for (cc=0; cc<MAX_CC; cc=cc+1) begin
         rclk=0; #5;
