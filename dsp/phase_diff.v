@@ -22,6 +22,10 @@ module phase_diff #(
 	output [dw-1:0] vfreq_out,
 	output err_ff
 );
+// For the default dw=14 case, the previous 32-bit status word
+// (fully in the rclk domain) can be constructed externally as
+//   wire [31:0] status_out = {err_ff, vfreq_out, 4'b0, phdiff_out};
+//   32                     =  1     + 14       + 4   + 13
 
 // XXX vfreq_out could have extra msbs added by unwrapping, or better still,
 // adding higher-order bits to phaset.
@@ -66,7 +70,4 @@ data_xdomain #(.size(dw)) xdom2(  // inefficient
 	.clk_out(rclk), .data_out(vfreq_out));
 
 reg_tech_cdc err_cdc(.I(err_r), .C(rclk), .O(err_ff));
-// Build 32-bit status word for rclk domain, assuming dw == 14
-// (now outside this module)
-// assign status_out = {err_ff, vfreq_out, 4'b0, phdiff_out};
 endmodule
