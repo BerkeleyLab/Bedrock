@@ -245,7 +245,7 @@ assign PWR_EN       = ~pwr_en_b;
 
 // ADC0_DIV, ADC1_DIV, DAC_DCO
 wire signed [PH_DIFF_DW-1:0] phdiff [N_ADC:0];
-wire [N_ADC:0] phdiff_val;
+wire [N_ADC:0] phdiff_err;
 // DSP_CLK, ADC0_DIV, ADC1_DIV, DAC_DCO
 wire [27:0] f_clks [N_ADC+1:0];
 wire pll_locked;
@@ -318,14 +318,13 @@ generate for (ix=0; ix<N_ADC; ix=ix+1) begin: ic_map
         .clk_div_buf  (clk_div_buf[ix])
     );
 
-    phase_diff #(.adv(PH_DIFF_ADV), .dw(PH_DIFF_DW+1)) phase_diff_i (
+    phase_diff #(.adv(PH_DIFF_ADV), .dw(PH_DIFF_DW+1), .delta(33)) phase_diff_i (
         .uclk1      (dsp_clk_out),
-        .ext_div1   (1'b0),
         .uclk2      (clk_div[ix]),
-        .ext_div2   (1'b0),
+        .uclk2g     (1'b1),
         .sclk       (clk_200),
         .rclk       (clk),
-        .dval       (phdiff_val[ix]),
+        .err        (phdiff_err[ix]),
         .phdiff_out (phdiff[ix])
     );
 
@@ -403,15 +402,15 @@ phase_diff #(
     .adv            (PH_DIFF_ADV),
     .dw             (PH_DIFF_DW+1),
     .order1         (2),
-    .order2         (1)
+    .order2         (1),
+    .delta          (33)
 ) phase_diff_dac (
     .uclk1      (dac_dco_clk),
-    .ext_div1   (1'b0),
     .uclk2      (dsp_clk_out),
-    .ext_div2   (1'b0),
+    .uclk2g     (1'b1),
     .sclk       (clk_200),
     .rclk       (clk),
-    .dval       (phdiff_val[2]),
+    .err        (phdiff_err[2]),
     .phdiff_out (phdiff[2])
 );
 
