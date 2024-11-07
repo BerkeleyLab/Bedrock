@@ -86,9 +86,9 @@ Ports
    * - vfreq_out[dw-1:0]
      - Output
      - 
-   * - status_out[31:0]
+   * - err_ff
      - Output
-     - see below, will break if dw is not 14
+     - 
 
 Implementation and use
 ''''''''''''''''''''''
