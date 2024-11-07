@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module phasex_tb;
+module phase_diff_tb;
 
 parameter FREQ1          =   238.0;         // MHz
 parameter F_RATIO        =   2;
@@ -25,14 +25,14 @@ wire signed [DW-1:0] phase_diff;
 
 initial begin
     if ($test$plusargs("vcd")) begin
-        $dumpfile("phasex.vcd");
-        $dumpvars(5,phasex_tb);
+        $dumpfile("phase_diff.vcd");
+        $dumpvars(5,phase_diff_tb);
     end
     for (cc=0; cc<MAX_CC; cc=cc+1) begin
         rclk=0; #5;
         rclk=1; #5;
     end
-    $display("ADV: %d, Expected phase: %d, Measured phase: %d",
+    if (&track.cnt[4:0]) $display("ADV: %d, Expected phase: %d, Measured phase: %d",
         ADV, phase_expect, phase_diff);
     if (errors == 0) begin
         $display("PASS");
@@ -49,7 +49,7 @@ initial forever #(UCLK2_PERIOD/2) uclk2 = ~uclk2;
 initial begin
     period_delay = UCLK1_DELAY_UI;
     $display("period_delay: %.4f UI", period_delay);
-    phase_expect = -period_delay * FULL_RANGE / F_RATIO;
+    if (&track.cnt[4:0]) phase_expect = -period_delay * FULL_RANGE / F_RATIO;
     #(UCLK1_PERIOD * period_delay);
     forever #(UCLK1_PERIOD/2) uclk1 = ~uclk1;
 end
@@ -60,19 +60,18 @@ end
 
 // device under test
 wire [DW:0] vfreq_out;
-wire dval;
+wire err_ff;
 phase_diff #(
-    .adv(ADV), .order1(F_RATIO), .order2(1), .dw(DW+1)
+    .dw(DW+1)
 ) track (
     .uclk1      (uclk1),
-    .ext_div1   (1'b0),
     .uclk2      (uclk2),
-    .ext_div2   (1'b0),
+    .uclk2g     (1'b1),
     .sclk       (sclk),
     .rclk       (rclk),
     .phdiff_out (phase_diff),
     .vfreq_out  (vfreq_out),
-    .dval       (dval)
+    .err_ff     (err_ff)
 );
 
 reg phase_pass=0;
@@ -80,7 +79,7 @@ real err_bar = 0.02;
 reg signed [DW-1:0] phase_err=0;
 // Readout display
 always @(negedge rclk) begin
-    if (dval) begin     // needs to wait when DW>=16
+    if (&track.cnt[4:0]) begin
         phase_err = phase_diff - phase_expect;
         phase_pass = $abs(phase_err)/FULL_RANGE < err_bar;
         // $display("cc: %d, phase_err: %d, pass: %d", cc, phase_err, phase_pass);

@@ -319,20 +319,16 @@ assign zif_cfg.U2_dco_clk_in = zif_cfg.U2_dco_clk_out;
 
 `define CONFIG_PHASE_DIFF
 `ifdef CONFIG_PHASE_DIFF
+wire err_ff_U2, err_ff_U3;
+wire [12:0] phdiff_out_U2, phdiff_out_U3;
+wire [13:0] vfreq_out_U2, vfreq_out_U3;
 // Measure the phases of the two BUFR outputs relative to adc_clk (U2's BUFR after MMCM and BUFG)
-wire [12:0] clk_phase_diff_out_U2,  clk_phase_diff_out_U3;
-wire [13:0] clk_phase_diff_freq_U2, clk_phase_diff_freq_U3;
-wire        clk_phase_diff_locked_U2,  clk_phase_diff_locked_U3;
-phase_diff phase_diff_U2(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U2_clk_div_bufr), .sclk(clk200),
-	.rclk(lb_clk), .phdiff_out(clk_phase_diff_out_U2),
-    .ext_div1(1'b0), .ext_div2(1'b0),
-	.vfreq_out(clk_phase_diff_freq_U2), .locked(clk_phase_diff_locked_U2));
-assign phase_status_U2 = {~clk_phase_diff_locked_U2, clk_phase_diff_freq_U2,4'b0, clk_phase_diff_out_U2};
-phase_diff phase_diff_U3(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U3_clk_div_bufr), .sclk(clk200),
-	.rclk(lb_clk), .phdiff_out(clk_phase_diff_out_U3),
-    .ext_div1(1'b0), .ext_div2(1'b0),
-	.vfreq_out(clk_phase_diff_freq_U3), .locked(clk_phase_diff_locked_U3));
-assign phase_status_U3 = {~clk_phase_diff_locked_U3,clk_phase_diff_freq_U3,4'b0,clk_phase_diff_out_U3};
+phase_diff #(.delta(33)) phase_diff_U2(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U2_clk_div_bufr), .uclk2g(1'b1), .sclk(clk200),
+	.rclk(lb_clk), .phdiff_out(phdiff_out_U2), .vfreq_out(vfreq_out_U2), .err_ff(err_ff_U2));
+phase_diff #(.delta(33)) phase_diff_U3(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U3_clk_div_bufr), .uclk2g(1'b1), .sclk(clk200),
+	.rclk(lb_clk), .phdiff_out(phdiff_out_U3), .vfreq_out(vfreq_out_U3), .err_ff(err_ff_U3));
+assign phase_status_U2 = {err_ff_U2, vfreq_out_U2, 4'b0, phdiff_out_U2};
+assign phase_status_U3 = {err_ff_U3, vfreq_out_U3, 4'b0, phdiff_out_U3};
 `else
 assign phase_status_U2 = 0;
 assign phase_status_U3 = 0;
