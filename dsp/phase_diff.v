@@ -4,7 +4,7 @@
 module phase_diff #(
 	// Default parameters tuned for LCLS-II LLRF Digitizer,
 	// where unknown clocks are 94.286 MHz and sampling clock is 200 MHz.
-    parameter order1=1,
+	parameter order1=1,
 	parameter order2=1,
 	parameter dw=14,
 	parameter adv=3861,
@@ -20,7 +20,7 @@ module phase_diff #(
 	// the following are in rclk domain
 	output [dw-2:0] phdiff_out,
 	output [dw-1:0] vfreq_out,
-	output [31:0] status_out  // see below, will break if dw is not 14
+	output err_ff
 );
 
 // XXX vfreq_out could have extra msbs added by unwrapping, or better still,
@@ -65,8 +65,8 @@ data_xdomain #(.size(dw)) xdom2(  // inefficient
 	.clk_in(sclk), .gate_in(&cnt[4:0]), .data_in(vernier_freq),
 	.clk_out(rclk), .data_out(vfreq_out));
 
+reg_tech_cdc err_cdc(.I(err_r), .C(rclk), .O(err_ff));
 // Build 32-bit status word for rclk domain, assuming dw == 14
-wire err_ff;  reg_tech_cdc err_cdc(.I(err_r), .C(rclk), .O(err_ff));
-assign status_out = {err_ff, vfreq_out, 4'b0, phdiff_out};
-// 32 = 1 + 14 + 4 + 13
+// (now outside this module)
+// assign status_out = {err_ff, vfreq_out, 4'b0, phdiff_out};
 endmodule

@@ -60,7 +60,7 @@ end
 
 // device under test
 wire [DW:0] vfreq_out;
-wire [31:0] status_out;
+wire err_ff;
 phase_diff #(
     .dw(DW+1)
 ) track (
@@ -71,7 +71,7 @@ phase_diff #(
     .rclk       (rclk),
     .phdiff_out (phase_diff),
     .vfreq_out  (vfreq_out),
-    .status_out (status_out)
+    .err_ff     (err_ff)
 );
 
 reg phase_pass=0;
