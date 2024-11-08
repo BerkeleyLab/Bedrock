@@ -127,6 +127,8 @@ RUN apt-get update && \
 
 COPY build-tools/litex_meta.sh /
 
-RUN mkdir /litex && \
-    cd /litex && \
+ENV LITEX_INSTALL_PATH=/litex
+
+RUN mkdir ${LITEX_INSTALL_PATH} && \
+    cd ${LITEX_INSTALL_PATH} && \
     sh /litex_meta.sh
