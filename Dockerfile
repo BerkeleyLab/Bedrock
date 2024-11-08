@@ -114,3 +114,19 @@ RUN apt-get update && \
         libidn12 && \
     rm -rf /var/lib/apt/lists/* && \
     ln -s libidn.so.12 /usr/lib/x86_64-linux-gnu/libidn.so.11
+
+# Install litex
+RUN apt-get update && \
+    apt-get install -y \
+        ninja-build \
+        gcc-aarch64-linux-gnu \
+        ghdl && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip3 install \
+        meson
+
+COPY build-tools/litex_meta.sh /
+
+RUN mkdir /litex && \
+    cd /litex && \
+    sh /litex_meta.sh
