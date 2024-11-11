@@ -27,7 +27,7 @@ RTEFI_EXTRA_V = spi_flash_engine.v
 include $(BADGER_DIR)/rules.mk
 
 $(AUTOGEN_DIR)/moving_average.v: $(DSP_DIR)/moving_average/moving_average.py
-	$(PYTHON) $(DSP_DIR)/moving_average/moving_average.py > $(AUTOGEN_DIR)/moving_average.v
+	$(PYTHON) $(DSP_DIR)/moving_average/moving_average.py | grep -v '(* top' > $@
 
 oscope_features: $(BUILD_DIR)/gen_features.py oscope_features.yaml
 	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_v2 --split
@@ -62,17 +62,20 @@ oscope_prep.v: $(AUTOGEN_DIR)/application_top_auto.vh $(AUTOGEN_DIR)/addr_map_ap
 oscope_pure_v.d: oscope_prep.v $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) $(AUTOGEN_DIR)/moving_average.v
 	$(VERILOG) -Wno-timescale -o /dev/null $< -y$(AUTOGEN_DIR) $(VFLAGS_DEP) -M$@.$$$$ && sort -u < $@.$$$$ | tr '\n' ' ' | sed -e 's/^/oscope_pure_v_check oscope_prep_yosys.json: /' -e 's/ $$//' > $@ && rm $@.$$$$
 # make this dependency file first, explicitly, if you are doing sv2v/cdc_snitch work
+dep: oscope_pure_v.d
 -include oscope_pure_v.d
-.PHONY: oscope_pure_v_check
-# default VERILATOR includes -Wall, and I don't want that (yet?)
+.PHONY: oscope_pure_v_check dep
 # dependencies from oscope_pure_v.d
+# sv2v tends to make a lot of VARHIDDEN
+# I don't like the 33 x UNDRIVEN
+VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-VARHIDDEN -Wno-DECLFILENAME -Wno-CASEINCOMPLETE
+VLATORFLAGS += -DSIMULATE
 oscope_pure_v_check:
-	verilator --lint-only -Wno-WIDTH -Wno-TIMESCALEMOD -Wno-PINMISSING -Wno-CASEINCOMPLETE -DSIMULATE $^
-OSCOPE_PURE_V = $(shell cat oscope_pure_v.d)
+	$(VERILATOR_LINT)
 YOSYS_JSON_OPTION += -DSIMULATE
 # most dependencies from oscope_pure_v.d
 oscope_prep_yosys.json: $(FPGA_FAMILY_DIR)/xilinx/IBUFGDS.v
-# exercise with make oscope_prep_cdc.txt
+# exercise with make dep && make oscope_prep_cdc.txt
 # =====
 
 $(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
@@ -100,7 +103,7 @@ download:
 
 include $(BUILD_DIR)/bottom_rules.mk
 CLEAN += *.bit *.bin *.prm $(APP_NAME)_regmap*.json scalar_$(APP_NAME)_regmap.json *_features*.json *_features*.vh oscope_marble*_features
-CLEAN += system_top.xdc zest_connector.csv $(RTEFI_CLEAN) foo.gtkw
+CLEAN += system_top.xdc zest_connector.csv $(RTEFI_CLEAN) foo.gtkw foo.vcd
 CLEAN += oscope_prep.v oscope_prep_yosys.json oscope_prep_cdc.txt oscope_pure_v.d
 CLEAN_DIRS +=  _xilinx .Xil
 
