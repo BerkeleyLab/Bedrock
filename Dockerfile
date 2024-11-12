@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim as testing_base_bookworm
+FROM debian:bookworm-slim AS testing_base_bookworm
 
 # Vivado needs libtinfo5, at least for Artix?
 RUN apt-get update && \
@@ -132,3 +132,15 @@ ENV LITEX_INSTALL_PATH=/litex
 RUN mkdir ${LITEX_INSTALL_PATH} && \
     cd ${LITEX_INSTALL_PATH} && \
     sh /litex_meta.sh
+
+# Install sv2v
+RUN apt-get update && \
+    apt-get install -y \
+        haskell-stack && \
+    rm -rf /var/lib/apt/lists/* && \
+    git clone https://github.com/zachjs/sv2v /sv2v && \
+    cd /sv2v && \
+    git checkout 7808819c48c167978aeb5ef34c6e5ed416e90875 && \
+    make && \
+    rm -rf $HOME/.stack && \
+    cp bin/sv2v /usr/local/bin/
