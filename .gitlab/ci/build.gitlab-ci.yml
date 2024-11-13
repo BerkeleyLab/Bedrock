@@ -15,6 +15,7 @@ build:
         -t $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA \
         -t $CONTAINER_IMAGE:latest \
         .
+    docker run --rm testing_base_bookworm bash -c 'cat "/etc/debian_version"'
     docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
     docker push $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
     docker push $CONTAINER_IMAGE:latest
