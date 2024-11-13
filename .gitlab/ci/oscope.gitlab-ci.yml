@@ -5,6 +5,20 @@ oscope_top_test:
   script:
     - make Voscope_top_tb && make Voscope_top_leep && make clean
 
+# We know the design doesn't yet get evaluated as CDC-clean, at least in part
+# due to Verilog inout ports being poorly supported by our tools.
+# Please take out the "|| true" if this ever gets fixed.
+oscope_cdc:
+  before_script:
+    - cd projects/oscope/marble_family
+  stage: test
+  script:
+    - make dep && make oscope_prep_yosys.json && (make oscope_prep_cdc.txt || true)
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - projects/oscope/marble_family/oscope_prep_cdc.txt
+
 oscope_top_bmb7:
   before_script:
     - cd projects/oscope/bmb7_cu && ls /non-free
