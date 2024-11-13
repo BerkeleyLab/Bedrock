@@ -25,7 +25,7 @@ hwload_ac701:
 	xc3sprog -c jtaghs1_fast $(SERIAL_NUM_OPT) $(BITFILE)
 
 hwtest_ac701:
-	ping -c2 $(SFP_IP) &&  cd ../test && python3 comms_top_test.py -t $(SFP_IP) -cf mem_test.cf
+	ping -c 2 $(SFP_IP) &&  cd ../test && $(PYTHON) comms_top_test.py -t $(SFP_IP) -cf mem_test.cf
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))

@@ -21,6 +21,7 @@ CFLAGS  = -std=c99 -Os -Wall -Wextra -Wundef -Wstrict-prototypes $(CLFLAGS)
 LDFLAGS = $(CLFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map,--defsym,BLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE),--gc-sections,--no-relax -T$(filter %.lds, $^)
 # --no-relax is a workaround for https://github.com/riscvarchive/riscv-binutils-gdb/issues/144
 # --verbose=3,-M for verbose linker output / debugging
+VIVADO_CMD = vivado -mode batch -nojou -nolog
 
 %.lst: %.elf
 	$(RISCV_TOOLS_PREFIX)objdump -d $< > $@
@@ -57,7 +58,7 @@ LDFLAGS = $(CLFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map
 	chmod -x $@
 
 %_synth.bit: %.v
-	vivado -nojou -mode batch -source $(filter %.tcl, $^) -tclargs $(basename $@) $(BLOCK_RAM_SIZE) $(filter %.v, $^)
+	$(VIVADO_CMD) -source $(filter %.tcl, $^) -tclargs $(basename $@) $(BLOCK_RAM_SIZE) $(filter %.v, $^)
 
 %_config:
 	xc3sprog -c jtaghs1_fast $(patsubst %_config,%.bit,$@)
