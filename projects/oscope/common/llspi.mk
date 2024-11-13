@@ -23,7 +23,7 @@ PYTHON = python3
 	$(VVP) $< $(VFLAGS)
 
 %.dat: %_tb
-	vvp $< > $@
+	$(VVP) $< > $@
 
 all: llspi_tb
 

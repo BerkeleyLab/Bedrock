@@ -53,11 +53,15 @@ oscope_top.sv: $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) $(AUTOGEN_DIR)/applicatio
 oscope_top.bit: $(AUTOGEN_DIR)/config_romx.v
 
 # =====
-# highly experimental and still somewhat messy
-# sv2v not supplied; see https://github.com/zachjs/sv2v
+# Process code base with sv2v, verilator, yosys, and cdc_snitch
+# Experimental and still somewhat messy
+# Exposes weaknessess in our tools' handling of inout ports; see
+#   https://github.com/zachjs/sv2v/issues/295
+#   https://github.com/YosysHQ/yosys/issues/4708
+#   https://github.com/verilator/verilator/issues/2844
 UPPER_SV = oscope_top.sv $(OSCOPE_COMMON_DIR)/application_top.sv $(BOARD_SUPPORT_DIR)/zest/zest_cfg_if.sv $(BOARD_SUPPORT_DIR)/zest/zest_if.sv $(BOARD_SUPPORT_DIR)/zest/zest_wrap.sv $(OSCOPE_COMMON_DIR)/digitizer_config.sv
 oscope_prep.v: $(AUTOGEN_DIR)/application_top_auto.vh $(AUTOGEN_DIR)/addr_map_application_top.vh oscope_marble2_features
-	sv2v -DSIMULATE -DVERILATOR -I $(AUTOGEN_DIR) $(UPPER_SV) > $@
+	$(SV2V) -DSIMULATE -DVERILATOR -I $(AUTOGEN_DIR) $(UPPER_SV) > $@
 	wc -l $@
 oscope_pure_v.d: oscope_prep.v $(AUTOGEN_DIR)/config_romx.v $(RTEFI_V) $(AUTOGEN_DIR)/moving_average.v
 	$(VERILOG) -Wno-timescale -o /dev/null $< -y$(AUTOGEN_DIR) $(VFLAGS_DEP) -M$@.$$$$ && sort -u < $@.$$$$ | tr '\n' ' ' | sed -e 's/^/oscope_pure_v_check oscope_prep_yosys.json: /' -e 's/ $$//' > $@ && rm $@.$$$$
@@ -72,6 +76,10 @@ VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-VARHIDDEN -Wno-DECLFILENAME -Wno-CASEINCO
 VLATORFLAGS += -DSIMULATE
 oscope_pure_v_check:
 	$(VERILATOR_LINT)
+# exercise with make dep && make oscope_pure_v_check
+# or make dep && make oscope_prep_lint
+# same result, but different dependency list management
+#
 YOSYS_JSON_OPTION += -DSIMULATE
 # most dependencies from oscope_pure_v.d
 oscope_prep_yosys.json: $(FPGA_FAMILY_DIR)/xilinx/IBUFGDS.v

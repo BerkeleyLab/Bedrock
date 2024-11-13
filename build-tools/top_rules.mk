@@ -20,6 +20,7 @@ VPIEXT = vpi
 PYTHON = python3
 AWK = awk
 XCIRCUIT = xcircuit
+SV2V = sv2v
 YOSYS = yosys
 YOSYS_QUIET = -q
 YOSYS_JSON_OPTION = -DBUGGY_FORLOOP
