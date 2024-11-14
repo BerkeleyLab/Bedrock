@@ -8,8 +8,7 @@ stages:
 variables:
   XILINX_VIVADO: /non-free/Xilinx/Vivado/2020.2
   CI_REGISTRY: mohs.dhcp.lbl.gov
-  CONTAINER_IMAGE: $CI_REGISTRY/testing_base_bookworm
-  # CONTAINER_IM_IMAGE: $CI_REGISTRY/riscv_bloat
+  CONTAINER_IMAGE: $CI_REGISTRY/bedrock_testing_base_bookworm
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
 
@@ -19,7 +18,6 @@ services:
   - name: mohs.dhcp.lbl.gov/docker:20.10.12-dind
     command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
     alias: docker
-#    entrypoint: ["dockerd-entrypoint.sh"]
 
 include:
   - local: .gitlab/ci/badger.gitlab-ci.yml
