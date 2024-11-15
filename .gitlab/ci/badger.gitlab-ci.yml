@@ -25,4 +25,4 @@ badger_ac701_run:
   dependencies:
     - badger_ac701
   script:
-    - cd badger/tests && test -r ac701_rgmii_vtest.bit && sh teststand_ac701.sh
+    - cd badger/tests && test -r ac701_rgmii_vtest.bit && SERIAL_NUM_OPT="-s 210203356870" sh teststand_ac701.sh
