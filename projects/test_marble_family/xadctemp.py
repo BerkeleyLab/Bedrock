@@ -1,7 +1,11 @@
 #!/usr/bin/python3
 # Convert xadc internal temperature register value (leep xadc_internal_temperature)
 # to degrees Celsius.
+import sys
 import re
+bedrock_dir = "../../"
+sys.path.append(bedrock_dir + "projects/common")
+import leep
 
 
 def _allhex(s):
@@ -102,13 +106,11 @@ def doLeep(ipaddr, port):
 
 
 if __name__ == "__main__":
-    import sys
     import argparse
     parser = argparse.ArgumentParser(
         description="Utility to read internal temperature of ")
     parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
     parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
 
-    import leep
     args = parser.parse_args()
     sys.exit(doLeep(args.addr, args.port))
