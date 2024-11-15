@@ -41,8 +41,7 @@ LDFLAGS = $(CLFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map
 %_load: %32.hex
 	$(PYTHON) $(COMMON_DIR)/boot_load.py $< $(BOOTLOADER_SERIAL) --baud_rate $(BOOTLOADER_BAUDRATE)
 
-# All testbenches use $stop, eliminating the `awk` dependency
-%_check: %_tb
+# All testbenches use $stop, eliminating the old `awk` dependency
 %_check: %_tb
 	$(VERILOG_SIM)
 
@@ -57,10 +56,12 @@ LDFLAGS = $(CLFLAGS) -Wl,--strip-debug,--print-memory-usage,-Bstatic,-Map,$*.map
 	chmod -x $@
 
 %_synth.bit: %.v
-	vivado -nojou -mode batch -source $(filter %.tcl, $^) -tclargs $(basename $@) $(BLOCK_RAM_SIZE) $(filter %.v, $^)
+	$(VIVADO_CMD) -source $(filter %.tcl, $^) -tclargs $(basename $@) $(BLOCK_RAM_SIZE) $(filter %.v, $^)
 
-%_config:
-	xc3sprog -c jtaghs1_fast $(patsubst %_config,%.bit,$@)
+# No serial number is provided in this rule, so it's only useful when
+# a single FTDI device is plugged into your workstation
+%_config: %.bit
+	xc3sprog -c jtaghs1_fast $<
 
 CLEAN += $(TARGET).vcd $(TARGET)_tb $(TARGET).map $(TARGET).lst  $(TARGET).elf pico.trace
 CLEAN += $(TARGET)8.hex $(TARGET)32.hex $(TARGET)32.dat $(TARGET).o $(OBJS)
