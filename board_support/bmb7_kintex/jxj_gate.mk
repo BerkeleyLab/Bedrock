@@ -23,7 +23,7 @@ COMMON_HDL_DIR = submodules/common-hdl
 	$(VVP) $< $(VFLAGS)
 
 %.dat: %_tb
-	vvp $< > $@
+	$(VVP) $< > $@
 
 all: jxj_gate_tb
 

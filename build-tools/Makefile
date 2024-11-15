@@ -4,6 +4,7 @@
 
 XCIRCUIT = xcircuit
 XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
+PANDOC = pandoc
 
 # Kind of weird to use xcircuit's rc file for this purpose,
 # but it does work.
@@ -15,7 +16,7 @@ all: cdc_snitch.html
 # We can generate a quick preview with pandoc.  cdc_snitch.md is also
 # checked compatible with sphinx, gitlab, and github.
 cdc_snitch.html: cdc_snitch.md cdc_BAD.svg cdc_OK1.svg cdc_OKX.svg
-	pandoc -t html $< > $@
+	$(PANDOC) -t html $< > $@
 
 clean:
 	rm -f cdc_snitch.html

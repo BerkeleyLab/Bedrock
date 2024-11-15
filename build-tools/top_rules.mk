@@ -18,8 +18,10 @@ VERILATOR = verilator -Wall -Wno-fatal
 GTKWAVE = gtkwave
 VPIEXT = vpi
 PYTHON = python3
+PERL = perl
 AWK = awk
 XCIRCUIT = xcircuit
+SV2V = sv2v
 YOSYS = yosys
 YOSYS_QUIET = -q
 YOSYS_JSON_OPTION = -DBUGGY_FORLOOP
@@ -224,4 +226,4 @@ COMMA := ,
 	dot -Tps $< -o $@
 
 %_support.vh: $(BS_HARDWARE_DIR)/%_support.in
-	perl $(BUILD_DIR)/regmap_proc.pl $< > $@
+	$(PERL) $(BUILD_DIR)/regmap_proc.pl $< > $@
