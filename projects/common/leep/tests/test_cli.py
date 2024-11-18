@@ -5,8 +5,8 @@ import json
 import math
 import random
 
-from build_rom import create_array
-from ..cli import parseTransaction
+from leep.build_rom import create_array
+from leep.cli import parseTransaction
 
 
 class LASS():

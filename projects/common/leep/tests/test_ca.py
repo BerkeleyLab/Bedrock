@@ -9,7 +9,7 @@ from types import ModuleType
 import numpy as np
 from numpy.testing import assert_equal
 
-from ..base import open
+from leep.base import open
 
 _log = logging.getLogger(__name__)
 

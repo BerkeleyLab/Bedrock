@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 FEED acquisition device logic substitution generator
 

@@ -1,7 +1,7 @@
 
 import unittest
 
-from ..base import DeviceBase
+from leep.base import DeviceBase
 
 
 class DummyDevice(DeviceBase):
