@@ -1,4 +1,11 @@
-leep_test2:
+leep_test:
   stage: test
+  before_script:
+    - python3 -m pip \
+        build \
+        hatch \
+        hatchling
+    - cd projects/common/leep
   script:
-    - make -C projects/common/leep && make -C projects/common/leep clean
+    - python -m build -v
+    - hatch test -v
