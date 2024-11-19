@@ -11,6 +11,7 @@ build:
   script: |
     docker pull $CONTAINER_IMAGE:latest || true
     docker build --cache-from $CONTAINER_IMAGE:latest \
+        --build-arg TWINE_TOKEN=$TWINE_TOKEN \
         -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME \
         -t $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA \
         -t $CONTAINER_IMAGE:latest \

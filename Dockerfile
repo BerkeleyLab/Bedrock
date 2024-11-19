@@ -146,6 +146,8 @@ RUN apt-get update && \
     cp bin/sv2v /usr/local/bin/
 
 # Install LEEP
+ARG TWINE_TOKEN
+
 RUN pip3 install \
     leep \
     --index-url https://__token__:$TWINE_TOKEN@gitlab.lbl.gov/api/v4/projects/473/packages/pypi/simple
