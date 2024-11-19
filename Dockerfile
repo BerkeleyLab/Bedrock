@@ -144,3 +144,8 @@ RUN apt-get update && \
     make && \
     rm -rf $HOME/.stack && \
     cp bin/sv2v /usr/local/bin/
+
+# Install LEEP
+RUN pip3 install \
+    leep \
+    --index-url https://__token__:$TWINE_TOKEN@gitlab.lbl.gov/api/v4/projects/473/packages/pypi/simple
