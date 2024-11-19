@@ -2,7 +2,7 @@ IP=$1
 echo "first_readout $IP"
 set -e
 ping -c 2 $IP
-export PYTHONPATH=../common:../../badger/tests
+export PYTHONPATH=../../badger/tests
 python3 -m testcase -a $IP -p 803 --stop --trx --si570
 python3 -m peek_mailbox leep://$IP:803
 echo "Reading kintex 7 internal temperature for $IP using XADC"

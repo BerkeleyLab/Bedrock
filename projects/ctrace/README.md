@@ -15,10 +15,12 @@ make wctrace_live
 ./wctrace_live +udp_port=3010
 
 # In another terminal, acquire 'scope traces with ctracer.py and save to "test.vcd"
-PYTHONPATH=../common python3 ctracer.py get leep://localhost:3010 -c config.in -o test.vcd --runtime 1
+python3 -m pip install leep
+python3 ctracer.py get leep://localhost:3010 -c config.in -o test.vcd --runtime 1
 
 # Optionally include a generated clk of net name "dclk" in your VCD as well (can substantially increase file size)
-PYTHONPATH=../common python3 ctracer.py get leep://localhost:3010 -c config.in -o test.vcd --runtime 1 --clk dclk
+python3 -m pip install leep
+python3 ctracer.py get leep://localhost:3010 -c config.in -o test.vcd --runtime 1 --clk dclk
 
 # View the resulting VCD file in gtkwave
 gtkwave test.vcd

@@ -3,7 +3,7 @@
 if [ -x $IP ]; then
   echo Usage: IP=192.168.19.31 ./xadctemp.sh
 else
-  PYTHONPATH=../common python3 xadctemp.py -i $IP
+  python3 xadctemp.py -i $IP
 fi
 
 # Note! The '-i' above is a red-herring!  Its only purpose is to ensure that

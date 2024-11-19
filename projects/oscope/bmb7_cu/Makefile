@@ -56,13 +56,13 @@ Voscope_top_tb: oscope_top.sv Voscope_top_tb.cpp $(BADGER_DIR)/tests/udp_model.c
 Voscope_top_leep: Voscope_top_tb $(APP_NAME)_regmap.json
 	@echo "----- Oscope leep list self-test -----"
 	timeout 20 ./$< &
-	PYTHONPATH=$(PROJECTS_DIR)/common/ $(PYTHON) -m leep.cli leep://localhost:3010 list > leep_list.txt
+	$(PYTHON) -m leep.cli leep://localhost:3010 list > leep_list.txt
 	$(AWK) -F'"' '/ {/{print $$2}' $(APP_NAME)_regmap.json | cmp leep_list.txt -
 
 Voscope_top_live: Voscope_top_tb $(APP_NAME)_regmap.json
 	@echo "----- Oscope build rom live test -----"
 	timeout 20 ./$< &
-	PYTHONPATH=$(PROJECTS_DIR)/common/ $(PYTHON) $(BUILD_DIR)/build_rom.py --live -a localhost -p 3010
+	$(PYTHON) $(BUILD_DIR)/build_rom.py --live -a localhost -p 3010
 
 system_top.xdc: $(APP_NAME)_orig_special.xdc $(APP_NAME)_common.xdc
 

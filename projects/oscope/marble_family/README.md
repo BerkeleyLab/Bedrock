@@ -65,7 +65,7 @@ Setup the right python path for software dependencies sprayed around bedrock. An
 
 ```
 cd $BEDROCK/projects/oscope/software
-export PYTHONPATH=../../../dsp/:../../common:../../../board_support/zest:/home/w/work/lbl/lcls2_llrf/software/bmb7
+export PYTHONPATH=../../../dsp/:../../../board_support/zest:/home/w/work/lbl/lcls2_llrf/software/bmb7
 ```
 
 ### Configure zest and run oscope
