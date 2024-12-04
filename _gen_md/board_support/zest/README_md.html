@@ -126,7 +126,7 @@ Expect to see errors and unfinished things.</p>
 <p>Full information about the Zest hardware is at: <a class="reference external" href="https://github.com/BerkeleyLab/Zest">https://github.com/BerkeleyLab/Zest</a></p>
 <section id="using-zest-setup-py">
 <h2>Using zest_setup.py<a class="headerlink" href="#using-zest-setup-py" title="Permalink to this heading"></a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export PYTHONPATH=../../dsp
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export PYTHONPATH=../../dsp/:../../projects/common/leep
 # -r resets the board, -f sets the local bus clock frequency
 python zest_setup.py -a $IP -r -f 125.
 </pre></div>

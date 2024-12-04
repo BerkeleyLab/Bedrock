@@ -192,50 +192,6 @@ Expect to see errors and unfinished things.</p>
 <div class="line">8/11 for SSRF</div>
 <div class="line">9/13 for Argonne RIA</div>
 <div class="line"><br /></div>
-<div class="line">The phase generation algorithm</div>
-<div class="line">0. The phase increments for dds are generated using a technique described</div>
-<div class="line">in these 2 places:</div>
-<div class="line">Section: PROGRAMMABLE MODULUS MODE in:</div>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://www.analog.com/media/en/technical-documentation/data-sheets/ad9915.pdf">https://www.analog.com/media/en/technical-documentation/data-sheets/ad9915.pdf</a></div>
-<div class="line">(AND) <a class="reference external" href="https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm">https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm</a></div>
-<div class="line">Basically, increment the phase step at a coarse resolution, accumulate the</div>
-<div class="line">error on the side, and when that error accumulates to the lowest bit of</div>
-<div class="line">the coarse counter, add an extra 1 to the following phase step.</div>
-</div>
-<div class="line">1. phase_step_h is the coarse (20 bit) integer truncated phase increment for</div>
-<div class="line-block">
-<div class="line">the cordic. There is a 1-bit increment of phase that comes from</div>
-<div class="line">accumulating residue phase.</div>
-</div>
-<div class="line">2. This residue phase is accumulating in steps of phase_step_l, in a 12-bit</div>
-<div class="line-block">
-<div class="line">counter.</div>
-</div>
-<div class="line">3. However, there will be an extra residue even for this 12-bit counter,</div>
-<div class="line">which is the modulus, and this added as an offset when the counter crosses 0</div>
-<div class="line"><br /></div>
-<div class="line">12-bit modulo supports largest known periodicity in a suggested LLRF system,</div>
-<div class="line">1427 for JLab.  For more normal periodicities, use a multiple to get finer</div>
-<div class="line">granularity.</div>
-<div class="line">Note that the downloaded modulo control is the 2’s complement of the</div>
-<div class="line">mathematical modulus.</div>
-<div class="line">e.g., SSRF IF/F_s ratio 8/11, use</div>
-<div class="line-block">
-<div class="line">modulo = 4096 - 372*11 = 4</div>
-<div class="line">phase_step_h = 2^20*8/11 = 762600</div>
-<div class="line">phase_step_l = (2^20*8%11)*372 = 2976</div>
-</div>
-<div class="line">e.g., Argonne RIA test IF/F_s ratio 9/13, use</div>
-<div class="line-block">
-<div class="line">modulo = 4096 - 315*13 = 1</div>
-<div class="line">phase_step_h = 2^20*9/13 = 725937</div>
-<div class="line">phase_step_l = (2^20*9%13)*315 = 945</div>
-<div class="line"><br /></div>
-</div>
-<div class="line">TODO:</div>
-<div class="line">Potentially, isolate phase generation into a separate module.</div>
-<div class="line">Haha, turns out there is ph_acc.v (We should USE it).</div>
 <div class="line">Synthesizes to ??? slices at ??? MHz in XC3Sxxx-4 using XST-??</div>
 <div class="line"><br /></div>
 <div class="line"><br /></div>
