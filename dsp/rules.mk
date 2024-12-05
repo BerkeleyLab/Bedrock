@@ -30,7 +30,7 @@ bits: $(BITS_)
 	$(VVP) $< +trace
 	$(PYTHON) $(word 2, $^) -f $*
 
-rot_dds_tb: cordicg_b22.v
+rot_dds_tb: cordicg_b22.v ph_acc.v
 
 mon_12_tb: cordicg_b22.v
 
