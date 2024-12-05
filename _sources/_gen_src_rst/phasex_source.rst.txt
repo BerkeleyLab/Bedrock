@@ -9,7 +9,7 @@ phasex Source File
    `timescale 1ns / 1ns
 
    // DMTD-inspired investigation into clock phasing
-   // No on-chip analysis, that could be added later once we see the captured patterns
+   // No on-chip analysis, but that could be added later once we see the captured patterns
    module phasex #(
    	parameter aw=10
    ) (
@@ -48,7 +48,7 @@ phasex Source File
 
    // Data flow logic, also in sclk domain
    reg [15:0] shiftr=0;
-   reg [1:0] snap=0;
+   (* ASYNC_REG = "TRUE" *) reg [1:0] snap=0;
    always @(posedge sclk) begin
    	snap <= {div2, div1};  // safely crosses clock domain
    	if (run) shiftr <= {shiftr[13:0], snap};

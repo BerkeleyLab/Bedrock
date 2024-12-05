@@ -8,7 +8,7 @@ Description
 
 | 
 |  DMTD-inspired investigation into clock phasing
-|  No on-chip analysis, that could be added later once we see the captured patterns
+|  No on-chip analysis, but that could be added later once we see the captured patterns
 
 Pinout
 ''''''
@@ -76,15 +76,4 @@ implementation can be found in :ref:`phasex_source`
 
 .. _`portable`: https://en.wikipedia.org/wiki/Software_portability
 .. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
-
-Timing Diagram
-''''''''''''''
-
-A `GTKWave`_-generated timing diagram is shown below:
-
-.. _`GTKWave`: https://gtkwave.sourceforge.net/
-
-.. _fig:phasex_timing:
-.. figure:: phasex_timing.png
-    :alt: Timing diagram
 

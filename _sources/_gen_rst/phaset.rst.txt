@@ -51,12 +51,7 @@ Parameters
    * - delta
      - ?
      - ?
-     - 264
-     - 8*33
-   * - ext_div_en
-     - ?
-     - ?
-     - 0
+     - 16
      - 
 
 Ports
@@ -71,10 +66,10 @@ Ports
    * - uclk
      - Input
      - 
-   * - sclk
+   * - uclkg
      - Input
      - 
-   * - ext_div
+   * - sclk
      - Input
      - 
    * - phase[dw-1:0]
@@ -92,4 +87,15 @@ implementation can be found in :ref:`phaset_source`
 
 .. _`portable`: https://en.wikipedia.org/wiki/Software_portability
 .. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
+
+Timing Diagram
+''''''''''''''
+
+A `GTKWave`_-generated timing diagram is shown below:
+
+.. _`GTKWave`: https://gtkwave.sourceforge.net/
+
+.. _fig:phaset_timing:
+.. figure:: phaset_timing.png
+    :alt: Timing diagram
 
