@@ -17,8 +17,8 @@ module freq_count #(
 	// outputs in sysclk domain
 	output reg [freq_width-1:0] frequency,
 	output freq_strobe,
-	output reg [15:0] diff_stream,
-	output reg diff_stream_strobe,
+	output reg [15:0] diff_stream, // stream of last 4 4-bit counts of f_in
+	output reg diff_stream_strobe, // strobe at f_sysclk/4
 	// glitch_catcher can be routed to a physical pin to trigger
 	// a 'scope; see glitch_thresh parameter above
 	output reg glitch_catcher
@@ -43,6 +43,7 @@ end
 wire [3:0] xcount;  // per-sysclk count of f_in edges
 wire [freq_width-1:0] frequency_w;
 freq_gcount #(
+	.gw(4),
 	.freq_width(freq_width),
 	.initv(initv)
 ) work (
