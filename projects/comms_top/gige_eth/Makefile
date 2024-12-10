@@ -35,5 +35,5 @@ ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     endif
 endif
 
-CLEAN += *.bit ../test/*.dat
+CLEAN += *.bit *.bin ../test/*.dat
 include $(BUILD_DIR)/bottom_rules.mk
