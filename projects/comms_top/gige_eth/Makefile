@@ -17,7 +17,7 @@ VERILOG_DEFINE_FLAGS =
 include $(COMMS_TOP_DIR)/rules.mk
 include $(BUILD_DIR)/top_rules.mk
 
-all: gen $(APP_NAME).bit
+all: $(APP_NAME).bit
 
 $(APP_NAME).bit: $(IP_TCL)
 

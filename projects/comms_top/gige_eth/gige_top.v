@@ -59,6 +59,7 @@ module gige_top (
    gtp_sys_clk_mmcm i_gtp_sys_clk_mmcm (
       .clk_in  (sys_clk_fast),
       .sys_clk (sys_clk), // Buffered 50 MHz
+      .reset   (1'b0),
       .locked  ()
    );
 `else
