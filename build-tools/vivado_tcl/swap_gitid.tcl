@@ -204,8 +204,8 @@ proc swap_gitid {old_commit new_commit rowwidth dry_run} {
                 puts "no relevant 8Kx8 BRAM found"
                 return 0
             }
-            set lc0 [length $c0]
-            set lc1 [length $c1]
+            set lc0 [llength $c0]
+            set lc1 [llength $c1]
             if {$lc0 != 1 || $lc1 != 1} {
                 puts "ERROR: swap_gitid can't handle case $rowwidth $lc0 $lc1 yet!"
                 return 0
