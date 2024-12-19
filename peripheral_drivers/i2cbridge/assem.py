@@ -211,29 +211,27 @@ class I2CAssembler(i2c_assem):
             try:
                 data.append(next(prog_iter))
             except StopIteration:
-                raise I2C_Assembler_Exception(
-                    "Corrupted program detected. " +
+                raise I2C_Assembler_Exception("Corrupted program detected. " +
                     "Program terminates before read (rd) instruction is completed")
         elif op_code == cls.o_wr:
             for n in range(n_code):
                 try:
                     data.append(next(prog_iter))
                 except StopIteration:
-                    raise I2C_Assembler_Exception(
-                        "Corrupted program detected. " +
+                    raise I2C_Assembler_Exception("Corrupted program detected. " +
                         "Program terminates before write (wr) instruction is completed")
         elif op_code == cls.o_wx:
             for n in range(n_code):
                 try:
                     data.append(next(prog_iter))
                 except StopIteration:
-                    raise I2C_Assembler_Exception(
-                        "Corrupted program detected. " +
+                    raise I2C_Assembler_Exception("Corrupted program detected. " +
                         "Program terminates before write-multi (wx) instruction is completed")
         # All other op_code values have no data
         return (op_code, n_code, data)
 
-    def check_program(self, verbose=False):
+    @classmethod
+    def check(cls, prog, verbose=False, advanced=False):
         """Check program for violations of subtle usage rules."""
         # Look for a jump backward then follow that address forward
         # Must encounter a set_resx() before a read() or violation.
@@ -246,19 +244,18 @@ class I2CAssembler(i2c_assem):
         loop_end = False
         has_read = False
         has_buffer_flip = False
-        iprog = ListStream(self._program)
+        iprog = ListStream(prog)
         pc = iprog.tell()
-        rval = self._get_next_instruction(iprog)
+        rval = cls._get_next_instruction(iprog)
         while rval is not None:
             op_code, n_code, data = rval
             if loop_end:    # Should not be any code after a backwards jump
-                raise I2C_Assembler_Exception(
-                    f"Instruction [{op_code:03b}:{n_code:05b}] " +
+                raise I2C_Assembler_Exception(f"Instruction [{op_code:03b}:{n_code:05b}] " +
                     f"at address {pc} is unreachable.")
-            if op_code == self.o_oo:
-                if n_code == self.n_oo_bf:  # buffer_flip
+            if op_code == cls.o_oo:
+                if n_code == cls.n_oo_bf:  # buffer_flip
                     has_buffer_flip = True
-            elif op_code == self.o_jp:    # jump
+            elif op_code == cls.o_jp:    # jump
                 prnt(f"Found jump at pc {pc:03x}")
                 if pc not in jumps:
                     jumps.append(pc)
@@ -272,29 +269,32 @@ class I2CAssembler(i2c_assem):
                 else:   # pc is in jumps (we've already followed it)
                     if pc > n_code*32:
                         loop_end = True
-            elif op_code == self.o_sx:  # set_resx
+            elif op_code == cls.o_sx:  # set_resx
                 prnt(f"Found set_resx at pc {pc:03x}")
                 if backwards_jumped:
                     prnt("  After a backwards jump")
                     srx_after_jump = True
-            elif op_code == self.o_rd:  # read
+            elif op_code == cls.o_rd:  # read
                 prnt(f"Found read at pc {pc:03x}")
                 has_read = True
                 if backwards_jumped:
                     prnt(f"  After a backwards jump (srx_after_jump = {srx_after_jump})")
                     if not srx_after_jump:
-                        raise I2C_Assembler_Exception(
-                            f"Program address 0x{pc:03x}: Must use set_resx() after " +
+                        raise I2C_Assembler_Exception(f"Program address 0x{pc:03x}: Must use set_resx() after " +
                             "a backwards jump before any read operations for consistent address of results.")
             pc = iprog.tell()
             prnt(f"pc = {pc:03x}")
-            rval = self._get_next_instruction(iprog)
+            rval = cls._get_next_instruction(iprog)
         if has_read and not has_buffer_flip:
-            if not self._advanced_mode:
-                raise I2C_Assembler_Exception(
-                    "Program has read operation but no buffer flip found." +
+            if not advanced:
+                raise I2C_Assembler_Exception("Program has read operation but no buffer flip found." +
                     " Result buffer is unreadable.  Use 'advanced mode' to suppress this exception.")
-        prnt("Program good")
+        return True
+
+    def check_program(self, verbose=False):
+        rval = self.check(self._program, verbose=verbose, advanced=self._advanced_mode)
+        if rval and verbose:
+            print("Program good")
         return
 
     def write(self, dadr, madr, data, addr_bytes=1):
@@ -312,7 +312,7 @@ class I2CAssembler(i2c_assem):
         self._check_pc()
         return None
 
-    def read(self, dadr, madr, dlen, addr_bytes=1, reg_name=None):
+    def read(self, dadr, madr, dlen, addr_bytes=1, reg_name = None):
         """Add an I2C read transaction to the program.
         Params:
             int dadr : Device I2C Address
@@ -488,10 +488,10 @@ class I2CAssembler(i2c_assem):
         if n is None:
             n = (self._pc()//32)+1  # ceil(pc/32)
         n = int(n)
-        if n < self._pc()//32:
+        if (n < self._pc()//32):
             raise I2C_Assembler_Exception(f"Cannot pad to index {n} which corresponds to an address earlier than" +
                                           " the current program counter value {self._pc()}")
-        elif n > self._INDEX_MAX:
+        elif (n > self._INDEX_MAX):
             raise I2C_Assembler_Exception(f"Program counter index {n} exceeds maximum {self._INDEX_MAX}")
         self._program += super().pad(n, self._pc())
         self._check_pc()
@@ -614,6 +614,26 @@ def test_mkRegName(argv):
     print(s)
     return
 
+def check_program(argv):
+    """Check an externally-compiled program for logical errors."""
+    if len(argv) < 2:
+        print(f"Check an externally-compiled program for logical errors.\n" +
+              "USAGE: python3 {argv[0]} prog_file")
+        return
+    prog = []
+    with open(argv[1], 'r') as fd:
+        line = fd.readline()
+        while line:
+            vals = line.strip().split()
+            prog.extend([int(v, 16) for v in vals])
+            line = fd.readline()
+    print("Program size: {} instructions".format(len(prog)))
+    if I2CAssembler.check(prog, verbose=False):
+        print("Program good")
+    else:
+        print("Program fail (see Exceptions)")
+    return
 
 if __name__ == "__main__":
-    test_mkRegName(sys.argv)
+    #test_mkRegName(sys.argv)
+    check_program(sys.argv)
