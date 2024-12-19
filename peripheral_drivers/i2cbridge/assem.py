@@ -654,6 +654,10 @@ class I2CAssembler(i2c_assem):
             fd.write(post)
         return
 
+    def get_regmap(self):
+        """Return dict of {regname: (results_memory_offset, number_of_bytes)}"""
+        return self._memdict
+
 
 class I2C_Assembler_Exception(Exception):
     def __init__(self, s):

@@ -6,7 +6,22 @@ from os.path import isfile
 from datetime import datetime
 
 
+def _int(x):
+    try:
+        return int(x)
+    except ValueError:
+        pass
+    try:
+        return int(x, 16)
+    except ValueError:
+        pass
+    return int(x, 2)
+
+
 # ========================= Platform-Specific Overrides =======================
+break_on_stop = True
+
+
 def platform_write(devaddr, nbytes, cmd_table):
     return None, 0
 
@@ -20,21 +35,29 @@ def platform_write_rpt(devaddr, memaddr, nbytes, cmd_table):
 # =============================================================================
 
 
-def decode(argv):
+def decode_file(argv):
     if len(argv) > 1:
         filename = argv[1]
     else:
         print("No filename provided")
         return
-    cmd_table = load_file(filename)
+    prog = load_file(filename)
+    return decode(prog, filename=prog.name)
+
+
+def decode(prog, filename=None):
+    cmd_table = iter(prog)
     pa = 0
     if not cmd_table:
         return
     else:
-        report_file = f"File {cmd_table.name} - {datetime.now()}\n---- Start of report ----\n"
+        report_file = ""
+        if filename is not None:
+            report_file = f"File {filename} - {datetime.now()}\n"
+        report_file += "---- Start of report ----\n"
         report_file += "Prog Address : Cmd Byte : [op_code n_code] -> Description and data\n"
     for idx, cmd_line in enumerate(cmd_table):
-        cmd_byte = int(cmd_line[:2], 16)
+        cmd_byte = _int(cmd_line)
         op_code = cmd_byte >> 5
         n_code = cmd_byte & 0x1f
 
@@ -42,6 +65,9 @@ def decode(argv):
         if op_code == 0:  # special
             if n_code == 0:
                 report_file += "STOP (sleep)\n"
+                if break_on_stop:
+                    report_file += "Terminating decoding due to break_on_stop policy\n"
+                    break
             elif n_code == 2:
                 report_file += "Result buffer flip\n"
             elif n_code == 3:
@@ -52,7 +78,7 @@ def decode(argv):
 
         elif op_code == 1:  # read
             dlen = n_code-1
-            devaddr = int(next(cmd_table)[:2], 16)
+            devaddr = _int(next(cmd_table))
             pa += 1
             s, inc = platform_read(devaddr, dlen, cmd_table)
             if s is not None:
@@ -64,7 +90,7 @@ def decode(argv):
         elif op_code == 2:  # write
             # n_code = 1 + addr_bytes + len(data)
             nbytes = n_code-1
-            devaddr = int(next(cmd_table)[:2], 16)
+            devaddr = _int(next(cmd_table))
             pa += 1
             s, inc = platform_write(devaddr, nbytes, cmd_table)
             if s is not None:
@@ -73,7 +99,7 @@ def decode(argv):
             else:
                 report_file += f"Write - dev_addr: 0x{devaddr:02x} - mem_addr+data:"
                 for j in range(nbytes):
-                    data = int(next(cmd_table)[:2], 16)
+                    data = _int(next(cmd_table))
                     pa += 1
                     report_file += f" 0x{data:02x}"
                 report_file += '\n'
@@ -81,11 +107,11 @@ def decode(argv):
         elif op_code == 3:  # write followed by repeated start
             addr_bytes = n_code-1
             dlen = n_code-2
-            devaddr = int(next(cmd_table)[:2], 16)
-            memaddr = int(next(cmd_table)[:2], 16)
+            devaddr = _int(next(cmd_table))
+            memaddr = _int(next(cmd_table))
             pa += 2
             if addr_bytes == 2:
-                memaddr = (memaddr << 8) + int(next(cmd_table)[:2], 16)
+                memaddr = (memaddr << 8) + _int(next(cmd_table))
                 pa += 1
             s, inc = platform_write_rpt(devaddr, memaddr, dlen, cmd_table)
             if s is not None:
@@ -95,7 +121,7 @@ def decode(argv):
                 report_file += f"Write - dev_addr: 0x{devaddr:02x} - mem_addr:" + \
                     f" 0x{memaddr:04x} - START - data:"
                 for j in range(n_code-2):
-                    data = int(next(cmd_table)[:2], 16)
+                    data = _int(next(cmd_table))
                     pa += 1
                     report_file += f" 0x{data:02x}"
                 report_file += '\n'
@@ -160,4 +186,4 @@ def is_plaintext(file):
 
 if __name__ == '__main__':
     import sys
-    decode(sys.argv)
+    decode_file(sys.argv)

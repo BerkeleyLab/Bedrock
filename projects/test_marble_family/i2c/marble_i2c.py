@@ -67,6 +67,15 @@ class MarbleI2C():
     # INA219 index : IC name
     _ina219_map = {0: "U17", 1: "U32", 2: "U57"}
 
+    # Build a 2D list from the map
+    _a = []
+    for mux, tree in _i2c_map.items():
+        mux_name, mux_addr = mux
+        for ch, branch in tree.items():
+            branch_name, branch_dict = branch
+            for ic_name, ic_addr in branch_dict.items():
+                _a.append((ic_name, ic_addr, branch_name, ch, mux_name, mux_addr))
+
     # ========= IC-Specific Information =================
     # U34 (PCAL9555) I2C GPIO expander
     # Unused pins are set as input and have internal weak pullups
@@ -209,33 +218,36 @@ class MarbleI2C():
                 return tree
         return {}
 
-    def get_ics(self):
+    @classmethod
+    def get_ics(cls):
         """Returns a list of tuples (name_str, i2c_address_int) for all ICs in the I2C map."""
         ics = []
-        for _l in self._a:
+        for _l in cls._a:
             name = _l[0]
             addr = _l[1]
             ics.append((name, addr))
         return ics
 
-    def get_i2c_addr(self, ic_name):
+    @classmethod
+    def get_i2c_addr(cls, ic_name):
         """Get the I2C address of IC with name 'ic_name'
         Params:
             string ic_name: Any valid IC name in the I2C map
         Returns int I2C address if 'ic_name'  is found in the I2C map, otherwise None.
         """
-        for _l in self._a:
+        for _l in cls._a:
             if ic_name == _l[0]:
                 return _l[1]
         return None
 
-    def get_i2c_name(self, i2c_addr):
+    @classmethod
+    def get_i2c_name(cls, i2c_addr):
         """Get the name of IC with I2C address 'i2c_addr'
         Params:
             int i2c_addr: I2C address of the desired IC (0-255).
         Returns string IC name if 'i2c_addr' is found in the I2C map, otherwise None.
         """
-        for _l in self._a:
+        for _l in cls._a:
             if i2c_addr == _l[1]:
                 return _l[0]
         return None
@@ -271,12 +283,13 @@ class MarbleI2C():
                 return ch
         return None
 
-    def get_addr(self, ic_name):
+    @classmethod
+    def get_addr(cls, ic_name):
         """Get the I2C address of IC given by string 'ic_name'
         Params:
             string ic_name: Any valid IC name in the I2C map
         Returns I2C address (int) if 'ic_name' is found in the I2C map, otherwise None."""
-        for nic in self._a:
+        for nic in cls._a:
             _ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = nic
             if ic_name.lower().strip() == _ic_name.lower().strip():
                 return ic_addr

@@ -6,18 +6,19 @@ import sys
 _decode_path = "../../../peripheral_drivers/i2cbridge"
 
 try:
-    import decode
+    import decode as _decode
 except ImportError:
     try:
-        from i2cbridge import decode
+        from i2cbridge import decode as _decode
     except ImportError:
         try:
             sys.path.append(_decode_path)
-            import decode
+            import decode as _decode
         except ImportError:
             print("Cannot import module 'decode'. Set PYTHONPATH to bedrock/peripheral_drivers/i2cbridge")
             sys.exit(1)
 
+_int = _decode._int
 
 import marble_i2c
 
@@ -57,7 +58,7 @@ def marble_write(devaddr, nbytes, cmd_table):
     inc = 0
     for muxname, address in marble.get_muxes():
         if devaddr == address:
-            bitmask = int(next(cmd_table), 16)
+            bitmask = _int(next(cmd_table))
             seltext = _selected(bitmask)
             inc += 1
             msg = f"Busmux - bitmask: 0b{bitmask:08b} Selected {seltext}"
@@ -67,7 +68,7 @@ def marble_write(devaddr, nbytes, cmd_table):
             ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = _l
             if devaddr == ic_addr and ((1 << ch) & bus_bitmask):
                 for n in range(nbytes):
-                    data.append(int(next(cmd_table), 16))
+                    data.append(_int(next(cmd_table)))
                     inc += 1
                 msg = "Write to {} - data: {}".format(ic_name, [hex(m) for m in data])
     return msg, inc
@@ -99,19 +100,21 @@ def marble_write_rpt(devaddr, memaddr, nbytes, cmd_table):
                 msg = "Read from {} offset 0x{:x} - START".format(ic_name, memaddr)
             else:
                 for n in range(nbytes):
-                    data.append(int(next(cmd_table), 16))
+                    data.append(_int(next(cmd_table)))
                     inc += 1
                 msg = "Write to {} offset 0x{:x} - data: {}".format(ic_name, memaddr, [hex(m) for m in data])
     return msg, inc
 
 
 # ====================== Override Generic Platform Hooks ======================
-decode.platform_write = marble_write
-decode.platform_read = marble_read
-decode.platform_write_rpt = marble_write_rpt
+_decode.platform_write = marble_write
+_decode.platform_read = marble_read
+_decode.platform_write_rpt = marble_write_rpt
 # =============================================================================
 
+# Expose the (now platform-specific) 'decode' function in the 'decode' module
+decode = _decode.decode
 
 if __name__ == "__main__":
     import sys
-    decode.decode(sys.argv)
+    _decode.decode_file(sys.argv)
