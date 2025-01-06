@@ -61,8 +61,8 @@ def min_Enable_delay(fh, fp, HOST_XACT_CYCLES=8, RLAT=3, MAX_XACTS=RTEFI_MTU_LIM
         enable_delay = 0
     if enable_delay < 0:
         print(f"enable_delay = {enable_delay} < 0!")
-        print(f"fh*(cdc0 + (MAX_XACTS + 1)*(RLAT/fp)) = {fh*(cdc0 + (MAX_XACTS + 1)*(RLAT/fp))};"
-              + f" HOST_XACT_CYCLES*MAX_XACTS = {HOST_XACT_CYCLES*MAX_XACTS}")
+        print(f"fh*(cdc0 + (MAX_XACTS + 1)*(RLAT/fp)) = {fh*(cdc0 + (MAX_XACTS + 1)*(RLAT/fp))};" +
+              f" HOST_XACT_CYCLES*MAX_XACTS = {HOST_XACT_CYCLES*MAX_XACTS}")
     return enable_delay
 
 
