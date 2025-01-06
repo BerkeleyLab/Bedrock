@@ -57,7 +57,7 @@ Voscope_top_leep: Voscope_top_tb $(APP_NAME)_regmap.json
 	@echo "----- Oscope leep list self-test -----"
 	timeout 20 ./$< &
 	PYTHONPATH=$(PROJECTS_DIR)/common/ $(PYTHON) -m leep.cli leep://localhost:3010 list > leep_list.txt
-	awk -F'"' '/ {/{print $$2}' $(APP_NAME)_regmap.json | cmp leep_list.txt -
+	$(AWK) -F'"' '/ {/{print $$2}' $(APP_NAME)_regmap.json | cmp leep_list.txt -
 
 Voscope_top_live: Voscope_top_tb $(APP_NAME)_regmap.json
 	@echo "----- Oscope build rom live test -----"

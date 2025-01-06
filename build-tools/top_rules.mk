@@ -18,8 +18,10 @@ VERILATOR = verilator -Wall -Wno-fatal
 GTKWAVE = gtkwave
 VPIEXT = vpi
 PYTHON = python3
+PERL = perl
 AWK = awk
 XCIRCUIT = xcircuit
+SV2V = sv2v
 YOSYS = yosys
 YOSYS_QUIET = -q
 YOSYS_JSON_OPTION = -DBUGGY_FORLOOP
@@ -218,10 +220,10 @@ EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
 COMMA := ,
 
-# http://www.graphviz.org/content/dot-language
+# https://graphviz.org/doc/info/lang.html
 # apt-get install graphviz
 %.ps:   %.dot
 	dot -Tps $< -o $@
 
 %_support.vh: $(BS_HARDWARE_DIR)/%_support.in
-	perl $(BUILD_DIR)/regmap_proc.pl $< > $@
+	$(PERL) $(BUILD_DIR)/regmap_proc.pl $< > $@

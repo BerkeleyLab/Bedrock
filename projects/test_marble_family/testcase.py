@@ -5,7 +5,6 @@ bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 sys.path.append(bedrock_dir + "projects/common")
-import leep
 from c2vcd import produce_vcd
 from fmc_test_l import fmc_decode
 
@@ -352,6 +351,7 @@ if __name__ == "__main__":
 
     # OK, setup is finished, start the actual work
     # dev = lbus_access.lbus_access(addr, port=port, timeout=3.0, allow_burst=False)
+    import leep
     leep_addr = "leep://" + addr + ":" + str(port)
     print(leep_addr)
     dev = leep.open(leep_addr, timeout=5.0)

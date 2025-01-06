@@ -62,6 +62,7 @@ module cav_mode(
 	input signed [17:0] bw,  // external
 	`AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 

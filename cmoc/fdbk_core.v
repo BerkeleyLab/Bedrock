@@ -33,6 +33,7 @@ module fdbk_core(
 	input [1:0] coarse_scale,  // external
 	`AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 // Knobs to use/bypass CORDIC multiplexer, Magnitude/Phase processor (slow),
 // and Low-Latency Processor (bypassing conversion to polar coordinates)

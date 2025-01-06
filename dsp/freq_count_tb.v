@@ -16,7 +16,8 @@ initial begin
 	end
 	// Simulated accumulation interval is 20*64 = 1280 ns
 	// Should catch an average of 1280/6 = 213.33 f_in edges in that time
-	if (frequency>212 && frequency < 215) begin
+	$display("frequency = %d", frequency);
+	if (frequency > 212 && frequency < 215) begin
 		$display("PASS");
 		$finish(0);
 	end else begin

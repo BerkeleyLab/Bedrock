@@ -16,7 +16,7 @@ import testcase
 from time import sleep
 
 
-def decode_settings(mbox, verbose):
+def decode_settings(mbox, verbose=False):
     for page in range(7):
         subset = mbox[page*16:page*16+16]
         if verbose:
@@ -37,11 +37,11 @@ def decode_settings(mbox, verbose):
     i2c_addr = mbox[96]
     config = mbox[97]
     start_freq = int.from_bytes(bytes(mbox[98:102]), 'big')  # 4 bytes, MSB-first, unused
-    if ((i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff) or (pcb_rev == 0xdeadbeef)):
+    if (i2c_addr == 0) or (i2c_addr == 0xff) or (config == 0) or (config == 0xff) or (pcb_rev == 0xdeadbeef):
         print("SI570 settings not configured through MMC,using default for {:s} v1.{:d}".format(board_name, marble_rev))
         start_freq = 0
         # use default values if it's a marble v1.2, v1.3 or marble_mini
-        if (marble_rev == 2 or marble_rev == 3 or board == 2):
+        if marble_rev == 2 or marble_rev == 3 or board == 2:
             i2c_addr = 0xee
             polarity = 0
             start_addr = 0x0d
@@ -50,7 +50,7 @@ def decode_settings(mbox, verbose):
             polarity = 0
             start_addr = 0x07
     # check the [7:6] bits of the config value is either 2'b01 or 2'b10, to make sure it valid
-    elif (((config >> 6) == 1) ^ ((config >> 6) == 2)):
+    elif ((config >> 6) == 1) ^ ((config >> 6) == 2):
         start_addr = 0x0d if (config & 0x02) else 0x07
         polarity = config & 0x01
     else:
@@ -164,19 +164,19 @@ def hw_write_prog(si570_addr, start_addr, reg):
 
 
 # check if the final output frequency is <= 50 ppm
-def check(fin):
-    ppm = ((fin)*(1/args.new_freq) - 1.0)*1e6
-    if (abs(ppm) >= 50):
+def check(fin, new_freq):
+    ppm = ((fin)*(1/new_freq) - 1.0)*1e6
+    if abs(ppm) >= 50:
         raise ValueError('SI570 final frequency measurement is not correct, out of spec by %i ppm' % ppm)
 
 
-def compute_si570(addr, key, verbose):
+def compute_si570(addr, key, verbose=False, debug=False):
     mbox = addr.reg_read(["spi_mbox"])[0]
     # using keyword just to keep print consistent
     _, si570_addr, polarity, config_addr, _ = decode_settings(mbox, verbose)
     prog = hw_test_prog(si570_addr, polarity, config_addr)
-    result = testcase.run_testcase(addr, prog, result_len=359, debug=args.debug, verbose=verbose)
-    if args.debug:
+    result = testcase.run_testcase(addr, prog, result_len=359, debug=debug, verbose=verbose)
+    if debug:
         print(" ".join(["%2.2x" % p for p in prog]))
         print("")
         for jx in range(16):
@@ -195,7 +195,7 @@ def compute_si570(addr, key, verbose):
     # keep everything in MHz
     fdco = default * n1 * hs_div
     fxtal = fdco / rfreq
-    if args.verbose:
+    if verbose:
         print('%s SI570 settings:' % key)
         print('REFREQ: %4.4f' % rfreq)
         print('N1: %3d' % n1)
@@ -208,15 +208,15 @@ def compute_si570(addr, key, verbose):
     return si570_addr, config_addr, fxtal, default
 
 
-def config_si570(addr, verbose):
-    if args.new_freq:
-        si570_addr, config_addr, fxtal, default = compute_si570(addr, "Measured", verbose)
+def config_si570(addr, new_freq, verbose=False, debug=False):
+    if new_freq:
+        si570_addr, config_addr, fxtal, default = compute_si570(addr, "Measured", verbose, debug)
         # if first measured frequency and new output frequency are < 10 ppm don't change/update
-        if (abs(((default)*(1/args.new_freq) - 1.0)*1e6) < 10):
+        if abs(((default)*(1/new_freq) - 1.0)*1e6) < 10:
             pass
         else:
             print("#######################################")
-            print("Changing output frequency to %4.4f MHz" % args.new_freq)
+            print("Changing output frequency to %4.4f MHz" % new_freq)
             # DCO frequency range: 4850 - 5670MHz
             # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
             # N1 values: 1, 2, 4, 6, 8...128
@@ -227,7 +227,7 @@ def config_si570(addr, verbose):
                 if i == 0:
                     n1_i = 1
                 for hsdiv_i in [4, 5, 6, 7, 9, 11]:
-                    fdco_i = args.new_freq * n1_i * hsdiv_i
+                    fdco_i = new_freq * n1_i * hsdiv_i
                     if (fdco_i > 4850.0) and (fdco_i < 5670.0):
                         # print(n1_i-1, hsdiv_i-4, fdco_i)
                         if fdco_i < best[2]:
@@ -236,7 +236,7 @@ def config_si570(addr, verbose):
             if best[2] > 5700.0:
                 raise Exception('Could not find appropriate settings for your new target frequency')
 
-            if args.debug:
+            if debug:
                 print('New best option is:')
                 print(best[0]-1, best[1]-4, best[2])
 
@@ -261,8 +261,8 @@ def config_si570(addr, verbose):
             # write new registers
             reg = [reg7, reg8, reg9, reg10, reg11, reg12]
             chg = hw_write_prog(si570_addr, config_addr, reg)
-            result1 = testcase.run_testcase(addr, chg, result_len=359, debug=args.debug, verbose=verbose)
-            if args.debug:
+            result1 = testcase.run_testcase(addr, chg, result_len=359, debug=debug, verbose=verbose)
+            if debug:
                 print(" ".join(["%2.2x" % p for p in chg]))
                 print("")
                 for jx in range(16):
@@ -272,11 +272,11 @@ def config_si570(addr, verbose):
             sleep(1)
             # read final values and output frequency?
             print("#######################################")
-            _, _, _, freq = compute_si570(addr, "Final", verbose)
-            check(freq)
+            _, _, _, freq = compute_si570(addr, "Final", verbose, debug)
+            check(freq, new_freq)
     else:  # read only current settings if you don't want to change anything
         print("#######################################")
-        compute_si570(addr, "Measured", verbose)
+        compute_si570(addr, "Measured", verbose, debug)
 
 
 if __name__ == "__main__":
@@ -297,7 +297,7 @@ if __name__ == "__main__":
 
     # dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
 
-    config_si570(addr, args.verbose)
+    config_si570(addr, args.new_freq, args.verbose, args.debug)
 
 # usage:
 # To read current output frequency:

@@ -5,6 +5,20 @@ oscope_top_test:
   script:
     - make Voscope_top_tb && make Voscope_top_leep && make clean
 
+# We know the design doesn't yet get evaluated as CDC-clean, at least in part
+# due to Verilog inout ports being poorly supported by our tools.
+# Please take out the error bypass (echo) if this ever gets fixed.
+oscope_cdc:
+  before_script:
+    - cd projects/oscope/marble_family
+  stage: test
+  script:
+    - make dep && make oscope_prep_yosys.json && (make oscope_prep_cdc.txt || echo "Found CDC violation, as expected; continuing")
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - projects/oscope/marble_family/oscope_prep_cdc.txt
+
 oscope_top_bmb7:
   before_script:
     - cd projects/oscope/bmb7_cu && ls /non-free
@@ -29,17 +43,15 @@ oscope_top_marble:
     paths:
       - projects/oscope/marble_family/oscope_top.bit
 
+# LITEX_INSTALL_PATH is defined in the Docker image
 marble_ddr3_test:
   stage: synthesis
   before_script:
-    - apt-get update && apt-get install -y ninja-build && pip3 install meson==0.64.1
-    - mkdir /litex_setup_dir
-    - (BD=$PWD && cd /litex_setup_dir && sh $BD/build-tools/litex_meta.sh)
-    - cd /litex_setup_dir/litex-boards/litex_boards/targets
+    - cd $LITEX_INSTALL_PATH/litex-boards/litex_boards/targets
   script:
     - XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && python3 berkeleylab_marble.py --build
     - echo $CI_PROJECT_DIR
-    - cp /litex_setup_dir/litex-boards/litex_boards/targets/build/berkeleylab_marble/gateware/berkeleylab_marble.bit $CI_PROJECT_DIR/
+    - cp $LITEX_INSTALL_PATH/litex-boards/litex_boards/targets/build/berkeleylab_marble/gateware/berkeleylab_marble.bit $CI_PROJECT_DIR/
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week
@@ -50,9 +62,6 @@ marble_ddr3_test:
 litex_trigger_capture:
   stage: synthesis
   before_script:
-    - apt-get update && apt-get install -y ninja-build && pip3 install meson==0.64.1
-    - mkdir /litex_setup_dir
-    - (BD=$PWD && cd /litex_setup_dir && sh $BD/build-tools/litex_meta.sh)
     - cd projects/trigger_capture
   script:
     XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && make marble.bit

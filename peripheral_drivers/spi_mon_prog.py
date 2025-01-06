@@ -8,7 +8,7 @@ class spi_mon_prog:
     def gen(self, cmd_arr, verbose=False):
         '''cmd_arr is array of tuples: (hw_sel, rnw, command[31:0])'''
         l_cmd = len(cmd_arr)
-        if (l_cmd > self.MAX_CMD):
+        if l_cmd > self.MAX_CMD:
             print("spi_mon: SPI commands (%d) exceed instruction memory size" % l_cmd)
             return []
         imem_a = []

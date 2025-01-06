@@ -9,13 +9,14 @@
 // and bmb7_kintex/jxj_gate have such an output.
 
 module jit_rad_gateway #(
+	parameter dw = 32,
 	parameter passthrough = 1
 ) (
 	// basic localbus hookup
 	input lb_clk,
 	input [3:0] lb_addr,
 	input lb_strobe,
-	output [31:0] lb_odata,
+	output [dw-1:0] lb_odata,
 	// control
 	input lb_prefill,
 	output lb_error,
@@ -25,7 +26,7 @@ module jit_rad_gateway #(
 	output xfer_snap,
 	output xfer_strobe,
 	output [3:0] xfer_addr,
-	input [31:0] xfer_odata
+	input [dw-1:0] xfer_odata
 );
 
 generate if (passthrough) begin : thru
@@ -60,7 +61,7 @@ end else begin : buffer
 		app_running_r <= app_running;
 	end
 	assign xfer_addr = addr1;
-	dpram #(.aw(4), .dw(32)) buff(
+	dpram #(.aw(4), .dw(dw)) buff(
 		.clka(app_clk), .addra(addr2), .wena(buff_we), .dina(xfer_odata),
 		.clkb(lb_clk), .addrb(lb_addr), .doutb(lb_odata));
 	//

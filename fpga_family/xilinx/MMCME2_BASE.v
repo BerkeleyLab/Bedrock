@@ -56,6 +56,7 @@ module MMCME2_BASE #(
 
 assign CLKOUT0 = CLKIN1;
 assign CLKOUT1 = CLKIN1;
+assign LOCKED = 1;
 // verilator lint_restore
 
 endmodule // MMCME2_BASE

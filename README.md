@@ -1,7 +1,7 @@
 Overview
 ========
 
-Bedrock generated documentation: https://berkeleylab.github.io/Bedrock
+Bedrock generated documentation: https://berkeleylab.github.io/Bedrock/
 
 [Bedrock](https://gitlab.lbl.gov/hdl-libraries/bedrock) is largely an accumulation
 of Verilog codebase written over the past several years at LBNL. It contains
@@ -33,9 +33,9 @@ A few comments regarding the codebase
 1. All software is set up to easily run on *nix systems.
 2. Currently everything is [built using GNU Make](build-tools/makefile.md).
 We are on an active lookout for other methods, if they're actually better for us.
-3. iverilog is used for simulation. We are slowly starting to use [Verilator](https://www.veripool.org/wiki/verilator) as well
+3. iverilog is used for simulation. We are slowly starting to use [Verilator](https://www.veripool.org/verilator/) as well
 (see badger)
-4. Xilinx tools are used for synthesis, and starting to support [YoSys](http://www.clifford.at/yosys/) (again see badger)
+4. Xilinx tools are used for synthesis, and starting to support [YoSys](https://yosyshq.net/yosys/) (again see badger)
 5. This repository is connected to Gitlab CI. All simulation based tests run
 automatically upon every commit on the continuous integration server. This helps
 us move faster (without breaking things).  A helpful subset of those tests

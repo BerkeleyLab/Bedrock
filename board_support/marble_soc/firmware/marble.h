@@ -3,6 +3,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define MARBLE_VAR_MARBLE_V1_2 0
+#define MARBLE_VAR_MARBLE_V1_3 1
+#define MARBLE_VAR_MARBLE_V1_4 2
+#define MARBLE_VAR_UNKNOWN     3
+
 typedef union _DataDword {
     uint32_t value;
     unsigned char bytes[4];
@@ -33,23 +38,17 @@ typedef struct {
     t_reg8 *regmap;
 } marble_init_byte_t;
 
-// # marble_v1_2 = 0, marble_v1_3 = 1, marble_v1_4 = 2 and so on..
-typedef enum {
-    MARBLE_VAR_MARBLE_V1_2,
-    MARBLE_VAR_MARBLE_V1_3,
-    MARBLE_VAR_MARBLE_V1_4,
-    MARBLE_VAR_UNKNOWN
-} MARBLE_VAR;
-
 typedef struct marble_init_t {
-    MARBLE_VAR marble_variant;
+    uint8_t marble_variant;
     marble_init_word_t ina219_fmc1_data;
     marble_init_word_t ina219_fmc2_data;
     marble_init_word_t ina219_12v_data;
     marble_init_byte_t pca9555_qsfp_data;   // u34
     marble_init_byte_t pca9555_misc_data;   // u39
     marble_init_byte_t adn4600_data;
-    marble_init_byte_t si570_data;
+    uint64_t si570_freq_hz;
+    bool enable_evr_gtx;
+    bool enable_poll_status;
 } marble_init_t;
 
 typedef struct ina219_info_t {
@@ -82,9 +81,7 @@ typedef struct adn4600_info_t {
     const uint8_t i2c_mux_sel;
     const uint8_t i2c_addr;
     /** schematic refdes */
-    const unsigned char refdes[4];
-    /** function name */
-    const unsigned char name[4];
+    const unsigned char refdes[6];
     uint8_t xpt_status[8];
 } adn4600_info_t;
 
@@ -106,11 +103,11 @@ typedef struct qsfp_info_t {
     int16_t temperature;
     /** Internally measured voltage, LSB 0.1 mV. Page 00h Byte 26-27 */
     uint16_t voltage;
-    /** Tx bias current, LSB 2 µA, Page 00h Byte 42-49 */
+    /** Tx bias current, LSB 2 microA, Page 00h Byte 42-49 */
     uint16_t bias_current[4];
-    /** Rx power, LSB 0.1 µW, Page 00h Byte 34-41 */
+    /** Rx power, LSB 0.1 microW, Page 00h Byte 34-41 */
     uint16_t rx_power[4];
-    /** Tx power, LSB 0.1 µW, Page 00h Byte 50-57 */
+    /** Tx power, LSB 0.1 microW, Page 00h Byte 50-57 */
     uint16_t tx_power[4];
     /** Page 00h Byte 148-163 */
     unsigned char vendor_name[16];
@@ -129,16 +126,18 @@ typedef struct si570_info_t {
     const uint8_t i2c_mux_sel;
     /** I2C device address */
     uint8_t i2c_addr;
-    /** start address */
-    uint8_t start_addr;
+    unsigned char regs[6];
     /** f_xtal, fixed,  0.09 ppb */
     uint64_t f_xtal_hz;
-    unsigned char regs[6];
     /** 38-bit fractional multiplier  */
     uint64_t rfreq;
+    uint64_t f_reset_hz;
+    uint64_t f_dco_hz;
+    uint64_t f_out_hz;
+    /** start address */
+    uint8_t start_addr;
     uint8_t hs_div;
     uint8_t n1;
-    uint64_t f_out_hz;
 } si570_info_t;
 
 /**
@@ -146,7 +145,7 @@ typedef struct si570_info_t {
  * @brief Structure holding marble board info
  */
 typedef struct marble_dev_t {
-    MARBLE_VAR variant;
+    uint8_t variant;
     ina219_info_t ina219_12v;
     ina219_info_t ina219_fmc1;
     ina219_info_t ina219_fmc2;
@@ -244,12 +243,26 @@ bool set_adn4600_info(adn4600_info_t *info, marble_init_byte_t *p_data);
  */
 bool get_si570_info(si570_info_t *info);
 
+
 /**
- * Write SI570 registers
+ * Reset SI570
  * @param info pointer to si570_info_t struct
- * @param p_data pointer to marble_init_byte_t struct
  */
-bool set_si570_info(si570_info_t *info, marble_init_byte_t *p_data);
+bool reset_si570(si570_info_t *info);
+
+/**
+ * Calculate SI570 registers from si570_info, and write
+ * @param info pointer to si570_info_t struct
+ * @param f1_hz new frequency in Hz
+ */
+bool calc_si570_regs(si570_info_t *info, uint64_t f1_hz);
+
+/**
+ * Write SI570 registers from si570_info
+ * @param info pointer to si570_info_t struct
+ * @param f1_hz new frequency in Hz
+ */
+bool set_si570_regs(si570_info_t *info, uint64_t f1_hz);
 
 /**
  * Poll marble board device info including ina219, pca9555, qsfp

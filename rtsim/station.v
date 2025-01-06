@@ -57,6 +57,7 @@ module station(
   // Local Bus for simulator configuration
   `AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 
@@ -128,4 +129,5 @@ adc_em #(.del(1)) a_for // auto
 adc_em #(.del(1)) a_rfl // auto
 	(.clk(clk), .strobe(iq), .in(reflect), .rnd(rndb[12: 0]), .adc(a_reflect), `AUTOMATIC_a_rfl);
 
+`undef AUTOMATIC_prng
 endmodule

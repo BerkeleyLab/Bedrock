@@ -94,7 +94,7 @@ def gen_array(pulse_vals, print_me=True):
     filln = 4*512 - len(pulse_vals)
     pulse_vals += [0] * filln
 
-    if (print_me):
+    if print_me:
         for x in pulse_vals:
             print(x)
 

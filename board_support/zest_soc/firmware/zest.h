@@ -82,6 +82,7 @@ typedef struct {
     uint32_t *fcnt_exp;      // expected ADC0_DIV, ADC1_DIV, DAC_DCO, DSP_CLK
     int8_t *phs_center;      // expected ADC0_DIV, ADC1_DIV, DAC_DCO
     uint8_t *ad9781_smp;     // expected AD9781_SMP values
+    bool enable_poll_status;
 } zest_init_t;
 
 typedef struct {
@@ -91,6 +92,15 @@ typedef struct {
     uint16_t addr_mask;
     uint32_t data_mask;
 } zest_devinfo_t;
+
+typedef struct zest_status_t
+{
+    uint32_t zest_frequencies[4];   // ADC0, ADC1, DAC_DCO, DSP_CLK
+    int16_t zest_phases[3];         // ADC0, ADC1, DAC_DCO
+    uint16_t amc7823_adcs[9];
+    uint32_t ad7794_adcs[6];
+} zest_status_t;
+
 
 /***************************************************************************//**
  * @brief SYNC both A&B banks by writing R5 when SYNC0_AUTO high
@@ -280,11 +290,20 @@ bool align_adc_clk_phase(uint8_t ch, int8_t center);
 bool check_ad9781_bist(void);
 
 /***************************************************************************//**
+ * @brief Get zest status
+*******************************************************************************/
+void get_zest_status(zest_status_t *zest);
+
+/***************************************************************************//**
+ * @brief Print zest status
+*******************************************************************************/
+void print_zest_status(void);
+
+/***************************************************************************//**
  * @brief Test function.
  * @param base              - base address
- * @param zest_init_data    - pointer to init register data.
  * @return pass             - true if all validation passes
 *******************************************************************************/
-bool init_zest_dbg(uint32_t base, zest_init_t *init_data);
+bool init_zest_dbg(uint32_t base);
 
 #endif

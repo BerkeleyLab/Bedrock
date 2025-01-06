@@ -11,6 +11,7 @@ make -C dsp clean
 make -C dsp/feedforward clean
 make -C homeless/freq_demo clean
 make -C homeless clean
+make -C projects/common/leep clean
 make -C localbus clean
 make -C build-tools/make-demo spotless
 make -C projects/test_marble_family/pps_lock clean
@@ -26,3 +27,4 @@ make -C serial_io/chitchat clean
 make -C serial_io/EVG_EVR clean
 make -C soc/picorv32/test clean
 make -C fpga_family/xilinx clean
+rm -r $(find * -name "__pycache__")

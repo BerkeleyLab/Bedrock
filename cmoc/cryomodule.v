@@ -66,6 +66,7 @@ module cryomodule(
 	input lb_read,
 	output [31:0] lb_out
 );
+`undef AUTOMATIC_self
 
 // Note that the following five parameters should all be in the range 0 to 255,
 // in order to be properly read out via config_data0, below.
@@ -104,8 +105,7 @@ wire lb2_clk = clk1x;
 
 parameter n_cycles = n_mech_modes * 2;
 parameter interp_span = 4;  // ceil(log2(n_cycles))
-`define SLOW_SR_LEN 4*8
-parameter sr_length = `SLOW_SR_LEN;
+parameter sr_length = 4*8;
 
 `ifndef SIMPLE_DEMO
 // Transfer local bus to clk2x domain
@@ -239,13 +239,13 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    assign slow_data_ready[cavity_n] = circle_data_ready[cavity_n] & ~slow_invalid;  // XXX mixes domains, simulate to make sure it's glitch-free
    // Make our own additions to slow shift register
    // equivalence circle_stat: circle_fault 1, circle_wrap 1, circle_addr 14
-`define SLOW_SR_DATA { circle_count, circle_stat }
+   wire [sr_length-1:0] slow_sr_data = { circle_count, circle_stat };
    // TODO: These `we_*` wires below, are taken from the decode signals that are auto generated
    wire [7:0] slow_shell_out;
 
    reg [sr_length-1:0] slow_read=0;
    always @(posedge clk1x) if (slow_op) begin
-      slow_read <= slow_snap ? `SLOW_SR_DATA : {slow_read[sr_length-9:0],slow_shell_out};
+      slow_read <= slow_snap ? slow_sr_data : {slow_read[sr_length-9:0],slow_shell_out};
    end
    assign slow_out = slow_read[sr_length-1:sr_length-8];
 

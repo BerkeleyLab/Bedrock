@@ -27,5 +27,5 @@ echo "d77081080f0c5109adc92d2730145228cb19633de7f2ff50ca3a4ec0cb341532  litex_se
 
 # Now that we're quite sure we have the litex_setup we want,
 # go ahead and run it.
-python3 litex_setup.py init install --config standard
+python3 litex_setup.py --init --update --tag 2023.08 --install --config standard
 echo "DONE"

@@ -39,7 +39,7 @@ yosys -V
 echo 'puts "tclsh [info patchlevel]"' | tclsh
 flake8 --version
 if [ "$1" = "more" ]; then
-python3 -c 'import nmigen; print("nmigen found")'
+python3 -c 'import nmigen; print("nmigen found", nmigen.__version__)'
 riscv64-unknown-elf-gcc --version
 fi
 
@@ -89,7 +89,10 @@ make -C homeless all checks
 make -C homeless/freq_demo
 
 ## leep_test
-(cd projects/common && python3 -m unittest -v)
+(cd projects/common && PYTHONPATH=../../build-tools python3 -m unittest -v)
+
+## leep_test2
+make -C projects/common/leep
 
 ## localbus
 make -C localbus

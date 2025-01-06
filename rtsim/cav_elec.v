@@ -61,6 +61,7 @@ module cav_elec(
 	input [11:0] modulo,  // external
 	`AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 `AUTOMATIC_map

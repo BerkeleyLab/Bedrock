@@ -38,7 +38,6 @@ VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
 # Configuration not covered (yet?) by Bedrock's top_rules.mk
 VCD_ARGS = $(VCD_ARGS_$@)
 VVP_FLAGS = ${VVP_FLAGS_$@} ${VCD_ARGS_$@}
-PERL = perl
 XCIRCUIT = xcircuit
 # XXX consider converting this to something more compatible with Bedrock's VIVADO_SYNTH.
 VIVADOEXEC = vivado
@@ -89,10 +88,10 @@ crc_selfcheck: crc_selfcheck.o crc32.o
 derive_tb: crc_genguts.vh
 
 crc_genguts.vh: crc_derive
-	./$^ 16 0x1021 32 > $@
+	./$< 16 0x1021 32 > $@
 
 crc8e_guts.vh: crc_derive
-	./$^ -lsb 32 0x04C11DB7 8 > $@
+	./$< -lsb 32 0x04C11DB7 8 > $@
 
 # New feature compared to PSPEPS: no include file (or path) needed!
 # crc8e_guts.v is pre-filled in.  The following steps give its derivation

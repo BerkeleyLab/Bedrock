@@ -1,40 +1,39 @@
 // Copied from the old freq_count, but with new g_in (gate) input added
 // Read the new name as frequency (gated) count.
+//
+// This version delegates reference counter function to the caller,
+// to allow synchronization and resource-sharing across multiple
+// freq_gcount instances.  Note that if you want a _lot_ of frequency
+// counter instances, maybe you should look into multi_counter.v.
+//
+// It no longer includes the obscure glitch diagnostics.  Those are
+// still available in freq_count, just in case anyone wants them.
 
 `timescale 1ns / 1ns
 
 module freq_gcount #(
-	// Default configuration useful for input frequencies < 96 MHz
-	parameter glitch_thresh=2,
-	parameter refcnt_width=24,
+	parameter gw=4,  // Gray code counter width
 	parameter freq_width=28,
-	parameter initv=0
+	parameter initv=0  // output value for frequency at start-up
 ) (
 	// input clocks
 	input sysclk,  // timespec 8.0 ns
 	input f_in,  // unknown input
-	input g_in,  // gate (f_in clock domain)
+
+	// control input in f_in domain
+	input g_in,  // gate (wire to 1 to get a simple frequency counter)
+
+	// control input in sysclk domain
+	input ref_strobe,  // typically one pulse every 2^24 sysclk cycles
 
 	// outputs in sysclk domain
-	output reg [freq_width-1:0] frequency,
+	output [freq_width-1:0] frequency,
 	output freq_strobe,
-	output reg [15:0] diff_stream,
-	output reg diff_stream_strobe,
-	// glitch_catcher can be routed to a physical pin to trigger
-	// a 'scope; see glitch_thresh parameter above
-	output reg glitch_catcher
+	output [gw-1:0] xcount  // cycle-by-cycle gated count of f_in
 );
 
-initial begin
-	frequency=initv;
-	diff_stream=0;
-	diff_stream_strobe=0;
-	glitch_catcher=0;
-end
-
-// four-bit Gray code counter on the input signal
-// http://en.wikipedia.org/wiki/Gray_code
-localparam gw=4;
+// four-bit (nominal) Gray code counter on the input signal
+// https://en.wikipedia.org/wiki/Gray_code
 reg [gw-1:0] gray1=0;
 
 // The following three expressions compute the next Gray code based on
@@ -57,7 +56,7 @@ end
 
 // verilator lint_save
 // verilator lint_off UNOPTFLAT
-wire [gw-1:0] bin3 = gray3 ^ {1'b0, bin3[gw-1:1]}; // convert Gray to binary
+wire [gw-1:0] bin3 = gray3 ^ {1'b0, bin3[gw-1:1]};  // Gray to binary
 // verilator lint_restore
 
 reg [gw-1:0] bin4=0, bin5=0, diff1=0;
@@ -65,37 +64,19 @@ always @(posedge sysclk) begin
 	bin4 <= bin3;
 	bin5 <= bin4;
 	diff1 <= bin4-bin5;
-	if (diff1 > glitch_thresh) glitch_catcher <= ~glitch_catcher;
 end
 
-// It might also be possible to histogram diff1,
-// but for now just accumulate it to get a traditional frequency counter.
-// Also make it available to stream to host at 24 MByte/sec, might be
-// especially interesting when reprogramming a clock divider like
-// the AD9512 on a LLRF4 board.
-// In that case a 48 MHz sysclk / 2^24 = 2.861 Hz update
+// Accumulate diff1 to get a traditional frequency counter
 reg [freq_width-1:0] accum=0, result=initv;
-reg [refcnt_width-1:0] refcnt=0;
-reg ref_carry=0;
-reg [15:0] stream=0;
-reg stream_strobe=0;
-always @(posedge sysclk) begin
-	{ref_carry, refcnt} <= refcnt + 1;
-	if (ref_carry) result <= accum;
-	accum <= (ref_carry ? 28'b0 : accum) + diff1;
-	stream <= {stream[11:0],diff1};
-	stream_strobe <= refcnt[1:0] == 0;
-end
-
-// Latch/pipeline one more time to perimeter of this module
-// to make routing easier
 reg freq_strobe_r=0;
 always @(posedge sysclk) begin
-	frequency <= result;
-	freq_strobe_r <= ref_carry;
-	diff_stream <= stream;
-	diff_stream_strobe <= stream_strobe;
+	accum <= (ref_strobe ? {freq_width{1'b0}} : accum) + diff1;
+	if (ref_strobe) result <= accum;
+	freq_strobe_r <= ref_strobe;  // high when new data is valid
 end
+
+assign frequency = result;  // Don't over-register
 assign freq_strobe = freq_strobe_r;
+assign xcount = diff1;
 
 endmodule

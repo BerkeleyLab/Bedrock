@@ -55,11 +55,11 @@ module application_top(
 // Needs placing before usage of any top-level registers
 wire clk1x_clk, clk2x_clk, lb4_clk;
 
-(* external, signal_type="single-cycle" *) reg [0:0] lamp_test_trig = 0;  // top-level single-cycle
-(* external, signal_type="single-cycle" *) reg [0:0] ctrace_start = 0;    // top-level single-cycle
+// Note: the syntax for these top-level registers is not quite compatible with "old" newad
 (* external *) reg [31:0] icc_cfg = 0;             // top-level
-(* external *) reg [7:0] tag_now = 0;              // top-level
 (* external *) reg [1:0] domain_jump_realign = 0;  // top-level
+// newad-force clk1x domain
+(* external, cd="clk1x" *) reg [7:0] tag_now = 0;  // top-level
 
 `AUTOMATIC_decode
 
@@ -157,10 +157,8 @@ wire [27:0] frequency_adc;
 wire [27:0] frequency_4xout;
 wire [27:0] frequency_clkout3;
 wire [27:0] frequency_dac_dco;
-wire [27:0] frequency_gtx_tx;
-wire [27:0] frequency_gtx_rx;
-wire [15:0] hist_dout;
-wire  [1:0] hist_status;
+wire [15:0] hist_dout=0;
+wire  [1:0] hist_status=0;
 wire [15:0] phasex_dout;
 wire phasex_ready;
 wire phasex_present;
@@ -173,12 +171,14 @@ wire [7:0] llspi_result;
 wire wave1_available, wave0_available;
 wire [7:0] rawadc_avail;
 wire [31:0] banyan_data;
-wire [31:0] banyan_status;
-wire [31:0] trace_data;
-wire [31:0] trace_status1;
-wire [31:0] trace_status2;
-wire [7:0] slow_data;
-wire [0:0] slow_data_ready;
+// banyan status register was constructed without regard to clock domains - please revisit
+wire [31:0] banyan_status_x;
+reg  [31:0] banyan_status;  always @(posedge lb_clk) banyan_status <= banyan_status_x;
+wire [31:0] trace_data=0;
+wire [31:0] trace_status1=0;
+wire [31:0] trace_status2=0;
+wire [7:0] slow_data=0;
+wire [0:0] slow_data_ready=0;
 wire [31:0] phase_status_U2;
 wire [31:0] phase_status_U3;
 reg [15:0] crc_errors=0;
@@ -187,31 +187,8 @@ wire [7:0] scanner_result_val;
 wire [7:0] slow_chain_out;
 wire [19:0] icc_data_U50, icc_data_U32;
 wire [8:0] qsfp_result;
-wire [31:0] ctrace_out;
-wire [0:0] ctrace_running;
-parameter ctrace_aw=12;
-wire [ctrace_aw-1:0] ctrace_pc;
-wire [ctrace_aw-0:0] ctrace_status = {ctrace_pc, ctrace_running};
-wire [31:0] ccr1_summary;
-wire [31:0] ccr1_counts;
-wire [31:0] ccr1_cavity0_status;
-wire [31:0] ccr1_cavity1_status;
-wire [31:0] ccr1_rev_id;
-reg [15:0] cc1_latency=0;
-wire [15:0] cct1_local_frame_counter;  // output of chitchat_tx
-wire signed [17:0] cavity0_detune;
-wire signed [17:0] cavity1_detune;
-reg [0:0] cct1_cavity0_detune_valid=0;
-reg [0:0] cct1_cavity1_detune_valid=0;
-wire cavity0_detune_stb;
-wire cavity1_detune_stb;
-wire [6:0] cavity0_sat_count;
-wire [6:0] cavity1_sat_count;
-wire [2:0] dtrace_status;
-wire [21:0] telem_monitor;
 wire signed [13:0] fdbk_drive_lb_out;
 wire [25:0] freq_multi_count_out;
-wire [1:0] dac_enabled;
 wire [31:0] U15_spi_addr_rdbk = {zif_cfg.U15_sdo_addr,  zif_cfg.U15_spi_rdbk};
 wire [1:0] U15_spi_status     = {zif_cfg.U15_spi_ready, zif_cfg.U15_sdio_as_sdo};
 wire [31:0] U18_spi_addr_rdbk = {zif_cfg.U18_sdo_addr,  zif_cfg.U18_spi_rdbk};
@@ -231,14 +208,24 @@ wire [31:0] hello_1 = "o wo";
 wire [31:0] hello_2 = "rld!";
 wire [31:0] hello_3 = 32'h0d0a0d0a;
 wire [31:0] ffffffff = 32'hffffffff;
-wire [31:0] U2dout_lsb = zif_cfg.U2_dout[31:0];
-wire [31:0] U2dout_msb = zif_cfg.U2_dout[63:32];
-wire [31:0] U3dout_lsb = zif_cfg.U3_dout[31:0];
-wire [31:0] U3dout_msb = zif_cfg.U3_dout[63:32];
 wire [19:0] idelay_value_out_U2_lsb = zif_cfg.U2_idelay_value_out[19:0];
 wire [19:0] idelay_value_out_U2_msb = zif_cfg.U2_idelay_value_out[39:20];
 wire [19:0] idelay_value_out_U3_lsb = zif_cfg.U3_idelay_value_out[19:0];
 wire [19:0] idelay_value_out_U3_msb = zif_cfg.U3_idelay_value_out[39:20];
+
+// Only useful if the ADC data is static, which is the plan when
+// configured to emit a test pattern during initial setup.
+// Maybe just get rid of this, and use the real data capture in banyan memory.
+reg [31:0] U2dout_lsb = 0;
+reg [31:0] U2dout_msb = 0;
+reg [31:0] U3dout_lsb = 0;
+reg [31:0] U3dout_msb = 0;
+always @(posedge lb_clk) begin
+	U2dout_lsb <= zif_cfg.U2_dout[31:0];
+	U2dout_msb <= zif_cfg.U2_dout[63:32];
+	U3dout_lsb <= zif_cfg.U3_dout[31:0];
+	U3dout_msb <= zif_cfg.U3_dout[63:32];
+end
 
 // Very basic pipelining of read process
 reg [23:0] lb_addr_r=0;
@@ -281,10 +268,6 @@ always @(posedge lb_clk) begin
 		4'h1: reg_bank_1 <= U3dout_msb;
 		4'h2: reg_bank_1 <= idelay_value_out_U3_lsb;
 		4'h3: reg_bank_1 <= idelay_value_out_U3_msb;
-		4'ha: reg_bank_1 <= dtrace_status;
-		4'hc: reg_bank_1 <= ctrace_status;  // alias: ctrace_running
-		4'hd: reg_bank_1 <= frequency_gtx_tx;
-		4'he: reg_bank_1 <= frequency_gtx_rx;
 		4'hf: reg_bank_1 <= hist_status;
 		default: reg_bank_1 <= 32'hfaceface;
 	endcase
@@ -310,16 +293,9 @@ always @(posedge lb_clk) begin
 	case (lb_addr[3:0])
 		4'h0: reg_bank_3 <= phase_status_U3;  // alias: clk_phase_diff_out_U3
 		4'h1: reg_bank_3 <= crc_errors;
-		4'h2: reg_bank_3 <= cavity0_detune;
-		4'h3: reg_bank_3 <= cavity1_detune;
-		4'h4: reg_bank_3 <= cavity0_sat_count;
-		4'h5: reg_bank_3 <= cavity1_sat_count;
-		4'h6: reg_bank_3 <= dac_enabled;
 		//  xxxx37  unused
 		4'h8: reg_bank_3 <= U15_spi_addr_rdbk;  // alias: U15_spi_rdbk
 		4'h9: reg_bank_3 <= U15_spi_status;
-		4'ha: reg_bank_3 <= cct1_cavity0_detune_valid;
-		4'hb: reg_bank_3 <= cct1_cavity1_detune_valid;
 		4'hc: reg_bank_3 <= U18_spi_addr_rdbk;  // alias: U18_spi_rdbk
 		4'hd: reg_bank_3 <= U18_spi_status;
 		//  xxxx3e  unused
@@ -332,18 +308,10 @@ always @(posedge lb_clk) begin
 		4'h4: reg_bank_4 <= trace_status1;
 		4'h5: reg_bank_4 <= trace_status2;
 		4'h7: reg_bank_4 <= slow_data_ready;
-		4'h8: reg_bank_4 <= telem_monitor;
 		default: reg_bank_4 <= 32'hfaceface;
 	endcase
 	case (lb_addr[3:0])
-		// Most of these are in the wrong clock domain
-		4'h0: reg_bank_5 <= ccr1_summary;
-		4'h1: reg_bank_5 <= ccr1_counts;
-		4'h2: reg_bank_5 <= ccr1_cavity0_status;
-		4'h3: reg_bank_5 <= ccr1_cavity1_status;
-		4'h4: reg_bank_5 <= ccr1_rev_id;
-		4'h5: reg_bank_5 <= cc1_latency;
-		4'h6: reg_bank_5 <= cct1_local_frame_counter;
+		4'h1: reg_bank_5 <= 1;
 		default: reg_bank_5 <= 32'hfaceface;
 	endcase
 	// All of the following rhs have had one stage of decode pipeline;
@@ -370,8 +338,8 @@ always @(posedge lb_clk) begin
 end
 
 wire rawadc_trig_x;
-(* lb_automatic *)
-digitizer_config digitizer_config // auto
+(* lb_automatic, cd="clk1x" *)
+digitizer_config digitizer_config // auto clk1x
   (
    .lb_clk(lb_clk),
    .lb_strobe(lb_strobe),
@@ -383,7 +351,7 @@ digitizer_config digitizer_config // auto
    .rawadc_trig_x(rawadc_trig_x),
    .adc_clk(adc_clk),
    .adc_data(adc_data),
-   .banyan_status(banyan_status),
+   .banyan_status(banyan_status_x),
    .phasex_dout(phasex_dout),
    .phase_status_U2(phase_status_U2),
    .phase_status_U3(phase_status_U3),

@@ -180,16 +180,16 @@ proc check_impl {} {
 
 proc check_bmem {pattern width} {
     set c [get_cells -hier -filter {PRIMITIVE_TYPE =~ BMEM.*.*} $pattern]
-    if {[llength $c] != 1} {
-        puts "ERROR: Unexpected number of $pattern!"
-        return 0
+    set xc {}
+    foreach cc $c {
+        set n [get_property READ_WIDTH_A $cc]
+        if {$n == $width} {
+            lappend xc $cc
+        } else {
+            puts "Ignoring instance $cc where Read Width is $width (not $n)"
+        }
     }
-    set n [get_property READ_WIDTH_A $c]
-    if {$n != $width} {
-        puts "ERROR: Read Width of $pattern must be $width (not $n)!"
-        return 0
-    }
-    return $c
+    return $xc
 }
 
 proc swap_gitid {old_commit new_commit rowwidth dry_run} {
@@ -200,7 +200,16 @@ proc swap_gitid {old_commit new_commit rowwidth dry_run} {
         8 {
             set c0 [check_bmem "*dxx_reg_0" 9]
             set c1 [check_bmem "*dxx_reg_1" 9]
-            if {$c0 == 0 || $c1 == 0} {return 0}
+            if {$c0 == {} && $c1 == {}} {
+                puts "no relevant 8Kx8 BRAM found"
+                return 0
+            }
+            set lc0 [llength $c0]
+            set lc1 [llength $c1]
+            if {$lc0 != 1 || $lc1 != 1} {
+                puts "ERROR: swap_gitid can't handle case $rowwidth $lc0 $lc1 yet!"
+                return 0
+            }
             set init0 [get_property INIT_00 $c0]
             set init1 [get_property INIT_00 $c1]
             set xx [gitid_proc $old_commit $new_commit $init0 $init1 $rowwidth]
@@ -216,17 +225,23 @@ proc swap_gitid {old_commit new_commit rowwidth dry_run} {
 
         16 {
             set c0 [check_bmem "*dxx_reg" 18]
-            if {$c0 == 0} {return 0}
-            set init0 [get_property INIT_00 $c0]
-            set init1 [get_property INIT_01 $c0]
-            set xx [gitid_proc $old_commit $new_commit $init0 $init1 $rowwidth]
-            if {[llength $xx] != 2} {return 0}
-            lassign $xx init0x init1x
-            if {$dry_run != 1} {
-                set_property INIT_00 $init0x $c0
-                set_property INIT_01 $init1x $c0
-            } else {
-                puts "Dry run only"
+            if {$c0 == {}} {
+                puts "no relevant 4Kx16 BRAM found"
+                return 0
+            }
+            foreach cc $c0 {
+                puts "trying $cc"
+                set init0 [get_property INIT_00 $cc]
+                set init1 [get_property INIT_01 $cc]
+                set xx [gitid_proc $old_commit $new_commit $init0 $init1 $rowwidth]
+                if {[llength $xx] != 2} {return 0}
+                lassign $xx init0x init1x
+                if {$dry_run != 1} {
+                    set_property INIT_00 $init0x $cc
+                    set_property INIT_01 $init1x $cc
+                } else {
+                    puts "Dry run only"
+                }
             }
         }
 
@@ -282,18 +297,19 @@ proc is_git_dirty {gitid} {
     }
 }
 
-# Generate 40 digits git commit id where the latest 16 digits
-# are zeros in case of local modification
+# Generate 40-hex-digit git commit id, where the last 16 digits
+# are zeros in case of local modification.
+# This result is normally headed for swap_gitid.
 proc generate_extended_git_id {git_id dirtiness} {
     if {[string length $git_id] < 40} {
         error "generate_extended_git_id error: [
             ]received a git id shorter than 40 digits!"
     }
+    set rr $git_id
     if {$dirtiness} {
-        return [string range $git_id 0 23]0000000000000000
-    } else {
-        return $git_id
+        set rr [string range $git_id 0 23]0000000000000000
     }
+    return [string toupper $rr]
 }
 
 # Print git hash in huge and colored way
@@ -310,7 +326,6 @@ proc get_git_context {} {
     # single-source-of-truth
     array set git_status [get_full_git_id]
     # everything else derived from that
-    set git_id [string range $git_status(id) 0 39]
     set git_id_short [string range $git_status(id) 0 7]
     set git_dirty [is_git_dirty $git_status(id)]
     set dirty_suffix ""

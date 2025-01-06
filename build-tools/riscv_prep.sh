@@ -7,7 +7,7 @@ set -e
 # Get upstream stable sources
 mkdir ref
 cd ref
-wget --no-verbose http://mirrors.kernel.org/gnu/binutils/binutils-2.32.tar.xz
+wget --no-verbose https://mirrors.kernel.org/gnu/binutils/binutils-2.32.tar.xz
 wget --no-verbose https://bigsearcher.com/mirrors/gcc/releases/gcc-8.3.0/gcc-8.3.0.tar.xz
 wget --no-verbose ftp://sourceware.org/pub/newlib/newlib-3.1.0.tar.gz
 

@@ -137,7 +137,9 @@ always @(posedge clk) begin
         if (|mem_wstrb && (mem_short_addr==UART_BAUDRATE)) begin
             if (mem_wstrb[0]) uprescale[ 7:0] <= mem_wdata[ 7:0];
             if (mem_wstrb[1]) uprescale[15:8] <= mem_wdata[15:8];
+`ifndef YOSYS
             $display("new UART prescale value = 0x%04x", mem_wdata);
+`endif
         end
         // -------------
         // --- Reads ---
