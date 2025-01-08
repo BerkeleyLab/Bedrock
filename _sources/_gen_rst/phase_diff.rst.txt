@@ -50,7 +50,17 @@ Parameters
    * - delta
      - ?
      - ?
-     - 16
+     - 33
+     - 
+   * - ext_div1_en
+     - ?
+     - ?
+     - 0
+     - 
+   * - ext_div2_en
+     - ?
+     - ?
+     - 0
      - 
 
 Ports
@@ -65,19 +75,22 @@ Ports
    * - uclk1
      - Input
      - unknown clock 1
+   * - ext_div1
+     - Input
+     - external divider on uclk1
    * - uclk2
      - Input
      - unknown clock 2
-   * - uclk2g
+   * - ext_div2
      - Input
-     - 
+     - external divider on uclk2
    * - sclk
      - Input
      - sampling clock
    * - rclk
      - Input
      - readout clock (data transfer, local bus)
-   * - err
+   * - dval
      - Output
      - 
    * - phdiff_out[dw-2:0]
@@ -86,7 +99,7 @@ Ports
    * - vfreq_out[dw-1:0]
      - Output
      - 
-   * - err_ff
+   * - locked
      - Output
      - 
 
@@ -98,15 +111,4 @@ implementation can be found in :ref:`phase_diff_source`
 
 .. _`portable`: https://en.wikipedia.org/wiki/Software_portability
 .. _`Verilog`: https://en.wikipedia.org/wiki/Verilog
-
-Timing Diagram
-''''''''''''''
-
-A `GTKWave`_-generated timing diagram is shown below:
-
-.. _`GTKWave`: https://gtkwave.sourceforge.net/
-
-.. _fig:phase_diff_timing:
-.. figure:: phase_diff_timing.png
-    :alt: Timing diagram
 
