@@ -73,10 +73,10 @@ Ports
      - 
    * - diff_stream[15:0]
      - Output
-     - 
+     - stream of last 4 4-bit counts of f_in
    * - diff_stream_strobe
      - Output
-     - 
+     - strobe at f_sysclk/4
    * - glitch_catcher
      - Output
      - 

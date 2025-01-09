@@ -118,6 +118,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#implementation-and-use">Implementation and use</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#timing-diagram">Timing Diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="phasex.html">phasex</a></li>
@@ -229,13 +230,7 @@ Expect to see errors and unfinished things.</p>
 <tr class="row-odd"><td><p>delta</p></td>
 <td><p>?</p></td>
 <td><p>?</p></td>
-<td><p>264</p></td>
-<td><p>8*33</p></td>
-</tr>
-<tr class="row-even"><td><p>ext_div_en</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>0</p></td>
+<td><p>16</p></td>
 <td></td>
 </tr>
 </tbody>
@@ -256,11 +251,11 @@ Expect to see errors and unfinished things.</p>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>sclk</p></td>
+<tr class="row-odd"><td><p>uclkg</p></td>
 <td><p>Input</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>ext_div</p></td>
+<tr class="row-even"><td><p>sclk</p></td>
 <td><p>Input</p></td>
 <td></td>
 </tr>
@@ -279,6 +274,13 @@ Expect to see errors and unfinished things.</p>
 <h2>Implementation and use<a class="headerlink" href="#implementation-and-use" title="Permalink to this heading"></a></h2>
 <p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Software_portability">portable</a> <a class="reference external" href="https://en.wikipedia.org/wiki/Verilog">Verilog</a>
 implementation can be found in <a class="reference internal" href="../_gen_src_rst/phaset_source.html#phaset-source"><span class="std std-ref">phaset Source File</span></a></p>
+</section>
+<section id="timing-diagram">
+<h2>Timing Diagram<a class="headerlink" href="#timing-diagram" title="Permalink to this heading"></a></h2>
+<p>A <a class="reference external" href="https://gtkwave.sourceforge.net/">GTKWave</a>-generated timing diagram is shown below:</p>
+<figure class="align-default" id="fig-phaset-timing">
+<img alt="Timing diagram" src="../_images/phaset_timing.png" />
+</figure>
 </section>
 </section>
 

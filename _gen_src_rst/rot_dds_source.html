@@ -93,79 +93,44 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">10</span><span class="c1">// 8/11 for SSRF</span>
 <span class="linenos">11</span><span class="c1">// 9/13 for Argonne RIA</span>
 <span class="linenos">12</span><span class="c1">//</span>
-<span class="linenos">13</span><span class="c1">// The phase generation algorithm</span>
-<span class="linenos">14</span><span class="c1">// 0. The phase increments for dds are generated using a technique described</span>
-<span class="linenos">15</span><span class="c1">// in these 2 places:</span>
-<span class="linenos">16</span><span class="c1">// Section: PROGRAMMABLE MODULUS MODE in:</span>
-<span class="linenos">17</span><span class="c1">//  https://www.analog.com/media/en/technical-documentation/data-sheets/ad9915.pdf</span>
-<span class="linenos">18</span><span class="c1">//  (AND) https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm</span>
-<span class="linenos">19</span><span class="c1">//  Basically, increment the phase step at a coarse resolution, accumulate the</span>
-<span class="linenos">20</span><span class="c1">//  error on the side, and when that error accumulates to the lowest bit of</span>
-<span class="linenos">21</span><span class="c1">//  the coarse counter, add an extra 1 to the following phase step.</span>
-<span class="linenos">22</span><span class="c1">// 1. phase_step_h is the coarse (20 bit) integer truncated phase increment for</span>
-<span class="linenos">23</span><span class="c1">//  the cordic. There is a 1-bit increment of phase that comes from</span>
-<span class="linenos">24</span><span class="c1">//  accumulating residue phase.</span>
-<span class="linenos">25</span><span class="c1">// 2. This residue phase is accumulating in steps of phase_step_l, in a 12-bit</span>
-<span class="linenos">26</span><span class="c1">//  counter.</span>
-<span class="linenos">27</span><span class="c1">// 3. However, there will be an extra residue even for this 12-bit counter,</span>
-<span class="linenos">28</span><span class="c1">// which is the modulus, and this added as an offset when the counter crosses 0</span>
-<span class="linenos">29</span>
-<span class="linenos">30</span><span class="c1">// 12-bit modulo supports largest known periodicity in a suggested LLRF system,</span>
-<span class="linenos">31</span><span class="c1">// 1427 for JLab.  For more normal periodicities, use a multiple to get finer</span>
-<span class="linenos">32</span><span class="c1">// granularity.</span>
-<span class="linenos">33</span><span class="c1">// Note that the downloaded modulo control is the 2&#39;s complement of the</span>
-<span class="linenos">34</span><span class="c1">// mathematical modulus.</span>
-<span class="linenos">35</span><span class="c1">// e.g., SSRF IF/F_s ratio 8/11, use</span>
-<span class="linenos">36</span><span class="c1">//     modulo = 4096 - 372*11 = 4</span>
-<span class="linenos">37</span><span class="c1">//     phase_step_h = 2^20*8/11 = 762600</span>
-<span class="linenos">38</span><span class="c1">//     phase_step_l = (2^20*8%11)*372 = 2976</span>
-<span class="linenos">39</span><span class="c1">// e.g., Argonne RIA test IF/F_s ratio 9/13, use</span>
-<span class="linenos">40</span><span class="c1">//     modulo = 4096 - 315*13 = 1</span>
-<span class="linenos">41</span><span class="c1">//     phase_step_h = 2^20*9/13 = 725937</span>
-<span class="linenos">42</span><span class="c1">//     phase_step_l = (2^20*9%13)*315 = 945</span>
+<span class="linenos">13</span><span class="c1">// Synthesizes to ??? slices at ??? MHz in XC3Sxxx-4 using XST-??</span>
+<span class="linenos">14</span><span class="c1">//</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="k">module</span><span class="w"> </span><span class="n">rot_dds</span><span class="p">(</span>
+<span class="linenos">19</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span><span class="w">  </span><span class="c1">// timespec 9.0 ns</span>
+<span class="linenos">20</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">reset</span><span class="p">,</span><span class="w">  </span><span class="c1">// active high, synchronous with clk</span>
+<span class="linenos">21</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">sina</span><span class="p">,</span>
+<span class="linenos">22</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">cosa</span><span class="p">,</span>
+<span class="linenos">23</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="mh">19</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">phase_step_h</span><span class="p">,</span>
+<span class="linenos">24</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="mh">11</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">phase_step_l</span><span class="p">,</span>
+<span class="linenos">25</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="mh">11</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">modulo</span>
+<span class="linenos">26</span><span class="p">);</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span><span class="c1">// 2^17/1.64676 = 79594, use a smaller value to keep CORDIC round-off</span>
+<span class="linenos">29</span><span class="c1">// from overflowing the output</span>
+<span class="linenos">30</span><span class="k">parameter</span><span class="w"> </span><span class="n">lo_amp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">18</span><span class="mi">&#39;d79590</span><span class="p">;</span>
+<span class="linenos">31</span><span class="c1">// Sometimes we cheat and use slightly smaller values than above,</span>
+<span class="linenos">32</span><span class="c1">// to make other computations fit better.</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">18</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">phase_acc</span><span class="p">;</span>
+<span class="linenos">35</span><span class="n">ph_acc</span><span class="w"> </span><span class="n">ph_acc_i</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos">36</span><span class="w">  </span><span class="p">.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="n">reset</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">en</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span><span class="w"> </span><span class="c1">// input</span>
+<span class="linenos">37</span><span class="w">  </span><span class="p">.</span><span class="n">phase_acc</span><span class="p">(</span><span class="n">phase_acc</span><span class="p">),</span><span class="w"> </span><span class="c1">// output [18:0]</span>
+<span class="linenos">38</span><span class="w">  </span><span class="p">.</span><span class="n">phase_step_h</span><span class="p">(</span><span class="n">phase_step_h</span><span class="p">),</span><span class="w"> </span><span class="c1">// input [19:0]</span>
+<span class="linenos">39</span><span class="w">  </span><span class="p">.</span><span class="n">phase_step_l</span><span class="p">(</span><span class="n">phase_step_l</span><span class="p">),</span><span class="w"> </span><span class="c1">// input [11:0]</span>
+<span class="linenos">40</span><span class="w">  </span><span class="p">.</span><span class="n">modulo</span><span class="p">(</span><span class="n">modulo</span><span class="p">)</span><span class="w"> </span><span class="c1">// input [11:0]</span>
+<span class="linenos">41</span><span class="p">);</span>
+<span class="linenos">42</span><span class="c1">// See rot_dds_config</span>
 <span class="linenos">43</span>
-<span class="linenos">44</span><span class="c1">// TODO:</span>
-<span class="linenos">45</span><span class="c1">// Potentially, isolate phase generation into a separate module.</span>
-<span class="linenos">46</span><span class="c1">// Haha, turns out there is ph_acc.v (We should USE it).</span>
-<span class="linenos">47</span><span class="c1">// Synthesizes to ??? slices at ??? MHz in XC3Sxxx-4 using XST-??</span>
-<span class="linenos">48</span><span class="c1">//</span>
+<span class="linenos">44</span><span class="n">cordicg_b22</span><span class="w"> </span><span class="p">#(.</span><span class="n">nstg</span><span class="p">(</span><span class="mh">20</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">width</span><span class="p">(</span><span class="mh">18</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">def_op</span><span class="p">(</span><span class="mh">0</span><span class="p">))</span><span class="w"> </span><span class="n">trig</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">opin</span><span class="p">(</span><span class="mh">2</span><span class="mb">&#39;b00</span><span class="p">),</span>
+<span class="linenos">45</span><span class="w">     </span><span class="p">.</span><span class="n">xin</span><span class="p">(</span><span class="n">lo_amp</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">yin</span><span class="p">(</span><span class="mh">18</span><span class="mi">&#39;d0</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">phasein</span><span class="p">(</span><span class="n">phase_acc</span><span class="p">),</span>
+<span class="linenos">46</span><span class="c1">// 2^17/1.64676 = 79594, use a smaller value to keep CORDIC round-off</span>
+<span class="linenos">47</span><span class="c1">// from overflowing the output</span>
+<span class="linenos">48</span><span class="w">     </span><span class="p">.</span><span class="n">xout</span><span class="p">(</span><span class="n">cosa</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">yout</span><span class="p">(</span><span class="n">sina</span><span class="p">));</span>
 <span class="linenos">49</span>
-<span class="linenos">50</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
-<span class="linenos">51</span>
-<span class="linenos">52</span><span class="k">module</span><span class="w"> </span><span class="n">rot_dds</span><span class="p">(</span>
-<span class="linenos">53</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span><span class="w">  </span><span class="c1">// timespec 9.0 ns</span>
-<span class="linenos">54</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">reset</span><span class="p">,</span><span class="w">  </span><span class="c1">// active high, synchronous with clk</span>
-<span class="linenos">55</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">sina</span><span class="p">,</span>
-<span class="linenos">56</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">cosa</span><span class="p">,</span>
-<span class="linenos">57</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="mh">19</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">phase_step_h</span><span class="p">,</span>
-<span class="linenos">58</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="mh">11</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">phase_step_l</span><span class="p">,</span>
-<span class="linenos">59</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="mh">11</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">modulo</span>
-<span class="linenos">60</span><span class="p">);</span>
-<span class="linenos">61</span>
-<span class="linenos">62</span><span class="c1">// 2^17/1.64676 = 79594, use a smaller value to keep CORDIC round-off</span>
-<span class="linenos">63</span><span class="c1">// from overflowing the output</span>
-<span class="linenos">64</span><span class="k">parameter</span><span class="w"> </span><span class="n">lo_amp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">18</span><span class="mi">&#39;d79590</span><span class="p">;</span>
-<span class="linenos">65</span><span class="c1">// Sometimes we cheat and use slightly smaller values than above,</span>
-<span class="linenos">66</span><span class="c1">// to make other computations fit better.</span>
-<span class="linenos">67</span>
-<span class="linenos">68</span><span class="c1">// See rot_dds_config</span>
-<span class="linenos">69</span>
-<span class="linenos">70</span><span class="kt">reg</span><span class="w"> </span><span class="n">carry</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">reset_d</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">71</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">19</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">phase_h</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">phase_step_hp</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">72</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">11</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">phase_l</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">73</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">74</span><span class="w">     </span><span class="p">{</span><span class="n">carry</span><span class="p">,</span><span class="w"> </span><span class="n">phase_l</span><span class="p">}</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">reset</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mh">13</span><span class="mb">&#39;b0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">((</span><span class="n">carry</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">modulo</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">12</span><span class="mb">&#39;b0</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">phase_l</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">phase_step_l</span><span class="p">);</span>
-<span class="linenos">75</span><span class="w">     </span><span class="n">phase_step_hp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">phase_step_h</span><span class="p">;</span>
-<span class="linenos">76</span><span class="w">     </span><span class="n">reset_d</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">reset</span><span class="p">;</span>
-<span class="linenos">77</span><span class="w">     </span><span class="n">phase_h</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">reset_d</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mh">20</span><span class="mb">&#39;b0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">phase_h</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">phase_step_hp</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">carry</span><span class="p">);</span>
-<span class="linenos">78</span><span class="k">end</span>
-<span class="linenos">79</span><span class="n">cordicg_b22</span><span class="w"> </span><span class="p">#(.</span><span class="n">nstg</span><span class="p">(</span><span class="mh">20</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">width</span><span class="p">(</span><span class="mh">18</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">def_op</span><span class="p">(</span><span class="mh">0</span><span class="p">))</span><span class="w"> </span><span class="n">trig</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">opin</span><span class="p">(</span><span class="mh">2</span><span class="mb">&#39;b00</span><span class="p">),</span>
-<span class="linenos">80</span><span class="w">     </span><span class="p">.</span><span class="n">xin</span><span class="p">(</span><span class="n">lo_amp</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">yin</span><span class="p">(</span><span class="mh">18</span><span class="mi">&#39;d0</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">phasein</span><span class="p">(</span><span class="n">phase_h</span><span class="p">[</span><span class="mh">19</span><span class="o">:</span><span class="mh">1</span><span class="p">]),</span>
-<span class="linenos">81</span><span class="c1">// 2^17/1.64676 = 79594, use a smaller value to keep CORDIC round-off</span>
-<span class="linenos">82</span><span class="c1">// from overflowing the output</span>
-<span class="linenos">83</span><span class="w">     </span><span class="p">.</span><span class="n">xout</span><span class="p">(</span><span class="n">cosa</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">yout</span><span class="p">(</span><span class="n">sina</span><span class="p">));</span>
-<span class="linenos">84</span>
-<span class="linenos">85</span><span class="k">endmodule</span>
+<span class="linenos">50</span><span class="k">endmodule</span>
 </pre></div>
 </div>
 </section>

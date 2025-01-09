@@ -117,6 +117,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ports">Ports</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#implementation-and-use">Implementation and use</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#timing-diagram">Timing Diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="phaset.html">phaset</a></li>
@@ -231,19 +232,7 @@ Expect to see errors and unfinished things.</p>
 <tr class="row-even"><td><p>delta</p></td>
 <td><p>?</p></td>
 <td><p>?</p></td>
-<td><p>33</p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>ext_div1_en</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>0</p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p>ext_div2_en</p></td>
-<td><p>?</p></td>
-<td><p>?</p></td>
-<td><p>0</p></td>
+<td><p>16</p></td>
 <td></td>
 </tr>
 </tbody>
@@ -264,39 +253,35 @@ Expect to see errors and unfinished things.</p>
 <td><p>Input</p></td>
 <td><p>unknown clock 1</p></td>
 </tr>
-<tr class="row-odd"><td><p>ext_div1</p></td>
-<td><p>Input</p></td>
-<td><p>external divider on uclk1</p></td>
-</tr>
-<tr class="row-even"><td><p>uclk2</p></td>
+<tr class="row-odd"><td><p>uclk2</p></td>
 <td><p>Input</p></td>
 <td><p>unknown clock 2</p></td>
 </tr>
-<tr class="row-odd"><td><p>ext_div2</p></td>
+<tr class="row-even"><td><p>uclk2g</p></td>
 <td><p>Input</p></td>
-<td><p>external divider on uclk2</p></td>
+<td></td>
 </tr>
-<tr class="row-even"><td><p>sclk</p></td>
+<tr class="row-odd"><td><p>sclk</p></td>
 <td><p>Input</p></td>
 <td><p>sampling clock</p></td>
 </tr>
-<tr class="row-odd"><td><p>rclk</p></td>
+<tr class="row-even"><td><p>rclk</p></td>
 <td><p>Input</p></td>
 <td><p>readout clock (data transfer, local bus)</p></td>
 </tr>
-<tr class="row-even"><td><p>dval</p></td>
+<tr class="row-odd"><td><p>err</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>phdiff_out[dw-2:0]</p></td>
+<tr class="row-even"><td><p>phdiff_out[dw-2:0]</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p>vfreq_out[dw-1:0]</p></td>
+<tr class="row-odd"><td><p>vfreq_out[dw-1:0]</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p>locked</p></td>
+<tr class="row-even"><td><p>err_ff</p></td>
 <td><p>Output</p></td>
 <td></td>
 </tr>
@@ -307,6 +292,13 @@ Expect to see errors and unfinished things.</p>
 <h2>Implementation and use<a class="headerlink" href="#implementation-and-use" title="Permalink to this heading"></a></h2>
 <p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Software_portability">portable</a> <a class="reference external" href="https://en.wikipedia.org/wiki/Verilog">Verilog</a>
 implementation can be found in <a class="reference internal" href="../_gen_src_rst/phase_diff_source.html#phase-diff-source"><span class="std std-ref">phase_diff Source File</span></a></p>
+</section>
+<section id="timing-diagram">
+<h2>Timing Diagram<a class="headerlink" href="#timing-diagram" title="Permalink to this heading"></a></h2>
+<p>A <a class="reference external" href="https://gtkwave.sourceforge.net/">GTKWave</a>-generated timing diagram is shown below:</p>
+<figure class="align-default" id="fig-phase-diff-timing">
+<img alt="Timing diagram" src="../_images/phase_diff_timing.png" />
+</figure>
 </section>
 </section>
 
