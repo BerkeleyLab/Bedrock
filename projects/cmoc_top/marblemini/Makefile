@@ -3,11 +3,9 @@ include $(TOP_DIR)/dir_list.mk
 .PHONY: all
 all: $(TARGET)
 
-HARDWARE = marblemini
-DSP_FLAVOR = 7
 XILINX_TOOL := VIVADO
-
 APP_NAME = cmoc
+HARDWARE = marblemini
 
 APP_DIR = $(TOP_DIR)/cmoc
 DSP_DIR = $(TOP_DIR)/dsp
@@ -32,11 +30,11 @@ system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)
 	@echo "Building for $(HARDWARE); Use make HARDWARE=marble(mini) otherwise"
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
-CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json $(RTEFI_CLEAN)
+CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json marble_features.vh marble_features.json $(RTEFI_CLEAN)
 CLEAN_DIRS += _xilinx
 
 cmoc_top.bit: $(AUTOGEN_DIR)/config_romx.v
-cmoc_top.v: $(AUTOGEN_DIR)/config_romx.v rtefi_blob.v construct_tx_table.v cryomodule_auto
+cmoc_top.v: marble_features.vh $(AUTOGEN_DIR)/config_romx.v rtefi_blob.v construct_tx_table.v cryomodule_auto
 
 download: cmoc_top.bit
 	openocd -f $(BOARD_SUPPORT_DIR)/$(HARDWARE)/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $^; exit"
@@ -49,6 +47,10 @@ $(DEPDIR)/$(TARGET).d: $(AUTOGEN_DIR)/config_romx.v
 $(APP_NAME)_regmap.json: $(AUTOGEN_DIR)/regmap_cryomodule.json $(OSCOPE_COMMON_DIR)/merge_json.py $(OSCOPE_COMMON_DIR)/shorten_names.py
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/merge_json.py -o $(APP_NAME)_regmap_long.json -i $(filter %.json, $^)
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/shorten_names.py -o $@ -i $(APP_NAME)_regmap_long.json
+
+# actual file output is marble_features.vh
+marble_features.json marble_features.vh: marble_features.yaml
+	$(PYTHON) $(BUILD_DIR)/gen_features.py -i $< -c $(HARDWARE)
 
 include $(BUILD_DIR)/bottom_rules.mk
 
