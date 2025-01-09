@@ -61,7 +61,7 @@ module cmoc_top(
 	output LD17,
 
 	// Physical Pmod
-	// Pmod1: use LED above with Digilent mapping
+	input [7:0] Pmod1,
 	input [7:0] Pmod2
 );
 
