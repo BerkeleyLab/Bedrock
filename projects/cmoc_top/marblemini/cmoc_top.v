@@ -50,8 +50,6 @@ module cmoc_top(
 
 	output       VCXO_EN,
 
-	output [7:0] LED,
-
 	// J15 TMDS 0, 1, 2, CLK
 	output [3:0] TMDS_P,
 	output [3:0] TMDS_N,
@@ -61,7 +59,7 @@ module cmoc_top(
 	output LD17,
 
 	// Physical Pmod
-	input [7:0] Pmod1,
+	output [7:0] Pmod1,
 	input [7:0] Pmod2
 );
 
@@ -217,6 +215,7 @@ localparam C_USE_I2CBRIDGE = 0;
 // vestiges of CERN FMC tester support
 wire old_scl1, old_scl2, old_sda1, old_sda2;
 
+wire [7:0] LED;
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
 marble_base #(
@@ -261,6 +260,7 @@ defparam base.rtefi.p4_client.engine.seven = 1;
 parameter BUF_AW=13;
 assign LD16 = LED[0];
 assign LD17 = LED[1];
+assign Pmod1 = LED;
 
 // test_marble_family instantiates a "Silly little test pattern generator" for these pins
 wire [3:0] tmds_q = 4'b0000;
