@@ -1,3 +1,7 @@
+LTM_CLKIN0   LTM_CLKIN[0]
+LTM_CLKIN12  LTM_CLKIN[1]
+LTM_CLKIN3   LTM_CLKIN[2]
+
 # Literal output follows
 
 create_clock -name clk1x -period 13.32 [get_nets clk_1x_90]
