@@ -1,0 +1,12 @@
+# Literal output follows
+
+create_clock -name clk1x -period 13.32 [get_nets clk_1x_90]
+create_clock -name clk2x -period  6.66 [get_nets clk_2x_0]
+
+set_clock_groups -name async_clks -asynchronous \
+  -group [get_clocks -include_generated_clocks sys_clk] \
+  -group [get_clocks -include_generated_clocks tx_clk] \
+  -group [get_clocks -include_generated_clocks rx_clk] \
+  -group [get_clocks -include_generated_clocks {clk1x clk2x}] \
+  -group [get_clocks -include_generated_clocks ddr_clk] \
+  -group [get_clocks -include_generated_clocks SI57X_A]

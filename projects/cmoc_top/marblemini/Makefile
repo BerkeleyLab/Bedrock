@@ -5,6 +5,7 @@ all: $(TARGET)
 
 XILINX_TOOL := VIVADO
 APP_NAME = cmoc
+
 HARDWARE = marblemini
 
 APP_DIR = $(TOP_DIR)/cmoc
@@ -26,15 +27,16 @@ VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(FPGA_FA
 
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
 
-system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)/$(HARDWARE)/pin_map.csv oscope_rules.csv
+system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)/$(HARDWARE)/pin_map.csv $(HARDWARE)_top.csv
 	@echo "Building for $(HARDWARE); Use make HARDWARE=marble(mini) otherwise"
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
-CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json marble_features.vh marble_features.json $(RTEFI_CLEAN)
+CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json marble_features*.vh $(RTEFI_CLEAN)
+CLEAN += *.log *.jou
 CLEAN_DIRS += _xilinx
 
 cmoc_top.bit: $(AUTOGEN_DIR)/config_romx.v
-cmoc_top.v: marble_features.vh $(AUTOGEN_DIR)/config_romx.v rtefi_blob.v construct_tx_table.v cryomodule_auto
+cmoc_top.v: marble_features_defs.vh marble_features_params.vh $(AUTOGEN_DIR)/config_romx.v rtefi_blob.v construct_tx_table.v cryomodule_auto
 
 download: cmoc_top.bit
 	openocd -f $(BOARD_SUPPORT_DIR)/$(HARDWARE)/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $^; exit"
@@ -48,9 +50,9 @@ $(APP_NAME)_regmap.json: $(AUTOGEN_DIR)/regmap_cryomodule.json $(OSCOPE_COMMON_D
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/merge_json.py -o $(APP_NAME)_regmap_long.json -i $(filter %.json, $^)
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/shorten_names.py -o $@ -i $(APP_NAME)_regmap_long.json
 
-# actual file output is marble_features.vh
-marble_features.json marble_features.vh: marble_features.yaml
-	$(PYTHON) $(BUILD_DIR)/gen_features.py -i $< -c $(HARDWARE)
+# actual file output is marble_features_(defs/params).vh
+marble_features_defs.vh marble_features_params.vh: $(BUILD_DIR)/gen_features.py marble_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c $(HARDWARE) --split
 
 include $(BUILD_DIR)/bottom_rules.mk
 

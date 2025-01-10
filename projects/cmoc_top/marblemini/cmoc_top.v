@@ -1,7 +1,18 @@
+`include "marble_features_defs.vh"
 module cmoc_top(
 	input       GTPREFCLK_P,
 	input       GTPREFCLK_N,
+`ifdef MARBLE_V2
+	input       DDR_REF_CLK_P,
+	input       DDR_REF_CLK_N,
+`endif
 	input       SYSCLK_P,
+
+	// SI570 clock inputs
+	`ifdef USE_SI570
+	input GTREFCLK_P,
+	input GTREFCLK_N,
+	`endif
 
 	// RGMII Tx port
 	output [3:0] RGMII_TXD,
@@ -50,9 +61,16 @@ module cmoc_top(
 
 	output       VCXO_EN,
 
+`ifdef MARBLE_V2
+	// Special for LTM4673 synchronization -- untested
+	output [2:0] LTM_CLKIN,
+`endif
+
+`ifdef MARBLE_MINI
 	// J15 TMDS 0, 1, 2, CLK
 	output [3:0] TMDS_P,
 	output [3:0] TMDS_N,
+`endif
 
 	// Directly attached LEDs
 	output LD16,
@@ -63,8 +81,22 @@ module cmoc_top(
 	input [7:0] Pmod2
 );
 
-`include "marble_features.vh"
+`include "marble_features_params.vh"
 
+// Only Marble V2 has DDR ref clk
+wire ddrrefclk_unbuf, ddrrefclk;
+generate
+if (C_CARRIER_REV == "v2") begin
+IBUFDS ddri_125(.I(DDR_REF_CLK_P), .IB(DDR_REF_CLK_N), .O(ddrrefclk_unbuf));
+// Vivado fails, with egregiously useless error messages,
+// if you don't put this BUFG in the chain to the MMCM.
+BUFG ddrg_125(.I(ddrrefclk_unbuf), .O(ddrrefclk));
+end
+endgenerate
+
+// For Marblemini, GTPREFCLKs are routed directly to MGTCLK pins,
+// so using them does not depend on the clock switch configuration
+// either
 wire gtpclk0, gtpclk;
 // Gateway GTP refclk to fabric
 IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0));
@@ -73,13 +105,25 @@ IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0)
 BUFG passg_125(.I(gtpclk0), .O(gtpclk));
 
 wire si570;
+`ifdef USE_SI570
+// Single-ended clock derived from programmable xtal oscillator
+ds_clk_buf #(
+	.GTX (1))
+i_ds_gtrefclk1 (
+	.clk_p   (GTREFCLK_P),
+	.clk_n   (GTREFCLK_N),
+	.clk_out (si570)
+);
+`else
 assign si570 = 0;
+`endif
 
 parameter in_phase_tx_clk = 1;
 // Standardized interface, hardware-dependent implementation
 wire tx_clk, tx_clk90, clk62;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
+wire test_clk;
 wire clk_out1;
 wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
 // used for calibrating IODELAY cells
@@ -90,28 +134,26 @@ wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
 // or have problems with the Xilinx DNA readout.
 `define USE_IDELAYCTRL
 
-`define USE_GTPCLK
-`ifdef USE_GTPCLK
-xilinx7_clocks #(
-        .DIFF_CLKIN("BYPASS"),
-        .CLKIN_PERIOD(8),  // REFCLK = 125 MHz
-        .MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
-        .DIV0     (8),       // 1 GHz / 8 = 125 MHz
-`ifdef USE_IDELAYCTRL
-        .DIV1     (5)     // 1 GHz / 5 = 200 MHz
-`else
-        .DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
-`endif
-) clocks_i(
-        .sysclk_p (gtpclk),
-        .sysclk_n (1'b0),
-        .reset    (pll_reset),
-        .clk_out0 (tx_clk),
-        .clk_out1 (clk_out1),
-        .clk_out2 (tx_clk90),
-        .locked   (clk_locked)
-);
-`else
+// Sanity check for C_SYSCLK_SRC
+generate
+if (C_SYSCLK_SRC != "gtp_ref_clk" &&
+    C_SYSCLK_SRC != "ddr_ref_clk" &&
+    C_SYSCLK_SRC != "sys_clk") begin
+    C_SYSCLK_SRC_parameter_has_an_invalid_value();
+end
+endgenerate
+
+// If using ddr_ref_clk it must be a v2
+generate
+if (C_SYSCLK_SRC == "ddr_ref_clk" &&
+    C_CARRIER_REV != "v2") begin
+    C_SYSCLK_SRC_ddr_ref_clk_can_only_be_used_with_a_Marble_v2();
+end
+endgenerate
+
+generate
+// this configuration is probably bit-rotted
+if (C_SYSCLK_SRC == "sys_clk") begin
 wire SYSCLK_N = 0;
 gmii_clock_handle clocks(
 	.sysclk_p(SYSCLK_P),
@@ -121,7 +163,44 @@ gmii_clock_handle clocks(
 	.clk_eth_90(tx_clk90),
 	.clk_locked(clk_locked)
 );
+assign test_clk=0;
+end
+else begin
+
+wire clk125;
+// Use GTPREFCLK_P
+if (C_SYSCLK_SRC == "gtp_ref_clk") begin
+assign clk125 = gtpclk;
+end
+// Use DDR_REF_CLK_P, preferred because it does not depend
+// on the ADN4600 clock switch configuration. Only available
+// on Marble v2
+else if (C_SYSCLK_SRC == "ddr_ref_clk") begin
+assign clk125 = ddrrefclk;
+end
+
+xilinx7_clocks #(
+	.DIFF_CLKIN("BYPASS"),
+	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
+	.MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
+	.DIV0     (8),     // 1 GHz / 8 = 125 MHz
+`ifdef USE_IDELAYCTRL
+	.DIV1     (5)     // 1 GHz / 5 = 200 MHz
+`else
+	.DIV1     (16)     // 1 GHz / 16 = 62.5 MHz
 `endif
+) clocks_i(
+	.sysclk_p (clk125),
+	.sysclk_n (1'b0),
+	.reset    (pll_reset),
+	.clk_out0 (tx_clk),
+	.clk_out1 (clk_out1),
+	.clk_out2 (tx_clk90),
+	.clk_out3f(test_clk),  // not buffered, straight from MMCM
+	.locked   (clk_locked)
+);
+end
+endgenerate
 
 `ifdef USE_IDELAYCTRL
 assign clk200 = clk_out1;
@@ -171,10 +250,9 @@ wire BOOT_CCLK;
 wire cfg_clk;  // Just for fun, so we can measure its frequency
 `ifndef SIMULATE
 STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
-`else // !`ifndef SIMULATE
-   assign cfg_clk = 0;
-   assign BOOT_CCLK = tx_clk;
-`endif // !`ifndef SIMULATE
+`else
+assign cfg_clk = 0;
+`endif
 
 // Placeholders
 wire ZEST_PWR_EN;
@@ -206,6 +284,13 @@ assign idelayctrl_reset = ext_config[2];  // might be helpful?
 `endif
 `endif
 
+// Placeholders for possible IDELAY control inside gmii_to_rgmii
+assign idelay_ce = 0;
+assign idelay_clk = 0;
+assign idelay_value_in = 0;
+
+// Maybe this cruft could be eliminated if the corresponding yaml defs
+// were rejiggered to be parameters.
 `ifdef USE_I2CBRIDGE
 localparam C_USE_I2CBRIDGE = 1;
 `else
@@ -215,6 +300,7 @@ localparam C_USE_I2CBRIDGE = 0;
 // vestiges of CERN FMC tester support
 wire old_scl1, old_scl2, old_sda1, old_sda2;
 
+wire [2:0] ps_sync;
 wire [7:0] LED;
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
@@ -250,7 +336,7 @@ marble_base #(
 		FMC1_CK_P, FMC1_CK_N, FMC1_LA_P, FMC1_LA_N}),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
-	.LED(LED), .GPS(Pmod2[3:0]), .ext_config(ext_config)
+	.GPS(Pmod2[3:0]), .ext_config(ext_config), .ps_sync(ps_sync), .LED(LED)
 );
 
 `ifndef SIMULATE
@@ -262,13 +348,15 @@ assign LD16 = LED[0];
 assign LD17 = LED[1];
 assign Pmod1 = LED;
 
-// test_marble_family instantiates a "Silly little test pattern generator" for these pins
-wire [3:0] tmds_q = 4'b0000;
-OBUFDS obuf[0:3] (.I(~ext_config), .O(TMDS_P), .OB(TMDS_N));
-
-// These are meaningful LEDs, one could use them
-wire [2:0] D4rgb;
-wire [2:0] D5rgb;
+`ifdef MARBLE_MINI
+// TMDS test pattern generation
+wire tmds_enable = ext_config[0];
+tmds_test tmds_test(.clk(test_clk), .enable(tmds_enable),
+	.tmds_p(TMDS_P), .tmds_n(TMDS_N));
+`endif
+`ifdef MARBLE_V2
+assign LTM_CLKIN = ps_sync;
+`endif
 
 wire clk_1x_90, clk_2x_0, clk_eth, clk_eth_90;
 
