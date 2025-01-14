@@ -102,7 +102,7 @@ fifo_2c #(
   .empty(b2a_empty) // output
 );
 
-wire lbb_rstb_w, lbb_wstb_w, lbb_ren_w, lbb_wen_r;
+wire lbb_rstb_w, lbb_wstb_w, lbb_ren_w, lbb_wen_w;
 assign {lbb_rstb_w, lbb_wstb_w, lbb_ren_w, lbb_wen_w, lbb_addr_w, lbb_wdata_w} = a2b_dout;
 assign lbb_wen  = lbb_wen_w  & a2b_re;
 assign lbb_ren  = lbb_ren_w  & ren;

@@ -126,12 +126,16 @@ initial begin
   // Wait for fifo_2c to clear out its uninitialized registers
   #(10*STEP) $display("Reading %d registers", MAX_XACTS[7:0]);
           interpacket_reset = 1'b0;
-  for (N=0; N<MAX_XACTS; N=N+1) begin
+  for (N=0; (N<MAX_XACTS) && ~break; N=N+1) begin
     #STEP wnr = 1'b0;
           addr = N[AW-1:0];
           start_stb = 1'b1;
     #STEP start_stb = 1'b0;
     #(6*STEP);
+  end
+  if (break) begin
+    $display("FAIL");
+    $stop(0);
   end
           `wait_timeout(~busy);
   if (to) $display("Timed out waiting for read transactions to complete");
@@ -139,13 +143,17 @@ initial begin
   $display("Done reading");
   #(2*STEP) $display("Writing %d registers", MAX_XACTS[7:0]);
           interpacket_reset = 1'b0;
-  for (N=0; N<MAX_XACTS; N=N+1) begin
+  for (N=0; (N<MAX_XACTS) && ~break; N=N+1) begin
     #STEP wnr = 1'b1;
           addr = N[AW-1:0];
           wdata = M;
           start_stb = 1'b1;
     #STEP start_stb = 1'b0;
     #(6*STEP);
+  end
+  if (break) begin
+    $display("FAIL");
+    $stop(0);
   end
           `wait_timeout(~busy);
   if (to) $display("Timed out waiting for write transactions to complete");
@@ -154,17 +162,27 @@ initial begin
   #(2*STEP) $display("Reading %d registers again", MAX_XACTS[7:0]);
           readback = 1'b1;
           interpacket_reset = 1'b0;
-  for (N=0; N<MAX_XACTS; N=N+1) begin
+  for (N=0; (N<MAX_XACTS) && ~break; N=N+1) begin
     #STEP wnr = 1'b0;
           addr = N[AW-1:0];
           start_stb = 1'b1;
     #STEP start_stb = 1'b0;
     #(6*STEP);
   end
+  if (break) begin
+    $display("FAIL");
+    $stop(0);
+  end
           `wait_timeout(~busy);
   if (to) $display("Timed out waiting for read transactions to complete");
   #(4*STEP) interpacket_reset = 1'b1;
-  $finish();
+  if (errors == 0) begin
+    $display("PASS");
+    $finish(0);
+  end else begin
+    $display("FAIL");
+    $stop(0);
+  end
 end
 
 endmodule
