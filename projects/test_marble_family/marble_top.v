@@ -361,7 +361,7 @@ defparam base.rtefi.p4_client.engine.seven = 1;
 `endif
 // Let Pmod float by default for golden bitfile use-case
 wire enable_pmod_out = ext_config[3];
-assign Pmod1 = enable_pmod_out ? leds : 4'bzzzz;
+assign Pmod1 = enable_pmod_out ? leds : 8'bzzzzzzzz;
 assign LD16 = leds[0];
 assign LD17 = leds[1];
 
