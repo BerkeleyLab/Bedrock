@@ -39,7 +39,7 @@
         "addr_width": 0,
         "sign": "unsigned",
         "base_addr": 327688,
-        "data_width": 3
+        "data_width": 8
     },
     "wr_dac": {
         "access": "rw",
