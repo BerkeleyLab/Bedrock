@@ -29,7 +29,7 @@ module gige_top (
 
    localparam IPADDR   = {8'd192, 8'd168, 8'd1, 8'd179};
    localparam MACADDR  = 48'h00105ad155b5;
-   localparam DOUBLEBIT = 1;  // XXX DOUBLEBIT = 1 fails hardware test
+   localparam DOUBLEBIT = 0;  // XXX DOUBLEBIT = 1 fails hardware test
 
 `define AC701
 `ifdef AC701
