@@ -44,7 +44,7 @@ assign  inv_clk_4x = ~(clk_4x);
 		else
 			d_in <= {d_in[2:0], data_in};
 	end
-        always @(clk or async_reset) begin
+	always @(clk or async_reset) begin
 		if (async_reset)
 			d_out <= 0;
 		else if (serdes_strobe)

@@ -6,14 +6,14 @@ reg lb_clk=0;
 integer cc;
 reg fail=0;
 initial begin
-        if ($test$plusargs("vcd")) begin
-                $dumpfile("jit_rad_gateway.vcd");
-                $dumpvars(5, jit_rad_gateway_tb);
-        end
-        for (cc=0; cc<2000; cc=cc+1) begin
-                #10; lb_clk=1;
-                #10; lb_clk=0;
-        end
+	if ($test$plusargs("vcd")) begin
+		$dumpfile("jit_rad_gateway.vcd");
+		$dumpvars(5, jit_rad_gateway_tb);
+	end
+	for (cc=0; cc<2000; cc=cc+1) begin
+		#10; lb_clk=1;
+		#10; lb_clk=0;
+	end
 	$display("%s", fail ? "FAIL" : "PASS");
 	if (fail) $stop(0);
 	$finish(0);
