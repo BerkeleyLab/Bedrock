@@ -82,6 +82,7 @@ DCM_SP #(
 BUFG bufg125_tx(.I(xclk125_buf), .O(clk_eth));
 
 PLL_ADV #(
+    .SIM_DEVICE("SPARTAN6"),
     .BANDWIDTH("OPTIMIZED"),
     .CLKIN1_PERIOD(clkin_period),
     .CLKFBOUT_MULT(plladv_mult), // 200x5=1000
