@@ -56,8 +56,7 @@ def platform_write_rpt(devaddr, memaddr, nbytes, cmd_table):
 
 
 def decode_file(filename, break_on_stop=True, base=None):
-    import os
-    progname = os.path.split(filename)[1]
+    # progname = os.path.split(filename)[1]
     prog = load_file(filename, base=base)
     decoder = I2CBridgeDecoder(report_filename=None, break_on_stop=break_on_stop)
     return decoder.decode(prog)
@@ -82,7 +81,7 @@ class I2CBridgeDecoder():
             fd = self._fd
         else:
             fd = sys.stdout
-        print(*args, **kwargs)
+        print(*args, **kwargs, file=fd)
         return
 
     def decode(self, prog):
@@ -156,7 +155,7 @@ class I2CBridgeDecoder():
                     pa += inc
                 else:
                     self.print(f"Write - dev_addr: 0x{devaddr:02x} - mem_addr:" +
-                        f" 0x{memaddr:04x} - START - data:", end="")
+                               f" 0x{memaddr:04x} - START - data:", end="")
                     for j in range(n_code-2):
                         data = _int(next(cmd_table))
                         pa += 1
@@ -179,7 +178,7 @@ class I2CBridgeDecoder():
             elif op_code == o_sx:  # set result address
                 result_address = 0x800 + n_code*32
                 self.print(f"Set result address to 0x{result_address:03x}" +
-                    f" (0x{n_code:02x})")
+                           f" (0x{n_code:02x})")
             pa += 1
 
         self.print("---- End of report ----")
@@ -198,7 +197,6 @@ def load_file(file_path=None, base=None):
             if binary:
                 return iter(open(file_path, 'rb'))
             else:
-                #return iter(open(file_path, 'r'))
                 fd = open(file_path, "r")
                 sl = fd.read().split()
                 ll = []
@@ -232,7 +230,8 @@ def main():
     import argparse
     parser = argparse.ArgumentParser("I2CBridge Program Decoder")
     parser.add_argument("prog_file", default=None, help="Program file (binary or hex ASCII) to decode")
-    parser.add_argument("-c", "--continue_on_stop", default=False, help="Instead of breaking decoding when 'stop' byte reached, continue parsing with warning.")
+    parser.add_argument("-c", "--continue_on_stop", default=False,
+                        help="Instead of breaking decoding when 'stop' byte reached, continue parsing with warning.")
     parser.add_argument("-d", "--decimal", default=False, help="Interpret ASCII input as base-10 (instead of base-16).")
     args = parser.parse_args()
     base = 16
