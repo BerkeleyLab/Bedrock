@@ -260,6 +260,10 @@ class MarbleI2C():
         Note: Use get_i2c_addr() if you just want the address and don't want to change
         the state of the bus multiplexer.
         """
+        for (busmux_ic, busmux_addr), bus_dict in self._i2c_map.items():
+            if ic_name == busmux_ic:
+                # We can always talk to the busmux
+                return busmux_addr
         for nic in self._a:
             _ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = nic
             if ic_name.lower().strip() == _ic_name.lower().strip():
@@ -403,10 +407,12 @@ class MarbleI2C():
         self.write("U34", 2, [data0, data1])  # U34 data registers
         return
 
-    def U34_read_data(self):
+    def U34_read_data(self, reg_name=None):
         """Add a read instruction to the I2C program to read the state of GPIO pins on
         GPIO expander U34 (PCAL9555).  Shows up in memory map as 'U34_PORT_DATA'"""
-        return self.read("U34", 0, 2, reg_name="U34_PORT_DATA")
+        if reg_name is None:
+            reg_name = "U34_PORT_DATA"
+        return self.read("U34", 0, 2, reg_name=reg_name)
 
     # ======================= U39 Helper Functions ============================
     def U39_configure(self):
@@ -438,10 +444,12 @@ class MarbleI2C():
         self.write("U39", 2, [data0, data1])  # U39 data registers
         return
 
-    def U39_read_data(self):
+    def U39_read_data(self, reg_name=None):
         """Add a read instruction to the I2C program to read the state of GPIO pins on
         GPIO expander U39 (PCAL9555).  Shows up in memory map as 'U39_PORT_DATA'"""
-        return self.read("U39", 0, 2, reg_name="U39_PORT_DATA")
+        if reg_name is None:
+            reg_name = "U39_PORT_DATA"
+        return self.read("U39", 0, 2, reg_name=reg_name)
 
     # ================ INA219 (U17, U32, U57) Helper Functions ================
     def INA219_read_bus_voltage(self, ic_name, reg_name=None):

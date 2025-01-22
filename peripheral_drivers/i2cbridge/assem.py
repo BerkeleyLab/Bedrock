@@ -336,13 +336,14 @@ class I2CAssembler(i2c_assem):
             int madr : Memory address within device ('addr_bytes' long)
             [int] data : Data to write (List of byte-sized ints)
             int addr_bytes : Size in bytes of memory address (1 or 2)
-        Returns: None
+        Returns: program instructions
         """
         if madr is None:
             addr_bytes = 0
-        self._program += super().write(dadr, madr, data, addr_bytes=addr_bytes)
+        pval = super().write(dadr, madr, data, addr_bytes=addr_bytes)
+        self._program += pval
         self._check_pc()
-        return None
+        return pval
 
     def read(self, dadr, madr, dlen, addr_bytes=1, reg_name=None):
         """Add an I2C read transaction to the program.
@@ -353,24 +354,27 @@ class I2CAssembler(i2c_assem):
             int addr_bytes : Size in bytes of memory address (1 or 2)
             str reg_name : A name to associate with result memory address
         Returns: Starting memory offset of result
+        NOPE! Returns: program instructions
         """
         if madr is None:
             addr_bytes = 0
-        self._program += super().read(dadr, madr, dlen, addr_bytes=addr_bytes)
+        pval = super().read(dadr, madr, dlen, addr_bytes=addr_bytes)
+        self._program += pval
         self._check_pc()
         if reg_name is None:
             reg_name = self._mkRegName(dadr, madr, self._rc)
         self._memdict[reg_name] = (self._rc, dlen)
         self._rc += dlen
         self._check_rc()
-        return self._rc
+        return pval
 
     def pause(self, n):
         """Add a pause of 'n' ticks to the program
         See README.md for discussion of tick length."""
-        self._program += super().pause(n)
+        pval = super().pause(n)
+        self._program += pval
         self._check_pc()
-        return
+        return pval
 
     def jump(self, n):
         """Add a jump instruction to program counter n*32
@@ -387,9 +391,10 @@ class I2CAssembler(i2c_assem):
                 "Jump would result in 'jump here' instruction"
                 + "(a jump to the program counter value of the jump instruction)."
             )
-        self._program += super().jump(n)
+        pval = super().jump(n)
+        self._program += pval
         self._check_pc()
-        return
+        return pval
 
     def jump_address(self, address):
         """Add a jump instruction to program counter 'address'
@@ -475,11 +480,12 @@ class I2CAssembler(i2c_assem):
         if n is None:
             n = (self._rc // 32) + 1  # ceil(rc/32)
         n = int(n)
-        self._program += super().set_resx(n)
+        pval = super().set_resx(n)
+        self._program += pval
         self._check_pc()
         self._rc = 32 * n
         self._check_rc()  # This should be redundant but certainly can't hurt
-        return
+        return pval
 
     def set_resx_address(self, address=None):
         """Add a set result address pointer instruction to program.
@@ -505,25 +511,28 @@ class I2CAssembler(i2c_assem):
 
     def buffer_flip(self):
         """Add a buffer flip instruction to the program."""
-        self._program += super().buffer_flip()
+        pval = super().buffer_flip()
+        self._program += pval
         self._check_pc()
-        return
+        return pval
 
     def trig_analyz(self):
         """Add an analyzer trigger instruction to the program."""
-        self._program += super().trig_analyz()
+        pval = super().trig_analyz()
+        self._program += pval
         self._check_pc()
-        return
+        return pval
 
     def hw_config(self, n):
         """Add a hw_config set instruction to the program.
         Params:
             int n : 4-bit mask of hw_config outputs of module i2c_chunk"""
-        self._program += super().hw_config(n)
+        pval = super().hw_config(n)
+        self._program += pval
         self._check_pc()
-        return
+        return pval
 
-    def pad(self, n=None):
+    def pad(self, *args, **kwargs):
         """Pad program memory up to location 32*n. Typically used to pad program
         to a location you can jump to.  Consider using jump_pad() for this purpose.
         Params:
@@ -531,7 +540,19 @@ class I2CAssembler(i2c_assem):
         Gotchas:
             32*n must be > current program counter.  Use with no arg (n=None) to avoid
             this pitfall (pads up to next nearest multiple of 32).
-        Returns: program counter index (pc/32) after pad"""
+        Returns: program counter index (pc/32) after pad
+        NOTE! To allow drop-in compatibility, this function also operates using the
+        same interface as i2c_assem.pad(n, length).  When used in this way, it returns
+        a list of program instructions - the same as the old-style usage."""
+        if len(args) == 2:
+            # Hack to preserve API of parent class
+            n = args[0]
+            current_pc = args[1]
+            return super().pad(n, current_pc)
+        elif len(args) == 1:
+            n = args[0]
+        if 'n' in kwargs.keys():
+            n = kwargs.get('n')
         if n is None:
             n = (self._pc() // 32) + 1  # ceil(pc/32)
         n = int(n)
@@ -544,7 +565,8 @@ class I2CAssembler(i2c_assem):
             raise I2C_Assembler_Exception(
                 f"Program counter index {n} exceeds maximum {self._INDEX_MAX}"
             )
-        self._program += super().pad(n, self._pc())
+        pval = super().pad(n, self._pc())
+        self._program += pval
         self._check_pc()
         return self._pc() // 32
 

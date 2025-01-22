@@ -112,9 +112,5 @@ _decode.platform_read = marble_read
 _decode.platform_write_rpt = marble_write_rpt
 # =============================================================================
 
-# Expose the (now platform-specific) 'decode' function in the 'decode' module
-decode = _decode.decode
-
 if __name__ == "__main__":
-    import sys
-    _decode.decode_file(sys.argv)
+    _decode.main()
