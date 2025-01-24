@@ -9,12 +9,12 @@ module stream_fifo #(
 	input [DW-1:0] d_in,
 	input d_in_valid,
 	input d_in_last,
-    output d_in_ready,
+	output d_in_ready,
 	input d_out_ready,
 	output [DW-1:0] d_out,
 	output d_out_last,
 	output d_out_valid,
-    output fifo_empty
+	output fifo_empty
 );
 
 wire d_out_last_i;

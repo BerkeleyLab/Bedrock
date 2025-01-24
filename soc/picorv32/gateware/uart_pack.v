@@ -97,8 +97,7 @@ reg urx_tready=0;
 
 uart_rx #(
     .DATA_WIDTH(DATA_WIDTH)
-)
-uart_rx_inst (
+) uart_rx_inst (
     .clk(clk),
     .rst(rst),
     .output_axis_tdata(urx_tdata),

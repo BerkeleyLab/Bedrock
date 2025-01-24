@@ -94,7 +94,7 @@ always @(posedge sf_clk) begin
 
 	if (trig_done && conveyor_cnt < data_len) begin
 		meas <= conveyor[conveyor_cnt];
-                conveyor_cnt <= conveyor_cnt + 1;
+		conveyor_cnt <= conveyor_cnt + 1;
 	end
 end
 

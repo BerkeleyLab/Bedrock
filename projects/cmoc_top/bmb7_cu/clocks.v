@@ -42,8 +42,7 @@ PLLE2_BASE #(
     .CLKOUT1_DIVIDE(pll_div),  .CLKOUT1_DUTY_CYCLE(0.5), .CLKOUT1_PHASE(90.0), // 125 MHz
     .REF_JITTER1(0.0),
     .STARTUP_WAIT("FALSE")
-)
-PLLE2_BASE_inst (
+) PLLE2_BASE_inst (
     .CLKIN1(sysclk_buf),
     .CLKOUT0(pll_clk_0),        // 125 MHz, 0 degree
     .CLKOUT1(pll_clk_90),       // 125 MHz, 90 degree

@@ -168,8 +168,7 @@ module xadc_tempvoltmon #(
     // Simulation attributes: Set for proper simulation behavior
     .SIM_DEVICE("7SERIES"),            // Select target device (values)
     .SIM_MONITOR_FILE("design.txt")  // Analog simulation data file name
-  )
-  XADC_inst (
+  ) XADC_inst (
     // ALARMS: 8-bit (each) output: ALM, OT
     .ALM(alm),                   // 8-bit output: Output alarm for temp, Vccint, Vccaux and Vccbram
     .OT(otemp),                  // 1-bit output: Over-Temperature alarm

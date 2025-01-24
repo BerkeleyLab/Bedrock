@@ -39,10 +39,10 @@ reg data_rdy=0;
 always @(posedge reset or posedge lb_clk) begin
    if (reset) begin
         reset_wait <= 4'b0;
-		rst_sync <= 1'b1;
-		rst_sync_int <= 1'b1;
-		rst_sync_int1 <= 1'b1;
-		rst_sync_int2 <= 1'b1;
+        rst_sync <= 1'b1;
+        rst_sync_int <= 1'b1;
+        rst_sync_int1 <= 1'b1;
+        rst_sync_int2 <= 1'b1;
         daddr_in <= 7'b0;
         den_in <= 1'b0;
         addr_out <= 0;
@@ -50,10 +50,10 @@ always @(posedge reset or posedge lb_clk) begin
         data_rdy <= 1'b0;
    end else begin
         reset_wait <= reset_wait_done ? 4'hf : reset_wait + 1'b1;
-		rst_sync <= 1'b0;
-		rst_sync_int <= rst_sync;
-		rst_sync_int1 <= rst_sync_int;
-		rst_sync_int2 <= rst_sync_int1;
+        rst_sync <= 1'b0;
+        rst_sync_int <= rst_sync;
+        rst_sync_int1 <= rst_sync_int;
+        rst_sync_int2 <= rst_sync_int1;
         daddr_in <= {2'b0, channel_out};
         den_in <= eoc_out;
         if (drdy_out) begin

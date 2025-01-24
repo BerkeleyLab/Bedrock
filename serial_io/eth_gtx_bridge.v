@@ -3,7 +3,7 @@
 // ------------------------------------
 // eth_gtx_bridge.v
 //
-// DEPRECATED
+// DEPRECATED (but still used in projects/comms_top!)
 // Wrapper around rtefi_blob and eth_gtx_hook with a TX/RX path width conversion for GTX compatibility
 // Note that this module "just" instantiates two others:
 // eth_gtx_hook and rtefi_blob.
@@ -18,10 +18,11 @@
 module eth_gtx_bridge #(
    parameter IP       = {8'd192, 8'd168, 8'd7, 8'd4},
    parameter MAC      = 48'h112233445566,
-   parameter JUMBO_DW = 14, // Not used, just holdover for compatibility with older eth_gtx_bridge
-   parameter GTX_DW   = 20) // Parallel GTX data width; Supported values are 10b and 20b
+   parameter JUMBO_DW = 14,  // Not used, just holdover for compatibility with older eth_gtx_bridge
+   parameter GTX_DW   = 20,  // Parallel GTX data width; Supported values are 10b and 20b
+   parameter DOUBLEBIT = 0)  // Experimental
 (
-   input               gtx_tx_clk,  // Transceiver clock at half rate
+   input               gtx_tx_clk,  // Transceiver clock, sometimes at half rate
    input               gmii_tx_clk, // Clock for Ethernet fabric - 125 MHz for 1GbE
    input               gmii_rx_clk,
    input  [GTX_DW-1:0] gtx_rxd,
@@ -60,7 +61,7 @@ module eth_gtx_bridge #(
    wire [7:0] gmii_rxd, gmii_txd;
    wire gmii_tx_en, gmii_rx_dv;
 
-   eth_gtx_hook #(.JUMBO_DW(14), .GTX_DW(20)) hook(
+   eth_gtx_hook #(.JUMBO_DW(14), .GTX_DW(GTX_DW), .DOUBLEBIT(DOUBLEBIT)) hook(
        .gtx_tx_clk   (gtx_tx_clk),
        .gmii_tx_clk  (gmii_tx_clk),
        .gmii_rx_clk  (gmii_rx_clk),

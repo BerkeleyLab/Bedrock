@@ -31,7 +31,7 @@ generate
 		for (ix=0; ix<len; ix=ix+1) begin
 			assign keep_use[ix] = keep[len-1-ix];
 		end
-        end
+	end
 	else begin : G_NKEEP_OLD
 		for (ix=0; ix<len; ix=ix+1) begin
 			assign keep_use[ix] = keep[ix];

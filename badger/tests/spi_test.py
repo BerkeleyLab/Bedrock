@@ -428,12 +428,14 @@ def remote_program(s, file_name, ad, size):
     f = open(file_name, 'rb')
     # assume that '.bin' file size is always less than whole pages
     for ba in reversed(range(start_p, stop_p)):
-        print("block %d" % ba)
+        print("block %d\r" % ba, end='', flush=True)
         f.seek((ba << 8) - ad)
         bd = f.read(PAGE)
         while not (write_enable(s, True)):
             time.sleep(WAIT)
         page_program(s, ba << 8, bd)
+    else:
+        print('')
     f.close()
     return
 
