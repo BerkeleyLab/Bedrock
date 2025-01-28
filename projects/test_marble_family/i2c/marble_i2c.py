@@ -128,9 +128,9 @@ class MarbleI2C():
     # P1_4  (unused)        In
     # P1_5  (unused)        In
     # P1_6  (unused)        In
-    # P1_7  CLKMUX_RST      Out
+    # P1_7  CLKMUX_nRST     Out
     u39_port1_dir = 0b01110011
-    u39_port1_out = 0b00000000  # No clkmux rst, LEDs off
+    u39_port1_out = 0b10000000  # No clkmux rst, LEDs off
 
     # U2 (ADN4600) MGT clock multiplexer
     u2_xpt_config = 0x40  # XPT Configuration register
