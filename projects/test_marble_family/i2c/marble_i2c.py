@@ -68,13 +68,13 @@ class MarbleI2C():
     _ina219_map = {0: "U17", 1: "U32", 2: "U57"}
 
     # Build a 2D list from the map
-    _a = []
+    _ic_list = []
     for mux, tree in _i2c_map.items():
         mux_name, mux_addr = mux
         for ch, branch in tree.items():
             branch_name, branch_dict = branch
             for ic_name, ic_addr in branch_dict.items():
-                _a.append((ic_name, ic_addr, branch_name, ch, mux_name, mux_addr))
+                _ic_list.append((ic_name, ic_addr, branch_name, ch, mux_name, mux_addr))
 
     # ========= IC-Specific Information =================
     # U34 (PCAL9555) I2C GPIO expander
@@ -172,16 +172,40 @@ class MarbleI2C():
 
     def _associate(self):
         """[private] Build a 2D list from the map"""
-        if hasattr(self, "_a"):
+        if hasattr(self, "_ic_list"):
             return
-        self._a = []
+        self._ic_list = []
         for mux, tree in self._i2c_map.items():
             mux_name, mux_addr = mux
             for ch, branch in tree.items():
                 branch_name, branch_dict = branch
                 for ic_name, ic_addr in branch_dict.items():
-                    self._a.append((ic_name, ic_addr, branch_name, ch, mux_name, mux_addr))
+                    self._ic_list.append((ic_name, ic_addr, branch_name, ch, mux_name, mux_addr))
         return
+
+    @property
+    def ic_list(self):
+        """Returns list of tuple entries:
+            (ic_name, ic_addr, branch_name, branch, mux_name, mux_addr)
+            string ic_name: Refdes (i.e. "U5") from schematic
+            int ic_addr:    I2C address of the IC (in 8-bit format)
+            string branch_name: The name of the I2C branch the IC lives on (i.e. "APP")
+            int branch:     The index of the branch (how it is selected by the bus mux)
+            string mux_name: The refdes of the bus mux that leads to this IC.
+            int mux_addr:   The I2C address of the bus mux that leads to this IC.
+        """
+        return self._ic_list
+
+    @property
+    def ic_dict(self):
+        """Returns dict of tuple entries:
+            ic_name: (ic_addr, branch_name, branch, mux_name, mux_addr)
+            See property 'ic_list' for description of each item.
+        """
+        dd = {}
+        for entry in self._ic_list:
+            dd[entry[0]] = entry[1:]
+        return dd
 
     def _busmux(self, mux_addr, mux_ch):
         """[private] Select a channel with the bus multiplexer at address mux_addr."""
@@ -222,7 +246,7 @@ class MarbleI2C():
     def get_ics(cls):
         """Returns a list of tuples (name_str, i2c_address_int) for all ICs in the I2C map."""
         ics = []
-        for _l in cls._a:
+        for _l in cls._ic_list:
             name = _l[0]
             addr = _l[1]
             ics.append((name, addr))
@@ -235,7 +259,7 @@ class MarbleI2C():
             string ic_name: Any valid IC name in the I2C map
         Returns int I2C address if 'ic_name'  is found in the I2C map, otherwise None.
         """
-        for _l in cls._a:
+        for _l in cls._ic_list:
             if ic_name == _l[0]:
                 return _l[1]
         return None
@@ -247,7 +271,7 @@ class MarbleI2C():
             int i2c_addr: I2C address of the desired IC (0-255).
         Returns string IC name if 'i2c_addr' is found in the I2C map, otherwise None.
         """
-        for _l in cls._a:
+        for _l in cls._ic_list:
             if i2c_addr == _l[1]:
                 return _l[0]
         return None
@@ -264,7 +288,7 @@ class MarbleI2C():
             if ic_name == busmux_ic:
                 # We can always talk to the busmux
                 return busmux_addr
-        for nic in self._a:
+        for nic in self._ic_list:
             _ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = nic
             if ic_name.lower().strip() == _ic_name.lower().strip():
                 # If we found a match, mux to it
@@ -279,7 +303,7 @@ class MarbleI2C():
         Returns int channel number (0-7) that was selected or None if 'branch' does not match
         any of the above.
         """
-        for nic in self._a:
+        for nic in self._ic_list:
             ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = nic
             if branch_name.lower().strip() == branch.lower().strip():
                 # If we found a match, mux to it
@@ -293,7 +317,7 @@ class MarbleI2C():
         Params:
             string ic_name: Any valid IC name in the I2C map
         Returns I2C address (int) if 'ic_name' is found in the I2C map, otherwise None."""
-        for nic in cls._a:
+        for nic in cls._ic_list:
             _ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = nic
             if ic_name.lower().strip() == _ic_name.lower().strip():
                 return ic_addr

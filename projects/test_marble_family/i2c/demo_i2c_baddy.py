@@ -46,7 +46,7 @@ def doViolations(argv):
                 violations[n]()
             except marble_i2c.assem.I2C_Assembler_Exception as i2ce:
                 print(f"{i2ce}\n")
-    return
+    return 0
 
 
 def violation1():
@@ -113,4 +113,4 @@ def violation6():
 
 
 if __name__ == "__main__":
-    doViolations(sys.argv)
+    exit(doViolations(sys.argv))

@@ -58,3 +58,7 @@ marble_run:
   script:
     - make marble2_hwload SERIAL=39 && sleep 8 && make marble2_hwtest SERIAL=39
 
+marble_i2c_check:
+  stage: test
+  script:
+    - make -C projects/test_marble_family/i2c tests

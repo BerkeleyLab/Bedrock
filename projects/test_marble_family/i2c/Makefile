@@ -1,16 +1,24 @@
 # A demo of Marble-specific I2C functionality
 
-PYTHON = python3
+PYTHON ?= python3
 
 TARGETS = prog.dat prog.vh prog.h prog.json
 
 .PHONY: all
 all: $(TARGETS)
 
-# ======= Build a program for i2c_chunk
+.PHONY: tests
+tests: check violations decode generic_decode
+
+# ======= Simply build and check a program
 PROG_FILE = demo_marble_i2c.py
+.PHONY: check
+check: $(PROG_FILE)
+	$(PYTHON) $<
+
+# ======= Build a program for i2c_chunk
 prog.dat: $(PROG_FILE)
-	$(PYTHON) $< > $@
+	$(PYTHON) $< p > $@
 
 # ======= Build a memory map in Verilog format
 prog.vh: $(PROG_FILE)
@@ -26,8 +34,8 @@ prog.json: $(PROG_FILE)
 
 # ======= Test a bunch of assembler violations
 BAD_FILE = demo_i2c_baddy.py
-.PHONY: test
-test: $(BAD_FILE)
+.PHONY: violations
+violations: $(BAD_FILE)
 	$(PYTHON) $<
 
 # ======= Decode a program in marble context

@@ -64,7 +64,7 @@ def marble_write(devaddr, nbytes, cmd_table):
             msg = f"Busmux - bitmask: 0b{bitmask:08b} Selected {seltext}"
     if msg is None:
         data = []
-        for _l in marble._a:
+        for _l in marble.ic_list:
             ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = _l
             if devaddr == ic_addr and ((1 << ch) & bus_bitmask):
                 for n in range(nbytes):
@@ -81,7 +81,7 @@ def marble_read(devaddr, nbytes, cmd_table):
     for muxname, address in marble.get_muxes():
         if devaddr == address:
             msg = "Busmux - Readback"
-    for _l in marble._a:
+    for _l in marble.ic_list:
         ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = _l
         if devaddr == ic_addr and ((1 << ch) & bus_bitmask):
             s = "" if nbytes == 1 else "s"
@@ -93,7 +93,7 @@ def marble_write_rpt(devaddr, memaddr, nbytes, cmd_table):
     data = []
     msg = None
     inc = 0
-    for _l in marble._a:
+    for _l in marble.ic_list:
         ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = _l
         if devaddr == ic_addr and ((1 << ch) & bus_bitmask):
             if nbytes == 0:
@@ -113,4 +113,4 @@ _decode.platform_write_rpt = marble_write_rpt
 # =============================================================================
 
 if __name__ == "__main__":
-    _decode.main()
+    exit(_decode.main())

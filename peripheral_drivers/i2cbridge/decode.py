@@ -182,7 +182,7 @@ class I2CBridgeDecoder():
             pa += 1
 
         self.print("---- End of report ----")
-        return
+        return 0
 
 
 def load_file(file_path=None, base=None):
@@ -241,4 +241,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    exit(main())
