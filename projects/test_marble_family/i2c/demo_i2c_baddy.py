@@ -27,28 +27,6 @@ def _int(x):
             return int(x, 2)
 
 
-def doViolations(argv):
-    if len(argv) > 1:
-        vMask = _int(argv[1])
-    else:
-        vMask = 0xFF
-    violations = (
-        violation1,
-        violation2,
-        violation3,
-        violation4,
-        violation5,
-        violation6,
-    )
-    for n in range(len(violations)):
-        if (1 << n) & vMask:
-            try:
-                violations[n]()
-            except marble_i2c.assem.I2C_Assembler_Exception as i2ce:
-                print(f"{i2ce}\n")
-    return 0
-
-
 def violation1():
     print("{:-^80s}".format(" Violation 1. Program size exceeded "))
     m = marble_i2c.MarbleI2C()
@@ -110,6 +88,44 @@ def violation6():
     m.jump(40)      # Jump out of program space
     m.check_program()
     return
+
+
+def doViolations(argv):
+    if len(argv) > 1:
+        vMask = _int(argv[1])
+    else:
+        vMask = 0xFF
+    violations = (
+        violation1,
+        violation2,
+        violation3,
+        violation4,
+        violation5,
+        violation6,
+    )
+    exceptions = [False]*len(violations)
+    for n in range(len(violations)):
+        if (1 << n) & vMask:
+            try:
+                violations[n]()
+            except marble_i2c.assem.I2C_Assembler_Exception as i2ce:
+                print(f"{i2ce}\n")
+                exceptions[n] = True
+        else:
+            # If we're not testing against it, pretend it succeeded
+            exceptions[n] = True
+    if False in exceptions:
+        missed = []
+        for n in range(len(exceptions)):
+            if not exceptions[n]:
+                missed.append(str(n+1))
+        ss = "s" if len(missed) > 1 else ""
+        print("FAIL: Did not catch all violations. Missed violation{} {}".format(
+              ss, ", ".join(missed)))
+        return 1
+    else:
+        print("PASS")
+    return 0
 
 
 if __name__ == "__main__":
