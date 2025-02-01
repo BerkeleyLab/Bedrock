@@ -45,7 +45,7 @@ module marble_top(
 	output BOOT_MOSI,
 	output CFG_D02,  // hope R209 is DNF
 
-	// One I2C bus, everything gatewayed through a TCA9548
+	// One I2C bus, with everything gatewayed through a TCA9548
 	inout  TWI_SCL,
 	inout  TWI_SDA,
 	inout  TWI_RST,
@@ -81,7 +81,7 @@ module marble_top(
 	// output ZEST_PWR_EN,
 
 `ifdef MARBLE_V2
-	// Special for LTM4673 synchronization -- untested
+	// Special for LTM4673 synchronization
 	output [2:0] LTM_CLKIN,
 `endif
 
@@ -101,6 +101,12 @@ module marble_top(
 );
 
 `include "marble_features_params.vh"
+
+// Local bus provided by marble_base; currently unused
+wire lb_clk, lb_strobe, lb_rd, lb_write, lb_rd_valid;
+wire [23:0] lb_addr;
+wire [31:0] lb_data_out;
+wire [31:0] lb_din;
 
 `ifndef MARBLE_V2
 wire [1:0] FMC1_CK_P;
@@ -154,7 +160,17 @@ marble_base #(
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
 	.twi_scl({dum_scl, old_scl1, old_scl2, TWI_SCL}),
 	.twi_sda({dum_sda, old_sda1, old_sda2, TWI_SDA}),
-	.fmc_test({FMC2_HA_P, FMC2_HA_N, FMC2_CK_P, FMC2_CK_N, FMC2_LA_P, FMC2_LA_N, FMC1_CK_P, FMC1_CK_N, FMC1_LA_P, FMC1_LA_N}),
+	.lb_clk(lb_clk),
+	.lb_addr(lb_addr),
+	.lb_strobe(lb_strobe),
+	.lb_rd(lb_rd),
+	.lb_write(lb_write),
+	.lb_rd_valid(lb_rd_valid),
+	.lb_data_out(lb_data_out),
+	.lb_data_in(lb_din),
+	.fmc_test({
+		FMC2_HA_P, FMC2_HA_N, FMC2_CK_P, FMC2_CK_N, FMC2_LA_P, FMC2_LA_N,
+		FMC1_CK_P, FMC1_CK_N, FMC1_LA_P, FMC1_LA_N}),
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),

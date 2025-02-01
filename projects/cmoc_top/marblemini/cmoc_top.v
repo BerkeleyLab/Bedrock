@@ -1,3 +1,6 @@
+// Top level CMOC chip
+// Closely matches marble_top.v
+
 `include "marble_features_defs.vh"
 
 module cmoc_top(
@@ -42,7 +45,7 @@ module cmoc_top(
 	output BOOT_MOSI,
 	output CFG_D02,  // hope R209 is DNF
 
-	// One I2C bus, everything gatewayed through a TCA9548
+	// One I2C bus, with everything gatewayed through a TCA9548
 	inout  TWI_SCL,
 	inout  TWI_SDA,
 	inout  TWI_RST,
@@ -63,7 +66,7 @@ module cmoc_top(
 	output VCXO_EN,
 
 `ifdef MARBLE_V2
-	// Special for LTM4673 synchronization -- untested
+	// Special for LTM4673 synchronization
 	output [2:0] LTM_CLKIN,
 `endif
 
@@ -84,11 +87,13 @@ module cmoc_top(
 
 `include "marble_features_params.vh"
 
+// Local bus connecting marble_base to (simulated) cryomodule
 wire lb_clk, lb_strobe, lb_rd, lb_write, lb_rd_valid;
 wire [23:0] lb_addr;
 wire [31:0] lb_data_out;
 wire [31:0] lb_din;
 
+// Not used
 wire [33:0] FMC1_LA_P;
 wire [33:0] FMC1_LA_N;
 wire [33:0] FMC2_LA_P;
@@ -113,9 +118,9 @@ localparam C_USE_I2CBRIDGE = 0;
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
 marble_base #(
-    .USE_I2CBRIDGE(C_USE_I2CBRIDGE),
-    .default_enable_rx(C_DEFAULT_ENABLE_RX),
-    .misc_config_default(C_MISC_CONFIG_DEFAULT)
+	.USE_I2CBRIDGE(C_USE_I2CBRIDGE),
+	.default_enable_rx(C_DEFAULT_ENABLE_RX),
+	.misc_config_default(C_MISC_CONFIG_DEFAULT)
 ) base(
 	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
@@ -130,7 +135,6 @@ marble_base #(
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
 	.twi_scl({dum_scl, old_scl1, old_scl2, TWI_SCL}),
 	.twi_sda({dum_sda, old_sda1, old_sda2, TWI_SDA}),
-	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.lb_clk(lb_clk),
 	.lb_addr(lb_addr),
 	.lb_strobe(lb_strobe),
@@ -142,6 +146,7 @@ marble_base #(
 	.fmc_test({
 		FMC2_HA_P, FMC2_HA_N, FMC2_CK_P, FMC2_CK_N, FMC2_LA_P, FMC2_LA_N,
 		FMC1_CK_P, FMC1_CK_N, FMC1_LA_P, FMC1_LA_N}),
+	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
 	.GPS(Pmod2[3:0]), .ext_config(ext_config), .ps_sync(ps_sync), .LED(leds)
@@ -151,29 +156,29 @@ parameter BUF_AW=13;
 wire clk_1x_90, clk_2x_0, clk_eth, clk_eth_90;
 parameter clk2x_div = 5;  // relative to 750 MHz (tx_clk * 6)
 clocks #(.mmcm_div0(clk2x_div*2), .mmcm_div1(clk2x_div)) clocks(
-    .rst(1'b0),
-    .sysclk_buf(tx_clk),
-    .clk_eth(clk_eth),
-    .clk_eth_90(clk_eth_90),
-    .clk_1x_90(clk_1x_90),
-    .clk_2x_0(clk_2x_0)
+	.rst(1'b0),
+	.sysclk_buf(tx_clk),
+	.clk_eth(clk_eth),
+	.clk_eth_90(clk_eth_90),
+	.clk_1x_90(clk_1x_90),
+	.clk_2x_0(clk_2x_0)
 );
 
 parameter vmod_mode_count=3;
 cryomodule #(
-    .mode_count(vmod_mode_count),
-    .use_config_rom(0)
+	.mode_count(vmod_mode_count),
+	.use_config_rom(0)
 ) cryomodule(
-    .clk1x(clk_1x_90),
-    .clk2x(clk_2x_0),
-    // Local Bus drives both simulator and controller
-    // Simulator is in the upper 16K, controller in the lower 16K words.
-    .lb_clk(lb_clk),
-    .lb_data(lb_data_out),
-    .lb_addr(lb_addr[16:0]),
-    .lb_write(lb_write),  // single-cycle causes a write // XXX write or strobe?
-    .lb_read(lb_rd),
-    .lb_out(lb_din)
+	.clk1x(clk_1x_90),
+	.clk2x(clk_2x_0),
+	// Local Bus drives both simulator and controller
+	// Simulator is in the upper 16K, controller in the lower 16K words.
+	.lb_clk(lb_clk),
+	.lb_data(lb_data_out),
+	.lb_addr(lb_addr[16:0]),
+	.lb_write(lb_write),  // single-cycle causes a write // XXX write or strobe?
+	.lb_read(lb_rd),
+	.lb_out(lb_din)
 );
 
 endmodule
