@@ -41,8 +41,10 @@ def violation1():
 def violation2():
     print("{:-^80s}".format(" Violation 2. Data (result) size exceeded "))
     m = marble_i2c.MarbleI2C()
+    m.set_resx()
     for n in range(64):
         m.read("U34", 0, 30)
+    m.buffer_flip()
     m.pause(4096)   # Pause for roughly 0.24ms
     m.jump(0)       # Jump back to loop start
     m.check_program()
@@ -53,7 +55,9 @@ def violation3():
     print("{:-^80s}".format(" Violation 3. Backwards jump with no buffer flip "))
     m = marble_i2c.MarbleI2C()
     m.bsp_config()
+    m.set_resx()
     m.read("U34", 0, 1)
+    # m.buffer_flip()
     m.pause(4096)   # Pause for roughly 0.24ms
     m.jump(0)       # Jump back to loop start
     m.check_program()
@@ -64,7 +68,9 @@ def violation4():
     print("{:-^80s}".format(" Violation 4. Read with no buffer flip "))
     m = marble_i2c.MarbleI2C()
     m.bsp_config()
+    m.set_resx()
     m.read("U34", 0, 1)
+    # m.buffer_flip()
     m.pause(4096)   # Pause for roughly 0.24ms
     m.check_program()
     return
@@ -74,7 +80,9 @@ def violation5():
     print("{:-^80s}".format(" Violation 5. Code after backwards jump (unreachable) "))
     m = marble_i2c.MarbleI2C()
     m.bsp_config()
+    m.set_resx()
     m.read("U34", 0, 1)
+    m.buffer_flip()
     m.jump(0)       # Jump back to loop start
     m.pause(4096)   # Pause for roughly 0.24ms
     m.check_program()
