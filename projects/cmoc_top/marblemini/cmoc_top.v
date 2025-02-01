@@ -107,51 +107,6 @@ wire [23:0] FMC2_HA_N;
 
 `include "marble_mid.vh"
 
-// Maybe this cruft could be eliminated if the corresponding yaml defs
-// were rejiggered to be parameters.
-`ifdef USE_I2CBRIDGE
-localparam C_USE_I2CBRIDGE = 1;
-`else
-localparam C_USE_I2CBRIDGE = 0;
-`endif
-
-// Real, portable implementation
-// Consider pulling 3-state drivers out of this
-marble_base #(
-	.USE_I2CBRIDGE(C_USE_I2CBRIDGE),
-	.default_enable_rx(C_DEFAULT_ENABLE_RX),
-	.misc_config_default(C_MISC_CONFIG_DEFAULT)
-) base(
-	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
-	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
-	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
-	.vgmii_rx_dv(vgmii_rx_dv), .vgmii_rx_er(vgmii_rx_er),
-	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked), .si570(si570),
-	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
-	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
-	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
-	.aux_clk(SYSCLK_P), .clk62(clk62), .cfg_clk(cfg_clk),
-	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
-	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
-	.twi_scl({dum_scl, old_scl1, old_scl2, TWI_SCL}),
-	.twi_sda({dum_sda, old_sda1, old_sda2, TWI_SDA}),
-	.lb_clk(lb_clk),
-	.lb_addr(lb_addr),
-	.lb_strobe(lb_strobe),
-	.lb_rd(lb_rd),
-	.lb_write(lb_write),
-	.lb_rd_valid(lb_rd_valid),
-	.lb_data_out(lb_data_out),
-	.lb_data_in(lb_din),
-	.fmc_test({
-		FMC2_HA_P, FMC2_HA_N, FMC2_CK_P, FMC2_CK_N, FMC2_LA_P, FMC2_LA_N,
-		FMC1_CK_P, FMC1_CK_N, FMC1_LA_P, FMC1_LA_N}),
-	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
-	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
-	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
-	.GPS(Pmod2[3:0]), .ext_config(ext_config), .ps_sync(ps_sync), .LED(leds)
-);
-
 parameter BUF_AW=13;
 wire clk_1x_90, clk_2x_0, clk_eth, clk_eth_90;
 parameter clk2x_div = 5;  // relative to 750 MHz (tx_clk * 6)

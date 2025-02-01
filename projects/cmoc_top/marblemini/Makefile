@@ -11,6 +11,7 @@ HARDWARE = marblemini
 APP_DIR = $(TOP_DIR)/cmoc
 DSP_DIR = $(TOP_DIR)/dsp
 OSCOPE_COMMON_DIR = $(TOP_DIR)/projects/oscope/common
+TEST_MARBLE_FAMILY = $(TOP_DIR)/projects/test_marble_family
 BS_HARDWARE_DIR = $(BOARD_SUPPORT_DIR)/$(HARDWARE)
 
 vpath %.v $(APP_DIR) $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BADGER_DIR)
@@ -23,7 +24,7 @@ include $(APP_DIR)/rules.mk
 
 SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
 
-VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/pll -y. -y$(APP_DIR) -y$(HOMELESS_DIR) -y$(HOMELESS_DIR)/freq_demo -y$(BADGER_DIR) -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y$(SERIAL_IO_DIR) -y../../test_marble_family -I../../test_marble_family -y../../test_marble_family/pps_lock -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y../bmb7_cu
+VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/pll -y. -y$(APP_DIR) -y$(HOMELESS_DIR) -y$(HOMELESS_DIR)/freq_demo -y$(BADGER_DIR) -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y$(SERIAL_IO_DIR) -y$(TEST_MARBLE_FAMILY) -I$(TEST_MARBLE_FAMILY) -y$(TEST_MARBLE_FAMILY)/pps_lock -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y../bmb7_cu
 
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
 

@@ -1,11 +1,14 @@
 # Defs are made available as Verilog defines
 # Params are made available as Verilog localparams and included in ROM metadata
+# XXX reuse from test_marble_family
 
 marblemini:
     defs:
         MARBLE_MINI: 1
         USE_SI570: 0
         USE_I2CBRIDGE: 1
+        MMC_CTRACE: 0
+        GPS_CTRACE: 0
     params:
         carrier: "Marble Mini"
         carrier_rev: "v1"
@@ -21,6 +24,8 @@ marble:
         MARBLE_V2: 1
         USE_SI570: 1
         USE_I2CBRIDGE: 1
+        MMC_CTRACE: 0
+        GPS_CTRACE: 0
     params:
         carrier: "Marble"
         carrier_rev: "v2"
