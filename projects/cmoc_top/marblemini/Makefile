@@ -52,7 +52,7 @@ $(APP_NAME)_regmap.json: $(AUTOGEN_DIR)/regmap_cryomodule.json $(OSCOPE_COMMON_D
 	$(PYTHON) $(OSCOPE_COMMON_DIR)/shorten_names.py -o $@ -i $(APP_NAME)_regmap_long.json
 
 # actual file output is marble_features_(defs/params).vh
-marble_features_defs.vh marble_features_params.vh: $(BUILD_DIR)/gen_features.py marble_features.yaml
+marble_features_defs.vh marble_features_params.vh: $(BUILD_DIR)/gen_features.py $(TEST_MARBLE_FAMILY)/marble_features.yaml
 	$(PYTHON) $< -i $(filter %.yaml, $^) -c $(HARDWARE) --split
 
 include $(BUILD_DIR)/bottom_rules.mk

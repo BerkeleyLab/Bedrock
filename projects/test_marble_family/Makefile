@@ -66,10 +66,10 @@ config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOU
 # gen_features.py rules (note the use of PHONY targets)
 # actual file outputs are marble_features_params.vh and marble_features_defs.vh
 marble1_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_mini --split
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c marblemini --split
 
 marble2_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_v2 --split
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble --split
 .PHONY: marble1_features marble2_features
 
 # ====
