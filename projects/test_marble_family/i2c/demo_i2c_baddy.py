@@ -93,7 +93,16 @@ def violation6():
     print("{:-^80s}".format(" Violation 6. Jump out of program "))
     m = marble_i2c.MarbleI2C()
     m.bsp_config()
-    m.jump(40)      # Jump out of program space
+    m.jump(4)      # Jump out of program space
+    m.check_program()
+    return
+
+
+def violation7():
+    print("{:-^80s}".format(" Violation 7. Invalid jump out of memory bounds "))
+    m = marble_i2c.MarbleI2C()
+    m.bsp_config()
+    m.jump(40)      # Jump out of allowable range
     m.check_program()
     return
 
@@ -110,6 +119,7 @@ def doViolations(argv):
         violation4,
         violation5,
         violation6,
+        violation7,
     )
     exceptions = [False]*len(violations)
     for n in range(len(violations)):

@@ -28,7 +28,7 @@ class ListStream:
         If offset < 0, set read pointer to end-abs(offset)."""
         offset = int(offset)
         if abs(offset) > self._max - 1:
-            raise Exception(
+            raise I2C_Assembler_Exception(
                 f"Attempting to seek to {offset} beyond size of stream {self._max}"
             )
         if offset < 0:
