@@ -99,7 +99,14 @@ proc project_create {platform_name project_name} {
         set project_cfgmem_size "none"
         set project_cfgrate "none"
     }
-
+    if [regexp "arty_a7_35t" $platform_name] {
+        set platform "arty_a7_35t"
+        set project_part "xc7a35ticsg324-1L"
+    }
+    if [regexp "arty_a7_100t" $platform_name] {
+        set platform "arty_a7_100t"
+        set project_part "xc7a100tcsg324-1"
+    }
     # planahead
     #
     if {$platform eq "ml605"} {
@@ -246,7 +253,7 @@ proc project_rpt {project_name} {
     report_datasheet -v -file ./_xilinx/$project_name/imp_datasheet.rpt
     report_cdc -v -details -file ./_xilinx/$project_name/cdc_report.rpt
     report_timing_summary -delay_type min_max -report_unconstrained -check_timing_verbose -max_paths 10 -input_pins -file ./_xilinx/$project_name/imp_timing.rpt
-    # http://xillybus.com/tutorials/vivado-timing-constraints-error
+    # https://xillybus.com/tutorials/vivado-timing-constraints-error
     if {! [string match -nocase {*timing constraints are met*} [report_timing_summary -no_header -no_detailed_paths -return_string]]} {
         puts "Timing constraints weren't met. Please check your design."
         exit 2
