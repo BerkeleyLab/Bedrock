@@ -37,7 +37,9 @@ iq_deinterleaver_multichannel Source File
             .scale_wi  (SCALE_WI),
             .dwi       (DWI),
             .davr      (DAVR)
-         ) i_iq_deinterleaver (
+         )
+         i_iq_deinterleaver
+         (
             .clk        (clk),
             .scale_in   (scale_in),
             .iq_data_in (iq_data_in[(ch_id+1)*DWI-1:ch_id*DWI]),
