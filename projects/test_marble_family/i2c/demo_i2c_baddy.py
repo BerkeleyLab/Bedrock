@@ -107,6 +107,18 @@ def violation7():
     return
 
 
+def violation8():
+    print("{:-^80s}".format(" Violation 8. Loop reads missing set_resx "))
+    m = marble_i2c.MarbleI2C()
+    # m.set_resx()
+    m.read("U34", 0, 1)
+    m.buffer_flip()
+    m.pause(4096)   # Pause for roughly 0.24ms
+    m.jump(0)       # Jump back to loop start
+    m.check_program()
+    return
+
+
 def doViolations(argv):
     if len(argv) > 1:
         vMask = _int(argv[1])
@@ -120,6 +132,7 @@ def doViolations(argv):
         violation5,
         violation6,
         violation7,
+        violation8,
     )
     exceptions = [False]*len(violations)
     for n in range(len(violations)):
