@@ -2,6 +2,8 @@
 // Keep the Tx and Rx clock domains separate, they could be 100ppm different
 // in a normal environment.
 module gmii_link #(
+	parameter DELAY=1250000,  // see negotiate.v
+	parameter ENC_DISPINIT=1,
 	parameter CTRACE_AW = 14
 ) (
 	// GMII Rx
@@ -39,8 +41,6 @@ module gmii_link #(
 //New internal wires removed from the module interface (error signals from 8b10b enc/dec)
 wire rx_err_code, rx_err_rdisp;
 
-parameter DELAY=1250000;  // see negotiate.v
-parameter ENC_DISPINIT=1;
 
 reg rx_rst=1, tx_rst=1;
 always @(posedge RX_CLK) rx_rst<=0;

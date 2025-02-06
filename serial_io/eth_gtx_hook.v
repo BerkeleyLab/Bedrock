@@ -14,8 +14,9 @@ module eth_gtx_hook #(
     parameter EVENINIT = 0,
     parameter ENC_DISPINIT=1'b0,
     parameter GTX_DW   = 20,  // Parallel GTX data width; Supported values are 10b and 20b
-    parameter DOUBLEBIT = 0)  // Experimental
-    (
+    parameter DOUBLEBIT = 0,  // Experimental
+    parameter CTRACE_AW = 14  // Diagnostic
+  ) (
         input               gtx_tx_clk,  // Transceiver clock, sometimes at half rate
         input               gmii_tx_clk, // Clock for Ethernet fabric - 125 MHz for 1GbE
         input               gmii_rx_clk,
@@ -35,9 +36,9 @@ module eth_gtx_hook #(
 
 `ifdef FIBER_TRACE
         // ctrace CSRs
-        ,input              ctrace_start, // TODO hook me up!
-        output              ctrace_running, // TODO hook me up!
-        output [CTRACE_AW-1:0] ctrace_pc_mon, // TODO hook me up!
+        ,input              ctrace_start,
+        output              ctrace_running,
+        output [CTRACE_AW-1:0] ctrace_pc_mon,
         // ctrace readout in lb_clk domain
         input               lb_clk,
         input  [CTRACE_AW-1:0] lb_addr,
@@ -122,7 +123,7 @@ module eth_gtx_hook #(
         // ---------------------------------
 
 
-        gmii_link #(.ENC_DISPINIT(ENC_DISPINIT)) i_gmii_link(
+        gmii_link #(.ENC_DISPINIT(ENC_DISPINIT), .CTRACE_AW(CTRACE_AW)) i_gmii_link(
             // GMII to MAC
             .RX_CLK       (gmii_rx_clk),
             .RXD          (gmii_rxd),
