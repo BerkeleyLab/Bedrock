@@ -1,6 +1,6 @@
 if { $argc <5 } {
     puts "Not enough arguments"
-    puts "Usage: vivado -mode batch -nojou -nolog -source project_proc.tcl vivado_project.tcl -tclargs <platform_name> <project_name> <project_xdc> <source_files>"
+    puts "Usage: vivado -mode batch -nojou -nolog -source project_proc.tcl vivado_project.tcl -tclargs <platform_name> <project_name> <verilog_defines> <project_xdc> <source_files>"
     exit
 }
 set my_platform_name [lindex $argv 0]

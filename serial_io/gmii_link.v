@@ -2,7 +2,7 @@
 // Keep the Tx and Rx clock domains separate, they could be 100ppm different
 // in a normal environment.
 module gmii_link #(
-	localparam CTRACE_AW = 14
+	parameter CTRACE_AW = 14
 ) (
 	// GMII Rx
 	input  RX_CLK,
