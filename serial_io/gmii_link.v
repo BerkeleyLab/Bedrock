@@ -1,7 +1,9 @@
 // This module acts as a GMII PHY, so the port directions seem backwards
 // Keep the Tx and Rx clock domains separate, they could be 100ppm different
 // in a normal environment.
-module gmii_link(
+module gmii_link #(
+	localparam CTRACE_AW = 14
+) (
 	// GMII Rx
 	input  RX_CLK,
 	output [7:0] RXD,
@@ -22,6 +24,16 @@ module gmii_link(
 	output operate,   // (GTX_CLK domain) tells upper levels we're ready to transmit
 	output [15:0] lacr_rx,  // (RX_CLK domain) layering violation
 	output [8:0] an_status
+`ifdef FIBER_TRACE
+	// ctrace CSRs
+	,input ctrace_start, // TODO hook me up!
+	output ctrace_running, // TODO hook me up!
+	output [CTRACE_AW-1:0] ctrace_pc_mon, // TODO hook me up!
+	// ctrace readout in lb_clk domain
+	input lb_clk,
+	input  [CTRACE_AW-1:0] lb_addr,
+	output [31:0] lb_out
+`endif
 );
 
 //New internal wires removed from the module interface (error signals from 8b10b enc/dec)
@@ -94,14 +106,44 @@ dec_8b10b my_dec_8b10b(
 negotiate #(.TIMER_TICKS(DELAY)) negotiator(
 	.rx_clk(RX_CLK),
 	.tx_clk(GTX_CLK),
-	.los(rx_err_los),
-	.lacr_in(lacr_rx_val),
-	.lacr_in_stb(lacr_rx_stb),
-	.lacr_out(lacr_out),
-	.lacr_send(lacr_send),
-	.operate(operate),
-	.an_status(an_status)
+	.los(rx_err_los),           // input
+	.lacr_in(lacr_rx_val),      // input [15:0]
+	.lacr_in_stb(lacr_rx_stb),  // input
+	.lacr_out(lacr_out),        // output [15:0]
+	.lacr_send(lacr_send),      // output
+	.operate(operate),          // output
+	.an_status(an_status)       // output [8:0]
 );
+
+`ifdef FIBER_TRACE
+// TODO - What clock?
+wire ctrace_clk = RX_CLK;
+localparam CTRACE_TW = 24;
+// I guess we'll just catch everything going between 'negotiate'
+localparam CTRACE_DW = 45;
+wire [CTRACE_DW-1:0] ctrace_data;
+assign ctrace_data[15: 0] = lacr_rx_val;
+assign ctrace_data[31:16] = lacr_out;
+assign ctrace_data[40:32] = an_status;
+assign ctrace_data[41]    = rx_err_los;
+assign ctrace_data[42]    = lacr_rx_stb;
+assign ctrace_data[43]    = lacr_send;
+assign ctrace_data[44]    = operate;
+wctrace #(
+  .AW(CTRACE_AW),
+  .DW(CTRACE_DW),
+  .TW(CTRACE_TW)
+) wctrace_i (
+  .clk(ctrace_clk), // input
+  .data(ctrace_data), // input [DW-1:0]
+  .start(ctrace_start), // input
+  .running(ctrace_running), // output
+  .pc_mon(ctrace_pc_mon), // output [AW-1:0]
+  .lb_clk(lb_clk), // input
+  .lb_addr(lb_addr), // input [AW-1:0]
+  .lb_out(lb_out) // output [31:0]
+);
+`endif
 
 assign lacr_rx = lacr_rx_val;
 
