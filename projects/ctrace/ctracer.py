@@ -667,47 +667,42 @@ def _mkFilename(fname, dest):
     return fname + ".vcd"
 
 
-def getCtraceMem(dev, size, proto=PROTO_LEEP):
+def getCtraceMem(dev, size):
     config = getConfig()
     if size is None:
         size = config.CTRACE_MEM_SIZE
     if size <= 0:
         return []
-    ctrace_offset = config.CTRACE_OFFSET
-    if proto == PROTO_SCRAP:
-        success, rdata = dev.read(ctrace_offset, size, aw=0, dw=2, extended=True)
-    else:  # proto == PROTO_LEEP
-        (rdata,) = dev.reg_read((config.CTRACE_MEM,))
-        rdata = rdata[
-            :size
-        ]  # LEEP will read the full memory, we'll return only the valid part
+    rdata = dev.reg_read_size(((config.CTRACE_MEM, size),))
     return rdata
 
 
-def runCtrace(dev, runtime=10, proto=PROTO_LEEP):
+def runCtrace(dev, runtime=10, xacts=[]):
     import time
-
     config = getConfig()
+
+    # Collect intermediary transactions
+    reg_vals = []
+    for xact in xacts:
+        # TODO - Use the transaction parsing in leep.cli
+        if '=' in xact:
+            reg, val = xact.split('=')[:2]
+            val = _int(val)
+            reg_vals.append((reg, val))
+            print(f"{reg} -> {val}")
+        else:
+            print(f"Ignoring intermediary read: {xact}")
+
     # Start ctrace
     print("Running ctrace...")
-    if proto == PROTO_SCRAP:
-        success, nwritten = dev.write(config.CTRACE_START_ADDR, [1])
-        if not success:
-            print("Failed to start ctrace")
-            return None
-    else:  # proto == PROTO_LEEP
-        dev.reg_write([(config.CTRACE_START_REG, 1)])
+    dev.reg_write([(config.CTRACE_START_REG, 1)])
+    # Perform intermediary transactions
+    if len(reg_vals) > 0:
+        dev.reg_write(reg_vals)
     # Wait for ctrace to complete
     wait = int(runtime)
     while wait:
-        if proto == PROTO_SCRAP:
-            success, rdata = dev.read(config.CTRACE_RUNNING_ADDR, 1)
-            if not success:
-                print("SCRAP read failed aboring.")
-                return False
-            rdata = rdata[0]
-        else:  # proto == PROTO_LEEP
-            (rdata,) = dev.reg_read((config.CTRACE_RUNNING_REG,))
+        rdata = dev.reg_read((config.CTRACE_RUNNING_REG,))[0]
         if not rdata:
             break
         time.sleep(1.0)
@@ -716,23 +711,12 @@ def runCtrace(dev, runtime=10, proto=PROTO_LEEP):
         # Ctrace not running (finished), read entire memory
         print("Done")
         return config.CTRACE_MEM_SIZE
-    if proto == PROTO_SCRAP:
-        ctrace_pcmon_addr = config.CTRACE_PCMON_ADDR
-        if ctrace_pcmon_addr is None:
-            print("Timeout waiting for ctrace to complete")
-            return config.CTRACE_MEM_SIZE
-        success, rdata = dev.read(ctrace_pcmon_addr, 1)
-        mem_size = rdata[0]
-        if not success:
-            print("SCRAP read failed aboring.")
-            return None
-    else:  # proto == PROTO_LEEP
-        (rdata,) = dev.reg_read((config.CTRACE_PCMON_REG,))
-        mem_size = rdata
+    rdata = dev.reg_read((config.CTRACE_PCMON_REG,))
+    mem_size = rdata[0]
     return mem_size
 
 
-def doScope(dev, ofile, run=True, runtime=10, proto=PROTO_LEEP, clk_name=None):
+def doScope(dev, ofile, run=True, runtime=10, clk_name=None, xacts=[]):
     config = getConfig()
     ctrace_chan0 = config.CTRACE_CHAN0
     signals = []
@@ -743,7 +727,7 @@ def doScope(dev, ofile, run=True, runtime=10, proto=PROTO_LEEP, clk_name=None):
     # Next run ctrace, if requested
     readout_size = config.CTRACE_MEM_SIZE
     if run:
-        readout_size = runCtrace(dev, runtime=runtime, proto=proto)
+        readout_size = runCtrace(dev, runtime=runtime, xacts=xacts)
         if readout_size is None:
             print("doScope runCtrace failed")
             return False
@@ -752,7 +736,7 @@ def doScope(dev, ofile, run=True, runtime=10, proto=PROTO_LEEP, clk_name=None):
         print("ctrace memory is empty")
         return False
     print("Reading ctrace memory (size={})".format(readout_size))
-    data = getCtraceMem(dev, size=readout_size, proto=proto)
+    data = getCtraceMem(dev, size=readout_size)
     ctp = CtraceParser(signals, dw=config.CTRACE_DW, timebits=config.CTRACE_TW, clk_name=clk_name)
     ctp.parseDump(data, signals=signals)
     time_step_ns = 1.0e9 / config.F_CLK_IN
@@ -766,17 +750,13 @@ def doGet(args):
     filename = _mkFilename(args.outfile, dest)
     if proto == PROTO_LEEP:
         import leep
-
         dev = leep.open(dest, timeout=args.timeout)
-        return doScope(dev, filename, run=True, runtime=args.runtime, proto=PROTO_LEEP, clk_name=args.clk)
     elif proto == PROTO_SCRAP:
         import scrap
-
         dev = scrap.SCRAPDevice(dest, silent=True)
-        return doScope(dev, filename, run=True, runtime=args.runtime, proto=PROTO_SCRAP, clk_name=args.clk)
     else:
         raise Exception("Unsupported protocol {}".format(proto))
-    return
+    return doScope(dev, filename, run=True, runtime=args.runtime, clk_name=args.clk, xacts=args.xact)
 
 
 def main():
@@ -791,17 +771,13 @@ def main():
     devhelp = "Device to interface with. E.g.\n  leep://$IP[:$PORT]\n  scrap:/dev/ttyUSB3\n  scrap:$IP:$PORT"
     parserGet.add_argument("dest", help=devhelp)
     parserGet.add_argument("-c", "--config", default=None, help="Configuration file.")
+    parserGet.add_argument("-x", "--xact", action="append",
+                           help="Transactions to do after issuing the 'start' signal (regname=val).")
     parserGet.add_argument("--clk", default=None, help="Net name for the generated clock.")
-    parserGet.add_argument(
-        "-o", "--outfile", default=None, help="Output VCD file name."
-    )
+    parserGet.add_argument("-o", "--outfile", default=None, help="Output VCD file name.")
     parserGet.add_argument("-t", "--timeout", type=float, default=5.0)
-    parserGet.add_argument(
-        "--runtime",
-        default=10,
-        type=float,
-        help="Time (in seconds) to wait for ctrace to complete.",
-    )
+    parserGet.add_argument("-r", "--runtime", default=10, type=float,
+                           help="Time (in seconds) to wait for ctrace to complete.")
     parserGet.set_defaults(handler=doGet)
     args = parser.parse_args()
     global _config
