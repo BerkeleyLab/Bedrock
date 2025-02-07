@@ -673,7 +673,7 @@ def getCtraceMem(dev, size):
         size = config.CTRACE_MEM_SIZE
     if size <= 0:
         return []
-    rdata = dev.reg_read_size(((config.CTRACE_MEM, size),))
+    rdata = dev.reg_read_size(((config.CTRACE_MEM, size),))[0]
     return rdata
 
 
@@ -711,8 +711,7 @@ def runCtrace(dev, runtime=10, xacts=[]):
         # Ctrace not running (finished), read entire memory
         print("Done")
         return config.CTRACE_MEM_SIZE
-    rdata = dev.reg_read((config.CTRACE_PCMON_REG,))
-    mem_size = rdata[0]
+    mem_size = dev.reg_read((config.CTRACE_PCMON_REG,))[0]
     return mem_size
 
 
