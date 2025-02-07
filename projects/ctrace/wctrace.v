@@ -72,8 +72,11 @@ dpram #(.dw(DW+TW), .aw(AW)) xmem(
 generate
 if ((DW+TW) > 224) begin: wide6
   initial begin
-    if ((DW+TW) > 256) $display("ERROR (wctrace.v): DW+TW = %d. Must be <= 256", DW+TW);
-    else `printd("DW = %d: In branch wide6", DW[7:0]);
+    if ((DW+TW) > 256) begin
+      //$display("ERROR (wctrace.v): DW+TW = %d. Must be <= 256", DW+TW);
+      $stop(0);
+    end
+    //else `printd("DW = %d: In branch wide6", DW[7:0]);
   end
   assign addrb = lb_addr >> 3;
   assign lb_out = lb_addr_d[2:0] == 3'b111 ? {{32-(DW+TW-224){1'b0}},doutb[DW+TW-1:224]} :
@@ -84,7 +87,7 @@ if ((DW+TW) > 224) begin: wide6
                   lb_addr_d[2:0] == 3'b010 ? doutb[95:64] :
                   lb_addr_d[2:0] == 3'b001 ? doutb[63:32] : doutb[31:0];
 end else if ((DW+TW) > 192) begin: wide5
-  initial `printd("DW = %d: In branch wide5", DW[7:0]);
+  //initial `printd("DW = %d: In branch wide5", DW[7:0]);
   assign addrb = lb_addr >> 3;
   assign lb_out = lb_addr_d[2:0] == 3'b111 ? 32'h0 :
                   lb_addr_d[2:0] == 3'b110 ? {{32-(DW+TW-192){1'b0}},doutb[DW+TW-1:192]} :
@@ -94,7 +97,7 @@ end else if ((DW+TW) > 192) begin: wide5
                   lb_addr_d[2:0] == 3'b010 ? doutb[95:64] :
                   lb_addr_d[2:0] == 3'b001 ? doutb[63:32] : doutb[31:0];
 end else if ((DW+TW) > 160) begin: wide4
-  initial `printd("DW = %d: In branch wide4", DW[7:0]);
+  //initial `printd("DW = %d: In branch wide4", DW[7:0]);
   assign addrb = lb_addr >> 3;
   assign lb_out = lb_addr_d[2:0] == 3'b111 ? 32'h0 :
                   lb_addr_d[2:0] == 3'b110 ? 32'h0 :
@@ -104,7 +107,7 @@ end else if ((DW+TW) > 160) begin: wide4
                   lb_addr_d[2:0] == 3'b010 ? doutb[95:64] :
                   lb_addr_d[2:0] == 3'b001 ? doutb[63:32] : doutb[31:0];
 end else if ((DW+TW) > 128) begin: wide3
-  initial `printd("DW = %d: In branch wide3", DW[7:0]);
+  //initial `printd("DW = %d: In branch wide3", DW[7:0]);
   assign addrb = lb_addr >> 3;
   assign lb_out = lb_addr_d[2:0] == 3'b111 ? 32'h0 :
                   lb_addr_d[2:0] == 3'b110 ? 32'h0 :
@@ -114,13 +117,13 @@ end else if ((DW+TW) > 128) begin: wide3
                   lb_addr_d[2:0] == 3'b010 ? doutb[95:64] :
                   lb_addr_d[2:0] == 3'b001 ? doutb[63:32] : doutb[31:0];
 end else if ((DW+TW) > 96) begin: wide2
-  initial `printd("DW = %d: In branch wide2", DW[7:0]);
+  //initial `printd("DW = %d: In branch wide2", DW[7:0]);
   assign addrb = lb_addr >> 2;
   assign lb_out = lb_addr_d[1:0] == 2'b11 ? {{32-(DW+TW-96){1'b0}},doutb[DW+TW-1:96]} :
                   lb_addr_d[1:0] == 2'b10 ? doutb[95:64] :
                   lb_addr_d[1:0] == 2'b01 ? doutb[63:32] : doutb[31:0];
 end else if ((DW+TW) > 64) begin: wide1
-  initial `printd("DW = %d: In branch wide1", DW[7:0]);
+  //initial `printd("DW = %d: In branch wide1", DW[7:0]);
   assign addrb = lb_addr >> 2;
   assign lb_out = lb_addr_d[1:0] == 2'b11 ? 32'h0 :
                   lb_addr_d[1:0] == 2'b10 ? {{32-(DW+TW-64){1'b0}},doutb[DW+TW-1:64]} :
@@ -130,7 +133,7 @@ end else if ((DW+TW) > 32) begin: wide0
   assign addrb = lb_addr >> 1;
   assign lb_out = lb_addr_d[0] ? {{32-(DW+TW-32){1'b0}},doutb[DW+TW-1:32]} : doutb[31:0];
 end else begin: normal
-  initial `printd("DW = %d: In branch normal", DW[7:0]);
+  //initial `printd("DW = %d: In branch normal", DW[7:0]);
   assign addrb = lb_addr;
   assign lb_out = {{32-(DW+TW){1'b0}},doutb};
 end
