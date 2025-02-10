@@ -50,6 +50,6 @@ i2cbridge tools.  Note the difference in readability from the application perspe
 This last test is not truly platform-specific but shows various violations of the I2C assembler rules
 using the Marble platform-aware interface.  None of the rules violated are specific to the platform.
 
-`make test`
+`make violations`
 
 See `demo_i2c_baddy.py` for examples of what to avoid.

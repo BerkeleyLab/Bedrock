@@ -109,17 +109,32 @@ def build_prog(argv):
     m.pause(4096)   # Pause for roughly 0.24ms
     m.jump(jump_n)  # Jump back to loop start
 
-    # ======= End Program =======
+    # ======= Demo Functionality =======
     if len(argv) > 1:
         op = argv[1]
         if len(argv) > 2:
             offset = _int(argv[2])
         else:
             offset = 0
-        m.write_reg_map(offset=offset, style=op)
+        if op == 'p':
+            m.write_program()
+        else:
+            m.write_reg_map(offset=offset, style=op)
+        return 0
+
+    # ======= (Anti-)Regression Test =======
+    rval = 0
+    errstr = None
+    try:
+        m.check_program()
+    except marble_i2c.assem.I2C_Assembler_Exception as err:
+        rval = 1
+        errstr = str(err)
+    if rval == 0:
+        print("PASS")
     else:
-        m.write_program()
-    return
+        print("FAIL: {}".format(errstr))
+    return rval
 
 
 if __name__ == "__main__":
