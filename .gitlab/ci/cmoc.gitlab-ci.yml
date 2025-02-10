@@ -12,12 +12,15 @@ cmoc_test:
   script:
     - make && make checks
 
-cmoc_top_marblemini:
+cmoc_top:
   before_script:
     - cd projects/cmoc_top/marblemini && ls /non-free
   stage: synthesis
   script:
-    - XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH make HARDWARE=marblemini cmoc_top.bit
+    - XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH make HARDWARE=${TARGET} cmoc_top.bit
+  parallel:
+    matrix:
+      - TARGET: [marblemini, marble]
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week
