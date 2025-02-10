@@ -3,12 +3,8 @@ import sys
 from math import pi, sqrt, log
 from numpy import exp as cexp
 from numpy import ceil
-# https://stackoverflow.com/questions/14132789/relative-imports-for-the-billionth-time
-# Leaves me with only one choice ... :(
-# Since I don't want to modify shell variables
-sys.path.append(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))) +
-    "/../build-tools")
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../build-tools"))
 from read_regmap import get_map, get_reg_info
 
 cav_num = 0
