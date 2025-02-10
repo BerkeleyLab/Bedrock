@@ -91,6 +91,14 @@ proc project_create {platform_name project_name} {
         set project_cfgmem_size "none"
         set project_cfgrate "none"
     }
+    if [regexp "arty_a7_35t" $platform_name] {
+        set platform "arty_a7_35t"
+        set project_part "xc7a35ticsg324-1L"
+    }
+    if [regexp "arty_a7_100t" $platform_name] {
+        set platform "arty_a7_100t"
+        set project_part "xc7a100tcsg324-1"
+    }
     # planahead
     #
     if {$platform eq "ml605"} {
