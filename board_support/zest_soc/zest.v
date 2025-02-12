@@ -3,12 +3,10 @@ module zest #(
     parameter DSP_FREQ_MHZ = 119.0,
     parameter FCNT_WIDTH = 16,  // to speed up simulation. 125M / 2**16 = 1.9kHz update rate.
     parameter PH_DIFF_DW = 13,
-    parameter real DAC_INTERP_COEFF_R = 1.0,
     localparam integer  N_ADC = 2,
     localparam integer  N_CH = N_ADC*4,
     localparam real     CLKIN_PERIOD = 1000.0 / DSP_FREQ_MHZ / 2,    // ns
-    localparam integer  PH_DIFF_ADV = DSP_FREQ_MHZ / 200.0 * (2**PH_DIFF_DW),
-    localparam [14:0]  DAC_INTERP_COEFF = DAC_INTERP_COEFF_R / 2 * (2**14)
+    localparam integer  PH_DIFF_ADV = DSP_FREQ_MHZ / 200.0 * (2**PH_DIFF_DW)
 ) (
     // Hardware pins
     // U24 74LVC8T245
@@ -424,25 +422,6 @@ freq_count #(
 
 assign dac_clk_out = dac_dco_clk;
 
-// interpolator, crossing from dsp_clk to dac_clk domain
-wire signed [13:0] dac0_in_data;
-zest_dac_interp #(.DW(14)) dac_interp_a (
-    .dsp_clk        (dsp_clk_out),
-    .din            (dac_in_data_i),
-    .coeff          (DAC_INTERP_COEFF),
-    .dac_clk        (dac_clk_out),
-    .dout           (dac0_in_data)
-);
-
-wire signed [13:0] dac1_in_data;
-zest_dac_interp #(.DW(14)) dac_interp_b (
-    .dsp_clk        (dsp_clk_out),
-    .din            (dac_in_data_q),
-    .coeff          (DAC_INTERP_COEFF),
-    .dac_clk        (dac_clk_out),
-    .dout           (dac1_in_data)
-);
-
 // DMA to generate arbitrary waveform for DAC BIST
 wire [13:0] awg_out_data;
 wire awg_out_valid;
@@ -469,8 +448,8 @@ always @(posedge dac_clk_out) begin
 end
 
 // Mux DAC data source
-wire [13:0] dac0_in_data_mux = dac0_enable ? (dac0_src_sel ? awg_out_data1 : dac0_in_data) : 14'h0;
-wire [13:0] dac1_in_data_mux = dac1_enable ? (dac1_src_sel ? awg_out_data1 : dac1_in_data) : 14'h0;
+wire [13:0] dac0_in_data_mux = dac0_enable ? (dac0_src_sel ? awg_out_data1 : dac_in_data_i) : 14'h0;
+wire [13:0] dac1_in_data_mux = dac1_enable ? (dac1_src_sel ? awg_out_data1 : dac_in_data_q) : 14'h0;
 
 // UG471 Fig 2-19, D2 @ rising edge == dac0, match AD9781 datasheet Fig 57.
 wire [14:0] dac_oddr_buf;
