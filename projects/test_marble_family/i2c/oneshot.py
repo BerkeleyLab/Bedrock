@@ -81,25 +81,39 @@ def decodeI2CProgram(args):
 def doI2CXact(args):
     marble = MarbleI2C()
     marble.set_resx()
-    if args.value is not None:
-        marble.write(args.ic, _int(args.reg_addr), [_int(args.value)], addr_bytes=1)
+    val = None
+    if '=' in args.reg_addr:
+        addr, val = args.reg_addr.split('=')[:2]
     else:
-        regaddr = _int(args.reg_addr)
+        addr = args.reg_addr
+    if val is not None:
+        if args.verbose:
+            print(f"Writing 0x{_int(val):x} to {args.ic} address {_int(addr)}")
+        marble.write(args.ic, _int(addr), [_int(val)], addr_bytes=1)
+    else:
+        regaddr = _int(addr)
         regname = f"{args.ic}_{regaddr:x}"
-        # print("reading {} bytes".format(_int(args.data_bytes)))
-        marble.read(args.ic, regaddr, _int(args.data_bytes), addr_bytes=1, reg_name=regname)
+        nbytes = _int(args.data_bytes)
+        if args.verbose:
+            ps = ""
+            if nbytes > 1:
+                ps = "s"
+            print("Reading {} byte{}".format(nbytes, ps))
+        marble.read(args.ic, regaddr, nbytes, addr_bytes=1, reg_name=regname)
     marble.buffer_flip()
     marble.stop()
     prog = marble.get_program()
-    # decode(prog)
+    if args.verbose:
+        decode(prog)
     dev = leep.open(args.dest)
     stop(dev)
     program(dev, prog)
     run(dev)
     stop(dev)
     wait_stopped(dev)
-    regmap = marble.get_regmap()
-    readback(dev, regmap)
+    if val is None:
+        regmap = marble.get_regmap()
+        readback(dev, regmap, verbose=args.verbose)
     return 0
 
 
@@ -140,22 +154,24 @@ def program(dev, prog):
     return
 
 
-def readback(dev, regmap):
+def readback(dev, regmap, verbose=False):
     """Regmap is dict of {regname: (results_memory_offset, number_of_bytes)}"""
     readsize = 1
     for regname, _rd in regmap.items():
         offset, nbytes = _rd
         if offset + nbytes > readsize:
             readsize = offset + nbytes
-    # print(f"readsize = {readsize}")
+    if verbose:
+        print(f"Reading {readsize} bytes")
     name_sizes = ((I2C_RESULTS[0], readsize, I2C_RESULTS[1]),)  # (name, size, offset)
     results = dev.reg_read_size(name_sizes)[0]
-    # print(f"results = {results}")
+    if verbose:
+        print(f"Result = {results}")
     for regname, _rd in regmap.items():
-        # print(f"results offset 0x{offset:x}")
         offset, nbytes = _rd
         data = results[offset:offset+nbytes]
-        # print(f"data = {data}")
+        if verbose:
+            print(f"offset {offset}: data = {data}")
         print_data(regname, data)
     return
 
@@ -177,8 +193,9 @@ def doI2C():
     parser.add_argument("dest", help="LEEP-compatible destination, i.e. \"leep://192.168.19.48:803\"")
     ic_options = [x[0] for x in MarbleI2C.get_ics()]
     parser.add_argument("-i", "--ic", default=None, choices=ic_options, help="IC name")
-    parser.add_argument("-a", "--reg_addr", default=0, help="Register address in IC's memory map")
-    parser.add_argument("-v", "--value", default=None, help="Value to write to address REG_ADDR")
+    parser.add_argument("-a", "--reg_addr", default=0,
+                        help="ADDR[=VALUE]. Register address in IC's memory map (and optional value to write).")
+    parser.add_argument("-v", "--verbose", default=False, action="store_true", help="Enable debug chatter")
     parser.add_argument("-n", "--data_bytes", default=1, help="How many bytes to read from REG_ADDR")
     args = parser.parse_args()
     if args.ic is None:

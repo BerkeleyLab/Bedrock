@@ -1,5 +1,24 @@
 # Marble Platform Support for I2CBridge Programming
 
+## One-shot I2C transactions
+The script `oneshot.py` is included here to allow composing and running single-transaction
+`i2cbridge` programs to a live target with a (hopefully) user-friendly interface.  Without
+worrying about the I2C tree on the Marble board or chip addresses, you can simply read from
+or write to any register in any chip just referring to the chip by name (refdes on the
+schematic).
+
+Example: turn on LD13 via the GPIO expander U39 by writing to register 3
+__WARNING__: The user LEDs are on the same port as `/CLKMUX_RST` which means we can shut down the board on accident
+if we aren't very careful to ensure we always keep bit 7 asserted when writing to this register!
+```sh
+PYTHONPATH=../../../peripheral_drivers/i2cbridge:$PYTHONPATH python3 oneshot.py leep://$IP:$PORT -i U39 -a 3=0x88
+```
+
+Example: read the inputs to port 0 on the GPIO expander U39 by reading from register 0
+```sh
+PYTHONPATH=../../../peripheral_drivers/i2cbridge:$PYTHONPATH python3 oneshot.py leep://192.168.19.40:803 -i U39 -a 0
+```
+
 ## Usage:
 
 These tools assume usage of the i2cbridge modules in `bedrock/peripheral_drivers/i2cbridge`.
