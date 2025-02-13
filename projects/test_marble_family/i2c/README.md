@@ -11,6 +11,11 @@ Example: turn on LD13 via the GPIO expander U39 by writing to register 3
 __WARNING__: The user LEDs are on the same port as `/CLKMUX_RST` which means we can shut down the board on accident
 if we aren't very careful to ensure we always keep bit 7 asserted when writing to this register!
 ```sh
+PYTHONPATH=../../../peripheral_drivers/i2cbridge:$PYTHONPATH python3 oneshot.py leep://$IP:$PORT -i U39 -a 3=0x80
+```
+
+Example: turn off LD13
+```sh
 PYTHONPATH=../../../peripheral_drivers/i2cbridge:$PYTHONPATH python3 oneshot.py leep://$IP:$PORT -i U39 -a 3=0x88
 ```
 
