@@ -154,6 +154,7 @@ def doI2CXact(args):
     marble = MarbleI2C()
     marble.set_resx()
     val = None
+    reads = 0
     for xact in args.xact:
         _type, ic_name, addr, val = parse_xact(xact)
         if _type in (XactType.write, XactType.read):
@@ -166,6 +167,7 @@ def doI2CXact(args):
                 print(f"Writing 0x{val:x} to {ic_name} address {addr}")
             marble.write(ic_name, addr, [val], addr_bytes=1)
         elif _type == XactType.read:
+            reads += 1
             regname = f"{ic_name}_{addr:x}"
             nbytes = val
             if args.verbose:
@@ -193,7 +195,7 @@ def doI2CXact(args):
     run(dev)
     stop(dev)
     wait_stopped(dev)
-    if val is None:
+    if reads > 0:
         regmap = marble.get_regmap()
         readback(dev, regmap, verbose=args.verbose)
     return 0
