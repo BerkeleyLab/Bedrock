@@ -50,6 +50,11 @@ GENERIC_DECODE_FILE=../../../peripheral_drivers/i2cbridge/decode.py
 generic_decode: prog.dat
 	$(PYTHON) $(GENERIC_DECODE_FILE) $<
 
+# ======= Test that oneshot does not throw an exception with all this
+.PHONY: oneshot_test
+oneshot_test:
+	PYTHONPATH=$$PYTHONPATH:../../../peripheral_drivers/i2cbridge $(PYTHON) oneshot.py test -i U2 0=1 0 QSFP1.86=1 pause=100 qsfp1.86=0 U34.0:4 U39.4 -l -v
+
 .PHONY: clean
 clean:
 	rm -f $(TARGETS)

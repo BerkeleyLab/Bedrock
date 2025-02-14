@@ -6,6 +6,7 @@ I2CBridgeDecoder = marble_i2c_decoder._decode.I2CBridgeDecoder
 
 import leep
 import time
+import re
 
 
 I2C_CTL = "twi_ctl"
@@ -78,33 +79,114 @@ def decodeI2CProgram(args):
     return 0
 
 
+class XactType:
+    read = 0
+    write = 1
+    pause = 2
+
+
+def parse_xact(ss):
+    """
+    Write transaction:
+      ic.addr=val
+    Read transaction:
+      ic.addr[:n]
+        :n = optionally indicate number of bytes to read (default = 1)
+    Pause:
+      wait[=duration]
+        =duration = optional duration in cycles (default = 10)
+    """
+    if ss.startswith("wait") or ss.startswith("pause"):
+        xact = XactType.pause
+        if '=' in ss:
+            duration = _int(ss.split('=')[1])
+        else:
+            duration = 10
+        return xact, None, None, duration
+    restr = r"^(\w+\.)?([0-9a-fA-Fx]+)([=:][0-9a-fA-Fx]+)?$"
+    _match = re.match(restr, ss)
+    if _match:
+        ic_name, addr, val = _match.groups()
+        if val is None:
+            xact = XactType.read
+            val = 1
+        else:
+            if val.startswith('='):
+                xact = XactType.write
+                val = _int(val.strip('='))
+            elif val.startswith(':'):
+                xact = XactType.read
+                val = _int(val.strip(':'))
+        if ic_name is not None:
+            ic_name = ic_name.strip('.')
+        return xact, ic_name, _int(addr), val
+    return None, None, None, None
+
+
+def test_parse_xact():
+    tests = (
+        ("foo",             (None, None, None, None)),
+        ("J17.86=1",        (XactType.write, "J17", 86, 1)),
+        ("U52.0x15=0xff",   (XactType.write, "U52", 0x15, 0xff)),
+        ("U1.0",            (XactType.read, "U1", 0, 1)),
+        ("50",              (XactType.read, None, 50, 1)),
+        ("1=0",             (XactType.write, None, 1, 0)),
+        ("50:8",            (XactType.read, None, 50, 8)),
+        ("U100.12:6",       (XactType.read, "U100", 12, 6)),
+        ("pause",           (XactType.pause, None, None, 10)),
+        ("wait",            (XactType.pause, None, None, 10)),
+        ("pause=100",       (XactType.pause, None, None, 100)),
+        ("pause=1",         (XactType.pause, None, None, 1)),
+        ("wait=0",          (XactType.pause, None, None, 0)),
+    )
+    fails = 0
+    for _input, _expected in tests:
+        _result = parse_xact(_input)
+        if _result != _expected:
+            fails += 1
+            print(f"FAIL: parse_xact({_input}) = {_result} != {_expected}")
+    if fails == 0:
+        print("PASS")
+    return fails
+
+
 def doI2CXact(args):
     marble = MarbleI2C()
     marble.set_resx()
     val = None
-    if '=' in args.reg_addr:
-        addr, val = args.reg_addr.split('=')[:2]
-    else:
-        addr = args.reg_addr
-    if val is not None:
-        if args.verbose:
-            print(f"Writing 0x{_int(val):x} to {args.ic} address {_int(addr)}")
-        marble.write(args.ic, _int(addr), [_int(val)], addr_bytes=1)
-    else:
-        regaddr = _int(addr)
-        regname = f"{args.ic}_{regaddr:x}"
-        nbytes = _int(args.data_bytes)
-        if args.verbose:
-            ps = ""
-            if nbytes > 1:
-                ps = "s"
-            print("Reading {} byte{}".format(nbytes, ps))
-        marble.read(args.ic, regaddr, nbytes, addr_bytes=1, reg_name=regname)
+    for xact in args.xact:
+        _type, ic_name, addr, val = parse_xact(xact)
+        if _type in (XactType.write, XactType.read):
+            if ic_name is None:
+                ic_name = args.ic
+            if ic_name is None:
+                raise Exception("ERROR: Must specify the target IC for each transaction or provide a default.")
+        if _type == XactType.write:
+            if args.verbose:
+                print(f"Writing 0x{val:x} to {ic_name} address {addr}")
+            marble.write(ic_name, addr, [val], addr_bytes=1)
+        elif _type == XactType.read:
+            regname = f"{ic_name}_{addr:x}"
+            nbytes = val
+            if args.verbose:
+                ps = ""
+                if nbytes > 1:
+                    ps = "s"
+                print(f"Reading {nbytes} byte{ps} from {ic_name} address {addr}")
+            marble.read(ic_name, addr, nbytes, addr_bytes=1, reg_name=regname)
+        elif _type == XactType.pause:
+            marble.pause(val)
     marble.buffer_flip()
-    marble.stop()
+    if args.loop:
+        marble.jump(0)
+    else:
+        marble.stop()
     prog = marble.get_program()
     if args.verbose:
         decode(prog)
+    if args.dest == "test":
+        print("Test done.")
+        return 0
     dev = leep.open(args.dest)
     stop(dev)
     program(dev, prog)
@@ -189,19 +271,28 @@ def print_data(regname, data):
 
 def doI2C():
     import argparse
-    parser = argparse.ArgumentParser("Arbitrary I2C on Marble via i2cbridge")
+    ic_help = "\n  ".join([": ".join((ic_name, descript)) for ic_name, descript in MarbleI2C._descript.items()])
+    parser = argparse.ArgumentParser("Arbitrary I2C on Marble via i2cbridge", epilog="Marble ICs:\n  " + ic_help,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("dest", help="LEEP-compatible destination, i.e. \"leep://192.168.19.48:803\"")
     ic_options = [x[0] for x in MarbleI2C.get_ics()]
-    parser.add_argument("-i", "--ic", default=None, choices=ic_options, help="IC name")
-    parser.add_argument("-a", "--reg_addr", default=0,
-                        help="ADDR[=VALUE]. Register address in IC's memory map (and optional value to write).")
+    for ic, aliases in MarbleI2C._aliases.items():
+        ic_options.extend(aliases)
+    parser.add_argument("-i", "--ic", default=None, choices=ic_options, help="Default IC name")
+    parser.add_argument("xact", nargs="+",
+                        help="[IC_NAME.]ADDR[=VALUE]. Optional IC name, register address in IC's memory map"
+                        + " (and optional value to write).")
     parser.add_argument("-v", "--verbose", default=False, action="store_true", help="Enable debug chatter")
-    parser.add_argument("-n", "--data_bytes", default=1, help="How many bytes to read from REG_ADDR")
+    parser.add_argument("-l", "--loop", default=False, action="store_true",
+                        help="Leave the program running in a loop after exiting.")
+    parser.add_argument("-d", "--decode", default=False, action="store_true",
+                        help="Read and decode the existing program in the target device.")
     args = parser.parse_args()
-    if args.ic is None:
+    if args.decode is None:
         return decodeI2CProgram(args)
     return doI2CXact(args)
 
 
 if __name__ == "__main__":
     exit(doI2C())
+    # exit(test_parse_xact())
