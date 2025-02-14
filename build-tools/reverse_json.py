@@ -99,6 +99,9 @@ param_db = {}
 address_offset = 0
 bank_state = None  # keep track of current block
 line_no = 0
+tbanks = {}  # total list of banks handled
+rbanks = {}  # banks found in final decoder
+final_mux = False
 for line in f.read().split('\n'):
     line_no += 1
     ehead = 'ERROR:%s:%d:' % (argv[1], line_no)  # just in case
@@ -127,6 +130,7 @@ for line in f.read().split('\n'):
                 stderr.write(ehead + ' bank %s assignment found in bank %s stanza\n' % (tbank, bank_state))
                 fail = 1
             sl += [rprint(m1.group, line, alias, address_offset)]
+            tbanks[tbank] = True
         else:
             stderr.write("WARNING: Surprising regexp failure: %s\n" % line)
     if "default" in line and ": reg_bank_" in line:
@@ -176,6 +180,28 @@ for line in f.read().split('\n'):
         m4 = re.search(r"\bcase\s*\(\w*addr", line)
         if m4:
             bank_state = "=armed="
+    if "casez" in line and "lb_addr_" in line:
+        final_mux = True
+    if "endcase" in line:
+        final_mux = False
+    if final_mux:
+        m5 = re.search(r"([0-9a-f])\?: *[a-zA-Z_]+ *<=.*reg_bank_([0-9a-f]) *;", line)
+        if m5:
+            fda = m5.group(1)
+            fdb = m5.group(2)
+            if verbose:
+                stderr.write("INFO: final decoder (%s) %s %s\n" % (line, fda, fdb))
+            if fda != fdb:
+                stderr.write("ERROR: final decoder address (%s) mismatch with bank (%s)\n" % (fda, fdb))
+            rbanks[fdb] = True
 print(",\n".join(sl))
 print("}")
+if verbose:
+    stderr.write("INFO: banks handled: " + " ".join(sorted(tbanks.keys())) + "\n")
+    stderr.write("INFO: banks decoded: " + " ".join(sorted(rbanks.keys())) + "\n")
+for fdb in sorted(tbanks.keys()):
+    if fdb not in rbanks:
+        stderr.write("ERROR: bank %s not found in final decoder\n" % fdb)
+        fail = 1
+
 exit(fail)
