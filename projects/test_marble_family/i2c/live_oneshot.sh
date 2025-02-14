@@ -10,3 +10,4 @@ python3 -m oneshot leep://$IP:803 U39.3=0x80
 test "$(python3 -m oneshot leep://$IP:803 U39.3)" = "U39_3: 0x80"
 python3 -m oneshot leep://$IP:803 U39.3=0x88
 test "$(python3 -m oneshot leep://$IP:803 U39.3)" = "U39_3: 0x88"
+echo "PASS"
