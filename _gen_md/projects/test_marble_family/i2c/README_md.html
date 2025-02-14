@@ -134,15 +134,32 @@ schematic).</p>
 <p>Example: turn on LD13 via the GPIO expander U39 by writing to register 3
 <strong>WARNING</strong>: The user LEDs are on the same port as <code class="docutils literal notranslate"><span class="pre">/CLKMUX_RST</span></code> which means we can shut down the board on accident
 if we aren’t very careful to ensure we always keep bit 7 asserted when writing to this register!</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHONPATH</span><span class="o">=</span>../../../peripheral_drivers/i2cbridge:<span class="nv">$PYTHONPATH</span><span class="w"> </span>python3<span class="w"> </span>oneshot.py<span class="w"> </span>leep://<span class="nv">$IP</span>:<span class="nv">$PORT</span><span class="w"> </span>-i<span class="w"> </span>U39<span class="w"> </span>-a<span class="w"> </span><span class="nv">3</span><span class="o">=</span>0x80
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHONPATH</span><span class="o">=</span>../../../peripheral_drivers/i2cbridge:<span class="nv">$PYTHONPATH</span><span class="w"> </span>python3<span class="w"> </span>oneshot.py<span class="w"> </span>leep://<span class="nv">$IP</span>:<span class="nv">$PORT</span><span class="w"> </span>U39.3<span class="o">=</span>0x80
 </pre></div>
 </div>
 <p>Example: turn off LD13</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHONPATH</span><span class="o">=</span>../../../peripheral_drivers/i2cbridge:<span class="nv">$PYTHONPATH</span><span class="w"> </span>python3<span class="w"> </span>oneshot.py<span class="w"> </span>leep://<span class="nv">$IP</span>:<span class="nv">$PORT</span><span class="w"> </span>-i<span class="w"> </span>U39<span class="w"> </span>-a<span class="w"> </span><span class="nv">3</span><span class="o">=</span>0x88
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHONPATH</span><span class="o">=</span>../../../peripheral_drivers/i2cbridge:<span class="nv">$PYTHONPATH</span><span class="w"> </span>python3<span class="w"> </span>oneshot.py<span class="w"> </span>leep://<span class="nv">$IP</span>:<span class="nv">$PORT</span><span class="w"> </span>U39.3<span class="o">=</span>0x88
 </pre></div>
 </div>
 <p>Example: read the inputs to port 0 on the GPIO expander U39 by reading from register 0</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHONPATH</span><span class="o">=</span>../../../peripheral_drivers/i2cbridge:<span class="nv">$PYTHONPATH</span><span class="w"> </span>python3<span class="w"> </span>oneshot.py<span class="w"> </span>leep://192.168.19.40:803<span class="w"> </span>-i<span class="w"> </span>U39<span class="w"> </span>-a<span class="w"> </span><span class="m">0</span>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHONPATH</span><span class="o">=</span>../../../peripheral_drivers/i2cbridge:<span class="nv">$PYTHONPATH</span><span class="w"> </span>python3<span class="w"> </span>oneshot.py<span class="w"> </span>leep://192.168.19.40:803<span class="w"> </span>U39.0
+</pre></div>
+</div>
+<p><em>(The following demos assume you have exported ``PYTHONPATH`` for brevity)</em></p>
+<p>We can also read more than 1 byte (very much dependent on the specifics of the IC’s I2C implementation).
+Example: read shunt voltage (addr 1, 16 bits) from INA219 U57</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>oneshot.py<span class="w"> </span>leep://<span class="nv">$IP</span>:<span class="nv">$PORT</span><span class="w"> </span>U57.1:2
+<span class="c1"># Note the &#39;:&#39; instead of a &#39;=&#39; (the latter indicates a write!)</span>
+</pre></div>
+</div>
+<p>Note that you can perform many transactions in one “one shot” program, including adding pauses between
+transactions, as in this demo disabling and re-enabling QSFP1 channel 0:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>oneshot.py<span class="w"> </span>leep://<span class="nv">$IP</span>:<span class="nv">$PORT</span><span class="w"> </span>J17.86<span class="o">=</span><span class="m">1</span><span class="w"> </span>J17.86<span class="o">=</span><span class="m">0</span>
+</pre></div>
+</div>
+<p>And breaking the “one shot” model, you can tell the program to continue looping after the script exits.
+This demo makes LD13 continually blink.</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>oneshot.py<span class="w"> </span>leep://<span class="nv">$IP</span>:<span class="nv">$PORT</span><span class="w"> </span>U39.3<span class="o">=</span>0x80<span class="w"> </span><span class="nv">pause</span><span class="o">=</span><span class="m">500</span><span class="w"> </span>U39.3<span class="o">=</span>0x88<span class="w"> </span><span class="nv">pause</span><span class="o">=</span><span class="m">500</span><span class="w"> </span>-l
 </pre></div>
 </div>
 </section>
