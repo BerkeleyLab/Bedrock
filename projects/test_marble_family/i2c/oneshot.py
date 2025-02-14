@@ -193,8 +193,9 @@ def doI2CXact(args):
     stop(dev)
     program(dev, prog)
     run(dev)
-    stop(dev)
-    wait_stopped(dev)
+    if not args.loop:
+        stop(dev)
+        wait_stopped(dev)
     if reads > 0:
         regmap = marble.get_regmap()
         readback(dev, regmap, verbose=args.verbose)
@@ -290,7 +291,7 @@ def doI2C():
     parser.add_argument("-d", "--decode", default=False, action="store_true",
                         help="Read and decode the existing program in the target device.")
     args = parser.parse_args()
-    if args.decode is None:
+    if args.decode:
         return decodeI2CProgram(args)
     return doI2CXact(args)
 
