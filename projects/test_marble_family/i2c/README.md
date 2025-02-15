@@ -1,5 +1,50 @@
 # Marble Platform Support for I2CBridge Programming
 
+## One-shot I2C transactions
+The script `oneshot.py` is included here to allow composing and running single-transaction
+`i2cbridge` programs to a live target with a (hopefully) user-friendly interface.  Without
+worrying about the I2C tree on the Marble board or chip addresses, you can simply read from
+or write to any register in any chip just referring to the chip by name (refdes on the
+schematic).
+
+Example: turn on LD13 via the GPIO expander U39 by writing to register 3
+__WARNING__: The user LEDs are on the same port as `/CLKMUX_RST` which means we can shut down the board on accident
+if we aren't very careful to ensure we always keep bit 7 asserted when writing to this register!
+```sh
+PYTHONPATH=../../../peripheral_drivers/i2cbridge:$PYTHONPATH python3 oneshot.py leep://$IP:$PORT U39.3=0x80
+```
+
+Example: turn off LD13
+```sh
+PYTHONPATH=../../../peripheral_drivers/i2cbridge:$PYTHONPATH python3 oneshot.py leep://$IP:$PORT U39.3=0x88
+```
+
+Example: read the inputs to port 0 on the GPIO expander U39 by reading from register 0
+```sh
+PYTHONPATH=../../../peripheral_drivers/i2cbridge:$PYTHONPATH python3 oneshot.py leep://192.168.19.40:803 U39.0
+```
+
+_(The following demos assume you have exported `PYTHONPATH` for brevity)_
+
+We can also read more than 1 byte (very much dependent on the specifics of the IC's I2C implementation).
+Example: read shunt voltage (addr 1, 16 bits) from INA219 U57
+```sh
+python3 oneshot.py leep://$IP:$PORT U57.1:2
+# Note the ':' instead of a '=' (the latter indicates a write!)
+```
+
+Note that you can perform many transactions in one "one shot" program, including adding pauses between
+transactions, as in this demo disabling and re-enabling QSFP1 channel 0:
+```sh
+python3 oneshot.py leep://$IP:$PORT J17.86=1 J17.86=0
+```
+
+And breaking the "one shot" model, you can tell the program to continue looping after the script exits.
+This demo makes LD13 continually blink.
+```sh
+python3 oneshot.py leep://$IP:$PORT U39.3=0x80 pause=500 U39.3=0x88 pause=500 -l
+```
+
 ## Usage:
 
 These tools assume usage of the i2cbridge modules in `bedrock/peripheral_drivers/i2cbridge`.

@@ -60,9 +60,30 @@ class MarbleI2C():
             }),
         }
     }
+    _descript = {
+        "U2": "ADN4600 clock multiplexer",
+        "SK1": "SO-DIMM DDR RAM",
+        "J17": "QSFP1",
+        "J8": "QSFP2",
+        "U57": "INA219 current sensor",
+        "U32": "INA219 current sensor",
+        "U17": "INA219 current sensor",
+        "Y6": "Si570 frequency synthesizer (clock generator)",
+        "U34": "GPIO expander (to QSFPs)",
+        "U39": "GPIO expander (to board management and LEDs)",
+    }
 
     # QSFP index : IC name
     _qsfp_map = {0: "J17", 1: "J8"}
+
+    # Handy alias list
+    _aliases = {
+        "J17": ("QSFP1",),
+        "J8":  ("QSFP2",),
+        "Y6":  ("SI570",),
+        "U2":  ("ADN4600",),
+        "SK1":  ("DDR",),
+    }
 
     # INA219 index : IC name
     _ina219_map = {0: "U17", 1: "U32", 2: "U57"}
@@ -276,6 +297,20 @@ class MarbleI2C():
                 return _l[0]
         return None
 
+    def _match_ic(self, query, valid_ic):
+        valid_ic = valid_ic.lower().strip()
+        query = query.lower().strip()
+        if query == valid_ic:
+            return True
+        if valid_ic in self._aliases.keys():
+            key = valid_ic
+        else:
+            key = valid_ic.upper()
+        aliases = [x.lower() for x in self._aliases.get(key, [])]
+        if query in aliases:
+            return True
+        return False
+
     def select_ic(self, ic_name):
         """Select (enable) the branch of a particular IC by name.
         Params:
@@ -290,7 +325,7 @@ class MarbleI2C():
                 return busmux_addr
         for nic in self._ic_list:
             _ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = nic
-            if ic_name.lower().strip() == _ic_name.lower().strip():
+            if self._match_ic(ic_name, _ic_name):
                 # If we found a match, mux to it
                 self._busmux(mux_addr, ch)
                 return ic_addr

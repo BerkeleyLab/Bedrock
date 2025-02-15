@@ -57,6 +57,7 @@ marble_run:
     - cd projects/test_marble_family && ln -s marble2.*.bit marble2.bit
   script:
     - make marble2_hwload SERIAL=39 && sleep 8 && make marble2_hwtest SERIAL=39
+    - make -C i2c live_oneshot SERIAL=39
 
 marble_i2c_check:
   stage: test
