@@ -10,12 +10,12 @@
 module phaset #(
 	parameter order=1,
 	parameter dw=14,
-	parameter adv=3861,
 	parameter delta=16
 ) (
 	input uclk,
 	input uclkg,
 	input sclk,
+       input [dw-1:0] adv,
 	output [dw-1:0] phase,
 	output fault  // single cycle
 );

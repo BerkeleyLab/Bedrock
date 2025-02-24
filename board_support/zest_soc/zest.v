@@ -318,10 +318,11 @@ generate for (ix=0; ix<N_ADC; ix=ix+1) begin: ic_map
         .clk_div_buf  (clk_div_buf[ix])
     );
 
-    phase_diff #(.adv(PH_DIFF_ADV), .dw(PH_DIFF_DW+1), .delta(33)) phase_diff_i (
+    phase_diff #(.dw(PH_DIFF_DW+1), .delta(33)) phase_diff_i (
         .uclk1      (dsp_clk_out),
         .uclk2      (clk_div[ix]),
         .uclk2g     (1'b1),
+        .adv        (PH_DIFF_ADV),
         .sclk       (clk_200),
         .rclk       (clk),
         .err        (phdiff_err[ix]),
@@ -399,7 +400,6 @@ wfm_pack #(
 
 // F_RATIO = 2. See phasex_tb.v
 phase_diff #(
-    .adv            (PH_DIFF_ADV),
     .dw             (PH_DIFF_DW+1),
     .order1         (2),
     .order2         (1),
@@ -408,6 +408,7 @@ phase_diff #(
     .uclk1      (dac_dco_clk),
     .uclk2      (dsp_clk_out),
     .uclk2g     (1'b1),
+    .adv        (PH_DIFF_ADV),
     .sclk       (clk_200),
     .rclk       (clk),
     .err        (phdiff_err[2]),
