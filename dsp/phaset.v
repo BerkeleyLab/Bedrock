@@ -15,7 +15,7 @@ module phaset #(
 	input uclk,
 	input uclkg,
 	input sclk,
-       input [dw-1:0] adv,
+        input [dw-1:0] adv,
 	output [dw-1:0] phase,
 	output fault  // single cycle
 );
