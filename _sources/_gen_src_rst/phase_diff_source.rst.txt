@@ -15,15 +15,14 @@ phase_diff Source File
    	parameter order1=1,
    	parameter order2=1,
    	parameter dw=14,
-   	parameter adv=3861,
    	parameter delta=16
-
    ) (
    	input uclk1,  // unknown clock 1
    	input uclk2,  // unknown clock 2
    	input uclk2g,
    	input sclk,   // sampling clock
    	input rclk,   // readout clock (data transfer, local bus)
+   	input [dw-1:0] adv,  // make adv a runtime variable
    	output err,
    	// the following are in rclk domain
    	output [dw-2:0] phdiff_out,
@@ -41,11 +40,11 @@ phase_diff Source File
    // Two phase trackers
    wire [dw-1:0] phaset_out1, phaset_out2;
    wire fault1, fault2;
-   phaset #(.order(order1), .dw(dw), .adv(adv), .delta(delta)) track1(
-   	.uclk(uclk1), .uclkg(1'b1), .sclk(sclk),
+   phaset #(.order(order1), .dw(dw), .delta(delta)) track1(
+   	.uclk(uclk1), .uclkg(1'b1), .sclk(sclk), .adv(adv),
    	.phase(phaset_out1), .fault(fault1));
-   phaset #(.order(order2), .dw(dw), .adv(adv), .delta(delta)) track2(
-   	.uclk(uclk2), .uclkg(uclk2g), .sclk(sclk),
+   phaset #(.order(order2), .dw(dw), .delta(delta)) track2(
+   	.uclk(uclk2), .uclkg(uclk2g), .sclk(sclk), .adv(adv),
    	.phase(phaset_out2), .fault(fault2));
 
    // Don't assume sclk phase is stable, just report the difference.

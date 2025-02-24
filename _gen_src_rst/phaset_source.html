@@ -93,12 +93,12 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">10</span><span class="k">module</span><span class="w"> </span><span class="n">phaset</span><span class="w"> </span><span class="p">#(</span>
 <span class="linenos">11</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">order</span><span class="o">=</span><span class="mh">1</span><span class="p">,</span>
 <span class="linenos">12</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">dw</span><span class="o">=</span><span class="mh">14</span><span class="p">,</span>
-<span class="linenos">13</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">adv</span><span class="o">=</span><span class="mh">3861</span><span class="p">,</span>
-<span class="linenos">14</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">delta</span><span class="o">=</span><span class="mh">16</span>
-<span class="linenos">15</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
-<span class="linenos">16</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">uclk</span><span class="p">,</span>
-<span class="linenos">17</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">uclkg</span><span class="p">,</span>
-<span class="linenos">18</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">sclk</span><span class="p">,</span>
+<span class="linenos">13</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">delta</span><span class="o">=</span><span class="mh">16</span>
+<span class="linenos">14</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos">15</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">uclk</span><span class="p">,</span>
+<span class="linenos">16</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">uclkg</span><span class="p">,</span>
+<span class="linenos">17</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">sclk</span><span class="p">,</span>
+<span class="linenos">18</span><span class="w">       </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">adv</span><span class="p">,</span>
 <span class="linenos">19</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">phase</span><span class="p">,</span>
 <span class="linenos">20</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="n">fault</span><span class="w">  </span><span class="c1">// single cycle</span>
 <span class="linenos">21</span><span class="p">);</span>
