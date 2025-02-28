@@ -26,7 +26,8 @@ module chitchat_rx #(
                                  //                       [1] - CRC fail,
                                  //                       [2] - Incorrect frame number
    output [15:0] ccrx_fault_cnt,
-   output        ccrx_los,        // Loss of sync - No comma characters for one period
+   output        ccrx_los,        // Loss of sync - invalid input
+                                  // will auto-recover after a few valid frames
    output        ccrx_frame_drop, // Signal dropped frame
 
    // Application-level outputs
@@ -71,8 +72,8 @@ module chitchat_rx #(
       .crc  (crc_rx)
    );
 
-   // Error checking
-   integer link_up_cnt = 0;
+   // Error checking; LINK_UP_CNT defined in chitchat_pack.vh
+   reg [7:0] link_up_cnt = 0;
    wire    link_up     = link_up_cnt == LINK_UP_CNT;
    wire    link_up_inc = (link_up_cnt < LINK_UP_CNT) ? 1 : 0;
 
@@ -88,8 +89,8 @@ module chitchat_rx #(
    always @(posedge clk) begin
       rx_valid_r   <= 0;
       frame_drop_r <= 0;
+      los_r <= ~link_up;
       if (last | timeout) begin
-         los_r <= timeout;
          if (|faults || timeout) begin
             link_up_cnt  <= 0;
             frame_drop_r <= last;
