@@ -68,6 +68,7 @@ phase_diff #(
     .uclk2      (uclk2),
     .uclk2g     (1'b1),
     .sclk       (sclk),
+    .adv        (ADV),
     .rclk       (rclk),
     .phdiff_out (phase_diff),
     .vfreq_out  (vfreq_out),
