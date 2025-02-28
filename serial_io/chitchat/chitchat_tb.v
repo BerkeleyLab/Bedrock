@@ -25,6 +25,7 @@ module chitchat_tb;
 
    reg cc_clk = 0;
    reg fail=0;
+   reg test_noise;
 
    integer SEED;
    integer tx_cnt=0;
@@ -34,6 +35,7 @@ module chitchat_tb;
          $dumpfile("chitchat.vcd");
          $dumpvars(5, chitchat_tb);
       end
+      test_noise = $test$plusargs("noise");
 
       if (!$value$plusargs("seed=%d", SEED)) SEED = 123;
 
@@ -52,6 +54,11 @@ module chitchat_tb;
    always begin
       #(CC_CLK_PERIOD/2); cc_clk = ~cc_clk;
    end
+
+   // White noise
+   wire [15:0] gtx_noise_data;
+   wire [1:0] gtx_noise_k;
+   gtx_noise gtx_noise_(.clk(cc_clk), .gtx_d(gtx_noise_data), .gtx_k(gtx_noise_k));
 
    // ----------------------
    // Generate stimulus
@@ -135,13 +142,19 @@ module chitchat_tb;
       .gtx_k                     (gtx_k)
    );
 
+   // Inject startup noise
+   reg startup=0;
+   always @(posedge cc_clk) startup <= test_noise && ($time < 10000);
+   wire [15:0] gtx_rx_d = startup ? gtx_noise_data : (gtx_d^corrupt);
+   wire [1:0] gtx_rx_k = startup ? gtx_noise_k : gtx_k;
+
    chitchat_rx #(
       .RX_GATEWARE_TYPE (RX_GATEW_TYPE)
    ) i_dut_rx (
       .clk   (cc_clk),
 
-      .gtx_d (gtx_d^corrupt),
-      .gtx_k (gtx_k),
+      .gtx_d (gtx_rx_d),
+      .gtx_k (gtx_rx_k),
 
       .ccrx_fault        (faults),
       .ccrx_fault_cnt    (fault_cnt),

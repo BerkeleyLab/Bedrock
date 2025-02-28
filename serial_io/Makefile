@@ -28,6 +28,8 @@ VVP_FLAGS_dec_8b10b_check = +init_file=self_sim.dat +init_disp=1
 SRCS = gmii_link.v ep_tx_pcs.v ep_rx_pcs.v ep_sync_detect.v enc_8b10b.v dec_8b10b.v negotiate.v shortfifo.v
 gmii_link_tb: $(SRCS)
 
+gtx_noise_tb: gtx_noise.v dec_8b10b.v
+
 # Special case; only minimally tie in to top_rules.mk
 gmii_to_rgmii_lint: gmii_to_rgmii.v
 	$(VERILATOR) --lint-only -Wno-TIMESCALEMOD -Wno-UNUSED $< -y $(FPGA_FAMILY_DIR)/xilinx
