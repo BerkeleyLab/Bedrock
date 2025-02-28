@@ -42,6 +42,11 @@ Parameters
      - ?
      - 14
      - 
+   * - adv
+     - ?
+     - ?
+     - 3861
+     - 
    * - delta
      - ?
      - ?
@@ -72,9 +77,6 @@ Ports
    * - rclk
      - Input
      - readout clock (data transfer, local bus)
-   * - adv[dw-1:0]
-     - Input
-     - make adv a runtime variable
    * - err
      - Output
      - 
