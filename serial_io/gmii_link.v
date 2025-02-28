@@ -26,6 +26,7 @@ module gmii_link #(
 	output operate,   // (GTX_CLK domain) tells upper levels we're ready to transmit
 	output [15:0] lacr_rx,  // (RX_CLK domain) layering violation
 	output [8:0] an_status
+`ifdef APP_LB_FROM_FIBER
 `ifdef FIBER_TRACE
 	// ctrace CSRs
 	,input ctrace_start, // TODO hook me up!
@@ -35,6 +36,7 @@ module gmii_link #(
 	input lb_clk,
 	input  [CTRACE_AW-1:0] lb_addr,
 	output [31:0] lb_out
+`endif
 `endif
 );
 
@@ -115,6 +117,7 @@ negotiate #(.TIMER_TICKS(DELAY)) negotiator(
 	.an_status(an_status)       // output [8:0]
 );
 
+`ifdef APP_LB_FROM_FIBER
 `ifdef FIBER_TRACE
 // TODO - What clock?
 wire ctrace_clk = RX_CLK;
@@ -143,6 +146,7 @@ wctrace #(
   .lb_addr(lb_addr), // input [AW-1:0]
   .lb_out(lb_out) // output [31:0]
 );
+`endif
 `endif
 
 assign lacr_rx = lacr_rx_val;

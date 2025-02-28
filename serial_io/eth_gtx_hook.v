@@ -34,6 +34,7 @@ module eth_gtx_hook #(
         output [7:0]        gmii_rxd,
         output              gmii_rx_dv
 
+`ifdef APP_LB_FROM_FIBER
 `ifdef FIBER_TRACE
         // ctrace CSRs
         ,input              ctrace_start,
@@ -43,6 +44,7 @@ module eth_gtx_hook #(
         input               lb_clk,
         input  [CTRACE_AW-1:0] lb_addr,
         output [31:0]       lb_out
+`endif
 `endif
     );
 
@@ -140,6 +142,7 @@ module eth_gtx_hook #(
             .an_bypass    (an_disable), // Disable auto-negotiation
             .lacr_rx      (lacr_rx),
             .an_status    (an_status_l)
+`ifdef APP_LB_FROM_FIBER
 `ifdef FIBER_TRACE
             // ctrace CSRs
             ,.ctrace_start(ctrace_start), // input
@@ -149,6 +152,7 @@ module eth_gtx_hook #(
             .lb_clk(lb_clk), // input
             .lb_addr(lb_addr), // input [CTRACE_AW-1:0]
             .lb_out(lb_out) // output [31:0]
+`endif
 `endif
         );
 
