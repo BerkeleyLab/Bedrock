@@ -443,6 +443,7 @@ class CtraceParser:
                         tclk.append("b0 {:s}".format(self._clk_id))
                     fd.write("\n".join(tclk) + "\n")
                 time += dt
+                print(f"time = {time}; dt = {dt}")
                 putc = self.VCDEmitStep(v, time * t_step)
                 fd.write(putc)
         return
@@ -717,7 +718,7 @@ def runCtrace(dev, runtime=10, xacts=[]):
     return mem_size
 
 
-def doScope(dev, ofile, run=True, runtime=10, clk_name=None, xacts=[]):
+def doScope(dev, ofile, run=True, runtime=10, clk_name=None, xacts=[], storeFile=None):
     config = getConfig()
     ctrace_chan0 = config.CTRACE_CHAN0
     signals = []
@@ -739,7 +740,7 @@ def doScope(dev, ofile, run=True, runtime=10, clk_name=None, xacts=[]):
     print("Reading ctrace memory (size={})".format(readout_size))
     data = getCtraceMem(dev, size=readout_size)
     ctp = CtraceParser(signals, dw=config.CTRACE_DW, timebits=config.CTRACE_TW, clk_name=clk_name)
-    ctp.parseDump(data, signals=signals)
+    ctp.parseDump(data, signals=signals, storeFile=storeFile)
     time_step_ns = 1.0e9 / config.F_CLK_IN
     ctp.VCDMake(ofile, time_step_ns=time_step_ns)
     print(f"Ctrace waveforms written to {ofile}")
@@ -757,7 +758,23 @@ def doGet(args):
         dev = scrap.SCRAPDevice(dest, silent=True)
     else:
         raise Exception("Unsupported protocol {}".format(proto))
-    return doScope(dev, filename, run=True, runtime=args.runtime, clk_name=args.clk, xacts=args.xact)
+    return doScope(dev, filename, run=True, runtime=args.runtime, clk_name=args.clk,
+                   xacts=args.xact, storeFile=args.store_file)
+
+
+def doParse(args):
+    import pickle
+    config = getConfig()
+    with open(args.file, "rb") as fd:
+        memdump = pickle.load(fd)
+    signals = memdump["signals"]
+    data = memdump["data"]
+    ctp = CtraceParser(signals, dw=config.CTRACE_DW, timebits=config.CTRACE_TW, clk_name=args.clk)
+    ctp.parseDump(data, signals=signals)
+    time_step_ns = 1.0e9 / config.F_CLK_IN
+    ctp.VCDMake(args.outfile, time_step_ns=time_step_ns)
+    print(f"Ctrace waveforms written to {args.outfile}")
+    return True
 
 
 def main():
@@ -779,7 +796,17 @@ def main():
     parserGet.add_argument("-t", "--timeout", type=float, default=5.0)
     parserGet.add_argument("-r", "--runtime", default=10, type=float,
                            help="Time (in seconds) to wait for ctrace to complete.")
+    parserGet.add_argument("-s", "--store_file", default=None,
+                           help="File in which to store raw dump.")
     parserGet.set_defaults(handler=doGet)
+    parserParse = subparsers.add_parser(
+        "parse", help="Generate VCD file from a pickled dump of ctrace memory"
+    )
+    parserParse.add_argument("file", help="Ctrace memory dump file (pickled)")
+    parserParse.add_argument("-o", "--outfile", default=None, help="Output VCD file name.")
+    parserParse.add_argument("-c", "--config", default=None, help="Configuration file.")
+    parserParse.add_argument("--clk", default=None, help="Net name for the generated clock.")
+    parserParse.set_defaults(handler=doParse)
     args = parser.parse_args()
     global _config
     _config = ctconf.Config(args.config)
