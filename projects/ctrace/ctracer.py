@@ -683,6 +683,8 @@ def runCtrace(dev, runtime=10, xacts=[]):
 
     # Collect intermediary transactions
     reg_vals = []
+    if xacts is None:
+        xacts = []
     for xact in xacts:
         # TODO - Use the transaction parsing in leep.cli
         if '=' in xact:
