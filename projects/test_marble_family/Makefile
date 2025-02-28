@@ -66,10 +66,10 @@ config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOU
 # gen_features.py rules (note the use of PHONY targets)
 # actual file outputs are marble_features_params.vh and marble_features_defs.vh
 marble1_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_mini --split
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c marblemini --split
 
 marble2_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_v2 --split
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble --split
 .PHONY: marble1_features marble2_features
 
 # ====
@@ -214,7 +214,7 @@ dna_tb: dna_tb.v dna.v
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
-	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado*
+	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble_features*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
 	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx marble_base_cdc.txt
 	rm -rf _xilinx .Xil obj_dir __pycache__

@@ -60,12 +60,42 @@ class MarbleI2C():
             }),
         }
     }
+    _descript = {
+        "U2": "ADN4600 clock multiplexer",
+        "SK1": "SO-DIMM DDR RAM",
+        "J17": "QSFP1",
+        "J8": "QSFP2",
+        "U57": "INA219 current sensor",
+        "U32": "INA219 current sensor",
+        "U17": "INA219 current sensor",
+        "Y6": "Si570 frequency synthesizer (clock generator)",
+        "U34": "GPIO expander (to QSFPs)",
+        "U39": "GPIO expander (to board management and LEDs)",
+    }
 
     # QSFP index : IC name
     _qsfp_map = {0: "J17", 1: "J8"}
 
+    # Handy alias list
+    _aliases = {
+        "J17": ("QSFP1",),
+        "J8":  ("QSFP2",),
+        "Y6":  ("SI570",),
+        "U2":  ("ADN4600",),
+        "SK1":  ("DDR",),
+    }
+
     # INA219 index : IC name
     _ina219_map = {0: "U17", 1: "U32", 2: "U57"}
+
+    # Build a 2D list from the map
+    _ic_list = []
+    for mux, tree in _i2c_map.items():
+        mux_name, mux_addr = mux
+        for ch, branch in tree.items():
+            branch_name, branch_dict = branch
+            for ic_name, ic_addr in branch_dict.items():
+                _ic_list.append((ic_name, ic_addr, branch_name, ch, mux_name, mux_addr))
 
     # ========= IC-Specific Information =================
     # U34 (PCAL9555) I2C GPIO expander
@@ -119,9 +149,9 @@ class MarbleI2C():
     # P1_4  (unused)        In
     # P1_5  (unused)        In
     # P1_6  (unused)        In
-    # P1_7  CLKMUX_RST      Out
+    # P1_7  CLKMUX_nRST     Out
     u39_port1_dir = 0b01110011
-    u39_port1_out = 0b00000000  # No clkmux rst, LEDs off
+    u39_port1_out = 0b10000000  # No clkmux rst, LEDs off
 
     # U2 (ADN4600) MGT clock multiplexer
     u2_xpt_config = 0x40  # XPT Configuration register
@@ -163,16 +193,40 @@ class MarbleI2C():
 
     def _associate(self):
         """[private] Build a 2D list from the map"""
-        if hasattr(self, "_a"):
+        if hasattr(self, "_ic_list"):
             return
-        self._a = []
+        self._ic_list = []
         for mux, tree in self._i2c_map.items():
             mux_name, mux_addr = mux
             for ch, branch in tree.items():
                 branch_name, branch_dict = branch
                 for ic_name, ic_addr in branch_dict.items():
-                    self._a.append((ic_name, ic_addr, branch_name, ch, mux_name, mux_addr))
+                    self._ic_list.append((ic_name, ic_addr, branch_name, ch, mux_name, mux_addr))
         return
+
+    @property
+    def ic_list(self):
+        """Returns list of tuple entries:
+            (ic_name, ic_addr, branch_name, branch, mux_name, mux_addr)
+            string ic_name: Refdes (i.e. "U5") from schematic
+            int ic_addr:    I2C address of the IC (in 8-bit format)
+            string branch_name: The name of the I2C branch the IC lives on (i.e. "APP")
+            int branch:     The index of the branch (how it is selected by the bus mux)
+            string mux_name: The refdes of the bus mux that leads to this IC.
+            int mux_addr:   The I2C address of the bus mux that leads to this IC.
+        """
+        return self._ic_list
+
+    @property
+    def ic_dict(self):
+        """Returns dict of tuple entries:
+            ic_name: (ic_addr, branch_name, branch, mux_name, mux_addr)
+            See property 'ic_list' for description of each item.
+        """
+        dd = {}
+        for entry in self._ic_list:
+            dd[entry[0]] = entry[1:]
+        return dd
 
     def _busmux(self, mux_addr, mux_ch):
         """[private] Select a channel with the bus multiplexer at address mux_addr."""
@@ -209,36 +263,53 @@ class MarbleI2C():
                 return tree
         return {}
 
-    def get_ics(self):
+    @classmethod
+    def get_ics(cls):
         """Returns a list of tuples (name_str, i2c_address_int) for all ICs in the I2C map."""
         ics = []
-        for _l in self._a:
+        for _l in cls._ic_list:
             name = _l[0]
             addr = _l[1]
             ics.append((name, addr))
         return ics
 
-    def get_i2c_addr(self, ic_name):
+    @classmethod
+    def get_i2c_addr(cls, ic_name):
         """Get the I2C address of IC with name 'ic_name'
         Params:
             string ic_name: Any valid IC name in the I2C map
         Returns int I2C address if 'ic_name'  is found in the I2C map, otherwise None.
         """
-        for _l in self._a:
+        for _l in cls._ic_list:
             if ic_name == _l[0]:
                 return _l[1]
         return None
 
-    def get_i2c_name(self, i2c_addr):
+    @classmethod
+    def get_i2c_name(cls, i2c_addr):
         """Get the name of IC with I2C address 'i2c_addr'
         Params:
             int i2c_addr: I2C address of the desired IC (0-255).
         Returns string IC name if 'i2c_addr' is found in the I2C map, otherwise None.
         """
-        for _l in self._a:
+        for _l in cls._ic_list:
             if i2c_addr == _l[1]:
                 return _l[0]
         return None
+
+    def _match_ic(self, query, valid_ic):
+        valid_ic = valid_ic.lower().strip()
+        query = query.lower().strip()
+        if query == valid_ic:
+            return True
+        if valid_ic in self._aliases.keys():
+            key = valid_ic
+        else:
+            key = valid_ic.upper()
+        aliases = [x.lower() for x in self._aliases.get(key, [])]
+        if query in aliases:
+            return True
+        return False
 
     def select_ic(self, ic_name):
         """Select (enable) the branch of a particular IC by name.
@@ -248,9 +319,13 @@ class MarbleI2C():
         Note: Use get_i2c_addr() if you just want the address and don't want to change
         the state of the bus multiplexer.
         """
-        for nic in self._a:
+        for (busmux_ic, busmux_addr), bus_dict in self._i2c_map.items():
+            if ic_name == busmux_ic:
+                # We can always talk to the busmux
+                return busmux_addr
+        for nic in self._ic_list:
             _ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = nic
-            if ic_name.lower().strip() == _ic_name.lower().strip():
+            if self._match_ic(ic_name, _ic_name):
                 # If we found a match, mux to it
                 self._busmux(mux_addr, ch)
                 return ic_addr
@@ -263,7 +338,7 @@ class MarbleI2C():
         Returns int channel number (0-7) that was selected or None if 'branch' does not match
         any of the above.
         """
-        for nic in self._a:
+        for nic in self._ic_list:
             ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = nic
             if branch_name.lower().strip() == branch.lower().strip():
                 # If we found a match, mux to it
@@ -271,12 +346,13 @@ class MarbleI2C():
                 return ch
         return None
 
-    def get_addr(self, ic_name):
+    @classmethod
+    def get_addr(cls, ic_name):
         """Get the I2C address of IC given by string 'ic_name'
         Params:
             string ic_name: Any valid IC name in the I2C map
         Returns I2C address (int) if 'ic_name' is found in the I2C map, otherwise None."""
-        for nic in self._a:
+        for nic in cls._ic_list:
             _ic_name, ic_addr, branch_name, ch, mux_name, mux_addr = nic
             if ic_name.lower().strip() == _ic_name.lower().strip():
                 return ic_addr
@@ -390,10 +466,12 @@ class MarbleI2C():
         self.write("U34", 2, [data0, data1])  # U34 data registers
         return
 
-    def U34_read_data(self):
+    def U34_read_data(self, reg_name=None):
         """Add a read instruction to the I2C program to read the state of GPIO pins on
         GPIO expander U34 (PCAL9555).  Shows up in memory map as 'U34_PORT_DATA'"""
-        return self.read("U34", 0, 2, reg_name="U34_PORT_DATA")
+        if reg_name is None:
+            reg_name = "U34_PORT_DATA"
+        return self.read("U34", 0, 2, reg_name=reg_name)
 
     # ======================= U39 Helper Functions ============================
     def U39_configure(self):
@@ -425,10 +503,12 @@ class MarbleI2C():
         self.write("U39", 2, [data0, data1])  # U39 data registers
         return
 
-    def U39_read_data(self):
+    def U39_read_data(self, reg_name=None):
         """Add a read instruction to the I2C program to read the state of GPIO pins on
         GPIO expander U39 (PCAL9555).  Shows up in memory map as 'U39_PORT_DATA'"""
-        return self.read("U39", 0, 2, reg_name="U39_PORT_DATA")
+        if reg_name is None:
+            reg_name = "U39_PORT_DATA"
+        return self.read("U39", 0, 2, reg_name=reg_name)
 
     # ================ INA219 (U17, U32, U57) Helper Functions ================
     def INA219_read_bus_voltage(self, ic_name, reg_name=None):

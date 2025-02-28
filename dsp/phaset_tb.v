@@ -36,8 +36,8 @@ wire [13:0] phaset_out;
 wire fault;
 // round(2**14*1320/14/2/200) = 3862 is the DDS frequency
 // delta kinda sets the gain and resolution of the phase tracking loop
-phaset #(.dw(14), .adv(3862), .delta(16)) track(
-	.uclk(uclk1), .uclkg(1'b1), .sclk(sclk),
+phaset #(.dw(14), .delta(16)) track(
+	.uclk(uclk1), .uclkg(1'b1), .sclk(sclk), .adv(14'd3862),
 	.phase(phaset_out), .fault(fault));
 
 // Demonstration that changing internal divider state (not the uclk1 phase
