@@ -1,13 +1,13 @@
 [timestart] 0
 [size] 1920 983
 [pos] -1 -1
-*-14.226988 9400 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-11.228931 3360 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] chitchat_tb.
 [sst_width] 292
 [signals_width] 530
 [sst_expanded] 1
 [sst_vpaned_height] 245
-@29
+@28
 chitchat_tb.startup
 @420
 chitchat_tb.tx_cnt
@@ -33,6 +33,11 @@ chitchat_tb.i_dut_rx.ccrx_frame_drop
 chitchat_tb.i_dut_rx.ccrx_fault[2:0]
 @22
 chitchat_tb.i_dut_rx.ccrx_fault_cnt[15:0]
+@28
+chitchat_tb.i_dut_rx.last
+chitchat_tb.i_dut_rx.timeout
+@22
+chitchat_tb.i_dut_rx.link_up_cnt[7:0]
 @28
 chitchat_tb.i_dut_rx.rx_valid
 @22
