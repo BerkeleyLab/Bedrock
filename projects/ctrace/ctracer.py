@@ -6,6 +6,9 @@ import math
 import ctconf
 
 COMPRESS_GETLISTS = True
+PROTO_SCRAP = 0
+PROTO_LEEP = 1
+
 
 _config = None
 
@@ -139,7 +142,7 @@ class CtraceParser:
             return ix
         return 0
 
-    def __init__(self, signals=[], timebits=24, mtime=64, dw=None, wide=False, clk_name=None):
+    def __init__(self, signals=[], timebits=24, dw=None, wide=False, clk_name=None):
         self.signals = signals
         self.sigdict = self._mkSigDict(signals)
         # import jbrowse
@@ -150,7 +153,7 @@ class CtraceParser:
             self.dw = len(self.signals)
         self.tw = timebits
         # mtime is the time delay to assume if a dt of 0 is parsed from the data
-        self.mtime = mtime
+        self.mtime = 1 << self.tw
         self.ignores = []
         self._timemask = ((1 << (self.dw + self.tw)) - 1) << self.dw
         self._timeshift = self.dw
@@ -400,7 +403,15 @@ class CtraceParser:
     def VCDEmitStep(self, v, time):
         """Write a signal line of the dumpvars section of the VCD file."""
         putc = []
-        putc.append("#{:d}".format(int(time)))
+        if not self._data_started:
+            if (self._old_v is not None) and (v != self._old_v):
+                # Data has changed from init, log it and future data
+                self._data_started = True
+            else:
+                self._old_v = v
+                return ""
+        if self._data_started:
+            putc.append("#{:d}".format(int(time)))
         for n in range(len(self._sigList)):
             signal, width, _id, getList = self._sigList[n]
             val = self._extractValue(v, *getList)
@@ -411,29 +422,40 @@ class CtraceParser:
         putc = "\n".join(putc) + "\n"
         return putc
 
-    def VCDMake(self, ofile=None, time_step_ns=8):
+    def VCDMake(self, ofile=None, time_step_ns=8, trim=True):
         """Create a VCD file with name 'ofile' using time step 'time_step_ns' (the minimum time
         difference in nanoseconds; the period of the clock used by ctrace)."""
         # 50 MHz and ns time step means multiply integer time count by 20
         t_step = float(time_step_ns)  # ns tick in simulation
-        if ofile is None:
-            ofile = sys.stdout
         time = 0
         self.first = True
         self.old_vals = [None] * len(self._sigList)
         # print(f"len(self.wfm) = {len(self.wfm)}")
         # print(f"len(self._sigList) = {len(self._sigList)}")
-        with open(ofile, "w") as fd:
-            for dt, v in self.wfm:
-                if self.first:
-                    putc = self.VCDMakeHeader(v)
-                    self.first = False
-                    fd.write(putc + "\n")
-                    if self._include_clock:
-                        fd.write("#0\n")  # Is there a better way to do this?
-                    continue
-                if dt == 0:
-                    dt = self.mtime
+        do_close = False
+        if ofile is None:
+            fd = sys.stdout
+        elif hasattr(ofile, "seek"):
+            fd = ofile
+        else:
+            fd = open(ofile, "w")
+            do_close = True
+        self._data_started = True
+        self._old_v = None
+        if trim:
+            self._data_started = False
+        for dt, v in self.wfm:
+            if self.first:
+                putc = self.VCDMakeHeader(v)
+                self.first = False
+                fd.write(putc + "\n")
+                if self._include_clock:
+                    fd.write("#0\n")  # Is there a better way to do this?
+                continue
+            if dt == 0:
+                dt = self.mtime
+            if self._data_started:
+                time += dt
                 if self._include_clock:
                     tclk = []
                     # Insert dt toggling events for the clock
@@ -442,10 +464,13 @@ class CtraceParser:
                         tclk.append("#{}".format((time + n + 0.5)*t_step))
                         tclk.append("b0 {:s}".format(self._clk_id))
                     fd.write("\n".join(tclk) + "\n")
-                time += dt
-                print(f"time = {time}; dt = {dt}")
-                putc = self.VCDEmitStep(v, time * t_step)
+            else:
+                time = dt
+            putc = self.VCDEmitStep(v, time * t_step)
+            if len(putc) > 0:
                 fd.write(putc)
+        if do_close:
+            fd.close()
         return
 
     def splitTimeData(self, datum):
@@ -456,35 +481,11 @@ class CtraceParser:
         # print(f"datum = 0x{datum:x}; time = 0x{time:x}, data = 0x{data:x}")
         return time, data
 
-    def parseDumpFile(self, delimiter=",", ishex=True):
-        """Parse input plaintext file.
-        Data is assumed to be separated by 'delimiter'.
-        If 'ishex', data is interpreted as hexadecimal,
-        otherwise as decimal. Ain't messing with binary."""
-        self.wfm = []
-        if ishex:
-            base = 16
-        else:
-            base = 10
-        with open(self.ifile, "r") as fd:
-            line = fd.readline()
-            # for line in f.read().split('\n'):
-            while line:
-                data = line.split(delimiter)
-                for datum in data:
-                    datum = int(datum, base)
-                    time, data = self.splitTimeData(datum)
-                    self.wfm.append([time, data])
-        return
-
     def parseDump(self, dumplist, signals=[], storeFile=None):
         """Parse a raw ctrace memory dump into a waveform for further
         processing (e.g. making into a VCD file)."""
         self.wfm = []
         _data = 0
-        # print(f"len(dumplist) = {len(dumplist)}")
-        # print(f"self._last_stage = {self._last_stage}")
-        # print(f"self._total_stages = {self._total_stages}")
         for n in range(len(dumplist)):
             datum = dumplist[n]
             stage = n % self._total_stages
@@ -549,96 +550,6 @@ def test_doMergeGetList():
             print(f"Merge: {getList}")
     print(f"DONE:  {getList}")
     return
-
-
-def testVCDMake(argv):
-    if len(argv) > 1:
-        import pickle
-
-        fname = argv[1]
-        with open(fname, "rb") as fd:
-            testdict = pickle.load(fd)
-        signals = testdict["signals"]
-        testdata = testdict["data"]
-        wide = True
-        dw = 40
-    else:
-        from d import signals, testdata
-
-        wide = True
-        dw = None
-    ctp = CtraceParser(signals, timebits=24, mtime=100, dw=dw, wide=wide)
-    ctp.parseDump(testdata)
-    outfname = "foo.vcd"
-    ctp.VCDMake(outfname, time_step_ns=10)
-    print("Wrote to {}".format(outfname))
-    return True
-
-
-def picklePy(fname):
-    import pickle
-
-    with open(fname, "rb") as fd:
-        testdict = pickle.load(fd)
-    signals = testdict["signals"]
-    testdata = testdict["data"]
-    print(f"signals={signals}")
-    print(f"testdata={testdata}")
-    return
-
-
-def test(s):
-    dw = _int(s)
-    tw = 24
-    _timemask = ((1 << (dw + tw)) - 1) << dw
-    _timeshift = dw
-    _datamask = (1 << dw) - 1
-    _datashift = 0
-
-    def splitTimeData(datum):
-        """Split one entry from ctrace memory into time and data portions."""
-        time = (datum & _timemask) >> _timeshift
-        data = (datum & _datamask) >> _datashift
-        return time, data
-
-    _buswidth = dw + tw
-    _last_stage = math.ceil(_buswidth / 32) - 1
-    _stage_width = math.ceil(math.log2(_last_stage + 1))
-    _total_stages = 1 << _stage_width
-    print(
-        f"buswidth = {_buswidth}; last_stage = {_last_stage}; stage_width = {_stage_width};" +
-        f" total_stages = {_total_stages}"
-    )
-    data = [
-        0x01020304,
-        0x05060708,
-        0x090A0B0C,
-        0x0D0E0F00,
-        0x11121314,
-        0x15161718,
-        0x191A1B1C,
-        0x1D1E1F10,
-    ]
-    _data = 0
-    for n in range(len(data)):
-        datum = data[n]
-        stage = n % _total_stages
-        if stage == 0:
-            _data = datum
-            print(f"  {n}: {stage}: _data = datum = {_data:x}")
-        elif stage < _last_stage:
-            _data += datum << (stage * 32)
-            print(f"  {n}: {stage}: _data += datum << 32 = {_data:x}")
-        if stage == _last_stage:
-            __time, __data = splitTimeData(_data)
-            print(
-                f"    PARSE: stage {stage} _data = {_data:x}; time = {__time}; data = {__data}"
-            )
-    return
-
-
-PROTO_SCRAP = 0
-PROTO_LEEP = 1
 
 
 def _parseProtocol(s):
@@ -787,12 +698,14 @@ def main():
         "get", help="Get ctrace memory and generate VCD file"
     )
     devhelp = "Device to interface with. E.g.\n  leep://$IP[:$PORT]\n  scrap:/dev/ttyUSB3\n  scrap:$IP:$PORT"
+    parser.add_argument("-n", "--no_trim", default=False, action="store_true",
+                        help="Don't trim empty (unchangin) data from the start.")
+    parser.add_argument("-c", "--config", default=None, help="Configuration file.")
+    parser.add_argument("--clk", default=None, help="Net name for the generated clock.")
+    parser.add_argument("-o", "--outfile", default=None, help="Output VCD file name.")
     parserGet.add_argument("dest", help=devhelp)
-    parserGet.add_argument("-c", "--config", default=None, help="Configuration file.")
     parserGet.add_argument("-x", "--xact", action="append",
                            help="Transactions to do after issuing the 'start' signal (regname=val).")
-    parserGet.add_argument("--clk", default=None, help="Net name for the generated clock.")
-    parserGet.add_argument("-o", "--outfile", default=None, help="Output VCD file name.")
     parserGet.add_argument("-t", "--timeout", type=float, default=5.0)
     parserGet.add_argument("-r", "--runtime", default=10, type=float,
                            help="Time (in seconds) to wait for ctrace to complete.")
@@ -803,9 +716,6 @@ def main():
         "parse", help="Generate VCD file from a pickled dump of ctrace memory"
     )
     parserParse.add_argument("file", help="Ctrace memory dump file (pickled)")
-    parserParse.add_argument("-o", "--outfile", default=None, help="Output VCD file name.")
-    parserParse.add_argument("-c", "--config", default=None, help="Configuration file.")
-    parserParse.add_argument("--clk", default=None, help="Net name for the generated clock.")
     parserParse.set_defaults(handler=doParse)
     args = parser.parse_args()
     global _config
@@ -814,10 +724,6 @@ def main():
 
 
 if __name__ == "__main__":
-    # testVCDMake(sys.argv)
-    # picklePy(sys.argv[1])
-    # print(CtraceParser._getRoot(sys.argv[1]))
     # test_mkSigDict(sys.argv)
-    # test(sys.argv[1])
     # test_doMergeGetList()
     main()
