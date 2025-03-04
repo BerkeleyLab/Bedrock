@@ -110,7 +110,7 @@ module chitchat_tb;
    wire [15:0] rx_frame_counter;
 
    wire        rx_valid;
-   wire [2:0]  faults;
+   wire [3:0]  faults;
    wire [15:0] fault_cnt;
    wire        los;
    wire        frame_drop;
@@ -142,7 +142,7 @@ module chitchat_tb;
       .gtx_k                     (gtx_k)
    );
 
-   // Inject startup noise
+   // Inject startup noise (if requested with the +noise plusarg)
    reg startup=0;
    always @(posedge cc_clk) startup <= test_noise && ($time < 10000);
    wire [15:0] gtx_rx_d = startup ? gtx_noise_data : (gtx_d^corrupt);
@@ -178,8 +178,12 @@ module chitchat_tb;
    localparam SCB_BUS_WI = 32*2 + 3 + 16*2; // Data*2 + Location + Frame*2
    wire [SCB_BUS_WI-1: 0] scb_data_in, scb_data_out;
    wire scb_write_en, scb_read_en, scb_full, scb_empty;
+   // Give the system a hot second to settle down, and then
+   // turn on FIFO operation during an interval when Tx is off.
+   reg settle=1;
+   always @(posedge cc_clk) settle <= $time < 13200;
 
-   assign scb_write_en = tx_send;
+   assign scb_write_en = tx_send & ~settle;
    assign scb_data_in = {tx_data1, tx_data0, tx_data0[2:0], rx_frame_counter, local_frame_counter};
 
    shortfifo #(
@@ -199,7 +203,7 @@ module chitchat_tb;
 
    // Pop on valid or when frame is dropped on RX side
    // Need to check if fifo is empty because CC_RX will signal empty at start of day
-   assign scb_read_en = (rx_valid | frame_drop) & ~scb_empty;
+   assign scb_read_en = (rx_valid | frame_drop) & ~scb_empty & ~settle;
 
    always @(posedge cc_clk) begin
       if (scb_full) begin
@@ -207,7 +211,7 @@ module chitchat_tb;
          fail <= 1;
       end
 
-      if (rx_valid) begin
+      if (rx_valid & ~settle) begin
          tx_cnt = tx_cnt + 1;
 
          if (scb_empty) begin
