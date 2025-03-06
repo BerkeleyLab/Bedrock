@@ -125,6 +125,7 @@ wire rx_synced; wire rx_even;
       lacr_rx_val <= {16{1'b0}};
     end
     else begin
+      lacr_rx_stb <= 0;
       if((~ep_rcr_en_pcs_i)) begin
         rx_state <= RX_NOFRAME;
         fifo_error <= 0;
@@ -182,12 +183,12 @@ wire rx_synced; wire rx_even;
           // an error? - drop to NOFRAME state.
           if((d_err | d_is_k | ~d_is_even)) begin
             rx_state <= RX_NOFRAME;
-            // LACR reception is enabled:
           end
           else if((lacr_rx_en)) begin
+            // LACR reception is enabled:
             lacr_rx_val[7:0] <= d_data; // Little endian
+            rx_state <= RX_CR4;
           end
-          rx_state <= RX_CR4;
         end
         RX_CR4 : begin
           // 2nd byte of LACR

@@ -396,13 +396,19 @@ class CtraceParser:
             self.old_vals[n] = val
             putc.append("b{:b} {:s}".format(val, _id))
         if self._include_clock:
-            putc.append("b0 {:s}".format(self._clk_id))
+            putc.append("b1 {:s}".format(self._clk_id))
         putc.append("$end")
         return "\n".join(putc)
 
-    def VCDEmitStep(self, v, time):
+    def VCDEmitStep(self, v, delta_time):
         """Write a signal line of the dumpvars section of the VCD file."""
         putc = []
+        if self._data_started:
+            last_time = self._time
+            self._time += delta_time
+        else:
+            last_time = 0
+            self._time = delta_time
         if not self._data_started:
             if (self._old_v is not None) and (v != self._old_v):
                 # Data has changed from init, log it and future data
@@ -411,7 +417,9 @@ class CtraceParser:
                 self._old_v = v
                 return ""
         if self._data_started:
-            putc.append("#{:d}".format(int(time)))
+            if self._include_clock:
+                putc.extend(self._make_clock(last_time, self._time))
+            putc.append("#{:d}".format(int(self._time*self._t_step)))
         for n in range(len(self._sigList)):
             signal, width, _id, getList = self._sigList[n]
             val = self._extractValue(v, *getList)
@@ -419,15 +427,27 @@ class CtraceParser:
             self.old_vals[n] = val
             if (old_val is None) or (val != old_val):
                 putc.append("b{:b} {:s}".format(val, _id))
+        if self._include_clock:
+            putc.append("b1 {:s}".format(self._clk_id))
         putc = "\n".join(putc) + "\n"
         return putc
+
+    def _make_clock(self, start, end):
+        tclk = []
+        for n in range(start, end):
+            if n > start:
+                tclk.append("#{}".format(int(n*self._t_step)))
+                tclk.append("b1 {:s}".format(self._clk_id))
+            tclk.append("#{}".format(int((n + 0.5)*self._t_step)))
+            tclk.append("b0 {:s}".format(self._clk_id))
+        return tclk
 
     def VCDMake(self, ofile=None, time_step_ns=8, trim=True):
         """Create a VCD file with name 'ofile' using time step 'time_step_ns' (the minimum time
         difference in nanoseconds; the period of the clock used by ctrace)."""
         # 50 MHz and ns time step means multiply integer time count by 20
-        t_step = float(time_step_ns)  # ns tick in simulation
-        time = 0
+        self._time = 0
+        self._t_step = float(time_step_ns)  # ns tick in simulation
         self.first = True
         self.old_vals = [None] * len(self._sigList)
         # print(f"len(self.wfm) = {len(self.wfm)}")
@@ -449,24 +469,10 @@ class CtraceParser:
                 putc = self.VCDMakeHeader(v)
                 self.first = False
                 fd.write(putc + "\n")
-                if self._include_clock:
-                    fd.write("#0\n")  # Is there a better way to do this?
                 continue
             if dt == 0:
                 dt = self.mtime
-            if self._data_started:
-                time += dt
-                if self._include_clock:
-                    tclk = []
-                    # Insert dt toggling events for the clock
-                    for n in range(int(dt)):
-                        tclk.append("b1 {:s}".format(self._clk_id))
-                        tclk.append("#{}".format((time + n + 0.5)*t_step))
-                        tclk.append("b0 {:s}".format(self._clk_id))
-                    fd.write("\n".join(tclk) + "\n")
-            else:
-                time = dt
-            putc = self.VCDEmitStep(v, time * t_step)
+            putc = self.VCDEmitStep(v, dt)
             if len(putc) > 0:
                 fd.write(putc)
         if do_close:
@@ -699,7 +705,7 @@ def main():
     )
     devhelp = "Device to interface with. E.g.\n  leep://$IP[:$PORT]\n  scrap:/dev/ttyUSB3\n  scrap:$IP:$PORT"
     parser.add_argument("-n", "--no_trim", default=False, action="store_true",
-                        help="Don't trim empty (unchangin) data from the start.")
+                        help="Don't trim empty (unchanging) data from the start.")
     parser.add_argument("-c", "--config", default=None, help="Configuration file.")
     parser.add_argument("--clk", default=None, help="Net name for the generated clock.")
     parser.add_argument("-o", "--outfile", default=None, help="Output VCD file name.")

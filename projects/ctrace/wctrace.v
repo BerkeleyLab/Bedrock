@@ -8,6 +8,7 @@ module wctrace #(
    parameter AW = 10  // width of address, sets depth of memory
   ,parameter DW = 40
   ,parameter TW = 24
+  ,parameter LOCAL_VCD = ""
 ) (
   input clk,
   input [DW-1:0] data,
@@ -26,10 +27,11 @@ localparam MEM_SHIFT = (DW+TW) > 128 ? 3 :
                        (DW+TW) >  32 ? 1 : 0;
 localparam MEM_AW = AW - MEM_SHIFT;
 
-reg [MEM_AW-1:0] pc=0, lb_addr_d=0;
+reg [MEM_AW-1:0] pc=0;
+//wire [MEM_AW-1:0] lb_addr_d = lb_addr;
 reg running_r = 0;
 assign running = running_r;
-assign pc_mon = pc;
+assign pc_mon = pc << MEM_SHIFT;
 
 reg [TW-1:0] count = 0;
 
@@ -38,10 +40,10 @@ reg diff = 0;
 reg of = 0;  // counter overflow
 wire wen = running_r & (diff | of);
 always @(posedge clk) begin
-  lb_addr_d <= lb_addr;
   data1 <= data;
   data2 <= data1;
-  diff <= data1 != data;
+  diff <= data2 != data1;
+  //diff <= data1 != data;
   if (start) begin
     pc <= 0;
     running_r <= 1;
@@ -62,6 +64,15 @@ wire [DW+TW-1:0] doutb_exact;
 wire [MEM_AW-1:0] addrb = lb_addr[AW-1:MEM_SHIFT];
 
 wire [255:0] doutb = {{256-DW-TW{1'b0}}, doutb_exact};  // stretch to widest useful form, left-padding with 0
+
+`ifdef FOO
+wire [AW-1:0] lb_addr_d = lb_addr;
+`else
+reg [AW-1:0] lb_addr_d=0;
+always @(posedge lb_clk) begin
+  lb_addr_d <= lb_addr;
+end
+`endif
 
 generate
 if ((DW+TW) > 256) begin: toowide
@@ -94,5 +105,31 @@ dpram #(.dw(DW+TW), .aw(MEM_AW)) xmem (
   .addra(pc), .dina(saveme), .wena(wen),
   .addrb(addrb), .doutb(doutb_exact)
 );
+
+`ifdef SIMULATE
+  integer fd;
+  reg wen_r=1'b0;
+  integer current_time;
+  `ifdef WCTRACE_LOCAL_VCD
+    initial begin
+      fd = $fopen(LOCAL_VCD, "w");
+      $fwrite(fd, "$version wctrace $end\n");
+      $fwrite(fd, "$timescale 1ns $end\n");
+      $fwrite(fd, "$scope module TOP $end\n");
+      $fwrite(fd, "$var wire %d a data $end\n", DW);
+      $fwrite(fd, "$upscope $end\n");
+    end
+    always @(posedge clk) begin
+      wen_r <= wen;
+      if (~running_r) current_time <= 0;
+      else if (wen) current_time <= current_time + count;
+      if (wen_r) begin
+        $fwrite(fd, "#%0d\n", current_time*10); // TODO - get actual CLK_PERIOD_NS
+        $fwrite(fd, "b%b a\n", data2);
+        $display("%0d data -> %h", current_time*10, data2);
+      end
+    end
+  `endif
+`endif
 
 endmodule

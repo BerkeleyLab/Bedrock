@@ -29,9 +29,9 @@ module gmii_link #(
 `ifdef APP_LB_FROM_FIBER
 `ifdef FIBER_TRACE
 	// ctrace CSRs
-	,input ctrace_start, // TODO hook me up!
-	output ctrace_running, // TODO hook me up!
-	output [CTRACE_AW-1:0] ctrace_pc_mon, // TODO hook me up!
+	,input ctrace_start,
+	output ctrace_running,
+	output [CTRACE_AW-1:0] ctrace_pc_mon,
 	// ctrace readout in lb_clk domain
 	input lb_clk,
 	input  [CTRACE_AW-1:0] lb_addr,
@@ -121,6 +121,13 @@ negotiate #(.TIMER_TICKS(DELAY)) negotiator(
 `ifdef FIBER_TRACE
 // TODO - What clock?
 wire ctrace_clk = RX_CLK;
+/*
+reg [11:0] sanity_counter = 0;
+wire sanity_strobe=sanity_counter == 0;
+always @(posedge ctrace_clk) begin
+  sanity_counter <= sanity_counter + 1;
+end
+*/
 localparam CTRACE_TW = 24;
 // I guess we'll just catch everything going between 'negotiate'
 localparam CTRACE_DW = 45;
@@ -132,6 +139,13 @@ assign ctrace_data[41]    = rx_err_los;
 assign ctrace_data[42]    = lacr_rx_stb;
 assign ctrace_data[43]    = lacr_send;
 assign ctrace_data[44]    = operate;
+// Ensure strobe and potentially cross clock domains
+reg ctrace_start_stb=1'b0, ctrace_start_d0=1'b0, ctrace_start_d1=1'b0;
+always @(posedge ctrace_clk) begin
+  ctrace_start_d0 <= ctrace_start;
+  ctrace_start_d1 <= ctrace_start_d0;
+  ctrace_start_stb <= ctrace_start_d0 & ~ctrace_start_d1;
+end
 wctrace #(
   .AW(CTRACE_AW),
   .DW(CTRACE_DW),
@@ -139,7 +153,7 @@ wctrace #(
 ) wctrace_i (
   .clk(ctrace_clk), // input
   .data(ctrace_data), // input [DW-1:0]
-  .start(ctrace_start), // input
+  .start(ctrace_start_stb), // input
   .running(ctrace_running), // output
   .pc_mon(ctrace_pc_mon), // output [AW-1:0]
   .lb_clk(lb_clk), // input

@@ -12,10 +12,15 @@ INC_DIRS=$(TESTS_DIR)
 
 all: wctrace_w2_check wctrace_w1_check wctrace_w0_check wctrace_n_check wctrace_live
 
-VFLAGS_wctrace_w2_tb=-DTEST_WIDE2 -DWCTRACE_DEBUG
-VFLAGS_wctrace_w1_tb=-DTEST_WIDE1 -DWCTRACE_DEBUG
-VFLAGS_wctrace_w0_tb=-DTEST_WIDE0 -DWCTRACE_DEBUG
-VFLAGS_wctrace_n_tb=-DTEST_NORMAL -DWCTRACE_DEBUG
+VFLAGS_wctrace_w3_tb=-DTEST_WIDE3 -DWCTRACE_LOCAL_VCD
+VFLAGS_wctrace_w2_tb=-DTEST_WIDE2 -DWCTRACE_LOCAL_VCD
+VFLAGS_wctrace_w1_tb=-DTEST_WIDE1 -DWCTRACE_LOCAL_VCD
+VFLAGS_wctrace_w0_tb=-DTEST_WIDE0 -DWCTRACE_LOCAL_VCD
+VFLAGS_wctrace_n_tb=-DTEST_NORMAL -DWCTRACE_LOCAL_VCD
+
+.PHONY: wctrace_w3_check
+wctrace_w3_check: wctrace_w3_tb
+	$(VERILOG_CHECK)
 
 .PHONY: wctrace_w2_check
 wctrace_w2_check: wctrace_w2_tb
@@ -32,6 +37,10 @@ wctrace_w0_check: wctrace_w0_tb
 .PHONY: wctrace_n_check
 wctrace_n_check: wctrace_n_tb
 	$(VERILOG_CHECK)
+
+.PHONY: wctrace_w3_tb
+wctrace_w3_tb: wctrace_tb.v $(WCTRACE_SOURCES)
+	$(VERILOG_TB)
 
 .PHONY: wctrace_w2_tb
 wctrace_w2_tb: wctrace_tb.v $(WCTRACE_SOURCES)

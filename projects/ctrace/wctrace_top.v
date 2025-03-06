@@ -89,7 +89,7 @@ always @(posedge clk) begin
 end
 
 // Fake data for wctrace
-reg [DW-5:0] counter=0;
+reg [DW-1:0] counter=0;
 reg [3:0] strobes=4'h0;
 always @(posedge clk) begin
   strobes <= 4'h0;
@@ -101,7 +101,7 @@ always @(posedge clk) begin
 end
 
 // NOTE: These signal assignments need to agree with "config.in"
-assign trace_data[DW-5:0] = counter;
+assign trace_data[DW-5:0] = counter[DW-5:0];
 assign trace_data[DW-1-:4] = strobes;
 
 endmodule
