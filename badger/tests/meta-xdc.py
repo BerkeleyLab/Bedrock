@@ -22,7 +22,6 @@ def _extract_name(ss):
     """
     bcnt = 0
     start = False
-    got_ports = False
     buf = []
     for c in ss:
         if c == '[':
@@ -35,7 +34,6 @@ def _extract_name(ss):
         if start:
             buf.append(c)
         if ''.join(buf[-9:]) == "get_ports":
-            got_ports = True
             buf = []
     name = ''.join(buf).strip()
     pairs = (('{', '}'), ('"', '"'), ("'", "'"))
@@ -72,11 +70,9 @@ def process_xdc_line(ss):
     """Only collects the 'set_property' lines (ignores 'create_clock', etc)."""
     if '#' in ss:
         ss = ss.split('#')[0]
-    #restr = r"^\s*(set_property)\s+([^;]+);"
-    #_match = re.match(restr, ss)
     ss = ss.strip()
     if ss.startswith("set_property"):
-        restr = "\[\s*get_ports.*"
+        restr = r"\[\s*get_ports.*"
         _match = re.search(restr, ss)
         if _match:
             name = _extract_name(ss[slice(*_match.span())])
@@ -89,11 +85,8 @@ def absorb_xdc(xdc_file):
     for ll in open(xdc_file).read().splitlines():
         if ll.startswith("#"):
             continue
-        #bb = ll.split()
-        #pin_name = bb[-1].rstrip("]")
-        #rest = " ".join(bb[:-1])
         pin_name, rest = process_xdc_line(ll)
-        if pin_name != None:
+        if pin_name is not None:
             ll = xdc_map.get(pin_name, [])
             ll.append(rest)
             xdc_map[pin_name] = ll
@@ -168,8 +161,5 @@ def main():
 
 
 if __name__ == "__main__":
-    #exit(test__extract_name())
+    # exit(test__extract_name())
     exit(main())
-
-
-
