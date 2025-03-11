@@ -1,58 +1,61 @@
+# Avnet AUBoard 15P p. 35
 
+# RGMII Rx  p. 35
+set_property -dict {PACKAGE_PIN Y15 IOSTANDARD LVCMOS18} [get_ports RGMII_RX_CLK]
+set_property -dict {PACKAGE_PIN AA15 IOSTANDARD LVCMOS18} [get_ports RGMII_RX_CTRL]
+set_property -dict {PACKAGE_PIN W15 IOSTANDARD LVCMOS18} [get_ports {RGMII_RXD[0]}]
+set_property -dict {PACKAGE_PIN W14 IOSTANDARD LVCMOS18} [get_ports {RGMII_RXD[1]}]
+set_property -dict {PACKAGE_PIN Y16 IOSTANDARD LVCMOS18} [get_ports {RGMII_RXD[2]}]
+set_property -dict {PACKAGE_PIN W16 IOSTANDARD LVCMOS18} [get_ports {RGMII_RXD[3]}]
 
-# RGMII Rx
-set_property -dict {PACKAGE_PIN L19 IOSTANDARD LVCMOS25} [get_ports RGMII_RX_CLK]
-set_property -dict {PACKAGE_PIN H15 IOSTANDARD LVCMOS25} [get_ports RGMII_RX_CTRL]
-set_property -dict {PACKAGE_PIN K13 IOSTANDARD LVCMOS25} [get_ports {RGMII_RXD[0]}]
-set_property -dict {PACKAGE_PIN H14 IOSTANDARD LVCMOS25} [get_ports {RGMII_RXD[1]}]
-set_property -dict {PACKAGE_PIN J14 IOSTANDARD LVCMOS25} [get_ports {RGMII_RXD[2]}]
-set_property -dict {PACKAGE_PIN K14 IOSTANDARD LVCMOS25} [get_ports {RGMII_RXD[3]}]
+# RGMII Tx  p. 35
+set_property -dict {PACKAGE_PIN AA14 IOSTANDARD LVCMOS18} [get_ports RGMII_TX_CLK]
+set_property -dict {PACKAGE_PIN AB14 IOSTANDARD LVCMOS18} [get_ports RGMII_TX_CTRL]
+set_property -dict {PACKAGE_PIN W13 IOSTANDARD LVCMOS18} [get_ports {RGMII_TXD[0]}]
+set_property -dict {PACKAGE_PIN W12 IOSTANDARD LVCMOS18} [get_ports {RGMII_TXD[1]}]
+set_property -dict {PACKAGE_PIN AA13 IOSTANDARD LVCMOS18} [get_ports {RGMII_TXD[2]}]
+set_property -dict {PACKAGE_PIN Y13 IOSTANDARD LVCMOS18} [get_ports {RGMII_TXD[3]}]
 
-# RGMII Tx
-set_property -dict {PACKAGE_PIN J15 IOSTANDARD LVCMOS25} [get_ports RGMII_TX_CLK]
-set_property -dict {PACKAGE_PIN J16 IOSTANDARD LVCMOS25} [get_ports RGMII_TX_CTRL]
-set_property -dict {PACKAGE_PIN G15 IOSTANDARD LVCMOS25} [get_ports {RGMII_TXD[0]}]
-set_property -dict {PACKAGE_PIN G16 IOSTANDARD LVCMOS25} [get_ports {RGMII_TXD[1]}]
-set_property -dict {PACKAGE_PIN G13 IOSTANDARD LVCMOS25} [get_ports {RGMII_TXD[2]}]
-set_property -dict {PACKAGE_PIN H13 IOSTANDARD LVCMOS25} [get_ports {RGMII_TXD[3]}]
+# QSPI Boot Flash  p. 20, but subsumed by STARTUPE3
+# set_property -dict {PACKAGE_PIN AA12 IOSTANDARD LVCMOS18} [get_ports BOOT_CS_B]
+# set_property -dict {PACKAGE_PIN AD11 IOSTANDARD LVCMOS18} [get_ports BOOT_MOSI]
+# set_property -dict {PACKAGE_PIN AC12 IOSTANDARD LVCMOS18} [get_ports BOOT_MISO]
 
-# QSPI Boot Flash
-set_property -dict {PACKAGE_PIN T19 IOSTANDARD LVCMOS25} [get_ports BOOT_CS_B]
-set_property -dict {PACKAGE_PIN P22 IOSTANDARD LVCMOS25} [get_ports BOOT_MOSI]
-set_property -dict {PACKAGE_PIN R22 IOSTANDARD LVCMOS25} [get_ports BOOT_MISO]
-
-# Debugging LEDs
-set_property -dict {PACKAGE_PIN C18 IOSTANDARD LVCMOS33} [get_ports {LED[0]}]
-set_property -dict {PACKAGE_PIN D22 IOSTANDARD LVCMOS33} [get_ports {LED[1]}]
-set_property -dict {PACKAGE_PIN E22 IOSTANDARD LVCMOS33} [get_ports {LED[2]}]
-set_property -dict {PACKAGE_PIN G21 IOSTANDARD LVCMOS33} [get_ports {LED[3]}]
+# Debugging LEDs  p. 41
+set_property -dict {PACKAGE_PIN A10 IOSTANDARD LVCMOS33} [get_ports {LED[0]}]
+set_property -dict {PACKAGE_PIN B10 IOSTANDARD LVCMOS33} [get_ports {LED[1]}]
+set_property -dict {PACKAGE_PIN B11 IOSTANDARD LVCMOS33} [get_ports {LED[2]}]
+set_property -dict {PACKAGE_PIN C11 IOSTANDARD LVCMOS33} [get_ports {LED[3]}]
 
 # MMC microcontroller for configuration - for real!?
-set_property -dict {PACKAGE_PIN C20 IOSTANDARD LVCMOS33} [get_ports SCLK]
-set_property -dict {PACKAGE_PIN D20 IOSTANDARD LVCMOS33} [get_ports CSB]
-set_property -dict {PACKAGE_PIN F19 IOSTANDARD LVCMOS33} [get_ports MOSI]
+# MikroE Click  p. 39
+set_property -dict {PACKAGE_PIN G11 IOSTANDARD LVCMOS33} [get_ports SCLK]
+set_property -dict {PACKAGE_PIN H11 IOSTANDARD LVCMOS33} [get_ports CSB]
+set_property -dict {PACKAGE_PIN G9 IOSTANDARD LVCMOS33} [get_ports MOSI]
 
 # 125 MHz from White Rabbit comes in via MGTREFCLK;
 # we should really turn on the GTP and use its TXOUTCLK.
 # 20 MHz from Y3 is a poor substitute
-set_property -dict {PACKAGE_PIN D17 IOSTANDARD LVCMOS33} [get_ports SYSCLK_P]
+# 300 MHz differential  p. 21
+set_property -dict {PACKAGE_PIN AD21 IOSTANDARD LVCMOS18} [get_ports SYSCLK_P]
 
 # Miscellaneous
-set_property -dict {PACKAGE_PIN M17 IOSTANDARD LVCMOS25} [get_ports PHY_RSTN]
-set_property -dict {PACKAGE_PIN D21 IOSTANDARD LVCMOS33} [get_ports RESET]
-set_property -dict {PACKAGE_PIN E13 IOSTANDARD LVCMOS33} [get_ports VCXO_EN]
+set_property -dict {PACKAGE_PIN AC14 IOSTANDARD LVCMOS18} [get_ports PHY_RSTN]
+# set_property -dict {PACKAGE_PIN D21 IOSTANDARD LVCMOS33} [get_ports RESET]
+# CLICK_PWM - XXX stupid
+set_property -dict {PACKAGE_PIN J9 IOSTANDARD LVCMOS33} [get_ports VCXO_EN]
 
 
 # Special pin properties for RGMII
 # Invalid to flag RGMII_RX_CLK as IOB TRUE
-set_property IOB TRUE [get_ports {RGMII_RX_CTRL}]
-set_property IOB TRUE [get_ports {RGMII_RXD*}]
-set_property IOB TRUE [get_ports {RGMII_TX*}]
+# set_property IOB TRUE [get_ports {RGMII_RX_CTRL}]
+# set_property IOB TRUE [get_ports {RGMII_RXD*}]
+# set_property IOB TRUE [get_ports {RGMII_TX*}]
 set_property SLEW FAST [get_ports {RGMII_TX*}]
 
 # Bank 0 setup
-set_property CFGBVS VCCO [current_design]
-set_property CONFIG_VOLTAGE 3.3 [current_design]
+set_property CFGBVS GND [current_design]
+set_property CONFIG_VOLTAGE 1.8 [current_design]
 
 # Clocks
 create_clock -name sys_clk -period 50.00 [get_ports SYSCLK_P]

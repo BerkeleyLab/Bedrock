@@ -92,11 +92,11 @@ endgenerate
 // wants an in-phase clock.
 wire rgmii_tx_clk_ = in_phase_tx_clk ? gmii_tx_clk : gmii_tx_clk90;
 ODDR #(
+    .SRTYPE ("ASYNC"),
     .DDR_CLK_EDGE  ("SAME_EDGE")
 ) rgmii_tx_clk_oddr (
     .Q(rgmii_tx_clk_buf),
     .C(rgmii_tx_clk_),
-    .CE(1'b1),
     .D1(1'b1),
     .D2(1'b0),
     .R(1'b0),
@@ -105,11 +105,11 @@ ODDR #(
 
 // rgmii_tx_ctl
 ODDR #(
+    .SRTYPE ("ASYNC"),
     .DDR_CLK_EDGE("SAME_EDGE")
 ) rgmii_tx_ctl_oddr (
     .Q(rgmii_tx_ctl_buf),
     .C(gmii_tx_clk),
-    .CE(1'b1),
     .D1(gmii_tx_en),
     .D2(gmii_tx_en ^ gmii_tx_er),
     .R(1'b0),
@@ -125,6 +125,7 @@ genvar i;
 generate for (i=0; i<4; i=i+1)
     begin: gen_rgmii_txd_oddr
         ODDR #(
+            .SRTYPE ("ASYNC"),
             .DDR_CLK_EDGE("SAME_EDGE")
         ) rgmii_txd_oddr (
             .Q(rgmii_txd_obuf[i]),
@@ -142,21 +143,25 @@ endgenerate
 // RGMII Rx, refer to PG051 Fig 3-67
 // refer to PG051 page 155 for using BUFIO + BUFR + IODELAY
 // rgmii_rx_clk
-wire rgmii_rx_clk_bufio, rgmii_rx_clk_bufr;
+wire rgmii_rx_clk_bufio;
 
-BUFIO rgmii_rx_clk_bufio_i (
+BUFG rgmii_rx_clk_bufio_i (
     .I(rgmii_rx_clk_buf),
     .O(rgmii_rx_clk_bufio)
 );
 
+`ifndef CHIP_FAMILY_ULTRASCALE
+wire rgmii_rx_clk_bufr;
 BUFR rgmii_rx_clk_bufr_i (
     .I(rgmii_rx_clk_buf),
     .CE(1'b1),
     .CLR(1'b0),
     .O(rgmii_rx_clk_bufr)
 );
-
 assign gmii_rx_clk = rgmii_rx_clk_bufr;
+`else
+assign gmii_rx_clk = rgmii_rx_clk_bufio;
+`endif
 
 // AC701 seems to not need RX delay.
 // Note that this chunk of code delays rxd (and ctl) but not clk.
@@ -237,6 +242,7 @@ wire gmii_rx_dv_int;
 wire rgmii_rx_ctl_int;
 
 IDDR #(
+    .SRTYPE ("ASYNC"),
     .DDR_CLK_EDGE("SAME_EDGE_PIPELINED")
 ) rgmii_rx_ctl_iddr (
     .Q1(gmii_rx_dv_int),
@@ -261,6 +267,7 @@ genvar k;
 generate for (k=0; k<4; k=k+1)
     begin: gen_rgmii_rxd_iddr
         IDDR #(
+            .SRTYPE ("ASYNC"),
             .DDR_CLK_EDGE("SAME_EDGE_PIPELINED")
         ) rgmii_rxd_iddr (
             .Q1(gmii_rxd_rise[k]),

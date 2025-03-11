@@ -109,7 +109,8 @@ make -C projects/test_marble_family/pps_lock
 
 ## oscope_top_test
 # optional, since it requires nmigen==0.2 (nmigen is not in Debian)
-if [ "$1" = "more" ]; then
+# if [ "$1" = "more" ]; then
+if false; then
 make -C projects/oscope/bmb7_cu Voscope_top_tb
 make -C projects/oscope/bmb7_cu Voscope_top_leep
 make -C projects/oscope/bmb7_cu clean

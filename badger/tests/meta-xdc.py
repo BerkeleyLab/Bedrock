@@ -1,22 +1,102 @@
 # Experimental implementation of a DSL for building an XDC file
 # by remapping pin names from an existing XDC file
 # See marble/pin_map.csv for the first (and currently only) use case.
-from sys import argv
 import re
 
 
 converter = {"DIFF_HSTL_II_25": ("LVDS_25", "LVCMOS25")}
 
+
 # original .xdc netlist file
 xdc_map = {}
 
 
+def _extract_name(ss):
+    """Extract name from:
+        [get_ports foo]
+        [get_ports { foo }]
+        [get_ports " foo " ]
+        [get_ports foo[0] ]
+        [get_ports "foo[0]" ]
+        [get_ports {foo[0]}]
+    """
+    bcnt = 0
+    start = False
+    got_ports = False
+    buf = []
+    for c in ss:
+        if c == '[':
+            start = True
+            bcnt += 1
+        elif c == ']':
+            bcnt -= 1
+        if start and (bcnt == 0):
+            break
+        if start:
+            buf.append(c)
+        if ''.join(buf[-9:]) == "get_ports":
+            got_ports = True
+            buf = []
+    name = ''.join(buf).strip()
+    pairs = (('{', '}'), ('"', '"'), ("'", "'"))
+    for pair in pairs:
+        if pair[0] in name and pair[1] in name:
+            i0 = name.index(pair[0])
+            i1 = name.rindex(pair[1])
+            name = name[i0+1:i1].strip()
+    return name
+
+
+def test__extract_name():
+    tests = (
+        ("[get_ports foo]", "foo"),
+        ("[get_ports { foo }]", "foo"),
+        ("[get_ports \" foo \" ]", "foo"),
+        ("[get_ports ' foo ' ]", "foo"),
+        ("[get_ports foo[0] ]", "foo[0]"),
+        ("[get_ports \"foo[0]\" ]", "foo[0]"),
+        ("   [get_ports {foo[0]}]", "foo[0]"),
+    )
+    fails = 0
+    for _input, _expected in tests:
+        _result = _extract_name(_input)
+        if _result != _expected:
+            print(f"FAIL: _extract_name({_input}) = {_result} != {_expected}")
+            fails += 1
+    if fails == 0:
+        print("PASS")
+    return fails
+
+
+def process_xdc_line(ss):
+    """Only collects the 'set_property' lines (ignores 'create_clock', etc)."""
+    if '#' in ss:
+        ss = ss.split('#')[0]
+    #restr = r"^\s*(set_property)\s+([^;]+);"
+    #_match = re.match(restr, ss)
+    ss = ss.strip()
+    if ss.startswith("set_property"):
+        restr = "\[\s*get_ports.*"
+        _match = re.search(restr, ss)
+        if _match:
+            name = _extract_name(ss[slice(*_match.span())])
+            preceding = ss[:_match.start()].strip() + " [get_ports"
+            return name, preceding
+    return None, None
+
+
 def absorb_xdc(xdc_file):
     for ll in open(xdc_file).read().splitlines():
-        bb = ll.split()
-        pin_name = bb[-1].rstrip("]")
-        rest = " ".join(bb[:-1])
-        xdc_map[pin_name] = rest
+        if ll.startswith("#"):
+            continue
+        #bb = ll.split()
+        #pin_name = bb[-1].rstrip("]")
+        #rest = " ".join(bb[:-1])
+        pin_name, rest = process_xdc_line(ll)
+        if pin_name != None:
+            ll = xdc_map.get(pin_name, [])
+            ll.append(rest)
+            xdc_map[pin_name] = ll
 
 
 def merge(xdc_info, vport, force_diff=False):
@@ -59,17 +139,37 @@ def absorb_map(fname):
             iostd_flag = splitted[2] if len(splitted) > 2 else None
             pa, pb = splitted[0:2]
             if pa in xdc_map:
-                merge(xdc_map[pa], pb, force_diff=(iostd_flag == "DIFF"))
+                for rest in xdc_map[pa]:
+                    merge(rest, pb, force_diff=(iostd_flag == "DIFF"))
             else:
                 print("wtf: Can't interpret {} %%".format(pa))
 
 
-if len(argv) < 3:
-    print("usage: $PYTHON %s foo.xdc foo_1.csv .. foo_n.csv" % argv[0])
-    print("  where foo_*.csv are re-mapping files")
-    exit(1)
+def main():
+    from sys import argv
+    import os
+    if len(argv) < 3:
+        print("usage: $PYTHON %s foo.xdc foo_1.csv .. foo_n.csv" % argv[0])
+        print("  where foo_*.csv are re-mapping files")
+        exit(1)
+    csvs = []
+    xdcs = []
+    for fname in argv[1:]:
+        _, ext = os.path.splitext(fname)
+        if ext == ".csv":
+            csvs.append(fname)
+        elif ext == ".xdc":
+            xdcs.append(fname)
+    for xdc in xdcs:
+        absorb_xdc(xdc)
+    for csv in csvs:
+        absorb_map(csv)
+    return 0
 
 
-absorb_xdc(argv[1])
-for fname in argv[2:]:
-    absorb_map(fname)
+if __name__ == "__main__":
+    #exit(test__extract_name())
+    exit(main())
+
+
+

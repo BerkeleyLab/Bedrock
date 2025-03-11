@@ -99,6 +99,12 @@ proc project_create {platform_name project_name} {
         set platform "arty_a7_100t"
         set project_part "xc7a100tcsg324-1"
     }
+    if [regexp "auboard_15p" $platform_name] {
+        set platform "auboard_15p"
+        set project_part "xcau15p-ffvb676-2-e"
+        set project_cfgrate "8.0"
+    }
+
     # planahead
     #
     if {$platform eq "ml605"} {
