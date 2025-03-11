@@ -32,6 +32,7 @@ module gmii_link #(
 	,input ctrace_start,
 	output ctrace_running,
 	output [CTRACE_AW-1:0] ctrace_pc_mon,
+	input  [31:0] ctrace_mask_0,
 	// ctrace readout in lb_clk domain
 	input lb_clk,
 	input  [CTRACE_AW-1:0] lb_addr,
@@ -119,26 +120,43 @@ negotiate #(.TIMER_TICKS(DELAY)) negotiator(
 
 `ifdef APP_LB_FROM_FIBER
 `ifdef FIBER_TRACE
-// TODO - What clock?
 wire ctrace_clk = RX_CLK;
-/*
-reg [11:0] sanity_counter = 0;
-wire sanity_strobe=sanity_counter == 0;
+reg rx_stb_envelope = 1'b0;
+reg [1:0] rx_stb_envelope_counter = 0;
 always @(posedge ctrace_clk) begin
-  sanity_counter <= sanity_counter + 1;
+  if (lacr_rx_stb) begin
+    rx_stb_envelope_counter <= 0;
+    rx_stb_envelope <= 1'b1;
+  end else begin
+    if (rx_stb_envelope_counter == 3) rx_stb_envelope <= 1'b0;
+    rx_stb_envelope_counter <= rx_stb_envelope_counter + 1;
+  end
+end
+
+/*
+reg [13:0] rx_stb_update_counter = 0;
+reg [11:0] rx_stb_counter = 0, rx_stb_counter_capture = 0;
+wire rx_stb_update = rx_stb_update_counter == 0;
+always @(posedge ctrace_clk) begin
+  rx_stb_update_counter <= rx_stb_update_counter + 1;
+  if (lacr_rx_stb) begin
+    rx_stb_counter <= rx_stb_counter + 1;
+  end
 end
 */
 localparam CTRACE_TW = 24;
 // I guess we'll just catch everything going between 'negotiate'
-localparam CTRACE_DW = 45;
+localparam CTRACE_DW = 46;
+wire rx_stb_mask = ctrace_mask_0[0];
 wire [CTRACE_DW-1:0] ctrace_data;
 assign ctrace_data[15: 0] = lacr_rx_val;
 assign ctrace_data[31:16] = lacr_out;
 assign ctrace_data[40:32] = an_status;
 assign ctrace_data[41]    = rx_err_los;
-assign ctrace_data[42]    = lacr_rx_stb;
+assign ctrace_data[42]    = lacr_rx_stb & rx_stb_mask;
 assign ctrace_data[43]    = lacr_send;
 assign ctrace_data[44]    = operate;
+assign ctrace_data[45]    = rx_stb_envelope;
 // Ensure strobe and potentially cross clock domains
 reg ctrace_start_stb=1'b0, ctrace_start_d0=1'b0, ctrace_start_d1=1'b0;
 always @(posedge ctrace_clk) begin

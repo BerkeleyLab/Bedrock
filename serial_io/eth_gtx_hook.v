@@ -40,6 +40,7 @@ module eth_gtx_hook #(
         ,input              ctrace_start,
         output              ctrace_running,
         output [CTRACE_AW-1:0] ctrace_pc_mon,
+        input  [31:0]       ctrace_mask_0,
         // ctrace readout in lb_clk domain
         input               lb_clk,
         input  [CTRACE_AW-1:0] lb_addr,
@@ -148,6 +149,7 @@ module eth_gtx_hook #(
             ,.ctrace_start(ctrace_start), // input
             .ctrace_running(ctrace_running), // output
             .ctrace_pc_mon(ctrace_pc_mon), // output [CTRACE_AW-1:0]
+            .ctrace_mask_0(ctrace_mask_0), // input [31:0]
             // ctrace readout in lb_clk domain
             .lb_clk(lb_clk), // input
             .lb_addr(lb_addr), // input [CTRACE_AW-1:0]

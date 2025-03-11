@@ -145,8 +145,6 @@ class CtraceParser:
     def __init__(self, signals=[], timebits=24, dw=None, wide=False, clk_name=None):
         self.signals = signals
         self.sigdict = self._mkSigDict(signals)
-        # import jbrowse
-        # print(jbrowse.strDict(self.sigdict))
         if dw is not None:
             self.dw = dw
         else:
@@ -450,8 +448,6 @@ class CtraceParser:
         self._t_step = float(time_step_ns)  # ns tick in simulation
         self.first = True
         self.old_vals = [None] * len(self._sigList)
-        # print(f"len(self.wfm) = {len(self.wfm)}")
-        # print(f"len(self._sigList) = {len(self._sigList)}")
         do_close = False
         if ofile is None:
             fd = sys.stdout
@@ -479,12 +475,13 @@ class CtraceParser:
             fd.close()
         return
 
-    def splitTimeData(self, datum):
+    def splitTimeData(self, datum, _print=False):
         """Split one entry from ctrace memory into time and data portions."""
         datum = int(datum)
         time = (datum & self._timemask) >> self._timeshift
         data = (datum & self._datamask) >> self._datashift
-        # print(f"datum = 0x{datum:x}; time = 0x{time:x}, data = 0x{data:x}")
+        if _print:
+            print(f"datum = 0x{datum:x}; time = 0x{time:x}, data = 0x{data:x}")
         return time, data
 
     def parseDump(self, dumplist, signals=[], storeFile=None):
@@ -492,13 +489,15 @@ class CtraceParser:
         processing (e.g. making into a VCD file)."""
         self.wfm = []
         _data = 0
+        # Sneaky bug! If we don't convert to infinite-length Python ints, we can overflow
+        # the numpy 64-bit integer that leep returns
         for n in range(len(dumplist)):
             datum = dumplist[n]
             stage = n % self._total_stages
             if stage == 0:
-                _data = datum
+                _data = int(datum)
             elif stage <= self._last_stage:
-                _data += datum << (stage * 32)
+                _data += int(datum) << (stage * 32)
             if stage == self._last_stage:
                 time, data = self.splitTimeData(_data)
                 self.wfm.append([time, data])
@@ -635,7 +634,7 @@ def runCtrace(dev, runtime=10, xacts=[]):
     return mem_size
 
 
-def doScope(dev, ofile, run=True, runtime=10, clk_name=None, xacts=[], storeFile=None):
+def doScope(dev, ofile, run=True, runtime=10, clk_name=None, xacts=[], storeFile=None, trim=True):
     config = getConfig()
     ctrace_chan0 = config.CTRACE_CHAN0
     signals = []
@@ -659,7 +658,7 @@ def doScope(dev, ofile, run=True, runtime=10, clk_name=None, xacts=[], storeFile
     ctp = CtraceParser(signals, dw=config.CTRACE_DW, timebits=config.CTRACE_TW, clk_name=clk_name)
     ctp.parseDump(data, signals=signals, storeFile=storeFile)
     time_step_ns = 1.0e9 / config.F_CLK_IN
-    ctp.VCDMake(ofile, time_step_ns=time_step_ns)
+    ctp.VCDMake(ofile, time_step_ns=time_step_ns, trim=trim)
     print(f"Ctrace waveforms written to {ofile}")
     return True
 
@@ -676,7 +675,7 @@ def doGet(args):
     else:
         raise Exception("Unsupported protocol {}".format(proto))
     return doScope(dev, filename, run=True, runtime=args.runtime, clk_name=args.clk,
-                   xacts=args.xact, storeFile=args.store_file)
+                   xacts=args.xact, storeFile=args.store_file, trim=not args.no_trim)
 
 
 def doParse(args):
@@ -689,7 +688,7 @@ def doParse(args):
     ctp = CtraceParser(signals, dw=config.CTRACE_DW, timebits=config.CTRACE_TW, clk_name=args.clk)
     ctp.parseDump(data, signals=signals)
     time_step_ns = 1.0e9 / config.F_CLK_IN
-    ctp.VCDMake(args.outfile, time_step_ns=time_step_ns)
+    ctp.VCDMake(args.outfile, time_step_ns=time_step_ns, trim=not args.no_trim)
     print(f"Ctrace waveforms written to {args.outfile}")
     return True
 
