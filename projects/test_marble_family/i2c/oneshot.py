@@ -10,8 +10,11 @@ import re
 
 
 I2C_CTL = "twi_ctl"
+I2C_CTL_LIST = ("twi_ctl", "i2c_ctl")
 I2C_STATUS = "twi_status"
+I2C_STATUS_LIST = ("twi_status", "i2c_status")
 I2C_MEM = "twi_data"
+I2C_MEM_LIST = ("twi_data", "twi_data")
 
 
 # Bit offsets for I2C_CTL
@@ -61,6 +64,13 @@ def _int(x):
     except ValueError:
         pass
     return int(x, 2)
+
+
+def find_reg(dev, reglist):
+    for regname in reglist:
+        if regname in dev.regmap.keys():
+            return regname
+    return None
 
 
 def decode(prog):
@@ -194,7 +204,6 @@ def doI2CXact(args):
     program(dev, prog)
     run(dev)
     if not args.loop:
-        stop(dev)
         wait_stopped(dev)
     if reads > 0:
         regmap = marble.get_regmap()
@@ -205,7 +214,8 @@ def doI2CXact(args):
 def wait_stopped(dev):
     attempts = 10
     # wait for run_stat = 0
-    name_sizes = ((I2C_STATUS, 1, 0),)
+    i2c_status = find_reg(dev, I2C_STATUS_LIST)
+    name_sizes = ((i2c_status, 1, 0),)
     while True:
         status = dev.reg_read_size(name_sizes)[0]
         if (status & STATUS_RUN_STAT) == 0:
@@ -219,7 +229,8 @@ def wait_stopped(dev):
 
 def stop(dev):
     # deassert run_cmd
-    name_vals = ((I2C_CTL, 0, 0),)
+    i2c_ctl = find_reg(dev, I2C_CTL_LIST)
+    name_vals = ((i2c_ctl, 0, 0),)
     dev.reg_write_offset(name_vals)
     wait_stopped(dev)
     return
@@ -227,8 +238,9 @@ def stop(dev):
 
 def run(dev):
     # reassert run_cmd
+    i2c_ctl = find_reg(dev, I2C_CTL_LIST)
     ctl_val = CTL_RUN_CMD
-    name_vals = ((I2C_CTL, ctl_val, 0),)
+    name_vals = ((i2c_ctl, ctl_val, 0),)
     dev.reg_write_offset(name_vals)
     return
 
@@ -284,7 +296,7 @@ def doI2C():
     parser.add_argument("-i", "--ic", default=None, choices=ic_options, help="Default IC name")
     parser.add_argument("xact", nargs="+",
                         help="[IC_NAME.]ADDR[=VALUE]. Optional IC name, register address in IC's memory map"
-                        + " (and optional value to write).")
+                        + " (and optional value to write). Or \"[pause|wait]=N\" to pause/wait for N ticks.")
     parser.add_argument("-v", "--verbose", default=False, action="store_true", help="Enable debug chatter")
     parser.add_argument("-l", "--loop", default=False, action="store_true",
                         help="Leave the program running in a loop after exiting.")

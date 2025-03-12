@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 
 import sys
+import os
 import re
 import math
 import ctconf
@@ -509,6 +510,7 @@ class CtraceParser:
                 storedict["signals"] = signals
                 storedict["data"] = dumplist
                 pickle.dump(storedict, fd)
+            print(f"Stored dump to {storeFile}")
         return
 
 
@@ -674,8 +676,10 @@ def doGet(args):
         dev = scrap.SCRAPDevice(dest, silent=True)
     else:
         raise Exception("Unsupported protocol {}".format(proto))
+    if args.store_file:
+        store_file = os.path.splitext(filename)[0] + ".pkl"
     return doScope(dev, filename, run=True, runtime=args.runtime, clk_name=args.clk,
-                   xacts=args.xact, storeFile=args.store_file, trim=not args.no_trim)
+                   xacts=args.xact, storeFile=store_file, trim=not args.no_trim)
 
 
 def doParse(args):
@@ -714,8 +718,8 @@ def main():
     parserGet.add_argument("-t", "--timeout", type=float, default=5.0)
     parserGet.add_argument("-r", "--runtime", default=10, type=float,
                            help="Time (in seconds) to wait for ctrace to complete.")
-    parserGet.add_argument("-s", "--store_file", default=None,
-                           help="File in which to store raw dump.")
+    parserGet.add_argument("-s", "--store_file", default=False, action="store_true",
+                           help="Also store raw memory as pickled dict.")
     parserGet.set_defaults(handler=doGet)
     parserParse = subparsers.add_parser(
         "parse", help="Generate VCD file from a pickled dump of ctrace memory"
