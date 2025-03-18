@@ -137,7 +137,7 @@ module chitchat_txrx_wrap_tb;
    wire [15:0] txrx_latency;
 
    wire        rx_valid;
-   wire [2:0]  faults;
+   wire [3:0]  faults;
    wire [15:0] fault_cnt;
    wire        los;
    wire        frame_drop;

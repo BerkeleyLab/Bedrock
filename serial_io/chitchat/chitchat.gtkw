@@ -1,22 +1,28 @@
-[timestart] 0
-[size] 1920 983
+[timestart] 10868
+[size] 1436 896
 [pos] -1 -1
-*-14.226988 9400 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-9.642455 13195 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] chitchat_tb.
-[sst_width] 292
-[signals_width] 530
+[sst_width] 269
+[signals_width] 349
 [sst_expanded] 1
-[sst_vpaned_height] 245
+[sst_vpaned_height] 244
+@28
+chitchat_tb.cc_clk
+chitchat_tb.startup
+chitchat_tb.settle
 @420
 chitchat_tb.tx_cnt
 @28
 chitchat_tb.tx_transmit_en
 @22
 chitchat_tb.corrupt[15:0]
+@28
+chitchat_tb.tx_send
+chitchat_tb.rx_valid
+chitchat_tb.frame_drop
 @200
 -CC_TX
-@28
-chitchat_tb.i_dut_tx.tx_ready
 @22
 chitchat_tb.i_dut_tx.tx_data0[31:0]
 chitchat_tb.i_dut_tx.tx_data1[31:0]
@@ -25,21 +31,26 @@ chitchat_tb.i_dut_tx.tx_location[2:0]
 @22
 chitchat_tb.i_dut_tx.tx_loopback_frame_counter[15:0]
 chitchat_tb.i_dut_tx.gtx_d[15:0]
-@28
-chitchat_tb.i_dut_tx.gtx_k
 @200
 -CC_RX
 @28
 chitchat_tb.i_dut_rx.ccrx_los
 chitchat_tb.i_dut_rx.ccrx_frame_drop
-chitchat_tb.i_dut_rx.ccrx_fault[2:0]
+chitchat_tb.i_dut_rx.ccrx_fault[3:0]
 @22
 chitchat_tb.i_dut_rx.ccrx_fault_cnt[15:0]
+@28
+chitchat_tb.i_dut_rx.last
+chitchat_tb.i_dut_rx.wrong_frame
+chitchat_tb.i_dut_rx.crc_fault
+chitchat_tb.i_dut_rx.wrong_prot
+chitchat_tb.i_dut_rx.timeout
+@22
+chitchat_tb.i_dut_rx.link_up_cnt[7:0]
 @28
 chitchat_tb.i_dut_rx.rx_valid
 @22
 chitchat_tb.i_dut_rx.rx_data0[31:0]
-@23
 chitchat_tb.i_dut_rx.rx_data1[31:0]
 [pattern_trace] 1
 [pattern_trace] 0

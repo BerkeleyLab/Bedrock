@@ -12,14 +12,14 @@ QF2_IP = 192.168.1.30
 FIB_IP = 192.168.1.173
 BIT = $(APP_NAME).bit
 
+all: gen $(APP_NAME).bit
+
 # Set auto-generated dependencies before including top_rules.mk
 VERILOG_AUTOGEN +=
 
 VERILOG_DEFINE_FLAGS =
 include rules.mk
 include $(BUILD_DIR)/top_rules.mk
-
-all: gen $(APP_NAME).bit
 
 $(APP_NAME).bit: $(IP_TCL)
 

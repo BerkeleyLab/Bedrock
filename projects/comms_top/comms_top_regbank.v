@@ -21,7 +21,7 @@ module comms_top_regbank #(
    // Control registers in
    input [15:0]        rx_frame_counter_i,
    input [15:0]        txrx_latency_i,
-   input [2:0]         ccrx_fault_i,
+   input [3:0]         ccrx_fault_i,
    input [15:0]        ccrx_fault_cnt_i,
    input               ccrx_los_i,
    input [3:0]         rx_protocol_ver_i,
@@ -34,7 +34,7 @@ module comms_top_regbank #(
    input               rx_match1_i,
    input [15:0]        rx_err_cnt0_i,
    input [15:0]        rx_err_cnt1_i,
-   input [6:0]         an_status_i,
+   input [8:0]         an_status_i,
    input [31:0]        ctr_mem_out_i,
 
    // Control registers out
