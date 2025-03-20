@@ -4,6 +4,7 @@ module zest #(
     parameter FCNT_WIDTH = 16,  // to speed up simulation. 125M / 2**16 = 1.9kHz update rate.
     parameter PH_DIFF_DW = 13,
     parameter real DAC_INTERP_COEFF_R = 1.0,
+    parameter TRANSPARENT_DAC = 0,
     localparam integer  N_ADC = 2,
     localparam integer  N_CH = N_ADC*4,
     localparam real     CLKIN_PERIOD = 1000.0 / DSP_FREQ_MHZ / 2,    // ns
@@ -427,7 +428,7 @@ assign dac_clk_out = dac_dco_clk;
 
 // interpolator, crossing from dsp_clk to dac_clk domain
 wire signed [13:0] dac0_in_data;
-zest_dac_interp #(.DW(14)) dac_interp_a (
+zest_dac_interp #(.DW(14), .transparent(TRANSPARENT_DAC)) dac_interp_a (
     .dsp_clk        (dsp_clk_out),
     .din            (dac_in_data_i),
     .coeff          (DAC_INTERP_COEFF),
@@ -436,7 +437,7 @@ zest_dac_interp #(.DW(14)) dac_interp_a (
 );
 
 wire signed [13:0] dac1_in_data;
-zest_dac_interp #(.DW(14)) dac_interp_b (
+zest_dac_interp #(.DW(14), .transparent(TRANSPARENT_DAC)) dac_interp_b (
     .dsp_clk        (dsp_clk_out),
     .din            (dac_in_data_q),
     .coeff          (DAC_INTERP_COEFF),
