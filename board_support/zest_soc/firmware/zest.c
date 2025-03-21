@@ -258,13 +258,24 @@ void reset_ad7794(void) {
     wait_ad7794_spi_ready();
 }
 
+#define AD7794_REG_COMMUNICATIONS       (0)
+#define AD7794_REG_STATUS               (0)
+#define AD7794_REG_MODE                 (1)
+#define AD7794_REG_CONFIGURATION        (2)
+#define AD7794_REG_DATA                 (3)
+#define AD7794_REG_ID                   (4)
+#define AD7794_REG_IO                   (5)
+#define AD7794_REG_OFFSET               (6)
+#define AD7794_REG_FULL_SCALE           (7)
+
 uint32_t read_ad7794_channel(uint8_t ch) {
     // internal ref, gain=0
-    write_zest_reg(ZEST_DEV_AD7794, 2, (0x90 | (ch & 0x7)));
+    write_zest_reg(ZEST_DEV_AD7794, AD7794_REG_CONFIGURATION, (0x90 | (ch & 0x7)));
     // single conversion, Figure 21
-    write_zest_reg(ZEST_DEV_AD7794, 1, 0x200a);
+    write_zest_reg(ZEST_DEV_AD7794, AD7794_REG_MODE, 0x200a);
     SPI_INIT(g_base_spi, 1, 0, 1, 1, 0, 8, 16);
-    SPI_SET_DAT_BLOCK(g_base_spi, 0x58);
+    // Send "read data register" message to COMMS register
+    SPI_SET_DAT_BLOCK(g_base_spi, 0x40 | (AD7794_REG_DATA << 3));
     SPI_INIT(g_base_spi, 1, 0, 1, 1, 0, 24, 16);
     wait_ad7794_spi_ready();
     SPI_SET_DAT_BLOCK(g_base_spi, 0);
@@ -551,9 +562,11 @@ void get_zest_status(zest_status_t *zest) {
     for (size_t ix=0; ix<9; ix++) {
         zest->amc7823_adcs[ix] = read_zest_reg(ZEST_DEV_AMC7823, ix);
     }
+#ifndef ZEST_BYPASS_AD7794_READS
     for (size_t ix=0; ix<6; ix++) {
         zest->ad7794_adcs[ix] = read_ad7794_channel(ix);
     }
+#endif
 }
 
 void print_zest_status(void) {

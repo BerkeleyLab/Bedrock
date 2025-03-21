@@ -269,6 +269,8 @@ bool set_si570_regs(si570_info_t *info, uint64_t f1_hz);
  * @param marble pointer to marble_dev_t structure
  */
 bool get_marble_info(marble_dev_t *marble);
+bool marble_info_complete(void);
+void marble_info_reset(void);
 
 /**
  * Initialize Marble board by programming i2c devices

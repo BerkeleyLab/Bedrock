@@ -290,25 +290,65 @@ bool set_adn4600_info(adn4600_info_t *info, marble_init_byte_t *p_data) {
     return ret;
 }
 
+static int marble_update_stage = 0;
+
+bool marble_info_complete(void) {
+    if (marble_update_stage == 0) return true;
+    return false;
+}
+
+void marble_info_reset(void) {
+    marble_update_stage = 0;
+    return;
+}
+
 bool get_marble_info(marble_dev_t *marble) {
     bool ret = true;
 
-    ret &= get_adn4600_info(&marble->adn4600);
-    ret &= get_ina219_info(&marble->ina219_12v);
-    ret &= get_ina219_info(&marble->ina219_fmc1);
-    ret &= get_ina219_info(&marble->ina219_fmc2);
-    ret &= get_pca9555_info(&marble->pca9555_qsfp);
-    ret &= get_pca9555_info(&marble->pca9555_misc);
-    marble->qsfp1.module_present = (marble->pca9555_qsfp.i0_val & 0x20) == 0;
-    marble->qsfp2.module_present = (marble->pca9555_qsfp.i1_val & 0x20) == 0;
-    if (marble->qsfp1.module_present) {
-        get_qsfp_info(&marble->qsfp1);
+    switch (marble_update_stage) {
+        case 0:
+            ret &= get_adn4600_info(&marble->adn4600);
+            ++marble_update_stage;
+            break;
+        case 1:
+            ret &= get_ina219_info(&marble->ina219_12v);
+            ++marble_update_stage;
+            break;
+        case 2:
+            ret &= get_ina219_info(&marble->ina219_fmc1);
+            ++marble_update_stage;
+            break;
+        case 3:
+            ret &= get_ina219_info(&marble->ina219_fmc2);
+            ++marble_update_stage;
+            break;
+        case 4:
+            ret &= get_pca9555_info(&marble->pca9555_qsfp);
+            ++marble_update_stage;
+            break;
+        case 5:
+            ret &= get_pca9555_info(&marble->pca9555_misc);
+            ++marble_update_stage;
+            break;
+        case 6:
+            marble->qsfp1.module_present = (marble->pca9555_qsfp.i0_val & 0x20) == 0;
+            if (marble->qsfp1.module_present) {
+                get_qsfp_info(&marble->qsfp1);
+            }
+            ++marble_update_stage;
+            break;
+        case 7:
+            marble->qsfp2.module_present = (marble->pca9555_qsfp.i1_val & 0x20) == 0;
+            if (marble->qsfp2.module_present) {
+                get_qsfp_info(&marble->qsfp2);
+            }
+            ++marble_update_stage;
+            break;
+        default:
+            ret &= get_si570_info(&marble->si570);
+            marble_update_stage = 0;
+            break;
     }
-    if (marble->qsfp2.module_present) {
-        get_qsfp_info(&marble->qsfp2);
-    }
-
-    ret &= get_si570_info(&marble->si570);
     return ret;
 }
 
