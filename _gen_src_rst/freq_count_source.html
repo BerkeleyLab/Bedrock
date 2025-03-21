@@ -87,7 +87,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 4</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="k">module</span><span class="w"> </span><span class="n">freq_count</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos"> 7</span><span class="w">     </span><span class="c1">// Default configuration useful for input frequencies &lt; 2*sysclk</span>
+<span class="linenos"> 7</span><span class="w">     </span><span class="c1">// Default configuration useful for input frequencies &lt; 96 MHz</span>
 <span class="linenos"> 8</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">glitch_thresh</span><span class="o">=</span><span class="mh">2</span><span class="p">,</span>
 <span class="linenos"> 9</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">refcnt_width</span><span class="o">=</span><span class="mh">24</span><span class="p">,</span>
 <span class="linenos">10</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">freq_width</span><span class="o">=</span><span class="mh">28</span><span class="p">,</span>
@@ -98,68 +98,29 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">15</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">f_in</span><span class="p">,</span><span class="w">  </span><span class="c1">// unknown input</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span><span class="w">     </span><span class="c1">// outputs in sysclk domain</span>
-<span class="linenos">18</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">freq_width</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">frequency</span><span class="p">,</span>
+<span class="linenos">18</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="n">freq_width</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">frequency</span><span class="p">,</span>
 <span class="linenos">19</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="n">freq_strobe</span><span class="p">,</span>
-<span class="linenos">20</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">diff_stream</span><span class="p">,</span><span class="w"> </span><span class="c1">// stream of last 4 4-bit counts of f_in</span>
-<span class="linenos">21</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="kt">reg</span><span class="w"> </span><span class="n">diff_stream_strobe</span><span class="p">,</span><span class="w"> </span><span class="c1">// strobe at f_sysclk/4</span>
+<span class="linenos">20</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">diff_stream</span><span class="p">,</span>
+<span class="linenos">21</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="n">diff_stream_strobe</span><span class="p">,</span>
 <span class="linenos">22</span><span class="w">     </span><span class="c1">// glitch_catcher can be routed to a physical pin to trigger</span>
 <span class="linenos">23</span><span class="w">     </span><span class="c1">// a &#39;scope; see glitch_thresh parameter above</span>
-<span class="linenos">24</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="kt">reg</span><span class="w"> </span><span class="n">glitch_catcher</span>
+<span class="linenos">24</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="n">glitch_catcher</span>
 <span class="linenos">25</span><span class="p">);</span>
 <span class="linenos">26</span>
-<span class="linenos">27</span><span class="k">initial</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">28</span><span class="w">     </span><span class="n">frequency</span><span class="o">=</span><span class="n">initv</span><span class="p">;</span>
-<span class="linenos">29</span><span class="w">     </span><span class="n">diff_stream</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">30</span><span class="w">     </span><span class="n">diff_stream_strobe</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">31</span><span class="w">     </span><span class="n">glitch_catcher</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">32</span><span class="k">end</span>
-<span class="linenos">33</span>
-<span class="linenos">34</span><span class="c1">// Reference counter</span>
-<span class="linenos">35</span><span class="c1">// may or may not be synchronized between instances</span>
-<span class="linenos">36</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">refcnt_width</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">refcnt</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">37</span><span class="kt">reg</span><span class="w"> </span><span class="n">ref_strobe</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">stream_strobe</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">38</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">sysclk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">39</span><span class="w">     </span><span class="p">{</span><span class="n">ref_strobe</span><span class="p">,</span><span class="w"> </span><span class="n">refcnt</span><span class="p">}</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">refcnt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span>
-<span class="linenos">40</span><span class="w">     </span><span class="n">stream_strobe</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">refcnt</span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">41</span><span class="k">end</span>
-<span class="linenos">42</span>
-<span class="linenos">43</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">3</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">xcount</span><span class="p">;</span><span class="w">  </span><span class="c1">// per-sysclk count of f_in edges</span>
-<span class="linenos">44</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="n">freq_width</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">frequency_w</span><span class="p">;</span>
-<span class="linenos">45</span><span class="n">freq_gcount</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos">46</span><span class="w">     </span><span class="p">.</span><span class="n">gw</span><span class="p">(</span><span class="mh">4</span><span class="p">),</span>
-<span class="linenos">47</span><span class="w">     </span><span class="p">.</span><span class="n">freq_width</span><span class="p">(</span><span class="n">freq_width</span><span class="p">),</span>
-<span class="linenos">48</span><span class="w">     </span><span class="p">.</span><span class="n">initv</span><span class="p">(</span><span class="n">initv</span><span class="p">)</span>
-<span class="linenos">49</span><span class="p">)</span><span class="w"> </span><span class="n">work</span><span class="w"> </span><span class="p">(</span>
-<span class="linenos">50</span><span class="w">     </span><span class="p">.</span><span class="n">sysclk</span><span class="p">(</span><span class="n">sysclk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">f_in</span><span class="p">(</span><span class="n">f_in</span><span class="p">),</span>
-<span class="linenos">51</span><span class="w">     </span><span class="p">.</span><span class="n">g_in</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span><span class="w">  </span><span class="c1">// this is the whole point!</span>
-<span class="linenos">52</span><span class="w">     </span><span class="p">.</span><span class="n">ref_strobe</span><span class="p">(</span><span class="n">ref_strobe</span><span class="p">),</span>
-<span class="linenos">53</span><span class="w">     </span><span class="p">.</span><span class="n">frequency</span><span class="p">(</span><span class="n">frequency_w</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">freq_strobe</span><span class="p">(</span><span class="n">freq_strobe</span><span class="p">),</span>
-<span class="linenos">54</span><span class="w">     </span><span class="p">.</span><span class="n">xcount</span><span class="p">(</span><span class="n">xcount</span><span class="p">)</span>
-<span class="linenos">55</span><span class="p">);</span>
-<span class="linenos">56</span>
-<span class="linenos">57</span><span class="c1">// Nobody except some ancient USB debugging ever used this.</span>
-<span class="linenos">58</span><span class="c1">// It&#39;s harmless; if you don&#39;t attach to the diff_stream,</span>
-<span class="linenos">59</span><span class="c1">// diff_stream_strobe, or glitch_catcher ports, it will all</span>
-<span class="linenos">60</span><span class="c1">// just disappear in synthesis.</span>
-<span class="linenos">61</span><span class="c1">//</span>
-<span class="linenos">62</span><span class="c1">// Make xcount available to stream to host at 24 MByte/sec, which was</span>
-<span class="linenos">63</span><span class="c1">// especially interesting when reprogramming a AD9512 clock divider</span>
-<span class="linenos">64</span><span class="c1">// on a LLRF4 board.</span>
-<span class="linenos">65</span><span class="c1">// It might also be possible to histogram xcount.</span>
-<span class="linenos">66</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">stream</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">67</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">sysclk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">68</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">xcount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">glitch_thresh</span><span class="p">)</span><span class="w"> </span><span class="n">glitch_catcher</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="o">~</span><span class="n">glitch_catcher</span><span class="p">;</span>
-<span class="linenos">69</span><span class="w">     </span><span class="n">stream</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">stream</span><span class="p">[</span><span class="mh">11</span><span class="o">:</span><span class="mh">0</span><span class="p">],</span><span class="w"> </span><span class="n">xcount</span><span class="p">};</span><span class="w">  </span><span class="c1">// assumes freq_gcount gw=4</span>
-<span class="linenos">70</span><span class="k">end</span>
-<span class="linenos">71</span>
-<span class="linenos">72</span><span class="c1">// Latch/pipeline one more time to perimeter of this module</span>
-<span class="linenos">73</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">sysclk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">74</span><span class="w">     </span><span class="n">diff_stream</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">stream</span><span class="p">;</span>
-<span class="linenos">75</span><span class="w">     </span><span class="n">diff_stream_strobe</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">stream_strobe</span><span class="p">;</span>
-<span class="linenos">76</span><span class="w">     </span><span class="n">frequency</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">frequency_w</span><span class="p">;</span>
-<span class="linenos">77</span><span class="k">end</span>
-<span class="linenos">78</span>
-<span class="linenos">79</span><span class="k">endmodule</span>
+<span class="linenos">27</span><span class="n">freq_gcount</span><span class="w"> </span><span class="p">#(</span>
+<span class="linenos">28</span><span class="w">     </span><span class="p">.</span><span class="n">glitch_thresh</span><span class="p">(</span><span class="n">glitch_thresh</span><span class="p">),</span>
+<span class="linenos">29</span><span class="w">     </span><span class="p">.</span><span class="n">refcnt_width</span><span class="p">(</span><span class="n">refcnt_width</span><span class="p">),</span>
+<span class="linenos">30</span><span class="w">     </span><span class="p">.</span><span class="n">freq_width</span><span class="p">(</span><span class="n">freq_width</span><span class="p">),</span>
+<span class="linenos">31</span><span class="w">     </span><span class="p">.</span><span class="n">initv</span><span class="p">(</span><span class="n">initv</span><span class="p">)</span>
+<span class="linenos">32</span><span class="p">)</span><span class="w"> </span><span class="n">work</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos">33</span><span class="w">     </span><span class="p">.</span><span class="n">sysclk</span><span class="p">(</span><span class="n">sysclk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">f_in</span><span class="p">(</span><span class="n">f_in</span><span class="p">),</span>
+<span class="linenos">34</span><span class="w">     </span><span class="p">.</span><span class="n">g_in</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span><span class="w">  </span><span class="c1">// this is the whole point!</span>
+<span class="linenos">35</span><span class="w">     </span><span class="p">.</span><span class="n">frequency</span><span class="p">(</span><span class="n">frequency</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">freq_strobe</span><span class="p">(</span><span class="n">freq_strobe</span><span class="p">),</span>
+<span class="linenos">36</span><span class="w">     </span><span class="p">.</span><span class="n">diff_stream</span><span class="p">(</span><span class="n">diff_stream</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">diff_stream_strobe</span><span class="p">(</span><span class="n">diff_stream_strobe</span><span class="p">),</span>
+<span class="linenos">37</span><span class="w">     </span><span class="p">.</span><span class="n">glitch_catcher</span><span class="p">(</span><span class="n">glitch_catcher</span><span class="p">)</span>
+<span class="linenos">38</span><span class="p">);</span>
+<span class="linenos">39</span>
+<span class="linenos">40</span><span class="k">endmodule</span>
 </pre></div>
 </div>
 </section>
