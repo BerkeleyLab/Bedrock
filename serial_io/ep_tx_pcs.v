@@ -58,6 +58,11 @@ input ep_lacr_tx_en_i // Link Autonegotiation Control Register, TX_EN field
 
 `include "endpoint.vh"
 
+`ifdef SIMULATE
+  `define INDENT  "                                                "
+  reg tx_non_breaklink=1'b1;
+`endif
+
 // TX state machine definitions
 parameter [3:0]
   TX_COMMA = 0,
@@ -85,6 +90,9 @@ reg [7:0] tx_data_p=0, tx_data_p2=0;
 always @(posedge clk) tx_data_p <= tx_data_i;
 always @(posedge clk) tx_data_p2 <= tx_data_p;
 reg tx_enable_p=0;
+`ifdef SIMULATE
+reg [15:0] old_ep_lacr_tx_val_i=0;
+`endif
 always @(posedge clk) tx_enable_p <= tx_enable;
 
   always @(posedge clk) begin
@@ -110,6 +118,16 @@ always @(posedge clk) tx_enable_p <= tx_enable;
         TX_IDLE : begin
           // endpoint wants to send LCR register by pulsing tx_cr_send_i
           if((ep_lacr_tx_en_i == 1'b 1)) begin
+            `ifdef SIMULATE
+              old_ep_lacr_tx_val_i <= ep_lacr_tx_val_i;
+              if (tx_non_breaklink && (ep_lacr_tx_val_i == 0)) begin
+                tx_non_breaklink <= 1'b0;
+                $display("%sTransmit breaklink", `INDENT);
+              end else if (~tx_non_breaklink) begin
+                tx_non_breaklink <= 1'b1;
+                $display("%sTransmit 0x%x", `INDENT, ep_lacr_tx_val_i);
+              end
+            `endif
             tx_state <= TX_CR1;
             tx_cr_alternate <= 1'b 0;
             // we've read something from the FIFO and it indicates a beginning of new frame
@@ -140,6 +158,9 @@ always @(posedge clk) tx_enable_p <= tx_enable;
           tx_state <= TX_CR4;
         end
         TX_CR4 : begin
+          `ifdef SIMULATE
+            if (old_ep_lacr_tx_val_i != ep_lacr_tx_val_i) $display("%sTransmitting 0x%x", `INDENT, ep_lacr_tx_val_i);
+          `endif
           tx_odata_reg <= ep_lacr_tx_val_i[15:8];
           if((ep_lacr_tx_en_i == 1'b 1)) begin
             tx_state <= TX_CR1;
@@ -183,5 +204,5 @@ always @(posedge clk) tx_enable_p <= tx_enable;
     end
   end
 
-
+`undef INDENT
 endmodule

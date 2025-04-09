@@ -22,6 +22,11 @@ module negotiate(
    output reg        operate,
    output [8:0]      an_status
 );
+
+`ifdef SIMULATE
+  `define INDENT  "                                                "
+`endif
+
    // 10 ms link_timer = 10e6/8
    parameter TIMER_TICKS = 1250000;
    localparam TIMER_LOG2 = 21;
@@ -153,6 +158,27 @@ module negotiate(
          an_state <= n_an_state;
       end
    end
+
+   `ifdef SIMULATE
+    reg [10*8-1:0] an_state_str [0:AN_ABORT];
+    reg non_breaklink=1'b0;
+    initial begin
+      an_state_str[AN_RESTART] = "AN_RESTART";
+      an_state_str[AN_ABILITY] = "AN_ABILITY";
+      an_state_str[AN_ACK]     = "AN_ACK    ";
+      an_state_str[AN_IDLE]    = "AN_IDLE   ";
+      an_state_str[AN_LINK_OK] = "AN_LINK_OK";
+      an_state_str[AN_ABORT]   = "AN_ABORT  ";
+    end
+
+    reg [2:0] old_an_state=AN_RESTART;
+    always @(posedge rx_clk) begin
+      old_an_state <= an_state;
+      if (old_an_state != an_state) begin
+        $display("%s%t->%s", `INDENT, $time, an_state_str[an_state]);
+      end
+    end
+   `endif
 
    wire idle_match = 1; // TODO: Perform actual idle marker check
 
@@ -302,4 +328,5 @@ module negotiate(
    // ACK reception of at least three consecutive matching config_reg
    // NP  parameter information follows, either message page or unformatted page
 
+`undef INDENT
 endmodule

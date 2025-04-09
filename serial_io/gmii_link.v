@@ -4,7 +4,8 @@
 module gmii_link #(
 	parameter DELAY=1250000,  // see negotiate.v
 	parameter ENC_DISPINIT=1,
-	parameter CTRACE_AW = 14
+	parameter CTRACE_AW = 14,
+	parameter [0:0] ADVERSARY = 1'b0
 ) (
 	// GMII Rx
 	input  RX_CLK,
@@ -50,20 +51,22 @@ always @(posedge RX_CLK) rx_rst<=0;
 always @(posedge GTX_CLK) tx_rst<=0;
 
 // Tx path from GMII to serializer
-wire [7:0] tx_odata;
+wire [7:0] tx_odata, tx_odata_pcs, tx_odata_an;
 wire tx_is_k;
+wire tx_is_k_pcs;
 wire [15:0] lacr_out;
 wire lacr_send;
 reg enc_dispin=ENC_DISPINIT;
 wire enc_dispout;
+wire [7:0] txd;
 ep_tx_pcs tx(.clk(GTX_CLK), .rst(tx_rst),
-	.tx_data_i(TXD),
+	.tx_data_i(txd),
 	.tx_enable(TX_EN & (operate | an_bypass)), // Wait for AN to complete (if enabled)
 	.ep_tcr_en_pcs_i(1'b1),
 	.ep_lacr_tx_val_i(lacr_out),
 	.ep_lacr_tx_en_i(lacr_send & ~an_bypass),
-	.tx_odata_reg(tx_odata),
-	.tx_is_k(tx_is_k),
+	.tx_odata_reg(tx_odata_pcs),
+	.tx_is_k(tx_is_k_pcs),
 	.disparity_i(enc_dispout)
 );
 
@@ -79,10 +82,13 @@ enc_8b10b my_enc_8b10b (
 wire [8:0] rxdata_dec_out;
 // Rx path from deserializer to GMII
 wire lacr_rx_stb;
-wire [15:0] lacr_rx_val;
+wire lacr_rx_en;
+wire [15:0] lacr_rx_val_pcs;
+wire rx_is_k = rxdata_dec_out[8];
+wire [7:0] rx_data = rxdata_dec_out[7:0];
 ep_rx_pcs rx(.clk(RX_CLK), .rst(rx_rst),
-	.dec_out(rxdata_dec_out[7:0]),
-	.dec_is_k(rxdata_dec_out[8]),
+	.dec_out(rx_data),
+	.dec_is_k(rx_is_k),
 	.dec_err_code(rx_err_code),
 	.dec_err_rdisp(rx_err_rdisp),
 	.dec_err_los(rx_err_los),
@@ -90,9 +96,9 @@ ep_rx_pcs rx(.clk(RX_CLK), .rst(rx_rst),
 	.gmii_dv(RX_DV),
 	.gmii_err(RX_ER),
 	.ep_rcr_en_pcs_i(1'b1),  // module enable
-	.lacr_rx_en(1'b1),
-	.lacr_rx_stb(lacr_rx_stb),
-	.lacr_rx_val(lacr_rx_val)
+	.lacr_rx_en(lacr_rx_en), // input
+	.lacr_rx_stb(lacr_rx_stb), // output
+	.lacr_rx_val(lacr_rx_val_pcs) // output [15:0]
 );
 
 reg dec_dispin=0;
@@ -106,6 +112,37 @@ dec_8b10b my_dec_8b10b(
 	.code_err(rx_err_code), .disp_err(rx_err_rdisp)
 );
 
+wire [15:0] lacr_rx_val;
+generate
+	if (ADVERSARY == 1'b1) begin: adversary
+		assign lacr_rx_en = 1'b0;
+		assign lacr_send = 1'b0;
+		//wire [7:0] tx_byte;
+		wire tx_is_k_an;
+		wire negotiating;
+		//assign txd = negotiating ? tx_byte : TXD;
+		assign txd = TXD;
+		assign tx_is_k = negotiating ? tx_is_k_an : tx_is_k_pcs;
+		assign operate = ~negotiating;
+		wire [15:0] lacr_rx_adversary;
+		assign lacr_rx_val = lacr_rx_adversary;
+		assign tx_odata = negotiating ? tx_odata_an : tx_odata_pcs;
+adversary_negotiate adversary_negotiate_i (
+  .clk(RX_CLK), // input
+  .rst(1'b0), // input
+  .rx_byte(rxdata_dec_out[7:0]), // input [7:0]
+  .rx_is_k(rxdata_dec_out[8]), // input
+  .tx_byte(tx_odata_an), // output [7:0]
+  .tx_is_k(tx_is_k_an), // output
+  .negotiating(negotiating), // output
+  .los(rx_err_los),
+	.lacr_rx_val(lacr_rx_adversary)
+);
+	end else begin: protagonist
+		assign lacr_rx_en=1'b1;
+		assign txd = TXD;
+		assign tx_is_k = tx_is_k_pcs;
+		assign tx_odata = tx_odata_pcs;
 negotiate #(.TIMER_TICKS(DELAY)) negotiator(
 	.rx_clk(RX_CLK),
 	.tx_clk(GTX_CLK),
@@ -117,6 +154,9 @@ negotiate #(.TIMER_TICKS(DELAY)) negotiator(
 	.operate(operate),          // output
 	.an_status(an_status)       // output [8:0]
 );
+	assign lacr_rx_val = lacr_rx_val_pcs;
+	end
+endgenerate
 
 `ifdef APP_LB_FROM_FIBER
 `ifdef FIBER_TRACE
@@ -181,6 +221,7 @@ wctrace #(
 `endif
 `endif
 
-assign lacr_rx = lacr_rx_val;
+	assign lacr_rx = lacr_rx_val;
+
 
 endmodule
