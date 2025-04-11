@@ -47,7 +47,9 @@ reg [$clog2(SECONDS_WIDTH)-1:0] bitsLeft = SECONDS_WIDTH - 1;
 reg enoughBits = 0, tooManyBits = 0;
 
 // Count clocks per second
-localparam PPS_INITIAL_INTERVAL = (NOMINAL_CLK_RATE / 100) * 99;
+localparam real NOMINAL_CLK_RATE_REAL = NOMINAL_CLK_RATE;
+localparam real NOMINAL_CLK_RATE_PERCENT = NOMINAL_CLK_RATE_REAL / 100;
+localparam PPS_INITIAL_INTERVAL = $rtoi(NOMINAL_CLK_RATE_PERCENT * 99);
 localparam PPS_WINDOW_INTERVAL = NOMINAL_CLK_RATE / 50;
 localparam CLK_COUNTER_WIDTH = $clog2(PPS_INITIAL_INTERVAL+PPS_WINDOW_INTERVAL+1);
 
