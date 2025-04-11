@@ -11,13 +11,13 @@ vpath %.v $(DSP_DIR)
 
 all: NMEAtest_check tinyEVR_check todReceiver_check evrSROC_check evr_ts_cdc_check
 
-tinyEVR_tb: tinyEVR.v
+tinyEVR_tb: tinyEVR.v todReceiver.v
 
 todReceiver_tb: todReceiver.v
 
 evrSROC_tb: evrSROC.v reg_tech_cdc.v
 
-evr_ts_cdc_tb: evr_ts_cdc.v tinyEVR.v
+evr_ts_cdc_tb: evr_ts_cdc.v tinyEVR.v todReceiver.v
 
 NMEAtest: NMEAtest.o NMEA.o
 

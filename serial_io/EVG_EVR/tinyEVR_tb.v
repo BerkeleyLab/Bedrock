@@ -27,6 +27,7 @@ module tinyEVR_tb;
 parameter TIMESTAMP_WIDTH = 64;
 parameter ACTION_WIDTH    = 4;
 parameter EVSTROBE_COUNT  = 126;
+parameter NOMINAL_CLK_RATE = 250;
 
 parameter EVCODE_SHIFT_ZERO     = 8'h70;
 parameter EVCODE_SHIFT_ONE      = 8'h71;
@@ -47,7 +48,9 @@ wire [TIMESTAMP_WIDTH-1:0] timestamp, timestamp_s;
 wire               [EVSTROBE_COUNT:1] evStrobe;
 wire    [ACTION_WIDTH-1:0] action;
 
-tinyEVR #(.EVSTROBE_COUNT(EVSTROBE_COUNT))
+tinyEVR #(
+    .EVSTROBE_COUNT(EVSTROBE_COUNT),
+    .NOMINAL_CLK_RATE(NOMINAL_CLK_RATE))
   tinyEVR (.evrRxClk(evrClk),
            .evrRxWord(evrRxWord),
            .evrCharIsK(evrCharIsK),
@@ -56,7 +59,9 @@ tinyEVR #(.EVSTROBE_COUNT(EVSTROBE_COUNT))
            .timestamp(timestamp),
            .evStrobe(evStrobe));
 
-smallEVR #(.ACTION_WIDTH(ACTION_WIDTH))
+smallEVR #(
+    .ACTION_WIDTH(ACTION_WIDTH),
+    .NOMINAL_CLK_RATE(NOMINAL_CLK_RATE))
   smallEVR (.evrRxClk(evrClk),
            .evrRxWord(evrRxWord),
            .evrCharIsK(evrCharIsK),
@@ -76,6 +81,20 @@ always begin
     #4 evrClk <= !evrClk;
 end
 
+// PPS generation
+localparam PPS_COUNTER_WIDTH = $clog2(NOMINAL_CLK_RATE+1)+1;
+reg [PPS_COUNTER_WIDTH-1:0] ppsCounter = NOMINAL_CLK_RATE;
+wire ppsCounterDone = ppsCounter[PPS_COUNTER_WIDTH-1];
+
+always @(posedge evrClk) begin
+    if(ppsCounterDone) begin
+        ppsCounter <= NOMINAL_CLK_RATE-2;
+    end
+    else begin
+        ppsCounter <= ppsCounter - 1;
+    end
+end
+
 integer i;
 reg fail=0;
 initial
@@ -92,24 +111,42 @@ begin
     setAction(EVCODE_SECONDS_MARKER, 4'b0010);
     setAction(8'hBC, 4'b1111);
     #40 ;
+
+    // EVR needs 4 PPS strobes for a valid timestamp
+    repeat(4) begin
+        wait (ppsCounterDone);
+        sendEvent(EVCODE_SECONDS_MARKER);
+        check(32'h00000000);
+    end
+
+    // EVR needs 2 seconds that are consecutive to be valid
+    #100 ;
+    sendSeconds(32'h12345678);
+    wait (ppsCounterDone);
     sendEvent(EVCODE_SECONDS_MARKER);
     check(32'h00000000);
+
+    // Start checkign from now on
     #100 ;
-    sendSeconds(32'h12345678);
-    #100 ;
-    sendEvent(EVCODE_SECONDS_MARKER);
-    check(32'h12345678);
-    #200 ;
+    sendSeconds(32'h12345679);
+    wait (ppsCounterDone);
     sendEvent(EVCODE_SECONDS_MARKER);
     check(32'h12345679);
-    #200 ;
-    sendSeconds(32'h12345678);
+
     #100 ;
-    sendSeconds(32'h12345678);
-    #100 ;
+    sendSeconds(32'h1234567A);
+    wait (ppsCounterDone);
     sendEvent(EVCODE_SECONDS_MARKER);
     check(32'h1234567A);
+
+    #100 ;
+    sendSeconds(32'h1234567B);
+    wait (ppsCounterDone);
+    sendEvent(EVCODE_SECONDS_MARKER);
+    check(32'h1234567B);
+
     #1000 ;
+
     if (fail) begin
       $display("FAIL");
       $stop(0);
@@ -165,7 +202,6 @@ task sendEvent;
         evrRxWord[7:0] = 8'h00;
         evrCharIsK = 2'bx0;
     end
-    @(posedge evrClk) ;
     end
 endtask
 

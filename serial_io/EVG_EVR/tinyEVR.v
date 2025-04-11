@@ -28,12 +28,19 @@
 module tinyEVR #(
     parameter EVSTROBE_COUNT   = 126,
     parameter DEBUG            = "false",
+    parameter NOMINAL_CLK_RATE = 125_000_000,
+    parameter STATUS_COUNTER_WIDTH = 10,
     parameter TIMESTAMP_WIDTH  = 64
     ) (
     input  wire                                            evrRxClk,
 
     (*mark_debug=DEBUG*) input                      [15:0] evrRxWord,
     (*mark_debug=DEBUG*) input                       [1:0] evrCharIsK,
+
+    // Status counters for time-of-day
+    (*mark_debug=DEBUG*) output wire [STATUS_COUNTER_WIDTH-1:0] tooManyBitsCounter,
+    (*mark_debug=DEBUG*) output wire [STATUS_COUNTER_WIDTH-1:0] tooFewBitsCounter,
+    (*mark_debug=DEBUG*) output wire [STATUS_COUNTER_WIDTH-1:0] outOfSeqCounter,
 
     (*mark_debug=DEBUG*) output wire                       ppsMarker,
     (*mark_debug=DEBUG*) output wire                       timestampValid,
@@ -44,6 +51,8 @@ module tinyEVR #(
 tinyEVRcommon #(.ACTION_RAM_WIDTH(0),
                 .EVSTROBE_COUNT(EVSTROBE_COUNT),
                 .DEBUG(DEBUG),
+                .NOMINAL_CLK_RATE(NOMINAL_CLK_RATE),
+                .STATUS_COUNTER_WIDTH(STATUS_COUNTER_WIDTH),
                 .TIMESTAMP_WIDTH(TIMESTAMP_WIDTH))
   tinyEVRcommon (
     .evrRxClk(evrRxClk),
@@ -54,6 +63,9 @@ tinyEVRcommon #(.ACTION_RAM_WIDTH(0),
     .timestamp(timestamp),
     .distributedDataBus(distributedDataBus),
     .action(evStrobe),
+    .tooManyBitsCounter(tooManyBitsCounter),
+    .tooFewBitsCounter(tooFewBitsCounter),
+    .outOfSeqCounter(outOfSeqCounter),
     .sysClk(1'b0),
     .sysActionWriteEnable(1'b0),
     .sysActionAddress(8'h00),
@@ -66,12 +78,19 @@ endmodule
 module smallEVR #(
     parameter ACTION_WIDTH    = 1,
     parameter DEBUG           = "false",
+    parameter NOMINAL_CLK_RATE = 125_000_000,
+    parameter STATUS_COUNTER_WIDTH = 10,
     parameter TIMESTAMP_WIDTH = 64
     ) (
     input  wire                                            evrRxClk,
 
     (*mark_debug=DEBUG*) input                      [15:0] evrRxWord,
     (*mark_debug=DEBUG*) input                       [1:0] evrCharIsK,
+
+    // Status counters for time-of-day
+    (*mark_debug=DEBUG*) output wire [STATUS_COUNTER_WIDTH-1:0] tooManyBitsCounter,
+    (*mark_debug=DEBUG*) output wire [STATUS_COUNTER_WIDTH-1:0] tooFewBitsCounter,
+    (*mark_debug=DEBUG*) output wire [STATUS_COUNTER_WIDTH-1:0] outOfSeqCounter,
 
     (*mark_debug=DEBUG*) output wire                       ppsMarker,
     (*mark_debug=DEBUG*) output wire                       timestampValid,
@@ -87,6 +106,8 @@ module smallEVR #(
 tinyEVRcommon #(.ACTION_RAM_WIDTH(ACTION_WIDTH),
                 .EVSTROBE_COUNT(0),
                 .DEBUG(DEBUG),
+                .NOMINAL_CLK_RATE(NOMINAL_CLK_RATE),
+                .STATUS_COUNTER_WIDTH(STATUS_COUNTER_WIDTH),
                 .TIMESTAMP_WIDTH(TIMESTAMP_WIDTH))
   tinyEVRcommon (
     .evrRxClk(evrRxClk),
@@ -97,6 +118,9 @@ tinyEVRcommon #(.ACTION_RAM_WIDTH(ACTION_WIDTH),
     .timestamp(timestamp),
     .distributedDataBus(distributedDataBus),
     .action(action),
+    .tooManyBitsCounter(tooManyBitsCounter),
+    .tooFewBitsCounter(tooFewBitsCounter),
+    .outOfSeqCounter(outOfSeqCounter),
     .sysClk(sysClk),
     .sysActionWriteEnable(sysActionWriteEnable),
     .sysActionAddress(sysActionAddress),
@@ -110,6 +134,8 @@ module tinyEVRcommon #(
     parameter EVSTROBE_COUNT   = 126,
     parameter DEBUG            = "false",
     parameter TIMESTAMP_WIDTH  = 64,
+    parameter NOMINAL_CLK_RATE = 125_000_000,
+    parameter STATUS_COUNTER_WIDTH = 10,
     parameter ACT_MSB = ACTION_RAM_WIDTH?ACTION_RAM_WIDTH-1:EVSTROBE_COUNT,
     parameter ACT_LSB = ACTION_RAM_WIDTH?0:1
     ) (
@@ -119,10 +145,15 @@ module tinyEVRcommon #(
     (*mark_debug=DEBUG*) input                       [1:0] evrCharIsK,
 
     (*mark_debug=DEBUG*) output wire                       ppsMarker,
-    (*mark_debug=DEBUG*) output reg                        timestampValid = 0,
+    (*mark_debug=DEBUG*) output wire                       timestampValid,
     (*mark_debug=DEBUG*) output wire [TIMESTAMP_WIDTH-1:0] timestamp,
     (*mark_debug=DEBUG*) output wire                 [7:0] distributedDataBus,
     output wire [ACT_MSB:ACT_LSB]                          action,
+
+    // Status counters for time-of-day
+    output wire [STATUS_COUNTER_WIDTH-1:0] tooManyBitsCounter,
+    output wire [STATUS_COUNTER_WIDTH-1:0] tooFewBitsCounter,
+    output wire [STATUS_COUNTER_WIDTH-1:0] outOfSeqCounter,
 
     input                                             sysClk,
     input                                             sysActionWriteEnable,
@@ -133,7 +164,6 @@ localparam SECONDS_WIDTH = TIMESTAMP_WIDTH/2;
 localparam TICKS_WIDTH   = TIMESTAMP_WIDTH/2;
 reg [SECONDS_WIDTH-1:0] tsSeconds = 0;
 reg   [TICKS_WIDTH-1:0] tsTicks = 0;
-assign timestamp = {tsSeconds, tsTicks};
 
 localparam EVCODE_SHIFT_ZERO     = 8'h70;
 localparam EVCODE_SHIFT_ONE      = 8'h71;
@@ -147,38 +177,28 @@ wire [7:0] evCode = evrRxWord[7:0];
 assign distributedDataBus = evrRxWord[15:8];
 wire evCodeValid = !evrCharIsK[0];
 
-always @(posedge evrRxClk) begin
-    // Update time stamp seconds and clear time stamp ticks
-    // on arrival of 'pulse per second' marker event code.
-    if (evCodeValid && (evCode == EVCODE_SECONDS_MARKER)) begin
-        if (enoughBits && !tooManyBits) begin
-            tsSeconds <= shiftReg;
-            timestampValid <= 1;
-        end
-        else if (timestampValid) begin
-            tsSeconds <= tsSeconds + 1;
-        end
-        tsTicks <= 0;
-        bitsLeft <= SECONDS_WIDTH - 1;
-        enoughBits <= 0;
-        tooManyBits <= 0;
-    end
-    else if (tsTicks[TICKS_WIDTH-1] == 0) begin
-        tsTicks <= tsTicks + 1;
-    end
-    else begin
-        timestampValid <= 0;
-    end
+todReceiver #(
+    .NOMINAL_CLK_RATE(NOMINAL_CLK_RATE),
+    .TIMESTAMP_WIDTH(TIMESTAMP_WIDTH),
+    .EVCODE_SHIFT_ZERO(EVCODE_SHIFT_ZERO),
+    .EVCODE_SHIFT_ONE(EVCODE_SHIFT_ONE),
+    .EVCODE_SECONDS_MARKER(EVCODE_SECONDS_MARKER),
+    .STATUS_COUNTER_WIDTH(STATUS_COUNTER_WIDTH))
+  todReceiver (
+    .clk(evrRxClk),
+    .rst(1'b0),
 
-    // Shift in another bit of upcoming seconds
-    if (evCodeValid
-     && ((evCode == EVCODE_SHIFT_ZERO) || (evCode == EVCODE_SHIFT_ONE))) begin
-        bitsLeft <= bitsLeft - 1;
-        if (enoughBits) tooManyBits <= 1;
-        if (bitsLeft == 0) enoughBits <= 1;
-        shiftReg <= {shiftReg[SECONDS_WIDTH-2:0], evCode[0]};
-    end
-end
+    .evCode(evCode),
+    .evCodeValid(evCodeValid),
+
+    .tooManyBitsCounter(tooManyBitsCounter),
+    .tooFewBitsCounter(tooFewBitsCounter),
+    .outOfSeqCounter(outOfSeqCounter),
+    .timestamp(),
+    .timestampValid(),
+    .timestampHA(timestamp),
+    .timestampHAValid(timestampValid)
+);
 
 // Rely on the optimizer to clean out all unused event strobes
 genvar e;
