@@ -17,7 +17,7 @@ module construct #(
 	// allowance Rx/Tx frequency offset.
 	// At the other end, p_offset + max(fp_offset) < (2048-MTU-guard)
 ) (
-	input clk,
+	input clk,  // timespec 6.8 ns
 	input [paw-1:0] gray_state,
 	// port to MAC/IP config, single-cycle latency
 	output [3:0] ip_a,

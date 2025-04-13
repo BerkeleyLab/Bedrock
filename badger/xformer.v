@@ -2,7 +2,7 @@
 // Uses the rearranged input packet and meta-information
 // to create output packet, still sans CRC32.
 module xformer(
-	input clk,
+	input clk,  // timespec 6.8 ns
 	input [5:0] pc,
 	input [1:0] category,
 	input [2:0] udp_sel,

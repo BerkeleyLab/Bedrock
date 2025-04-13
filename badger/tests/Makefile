@@ -218,13 +218,13 @@ hw_test_yosys.json: hw_test_skin.v $(HW_TEST_V)
 # experimental bitfiles, not for hardware
 # summarizes fabric footprints based on XST synthesizing for Spartan-6
 bits: scanner.bit construct.bit xformer.bit ethernet_crc_add.bit udp_port_cam_wrap.bit rtefi_blob.bit
-	cd _xilinx && for f in $(basename $^); do echo $$f; grep "Slice LUT" $${f}_map.mrp; done
+	cd _xilinx && for f in $(basename $^); do echo $$f; grep -E "of Slice LUT|of RAMB" $${f}_map.mrp; done
 scanner.bit: ones_chksum.v udp_port_cam.v crc8e_guts.v reg_tech_cdc.v
 construct.bit: ones_chksum.v construct_tx_table.v
 xformer.bit: hack_icmp_cksum.v reg_delay.v
 ethernet_crc_add.bit: crc8e_guts.v
 udp_port_cam_wrap.bit: udp_port_cam.v
-rtefi_blob.bit: $(RTEFI_V)
+rtefi_blob.bit: $(RTEFI_V) rtefi_blob.ucf
 
 # =====
 # Make a bitfile for an SP605 with Xilinx XST

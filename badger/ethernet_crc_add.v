@@ -6,7 +6,7 @@
 // raw_s is valid just for the (incoming) packet data.
 // raw_l is also valid for a few cycles before, and 4 cycles after, that.
 module ethernet_crc_add(
-	input clk,
+	input clk,  // timespec 6.8 ns
 	input raw_s,
 	input raw_l,
 	input [7:0] raw_d,
