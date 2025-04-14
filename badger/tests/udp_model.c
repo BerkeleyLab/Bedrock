@@ -132,7 +132,6 @@ struct udp_state *udp_setup_r(unsigned short udp_port_, int badger_client_)
 		exit(1);
 	}
 	setup_receive(ust->udpfd, INADDR_ANY, udp_port_);
-	/* setup_transmit(udpfd, lskdjfsdlj, 2000); */
 	fcntl(ust->udpfd, F_SETFL, O_NONBLOCK);
 	return ust;
 }
@@ -164,14 +163,14 @@ void udp_receiver_r(struct udp_state *ust, int *in_octet, int *in_valid, int *in
 			inbuf->len = rc;
 			inbuf->cur = 0;
 			ust->sleepctr = 0;
-			ust->preamble_cnt = 18;  /* should be 44(?) but I'm easily bored. */
+			ust->preamble_cnt = 28;  /* should be 44(?) but I'm easily bored. */
 			if (udp_model_debug) {
 				fputs("Rx:", stderr);
 				print_buf(stderr, inbuf);
 			}
 		}
 	}
-	if (ust->badger_client) { // Badger client interface
+	if (ust->badger_client) {  /* Badger client interface */
 		if (ust->preamble_cnt > 0) {
 			--(ust->preamble_cnt);
 			if (in_valid) *in_valid = 1;
@@ -182,6 +181,15 @@ void udp_receiver_r(struct udp_state *ust, int *in_octet, int *in_valid, int *in
 			--(ust->postfix_cnt);
 			if (in_valid) *in_valid = 1;
 			if (in_count) *in_count = 0;
+			return;
+		}
+	} else {
+		/* Even Raw mode needs a well-defined minimum time between packets */
+		if (ust->preamble_cnt > 0) {
+			--(ust->preamble_cnt);
+			if (in_valid) *in_valid = 0;
+			if (in_count) *in_count = 0;
+			if (in_octet) *in_octet = 0;
 			return;
 		}
 	}
