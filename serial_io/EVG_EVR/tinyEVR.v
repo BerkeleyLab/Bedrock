@@ -45,6 +45,8 @@ module tinyEVR #(
     (*mark_debug=DEBUG*) output wire                       ppsMarker,
     (*mark_debug=DEBUG*) output wire                       timestampValid,
     (*mark_debug=DEBUG*) output wire [TIMESTAMP_WIDTH-1:0] timestamp,
+    (*mark_debug=DEBUG*) output wire                       timestampHAValid,
+    (*mark_debug=DEBUG*) output wire [TIMESTAMP_WIDTH-1:0] timestampHA,
     (*mark_debug=DEBUG*) output wire                 [7:0] distributedDataBus,
     output wire [EVSTROBE_COUNT:1]                         evStrobe);
 
@@ -61,6 +63,8 @@ tinyEVRcommon #(.ACTION_RAM_WIDTH(0),
     .ppsMarker(ppsMarker),
     .timestampValid(timestampValid),
     .timestamp(timestamp),
+    .timestampHAValid(timestampHAValid),
+    .timestampHA(timestampHA),
     .distributedDataBus(distributedDataBus),
     .action(evStrobe),
     .tooManyBitsCounter(tooManyBitsCounter),
@@ -95,6 +99,8 @@ module smallEVR #(
     (*mark_debug=DEBUG*) output wire                       ppsMarker,
     (*mark_debug=DEBUG*) output wire                       timestampValid,
     (*mark_debug=DEBUG*) output wire [TIMESTAMP_WIDTH-1:0] timestamp,
+    (*mark_debug=DEBUG*) output wire                       timestampHAValid,
+    (*mark_debug=DEBUG*) output wire [TIMESTAMP_WIDTH-1:0] timestampHA,
     (*mark_debug=DEBUG*) output wire                 [7:0] distributedDataBus,
     (*mark_debug=DEBUG*) output wire    [ACTION_WIDTH-1:0] action,
 
@@ -116,6 +122,8 @@ tinyEVRcommon #(.ACTION_RAM_WIDTH(ACTION_WIDTH),
     .ppsMarker(ppsMarker),
     .timestampValid(timestampValid),
     .timestamp(timestamp),
+    .timestampHAValid(timestampHAValid),
+    .timestampHA(timestampHA),
     .distributedDataBus(distributedDataBus),
     .action(action),
     .tooManyBitsCounter(tooManyBitsCounter),
@@ -147,6 +155,8 @@ module tinyEVRcommon #(
     (*mark_debug=DEBUG*) output wire                       ppsMarker,
     (*mark_debug=DEBUG*) output wire                       timestampValid,
     (*mark_debug=DEBUG*) output wire [TIMESTAMP_WIDTH-1:0] timestamp,
+    (*mark_debug=DEBUG*) output wire                       timestampHAValid,
+    (*mark_debug=DEBUG*) output wire [TIMESTAMP_WIDTH-1:0] timestampHA,
     (*mark_debug=DEBUG*) output wire                 [7:0] distributedDataBus,
     output wire [ACT_MSB:ACT_LSB]                          action,
 
@@ -194,10 +204,10 @@ todReceiver #(
     .tooManyBitsCounter(tooManyBitsCounter),
     .tooFewBitsCounter(tooFewBitsCounter),
     .outOfSeqCounter(outOfSeqCounter),
-    .timestamp(),
-    .timestampValid(),
-    .timestampHA(timestamp),
-    .timestampHAValid(timestampValid)
+    .timestamp(timestamp),
+    .timestampValid(timestampValid),
+    .timestampHA(timestampHA),
+    .timestampHAValid(timestampHAValid)
 );
 
 // Rely on the optimizer to clean out all unused event strobes
