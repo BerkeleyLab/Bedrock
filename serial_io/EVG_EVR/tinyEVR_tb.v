@@ -42,9 +42,10 @@ reg          evrClk = 1;
 reg   [15:0] evrRxWord = 16'hx;
 reg    [1:0] evrCharIsK = 2'hx;
 
-wire                       ppsMarker, timestampValid;
-wire                       ppsMarker_s, timestampValid_s;
+wire                       ppsMarker, timestampValid, timestampHAValid;
+wire                       ppsMarker_s, timestampValid_s, timestampHAValid_s;
 wire [TIMESTAMP_WIDTH-1:0] timestamp, timestamp_s;
+wire [TIMESTAMP_WIDTH-1:0] timestampHA, timestampHA_s;
 wire               [EVSTROBE_COUNT:1] evStrobe;
 wire    [ACTION_WIDTH-1:0] action;
 
@@ -55,8 +56,10 @@ tinyEVR #(
            .evrRxWord(evrRxWord),
            .evrCharIsK(evrCharIsK),
            .ppsMarker(ppsMarker),
-           .timestampHAValid(timestampValid),
-           .timestampHA(timestamp),
+           .timestampValid(timestampValid),
+           .timestamp(timestamp),
+           .timestampHAValid(timestampHAValid),
+           .timestampHA(timestampHA),
            .evStrobe(evStrobe));
 
 smallEVR #(
@@ -66,8 +69,10 @@ smallEVR #(
            .evrRxWord(evrRxWord),
            .evrCharIsK(evrCharIsK),
            .ppsMarker(ppsMarker_s),
-           .timestampHAValid(timestampValid_s),
-           .timestampHA(timestamp_s),
+           .timestampValid(timestampValid_s),
+           .timestamp(timestamp_s),
+           .timestampHAValid(timestampHAValid_s),
+           .timestampHA(timestampHA_s),
            .action(action),
            .sysClk(sysClk),
            .sysActionWriteEnable(sysActionWriteEnable),
@@ -112,12 +117,10 @@ begin
     setAction(8'hBC, 4'b1111);
     #40 ;
 
-    // EVR needs 4 PPS strobes for a valid timestamp
-    repeat(4) begin
-        wait (ppsCounterDone);
-        sendEvent(EVCODE_SECONDS_MARKER);
-        check(32'h00000000);
-    end
+    wait (ppsCounterDone);
+    sendEvent(EVCODE_SECONDS_MARKER);
+    check(32'h00000000);
+    checkHA(32'h00000000);
 
     // Start checking from now on
     #100 ;
@@ -125,24 +128,28 @@ begin
     wait (ppsCounterDone);
     sendEvent(EVCODE_SECONDS_MARKER);
     check(32'h12345678);
+    checkHA(32'h12345678);
 
     #100 ;
     sendSeconds(32'h12345679);
     wait (ppsCounterDone);
     sendEvent(EVCODE_SECONDS_MARKER);
     check(32'h12345679);
+    checkHA(32'h12345679);
 
     #100 ;
     sendSeconds(32'h1234567A);
     wait (ppsCounterDone);
     sendEvent(EVCODE_SECONDS_MARKER);
     check(32'h1234567A);
+    checkHA(32'h1234567A);
 
     #100 ;
     sendSeconds(32'h1234567B);
     wait (ppsCounterDone);
     sendEvent(EVCODE_SECONDS_MARKER);
     check(32'h1234567B);
+    checkHA(32'h1234567B);
 
     #1000 ;
 
@@ -204,13 +211,28 @@ task sendEvent;
     end
 endtask
 
-task check;
+task checkRaw;
     input [31:0] arg;
+    input HA;
     reg [31:0] seconds;
     begin
-    seconds = timestamp[32+:32];
-    $display("%x %x %s", arg, seconds, (arg == seconds) ? " OK" : "BAD");
+    seconds = HA? timestampHA[32+:32] : timestamp[32+:32];
+    $display("%s %x %x %s", HA? "HA":"Normal", arg, seconds, (arg == seconds) ? " OK" : "BAD");
     if (arg != seconds) fail = 1;
+    end
+endtask
+
+task check;
+    input [31:0] arg;
+    begin
+        checkRaw(arg, 1'b0);
+    end
+endtask
+
+task checkHA;
+    input [31:0] arg;
+    begin
+        checkRaw(arg, 1'b1);
     end
 endtask
 
