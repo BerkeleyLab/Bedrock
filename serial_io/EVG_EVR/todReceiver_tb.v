@@ -63,32 +63,17 @@ localparam PPS_STROBE_DELAY_CHAIN_LENGTH = 3;
 
 reg pps_d = 0;
 reg ppsStrobe = 0;
-reg ppsStrobe_d[0:PPS_STROBE_DELAY_CHAIN_LENGTH-1];
+reg ppsStrobe_d0 = 0, ppsStrobe_d1 = 0, ppsStrobe_d2 = 0;
 
 always @(posedge clk) begin
     pps_d <= pps;
-    ppsStrobe_d[0] <= ppsStrobe;
+    ppsStrobe_d0 <= ppsStrobe;
+    ppsStrobe_d1 <= ppsStrobe_d0;
+    ppsStrobe_d2 <= ppsStrobe_d1;
 
     ppsStrobe <= 0;
     if (pps && !pps_d) begin
         ppsStrobe <= 1;
-    end
-end
-
-genvar i;
-generate
-    for (i = 0; i < PPS_STROBE_DELAY_CHAIN_LENGTH-1; i = i + 1) begin
-        always @(posedge clk) begin
-            ppsStrobe_d[i+1] <= ppsStrobe_d[i];
-        end
-    end
-endgenerate
-
-// dump ppsStrobe_d
-integer j = 0;
-initial begin
-    for (j = 0; j < PPS_STROBE_DELAY_CHAIN_LENGTH; j = j + 1) begin
-        $dumpvars(0, ppsStrobe_d[j]);
     end
 end
 
@@ -197,7 +182,7 @@ always @(posedge clk) begin
     // It takes 2 clock cycles after ppsStrobe for the
     // todReceiver to perceive that + 1 clock cycle for
     // the seconds latch
-    if (ppsStrobe_d[2]) begin
+    if (ppsStrobe_d2) begin
         if (!timestampHAValid) begin
             timestampInvCounter = timestampInvCounter + 1;
             if (timestampInvCounter > TIMESTAMP_INVALID_ALLOWANCE) begin
