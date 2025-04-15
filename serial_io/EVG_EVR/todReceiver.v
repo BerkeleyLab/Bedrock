@@ -79,7 +79,6 @@ wire ppsStrobe = evCodeValid && (evCode == EVCODE_SECONDS_MARKER);
 
 reg [2:0] ppsValidCounter = 0;
 wire ppsValid = ppsValidCounter[2];
-reg secondsValid = 0;
 
 reg [CLK_COUNTER_WIDTH-1:0] clockCounter = 0;
 reg [PPS_INITIAL_WIDTH-1:0] ppsInitial = 0;
@@ -219,8 +218,10 @@ end
 // Seconds receiver
 ///////////////////////////////////////////////////////////////////////////////
 
+reg secondsValid = 0;
+
 assign timestampHAValid = secondsValid && ppsValid;
-assign timestampValid = secondsValid && ppsValid;
+assign timestampValid = secondsValid;
 
 always @(posedge clk) begin
     if (rst) begin
@@ -234,15 +235,11 @@ always @(posedge clk) begin
         if (ppsStrobe) begin
             if (enoughBits && !tooManyBits) begin
                 expectSeconds <= shiftReg + 1;
-                if (shiftReg == expectSeconds) begin
-                    seconds <= shiftReg;
-                    secondsValid <= 1;
-                end
-                else begin
+                seconds <= shiftReg;
+                secondsValid <= 1;
+
+                if (shiftReg != expectSeconds) begin
                     outOfSeqCounter <= outOfSeqCounter + 1;
-                    if (secondsValid) begin
-                        seconds <= seconds + 1;
-                    end
                 end
             end
             else if (secondsValid) begin
