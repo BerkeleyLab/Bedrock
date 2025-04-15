@@ -3,7 +3,7 @@
 [pos] -1 -1
 *-6.000000 5932 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] gmii_link_tb.
-[treeopen] gmii_link_tb.link.
+[treeopen] gmii_link_tb.link_0.
 [sst_width] 294
 [signals_width] 261
 [sst_expanded] 1
@@ -16,70 +16,70 @@ gmii_link_tb.operate
 @200
 -TX_PCS
 @22
-gmii_link_tb.link.tx.tx_state[3:0]
+gmii_link_tb.link_0.tx.tx_state[3:0]
 @28
-gmii_link_tb.link.tx.tx_is_k
-gmii_link_tb.link.tx.tx_enable
-gmii_link_tb.link.tx.ep_lacr_tx_en_i
+gmii_link_tb.link_0.tx.tx_is_k
+gmii_link_tb.link_0.tx.tx_enable
+gmii_link_tb.link_0.tx.ep_lacr_tx_en_i
 @22
-gmii_link_tb.link.tx.ep_lacr_tx_val_i[15:0]
-gmii_link_tb.link.tx.tx_odata_reg[7:0]
-gmii_link_tb.link.txdata[9:0]
+gmii_link_tb.link_0.tx.ep_lacr_tx_val_i[15:0]
+gmii_link_tb.link_0.tx.tx_odata_reg[7:0]
+gmii_link_tb.link_0.txdata[9:0]
 @28
-gmii_link_tb.link.enc_dispin
-gmii_link_tb.link.enc_dispout
+gmii_link_tb.link_0.enc_dispin
+gmii_link_tb.link_0.enc_dispout
 @200
 -RX_PCS
 @28
-gmii_link_tb.link.rx.rx_state[2:0]
+gmii_link_tb.link_0.rx.rx_state[2:0]
 @200
 -AUTO-NEGOTIATION TX
 @28
-gmii_link_tb.link.negotiator.lacr_send
-gmii_link_tb.link.negotiator.an_state[2:0]
-gmii_link_tb.link.negotiator.abl_match
-gmii_link_tb.link.negotiator.ack_match
-gmii_link_tb.link.negotiator.consistency_match
+gmii_link_tb.link_0.protagonist.negotiator.lacr_send
+gmii_link_tb.link_0.protagonist.negotiator.an_state[2:0]
+gmii_link_tb.link_0.protagonist.negotiator.abl_match
+gmii_link_tb.link_0.protagonist.negotiator.ack_match
+gmii_link_tb.link_0.protagonist.negotiator.consistency_match
 @22
-gmii_link_tb.link.negotiator.lacr_out[15:0]
+gmii_link_tb.link_0.protagonist.negotiator.lacr_out[15:0]
 @28
-gmii_link_tb.link.negotiator.an_state[2:0]
+gmii_link_tb.link_0.protagonist.negotiator.an_state[2:0]
 @24
 [color] 1
-gmii_link_tb.link.negotiator.link_timer[20:0]
+gmii_link_tb.link_0.protagonist.negotiator.link_timer[20:0]
 @28
-gmii_link_tb.link.negotiator.link_timer_start
-gmii_link_tb.link.negotiator.link_timer_done
+gmii_link_tb.link_0.protagonist.negotiator.link_timer_start
+gmii_link_tb.link_0.protagonist.negotiator.link_timer_done
 @200
 -AUTO-NEGOTIATION RX
 @28
-gmii_link_tb.link.negotiator.lacr_in_stb
+gmii_link_tb.link_0.protagonist.negotiator.lacr_in_stb
 @22
-gmii_link_tb.link.negotiator.lacr_in[15:0]
+gmii_link_tb.link_0.protagonist.negotiator.lacr_in[15:0]
 @c00022
-gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
+gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
 @28
-(0)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(1)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(2)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(3)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(4)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(5)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(6)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(7)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(8)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(9)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(10)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(11)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(12)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(13)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(14)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
-(15)gmii_link_tb.link.negotiator.lacr_prev_val[15:0]
+(0)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(1)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(2)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(3)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(4)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(5)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(6)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(7)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(8)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(9)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(10)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(11)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(12)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(13)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(14)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
+(15)gmii_link_tb.link_0.protagonist.negotiator.lacr_prev_val[15:0]
 @1401200
 -group_end
 @28
-gmii_link_tb.link.negotiator.lacr_match
-gmii_link_tb.link.negotiator.lacr_change
-gmii_link_tb.link.negotiator.operate
+gmii_link_tb.link_0.protagonist.negotiator.lacr_match
+gmii_link_tb.link_0.protagonist.negotiator.lacr_change
+gmii_link_tb.link_0.protagonist.negotiator.operate
 [pattern_trace] 1
 [pattern_trace] 0

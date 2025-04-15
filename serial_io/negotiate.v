@@ -258,6 +258,7 @@ module negotiate(
 
    assign wdog_timeout = (wdog_cnt==WATCHDOG_TIME);
 
+   // Remember that remote_fault is two bits wide
    wire [8:0] an_status_l = {an_state==AN_ABORT, an_state==AN_ABILITY,
                              wdog_an_disable, remote_fault, abl_mismatch,
                              an_state==AN_ACK, an_state==AN_IDLE, an_state==AN_LINK_OK};
