@@ -169,7 +169,9 @@ wire rx_synced; wire rx_even;
         RX_COMMA : begin
           // received code group with error (or control code group) - go to NOFRAME
           if((d_err | d_is_k | d_is_even)) begin
-            $display("%s->RX_NOFRAME 0x%x, %b, %b, %b", `INDENT, dec_out, d_is_k, dec_err, d_is_even);
+            `ifdef SIMULATE
+                $display("%s(%t) ->RX_NOFRAME 0x%x, %b, %b, %b", `INDENT, $stime, dec_out, d_is_k, dec_err, d_is_even);
+            `endif
             rx_state <= RX_NOFRAME;
           end
           else begin
@@ -214,7 +216,11 @@ wire rx_synced; wire rx_even;
             //$display("%s->STROBE! 0x%x", `INDENT, {d_data, lacr_rx_val[7:0]});
             lacr_rx_val[15:8] <= d_data;
             lacr_rx_stb <= 1;
-          end else $display("%s->NO_STROBE: lacr_rx_en = %b", `INDENT, lacr_rx_en);
+          end else begin
+            `ifdef SIMULATE
+            $display("%s(%t) ->NO_STROBE: lacr_rx_en = %b", `INDENT, $stime, lacr_rx_en);
+            `endif
+          end
           rx_state <= RX_NOFRAME;
         end
           //-----------------------------------------------------------------------------
@@ -279,8 +285,8 @@ assign ep_rcr_los_o = dec_err_los;
     if (lacr_rx_stb) begin
       old_lacr <= lacr_rx_val;
       if (old_lacr != lacr_rx_val) begin
-        if (lacr_rx_val != 0) $display("%sReceived 0x%x", `INDENT, lacr_rx_val);
-        else $display("%sReceived breaklink", `INDENT);
+        if (lacr_rx_val != 0) $display("%s(%t) Received 0x%x", `INDENT, $stime, lacr_rx_val);
+        else $display("%s(%t) Received breaklink", `INDENT, $stime);
       end
     end
   end

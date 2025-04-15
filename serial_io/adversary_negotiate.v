@@ -117,7 +117,8 @@ reg mr_page_rx = 1'b0; // ???
 reg an_state_transition_stb = 1'b0;
 reg xmit_rst_stb=1'b0;
 `ifdef SIMULATE
-  `define INDENT  "            "
+  //`define INDENT  "            "
+  `define INDENT  ""
 reg [23*8-1:0] an_state_str [0:LINK_OK];
 reg non_breaklink=1'b0;
 initial begin
@@ -141,7 +142,7 @@ always @(posedge clk) begin
   old_an_state <= an_state;
   if (old_an_state != an_state) begin
     if ((an_state != ABILITY_DETECT_WAIT) && (an_state != ACKNOWLEDGE_DETECT_WAIT)) begin
-      if (non_breaklink) $display("%t: ->%s", $stime, an_state_str[an_state]);
+      if (non_breaklink) $display("%s(%t) -> %s", `INDENT, $stime, an_state_str[an_state]);
     end
   end
 end
@@ -199,7 +200,7 @@ always @(posedge clk) begin
           an_state_transition_stb <= 1'b1;
         end else begin
           `ifdef SIMULATE
-            if (non_breaklink) $display("%sReceived Breaklink", `INDENT);
+            if (non_breaklink) $display("%s(%t) Received Breaklink", `INDENT, $stime);
           `endif
           // Breaklink
           an_state <= AN_ENABLE;
@@ -216,8 +217,8 @@ always @(posedge clk) begin
       if ((acknowledge_match & !consistency_match) || (ability_match & (rx_Config_Reg==0))) begin
         // Failed consistency check and/or breaklink
         `ifdef SIMULATE
-          if (non_breaklink & (ability_match & (rx_Config_Reg==0))) $display("%sReceived Breaklink", `INDENT);
-          else $display("%sFailed consistency check", `INDENT);
+          if (non_breaklink & (ability_match & (rx_Config_Reg==0))) $display("%s(%t) Received Breaklink", `INDENT, $stime);
+          else $display("%s(%t) Failed consistency check", `INDENT, $stime);
         `endif
         an_state <= AN_ENABLE;
         an_state_transition_stb <= 1'b1;
@@ -237,7 +238,7 @@ always @(posedge clk) begin
       end else begin
         if (ability_match & (rx_Config_Reg==0)) begin
           `ifdef SIMULATE
-            if (non_breaklink) $display("%sReceived Breaklink", `INDENT);
+            if (non_breaklink) $display("%s(%t) Received Breaklink", `INDENT, $stime);
           `endif
           an_state <= AN_ENABLE; // Breaklink received
           an_state_transition_stb <= 1'b1;
@@ -262,7 +263,7 @@ always @(posedge clk) begin
       end else begin
         if (ability_match & (rx_Config_Reg==0)) begin
           `ifdef SIMULATE
-            if (non_breaklink) $display("%sReceived Breaklink", `INDENT);
+            if (non_breaklink) $display("%s(%t) Received Breaklink", `INDENT, $stime);
           `endif
           an_state <= AN_ENABLE; // Breaklink received
           an_state_transition_stb <= 1'b1;
@@ -279,8 +280,8 @@ always @(posedge clk) begin
       resolve_priority <= 1'b1;
       if (ability_match) begin
         `ifdef SIMULATE
-          if (non_breaklink && (rx_Config_Reg==0)) $display("%sReceived Breaklink", `INDENT);
-          else $display("%sLeaving LINK_OK with rx_Config_Reg = 0x%x", `INDENT, rx_Config_Reg);
+          if (non_breaklink && (rx_Config_Reg==0)) $display("%s(%t) Received Breaklink", `INDENT, $stime);
+          else $display("%s(%t) Leaving LINK_OK with rx_Config_Reg = 0x%x", `INDENT, $stime, rx_Config_Reg);
         `endif
         an_state <= AN_ENABLE;
         an_state_transition_stb <= 1'b1;
@@ -431,10 +432,10 @@ always @(posedge clk) begin
       `ifdef SIMULATE
       if ((tx_Config_Reg != 0) && ~tx_non_breaklink) begin
         tx_non_breaklink <= 1'b1;
-        $display("%sTransmitting 0x%x", `INDENT, tx_Config_Reg);
+        $display("%s(%t) Transmitting 0x%x", `INDENT, $stime, tx_Config_Reg);
       end else if ((tx_Config_Reg == 0) && tx_non_breaklink) begin
         tx_non_breaklink <= 1'b0;
-        $display("%sTransmitting breaklink", `INDENT);
+        $display("%s(%t) Transmitting breaklink", `INDENT, $stime);
       end
       `endif
       // Just blast out the CR

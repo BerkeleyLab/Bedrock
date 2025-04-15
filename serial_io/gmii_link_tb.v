@@ -10,11 +10,18 @@ module gmii_link_tb;
    wire operate;  // from link negotiator
    wire [8:0] an_status;
 
+   `define INDENT_PROTAGONIST  "                                                "
+   `define INDENT_ADVERSARY    ""
+   `define INDENT_DIFF                  "                                       "
+   `define HLINE               "------------------------------------------------------------"
+
    initial begin
       if ($test$plusargs("vcd")) begin
          $dumpfile("gmii_link.vcd");
          $dumpvars(5,gmii_link_tb);
       end
+      $display("%sAdversary%sOriginal", `INDENT_ADVERSARY, `INDENT_DIFF);
+      $display(`HLINE);
       for (cc=0; cc<5000; cc=cc+1) begin
          clk=0; #(CLKP/2);
          clk=1; #(CLKP/2);

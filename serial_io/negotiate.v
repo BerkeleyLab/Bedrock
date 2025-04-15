@@ -175,7 +175,7 @@ module negotiate(
     always @(posedge rx_clk) begin
       old_an_state <= an_state;
       if (old_an_state != an_state) begin
-        $display("%s%t->%s", `INDENT, $time, an_state_str[an_state]);
+        $display("%s(%t) -> %s", `INDENT, $stime, an_state_str[an_state]);
       end
     end
    `endif
