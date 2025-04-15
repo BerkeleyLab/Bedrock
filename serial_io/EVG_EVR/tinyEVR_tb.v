@@ -55,8 +55,8 @@ tinyEVR #(
            .evrRxWord(evrRxWord),
            .evrCharIsK(evrCharIsK),
            .ppsMarker(ppsMarker),
-           .timestampValid(timestampValid),
-           .timestamp(timestamp),
+           .timestampHAValid(timestampValid),
+           .timestampHA(timestamp),
            .evStrobe(evStrobe));
 
 smallEVR #(
@@ -66,8 +66,8 @@ smallEVR #(
            .evrRxWord(evrRxWord),
            .evrCharIsK(evrCharIsK),
            .ppsMarker(ppsMarker_s),
-           .timestampValid(timestampValid_s),
-           .timestamp(timestamp_s),
+           .timestampHAValid(timestampValid_s),
+           .timestampHA(timestamp_s),
            .action(action),
            .sysClk(sysClk),
            .sysActionWriteEnable(sysActionWriteEnable),
@@ -119,14 +119,13 @@ begin
         check(32'h00000000);
     end
 
-    // EVR needs 2 seconds that are consecutive to be valid
+    // Start checking from now on
     #100 ;
     sendSeconds(32'h12345678);
     wait (ppsCounterDone);
     sendEvent(EVCODE_SECONDS_MARKER);
-    check(32'h00000000);
+    check(32'h12345678);
 
-    // Start checkign from now on
     #100 ;
     sendSeconds(32'h12345679);
     wait (ppsCounterDone);
