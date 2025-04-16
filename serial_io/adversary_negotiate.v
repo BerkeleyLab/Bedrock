@@ -449,6 +449,7 @@ always @(posedge clk) begin
         if (ordered_set_variant) tx_byte <= D_21_5_DEC;
         else tx_byte <= D_2_2_DEC;
         tx_is_k <= 1'b0;
+        ordered_set_variant <= ~ordered_set_variant;
       end else if (byte_counter == 2) begin
         tx_byte <= tx_Config_Reg[7:0];
         tx_is_k <= 1'b0;

@@ -78,12 +78,13 @@ module negotiate(
    reg [2:0] lacr_match_cnt=0;
 
    wire match_ok = (lacr_match_cnt==3);
-
+   // & 16'hfffd masks off the Ack bit
+   wire lacr_match_c = (lacr_prev_val&16'hfffd == lacr_in&16'hfffd);
    always @(posedge rx_clk) begin
       if (an_state != AN_RESTART) begin
          if (lacr_in_stb) lacr_prev_val <= lacr_in;
-         lacr_match  <= lacr_in_stb & (lacr_prev_val == lacr_in);
-         lacr_change <= lacr_in_stb & (lacr_prev_val != lacr_in);
+         lacr_match  <= lacr_in_stb & lacr_match_c;
+         lacr_change <= lacr_in_stb & ~lacr_match_c;
 
          if (lacr_match)
             lacr_match_cnt <= lacr_match_cnt + 1;

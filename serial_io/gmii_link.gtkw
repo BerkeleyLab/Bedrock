@@ -9,9 +9,9 @@
 [sst_expanded] 1
 [sst_vpaned_height] 209
 @22
-gmii_link_tb.tx_data[7:0]
+gmii_link_tb.tx_data_0[7:0]
 @28
-gmii_link_tb.tx_enable
+gmii_link_tb.tx_enable_0
 gmii_link_tb.operate
 @200
 -TX_PCS

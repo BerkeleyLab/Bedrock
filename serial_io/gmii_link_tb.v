@@ -81,7 +81,7 @@ module gmii_link_tb;
       end
 
       #(CLKP*10)
-      wait (clk);
+      @(posedge clk);
       phys_en <= 1;
       // Expect successful AN
       wait (operate)
@@ -141,6 +141,7 @@ module gmii_link_tb;
 
    wire [7:0] tx_data_1 = 0;
    wire tx_enable_1 = tx_enable_0;
+   wire operate_1;  // not used, right?
    gmii_link #(
       .DELAY(50),
       .ADVERSARY(1'b1)
@@ -157,7 +158,7 @@ module gmii_link_tb;
       .txdata     (gtx_txdata_10_1),
       .rx_err_los (rx_los),
       .rxdata     (gtx_rxdata_10_1),
-      .operate    (operate),
+      .operate    (operate_1),
       .lacr_rx    (lacr_rx_1),
       .an_status  ()
    );
