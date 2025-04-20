@@ -80,7 +80,7 @@ localparam [3:0] AN_ENABLE              = 4'h0,
                  COMPLETE_ACKNOWLEDGE   = 4'h7,
                  IDLE_DETECT            = 4'h8,
                  LINK_OK                = 4'h9;
-reg [2:0] an_state = AN_ENABLE;
+reg [3:0] an_state = AN_ENABLE;
 localparam [16:0] mr_adv_ability = 17'b00000000001000000; // Only FD, no Next_Page, no Pause frames
 // mr_adv_ability[16] = device supports next_page exchange (NP)
 // mr_adv_ability[14:1] = tx_Config_Reg[13:0]
@@ -134,7 +134,7 @@ initial begin
   an_state_str[IDLE_DETECT]             = "IDLE_DETECT            ";
   an_state_str[LINK_OK]                 = "LINK_OK                ";
 end
-reg [2:0] old_an_state = AN_ENABLE;
+reg [3:0] old_an_state = AN_ENABLE;
 initial begin
   $timeformat(-9, 0, "ns", 8);
 end
@@ -318,7 +318,7 @@ always @(posedge clk) begin
     acknowledge_match_counter <= 0;
   end
   case (cr_state)
-    CR_STATE_IDLE: begin
+    default /* CR_STATE_IDLE */: begin
       if (rx_is_k28_5) cr_state <= CR_STATE_GOT_K;
     end
     CR_STATE_GOT_K: begin
