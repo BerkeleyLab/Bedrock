@@ -72,8 +72,10 @@ module gmii_link_tb;
    end
 
    // Sequence of directed tests
+   localparam link_0_timer = 32;  // units of 8ns ticks
    initial begin
-      #(CLKP*(50 + link_0.protagonist.negotiator.WATCHDOG_TIME)) // Must be longer than WDOG timeout
+      // The "8*" is a bug carried forward, so I can temporarily see matching behavior
+      #(CLKP*(50 + 8*link_0_timer))  // Must be longer than WDOG timeout
       // No physical link; Don't expect any AN activity
       if (operate || an_status[6] || an_status[0] || rx_dv_0 || rx_dv_1) begin
          $display("FAIL: %t AN unexpected when physical link is down", $time);
@@ -94,6 +96,7 @@ module gmii_link_tb;
       // Disable Full Duplex advertisement and restart AN by pulsing LOS
       rx_los <= 1;
       link_0.protagonist.negotiator.FD <= 0;
+      // link_0.adversary.adversary_negotiate_i.FD <= 0;
       #(CLKP*4); rx_los <= 0;
       // Expect AN abort
       wait (operate)
@@ -106,6 +109,7 @@ module gmii_link_tb;
       // Attempt a successful AN by pulsing LOS
       rx_los <= 1;
       link_0.protagonist.negotiator.FD <= 1;
+      // link_0.adversary.adversary_negotiate_i.FD <= 1;
       #(CLKP*4); rx_los <= 0;
       // Expect successful AN
       wait (operate)
@@ -119,7 +123,7 @@ module gmii_link_tb;
    // Note that the DELAY value is set _much_ lower than in real-life,
    // so we can see the process more easily in a waveform viewer.
    gmii_link #(
-      .DELAY(32),
+      .TIMER(link_0_timer),
       .INDENT(`INDENT_PROTAGONIST),
       .ADVERSARY(1'b0)
     ) link_0 (
@@ -144,7 +148,7 @@ module gmii_link_tb;
    wire tx_enable_1 = tx_enable_0;
    wire operate_1;  // not used, right?
    gmii_link #(
-      .DELAY(50),
+      .TIMER(32),
       .INDENT(`INDENT_ADVERSARY),
       .ADVERSARY(1'b1)
     ) link_1 (

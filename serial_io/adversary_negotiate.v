@@ -7,7 +7,8 @@
  */
 
 module adversary_negotiate #(
-  parameter CLK_PERIOD_NS = 8,
+  // 10 ms link_timer = 10e6/8
+  parameter TIMER_TICKS = 1250000,
   parameter INDENT = ""
 ) (
   input  clk,
@@ -41,13 +42,8 @@ wire rx_is_d16_2 = ~rx_is_k & (rx_byte == D_16_2_DEC);
  *  K.28.5  BC  101 11100 001111 1010 110000 0101     *Comma: Run of 5 1's or 5 0's
  */
 
-`ifdef SIMULATE
-localparam LINK_TIMER_PERIOD_NS = 256; // 256ns
-`else
-localparam LINK_TIMER_PERIOD_NS = 10_000_000; // 10ms
-`endif
-localparam LINK_TIMER_AW = $clog2(LINK_TIMER_PERIOD_NS/CLK_PERIOD_NS);
-localparam [LINK_TIMER_AW-1:0] LINK_TIMER_MAX = (LINK_TIMER_PERIOD_NS/CLK_PERIOD_NS)-1;
+localparam LINK_TIMER_AW = $clog2(TIMER_TICKS);
+localparam [LINK_TIMER_AW-1:0] LINK_TIMER_MAX = TIMER_TICKS-1;
 reg [LINK_TIMER_AW-1:0] link_timer=0;
 wire link_timer_done = link_timer == LINK_TIMER_MAX;
 reg link_timer_stb=1'b0, link_timer_enabled=1'b0;
@@ -82,6 +78,7 @@ localparam [3:0] AN_ENABLE              = 4'h0,
                  IDLE_DETECT            = 4'h8,
                  LINK_OK                = 4'h9;
 reg [3:0] an_state = AN_ENABLE;
+reg  FD=1;   // Full Duplex capable  XXX not used
 localparam [16:0] mr_adv_ability = 17'b00000000001000000; // Only FD, no Next_Page, no Pause frames
 // mr_adv_ability[16] = device supports next_page exchange (NP)
 // mr_adv_ability[14:1] = tx_Config_Reg[13:0]

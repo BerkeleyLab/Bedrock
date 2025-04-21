@@ -2,7 +2,7 @@
 // Keep the Tx and Rx clock domains separate, they could be 100ppm different
 // in a normal environment.
 module gmii_link #(
-	parameter DELAY=1250000,  // see negotiate.v
+	parameter TIMER=1250000,  // see negotiate.v
 	parameter ENC_DISPINIT=1,
 	parameter CTRACE_AW = 14,
 	parameter INDENT = "",
@@ -128,7 +128,7 @@ generate
 		wire [15:0] lacr_rx_adversary;
 		assign lacr_rx_val = lacr_rx_adversary;
 		assign tx_odata = negotiating ? tx_odata_an : tx_odata_pcs;
-adversary_negotiate adversary_negotiate_i (
+adversary_negotiate #(.TIMER_TICKS(TIMER), .INDENT(INDENT)) adversary_negotiate_i (
   .clk(RX_CLK), // input
   .rst(1'b0), // input
   .rx_byte(rxdata_dec_out[7:0]), // input [7:0]
@@ -144,7 +144,7 @@ adversary_negotiate adversary_negotiate_i (
 		assign txd = TXD;
 		assign tx_is_k = tx_is_k_pcs;
 		assign tx_odata = tx_odata_pcs;
-negotiate #(.TIMER_TICKS(DELAY), .INDENT(INDENT)) negotiator(
+negotiate #(.TIMER_TICKS(TIMER), .INDENT(INDENT)) negotiator(
 	.rx_clk(RX_CLK),
 	.tx_clk(GTX_CLK),
 	.los(rx_err_los),           // input
