@@ -31,9 +31,7 @@ output reg lacr_rx_stb
 
 `include "endpoint.vh"
 
-`ifdef SIMULATE
-  `define INDENT  "                                                "
-`endif
+parameter INDENT = "";
 
 // RX state machine definitions
 parameter [2:0]
@@ -155,7 +153,7 @@ wire rx_synced; wire rx_even;
             rx_state <= RX_NOFRAME;
           end else if ((d_is_comma)) begin
             // we've got a comma: it's probably an idle sequence, go and check it
-            //$display("%s->RX_COMMA", `INDENT);
+            //$display("%s->RX_COMMA", INDENT);
             rx_state <= RX_COMMA;
           end else if ((d_is_spd & d_is_even)) begin
             // we've got a Start-of-Packet Delimiter
@@ -170,19 +168,19 @@ wire rx_synced; wire rx_even;
           // received code group with error (or control code group) - go to NOFRAME
           if((d_err | d_is_k | d_is_even)) begin
             `ifdef SIMULATE
-                $display("%s(%t) ->RX_NOFRAME 0x%x, %b, %b, %b", `INDENT, $stime, dec_out, d_is_k, dec_err, d_is_even);
+                $display("%s(%t) ->RX_NOFRAME 0x%x, %b, %b, %b", INDENT, $stime, dec_out, d_is_k, dec_err, d_is_even);
             `endif
             rx_state <= RX_NOFRAME;
           end
           else begin
             // received D5.6 or D16.2 - it's an idle pattern.
             if((d_is_idle)) begin
-              //$display("%s->RX_NOFRAME d_is_idle", `INDENT);
+              //$display("%s->RX_NOFRAME d_is_idle", INDENT);
               rx_state <= RX_NOFRAME;
               // received D21.5 or D2.2 - it's a 802.3x autonegotiation LACR
             end
             else if((d_is_lcr)) begin
-              //$display("%s->RX_CR3", `INDENT);
+              //$display("%s->RX_CR3", INDENT);
               rx_state <= RX_CR3;
             end
             else begin
@@ -196,29 +194,29 @@ wire rx_synced; wire rx_even;
           // 1st byte of LACR
           // an error? - drop to NOFRAME state.
           if((d_err | d_is_k | ~d_is_even)) begin
-            //$display("%s->RX_NOFRAME, %b, %b, %b", `INDENT, d_err, d_is_k, d_is_even);
+            //$display("%s->RX_NOFRAME, %b, %b, %b", INDENT, d_err, d_is_k, d_is_even);
             rx_state <= RX_NOFRAME;
           end
           else if((lacr_rx_en)) begin
             // LACR reception is enabled:
             lacr_rx_val[7:0] <= d_data; // Little endian
-            //$display("%s->RX_CR4", `INDENT);
+            //$display("%s->RX_CR4", INDENT);
             rx_state <= RX_CR4;
           end
         end
         RX_CR4 : begin
           // 2nd byte of LACR
           if((d_err | d_is_k | d_is_even)) begin
-            //$display("%s->RX_NOFRAME %b, %b, %b", `INDENT, d_err, d_is_k, d_is_even);
+            //$display("%s->RX_NOFRAME %b, %b, %b", INDENT, d_err, d_is_k, d_is_even);
             rx_state <= RX_NOFRAME;
           end
           else if((lacr_rx_en)) begin
-            //$display("%s->STROBE! 0x%x", `INDENT, {d_data, lacr_rx_val[7:0]});
+            //$display("%s->STROBE! 0x%x", INDENT, {d_data, lacr_rx_val[7:0]});
             lacr_rx_val[15:8] <= d_data;
             lacr_rx_stb <= 1;
           end else begin
             `ifdef SIMULATE
-            $display("%s(%t) ->NO_STROBE: lacr_rx_en = %b", `INDENT, $stime, lacr_rx_en);
+            $display("%s(%t) ->NO_STROBE: lacr_rx_en = %b", INDENT, $stime, lacr_rx_en);
             `endif
           end
           rx_state <= RX_NOFRAME;
@@ -285,12 +283,11 @@ assign ep_rcr_los_o = dec_err_los;
     if (lacr_rx_stb) begin
       old_lacr <= lacr_rx_val;
       if (old_lacr != lacr_rx_val) begin
-        if (lacr_rx_val != 0) $display("%s(%t) Received 0x%x", `INDENT, $stime, lacr_rx_val);
-        else $display("%s(%t) Received breaklink", `INDENT, $stime);
+        if (lacr_rx_val != 0) $display("%s(%t) Received 0x%x", INDENT, $stime, lacr_rx_val);
+        else $display("%s(%t) Received breaklink", INDENT, $stime);
       end
     end
   end
 `endif
 
-`undef INDENT
 endmodule

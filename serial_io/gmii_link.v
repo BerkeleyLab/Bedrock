@@ -5,6 +5,7 @@ module gmii_link #(
 	parameter DELAY=1250000,  // see negotiate.v
 	parameter ENC_DISPINIT=1,
 	parameter CTRACE_AW = 14,
+	parameter INDENT = "",
 	parameter [0:0] ADVERSARY = 1'b0
 ) (
 	// GMII Rx
@@ -59,7 +60,7 @@ wire lacr_send;
 reg enc_dispin=ENC_DISPINIT;
 wire enc_dispout;
 wire [7:0] txd;
-ep_tx_pcs tx(.clk(GTX_CLK), .rst(tx_rst),
+ep_tx_pcs #(.INDENT(INDENT)) tx(.clk(GTX_CLK), .rst(tx_rst),
 	.tx_data_i(txd),
 	.tx_enable(TX_EN & (operate | an_bypass)), // Wait for AN to complete (if enabled)
 	.ep_tcr_en_pcs_i(1'b1),
@@ -86,7 +87,7 @@ wire lacr_rx_en;
 wire [15:0] lacr_rx_val_pcs;
 wire rx_is_k = rxdata_dec_out[8];
 wire [7:0] rx_data = rxdata_dec_out[7:0];
-ep_rx_pcs rx(.clk(RX_CLK), .rst(rx_rst),
+ep_rx_pcs #(.INDENT(INDENT)) rx(.clk(RX_CLK), .rst(rx_rst),
 	.dec_out(rx_data),
 	.dec_is_k(rx_is_k),
 	.dec_err_code(rx_err_code),
@@ -143,7 +144,7 @@ adversary_negotiate adversary_negotiate_i (
 		assign txd = TXD;
 		assign tx_is_k = tx_is_k_pcs;
 		assign tx_odata = tx_odata_pcs;
-negotiate #(.TIMER_TICKS(DELAY)) negotiator(
+negotiate #(.TIMER_TICKS(DELAY), .INDENT(INDENT)) negotiator(
 	.rx_clk(RX_CLK),
 	.tx_clk(GTX_CLK),
 	.los(rx_err_los),           // input

@@ -23,9 +23,7 @@ module negotiate(
    output [8:0]      an_status
 );
 
-`ifdef SIMULATE
-  `define INDENT  "                                                "
-`endif
+   parameter INDENT = "";
 
    // 10 ms link_timer = 10e6/8
    parameter TIMER_TICKS = 1250000;
@@ -176,7 +174,7 @@ module negotiate(
     always @(posedge rx_clk) begin
       old_an_state <= an_state;
       if (old_an_state != an_state) begin
-        $display("%s(%t) -> %s", `INDENT, $stime, an_state_str[an_state]);
+        $display("%s(%t) -> %s", INDENT, $stime, an_state_str[an_state]);
       end
     end
    `endif
@@ -330,5 +328,4 @@ module negotiate(
    // ACK reception of at least three consecutive matching config_reg
    // NP  parameter information follows, either message page or unformatted page
 
-`undef INDENT
 endmodule

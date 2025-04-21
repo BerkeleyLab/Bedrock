@@ -58,8 +58,8 @@ input ep_lacr_tx_en_i // Link Autonegotiation Control Register, TX_EN field
 
 `include "endpoint.vh"
 
+parameter INDENT = "";
 `ifdef SIMULATE
-  `define INDENT  "                                                "
   reg tx_non_breaklink=1'b1;
 `endif
 
@@ -122,10 +122,10 @@ always @(posedge clk) tx_enable_p <= tx_enable;
               old_ep_lacr_tx_val_i <= ep_lacr_tx_val_i;
               if (tx_non_breaklink && (ep_lacr_tx_val_i == 0)) begin
                 tx_non_breaklink <= 1'b0;
-                $display("%s(%t) Transmitting breaklink", `INDENT, $stime);
+                $display("%s(%t) Transmitting breaklink", INDENT, $stime);
               end else if (~tx_non_breaklink) begin
                 tx_non_breaklink <= 1'b1;
-                $display("%s(%t) Transmitting 0x%x", `INDENT, $stime, ep_lacr_tx_val_i);
+                $display("%s(%t) Transmitting 0x%x", INDENT, $stime, ep_lacr_tx_val_i);
               end
             `endif
             tx_state <= TX_CR1;
@@ -159,7 +159,7 @@ always @(posedge clk) tx_enable_p <= tx_enable;
         end
         TX_CR4 : begin
           `ifdef SIMULATE
-            if (old_ep_lacr_tx_val_i != ep_lacr_tx_val_i) $display("%s(%t) Transmitting 0x%x", `INDENT, $stime, ep_lacr_tx_val_i);
+            if (old_ep_lacr_tx_val_i != ep_lacr_tx_val_i) $display("%s(%t) Transmitting 0x%x", INDENT, $stime, ep_lacr_tx_val_i);
           `endif
           tx_odata_reg <= ep_lacr_tx_val_i[15:8];
           if((ep_lacr_tx_en_i == 1'b 1)) begin
@@ -204,5 +204,4 @@ always @(posedge clk) tx_enable_p <= tx_enable;
     end
   end
 
-`undef INDENT
 endmodule

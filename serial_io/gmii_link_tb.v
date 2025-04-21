@@ -120,6 +120,7 @@ module gmii_link_tb;
    // so we can see the process more easily in a waveform viewer.
    gmii_link #(
       .DELAY(32),
+      .INDENT(`INDENT_PROTAGONIST),
       .ADVERSARY(1'b0)
     ) link_0 (
       .RX_CLK     (clk),
@@ -144,6 +145,7 @@ module gmii_link_tb;
    wire operate_1;  // not used, right?
    gmii_link #(
       .DELAY(50),
+      .INDENT(`INDENT_ADVERSARY),
       .ADVERSARY(1'b1)
     ) link_1 (
       .RX_CLK     (clk),
