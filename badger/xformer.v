@@ -75,7 +75,7 @@ wire len_soon = pc==43 && udp;
 reg pdata_down=0;
 always @(posedge clk) begin
 	len_stb <= {len_stb[2:0], len_soon};
-	if (len_stb[0]) pdata_count[10:8] <= idata;
+	if (len_stb[0]) pdata_count[10:8] <= idata[2:0];
 	if (len_stb[1]) pdata_count[7:0] <= idata;
 	// a zero-length UDP packet must never assert data-valid
 	if (len_stb[3] && pdata_count > 8) pdata_down <= 1;

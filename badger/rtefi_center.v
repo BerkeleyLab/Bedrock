@@ -140,7 +140,7 @@ pbuf_writer #(.paw(paw)) b_write(.clk(rx_clk),
 	.gray_state(gray_state),
 	.badge_stb(ibadge_stb)
 );
-assign ibadge_data = pbuf_din;
+assign ibadge_data = pbuf_din[7:0];
 
 // 1 MTU DPRAM; note the ninth bit used to mark Start of Frame.
 // Also note the lack of a write-enable, just write every cycle.

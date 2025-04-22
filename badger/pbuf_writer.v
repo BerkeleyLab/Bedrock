@@ -121,7 +121,7 @@ always @(posedge clk) begin
 		mac_queue <= 0;
 	end
 end
-assign rx_mac_d = pxd;
+assign rx_mac_d = pxd[7:0];
 assign rx_mac_a = {mac_bank, mac_a0};
 assign rx_mac_wen = mac_save;
 

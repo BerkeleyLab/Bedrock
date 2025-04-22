@@ -276,9 +276,10 @@ endmodule
 
 // =====
 // UDP/ICMP Checksum checker
-// Calculation structure is about the same, superficially looks like
-// we just need a little stream selection logic based on the protocol,
-// and a single one's-complement accumulator can handle both cases.
+// Calculation structure for UDP and ICMP is about the same, so it
+// superficially looks like we just need a little stream selection logic
+// based on the protocol, and then a single one's-complement accumulator
+// could handle both cases.
 // This rosy scenario is stymied by UDP's pathological inclusion of
 // _two_ copies of the UDP length.  At the moment, therefore, this
 // module doesn't handle UDP.
