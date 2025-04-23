@@ -11,7 +11,8 @@ module xformer(
 	input eth_strobe_long,
 	// As documented in doc/clients.eps
 	output [10:0] len_c,
-	// don't bother with data output port, it's the same as idata above
+	// Don't bother with a data output port to the clients,
+	// since what they need is exactly a copy of idata above.
 	// 7 of these strobes for the 7 possible clients
 	output [6:0] raw_l,
 	output [6:0] raw_s,
