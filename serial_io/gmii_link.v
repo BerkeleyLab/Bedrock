@@ -137,7 +137,8 @@ adversary_negotiate #(.TIMER_TICKS(TIMER), .INDENT(INDENT)) adversary_negotiate_
   .tx_is_k(tx_is_k_an), // output
   .negotiating(negotiating), // output
   .los(rx_err_los),
-	.lacr_rx_val(lacr_rx_adversary)
+	.lacr_rx_val(lacr_rx_adversary),
+	.an_status(an_status)
 );
 	end else begin: protagonist
 		assign lacr_rx_en=1'b1;

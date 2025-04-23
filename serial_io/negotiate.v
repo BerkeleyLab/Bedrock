@@ -77,16 +77,16 @@ module negotiate(
 
    wire match_ok = (lacr_match_cnt==3);
    // & 16'hbfff masks off the ACK_BITPOS bit - note possible bit-order confusion
-   wire lacr_match_c = (lacr_prev_val&16'hbfff == lacr_in&16'hbfff);
+   wire lacr_match_c = ((lacr_prev_val&16'hbfff) == (lacr_in&16'hbfff));
    always @(posedge rx_clk) begin
       if (an_state != AN_RESTART) begin
          if (lacr_in_stb) lacr_prev_val <= lacr_in;
          lacr_match  <= lacr_in_stb & lacr_match_c;
          lacr_change <= lacr_in_stb & ~lacr_match_c;
 
-         if (lacr_match)
+         if (lacr_match && (lacr_match_cnt!=3))
             lacr_match_cnt <= lacr_match_cnt + 1;
-         if (lacr_change || match_ok || an_rst) begin
+         if (lacr_change /* || match_ok */ || an_rst) begin
             lacr_match_cnt <= 0;
          end
       end
@@ -104,7 +104,7 @@ module negotiate(
       end else begin
          if (an_state==AN_ACK && match_ok && lacr_prev_val[ACK_BITPOS])
             ack_match <= 1;
-         if (an_state==AN_ABILITY && match_ok && !lacr_prev_val[ACK_BITPOS]) begin
+         if (an_state==AN_ABILITY && match_ok /* && !lacr_prev_val[ACK_BITPOS] */) begin
             abl_match <= 1;
             lacr_ability <= lacr_prev_val;
             lacr_ability[ACK_BITPOS] <= 1; // Consistency check done against acked version
@@ -198,7 +198,7 @@ module negotiate(
             n_send_breaklink = 1;
             if (!link_timer_on && !link_timer_done)
                link_timer_start = 1;
-            if (link_timer_done && link_det)
+            if (/* link_timer_done && */ link_det)
                n_an_state = wdog_an_disable ? AN_ABORT : AN_ABILITY;
          end
          AN_ABILITY: begin // Ability detect

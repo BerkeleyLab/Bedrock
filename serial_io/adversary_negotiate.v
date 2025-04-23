@@ -19,7 +19,8 @@ module adversary_negotiate #(
   output reg tx_is_k,
   output negotiating,
   input  los, // loss-of-signal
-  output [15:0] lacr_rx_val
+  output [15:0] lacr_rx_val,
+  output [8:0] an_status  // debug; partial emulation of negotiate.v output
 );
 
 localparam [7:0] K_28_5_DEC = 8'b101_11100, // 0xbc
@@ -41,6 +42,16 @@ wire rx_is_d16_2 = ~rx_is_k & (rx_byte == D_16_2_DEC);
  *  ---------------------------------------------
  *  K.28.5  BC  101 11100 001111 1010 110000 0101     *Comma: Run of 5 1's or 5 0's
  */
+
+// Maybe stupid; cribbed from negotiate.v
+// Detect physical link
+reg link_det=0;
+always @(posedge clk) begin
+   if (rx_cr_stb)
+      link_det <= 1;
+   if (los)
+      link_det <= 0;
+end
 
 localparam LINK_TIMER_AW = $clog2(TIMER_TICKS);
 localparam [LINK_TIMER_AW-1:0] LINK_TIMER_MAX = TIMER_TICKS-1;
@@ -78,6 +89,16 @@ localparam [3:0] AN_ENABLE              = 4'h0,
                  IDLE_DETECT            = 4'h8,
                  LINK_OK                = 4'h9;
 reg [3:0] an_state = AN_ENABLE;
+
+wire [1:0] remote_fault = {rx_Config_Reg[13], rx_Config_Reg[12]};
+wire abl_mismatch = ~rx_Config_Reg[5];
+wire [8:0] an_status_l = {an_state==AN_ENABLE, an_state==ABILITY_DETECT || an_state==ABILITY_DETECT_WAIT,
+                          ~link_timer_enabled, remote_fault, abl_mismatch,
+                          an_state==ACKNOWLEDGE_DETECT || an_state==ACKNOWLEDGE_DETECT_WAIT, an_state==IDLE_DETECT, an_state==LINK_OK};
+reg [8:0] an_status_r=0;
+always @(posedge clk) an_status_r <= an_status_l;
+assign an_status = an_status_r;
+
 reg  FD=1;   // Full Duplex capable  XXX not used
 localparam [16:0] mr_adv_ability = 17'b00000000001000000; // Only FD, no Next_Page, no Pause frames
 // mr_adv_ability[16] = device supports next_page exchange (NP)
@@ -173,7 +194,7 @@ always @(posedge clk) begin
         // Start the link timer
         link_timer_stb <= 1'b1;
       end else begin
-        if (link_timer_done) begin
+        if (link_timer_done & link_det) begin
           an_state <= ABILITY_DETECT;
           an_state_transition_stb <= 1'b1;
         end
@@ -372,7 +393,7 @@ always @(posedge clk) begin
           acknowledge_match_counter <= 0;
           acknowledge_match <= 1'b1;
           // Do consistency_match check on successfuly acknowledge_match as well
-          if (rx_cr_consistency == rx_Config_Reg) consistency_match <= 1'b1;
+          if ((rx_cr_consistency&16'hbfff) == (rx_Config_Reg&16'hbfff)) consistency_match <= 1'b1;
           else consistency_match <= 1'b0;
         end else begin
           acknowledge_match_counter <= acknowledge_match_counter + 1;

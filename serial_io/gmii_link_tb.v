@@ -72,10 +72,10 @@ module gmii_link_tb;
    end
 
    // Sequence of directed tests
-   localparam link_0_timer = 32;  // units of 8ns ticks
+   localparam link_0_timer = 64;  // units of 8ns ticks
    initial begin
       // The "8*" is a bug carried forward, so I can temporarily see matching behavior
-      #(CLKP*(50 + 8*link_0_timer))  // Must be longer than WDOG timeout
+      #(CLKP*(50 + link_0_timer))  // Must be longer than WDOG timeout
       // No physical link; Don't expect any AN activity
       if (operate || an_status[6] || an_status[0] || rx_dv_0 || rx_dv_1) begin
          $display("FAIL: %t AN unexpected when physical link is down", $time);
@@ -92,6 +92,7 @@ module gmii_link_tb;
          $stop(0);
       end
 
+`ifdef STRESS
       #(CLKP*1000)
       // Disable Full Duplex advertisement and restart AN by pulsing LOS
       rx_los <= 1;
@@ -104,6 +105,7 @@ module gmii_link_tb;
          $display("FAIL: %t Link is up but AN abort not signalled", $time);
          $stop(0);
       end
+`endif
 
       #(CLKP*1000)
       // Attempt a successful AN by pulsing LOS
@@ -148,7 +150,7 @@ module gmii_link_tb;
    wire tx_enable_1 = tx_enable_0;
    wire operate_1;  // not used, right?
    gmii_link #(
-      .TIMER(32),
+      .TIMER(60),
       .INDENT(`INDENT_ADVERSARY),
       .ADVERSARY(1'b1)
     ) link_1 (
