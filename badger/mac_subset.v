@@ -50,6 +50,7 @@ test_tx_mac #(
 );
 
 // Move scanner_busy to tx_clk domain for use by precog
+// Better to pull this step up to rtefi_center?
 wire scanner_busy_tx;
 reg_tech_cdc scanner_busy_cdc(.I(scanner_busy), .C(tx_clk), .O(scanner_busy_tx));
 

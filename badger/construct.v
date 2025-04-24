@@ -39,18 +39,16 @@ module construct #(
 	output eth_strobe_short  // doesn't
 );
 
-// Capture state across clock domains, convert back to binary
-(* ASYNC_REG = "TRUE" *) reg [paw-1:0] gray_l0=0, gray_l=0;
-reg [paw-1:0] state=0;
+// Capture state across clock domains, then convert back to binary
+wire [paw-1:0] gray_l;
+// Better to pull this first step up to rtefi_center?
+reg_tech_cdc gcx[paw-1:0] (.C(clk), .I(gray_state), .O(gray_l));
 // verilator lint_save
 // verilator lint_off UNOPTFLAT
 wire [paw-1:0] new_state = gray_l ^ {1'b0, new_state[paw-1:1]};
 // verilator lint_restore
-always @(posedge clk) begin
-	gray_l0 <= gray_state;
-	gray_l <= gray_l0;
-	state <= new_state;
-end
+reg [paw-1:0] state=0;
+always @(posedge clk) state <= new_state;
 
 // Debugging hook
 reg [paw-1:0] old_state=0, state_diff=0;
