@@ -616,23 +616,26 @@ def runCtrace(dev, runtime=10, xacts=[]):
 
     # Start ctrace
     print("Running ctrace...")
-    dev.reg_write([(config.CTRACE_START_REG, 1)])
-    # Perform intermediary transactions
-    if len(reg_vals) > 0:
-        dev.reg_write(reg_vals)
-    # Wait for ctrace to complete
-    wait = int(runtime)
-    while wait:
-        rdata = dev.reg_read((config.CTRACE_RUNNING_REG,))[0]
-        if not rdata:
-            break
-        time.sleep(1.0)
-        wait -= 1
-    if wait:
+    if runtime > 0:
+        dev.reg_write([(config.CTRACE_START_REG, 1)])
+        # Perform intermediary transactions
+        if len(reg_vals) > 0:
+            dev.reg_write(reg_vals)
+        # Wait for ctrace to complete
+        wait = int(runtime)
+        while wait:
+            rdata = dev.reg_read((config.CTRACE_RUNNING_REG,))[0]
+            if not rdata:
+                break
+            time.sleep(1.0)
+            wait -= 1
+    if (runtime > 0) and wait:
         # Ctrace not running (finished), read entire memory
         print("Done")
         return 1 << config.CTRACE_AW
     mem_size = dev.reg_read((config.CTRACE_PCMON_REG,))[0]
+    if mem_size == 0:
+        return 1 << config.CTRACE_AW
     return mem_size
 
 
@@ -716,8 +719,9 @@ def main():
     parserGet.add_argument("-x", "--xact", action="append",
                            help="Transactions to do after issuing the 'start' signal (regname=val).")
     parserGet.add_argument("-t", "--timeout", type=float, default=5.0)
-    parserGet.add_argument("-r", "--runtime", default=10, type=float,
-                           help="Time (in seconds) to wait for ctrace to complete.")
+    parserGet.add_argument("-r", "--runtime", default=0, type=float,
+                           help="Time (in seconds) to wait for ctrace to complete. If runtime == 0, " + \
+                           "don't start ctrace, just read out what's already there.")
     parserGet.add_argument("-s", "--store_file", default=False, action="store_true",
                            help="Also store raw memory as pickled dict.")
     parserGet.set_defaults(handler=doGet)
