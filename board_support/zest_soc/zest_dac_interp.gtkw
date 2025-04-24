@@ -1,0 +1,31 @@
+[timestart] 0
+[size] 1920 1043
+[pos] -1 -1
+*-14.000000 20000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] zest_dac_interp_tb.
+[sst_width] 233
+[signals_width] 164
+[sst_expanded] 1
+[sst_vpaned_height] 298
+@28
+zest_dac_interp_tb.dsp_clk
+@420
+zest_dac_interp_tb.dut.din[13:0]
+zest_dac_interp_tb.dut.coeff[14:0]
+@28
+zest_dac_interp_tb.dut.dac_clk
+@420
+zest_dac_interp_tb.dut.d1[13:0]
+zest_dac_interp_tb.dut.d2[13:0]
+@421
+zest_dac_interp_tb.dut.d3[13:0]
+@420
+zest_dac_interp_tb.dut.sum[14:0]
+zest_dac_interp_tb.dut.r[29:0]
+zest_dac_interp_tb.dut.r1[29:0]
+@28
+zest_dac_interp_tb.dut.tick
+@420
+zest_dac_interp_tb.dut.dout[13:0]
+[pattern_trace] 1
+[pattern_trace] 0
