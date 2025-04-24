@@ -206,6 +206,19 @@ always @(posedge ctrace_clk) begin
   ctrace_start_d1 <= ctrace_start_d0;
   ctrace_start_stb <= ctrace_start_d0 & ~ctrace_start_d1;
 end
+
+reg boot_stb=1'b0, boot_0=1'b0, boot_1=1'b0;
+wire link_lock = ~rx_err_los;
+reg link_lock_0=1'b0, link_lock_1=1'b0, link_lock_stb=1'b0;
+always @(posedge ctrace_clk) begin
+  boot_0 <= 1'b1;
+  boot_1 <= boot_0;
+  boot_stb <= boot_0 & (~boot_1);
+  link_lock_0 <= link_lock;
+  link_lock_1 <= link_lock_0;
+  link_lock_stb <= link_lock_0 & (~link_lock_1);
+end
+wire start_stb = ctrace_start_stb | boot_stb | link_lock_stb;
 wctrace #(
   .AW(CTRACE_AW),
   .DW(CTRACE_DW),
@@ -213,7 +226,7 @@ wctrace #(
 ) wctrace_i (
   .clk(ctrace_clk), // input
   .data(ctrace_data), // input [DW-1:0]
-  .start(ctrace_start_stb), // input
+  .start(start_stb), // input
   .running(ctrace_running), // output
   .pc_mon(ctrace_pc_mon), // output [AW-1:0]
   .lb_clk(lb_clk), // input
