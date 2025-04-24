@@ -11,12 +11,12 @@ module duc #(
 	input signed [16:0] drive_q,
 	input signed [17:0] cosa,
 	input signed [17:0] sina,
-    input signed [14:0] interp_coeff,
-    input dac_iq_phase,  // unused for now
+       input signed [14:0] interp_coeff,
+       input dac_iq_phase,  // unused for now
 	output signed [15:0] dac_mon,
     // in dac_clk domain
 	input dac_clk,
-    output signed [15:0] dac_out
+       output signed [15:0] dac_out
 );
 
 reg signed [17:0] cosb=0, sinb=0;

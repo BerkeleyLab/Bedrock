@@ -61,7 +61,7 @@ duc dut(.adc_clk(clk), .dac_clk(dac_clk),
 	.div_state(div_state), .dac_iq_phase(1'b0),
 	.drive_i(drive_i), .drive_q(drive_q),
 	.cosa(cosa), .sina(sina),
-    .interp_coeff(interp_coeff), .dac_mon(dac_mon),
+       .interp_coeff(interp_coeff), .dac_mon(dac_mon),
 	.dac_out(dac_out)
 );
 
@@ -70,6 +70,3 @@ always @(negedge dac_clk) if (trace) begin
 end
 
 endmodule
-
-// Intended to control compilation of duc.v
-`define AWA

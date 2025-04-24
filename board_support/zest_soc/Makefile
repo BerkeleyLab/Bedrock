@@ -23,5 +23,6 @@ duc_check: duc_test.py duc.dat
 
 CLEAN += $(TEST_BENCH)
 CLEAN += $(TEST_BENCH:%_tb=%.vcd)
+CLEAN += *.dat
 
 include $(BUILD_DIR)/bottom_rules.mk
