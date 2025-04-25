@@ -42,11 +42,9 @@ module etrig_bridge (
   reg etrig_pulse_delayed_i = 0; // delayed pulse
   reg etrig_toggle = 0; // flag indicating that we received a pulse
 
-  // 2-FF synchronizers
-  (* ASYNC_REG = "TRUE" *) reg [1:0] trign_0_sync=0, trign_1_sync=0, trign_2_sync=0;
-
-  // Move delay control to adc_clk domain.  Should be attainable using newad.
+  // Move delay and sel controls to adc_clk domain.  Should be attainable using newad.
   reg [25:0] delay_r=0;  always @(posedge adc_clk) delay_r <= delay;
+  reg [1:0]  sel_r=0;    always @(posedge adc_clk) sel_r <= sel;
 
   // generates the internal trigger
   always @(posedge lb_clk) begin
@@ -60,19 +58,17 @@ module etrig_bridge (
     .clk1(lb_clk), .flagin_clk1(etrig_p_pulse),
     .clk2(adc_clk), .flagout_clk2(etrig_p_pulse_x));
 
-  // 2-FF synchronizer before handling further
-  reg [1:0] sel_r=0;
-  always @(posedge adc_clk) begin
-     trign_0_sync <= {trign_0_sync[0], trign_0};
-     trign_1_sync <= {trign_1_sync[0], trign_1};
-     trign_2_sync <= {trign_2_sync[0], trign_2};
-     sel_r <= sel;  // arrived in lb_clk
-  end
+  // 2-FF synchronizers
+  wire trign_0_sync, trign_1_sync, trign_2_sync;
+  reg_tech_cdc trigx_0(.I(trign_0), .C(adc_clk), .O(trign_0_sync));
+  reg_tech_cdc trigx_1(.I(trign_1), .C(adc_clk), .O(trign_1_sync));
+  reg_tech_cdc trigx_2(.I(trign_2), .C(adc_clk), .O(trign_2_sync));
+
 
   // MUX to decide which trigger to propagate (external triggers are active-low)
-  assign async_trig = (sel_r == ETRIG_0) ? ~trign_0_sync[1] :
-                      (sel_r == ETRIG_1) ? ~trign_1_sync[1] :
-                      (sel_r == ETRIG_2) ? ~trign_2_sync[1] :
+  assign async_trig = (sel_r == ETRIG_0) ? ~trign_0_sync :
+                      (sel_r == ETRIG_1) ? ~trign_1_sync :
+                      (sel_r == ETRIG_2) ? ~trign_2_sync :
                       1'b0;
 
   // Glitch filter async inputs by ignoring pulses shorter than 128/adc_clk = 1.356 us
