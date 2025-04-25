@@ -2,7 +2,6 @@
 
 module duc #(
     parameter DW = 17,
-    parameter DWLO = 18,
     parameter USE_MIX_FOVER4 = 1
 )(
     // in adc_clk domain
@@ -10,8 +9,8 @@ module duc #(
 	input [1:0] div_state,
 	input signed [DW-1:0] drive_i,
 	input signed [DW-1:0] drive_q,
-	input signed [DWLO-1:0] cosa,
-	input signed [DWLO-1:0] sina,
+	input signed [DW:0] cosa,
+	input signed [DW:0] sina,
        input signed [DW-1:0] interp_coeff,
        input dac_iq_phase,  // unused for now
 	output signed [DW-2:0] dac_mon,
@@ -20,8 +19,8 @@ module duc #(
        output signed [DW-2:0] dac_out
 );
 
-reg signed [DWLO-1:0] cosb=0, sinb=0;
-reg signed [DWLO-1:0] cosb1=0, sinb1=0, cosb2=0, sinb2=0;
+reg signed [DW:0] cosb=0, sinb=0;
+reg signed [DW:0] cosb1=0, sinb1=0, cosb2=0, sinb2=0;
 wire signed [DW-2:0] out1, out2;
 
 // Digital Up-converter - Double side-band modulator
@@ -44,8 +43,8 @@ generate if (USE_MIX_FOVER4) begin : fover4
         // Convert the 7/33 LO to 61/132 by (complex) multiplying by a 1/4 LO.
         // This is "cheap" and adds the minimum extra divider state.
         // Only has value because we keep the LO in complex form.
-        wire signed [DWLO-1:0] cosi = ~cosa;
-        wire signed [DWLO-1:0] sini = ~sina;
+        wire signed [DW:0] cosi = ~cosa;
+        wire signed [DW:0] sini = ~sina;
         always @(posedge adc_clk) case(div_state)
             2'b00: begin cosb <= cosa;  sinb <= sina;  end
             2'b01: begin cosb <= sini;  sinb <= cosa;  end
@@ -92,7 +91,7 @@ end else begin: no_fover4
             .q_data(drive_q), .q_gate(1'b1), .q_trig(1'b1),
             .o_data(out1));
 
-        zest_dac_interp #(.DW(DW)) dac_interp_a (
+        zest_dac_interp #(.DW(DW-1)) dac_interp_a (
             .dsp_clk        (adc_clk),
             .din            (out1),
             .coeff          (interp_coeff),

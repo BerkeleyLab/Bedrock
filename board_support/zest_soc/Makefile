@@ -9,11 +9,13 @@ TEST_BENCH  = duc_tb zest_dac_interp_tb
 CHECKS      = duc_check
 
 vpath %.v $(DSP_DIR)
-VFLAGS_DEP += -y$(DSP_DIR) -y$(CORDIC_DIR) -y.
-VFLAGS += $(VFLAGS_DEP)
+VFLAGS += -y$(DSP_DIR) -y$(CORDIC_DIR) -y. -I.
 
 .PHONY: all clean
-all: $(TEST_BENCH) $(CHECKS)
+all: cordicg_b22.v $(TEST_BENCH) $(CHECKS)
+
+cordicg_b22.v: $(CORDIC_DIR)/cordicgx.py
+	python3 $< 22 $@
 
 # validate and demonstrate duc.v, that's similar to bedrock's second_if_out.v
 duc.dat: duc_tb
@@ -21,7 +23,7 @@ duc.dat: duc_tb
 duc_check: duc_test.py duc.dat
 	$(PYTHON) $^
 
-CLEAN += $(TEST_BENCH)
+CLEAN += $(TEST_BENCH) cordicg_b22.v
 CLEAN += $(TEST_BENCH:%_tb=%.vcd)
 CLEAN += *.dat
 
