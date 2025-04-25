@@ -61,15 +61,26 @@ enc_8b10b enc_8b10b_i (
 );
 
 wire negotiating;
+wire [15:0] lacr_rx_val;
+wire [8:0] an_status;
+wire [15:0] lacr_tx_val;
+wire lacr_send;
+wire lacr_rx_stb
+
 adversary_negotiate adversary_negotiate_i (
-  .clk(clk), // input
-  .rst(1'b0), // input
-  .rx_byte(rx_byte), // input [7:0]
-  .rx_is_k(rx_is_k), // input
-  .tx_byte(tx_byte), // output [7:0]
-  .tx_is_k(tx_is_k), // output
-  .negotiating(negotiating), // output
-  .los(1'b0)
+  .clk(clk),                  // input
+  .rst(1'b0),                 // input
+  .rx_byte(rx_byte),          // input [7:0]
+  .rx_is_k(rx_is_k),          // input
+  .tx_byte(tx_byte),          // output [7:0]
+  .tx_is_k(tx_is_k),          // output
+  .negotiating(negotiating),  // output
+  .los(1'b0),                 // output
+  .lacr_rx_val(lacr_rx_val),  // output [15:0]
+  .an_status(an_status),      // output [8:0]
+  .lacr_tx_val(lacr_tx_val),  // output [15:0]
+  .lacr_send(lacr_send),      // output
+  .lacr_rx_stb(lacr_rx_stb)   // output
 );
 
 /* If tx_is_k:

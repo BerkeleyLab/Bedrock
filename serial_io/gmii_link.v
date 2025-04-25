@@ -82,7 +82,7 @@ enc_8b10b my_enc_8b10b (
 
 wire [8:0] rxdata_dec_out;
 // Rx path from deserializer to GMII
-wire lacr_rx_stb;
+wire lacr_rx_stb, lacr_rx_stb_ep;
 wire lacr_rx_en;
 wire [15:0] lacr_rx_val_pcs;
 wire rx_is_k = rxdata_dec_out[8];
@@ -98,7 +98,7 @@ ep_rx_pcs #(.INDENT(INDENT)) rx(.clk(RX_CLK), .rst(rx_rst),
 	.gmii_err(RX_ER),
 	.ep_rcr_en_pcs_i(1'b1),  // module enable
 	.lacr_rx_en(lacr_rx_en), // input
-	.lacr_rx_stb(lacr_rx_stb), // output
+	.lacr_rx_stb(lacr_rx_stb_ep), // output
 	.lacr_rx_val(lacr_rx_val_pcs) // output [15:0]
 );
 
@@ -117,7 +117,6 @@ wire [15:0] lacr_rx_val;
 generate
 	if (ADVERSARY == 1'b1) begin: adversary
 		assign lacr_rx_en = 1'b0;
-		assign lacr_send = 1'b0;
 		//wire [7:0] tx_byte;
 		wire tx_is_k_an;
 		wire negotiating;
@@ -125,37 +124,39 @@ generate
 		assign txd = TXD;
 		assign tx_is_k = negotiating ? tx_is_k_an : tx_is_k_pcs;
 		assign operate = ~negotiating;
-		wire [15:0] lacr_rx_adversary;
-		assign lacr_rx_val = lacr_rx_adversary;
 		assign tx_odata = negotiating ? tx_odata_an : tx_odata_pcs;
-adversary_negotiate #(.TIMER_TICKS(TIMER), .INDENT(INDENT)) adversary_negotiate_i (
-  .clk(RX_CLK), // input
-  .rst(1'b0), // input
-  .rx_byte(rxdata_dec_out[7:0]), // input [7:0]
-  .rx_is_k(rxdata_dec_out[8]), // input
-  .tx_byte(tx_odata_an), // output [7:0]
-  .tx_is_k(tx_is_k_an), // output
-  .negotiating(negotiating), // output
-  .los(rx_err_los),
-	.lacr_rx_val(lacr_rx_adversary),
-	.an_status(an_status)
-);
+		adversary_negotiate #(.TIMER_TICKS(TIMER), .INDENT(INDENT)) adversary_negotiate_i (
+			.clk(RX_CLK), // input
+			.rst(1'b0), // input
+			.rx_byte(rxdata_dec_out[7:0]), // input [7:0]
+			.rx_is_k(rxdata_dec_out[8]), // input
+			.tx_byte(tx_odata_an),      // output [7:0]
+			.tx_is_k(tx_is_k_an),       // output
+			.negotiating(negotiating),  // output
+			.los(rx_err_los),           // input
+			.lacr_rx_val(lacr_rx_val),  // output [15:0]
+			.an_status(an_status),      // output [8:0]
+			.lacr_tx_val(lacr_out),     // output [15:0]
+			.lacr_send(lacr_send),      // output
+			.lacr_rx_stb(lacr_rx_stb)   // output
+		);
 	end else begin: protagonist
 		assign lacr_rx_en=1'b1;
 		assign txd = TXD;
 		assign tx_is_k = tx_is_k_pcs;
 		assign tx_odata = tx_odata_pcs;
-negotiate #(.TIMER_TICKS(TIMER), .INDENT(INDENT)) negotiator(
-	.rx_clk(RX_CLK),
-	.tx_clk(GTX_CLK),
-	.los(rx_err_los),           // input
-	.lacr_in(lacr_rx_val),      // input [15:0]
-	.lacr_in_stb(lacr_rx_stb),  // input
-	.lacr_out(lacr_out),        // output [15:0]
-	.lacr_send(lacr_send),      // output
-	.operate(operate),          // output
-	.an_status(an_status)       // output [8:0]
-);
+		assign lacr_rx_stb = lacr_rx_stb_ep;
+		negotiate #(.TIMER_TICKS(TIMER), .INDENT(INDENT)) negotiator(
+			.rx_clk(RX_CLK),
+			.tx_clk(GTX_CLK),
+			.los(rx_err_los),           // input
+			.lacr_in(lacr_rx_val),      // input [15:0]
+			.lacr_in_stb(lacr_rx_stb),  // input
+			.lacr_out(lacr_out),        // output [15:0]
+			.lacr_send(lacr_send),      // output
+			.operate(operate),          // output
+			.an_status(an_status)       // output [8:0]
+		);
 	assign lacr_rx_val = lacr_rx_val_pcs;
 	end
 endgenerate

@@ -20,8 +20,13 @@ module adversary_negotiate #(
   output negotiating,
   input  los, // loss-of-signal
   output [15:0] lacr_rx_val,
-  output [8:0] an_status  // debug; partial emulation of negotiate.v output
+  output [8:0] an_status,  // debug; partial emulation of negotiate.v output
+  output [15:0] lacr_tx_val,
+  output lacr_send,
+  output lacr_rx_stb
 );
+
+assign lacr_rx_stb = rx_cr_stb;
 
 localparam [7:0] K_28_5_DEC = 8'b101_11100, // 0xbc
                  D_21_5_DEC = 8'b101_10101, // 0xb5
@@ -78,6 +83,7 @@ localparam [1:0] XMIT_IDLE   = 2'h0,
                  XMIT_DATA   = 2'h2,
                  XMIT_INVALID= 2'h3;
 reg [1:0] xmit=XMIT_IDLE;
+assign lacr_send = xmit == XMIT_CONFIGURATION;
 localparam [3:0] AN_ENABLE              = 4'h0,
                  AN_RESTART             = 4'h1,
                  AN_DISABLE_LINK_OK     = 4'h2,
@@ -92,9 +98,16 @@ reg [3:0] an_state = AN_ENABLE;
 
 wire [1:0] remote_fault = {rx_Config_Reg[13], rx_Config_Reg[12]};
 wire abl_mismatch = ~rx_Config_Reg[5];
-wire [8:0] an_status_l = {an_state==AN_ENABLE, an_state==ABILITY_DETECT || an_state==ABILITY_DETECT_WAIT,
-                          ~link_timer_enabled, remote_fault, abl_mismatch,
-                          an_state==ACKNOWLEDGE_DETECT || an_state==ACKNOWLEDGE_DETECT_WAIT, an_state==IDLE_DETECT, an_state==LINK_OK};
+wire [8:0] an_status_l = {
+  an_state==AN_ENABLE,
+  an_state==ABILITY_DETECT || an_state==ABILITY_DETECT_WAIT,
+  ~link_timer_enabled,
+  remote_fault, // 2 bits
+  abl_mismatch,
+  an_state==ACKNOWLEDGE_DETECT || an_state==ACKNOWLEDGE_DETECT_WAIT,
+  an_state==IDLE_DETECT,
+  an_state==LINK_OK
+};
 reg [8:0] an_status_r=0;
 always @(posedge clk) an_status_r <= an_status_l;
 assign an_status = an_status_r;
@@ -113,7 +126,8 @@ localparam [16:0] mr_adv_ability = 17'b00000000001000000; // Only FD, no Next_Pa
 
 // TODO - This seems to refer to the "link partner" but this information comes
 // from rx_Config_Reg, so I don't know why this is needed.
-reg [15:0] tx_Config_Reg=16'h0, rx_Config_Reg=16'h0;
+reg [15:0] tx_Config_Reg=16'h0, rx_Config_Reg=16'hffff;
+assign lacr_tx_val = tx_Config_Reg;
 wire [16:0] mr_lp_adv_ability = {rx_Config_Reg, 1'b0};
 assign lacr_rx_val = rx_Config_Reg;
 
@@ -130,6 +144,11 @@ reg ability_match=1'b0;
 reg resolve_priority=1'b0;
 reg acknowledge_match=1'b0;
 reg consistency_match=1'b0;
+reg reset_stb=1'b0,
+    ability_match_clear_stb=1'b0,
+    consistency_match_clear_stb=1'b0,
+    acknowledge_match_clear_stb=1'b0,
+    idle_match_clear_stb=1'b0;
 reg np_rx=1'b0; // Received Next_Page (not supported)
 
 reg mr_page_rx = 1'b0; // ???
@@ -160,13 +179,18 @@ always @(posedge clk) begin
   old_an_state <= an_state;
   if (old_an_state != an_state) begin
     if ((an_state != ABILITY_DETECT_WAIT) && (an_state != ACKNOWLEDGE_DETECT_WAIT)) begin
-      if (non_breaklink) $display("%s(%t) -> %s", INDENT, $stime, an_state_str[an_state]);
+      $display("%s(%t) -> %s", INDENT, $stime, an_state_str[an_state]);
     end
   end
 end
 `endif
 // ==================== Auto-Negotiation State Machine =======================
 always @(posedge clk) begin
+  reset_stb <= 1'b0;
+  ability_match_clear_stb <= 1'b0;
+  consistency_match_clear_stb <= 1'b0;
+  acknowledge_match_clear_stb <= 1'b0;
+  idle_match_clear_stb <= 1'b0;
   xmit_rst_stb <= 1'b0;
   link_timer_stb <= 1'b0;
   an_state_transition_stb <= 1'b0;
@@ -185,6 +209,7 @@ always @(posedge clk) begin
         an_state <= AN_DISABLE_LINK_OK;
       end
       an_state_transition_stb <= 1'b1;
+      reset_stb <= 1'b1;
     end
     AN_RESTART: begin
       mr_np_loaded <= 1'b0;
@@ -197,6 +222,7 @@ always @(posedge clk) begin
         if (link_timer_done & link_det) begin
           an_state <= ABILITY_DETECT;
           an_state_transition_stb <= 1'b1;
+          ability_match_clear_stb <= 1'b1;
         end
       end
     end
@@ -216,9 +242,11 @@ always @(posedge clk) begin
           // No breaklink
           an_state <= ACKNOWLEDGE_DETECT;
           an_state_transition_stb <= 1'b1;
+          consistency_match_clear_stb <= 1'b1;
+          acknowledge_match_clear_stb <= 1'b1;
         end else begin
           `ifdef SIMULATE
-            if (non_breaklink) $display("%s(%t) Received Breaklink", INDENT, $stime);
+            $display("%s(%t) Received Breaklink", INDENT, $stime);
           `endif
           // Breaklink
           an_state <= AN_ENABLE;
@@ -253,6 +281,7 @@ always @(posedge clk) begin
         toggle_rx <= rx_Config_Reg[11];
         //np_rx <= rx_Config_Reg[15]; // Next_Page not supported
         mr_page_rx <= 1'b1;
+        ability_match_clear_stb <= 1'b1;
       end else begin
         if (ability_match & (rx_Config_Reg==0)) begin
           `ifdef SIMULATE
@@ -278,6 +307,8 @@ always @(posedge clk) begin
         xmit_rst_stb <= 1'b1;
         xmit <= XMIT_IDLE;
         resolve_priority <= 1'b1;
+        ability_match_clear_stb <= 1'b1;
+        idle_match_clear_stb <= 1'b1;
       end else begin
         if (ability_match & (rx_Config_Reg==0)) begin
           `ifdef SIMULATE
@@ -327,12 +358,29 @@ wire [14:0] rx_Config_Reg_ignore_ack = {rx_Config_Reg[15], rx_Config_Reg[13:0]};
 always @(posedge clk) begin
   idle_stb <= 1'b0;
   rx_cr_stb <= 1'b0;
-  if (an_state_transition_stb) begin
+  if (reset_stb) begin
     ability_match <= 1'b0;
-    acknowledge_match <= 1'b0;
-    consistency_match <= 1'b0;
     ability_match_counter <= 0;
+    acknowledge_match <= 1'b0;
     acknowledge_match_counter <= 0;
+    consistency_match <= 1'b0;
+    idle_match <= 1'b0;
+    idle_counter <= 0;
+  end
+  if (ability_match_clear_stb) begin
+    ability_match <= 1'b0;
+    ability_match_counter <= 0;
+  end
+  if (consistency_match_clear_stb) begin
+    consistency_match <= 1'b0;
+  end
+  if (acknowledge_match_clear_stb) begin
+    acknowledge_match <= 1'b0;
+    acknowledge_match_counter <= 0;
+  end
+  if (idle_match_clear_stb) begin
+    idle_match <= 1'b0;
+    idle_counter <= 0;
   end
   case (cr_state)
     default /* CR_STATE_IDLE */: begin
@@ -425,7 +473,7 @@ reg in_loop=1'b0;
 *      Used to maintain running disparity (RD)
 */
 `ifdef SIMULATE
-  reg tx_non_breaklink=1'b0;
+  reg [15:0] old_tx_Config_Reg=16'hffff;
 `endif
 always @(posedge clk) begin
   if (xmit_rst_stb) begin
@@ -447,15 +495,18 @@ always @(posedge clk) begin
       byte_counter <= byte_counter + 1;
     end
     XMIT_CONFIGURATION: begin
+      /*
       `ifdef SIMULATE
-      if ((tx_Config_Reg != 0) && ~tx_non_breaklink) begin
-        tx_non_breaklink <= 1'b1;
-        $display("%s(%t) Transmitting 0x%x", INDENT, $stime, tx_Config_Reg);
-      end else if ((tx_Config_Reg == 0) && tx_non_breaklink) begin
-        tx_non_breaklink <= 1'b0;
-        $display("%s(%t) Transmitting breaklink", INDENT, $stime);
+      if (old_tx_Config_Reg != tx_Config_Reg) begin
+        if (tx_Config_Reg == 0) begin
+          $display("%s(%t) Transmitting breaklink", INDENT, $stime);
+        end else begin
+          $display("%s(%t) Transmitting 0x%x", INDENT, $stime, tx_Config_Reg);
+        end
       end
+      old_tx_Config_Reg <= tx_Config_Reg;
       `endif
+      */
       // Just blast out the CR
       /* C1 = /K.28.5/D.21.5/Config_Reg
        * C2 = /K.28.5/D.2.2/Config_Reg

@@ -198,7 +198,7 @@ module negotiate(
             n_send_breaklink = 1;
             if (!link_timer_on && !link_timer_done)
                link_timer_start = 1;
-            if (/* link_timer_done && */ link_det)
+            if (link_timer_done && link_det)
                n_an_state = wdog_an_disable ? AN_ABORT : AN_ABILITY;
          end
          AN_ABILITY: begin // Ability detect
