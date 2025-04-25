@@ -54,9 +54,10 @@ rot_dds #(.lo_amp(lo_amp_145)) dds_145 (.clk(clk), .reset(1'b0),
 	.modulo(modulo)
 );
 
-wire signed [14:0] interp_coeff = 0;
-wire signed [15:0] dac_out;
-wire signed [15:0] dac_mon;
+localparam DW = 17;
+wire signed [DW-1:0] interp_coeff = 0;
+wire signed [DW-2:0] dac_out;
+wire signed [DW-2:0] dac_mon;
 duc dut(.adc_clk(clk), .dac_clk(dac_clk),
 	.div_state(div_state), .dac_iq_phase(1'b0),
 	.drive_i(drive_i), .drive_q(drive_q),
