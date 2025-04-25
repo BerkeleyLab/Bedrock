@@ -99,6 +99,7 @@ class Zest(Module, AutoCSR):
             "board_support/zest_soc/zest.v",
             "board_support/zest_soc/zest_clk_map.v",
             "board_support/zest_soc/zest_spi_dio_pack.v",
+            "board_support/zest_soc/duc.v",
             "board_support/zest_soc/zest_dac_interp.v",
             "fpga_family/xilinx/xilinx7_clocks.v",
             "dsp/freq_count.v",
@@ -109,6 +110,7 @@ class Zest(Module, AutoCSR):
             "dsp/reg_tech_cdc.v",
             "dsp/phaset.v",
             "dsp/dpram.v",
+            "dsp/flevel_set.v",
             "soc/picorv32/gateware/awg_pack.v",
             "soc/picorv32/gateware/sfr_pack.v",
             "soc/picorv32/gateware/munpack.v",
@@ -176,8 +178,13 @@ class Zest(Module, AutoCSR):
         self.clk_div_out      = Signal(2)
         self.adc_out_clk      = Signal(8)
         self.adc_out_data     = Signal(128)
-        self.dac_in_data_i    = Signal(14)
-        self.dac_in_data_q    = Signal(14)
+        self.dac_clk_out      = Signal()
+        self.dac_out          = Signal()
+        self.dsp_div_state    = Signal()
+        self.lo_cos           = Signal()
+        self.lo_sin           = Signal()
+        self.baseband_drive_i = Signal()
+        self.baseband_drive_q = Signal()
         self.clk_200          = Signal()
         self.clk              = Signal()
         self.rst              = Signal()
@@ -244,8 +251,13 @@ class Zest(Module, AutoCSR):
                                   o_clk_div_out=self.clk_div_out,
                                   o_adc_out_clk=self.adc_out_clk,
                                   o_adc_out_data=self.adc_out_data,
-                                  i_dac_in_data_i=self.dac_in_data_i,
-                                  i_dac_in_data_q=self.dac_in_data_q,
+                                  o_dac_clk_out=self.dac_clk_out,
+                                  o_dac_out=self.dac_out,
+                                  i_dsp_div_state=self.dsp_div_state,
+                                  i_lo_cos=self.lo_cos,
+                                  i_lo_sin=self.lo_sin,
+                                  i_baseband_drive_i=self.baseband_drive_i,
+                                  i_baseband_drive_q=self.baseband_drive_q,
                                   i_clk_200=self.clk_200,
                                   i_clk=self.clk,
                                   i_rst=self.rst,

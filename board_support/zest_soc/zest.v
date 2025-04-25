@@ -433,8 +433,8 @@ assign dac_clk_out = dac_dco_clk;
 
 // upconverter, interpolator, crossing from dsp_clk to dac_clk domain
 // XXX assumes only one set of baseband I/Q signals come in
-wire signed [13:0] dac0_in_data;
-wire signed [13:0] dac1_in_data;
+wire signed [15:0] dac0_in_data;
+wire signed [15:0] dac1_in_data;
 duc #(.USE_MIX_FOVER4(0)) dac_a(
     .adc_clk(dsp_clk_out),
     .div_state(dsp_div_state),

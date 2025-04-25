@@ -91,7 +91,7 @@ end else begin: no_fover4
             .q_data(drive_q), .q_gate(1'b1), .q_trig(1'b1),
             .o_data(out1));
 
-        zest_dac_interp #(.DW(14)) dac_interp_a (
+        zest_dac_interp #(.DW(16)) dac_interp_a (
             .dsp_clk        (adc_clk),
             .din            (out1),
             .coeff          (interp_coeff),

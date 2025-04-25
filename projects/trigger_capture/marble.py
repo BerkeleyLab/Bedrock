@@ -72,8 +72,6 @@ class SDRAMLoopbackSoC(BaseSoC):
         # self.clk_div_out      = Signal(2)
         # self.adc_out_clk      = Signal(8)
         # self.adc_out_data     = Signal(128)
-        # self.dac_in_data_i    = Signal(14)
-        # self.dac_in_data_q    = Signal(14)
         # self.clk_200          = Signal()
         # self.clk              = Signal()
         # self.rst              = Signal()
