@@ -3,8 +3,8 @@ module zest #(
     parameter DSP_FREQ_MHZ = 119.0,
     parameter FCNT_WIDTH = 16,  // to speed up simulation. 125M / 2**16 = 1.9kHz update rate.
     parameter PH_DIFF_DW = 13,
+    parameter USE_MIX_FOVER4 = 0,
     parameter real DAC_INTERP_COEFF_R = 1.0,
-    parameter TRANSPARENT_DAC = 0,
     localparam integer  N_ADC = 2,
     localparam integer  N_CH = N_ADC*4,
     localparam real     CLKIN_PERIOD = 1000.0 / DSP_FREQ_MHZ / 2,    // ns
@@ -71,8 +71,13 @@ module zest #(
     output [N_CH-1:0]    adc_out_clk,
     output [16*N_CH-1:0] adc_out_data,
     output               dac_clk_out,
-    input  [13:0]        dac_in_data_i,
-    input  [13:0]        dac_in_data_q,
+    output [15:0]        dac_out,
+    // Used for digital up-conversion
+    input [1:0]          dsp_div_state,
+    input signed [17:0]  lo_cos,
+    input signed [17:0]  lo_sin,
+    input signed [16:0]  baseband_drive_i,
+    input signed [16:0]  baseband_drive_q,
 
     input  clk_200,
     // PicoRV32 packed MEM Bus interface
@@ -426,23 +431,36 @@ freq_count #(
 
 assign dac_clk_out = dac_dco_clk;
 
-// interpolator, crossing from dsp_clk to dac_clk domain
+// upconverter, interpolator, crossing from dsp_clk to dac_clk domain
+// XXX assumes only one set of baseband I/Q signals come in
 wire signed [13:0] dac0_in_data;
-zest_dac_interp #(.DW(14), .transparent(TRANSPARENT_DAC)) dac_interp_a (
-    .dsp_clk        (dsp_clk_out),
-    .din            (dac_in_data_i),
-    .coeff          (DAC_INTERP_COEFF),
-    .dac_clk        (dac_clk_out),
-    .dout           (dac0_in_data)
+wire signed [13:0] dac1_in_data;
+duc #(.USE_MIX_FOVER4(0)) dac_a(
+    .adc_clk(dsp_clk_out),
+    .div_state(dsp_div_state),
+    .dac_iq_phase(1'b0),
+    .drive_i(baseband_drive_i),
+    .drive_q(baseband_drive_q),
+    .cosa(lo_cos),
+    .sina(lo_sin),
+    .interp_coeff(DAC_INTERP_COEFF),
+    .dac_clk(dac_clk_out),
+    .dac_mon(dac_out),
+    .dac_out(dac0_in_data)
 );
 
-wire signed [13:0] dac1_in_data;
-zest_dac_interp #(.DW(14), .transparent(TRANSPARENT_DAC)) dac_interp_b (
-    .dsp_clk        (dsp_clk_out),
-    .din            (dac_in_data_q),
-    .coeff          (DAC_INTERP_COEFF),
-    .dac_clk        (dac_clk_out),
-    .dout           (dac1_in_data)
+duc #(.USE_MIX_FOVER4(0)) dac_b(
+    .adc_clk(dsp_clk_out),
+    .div_state(dsp_div_state),
+    .dac_iq_phase(1'b0),
+    .drive_i(baseband_drive_i),
+    .drive_q(baseband_drive_q),
+    .cosa(lo_cos),
+    .sina(lo_sin),
+    .interp_coeff(DAC_INTERP_COEFF),
+    .dac_clk(dac_clk_out),
+    .dac_mon(dac_out),
+    .dac_out(dac1_in_data)
 );
 
 // DMA to generate arbitrary waveform for DAC BIST
@@ -471,8 +489,8 @@ always @(posedge dac_clk_out) begin
 end
 
 // Mux DAC data source
-wire [13:0] dac0_in_data_mux = dac0_enable ? (dac0_src_sel ? awg_out_data1 : dac0_in_data) : 14'h0;
-wire [13:0] dac1_in_data_mux = dac1_enable ? (dac1_src_sel ? awg_out_data1 : dac1_in_data) : 14'h0;
+wire [13:0] dac0_in_data_mux = dac0_enable ? (dac0_src_sel ? awg_out_data1 : dac0_in_data[15:2]) : 14'h0;
+wire [13:0] dac1_in_data_mux = dac1_enable ? (dac1_src_sel ? awg_out_data1 : dac1_in_data[15:2]) : 14'h0;
 
 // UG471 Fig 2-19, D2 @ rising edge == dac0, match AD9781 datasheet Fig 57.
 wire [14:0] dac_oddr_buf;
