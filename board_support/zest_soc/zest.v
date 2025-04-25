@@ -490,8 +490,8 @@ always @(posedge dac_clk_out) begin
 end
 
 // Mux DAC data source
-wire [13:0] dac0_in_data_mux = dac0_enable ? (dac0_src_sel ? awg_out_data1 : dac0_in_data[DUC_DW-1:DUC_DW-15]) : 14'h0;
-wire [13:0] dac1_in_data_mux = dac1_enable ? (dac1_src_sel ? awg_out_data1 : dac1_in_data[DUC_DW-1:DUC_DW-15]) : 14'h0;
+wire [13:0] dac0_in_data_mux = dac0_enable ? (dac0_src_sel ? awg_out_data1 : dac0_in_data[DUC_DW-2:DUC_DW-15]) : 14'h0;
+wire [13:0] dac1_in_data_mux = dac1_enable ? (dac1_src_sel ? awg_out_data1 : dac1_in_data[DUC_DW-2:DUC_DW-15]) : 14'h0;
 
 // UG471 Fig 2-19, D2 @ rising edge == dac0, match AD9781 datasheet Fig 57.
 wire [14:0] dac_oddr_buf;
