@@ -436,7 +436,7 @@ assign dac_clk_out = dac_dco_clk;
 // XXX assumes only one set of baseband I/Q signals come in
 wire signed [DUC_DW-2:0] dac0_in_data;
 wire signed [DUC_DW-2:0] dac1_in_data;
-duc #(.DW(17), .USE_MIX_FOVER4(0)) dac_a(
+duc #(.DW(17), .USE_MIX_FOVER4(USE_MIX_FOVER4)) dac_a(
     .adc_clk(dsp_clk_out),
     .div_state(dsp_div_state),
     .dac_iq_phase(1'b0),
@@ -450,7 +450,7 @@ duc #(.DW(17), .USE_MIX_FOVER4(0)) dac_a(
     .dac_out(dac0_in_data)
 );
 
-duc #(.DW(17), .USE_MIX_FOVER4(0)) dac_b(
+duc #(.DW(17), .USE_MIX_FOVER4(USE_MIX_FOVER4)) dac_b(
     .adc_clk(dsp_clk_out),
     .div_state(dsp_div_state),
     .dac_iq_phase(1'b0),
@@ -460,7 +460,6 @@ duc #(.DW(17), .USE_MIX_FOVER4(0)) dac_b(
     .sina(lo_sin),
     .interp_coeff(DAC_INTERP_COEFF),
     .dac_clk(dac_clk_out),
-    .dac_mon(dac_out),
     .dac_out(dac1_in_data)
 );
 
