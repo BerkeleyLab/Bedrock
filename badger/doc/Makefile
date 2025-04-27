@@ -6,7 +6,7 @@ PANDOC = pandoc
 all: svg
 .PHONY: svg html
 
-svg: rtefi.svg clients.svg mem_gateway.svg memory.svg tx_path.svg precog_upg.svg
+svg: rtefi.svg stack.svg clients.svg mem_gateway.svg memory.svg tx_path.svg precog_upg.svg
 
 html: ../index.html ../status.html
 
