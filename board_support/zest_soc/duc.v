@@ -4,19 +4,19 @@ module duc #(
     parameter DW = 17,
     parameter USE_MIX_FOVER4 = 1
 )(
-    // in adc_clk domain
+        // in adc_clk domain
 	input adc_clk,
 	input [1:0] div_state,
 	input signed [DW-1:0] drive_i,
 	input signed [DW-1:0] drive_q,
 	input signed [DW:0] cosa,
 	input signed [DW:0] sina,
-       input signed [DW-1:0] interp_coeff,
-       input dac_iq_phase,  // unused for now
+        input signed [DW-1:0] interp_coeff,
+        input dac_iq_phase,  // unused for now
 	output signed [DW-2:0] dac_mon,
-    // in dac_clk domain
+        // in dac_clk domain
 	input dac_clk,
-       output signed [DW-2:0] dac_out
+        output signed [DW-2:0] dac_out
 );
 
 reg signed [DW:0] cosb=0, sinb=0;
