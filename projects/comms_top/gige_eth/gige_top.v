@@ -29,6 +29,7 @@ module gige_top (
 
    localparam IPADDR   = {8'd192, 8'd168, 8'd1, 8'd179};
    localparam MACADDR  = 48'h00105ad155b5;
+   localparam DOUBLEBIT = 0;  // XXX DOUBLEBIT = 1 fails hardware test
 
 `define AC701
 `ifdef AC701
@@ -58,6 +59,7 @@ module gige_top (
    gtp_sys_clk_mmcm i_gtp_sys_clk_mmcm (
       .clk_in  (sys_clk_fast),
       .sys_clk (sys_clk), // Buffered 50 MHz
+      .reset   (1'b0),
       .locked  ()
    );
 `else
@@ -87,21 +89,31 @@ module gige_top (
 
    // Route 62.5 MHz TXOUTCLK through clock manager to generate 125 MHz clock
    // Ethernet clock managers
+   wire gmii_tx_clk_half;
    mgt_eth_clks i_gt_eth_clks_tx (
       .reset       (~gt_cpll_locked[0]),
       .mgt_out_clk (gt0_tx_out_clk), // From transceiver
-      .mgt_usr_clk (gt0_tx_usr_clk), // Buffered 62.5 MHz
+      .mgt_usr_clk (gmii_tx_clk_half), // Buffered 62.5 MHz
       .gmii_clk    (gmii_tx_clk),     // Buffered 125 MHz
       .pll_lock    (tx0_pll_lock)
    );
 
+   wire gmii_rx_clk_half;
    mgt_eth_clks i_gt_eth_clks_rx (
       .reset       (~gt_cpll_locked[0]),
       .mgt_out_clk (gt0_rx_out_clk), // From transceiver
-      .mgt_usr_clk (gt0_rx_usr_clk),
+      .mgt_usr_clk (gmii_rx_clk_half),
       .gmii_clk    (gmii_rx_clk),
       .pll_lock    (rx0_pll_lock)
    );
+   // two cases: gt0_*_out_clk = 125 MHz or 62.5 MHz
+   generate if (DOUBLEBIT) begin : G_DOUBLEBIT
+      assign gt0_tx_usr_clk = gmii_tx_clk;
+      assign gt0_rx_usr_clk = gmii_rx_clk;
+   end else begin: G_SLOW
+      assign gt0_tx_usr_clk = gmii_tx_clk_half;
+      assign gt0_rx_usr_clk = gmii_rx_clk_half;
+   end endgenerate
 
    // ----------------------------------
    // GTP Instantiation
@@ -167,9 +179,10 @@ module gige_top (
    eth_gtx_bridge #(
       .IP         (IPADDR),
       .MAC        (MACADDR),
-      .GTX_DW     (GTX_ETH_WIDTH))
+      .GTX_DW     (GTX_ETH_WIDTH),
+      .DOUBLEBIT  (DOUBLEBIT))
    i_eth_gtx_bridge (
-      .gtx_tx_clk   (gt0_tx_usr_clk), // Transceiver clock at half rate
+      .gtx_tx_clk   (gt0_tx_usr_clk), // Transceiver clock, sometimes at half rate
       .gmii_tx_clk  (gmii_tx_clk),     // Clock for Ethernet fabric - 125 MHz for 1GbE
       .gmii_rx_clk  (gmii_rx_clk),
       .gtx_rxd      (gt0_rxd),

@@ -103,6 +103,9 @@ make -C build-tools/make-demo clean check consistency
 ## marble_cdc
 make -C projects/test_marble_family marble_base_cdc.txt
 
+## marble_i2c_check
+make -C projects/test_marble_family/i2c tests
+
 ## marble_sim
 make -C projects/test_marble_family all net_slave_check
 make -C projects/test_marble_family/pps_lock

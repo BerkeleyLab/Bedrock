@@ -52,8 +52,8 @@ always @(posedge clk) begin
 	amp_nonzero <= |amp_r;
 	if (gate) amp_r <= amp_railed ? amp_flat : amp_step;
 	// amplitude needs to be back to zero when next reset hits
-        // for robustness to incorrect parameters, force it low
-        if (reset) amp_r <= 0;
+	// for robustness to incorrect parameters, force it low
+	if (reset) amp_r <= 0;
 	a_warning_r <= reset & amp_nonzero;
 end
 assign amp = amp_r;

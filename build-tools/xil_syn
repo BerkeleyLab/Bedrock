@@ -188,7 +188,7 @@ echo "\`include \"$XILINX/verilog/src/iSE/unisim_comp.v\"" >>"$DESIGN.prj"
 if test -z "$ucf"; then ucf="root/${DESIGN}.ucf"; fi
 if [ ! -r "$ucf" ]; then
     ucf=${DESIGN}.ucf
-    perl -ne 'if (/(\w+)[,;]\s+\/\/ timespec\s+(.+)/) {print "NET \"$1\" LOC=\"'"${CLOCK_PIN}"'\";\nNET \"$1\" TNM_NET = \"CLK_1\";\nTIMESPEC \"TS_CLK_1\" = PERIOD \"CLK_1\" $2 HIGH 50%;\n"}' "root/$toplevel" >"$ucf"
+    perl -ne 'if (/(\w+)[,;]\s+\/\/ timespec\s+(.+)/) {print "NET \"$1\" LOC=\"'"${CLOCK_PIN}"'\";\nNET \"$1\" TNM_NET = \"CLK_1\";\nTIMESPEC \"TS_CLK_1\" = PERIOD \"CLK_1\" $2 HIGH 50%;\n"}' "$toplevel" >"$ucf"
 fi
 test -r "$ucf" || BOMB="$BOMB $ucf"
 

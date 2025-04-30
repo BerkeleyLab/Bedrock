@@ -30,7 +30,7 @@ bits: $(BITS_)
 	$(VVP) $< +trace
 	$(PYTHON) $(word 2, $^) -f $*
 
-rot_dds_tb: cordicg_b22.v
+rot_dds_tb: cordicg_b22.v ph_acc.v
 
 mon_12_tb: cordicg_b22.v
 
@@ -76,7 +76,7 @@ include $(DSP_DIR)/lo_lut/rules.mk
 # SSB Drivers
 SSB_TEST_PY = ssb_drive_test.py
 
-second_if_out_tb: cordicg_b22.v lo_lut_f40.v lo_lut_f40_05.v
+second_if_out_tb: second_if_out.v cordicg_b22.v lo_lut_f40.v lo_lut_f40_05.v
 
 second_if_out_check: second_if_out_tb $(SSB_TEST_PY)
 	$(VVP) $< +trace +if_lo=0 && $(PYTHON) $(word 2, $^) second_if_out.dat 145

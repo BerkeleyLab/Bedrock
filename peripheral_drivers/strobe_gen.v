@@ -2,11 +2,10 @@
 
 module strobe_gen #(
 	parameter TYPE="RISE_EDGE"
-)
-(
-    input I_clk,
-    input I_signal,
-    output O_strobe
+) (
+	input I_clk,
+	input I_signal,
+	output O_strobe
 );
 reg [1:0] sig_r;
 generate
@@ -19,7 +18,7 @@ else
 endgenerate
 
 always @(posedge I_clk) begin
-    sig_r<={sig_r[0],I_signal};
+	sig_r<={sig_r[0],I_signal};
 end
 assign O_strobe=(sig_r==2'b01);
 

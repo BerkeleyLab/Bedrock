@@ -14,6 +14,7 @@ make -C homeless clean
 make -C projects/common/leep clean
 make -C localbus clean
 make -C build-tools/make-demo spotless
+make -C projects/test_marble_family/i2c clean
 make -C projects/test_marble_family/pps_lock clean
 make -C projects/test_marble_family clean
 make -C projects/oscope/bmb7_cu clean

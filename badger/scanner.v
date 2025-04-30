@@ -21,7 +21,7 @@
 // The four submodules have relatively consistent ports and semantics.
 
 module scanner (
-	input clk,
+	input clk,  // timespec 6.8 ns
 	input [7:0] eth_in,
 	input eth_in_s,
 	input eth_in_e,  // error flag from PHY
@@ -276,9 +276,10 @@ endmodule
 
 // =====
 // UDP/ICMP Checksum checker
-// Calculation structure is about the same, superficially looks like
-// we just need a little stream selection logic based on the protocol,
-// and a single one's-complement accumulator can handle both cases.
+// Calculation structure for UDP and ICMP is about the same, so it
+// superficially looks like we just need a little stream selection logic
+// based on the protocol, and then a single one's-complement accumulator
+// could handle both cases.
 // This rosy scenario is stymied by UDP's pathological inclusion of
 // _two_ copies of the UDP length.  At the moment, therefore, this
 // module doesn't handle UDP.
@@ -324,7 +325,7 @@ module arp_patt(
 	output pass
 );
 
-reg [7:0] template;
+reg [7:0] template=0;
 always @(posedge clk) case(cnt[3:0])
 	// template starts at 12th byte of Ethernet packet,
 	// after the two MAC addresses.
@@ -362,7 +363,7 @@ module ip_patt(
 	output [15:0] length
 );
 
-reg [7:0] template;
+reg [7:0] template=0;
 always @(posedge clk) case(cnt[4:0])
 	// template starts at 12th byte of Ethernet packet,
 	// after the two MAC addresses.
@@ -441,7 +442,7 @@ module icmp_patt(
 	output pass
 );
 
-reg [7:0] template;
+reg [7:0] template=0;
 always @(posedge clk) case(cnt[2:0])
 	// Ethernet/IP header is not in our scope
 	// template starts at 23rd byte of Ethernet packet,

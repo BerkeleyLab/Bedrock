@@ -1,6 +1,10 @@
-module OBUF (
-	output O,
-	input I
+module OBUF #(
+    parameter IOSTANDARD = "DEFAULT"
+) (
+    output O,
+    input I
 );
-	buf b(O, I);
+
+buf b(O, I);
+
 endmodule

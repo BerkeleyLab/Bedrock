@@ -1,0 +1,6 @@
+NET "rx_clk" LOC="K21";
+NET "rx_clk" TNM_NET = "CLK_1";
+TIMESPEC "TS_CLK_1" = PERIOD "CLK_1" 6.8 ns HIGH 50%;
+NET "tx_clk" LOC="L20";
+NET "tx_clk" TNM_NET = "CLK_2";
+TIMESPEC "TS_CLK_2" = PERIOD "CLK_2" 6.8 ns HIGH 50%;

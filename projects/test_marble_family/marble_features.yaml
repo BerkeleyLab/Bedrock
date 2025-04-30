@@ -1,7 +1,7 @@
 # Defs are made available as Verilog defines
 # Params are made available as Verilog localparams and included in ROM metadata
 
-marble_mini:
+marblemini:
     defs:
         MARBLE_MINI: 1
         USE_SI570: 0
@@ -18,7 +18,7 @@ marble_mini:
         # sys_clk is only usable if use_rgmii_idelay: 0
         sysclk_src: "gtp_ref_clk"
 
-marble_v2:
+marble:
     defs:
         MARBLE_V2: 1
         USE_SI570: 1

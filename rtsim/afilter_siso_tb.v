@@ -13,15 +13,15 @@ integer cc;
 `ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
-                $dumpfile("afilter_siso.vcd");
-                $dumpvars(5, afilter_siso_tb);
-        end
-        for (cc=0; cc<400; cc=cc+1) begin
-                clk=0; #4;
-                clk=1; #4;
-        end
-        $display("WARNING: Not a self-checking testbench. Will always PASS. Relies on external post-processing.");
-        $display("PASS");
+		$dumpfile("afilter_siso.vcd");
+		$dumpvars(5, afilter_siso_tb);
+	end
+	for (cc=0; cc<400; cc=cc+1) begin
+		clk=0; #4;
+		clk=1; #4;
+	end
+	$display("WARNING: Not a self-checking testbench. Will always PASS. Relies on external post-processing.");
+	$display("PASS");
 end
 `endif //  `ifdef SIMULATE
 

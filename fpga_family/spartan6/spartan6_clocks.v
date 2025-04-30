@@ -82,6 +82,7 @@ DCM_SP #(
 BUFG bufg125_tx(.I(xclk125_buf), .O(clk_eth));
 
 PLL_ADV #(
+    .SIM_DEVICE("SPARTAN6"),
     .BANDWIDTH("OPTIMIZED"),
     .CLKIN1_PERIOD(clkin_period),
     .CLKFBOUT_MULT(plladv_mult), // 200x5=1000
@@ -92,8 +93,7 @@ PLL_ADV #(
     .CLKOUT2_DIVIDE(plladv_mult),  .CLKOUT2_DUTY_CYCLE(0.5), .CLKOUT2_PHASE( 0.0), // 200 MHz
     .REF_JITTER(0.005),
     .COMPENSATION("SYSTEM_SYNCHRONOUS")
-)
-PLL_ADV_inst (
+) PLL_ADV_inst (
     .CLKINSEL(1'b1),
     .CLKIN1(sysclk_buf),
     .CLKOUT0(clk_1x_buf),        // 62.5 MHz, 90 degree

@@ -10,6 +10,9 @@ Rules in the associated Makefile convert them to the web-compatible SVG format.
 ### Block Diagram
 ![block diagram](rtefi.svg)
 
+### Context at the system level
+![implementation stack block diagram](stack.svg)
+
 ### Attachment of clients:
 ![client interface timing diagram](clients.svg)
 

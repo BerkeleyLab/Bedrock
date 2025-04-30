@@ -31,7 +31,7 @@ wire [23:0] rtefi_lb_addr;
 wire [31:0] rtefi_lb_data_out;
 wire [31:0] rtefi_lb_data_in;
 
-
+// TODO: Add option to let MMC set the IP address and MAC
 rtefi_blob #(.ip(ip), .mac(mac)) badger(
 	// GMII Input (Rx)
 	.rx_clk(gmii_rx_clk),

@@ -30,9 +30,7 @@ module iq_mixer_multichannel #(
          .dwi       (DWI),
          .davr      (DAVR),
          .dwlo      (DWLO)
-      )
-      i_mixer_cos
-      (
+      ) i_mixer_cos (
          .clk    (clk),
          .adcf   (adc[(ch_id+1)*DWI-1: ch_id*DWI]),
          .mult   (cos),
@@ -44,9 +42,7 @@ module iq_mixer_multichannel #(
          .dwi       (DWI),
          .davr      (DAVR),
          .dwlo      (DWLO)
-      )
-      i_mixer_sin
-      (
+      ) i_mixer_sin (
          .clk    (clk),
          .adcf   (adc[(ch_id+1)*DWI-1: ch_id*DWI]),
          .mult   (sin),
