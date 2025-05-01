@@ -1,11 +1,3 @@
-[*]
-[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Tue Apr 15 23:17:11 2025
-[*]
-[dumpfile] "/home/lrusso/repos/bedrock/serial_io/EVG_EVR/todReceiver.vcd"
-[dumpfile_mtime] "Tue Apr 15 23:14:29 2025"
-[dumpfile_size] 40671412
-[savefile] "/home/lrusso/repos/bedrock/serial_io/EVG_EVR/todReceiver.gtkw"
 [timestart] 5000952000
 [size] 1910 1022
 [pos] -1 -1
