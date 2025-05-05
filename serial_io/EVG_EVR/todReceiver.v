@@ -219,16 +219,16 @@ end
 ///////////////////////////////////////////////////////////////////////////////
 always @(posedge clk) begin
     if (rst) begin
-        tooFewBitsCounter <= 0;
+        tooManyBitsCounter <= 0;
         tooFewBitsCounter <= 0;
     end
     else begin
         if (ppsStrobe) begin
-            if (!enoughBits)
-                tooFewBitsCounter <= tooFewBitsCounter + 1;
-
             if (tooManyBits)
                 tooManyBitsCounter <= tooManyBitsCounter + 1;
+
+            if (!enoughBits)
+                tooFewBitsCounter <= tooFewBitsCounter + 1;
         end
     end
 end
