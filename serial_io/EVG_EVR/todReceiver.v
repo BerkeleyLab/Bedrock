@@ -47,6 +47,13 @@ reg [$clog2(SECONDS_WIDTH)-1:0] bitsLeft = SECONDS_WIDTH - 1;
 reg enoughBits = 0, tooManyBits = 0;
 
 // Count clocks per second
+//
+// For a typical NOMINAL_CLK_RATE = 125 MHz:
+//
+// NOMINAL_CLK_RATE_PERCENT =     125_000
+// PPS_INITIAL_INTERVAL     = 123_750_000
+// PPS_WINDOW_INTERVAL      =   2_500_000
+// CLK_COUNTER_WIDTH        =          27
 localparam real NOMINAL_CLK_RATE_REAL = NOMINAL_CLK_RATE;
 localparam real NOMINAL_CLK_RATE_PERCENT = NOMINAL_CLK_RATE_REAL / 100;
 localparam PPS_INITIAL_INTERVAL = $rtoi(NOMINAL_CLK_RATE_PERCENT * 99);
@@ -54,6 +61,14 @@ localparam PPS_WINDOW_INTERVAL = NOMINAL_CLK_RATE / 50;
 localparam CLK_COUNTER_WIDTH = $clog2(PPS_INITIAL_INTERVAL+PPS_WINDOW_INTERVAL+1);
 
 // Low pass filter clocks per second
+//
+// For a typical NOMINAL_CLK_RATE = 125 MHz:
+//
+// FILTER_ACCUMULATOR_WIDTH    = 31
+// PPS_INITIAL_WIDTH           = 28
+// PPS_WINDOW_WIDTH            = 23
+// FRACTION_ACCUMULATOR_WIDTH  = 44
+// FRACTION_INCREMENT_WIDTH    = 18
 localparam FRACTION_WIDEN = 12;
 localparam FILTER_L2_ALPHA = 4;
 localparam FILTER_ACCUMULATOR_WIDTH = CLK_COUNTER_WIDTH + FILTER_L2_ALPHA;
@@ -122,6 +137,10 @@ end
 ///////////////////////////////////////////////////////////////////////////////
 
 // Compute fractional second increment from filtered clocks per second
+//
+// For a typical NOMINAL_CLK_RATE = 125 MHz:
+//
+// DIVIDER_BITCOUNT_WIDTH    = 6
 localparam DIVIDER_BITCOUNT_WIDTH = $clog2(FRACTION_INCREMENT_WIDTH)+1;
 
 reg [DIVIDER_BITCOUNT_WIDTH-1:0] dividerBitsLeft;
