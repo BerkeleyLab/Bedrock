@@ -26,7 +26,8 @@ output ep_rcr_los_o,   // loss-of-sync field
 // Link Autonegotiation Configuration Register
 input lacr_rx_en,          // enable reception
 output reg [15:0] lacr_rx_val,
-output reg lacr_rx_stb
+output reg lacr_rx_stb,
+output reg idle_stb=1'b0
 );
 
 `include "endpoint.vh"
@@ -132,6 +133,7 @@ wire rx_synced; wire rx_even;
     end
     else begin
       lacr_rx_stb <= 0;
+      idle_stb <= 1'b0;
       if((~ep_rcr_en_pcs_i)) begin
         rx_state <= RX_NOFRAME;
         fifo_error <= 0;
@@ -168,7 +170,7 @@ wire rx_synced; wire rx_even;
           // received code group with error (or control code group) - go to NOFRAME
           if((d_err | d_is_k | d_is_even)) begin
             `ifdef SIMULATE
-                $display("%s(%t) ->RX_NOFRAME 0x%x, %b, %b, %b", INDENT, $stime, dec_out, d_is_k, dec_err, d_is_even);
+                $display("%s(%t) ->RX_NOFRAME 0x%x, %b, %b, %b", INDENT, $stime, dec_out, d_is_k, d_err, d_is_even);
             `endif
             rx_state <= RX_NOFRAME;
           end
@@ -177,6 +179,7 @@ wire rx_synced; wire rx_even;
             if((d_is_idle)) begin
               //$display("%s->RX_NOFRAME d_is_idle", INDENT);
               rx_state <= RX_NOFRAME;
+              idle_stb <= 1'b1;
               // received D21.5 or D2.2 - it's a 802.3x autonegotiation LACR
             end
             else if((d_is_lcr)) begin

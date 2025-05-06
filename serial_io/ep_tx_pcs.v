@@ -119,7 +119,10 @@ always @(posedge clk) tx_enable_p <= tx_enable;
             tx_cr_alternate <= 1'b 0;
             // we've read something from the FIFO and it indicates a beginning of new frame
           end
-          else if(tx_enable) begin
+          else if (tx_enable) begin
+            `ifdef SIMULATE
+              $display("%s(%t) tx_enable: going to TX_SPD", INDENT, $stime);
+            `endif
             tx_state <= TX_SPD;
           end
           else begin

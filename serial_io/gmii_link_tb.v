@@ -72,7 +72,7 @@ module gmii_link_tb;
    end
 
    // Sequence of directed tests
-   localparam link_0_timer = 64;  // units of 8ns ticks
+   localparam link_0_timer = 128;  // units of 8ns ticks
    initial begin
       // The "8*" is a bug carried forward, so I can temporarily see matching behavior
       #(CLKP*(50 + link_0_timer))  // Must be longer than WDOG timeout
@@ -150,7 +150,7 @@ module gmii_link_tb;
    wire tx_enable_1 = tx_enable_0;
    wire operate_1;  // not used, right?
    gmii_link #(
-      .TIMER(60),
+      .TIMER(link_0_timer),
       .INDENT(`INDENT_ADVERSARY),
       .ADVERSARY(1'b1)
     ) link_1 (
@@ -204,7 +204,7 @@ module gmii_link_tb;
       end
       if (rx_dv_0) begin
          if (scb_full || scb_empty || (scb_data_out != rx_data_0)) begin
-            $display("FAIL: %t Data transmission error", $time);
+            //$display("FAIL: %t Data transmission error (%x != %x)", $time, scb_data_out, rx_data_0);
             data_fail <= data_fail + 1;
          end
       end

@@ -60,12 +60,13 @@ wire lacr_send;
 reg enc_dispin=ENC_DISPINIT;
 wire enc_dispout;
 wire [7:0] txd;
+wire ep_lacr_tx_en_i;
 ep_tx_pcs #(.INDENT(INDENT)) tx(.clk(GTX_CLK), .rst(tx_rst),
 	.tx_data_i(txd),
 	.tx_enable(TX_EN & (operate | an_bypass)), // Wait for AN to complete (if enabled)
 	.ep_tcr_en_pcs_i(1'b1),
 	.ep_lacr_tx_val_i(lacr_out),
-	.ep_lacr_tx_en_i(lacr_send & ~an_bypass),
+	.ep_lacr_tx_en_i(ep_lacr_tx_en_i),
 	.tx_odata_reg(tx_odata_pcs),
 	.tx_is_k(tx_is_k_pcs),
 	.disparity_i(enc_dispout)
@@ -87,6 +88,7 @@ wire lacr_rx_en;
 wire [15:0] lacr_rx_val_pcs;
 wire rx_is_k = rxdata_dec_out[8];
 wire [7:0] rx_data = rxdata_dec_out[7:0];
+wire idle_stb;
 ep_rx_pcs #(.INDENT(INDENT)) rx(.clk(RX_CLK), .rst(rx_rst),
 	.dec_out(rx_data),
 	.dec_is_k(rx_is_k),
@@ -99,7 +101,8 @@ ep_rx_pcs #(.INDENT(INDENT)) rx(.clk(RX_CLK), .rst(rx_rst),
 	.ep_rcr_en_pcs_i(1'b1),  // module enable
 	.lacr_rx_en(lacr_rx_en), // input
 	.lacr_rx_stb(lacr_rx_stb_ep), // output
-	.lacr_rx_val(lacr_rx_val_pcs) // output [15:0]
+	.lacr_rx_val(lacr_rx_val_pcs), // output [15:0]
+	.idle_stb(idle_stb) // output
 );
 
 reg dec_dispin=0;
@@ -114,38 +117,31 @@ dec_8b10b my_dec_8b10b(
 );
 
 wire [15:0] lacr_rx_val;
+assign tx_is_k = tx_is_k_pcs;
+assign tx_odata = tx_odata_pcs;
+assign txd = TXD;
+assign ep_lacr_tx_en_i = lacr_send & ~an_bypass;
+assign lacr_rx_en = 1'b1;
+assign lacr_rx_stb = lacr_rx_stb_ep;
+assign lacr_rx_val = lacr_rx_val_pcs;
 generate
 	if (ADVERSARY == 1'b1) begin: adversary
-		assign lacr_rx_en = 1'b0;
-		//wire [7:0] tx_byte;
-		wire tx_is_k_an;
-		wire negotiating;
-		//assign txd = negotiating ? tx_byte : TXD;
-		assign txd = TXD;
-		assign tx_is_k = negotiating ? tx_is_k_an : tx_is_k_pcs;
-		assign operate = ~negotiating;
-		assign tx_odata = negotiating ? tx_odata_an : tx_odata_pcs;
 		adversary_negotiate #(.TIMER_TICKS(TIMER), .INDENT(INDENT)) adversary_negotiate_i (
-			.clk(RX_CLK), // input
+			.rx_clk(RX_CLK), // input
+			.tx_clk(GTX_CLK),
 			.rst(1'b0), // input
-			.rx_byte(rxdata_dec_out[7:0]), // input [7:0]
-			.rx_is_k(rxdata_dec_out[8]), // input
-			.tx_byte(tx_odata_an),      // output [7:0]
-			.tx_is_k(tx_is_k_an),       // output
-			.negotiating(negotiating),  // output
+			.mr_an_enable(1'b1),        // input
 			.los(rx_err_los),           // input
-			.lacr_rx_val(lacr_rx_val),  // output [15:0]
-			.an_status(an_status),      // output [8:0]
-			.lacr_tx_val(lacr_out),     // output [15:0]
+			.idle_stb(idle_stb),        // input
+			.lacr_in(lacr_rx_val),          // input [15:0]
+			.lacr_in_stb(lacr_rx_stb),  // input
+			.lacr_out(lacr_out),        // output [15:0]
 			.lacr_send(lacr_send),      // output
-			.lacr_rx_stb(lacr_rx_stb)   // output
+			.negotiating(),  // output
+			.pcs_data(operate),         // output
+			.an_status(an_status)       // output [8:0]
 		);
 	end else begin: protagonist
-		assign lacr_rx_en=1'b1;
-		assign txd = TXD;
-		assign tx_is_k = tx_is_k_pcs;
-		assign tx_odata = tx_odata_pcs;
-		assign lacr_rx_stb = lacr_rx_stb_ep;
 		negotiate #(.TIMER_TICKS(TIMER), .INDENT(INDENT)) negotiator(
 			.rx_clk(RX_CLK),
 			.tx_clk(GTX_CLK),
@@ -157,7 +153,6 @@ generate
 			.operate(operate),          // output
 			.an_status(an_status)       // output [8:0]
 		);
-	assign lacr_rx_val = lacr_rx_val_pcs;
 	end
 endgenerate
 
