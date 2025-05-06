@@ -720,7 +720,7 @@ def main():
                            help="Transactions to do after issuing the 'start' signal (regname=val).")
     parserGet.add_argument("-t", "--timeout", type=float, default=5.0)
     parserGet.add_argument("-r", "--runtime", default=0, type=float,
-                           help="Time (in seconds) to wait for ctrace to complete. If runtime == 0, " + \
+                           help="Time (in seconds) to wait for ctrace to complete. If runtime == 0, " +
                            "don't start ctrace, just read out what's already there.")
     parserGet.add_argument("-s", "--store_file", default=False, action="store_true",
                            help="Also store raw memory as pickled dict.")
