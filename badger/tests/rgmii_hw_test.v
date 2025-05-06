@@ -27,12 +27,14 @@ module rgmii_hw_test(
 	input MOSI,
 
 	// SPI boot flash programming port
+`ifndef CHIP_FAMILY_ULTRASCALE
 `ifndef CHIP_FAMILY_7SERIES
 	output BOOT_CCLK,
 `endif
 	output BOOT_CS_B,
 	input  BOOT_MISO,
 	output BOOT_MOSI,
+`endif
 
 `ifdef MARBLE_TEST
 	output VCXO_EN,
@@ -97,6 +99,16 @@ wire BOOT_CCLK;
 // and UG470 p. 90: STARTUPE2 Primitive
 STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0));
 defparam vgmii.rtefi.p4_client.engine.seven = 1;
+`endif
+
+`ifdef CHIP_FAMILY_ULTRASCALE
+// See UG974 p. 679 STARTUPE3 primitive
+// Untested.  Could be worse.
+wire [3:0] ultra_di, ultra_do, ultra_dtx;
+STARTUPE3 set_boot(.CFGCLK(BOOT_CCLK), .DI(ultra_di), .DO(ultra_do), .DTS(ultra_dts), .FCSBO(BOOT_CS_B));
+wire BOOT_MISO = ultra_di[1];
+assign ultra_do = {3'b000, BOOT_MOSI};
+assign ultra_dts = 4'b0010;  // tri-state control
 `endif
 
 // Real work
