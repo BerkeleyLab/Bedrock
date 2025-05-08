@@ -23,8 +23,9 @@
 module scanner (
 	input clk,
 	input [7:0] eth_in,
-	input eth_in_s,
+	input eth_in_s,  // Ethernet data strobe (rx_dv for GMII)
 	input eth_in_e,  // error flag from PHY
+	input eth_pkt, // Ethernet packet envelope (rx_dv for GMII)
 	// PSPEPS didn't do anything with eth_in_e, which is certainly
 	// a mistake, but did work in practice.  Let's get this code working
 	// and basically tested before adding that new feature.
@@ -74,7 +75,7 @@ reg_tech_cdc enable_rx_cdc(.I(enable_rx), .C(clk), .O(enable_rx_r));
 
 // State machine mostly cribbed from head_rx.v
 wire [7:0] eth_octet = eth_in;
-wire eth_strobe = eth_in_s;
+wire eth_strobe = eth_in_s & eth_pkt;
 // exactly four states, one-hot encoded
 reg h_idle=1, h_preamble=0, h_data=0, h_drop=0;
 wire drop_packet;
@@ -92,17 +93,20 @@ always @(posedge clk) begin
 	end
 	if (h_preamble) begin
 		if (eth_strobe & (eth_octet==8'hd5)) begin
+			// SOF
 			h_preamble <= 0;
 			if (ifg_ok) h_data <= 1;
 			else h_drop <= 1;  // IFG too small.
 		end else if (eth_strobe & (eth_octet!=8'h55)) begin
+			// Scrambled preamble
 			h_preamble <= 0; h_drop <= 1;
-		end else if (~eth_strobe) begin
+		end else if (~eth_pkt) begin
+			// Packet is done; go idle
 			h_preamble <= 0; h_idle <= 1;
 		end
 	end
 	if (h_data) begin
-		if (~eth_strobe) begin
+		if (~eth_pkt) begin
 			h_data <= 0; h_idle <= 1;
 		end else if (drop_packet) begin   // poorly tested
 			h_data <= 0; h_drop <= 1;
@@ -126,9 +130,11 @@ end
 // Squelch data that isn't being considered
 reg h_data_d1=0, h_data_d2=0, data_first=0;
 reg [7:0] data_d1=0, data_d2=0;
+reg h_data_valid=1'b0;
 always @(posedge clk) begin
+	h_data_valid <= eth_in_s;
 	h_data_d1 <= h_data;
-	h_data_d2 <= h_data & h_data_d1;  // XXX horrible hack
+	h_data_d2 <= h_data & h_data_d1 & h_data_valid;  // XXX horrible hack
 	// Why does h_data last one octet past last Ethernet octet in data?
 	data_first <= h_data & ~h_data_d1;
 	data_d1 <= eth_strobe ? eth_octet : 8'b0;

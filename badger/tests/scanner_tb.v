@@ -48,7 +48,7 @@ reg [7:0] pno_d;
 wire busy, keep;
 scanner a(.clk(clk),
 	.eth_in(eth_in), .eth_in_s(eth_in_s),
-	.eth_in_e(1'b0), .enable_rx(1'b1),  // no tests for these
+	.eth_in_e(1'b0), .eth_pkt(eth_in_s), .enable_rx(1'b1),  // no tests for these
 	.ip_a(ip_a), .ip_d(ip_d),
 	.pno_a(pno_a), .pno_d(pno_d),
 	.busy(busy), .keep(keep),
