@@ -16,13 +16,21 @@
 // Thus to generate a chirp, the AM part goes to lim_X_hi and lim_X_lo,
 // propagating to drv_x.  The phase part goes to ph_offset, with sel_en=0,
 // which then propagates to drv_p.
+
 `define AUTOMATIC_self
 `define AUTOMATIC_decode
 `define AUTOMATIC_mp_proc
 `define LB_DECODE 1
 `include "fdbk_core_auto.vh"
 
-module fdbk_core(
+module fdbk_core #(
+	parameter ff_dshift = 0, // Deferred ff_ddrive downshift
+	// Knobs to use/bypass CORDIC multiplexer, Magnitude/Phase processor (slow),
+	// and Low-Latency Processor (bypassing conversion to polar coordinates)
+	parameter use_cordic_mux = 1,
+	parameter use_mp_proc = 1,
+	parameter use_ll_prop = 1
+)(
 	input clk,  // timespec 8.0 ns
 	input sync,  // one in eight
 	input iq, // high on first
@@ -31,15 +39,20 @@ module fdbk_core(
 	output [11:0] cmp_event,  // see mp_proc.v
 	(* external *)
 	input [1:0] coarse_scale,  // external
+	input chirp_en,
+	input signed [17:0] chirp_amp,
+	input signed [18:0] chirp_ph,
+	input               ffd_en,
+	input signed [17:0] ff_setm, // FeedForward mag setpoint
+	input signed [17:0] ff_setp, // FeedForward ph setpoint - unused
+	input signed [17:0] ff_ddrive, // FF drive (derivative) to be accumulated in I term
+	input signed [17:0] ff_dphase, // FF phase (derivative); currently unused
+	input               ffp_en,
+	input signed [17:0] ff_drive,  // FF drive added to P term
+	input signed [17:0] ff_phase,  // FF phase
 	`AUTOMATIC_self
 );
 `undef AUTOMATIC_self
-
-// Knobs to use/bypass CORDIC multiplexer, Magnitude/Phase processor (slow),
-// and Low-Latency Processor (bypassing conversion to polar coordinates)
-parameter use_cordic_mux = 1;
-parameter use_mp_proc = 1;
-parameter use_ll_prop = 1;
 
 `AUTOMATIC_decode
 
@@ -70,29 +83,35 @@ wire signed [17:0] cordic_in_xy;
 cordic_mux cordic(.clk(clk), .phase(~iq), .in_iq(ser_data[21:4]), .out_iq(out_iq),
 	.in_xy(cordic_in_xy), .in_ph(cordic_in_ph), .out_mp(out_mp));
 
-wire signed [17:0] proc_out_xy;
-wire signed [18:0] proc_out_ph;
+wire signed [17:0] proc_out_xy, chirp_in_xy;
+wire signed [18:0] proc_out_ph, chirp_in_ph;
+
+assign chirp_in_xy = ~iq ? chirp_amp : 18'b0;
+assign chirp_in_ph = chirp_ph;
+
 // Multiplexer to enable/bypass controls on magnitude and phase (slow path)
-assign cordic_in_ph = use_mp_proc ? proc_out_ph : {out_mp,1'b0};
-assign cordic_in_xy = use_mp_proc ? proc_out_xy : iq ? out_mp : 0;
+assign cordic_in_ph = chirp_en ? chirp_in_ph : use_mp_proc ? proc_out_ph : {out_mp,1'b0};
+assign cordic_in_xy = chirp_en ? chirp_in_xy : use_mp_proc ? proc_out_xy : iq ? out_mp : 0;
 
 // Establish strobe for magnitude and phase processor input
 wire sync3 = stb[1];
 
 // Instantiate magnitude and phase processor
+// XXX: Review thresh_shift for SRF use
+// .thresh_shift (6) in lcls2_llrf sel4v
+
 (* lb_automatic *)
-mp_proc mp_proc // auto
+mp_proc #(.ff_dshift(ff_dshift)) mp_proc // auto
 	(.clk(clk), .sync(sync3),
 	.in_mp(out_mp), // .state(state),
-	// Feedforward not exercised in this test
-	.ffd_en(1'b0),
-	.ffp_en(1'b0),
-	.ff_setm(18'b0),
-	.ff_setp(18'b0),
-	.ff_ddrive(18'b0),
-	.ff_dphase(18'b0),
-	.ff_drive(18'b0),
-	.ff_phase(18'b0),
+	// Feedforward - not well tested
+	.ffd_en(ffd_en),
+	.ff_setm(ff_setm),
+	.ff_setp(ff_setp),
+	.ff_ddrive(ff_ddrive),
+	.ff_dphase(ff_dphase),
+	.ffp_en(ffp_en),
+	.ff_drive(ff_drive), .ff_phase(ff_phase),
 	//
 	.out_xy(proc_out_xy), .out_ph(proc_out_ph),
 	.cmp_event(cmp_event),
@@ -117,6 +136,6 @@ ll_prop prop(.clk(clk), .iq(iq), .in_iq(in_xy), .out_iq(prop_out_iq),
 	.set_iq(out2), .gain_iq(out3), .drive_iq(out1));
 
 // Select either Low-Latency or SEL outputs
-assign out_xy = use_ll_prop ? prop_out_iq : out1;
+assign out_xy = chirp_en ? out_iq : use_ll_prop ? prop_out_iq : out1;
 
 endmodule

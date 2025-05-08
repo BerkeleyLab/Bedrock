@@ -202,6 +202,11 @@ fdbk_core fdbk_core  // auto
 	(.clk(clk),
 	.sync(sync),
 	.iq(iq), .in_xy(fdbk_in), .out_xy(fdbk_out_xy), .cmp_event(cmp_event),
+	// unused features
+	.chirp_en(1'b0), .chirp_amp(18'b0), .chirp_ph(19'b0),
+	.ffd_en(1'b0), .ff_setm(18'b0), .ff_setp(18'b0), .ff_ddrive(18'b0), .ff_dphase(18'b0),
+	.ffp_en(1'b0), .ff_drive(18'b0), .ff_phase(18'b0),
+	//
 	`AUTOMATIC_fdbk_core
 );
 
