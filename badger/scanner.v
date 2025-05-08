@@ -26,8 +26,9 @@ module scanner (
 	input eth_in_s,
 	input eth_in_e,  // error flag from PHY
 	// PSPEPS didn't do anything with eth_in_e, which is certainly
-	// a mistake, but did work in practice.  Let's get this code working
-	// and basically tested before adding that new feature.
+	// a mistake, but did work in practice.  Ditto for this version,
+	// and it's proven to be very robust.  Presumably the 32-bit CRC
+	// makes the RX_ER bit effectively redundant?
 	//
 	// New port: async input to allow packet reception
 	// Lets someone turn off the Ethernet subsystem during maintenance,
@@ -72,11 +73,16 @@ parameter handle_icmp = 1;
 wire enable_rx_r;
 reg_tech_cdc enable_rx_cdc(.I(enable_rx), .C(clk), .O(enable_rx_r));
 
-// State machine mostly cribbed from head_rx.v
+// Ethernet frame state machine, primarily based on eth_strobe from PHY
 wire [7:0] eth_octet = eth_in;
 wire eth_strobe = eth_in_s;
 // exactly four states, one-hot encoded
 reg h_idle=1, h_preamble=0, h_data=0, h_drop=0;
+// The exact start of frame (transition from h_preamble to h_data)
+// is controlled by a traditional Ethernet synchronization preamble and SFD.
+// That old-school bit-pattern of 10101010 10101010 10101011
+// looks like 55 55 d5 when read over the 8-bit GMII port.  See
+// https://en.wikipedia.org/wiki/Ethernet_frame#Preamble_and_start_frame_delimiter
 wire drop_packet;
 reg [3:0] ifg_count=0;  // Inter-frame gap counter
 wire ifg_inc = ~(&ifg_count[3:2]);  // saturate at 12

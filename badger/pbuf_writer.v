@@ -76,6 +76,10 @@ always @(posedge clk) begin
 	if (trig) origin <= fp;
 	case (post_cnt)
 		// 12 unused bits, will find customers later, including authentication
+		// Note that the 0 to 1 transition in bit 7 position between states 0 and 1
+		// is absolutely CRITICALLY IMPORTANT to let the reader find the beginning
+		// of the packet even when it occasionally skips reading a word, in the
+		// case where the reader (Tx side) clock is slower than this clock.
 		0: pxd <= {1'b1, 1'b0, 7'b0};
 		1: pxd <= {1'b1, 1'b1, pack_len[6:0]};
 		2: pxd <= {1'b0, 4'd0, pack_len[10:7]};
