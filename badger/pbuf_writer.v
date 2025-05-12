@@ -95,6 +95,7 @@ assign mem_d = pxd;
 assign badge_stb = badge_stb_r;
 
 // We need rx_mac_hbank in our own clk domain
+// Better to pull this step up to rtefi_center?
 wire rx_mac_hbank_r;
 reg_tech_cdc rx_mac_hbank_cdc(.I(rx_mac_hbank), .C(clk), .O(rx_mac_hbank_r));
 
