@@ -302,7 +302,7 @@ always @(posedge rx_clk) begin
 
     // <<< Once a local device has completed transmission of its Next Page information, if any, it
     //     shall transmit Message Pages with a Null message code (see Annex 28C) and the NP bit set
-    //     to logic zero while its link partner continues to transmit valid Next Pages. >>> 
+    //     to logic zero while its link partner continues to transmit valid Next Pages. >>>
     NEXT_PAGE_WAIT: begin
       mr_np_loaded <= 1'b0;
       tx_Config_Reg[15] <= 1'b0; // NP bit

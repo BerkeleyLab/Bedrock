@@ -16,7 +16,7 @@ all: targets gmii_to_rgmii_lint
 
 .PHONY: checks
 targets: $(TGT_)
-checks: $(CHK_)
+checks: $(CHK_) gmii_link_cdc.txt
 
 SRCS = patt_gen.v data_xdomain.v flag_xdomain.v reg_tech_cdc.v multi_sampler.v
 patt_gen_tb : $(SRCS)
@@ -36,7 +36,10 @@ adversary_negotiate_tb: adversary_negotiate_tb.v adversary_negotiate.v enc_8b10b
 
 adversary_negotiate_check: adversary_negotiate_tb
 
+gmii_link_yosys.json: gmii_link_shell.v $(SRCS)
+
 CLEAN += patt_gen_tb gmii_link_tb dec_8b10b_tb *.vcd
+CLEAN += gmii_link_cdc.txt gmii_link_yosys.json
 CLEAN_DIR += _autogen
 
 include $(BUILD_DIR)/bottom_rules.mk
