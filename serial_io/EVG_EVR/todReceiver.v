@@ -73,7 +73,7 @@ localparam FRACTION_WIDEN = 12;
 localparam FILTER_L2_ALPHA = 4;
 localparam FILTER_ACCUMULATOR_WIDTH = CLK_COUNTER_WIDTH + FILTER_L2_ALPHA;
 reg [FILTER_ACCUMULATOR_WIDTH-1:0] filterAccumulator =
-                                                    NOMINAL_CLK_RATE << FILTER_L2_ALPHA;
+                                                    (NOMINAL_CLK_RATE << FILTER_L2_ALPHA) - 6;
 wire [CLK_COUNTER_WIDTH-1:0] filteredClocksPerSecond =
              filterAccumulator[FILTER_ACCUMULATOR_WIDTH-1-:CLK_COUNTER_WIDTH];
 
@@ -81,7 +81,7 @@ wire [CLK_COUNTER_WIDTH-1:0] filteredClocksPerSecond =
 localparam PPS_INITIAL_WIDTH = $clog2(PPS_INITIAL_INTERVAL+1)+1;
 localparam PPS_WINDOW_WIDTH = $clog2(PPS_WINDOW_INTERVAL+1)+1;
 
-// Accumlate fractional seconds
+// Accumulate fractional seconds
 localparam FRACTION_ACCUMULATOR_WIDTH = 32 + FRACTION_WIDEN;
 localparam FRACTION_INCREMENT_WIDTH = $clog2((1<<30)/(PPS_INITIAL_INTERVAL/4)) +
                                                                  FRACTION_WIDEN;

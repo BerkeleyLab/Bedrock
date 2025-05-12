@@ -31,13 +31,13 @@ initial begin
         clk = 0; #5;
     end
 
-	if (errors) begin
-		$display("FAIL");
-		$stop(0);
-	end else begin
-		$display("PASS");
-		$finish(0);
-	end
+    if (errors) begin
+        $display("FAIL");
+        $stop(0);
+    end else begin
+        $display("PASS");
+        $finish(0);
+    end
 end
 
 //////////////////////////////////

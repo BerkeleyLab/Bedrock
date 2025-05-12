@@ -65,7 +65,6 @@ todReceiver_tb.todStart
 -DUT
 @28
 todReceiver_tb.DUT.clk
-@29
 todReceiver_tb.DUT.rst
 @22
 todReceiver_tb.DUT.evCode[7:0]
@@ -73,6 +72,7 @@ todReceiver_tb.DUT.evCode[7:0]
 todReceiver_tb.DUT.fractionOverflow
 @24
 todReceiver_tb.DUT.fraction[31:0]
+todReceiver_tb.DUT.filteredClocksPerSecond[13:0]
 @28
 todReceiver_tb.DUT.ppsInitialDone
 todReceiver_tb.DUT.ppsStrobe
