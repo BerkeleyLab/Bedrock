@@ -8,6 +8,7 @@ module reg_tech_cdc(
     input C,
     output O
 );
+parameter POST_STAGES=1;
 
 // Probably OK to stack up various vendor-specific attributes here.
 // If incompatibilities are discovered, maybe they can be addressed
@@ -20,6 +21,6 @@ always @(posedge C) begin
     r1 <= I;
     r2 <= r1;
 end
-assign O = r2;
+assign O = (POST_STAGES==0) ? r1 : r2;
 
 endmodule
