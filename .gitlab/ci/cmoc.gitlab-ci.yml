@@ -11,6 +11,11 @@ cmoc_test:
   stage: test
   script:
     - make && make checks
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - cmoc/fdbk_core_plot.pdf
 
 cmoc_top:
   before_script:

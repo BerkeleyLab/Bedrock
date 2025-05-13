@@ -60,6 +60,7 @@ integer in_file, out_file;
 reg [255:0] in_file_name;
 reg [255:0] out_file_name;
 `ifdef SIMULATE
+
 // The command-line arguments depend on the test type in question
 initial begin
 	if (!$value$plusargs("in_file=%s", in_file_name)) in_file_name="fdbk_core_in.dat";
@@ -161,21 +162,40 @@ always @(posedge lb_clk) begin
 	else
 	begin
 		lb_data <= 32'hx;
-		lb_addr <= 7'hx;
+		lb_addr <= 16'hx;
 		lb_write <= 0;
 	end
 end
 `endif //  `ifdef SIMULATE
+
+// Disabled for now; can this also be made a run-time selection?
+reg chirp_en=0;
+reg signed [17:0] chirp_amp=10000;
+reg [18:0] chirp_ph=0;
+always @(posedge clk) chirp_ph <= chirp_ph + 111;
 
 // Magic Local Bus decoder
 `AUTOMATIC_decode
 
 wire sync1=(state==7);
 wire signed [17:0] out_xy;
+wire signed [17:0] ff_setm=0, ff_ddrive=0;  // TODO: Exercise FF pulse
+
 (* lb_automatic *)
 fdbk_core #(.use_mp_proc(1), .use_ll_prop(0)) dut // auto
 	(.clk(clk),
 	.sync(sync1), .iq(iq), .in_xy(in1), .out_xy(out_xy),
+	.chirp_en(chirp_en), .chirp_amp(chirp_amp), .chirp_ph(chirp_ph),
+	// untested features
+	.ffd_en(1'b0),
+	.ff_setm(ff_setm),
+	.ff_setp(18'b0),  // Phase is unused for now
+	.ff_ddrive(ff_ddrive),
+	.ff_dphase(18'b0),
+	.ffp_en(1'b0),
+	.ff_drive(18'b0),
+	.ff_phase(18'b0),
+	//
 	`AUTOMATIC_dut);
 
 `ifdef SIMULATE

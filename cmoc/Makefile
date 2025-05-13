@@ -34,10 +34,15 @@ _dep/fdbk_core_tb.d: fdbk_core_tb_auto
 _dep/rf_controller_tb.d: rf_controller_tb_auto
 
 
-fdbk_core.vcd: $(AUTOGEN_DIR)/regmap_fdbk_core_tb.json
-fdbk_core.vcd: fdbk_core_tb fdbk_core_test.py
-	$(PYTHON) fdbk_core_test.py
-fdbk_core_check: fdbk_core.vcd
+# No magic to generate fdbk_core.vcd, because running fdbk_core_tb
+# depends on in_file.  A plethora of such files are created by fdbk_core_test.py,
+# which then runs fdbk_core_tb for each case.
+# fdbk_core.vcd: $(AUTOGEN_DIR)/regmap_fdbk_core_tb.json
+
+.PRECIOUS: fdbk_core_plot.pdf
+fdbk_core_plot.pdf: fdbk_core_tb fdbk_core_test.py $(AUTOGEN_DIR)/regmap_fdbk_core_tb.json
+	$(PYTHON) fdbk_core_test.py $@
+fdbk_core_check: fdbk_core_plot.pdf
 	@echo DONE
 
 cryomodule_in.dat: cryomodule_test_setup.py $(AUTOGEN_DIR)/regmap_cryomodule.json
@@ -90,5 +95,6 @@ endif
 CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd
 CLEAN += *.o tap-vpi.vpi
 CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cryomodule_in.dat cryomodule_p.dat cryomodule.dat $(RTEFI_CLEAN)
+CLEAN += fdbk_core_plot.pdf
 CLEAN_DIRS += _xilinx
 include $(BUILD_DIR)/bottom_rules.mk
