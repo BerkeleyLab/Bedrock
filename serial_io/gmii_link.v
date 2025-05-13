@@ -133,12 +133,12 @@ generate
 			.mr_an_enable(1'b1),        // input
 			.los(rx_err_los),           // input
 			.idle_stb(idle_stb),        // input
-			.lacr_in(lacr_rx_val),          // input [15:0]
+			.lacr_in(lacr_rx_val),      // input [15:0]
 			.lacr_in_stb(lacr_rx_stb),  // input
 			.lacr_out(lacr_out),        // output [15:0]
 			.lacr_send(lacr_send),      // output
-			.negotiating(),  // output
-			.pcs_data(operate),         // output
+			.negotiating(),             // output
+			.operate(operate),          // output
 			.an_status(an_status)       // output [8:0]
 		);
 	end else begin: protagonist

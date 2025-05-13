@@ -14,7 +14,7 @@ module adversary_negotiate #(
   parameter INDENT = ""
 ) (
   input  rx_clk,
-  input  tx_clk, // TODO - Cross domains properly!
+  input  tx_clk,
   input  rst,
   // Control
   input  mr_an_enable, // Enable auto-negotiation.
@@ -28,7 +28,7 @@ module adversary_negotiate #(
   output lacr_send,
   // Status
   output negotiating,
-  output pcs_data,
+  output operate,
   output [8:0] an_status   // debug; partial emulation of negotiate.v output
 );
 
@@ -67,7 +67,7 @@ localparam [1:0] XMIT_IDLE   = 2'h0,
                  XMIT_DATA   = 2'h2,
                  XMIT_INVALID= 2'h3;
 reg [1:0] xmit=XMIT_IDLE;
-assign lacr_send = xmit == XMIT_CONFIGURATION;
+wire lacr_send_l = xmit == XMIT_CONFIGURATION;
 localparam [3:0] AN_ENABLE              = 4'h0,
                  AN_RESTART             = 4'h1,
                  AN_DISABLE_LINK_OK     = 4'h2,
@@ -91,10 +91,6 @@ wire [8:0] an_status_l = {
   an_state==IDLE_DETECT,
   an_state==LINK_OK
 };
-reg [8:0] an_status_r=0;
-always @(posedge rx_clk) an_status_r <= an_status_l;
-assign an_status = an_status_r;
-
 reg [15:0] tx_Config_Reg=16'h0, rx_Config_Reg=16'h0000;
 localparam [15:0] mr_adv_ability = 16'b1000000000100000; // Only FD, Next_Page support, no Pause frames
 reg [15:0] mr_lp_adv_ability = 16'h0000;
@@ -103,11 +99,36 @@ reg [15:0] mr_lp_adv_ability = 16'h0000;
              |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
     Bit Name |NP |ACK|RF2|RF1|    rsvd   |PS2|PS1|HD |FD |        rsvd       |
 */
-// Do not support Next_Page
 
-assign lacr_out = tx_Config_Reg;
+wire negotiating_l = an_state != LINK_OK;
 
-assign negotiating = an_state != LINK_OK;
+// ========================== Clock Domain Crossing: rx_clk to tx_clk ==============================
+reg [8:0] an_status_r=0;
+reg pcs_data_r=1'b0, lacr_send_r=1'b0, negotiating_r=1'b0;
+(* ASYNC_REG = "TRUE" *) (* magic_cdc *) reg [8:0] an_status_t=0;
+(* ASYNC_REG = "TRUE" *) (* magic_cdc *) reg pcs_data_t=1'b0, lacr_send_t=1'b0, negotiating_t=1'b0;
+(* ASYNC_REG = "TRUE" *) (* magic_cdc *) reg [15:0] tx_Config_Reg_t=16'h0;
+
+always @(posedge rx_clk) begin
+  pcs_data_r <= xmit == XMIT_DATA;
+  an_status_r <= an_status_l;
+  lacr_send_r <= lacr_send_l;
+  negotiating_r <= negotiating_l;
+end
+always @(posedge tx_clk) begin
+  tx_Config_Reg_t <= tx_Config_Reg;
+  pcs_data_t <= pcs_data_r;
+  an_status_t <= an_status_r;
+  lacr_send_t <= lacr_send_r;
+  negotiating_t <= negotiating_r;
+end
+assign an_status = an_status_t;
+assign lacr_send = lacr_send_t;
+assign operate = pcs_data_t;
+assign lacr_out = tx_Config_Reg_t;
+assign negotiating = negotiating_t;
+
+// =================================================================================================
 reg mr_an_complete = 1'b0;
 // <<< The variable mr_np_loaded is set to TRUE to indicate that the local device has loaded its
 //     Auto-Negotiation Next Page transmit register with Next Page information for transmission.
@@ -168,7 +189,7 @@ wire rx_cr_ack = lacr_in[14];
 wire [14:0] rx_Config_Reg_ignore_ack = {rx_Config_Reg[15], rx_Config_Reg[13:0]};
 wire [14:0] lacr_in_ignore_ack = {lacr_in[15], lacr_in[13:0]};
 
-// ==================== Auto-Negotiation State Machine =======================
+// ================================ Auto-Negotiation State Machine =================================
 always @(posedge rx_clk) begin
   reset_stb <= 1'b0;
   link_timer_stb <= 1'b0;
@@ -350,7 +371,6 @@ always @(posedge rx_clk) begin
     consistency_match <= 1'b0;
     idle_match <= 1'b0;
     idle_counter <= 0;
-    np_rx <= 1'b0;
   end
 
   // ======================================= idle_match ===========================================
@@ -434,7 +454,5 @@ always @(posedge rx_clk) begin
     acknowledge_match_counter <= 0;
   end
 end
-
-assign pcs_data = xmit == XMIT_DATA;
 
 endmodule

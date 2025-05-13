@@ -51,7 +51,15 @@ end
 assign an_status = an_status_r;
 assign operate = operate_r;
 
-gmii_link gmii_link_(
+`ifdef ADVERSARY_NEGOTIATE
+	localparam [0:0] ADVERSARY = 1'b1;
+`else
+	localparam [0:0] ADVERSARY = 1'b0;
+`endif
+
+gmii_link #(
+	.ADVERSARY(ADVERSARY)
+) gmii_link_(
 	.RX_CLK(RX_CLK),
 	.RXD(RXD),
 	.RX_DV(RX_DV),

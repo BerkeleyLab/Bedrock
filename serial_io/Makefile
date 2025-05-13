@@ -16,7 +16,7 @@ all: targets gmii_to_rgmii_lint
 
 .PHONY: checks
 targets: $(TGT_)
-checks: $(CHK_) gmii_link_cdc.txt
+checks: $(CHK_) gmii_link_cdc.txt gmii_link_adversary_cdc.txt
 
 SRCS = patt_gen.v data_xdomain.v flag_xdomain.v reg_tech_cdc.v multi_sampler.v
 patt_gen_tb : $(SRCS)
@@ -38,8 +38,14 @@ adversary_negotiate_check: adversary_negotiate_tb
 
 gmii_link_yosys.json: gmii_link_shell.v $(SRCS)
 
+# Breaks the rule-matching pattern and requires a target-specific define, so I'm just copying and modifying the recipe
+gmii_link_adversary_yosys.json: gmii_link_shell.v $(SRCS) $(BUILD_DIR)/cdc_snitch_proc.ys
+	$(YOSYS_JSON_PRECHECK)
+	$(YOSYS) --version
+	$(YOSYS) $(YOSYS_QUIET) -p "read_verilog -DADVERSARY_NEGOTIATE $(YOSYS_JSON_OPTION) $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
+
 CLEAN += patt_gen_tb gmii_link_tb dec_8b10b_tb *.vcd
-CLEAN += gmii_link_cdc.txt gmii_link_yosys.json
+CLEAN += gmii_link_cdc.txt gmii_link_yosys.json gmii_link_adversary_cdc.txt gmii_link_adversary_yosys.json
 CLEAN_DIR += _autogen
 
 include $(BUILD_DIR)/bottom_rules.mk
