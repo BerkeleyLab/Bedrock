@@ -83,7 +83,7 @@ def run_test_bench(setmp_val,
 
         # Command line to run Verilog simulation
         # Arguments depend on the type of test-bench being run (test_type)
-        command = 'vvp -n fdbk_core_tb +vcd +test=' + \
+        command = 'vvp -n fdbk_core_tb +test=' + \
             str(test_type) + ' +in_file=' + in_file + ' +out_file=' + out_file + \
             ' +sp_step_time=' + str(setmp_step_time) + ' +sp_step_file=' + setmp_file +\
             ' +lim_step_time=' + str(lim_step_time) + ' +lim_step_file=' + lim_file
@@ -92,10 +92,10 @@ def run_test_bench(setmp_val,
             command = command + ' +in_i=' + str(in_i) + ' +in_q=' + str(in_q)
 
     elif test_type == 0 or test_type == 4:
-        command = 'vvp -n fdbk_core_tb +vcd +test=' + str(
+        command = 'vvp -n fdbk_core_tb +test=' + str(
             test_type) + ' +in_file=' + in_file + ' +out_file=' + out_file
     elif test_type == 1:
-        command = 'vvp -n fdbk_core_tb +vcd +test=' + str(
+        command = 'vvp -n fdbk_core_tb +test=' + str(
             test_type
         ) + ' +in_file=' + in_file + ' +out_file=' + out_file + ' +in_i=' + str(
             in_i) + ' +in_q=' + str(in_q)
@@ -110,7 +110,7 @@ def run_test_bench(setmp_val,
         call(command + " > /dev/null", shell=True)
 
 
-def run_sp_test_bench(plot=False):
+def run_sp_test_bench(plot_meth=None):
     """
     Set-point scaling test:
     The test-bench drives the input of the feedback controller with a given value
@@ -165,7 +165,7 @@ def run_sp_test_bench(plot=False):
         result = 'FAIL'
     print((">>> " + result))
 
-    if plot:
+    if plot_meth:
         # Plot results
         plt.plot(
             trang * 1e6,
@@ -182,14 +182,14 @@ def run_sp_test_bench(plot=False):
 
         # Format plot
         plt.title(
-            "Set-point amplitude scaling test-bench", fontsize=40, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=30)
-        plt.ylabel('Amplitude [FPGA counts]', fontsize=30)
+            "Set-point amplitude scaling test-bench", fontsize=20, y=1.01)
+        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=16)
+        plt.ylabel('Amplitude [FPGA counts]', fontsize=16)
         plt.legend(loc='upper right')
         plt.ylim([-80000, 80000])
-        plt.rc('font', **{'size': 15})
 
-        plt.show()
+        plot_meth()
+        plt.close()
 
     print("---- Phase test ----\n")
     # Set set-point to pre-defined value on both amplitude and phase,
@@ -266,7 +266,7 @@ def run_sp_test_bench(plot=False):
             result = 'FAIL'
         print((">>> " + result))
 
-        if plot:
+        if plot_meth:
             # Plot results
             plt.plot(
                 trang * 1e6,
@@ -287,20 +287,20 @@ def run_sp_test_bench(plot=False):
             # Format plot
             title_text = 'Set-point phase scaling test-bench (%d' % (
                 int(phase)) + r'$\degree$' + ')'
-            plt.title(title_text, fontsize=40, y=1.01)
-            plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=30)
-            plt.ylabel('Phase [Degrees]', fontsize=30)
+            plt.title(title_text, fontsize=20, y=1.01)
+            plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=16)
+            plt.ylabel('Phase [Degrees]', fontsize=16)
             plt.legend(loc='upper right')
-            plt.rc('font', **{'size': 15})
 
-            plt.show()
+            plot_meth()
+            plt.close()
 
         pass_phase_test = pass_phase_test & pass_this_phase_test
 
     return pass_amp_test & pass_phase_test
 
 
-def run_prop_test_bench(plot=False):
+def run_prop_test_bench(plot_meth=None):
     """
     Proportional gain scaling test:
     This test-bench drives the input of the feedback controller with a given value
@@ -372,8 +372,8 @@ def run_prop_test_bench(plot=False):
     ll = (kp, np.real(kp_measured), "." if ok1 else "BAD")
     print('\nKp: Set to %.3f, measured: %.3f  %s' % ll)
 
-    if plot:
-        plt.text(1.6, -60000, kp_text, verticalalignment='top', fontsize=30)
+    if plot_meth:
+        plt.text(1.6, -60000, kp_text, verticalalignment='top', fontsize=16)
 
         # Plot results
         plt.plot(
@@ -387,13 +387,12 @@ def run_prop_test_bench(plot=False):
 
         # Format plot
         plt.title(
-            "Proportional gain test-bench (Amplitude)", fontsize=40, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=30)
-        plt.ylabel('Amplitude [FPGA counts]', fontsize=30)
+            "Proportional gain test-bench (Amplitude)", fontsize=20, y=1.01)
+        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=16)
+        plt.ylabel('Amplitude [FPGA counts]', fontsize=16)
         plt.legend(loc='upper right')
         plt.xlim([1.4, 2.5])
         plt.ylim([-140000, 30000])
-        plt.rc('font', **{'size': 15})
 
         plt.axvline(
             x=(setmp_step_time) * Tstep * 1e6, color='k', linestyle='--')
@@ -401,7 +400,8 @@ def run_prop_test_bench(plot=False):
         plt.axhline(y=out1, color='r', linestyle='--')
         plt.axhline(y=out2, color='g', linestyle='--')
 
-        plt.show()
+        plot_meth()
+        plt.close()
 
     print("---- Phase test ----\n")
 
@@ -469,13 +469,13 @@ def run_prop_test_bench(plot=False):
     ll = (kp, np.imag(kp_measured), "." if ok2 else "BAD")
     print('\nKp: Set to %.3f, measured: %.3f  %s' % ll)
 
-    if plot:
+    if plot_meth:
         plt.text(
             1.6,
             -60000 * 360 / 2**18,
             kp_text,
             verticalalignment='top',
-            fontsize=30)
+            fontsize=16)
 
         # Plot results
         plt.plot(
@@ -495,12 +495,11 @@ def run_prop_test_bench(plot=False):
             linewidth=2)
 
         # Format plot
-        plt.title("Proportional gain test-bench (Phase)", fontsize=40, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=30)
-        plt.ylabel('Phase [Degrees]', fontsize=30)
+        plt.title("Proportional gain test-bench (Phase)", fontsize=20, y=1.01)
+        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=16)
+        plt.ylabel('Phase [Degrees]', fontsize=16)
         plt.legend(loc='upper right')
         plt.xlim([1.4, 2.5])
-        plt.rc('font', **{'size': 15})
 
         plt.axvline(
             x=(setmp_step_time) * Tstep * 1e6, color='k', linestyle='--')
@@ -508,12 +507,13 @@ def run_prop_test_bench(plot=False):
         plt.axhline(y=out1 * 360 / 2**18, color='r', linestyle='--')
         plt.axhline(y=out2 * 360 / 2**18, color='g', linestyle='--')
 
-        plt.show()
+        plot_meth()
+        plt.close()
 
     return ok1 and ok2
 
 
-def run_int_test_bench(plot=False):
+def run_int_test_bench(plot_meth=None):
     """
     Integral gain scaling test:
     The test-bench drives the input of the feedback controller with a given value
@@ -597,10 +597,10 @@ def run_int_test_bench(plot=False):
     print('\nKi: Set to %.6f, measured %.6f, factor %.4f  %s' % ll)
     print(limit_text)
 
-    if plot:
-        plt.text(0.25, -10000, ki_text, verticalalignment='top', fontsize=30)
+    if plot_meth:
+        plt.text(0.25, -10000, ki_text, verticalalignment='top', fontsize=16)
         plt.text(
-            0.25, -13000, limit_text, verticalalignment='top', fontsize=30)
+            0.25, -13000, limit_text, verticalalignment='top', fontsize=16)
 
         # Plot results
         plt.plot(
@@ -612,13 +612,12 @@ def run_int_test_bench(plot=False):
             linewidth=2)
 
         # Format plot
-        plt.title("Integral gain test-bench (Amplitude)", fontsize=40, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=30)
-        plt.ylabel('Amplitude [FPGA counts]', fontsize=30)
+        plt.title("Integral gain test-bench (Amplitude)", fontsize=20, y=1.01)
+        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=16)
+        plt.ylabel('Amplitude [FPGA counts]', fontsize=16)
         plt.legend(loc='upper right')
         plt.xlim([0.0, 3.5])
         plt.ylim([-40000, 20000])
-        plt.rc('font', **{'size': 15})
 
         # Highlight the region of the output signal where the slope is calculated
         plt.plot(
@@ -627,7 +626,8 @@ def run_int_test_bench(plot=False):
             label='Slope',
             linewidth=3)
 
-        plt.show()
+        plot_meth()
+        plt.close()
 
     print("---- Phase test ----\n")
 
@@ -702,19 +702,19 @@ def run_int_test_bench(plot=False):
     print('\nKi: Set to %.6f, measured %.6f, factor %.4f  %s' % ll)
     print(limit_text)
 
-    if plot:
+    if plot_meth:
         plt.text(
             0.25,
             -10000 * 360 / 2**18,
             ki_text,
             verticalalignment='top',
-            fontsize=30)
+            fontsize=16)
         plt.text(
             0.25,
             -15000 * 360 / 2**18,
             limit_text,
             verticalalignment='top',
-            fontsize=30)
+            fontsize=16)
 
         # Plot results
         plt.plot(
@@ -736,19 +736,19 @@ def run_int_test_bench(plot=False):
             linewidth=3)
 
         # Format plot
-        plt.title("Integral gain test-bench (Phase)", fontsize=40, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=30)
-        plt.ylabel('Phase [Degrees]', fontsize=30)
+        plt.title("Integral gain test-bench (Phase)", fontsize=20, y=1.01)
+        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=16)
+        plt.ylabel('Phase [Degrees]', fontsize=16)
         plt.legend(loc='upper right')
-        plt.rc('font', **{'size': 15})
         plt.ylim([-70, 35])
 
-        plt.show()
+        plot_meth()
+        plt.close()
 
     return ok1 and ok2
 
 
-def run_latency_test_bench(plot=False):
+def run_latency_test_bench(plot_meth=None):
 
     print("\n---- Latency test-bench ----\n")
 
@@ -815,9 +815,9 @@ def run_latency_test_bench(plot=False):
     ll = (latency_clks, "." if ok1 else "BAD")
     print('\nLatency through fdbk_core is %d clock cycles  %s\n' % ll)
 
-    if plot:
+    if plot_meth:
         plt.text(
-            0.5, 20000, latency_text, verticalalignment='top', fontsize=30)
+            0.5, 20000, latency_text, verticalalignment='top', fontsize=16)
 
         # Plot results
         plt.plot(
@@ -832,42 +832,59 @@ def run_latency_test_bench(plot=False):
             linewidth=2)
 
         # Format plot
-        plt.title("Latency test-bench", fontsize=40, y=1.01)
-        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=30)
-        plt.ylabel('Amplitude [FPGA counts]', fontsize=30)
+        plt.title("Latency test-bench", fontsize=20, y=1.01)
+        plt.xlabel('Time [' + r'${\rm \mu}$' + 's]', fontsize=16)
+        plt.ylabel('Amplitude [FPGA counts]', fontsize=16)
         plt.legend(loc='upper right')
         plt.ylim([-10000, 50000])
-        plt.rc('font', **{'size': 15})
 
-        plt.show()
+        plot_meth()
+        plt.close()
 
     return ok1
 
 
 if __name__ == "__main__":
 
+    from sys import argv
     ok = True
+    plot_arg = None
+    if len(argv) > 1:
+        plot_arg = argv[1]
+    plot_meth = None
+    pdf_wrap = None
+    if plot_arg:
+        plt.rcParams["figure.figsize"] = [10, 8]
+        plt.rc('font', **{'size': 15})
+        plot_meth = plt.show
+        if plot_arg.endswith(".pdf"):
+            from matplotlib.backends.backend_pdf import PdfPages
+            pdf_wrap = PdfPages(plot_arg)
+            plot_meth = pdf_wrap.savefig
+            print("PDF plots will be saved to " + plot_arg)
 
     # Run Set-point scaling test
-    rc = run_sp_test_bench()
+    rc = run_sp_test_bench(plot_meth=plot_meth)
     print("test 1", rc)
     ok &= rc
 
     # Run feedback proportional gain scaling test
-    rc = run_prop_test_bench()
+    rc = run_prop_test_bench(plot_meth=plot_meth)
     print("test 2", rc)
     ok &= rc
 
     # Run feedback integral gain scaling test
-    rc = run_int_test_bench()
+    rc = run_int_test_bench(plot_meth=plot_meth)
     print("test 3", rc)
     ok &= rc
 
     # Run latency test
-    rc = run_latency_test_bench()
+    rc = run_latency_test_bench(plot_meth=plot_meth)
     print("test 4", rc)
     ok &= rc
 
+    if pdf_wrap:
+        pdf_wrap.close()
     if ok:
         print("PASS")
     else:
