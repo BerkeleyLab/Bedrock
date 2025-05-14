@@ -22,10 +22,10 @@
 
 module scanner (
 	input clk,
+	input ce,  // Clock enable strobe for slower line rates
 	input [7:0] eth_in,
-	input eth_in_s,  // Ethernet data strobe (rx_dv for GMII)
+	input eth_in_s,
 	input eth_in_e,  // error flag from PHY
-	input eth_pkt, // Ethernet packet envelope (rx_dv for GMII)
 	// PSPEPS didn't do anything with eth_in_e, which is certainly
 	// a mistake, but did work in practice.  Let's get this code working
 	// and basically tested before adding that new feature.
@@ -75,7 +75,7 @@ reg_tech_cdc enable_rx_cdc(.I(enable_rx), .C(clk), .O(enable_rx_r));
 
 // State machine mostly cribbed from head_rx.v
 wire [7:0] eth_octet = eth_in;
-wire eth_strobe = eth_in_s & eth_pkt;
+wire eth_strobe = eth_in_s;
 // exactly four states, one-hot encoded
 reg h_idle=1, h_preamble=0, h_data=0, h_drop=0;
 wire drop_packet;
@@ -84,61 +84,62 @@ wire ifg_inc = ~(&ifg_count[3:2]);  // saturate at 12
 wire ifg_ok = ifg_count >= 10;  // slightly relaxed from spec of 12,
 // this configuration guarantees 11 non-data cycles between frames
 always @(posedge clk) begin
-	if (h_idle | h_preamble) ifg_count <= ifg_count + ifg_inc;
-	else ifg_count <= 0;
-	if (h_idle & eth_strobe) begin
-		h_idle <= 0;
-		if (eth_octet==8'h55 && enable_rx_r) h_preamble <= 1;
-		else h_drop <= 1;
-	end
-	if (h_preamble) begin
-		if (eth_strobe & (eth_octet==8'hd5)) begin
-			// SOF
-			h_preamble <= 0;
-			if (ifg_ok) h_data <= 1;
-			else h_drop <= 1;  // IFG too small.
-		end else if (eth_strobe & (eth_octet!=8'h55)) begin
-			// Scrambled preamble
-			h_preamble <= 0; h_drop <= 1;
-		end else if (~eth_pkt) begin
-			// Packet is done; go idle
-			h_preamble <= 0; h_idle <= 1;
+	if (ce) begin
+		if (h_idle | h_preamble) ifg_count <= ifg_count + ifg_inc;
+		else ifg_count <= 0;
+		if (h_idle & eth_strobe) begin
+			h_idle <= 0;
+			if (eth_octet==8'h55 && enable_rx_r) h_preamble <= 1;
+			else h_drop <= 1;
 		end
-	end
-	if (h_data) begin
-		if (~eth_pkt) begin
-			h_data <= 0; h_idle <= 1;
-		end else if (drop_packet) begin   // poorly tested
-			h_data <= 0; h_drop <= 1;
+		if (h_preamble) begin
+			if (eth_strobe & (eth_octet==8'hd5)) begin
+				h_preamble <= 0;
+				if (ifg_ok) h_data <= 1;
+				else h_drop <= 1;  // IFG too small.
+			end else if (eth_strobe & (eth_octet!=8'h55)) begin
+				h_preamble <= 0; h_drop <= 1;
+			end else if (~eth_strobe) begin
+				h_preamble <= 0; h_idle <= 1;
+			end
 		end
-	end
-	if (h_drop & ~eth_strobe) begin
-		h_drop <= 0; h_idle <= 1;
+		if (h_data) begin
+			if (~eth_strobe) begin
+				h_data <= 0; h_idle <= 1;
+			end else if (drop_packet) begin   // poorly tested
+				h_data <= 0; h_drop <= 1;
+			end
+		end
+		if (h_drop & ~eth_strobe) begin
+			h_drop <= 0; h_idle <= 1;
+		end
 	end
 end
 
 // Debug helper
 reg [1:0] debug1_r=0;
 always @(posedge clk) begin
-	if (h_idle) debug1_r <= 0;
-	if (h_preamble) debug1_r <= 1;
-	if (h_data) debug1_r <= 3;
-	if (h_drop) debug1_r <= 2;
+	if (ce) begin
+		if (h_idle) debug1_r <= 0;
+		if (h_preamble) debug1_r <= 1;
+		if (h_data) debug1_r <= 3;
+		if (h_drop) debug1_r <= 2;
+	end
 end
 
 // Synchronization and pipelining step
 // Squelch data that isn't being considered
 reg h_data_d1=0, h_data_d2=0, data_first=0;
 reg [7:0] data_d1=0, data_d2=0;
-reg h_data_valid=1'b0;
 always @(posedge clk) begin
-	h_data_valid <= eth_in_s;
-	h_data_d1 <= h_data;
-	h_data_d2 <= h_data & h_data_d1 & h_data_valid;  // XXX horrible hack
-	// Why does h_data last one octet past last Ethernet octet in data?
-	data_first <= h_data & ~h_data_d1;
-	data_d1 <= eth_strobe ? eth_octet : 8'b0;
-	data_d2 <= data_d1;
+	if (ce) begin
+		h_data_d1 <= h_data;
+		h_data_d2 <= h_data & h_data_d1;  // XXX horrible hack
+		// Why does h_data last one octet past last Ethernet octet in data?
+		data_first <= h_data & ~h_data_d1;
+		data_d1 <= eth_strobe ? eth_octet : 8'b0;
+		data_d2 <= data_d1;
+	end
 end
 
 // Unified handling of MAC/IP addresses via external config memory
@@ -162,7 +163,9 @@ end
 //
 reg [10:0] pack_cnt=0;
 always @(posedge clk) begin
-	pack_cnt <= h_data ? pack_cnt+1 : 0;
+	if (ce) begin
+		pack_cnt <= h_data ? pack_cnt+1 : 0;
+	end
 end
 assign drop_packet = pack_cnt >= 1536;
 assign ip_a = pack_cnt > 36 || pack_cnt < 16 ? pack_cnt[3:0] : pack_cnt[3:0]+8;
@@ -171,15 +174,17 @@ wire ip_m = ip_d == data_d1;
 // efficient later, using synthesis measurements and good regression tests.
 reg want_c_eth=0, want_c_arp=0, want_c_ip=0;
 always @(posedge clk) begin
-	want_c_eth <= pack_cnt < 6;
-	want_c_arp <= pack_cnt >= 38 && pack_cnt < 42;
-	want_c_ip  <= pack_cnt >= 30 && pack_cnt < 34;
+	if (ce) begin
+		want_c_eth <= pack_cnt < 6;
+		want_c_arp <= pack_cnt >= 38 && pack_cnt < 42;
+		want_c_ip  <= pack_cnt >= 30 && pack_cnt < 34;
+	end
 end
 // Accumulate state
 wire pz = pack_cnt == 0;
-reg pass_ethmac=0;  always @(posedge clk) begin if (want_c_eth & ~ip_m) pass_ethmac <= 0; if (pz) pass_ethmac <= 1; end
-reg pass_arpip=0;   always @(posedge clk) begin if (want_c_arp & ~ip_m) pass_arpip  <= 0; if (pz) pass_arpip  <= 1; end
-reg pass_ipdst=0;   always @(posedge clk) begin if (want_c_ip  & ~ip_m) pass_ipdst  <= 0; if (pz) pass_ipdst  <= 1; end
+reg pass_ethmac=0;  always @(posedge clk) begin if (ce) begin if (want_c_eth & ~ip_m) pass_ethmac <= 0; if (pz) pass_ethmac <= 1; end end
+reg pass_arpip=0;   always @(posedge clk) begin if (ce) begin if (want_c_arp & ~ip_m) pass_arpip  <= 0; if (pz) pass_arpip  <= 1; end end
+reg pass_ipdst=0;   always @(posedge clk) begin if (ce) begin if (want_c_ip  & ~ip_m) pass_ipdst  <= 0; if (pz) pass_ipdst  <= 1; end end
 
 // Specific protocols; IP is a component of both ICMP and UDP
 wire [15:0] ip_length, udp_length;
@@ -187,7 +192,7 @@ wire [15:0] ip_length, udp_length;
 // ARP handling is optional, chosen by the handle_arp parameter.
 wire pass_arp0;
 generate if (handle_arp) begin : find_arp
-	arp_patt arp_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_arp0));
+	arp_patt arp_p (.clk(clk), .ce(ce), .cnt(pack_cnt), .data(data_d1), .pass(pass_arp0));
 end else begin : no_find_arp
 	assign pass_arp0 = 0;
 end endgenerate
@@ -195,25 +200,25 @@ end endgenerate
 // ICMP handling is optional, chosen by the handle_icmp parameter.
 wire pass_icmp0;
 generate if (handle_icmp) begin : find_icmp
-	icmp_patt icmp_p(.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_icmp0));
+	icmp_patt icmp_p(.clk(clk), .ce(ce), .cnt(pack_cnt), .data(data_d1), .pass(pass_icmp0));
 end else begin : no_find_icmp
 	assign pass_icmp0 = 0;
 end endgenerate
 
 // IP, UDP, and checksum handling are given, but see note below about UDP checksums.
-wire pass_ip0;   ip_patt   ip_p  (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_ip0), .length(ip_length));
-wire pass_udp0;  udp_patt  udp_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_udp0), .length(udp_length));
-wire pass_sum;   cksum_chk chk_p (.clk(clk), .cnt(pack_cnt), .data(data_d1), .pass(pass_sum), .length(ip_length));
+wire pass_ip0;   ip_patt   ip_p  (.clk(clk), .ce(ce), .cnt(pack_cnt), .data(data_d1), .pass(pass_ip0), .length(ip_length));
+wire pass_udp0;  udp_patt  udp_p (.clk(clk), .ce(ce), .cnt(pack_cnt), .data(data_d1), .pass(pass_udp0), .length(udp_length));
+wire pass_sum;   cksum_chk chk_p (.clk(clk), .ce(ce), .cnt(pack_cnt), .data(data_d1), .pass(pass_sum), .length(ip_length));
 
 // CRC32
 wire crc_zero;
-crc8e_guts crc8e(.clk(clk), .gate(h_data_d1), .first(data_first),
+crc8e_guts crc8e(.clk(clk), .gate(ce & h_data_d1), .first(data_first),
 	.d_in(data_d1), .zero(crc_zero));
 wire final_octet = h_data_d1 & ~h_data;
 
 // UDP port number
 reg udp_port_stb=0;
-always @(posedge clk) udp_port_stb <= pack_cnt == 36;
+always @(posedge clk) if (ce) udp_port_stb <= pack_cnt == 36;
 wire [2:0] port_p0;  wire port_h, port_v;
 udp_port_cam #(.naw(3)) cam(.clk(clk),
 	.port_s(udp_port_stb), .data(data_d1),
@@ -223,11 +228,11 @@ udp_port_cam #(.naw(3)) cam(.clk(clk),
 
 // Packet length (doesn't count GMII preamble)
 reg [10:0] pack_len_r=0;
-always @(posedge clk) if (h_data) pack_len_r <= pack_cnt;
+always @(posedge clk) if (ce & h_data) pack_len_r <= pack_cnt;
 
 // Weird place for this
 reg ip_len_check=0, udp_len_check=0;
-always @(posedge clk) if (h_data) begin
+always @(posedge clk) if (ce & h_data) begin
 	ip_len_check <= pack_cnt >= ip_length + 18; // 18 = 14 Ethernet header + 4 CRC
 	udp_len_check <= ip_length >= udp_length + 20; // 20 = IP header length
 end
@@ -235,8 +240,10 @@ end
 // One more oddball
 reg unicast_src_mac=0;
 always @(posedge clk) begin
-	if (pack_cnt==1) unicast_src_mac <= 1;  // optimistic, needed to make busy flag work
-	if (pack_cnt==7) unicast_src_mac <= ~data_d1[0];
+	if (ce) begin
+		if (pack_cnt==1) unicast_src_mac <= 1;  // optimistic, needed to make busy flag work
+		if (pack_cnt==7) unicast_src_mac <= ~data_d1[0];
+	end
 end
 
 // Summary bits (mostly) don't leak irrelevant state
@@ -258,8 +265,10 @@ wire busy_with_udp = unicast_src_mac & pass_ethmac & pass_ip0 & pass_udp0;
 wire busy_with_icmp = unicast_src_mac & pass_ethmac & pass_ip0 & pass_icmp0;
 reg busy_r=0, keep_r=0;
 always @(posedge clk) begin
-	busy_r <= odata_s & (busy_with_arp | busy_with_udp | busy_with_icmp);
-	keep_r <= odata_s & (category != 0);
+	if (ce) begin
+		busy_r <= odata_s & (busy_with_arp | busy_with_udp | busy_with_icmp);
+		keep_r <= odata_s & (category != 0);
+	end
 end
 assign busy = busy_r;
 assign keep = keep_r;
@@ -267,7 +276,7 @@ assign keep = keep_r;
 // Debug helper
 reg [1:0] debug2_r=0;
 always @(posedge clk) begin
-	if (status_valid) debug2_r <= category;
+	if (ce & status_valid) debug2_r <= category;
 end
 assign debug = {debug2_r, debug1_r};
 
@@ -290,6 +299,7 @@ endmodule
 // module doesn't handle UDP.
 module cksum_chk(
 	input clk,
+	input ce,
 	input [10:0] cnt,
 	input [7:0] data,
 	input [15:0] length,  // IP length
@@ -312,10 +322,12 @@ ones_chksum ck(.clk(clk), .clear(chksum_zero), .gate(chksum_gate),
 // Final state, should find FF FF at end of IP packet
 reg eof=0, state=0;
 always @(posedge clk) begin
-	if (chksum_zero) state <= 0;
-	if (end_of_ip) state <= ones;
-	eof <= end_of_ip;
-	if (eof) state <= state & ones;
+	if (ce) begin
+		if (chksum_zero) state <= 0;
+		if (end_of_ip) state <= ones;
+		eof <= end_of_ip;
+		if (eof) state <= state & ones;
+	end
 end
 assign pass = state;
 
@@ -325,34 +337,41 @@ endmodule // UDP/ICMP Checksum checker
 // ARP pattern checker
 module arp_patt(
 	input clk,
+	input ce,
 	input [10:0] cnt,
 	input [7:0] data,
 	output pass
 );
 
 reg [7:0] template;
-always @(posedge clk) case(cnt[3:0])
-	// template starts at 12th byte of Ethernet packet,
-	// after the two MAC addresses.
-	4'd12: template <= 8'h08;
-	4'd13: template <= 8'h06;
-	4'd14: template <= 8'h00;   // ARP Ethernet hardware, octet 1
-	4'd15: template <= 8'h01;   // ARP Ethernet hardware, octet 2
-	4'd00: template <= 8'h08;   // ARP Protocol IP
-	4'd01: template <= 8'h00;   // ARP Protocol IP
-	4'd02: template <= 8'h06;   // ARP protocol address length
-	4'd03: template <= 8'h04;   // ARP protocol address length
-	4'd04: template <= 8'h00;   // ARP protocol operation
-	4'd05: template <= 8'h01;   // ARP protocol operation (request)
-	default: template <= 8'h00;
-endcase
+always @(posedge clk) begin
+	if (ce) begin
+		case(cnt[3:0])
+			// template starts at 12th byte of Ethernet packet,
+			// after the two MAC addresses.
+			4'd12: template <= 8'h08;
+			4'd13: template <= 8'h06;
+			4'd14: template <= 8'h00;   // ARP Ethernet hardware, octet 1
+			4'd15: template <= 8'h01;   // ARP Ethernet hardware, octet 2
+			4'd00: template <= 8'h08;   // ARP Protocol IP
+			4'd01: template <= 8'h00;   // ARP Protocol IP
+			4'd02: template <= 8'h06;   // ARP protocol address length
+			4'd03: template <= 8'h04;   // ARP protocol address length
+			4'd04: template <= 8'h00;   // ARP protocol operation
+			4'd05: template <= 8'h01;   // ARP protocol operation (request)
+			default: template <= 8'h00;
+		endcase
+	end
+end
 
 reg want=0, pass_r=0;
 wire match = data == template;
 always @(posedge clk) begin
-	want <= cnt >= 12 && cnt < 22;
-	if (cnt == 0) pass_r <= 1;
-	if (want & ~match) pass_r <= 0;
+	if (ce) begin
+		want <= cnt >= 12 && cnt < 22;
+		if (cnt == 0) pass_r <= 1;
+		if (want & ~match) pass_r <= 0;
+	end
 end
 assign pass = pass_r;
 
@@ -362,6 +381,7 @@ endmodule  // ARP pattern checker
 // IP pattern checker
 module ip_patt(
 	input clk,
+	input ce,
 	input [10:0] cnt,
 	input [7:0] data,
 	output pass,
@@ -369,26 +389,30 @@ module ip_patt(
 );
 
 reg [7:0] template;
-always @(posedge clk) case(cnt[4:0])
-	// template starts at 12th byte of Ethernet packet,
-	// after the two MAC addresses.
-	5'd12: template <= 8'h08;  // Bytes 12 and 13 are Ethertype IPv4
-	5'd13: template <= 8'h00;  // https://en.wikipedia.org/wiki/Ethertype
+always @(posedge clk) begin
+	if (ce) begin
+		case(cnt[4:0])
+			// template starts at 12th byte of Ethernet packet,
+			// after the two MAC addresses.
+			5'd12: template <= 8'h08;  // Bytes 12 and 13 are Ethertype IPv4
+			5'd13: template <= 8'h00;  // https://en.wikipedia.org/wiki/Ethertype
 
-	// Start of IPv4 header [https://en.wikipedia.org/wiki/IPv4#Header]
-	5'd14: template <= 8'h45;  // Vers (4 for ipv4) / IHL (> 5 is a weird case)
-	// 15  ignore  TOS (later changed to DSCP and ECN)
-	// 16  ignore  length msb
-	// 17  ignore  length lsb
-	// 18  ignore  identification msb
-	// 19  ignore  identification lsb
-	5'd20: template <= 8'h00;  // Flags/Fragment
-	5'd21: template <= 8'h00;
-	// 22  ignore  TTL (but see below)
-	// 23  ignore  Protocol
-	// 24-33  header checksum, source address, destination address
-	default: template <= 8'h00;
-endcase
+			// Start of IPv4 header [https://en.wikipedia.org/wiki/IPv4#Header]
+			5'd14: template <= 8'h45;  // Vers (4 for ipv4) / IHL (> 5 is a weird case)
+			// 15  ignore  TOS (later changed to DSCP and ECN)
+			// 16  ignore  length msb
+			// 17  ignore  length lsb
+			// 18  ignore  identification msb
+			// 19  ignore  identification lsb
+			5'd20: template <= 8'h00;  // Flags/Fragment
+			5'd21: template <= 8'h00;
+			// 22  ignore  TTL (but see below)
+			// 23  ignore  Protocol
+			// 24-33  header checksum, source address, destination address
+			default: template <= 8'h00;
+		endcase
+	end
+end
 
 // Packet has expired when TTL hits zero
 reg ttl_flag=0;
@@ -398,12 +422,14 @@ reg want=0, mask_df_bit=0, pass_r=0;
 wire [7:0] df_mask = {1'b1, ~mask_df_bit, 6'h3f};
 wire match = (data&df_mask) == template;
 always @(posedge clk) begin
-	want <= cnt >= 12 && cnt < 15 || cnt >= 20 && cnt < 22;
-	mask_df_bit <= cnt == 20;
-	ttl_flag <= cnt == 22;
-	if (cnt == 0) pass_r <= 1;
-	if (want & ~match) pass_r <= 0;
-	if (zero_ttl) pass_r <= 0;
+	if (ce) begin
+		want <= cnt >= 12 && cnt < 15 || cnt >= 20 && cnt < 22;
+		mask_df_bit <= cnt == 20;
+		ttl_flag <= cnt == 22;
+		if (cnt == 0) pass_r <= 1;
+		if (want & ~match) pass_r <= 0;
+		if (zero_ttl) pass_r <= 0;
+	end
 end
 
 // IP packet total length
@@ -412,16 +438,20 @@ end
 reg [7:0] data_d=0;
 reg [15:0] length_r=0;
 always @(posedge clk) begin
-	data_d <= data;
-	if (cnt==18) length_r <= {data_d, data};
+	if (ce) begin
+		data_d <= data;
+		if (cnt==18) length_r <= {data_d, data};
+	end
 end
 assign length = length_r;
 
 // IP header checksum
 reg out_chksum_gate=0, out_chksum_zero=0;
 always @(posedge clk) begin
-	out_chksum_gate <= cnt >= 14 && cnt < 34;
-	out_chksum_zero <= cnt == 0;
+	if (ce) begin
+		out_chksum_gate <= cnt >= 14 && cnt < 34;
+		out_chksum_zero <= cnt == 0;
+	end
 end
 wire chksum_all_ones;
 ones_chksum ck(.clk(clk), .clear(out_chksum_zero), .gate(out_chksum_gate),
@@ -429,9 +459,11 @@ ones_chksum ck(.clk(clk), .clear(out_chksum_zero), .gate(out_chksum_gate),
 reg chksum_all_ones_d=0;
 reg chksum_fail=0;
 always @(posedge clk) begin
-	chksum_all_ones_d <= chksum_all_ones;
-	if (cnt==0) chksum_fail <= 0;
-	if (cnt==35) chksum_fail <= ~chksum_all_ones | ~chksum_all_ones_d;
+	if (ce) begin
+		chksum_all_ones_d <= chksum_all_ones;
+		if (cnt==0) chksum_fail <= 0;
+		if (cnt==35) chksum_fail <= ~chksum_all_ones | ~chksum_all_ones_d;
+	end
 end
 assign pass = pass_r & ~chksum_fail;
 
@@ -442,28 +474,35 @@ endmodule  // IP header
 // For ICMP checksum see module cksum_chk
 module icmp_patt(
 	input clk,
+	input ce,
 	input [10:0] cnt,
 	input [7:0] data,
 	output pass
 );
 
 reg [7:0] template;
-always @(posedge clk) case(cnt[2:0])
-	// Ethernet/IP header is not in our scope
-	// template starts at 23rd byte of Ethernet packet,
-	// after the two MAC addresses.
-	3'd7: template <= 8'h01;  // cnt==23, Proto (ICMP)
-	3'd2: template <= 8'h08;  // cnt==34, ICMP echo request
-	3'd3: template <= 8'h00;  // cnt==35, ICMP code
-	default: template <= 8'h00;
-endcase
+always @(posedge clk) begin
+	if (ce) begin
+		case(cnt[2:0])
+			// Ethernet/IP header is not in our scope
+			// template starts at 23rd byte of Ethernet packet,
+			// after the two MAC addresses.
+			3'd7: template <= 8'h01;  // cnt==23, Proto (ICMP)
+			3'd2: template <= 8'h08;  // cnt==34, ICMP echo request
+			3'd3: template <= 8'h00;  // cnt==35, ICMP code
+			default: template <= 8'h00;
+		endcase
+	end
+end
 
 reg want=0, pass_r=0;
 wire match = data == template;
 always @(posedge clk) begin
-	want <= cnt == 23 || cnt==34 || cnt==35;
-	if (cnt == 0) pass_r <= 1;
-	if (want & ~match) pass_r <= 0;
+	if (ce) begin
+		want <= cnt == 23 || cnt==34 || cnt==35;
+		if (cnt == 0) pass_r <= 1;
+		if (want & ~match) pass_r <= 0;
+	end
 end
 assign pass = pass_r;
 
@@ -473,6 +512,7 @@ endmodule  // ICMP pattern checker
 // UDP pattern checker
 module udp_patt(
 	input clk,
+	input ce,
 	input [10:0] cnt,
 	input [7:0] data,
 	output pass,
@@ -491,20 +531,24 @@ wire reject_low = cnt==35 & ~|data[7:2];
 // Reject packets to destination port number 0
 reg pzero_d=0, pzero_d1=0, pzero_t=0;
 always @(posedge clk) begin
-	pzero_d <= data == 8'h00;
-	pzero_d1 <= pzero_d;
-	pzero_t <= cnt == 36;
+	if (ce) begin
+		pzero_d <= data == 8'h00;
+		pzero_d1 <= pzero_d;
+		pzero_t <= cnt == 36;
+	end
 end
 wire discard_port0 = pzero_t & pzero_d & pzero_d1;
 
 reg want=0, pass_r=0;
 wire match = data == template;
 always @(posedge clk) begin
-	want <= cnt == 23;
-	if (cnt == 0) pass_r <= 1;
-	if (want & ~match) pass_r <= 0;
-	if (reject_low) pass_r <= 0;
-	if (discard_port0) pass_r <= 0;
+	if (ce) begin
+		want <= cnt == 23;
+		if (cnt == 0) pass_r <= 1;
+		if (want & ~match) pass_r <= 0;
+		if (reject_low) pass_r <= 0;
+		if (discard_port0) pass_r <= 0;
+	end
 end
 assign pass = pass_r;
 
@@ -514,8 +558,10 @@ assign pass = pass_r;
 reg [7:0] data_d=0;
 reg [15:0] length_r=0;
 always @(posedge clk) begin
-	data_d <= data;
-	if (cnt==40) length_r <= {data_d, data};
+	if (ce) begin
+		data_d <= data;
+		if (cnt==40) length_r <= {data_d, data};
+	end
 end
 assign length = length_r;
 

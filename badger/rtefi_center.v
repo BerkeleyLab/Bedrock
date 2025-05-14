@@ -112,8 +112,8 @@ wire sdata_s, sdata_l;
 wire [10:0] pack_len;
 wire [7:0] status_vec; wire status_valid;
 scanner #(.handle_arp(handle_arp), .handle_icmp(handle_icmp)) a_scan(
-	.clk(rx_clk),
-	.eth_in(eth_in_r), .eth_in_s(eth_in_s_r), .eth_in_e(eth_in_e_r), .eth_pkt(eth_in_s_r),
+	.clk(rx_clk), .ce(1'b1),
+	.eth_in(eth_in_r), .eth_in_s(eth_in_s_r), .eth_in_e(eth_in_e_r),
 	.enable_rx(enable_rx),
 	.ip_a(ip_a), .ip_d(ip_d),
 	.pno_a(pno_a), .pno_d(pno_d),
