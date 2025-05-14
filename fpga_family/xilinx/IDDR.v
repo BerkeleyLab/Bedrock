@@ -3,6 +3,7 @@
 // https://docs.amd.com/go/en-US/ug471_7Series_SelectIO
 
 module IDDR #(
+    parameter SRTYPE = "ASYNC",
     parameter DDR_CLK_EDGE="SAME_EDGE_PIPELINED"
 ) (
     output Q1,

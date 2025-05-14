@@ -97,6 +97,7 @@ ODDR #(
 ) rgmii_tx_clk_oddr (
     .Q(rgmii_tx_clk_buf),
     .C(rgmii_tx_clk_),
+    .CE(1'b1),
     .D1(1'b1),
     .D2(1'b0),
     .R(1'b0),
@@ -110,6 +111,7 @@ ODDR #(
 ) rgmii_tx_ctl_oddr (
     .Q(rgmii_tx_ctl_buf),
     .C(gmii_tx_clk),
+    .CE(1'b1),
     .D1(gmii_tx_en),
     .D2(gmii_tx_en ^ gmii_tx_er),
     .R(1'b0),
