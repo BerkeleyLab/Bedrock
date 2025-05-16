@@ -612,10 +612,10 @@ def main():
     if args.check_prog:
         check_prog(sock)
 
-    if EXPERT and args.disable_wp is not None:
+    if EXPERT and args.disable_wp is True:
         enable_prog(sock)
 
-    if EXPERT and args.enable_wp is not None:
+    if EXPERT and args.enable_wp is True:
         enable_wp(sock)  # can be used to recover messed-up BP bits?
 
     if args.erase:
