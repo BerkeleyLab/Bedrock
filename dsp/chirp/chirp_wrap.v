@@ -13,7 +13,7 @@
 //
 // ------------------------------------
 
-module chirp_wrap # (
+module chirp_wrap #(
    parameter DD_SHIFT = 16, // See comments in parab.v for dx
    parameter AMP_WI = 20,
    parameter PH_WI = 20,

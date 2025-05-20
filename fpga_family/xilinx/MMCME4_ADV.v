@@ -52,7 +52,7 @@ module MMCME4_ADV #(
     parameter SS_MODE = "CENTER_HIGH",
     parameter integer SS_MOD_PERIOD = 10000,
     parameter STARTUP_WAIT = "FALSE"
-)(
+) (
     output  CLKFBOUT,
     output  CLKFBOUTB,
     output  CLKOUT0,

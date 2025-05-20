@@ -1,4 +1,6 @@
-module lvds_dco #(parameter flip_dco=0) (
+module lvds_dco #(
+parameter flip_dco=0
+) (
 input clk_reset,  // for resetting BUFR divider state
 input mmcm_reset,  // be safe
 output mmcm_locked,

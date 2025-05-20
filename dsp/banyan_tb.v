@@ -8,7 +8,7 @@ integer cc;
 integer pass_count=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
-		$dumpfile("banyan_tb.vcd");
+		$dumpfile("banyan.vcd");
 		$dumpvars(5,banyan_tb);
 	end
 	trace = $test$plusargs("trace");

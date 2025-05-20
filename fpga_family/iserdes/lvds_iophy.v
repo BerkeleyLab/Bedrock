@@ -1,6 +1,6 @@
 module lvds_iophy #(
    parameter flip_d=0
-)(
+) (
    input            d_p,
    input            d_n,
    output reg [7:0] dout,

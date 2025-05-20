@@ -1,4 +1,6 @@
-module lvds_frame #(parameter flip_frame=0) (
+module lvds_frame #(
+	parameter flip_frame=0
+) (
 	input frame_p,
 	input frame_n,
 	output frame

@@ -33,7 +33,7 @@ module MMCME2_BASE #(
     parameter integer DIVCLK_DIVIDE = 1,
     parameter real REF_JITTER1 = 0.010,
     parameter STARTUP_WAIT = "FALSE"
-)(
+) (
     output  CLKFBOUT,
     output  CLKFBOUTB,
     output  CLKOUT0,

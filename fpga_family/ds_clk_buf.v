@@ -3,7 +3,7 @@ module ds_clk_buf #(
    parameter USE_BUF = 0 // 0 - No buffer
                          // 1 - BUFG
                          // 2 - BUFH
-)(
+) (
    input  clk_p,
    input  clk_n,
    output clk_out

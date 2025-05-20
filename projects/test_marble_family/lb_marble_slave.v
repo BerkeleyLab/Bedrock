@@ -20,7 +20,7 @@ module lb_marble_slave #(
 	`else
 	parameter initial_twi_file=""
 	`endif
-)(
+) (
 	input clk,  // 125 MHz lb_clk == tx_clk originating with 25 MHz VCXO Y1
 	input [23:0] addr,
 	input control_strobe,

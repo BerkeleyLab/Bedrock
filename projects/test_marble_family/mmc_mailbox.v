@@ -4,7 +4,7 @@
 
 module mmc_mailbox #(
   parameter [0:0] DEFAULT_ENABLE_RX = 1
-)(
+) (
   input clk,
   // localbus
   input [10:0]  lb_addr,    // 2kB total memory space

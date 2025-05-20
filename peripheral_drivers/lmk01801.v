@@ -1,4 +1,7 @@
-module lmk01801 #(parameter flip_clk=0, parameter SPIMODE="passthrough") (
+module lmk01801 #(
+   parameter flip_clk=0,
+   parameter SPIMODE="passthrough"
+) (
    input CLKOUT3_INV,
    input CLKOUT3,
    output CLKUWIRE,

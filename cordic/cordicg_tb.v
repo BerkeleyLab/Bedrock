@@ -8,7 +8,7 @@
 `define DPW 22
 `endif
 
-module main();
+module cordicg_tb;
 
 // Configure here, or override externally
 parameter width = 18;
@@ -24,8 +24,8 @@ reg signed [width:0] phasein=0;
 reg rand1, rand2, rand3, rand4, rand5, rand6, rand7, rand8;  // single bits
 initial begin
 	if ($test$plusargs("vcd")) begin
-		$dumpfile("cordic.vcd");
-		$dumpvars(5,main);
+		$dumpfile("cordicg.vcd");
+		$dumpvars(5, cordicg_tb);
 	end
 	$display("xxx width %d", width);
 	if (!$value$plusargs("rmix=%d", rmix)) rmix=0;
