@@ -271,6 +271,18 @@ bool set_si570_regs(si570_info_t *info, uint64_t f1_hz);
 bool get_marble_info(marble_dev_t *marble);
 
 /**
+ * Poll marble board device info in a staged manner to prevent
+ * long polling delays.  This function should be called in a
+ * main loop, and when marble_info_complete() returns true,
+ * fresh data is available to print using print_marble_status().
+ * The function marble_info_reset() is available to reset the
+ * polling state machine if needed.
+ */
+bool get_marble_info_staged(marble_dev_t *marble);
+bool marble_info_complete(void);
+void marble_info_reset(void);
+
+/**
  * Initialize Marble board by programming i2c devices
  * including pca9555 and clock settings;
  * Poll all device information into marble_dev;
