@@ -1,24 +1,27 @@
 build:
+  extends: .build-matrix
   image: docker:stable
   stage: build
   before_script:
     - cat /etc/hosts
     - cat /etc/resolv.conf
     - docker info
-    - echo $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
-    - echo $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
-    - echo $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+    - echo $IMAGE:$CI_COMMIT_REF_NAME
+    - echo $IMAGE:$CI_COMMIT_SHORT_SHA
+    - echo $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
   script: |
-    docker pull $CONTAINER_IMAGE:latest || true
-    docker build --cache-from $CONTAINER_IMAGE:latest \
-        -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME \
-        -t $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA \
-        -t $CONTAINER_IMAGE:latest \
+    IMAGE_BASENAME=${IMAGE##*/}
+    docker pull $IMAGE:latest || true
+    docker build --cache-from $IMAGE:latest \
+        -t $IMAGE:$CI_COMMIT_REF_NAME \
+        -t $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA \
+        -t $IMAGE:latest \
+        -f Dockerfile.${IMAGE_BASENAME} \
         .
-    docker run --rm $CONTAINER_IMAGE bash -c 'echo -n "Debian version: "; cat "/etc/debian_version"'
-    docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
-    docker push $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
-    docker push $CONTAINER_IMAGE:latest
+    docker run --rm $IMAGE bash -c 'echo -n "Debian version: "; cat "/etc/debian_version"'
+    docker push $IMAGE:$CI_COMMIT_REF_NAME
+    docker push $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+    docker push $IMAGE:latest
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: $CI_COMMIT_BRANCH

@@ -8,11 +8,19 @@ stages:
 variables:
   XILINX_VIVADO: /non-free/Xilinx/Vivado/2020.2
   CI_REGISTRY: mohs.dhcp.lbl.gov
-  CONTAINER_IMAGE: $CI_REGISTRY/bedrock_testing_base_bookworm
+  DEFAULT_IMAGE: $CI_REGISTRY/bedrock_testing_base_bookworm
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
 
-image: $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
+# default image if no other specified
+image: $DEFAULT_IMAGE:$CI_COMMIT_REF_NAME
+
+# build matrix for docker image generation
+.build-matrix:
+  parallel:
+    matrix:
+      - IMAGE: $CI_REGISTRY/bedrock_testing_base_bookworm
+      - IMAGE: $CI_REGISTRY/bedrock_testing_base_trixie
 
 services:
   - name: mohs.dhcp.lbl.gov/docker:20.10.12-dind
