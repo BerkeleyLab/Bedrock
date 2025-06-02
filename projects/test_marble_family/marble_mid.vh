@@ -54,7 +54,7 @@ generate
 if (C_SYSCLK_SRC != "gtp_ref_clk" &&
     C_SYSCLK_SRC != "ddr_ref_clk" &&
     C_SYSCLK_SRC != "sys_clk") begin
-    C_SYSCLK_SRC_parameter_has_an_invalid_value();
+    $error("C_SYSCLK_SRC parameter has an invalid value");
 end
 endgenerate
 
@@ -62,7 +62,7 @@ endgenerate
 generate
 if (C_SYSCLK_SRC == "ddr_ref_clk" &&
     C_CARRIER_REV != "v2") begin
-    C_SYSCLK_SRC_ddr_ref_clk_can_only_be_used_with_a_Marble_v2();
+    $error("C_SYSCLK_SRC ddr_ref_clk can only be used with a Marble v2");
 end
 endgenerate
 
