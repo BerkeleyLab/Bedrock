@@ -2,6 +2,10 @@ build:
   extends: .build-matrix
   image: docker:stable
   stage: build
+  services:
+    - name: mohs.dhcp.lbl.gov/docker:20.10.12-dind
+      command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
+      alias: docker
   before_script:
     - cat /etc/hosts
     - cat /etc/resolv.conf

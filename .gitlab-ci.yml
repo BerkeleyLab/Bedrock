@@ -23,11 +23,6 @@ image: $DEFAULT_IMAGE:$CI_COMMIT_REF_NAME
       - IMAGE: $CI_REGISTRY/bedrock_testing_base_bookworm
       - IMAGE: $CI_REGISTRY/bedrock_testing_base_trixie
 
-services:
-  - name: mohs.dhcp.lbl.gov/docker:20.10.12-dind
-    command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
-    alias: docker
-
 include:
   - local: .gitlab/ci/badger.gitlab-ci.yml
   - local: .gitlab/ci/build.gitlab-ci.yml
@@ -49,12 +44,14 @@ include:
 
 leep_test:
   extends: .build-matrix
+  image: $IMAGE
   stage: test
   script:
     - cd projects/common && PYTHONPATH=../../build-tools python3 -m unittest -v
 
 flake8:
   extends: .build-matrix
+  image: $IMAGE
   stage: test
   script:
     - find . -name "*.py" -exec flake8 {} +
