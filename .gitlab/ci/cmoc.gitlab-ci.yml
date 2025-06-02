@@ -1,4 +1,6 @@
 rtsim_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd rtsim && make clean && make
   stage: test
@@ -6,6 +8,8 @@ rtsim_test:
     - make clean && make checks && make rtsim.dat
 
 cmoc_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd cmoc && export PYTHONPATH=../build-tools/
   stage: test

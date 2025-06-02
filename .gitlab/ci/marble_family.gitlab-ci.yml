@@ -1,4 +1,6 @@
 marble_sim:
+  extends: .build-matrix
+  image: $IMAGE
   stage: test
   script:
     - make -C projects/test_marble_family all net_slave_check
@@ -60,6 +62,8 @@ marble_run:
     - make -C i2c live_oneshot SERIAL=39
 
 marble_i2c_check:
+  extends: .build-matrix
+  image: $IMAGE
   stage: test
   script:
     - make -C projects/test_marble_family/i2c tests

@@ -1,4 +1,6 @@
 ctrace_test:
+  extends: .build-matrix
+  image: $IMAGE
   stage: test
   script:
     - make -C projects/ctrace

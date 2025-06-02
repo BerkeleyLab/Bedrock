@@ -48,10 +48,13 @@ include:
   - local: .gitlab/ci/leep.gitlab-ci.yml
 
 leep_test:
+  extends: .build-matrix
+  stage: test
   script:
     - cd projects/common && PYTHONPATH=../../build-tools python3 -m unittest -v
 
 flake8:
+  extends: .build-matrix
   stage: test
   script:
     - find . -name "*.py" -exec flake8 {} +

@@ -1,4 +1,6 @@
 oscope_top_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/oscope/bmb7_cu
   stage: test
@@ -9,6 +11,8 @@ oscope_top_test:
 # due to Verilog inout ports being poorly supported by our tools.
 # Please take out the error bypass (echo) if this ever gets fixed.
 oscope_cdc:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/oscope/marble_family
   stage: test

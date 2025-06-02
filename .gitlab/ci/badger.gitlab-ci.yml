@@ -1,4 +1,6 @@
 badger_test:
+  extends: .build-matrix
+  image: $IMAGE
   stage: test
   before_script:
     - cd badger/tests && make clean && sh ./tap-setup.sh

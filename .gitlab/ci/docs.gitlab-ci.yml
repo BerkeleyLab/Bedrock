@@ -1,4 +1,6 @@
 make_docs:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd build-tools/make-demo && make clean
   stage: test

@@ -1,4 +1,6 @@
 soc_picorv32_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd soc/picorv32/test
   stage: test
