@@ -10,7 +10,7 @@ RUN apt-get update && \
     build-essential \
     yosys \
     verilator \
-    libtinfo5 \
+    libtinfo6 \
     wget \
     iputils-ping \
     iproute2 \
