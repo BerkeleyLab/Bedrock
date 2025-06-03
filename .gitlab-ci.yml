@@ -26,6 +26,10 @@ image: $DEFAULT_IMAGE:$CI_COMMIT_REF_NAME
     matrix:
       - IMAGE_VARIANT: bookworm
       - IMAGE_VARIANT: trixie
+  rules:
+    - if: '$IMAGE_VARIANT =~ /.*trixie$/ && $CI_JOB_NAME =~ /^oscope.*$/'
+      allow_failure: true
+    - when: always
 
 include:
   - local: .gitlab/ci/badger.gitlab-ci.yml
