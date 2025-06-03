@@ -21,17 +21,36 @@ cmoc_test:
     paths:
       - cmoc/fdbk_core_plot.pdf
 
+# Because Gitlab doesn't support using extends with
+# multiple parallel:matrix + Issue 439828 (https://gitlab.com/gitlab-org/gitlab/-/issues/439828)
+# the following is the best I could think of to merge 2 parallel:matrix lists:
+
+# Define the specific dictionary you want
+.marble-targets:
+  parallel:
+    TARGET: [marblemini, marble]
+
+# Merge the above dictionary witht th ebuild matrix defined in .gitlab-ci.yml
+.cmoc-top-matrix:
+  extends:
+    - .build-images
+    - .marble-targets
+
+.cmoc-top-build-matrix:
+  variables: !reference [.build-matrix, variables]
+  parallel:
+    matrix:
+      - !reference [.cmoc-top-matrix, parallel]
+  rules: !reference [.build-matrix, rules]
+
 cmoc_top:
-  extends: .build-matrix
+  extends: .cmoc-top-build-matrix
   image: $IMAGE
   before_script:
     - cd projects/cmoc_top/marblemini && ls /non-free
   stage: synthesis
   script:
     - XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH make HARDWARE=${TARGET} cmoc_top.bit
-  parallel:
-    matrix:
-      - TARGET: [marblemini, marble]
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week

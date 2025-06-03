@@ -18,14 +18,17 @@ variables:
 # default image if no other specified
 image: $DEFAULT_IMAGE:$CI_COMMIT_REF_NAME
 
+.build-images:
+  parallel:
+    IMAGE_VARIANT: [bookworm, trixie]
+
 # build matrix for docker image generation
 .build-matrix:
   variables:
     IMAGE: ${CI_REGISTRY}/${IMAGE_BASE}_${IMAGE_VARIANT}
   parallel:
     matrix:
-      - IMAGE_VARIANT: bookworm
-      - IMAGE_VARIANT: trixie
+      - !reference [.build-images, parallel]
   rules:
     - if: '$IMAGE_VARIANT =~ /.*trixie$/ && $CI_JOB_NAME =~ /^oscope.*$/'
       allow_failure: true
