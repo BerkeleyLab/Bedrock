@@ -109,9 +109,8 @@ crc8e_guts_check: crc8e_guts_y.v crc8e_guts.v
 # pcap2v for using pcap files; not part of the main testing path,
 # and therefore not part of the default build.
 # apt-get install libpcap-dev
-pcap2v: crc32.o
-CFLAGS_pcap2v = -D_DEFAULT_SOURCE
-LDLIBS_pcap2v = -l pcap
+pcap2v: pcap2v.o crc32.o
+	$(CC) -o $@ $^ -l pcap
 
 # =====
 # VPI module support for live testing
