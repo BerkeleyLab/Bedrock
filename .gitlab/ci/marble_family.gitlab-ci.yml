@@ -15,7 +15,10 @@ marble_sim:
     expire_in: 2 days
 
 marble_mini_synth:
-  extends: .bitgen
+  extends:
+    - .build-matrix
+    - .bitgen
+  image: $IMAGE
   script:
     - PATH=$XILINX_VIVADO/bin:$PATH make marble1.bit
   artifacts:
@@ -27,6 +30,8 @@ marble_mini_synth:
       - projects/test_marble_family/_xilinx/marble1.runs/impl_1/marble_top_*.rpt
 
 marble_mini_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   tags:
     - deploy
@@ -38,7 +43,10 @@ marble_mini_run:
     - make marble1_hwload && sleep 8 && make marble1_hwtest
 
 marble_v2_synth:
-  extends: .bitgen
+  extends:
+    - .build-matrix
+    - .bitgen
+  image: $IMAGE
   script:
     - PATH=$XILINX_VIVADO/bin:$PATH make marble2.bit
   artifacts:
@@ -50,6 +58,8 @@ marble_v2_synth:
       - projects/test_marble_family/_xilinx/marble2.runs/impl_1/marble_top_*.rpt
 
 marble_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   tags:
     - deploy

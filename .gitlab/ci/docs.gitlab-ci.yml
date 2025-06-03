@@ -8,6 +8,8 @@ make_docs:
     - make check consistency
 
 sphinx_docs:
+  extends: .build-matrix
+  image: $IMAGE
   stage: docs
   before_script: |
     apt-get update

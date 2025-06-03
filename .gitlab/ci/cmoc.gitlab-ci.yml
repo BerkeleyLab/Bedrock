@@ -22,6 +22,8 @@ cmoc_test:
       - cmoc/fdbk_core_plot.pdf
 
 cmoc_top:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/cmoc_top/marblemini && ls /non-free
   stage: synthesis

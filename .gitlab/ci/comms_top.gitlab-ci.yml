@@ -1,4 +1,6 @@
 comms_top:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/comms_top && ls /non-free
   stage: synthesis
@@ -11,6 +13,8 @@ comms_top:
       - projects/comms_top/comms_top.bit
 
 comms_top_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   tags:
     - deploy
@@ -22,6 +26,8 @@ comms_top_run:
     - make QF2_TOOLS=qf2_users QF2_IP=192.168.1.30 hwload && sleep 8 && make hwtest
 
 gige_sfp_ac701:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/comms_top/gige_eth && ls /non-free
   stage: synthesis
@@ -34,6 +40,8 @@ gige_sfp_ac701:
       - projects/comms_top/gige_eth/gige_top.bit
 
 gige_sfp_ac701_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   tags:
     - deploy

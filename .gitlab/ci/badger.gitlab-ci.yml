@@ -8,6 +8,8 @@ badger_test:
     - make && bash tftp_test.sh && bash speed_check.sh
 
 badger_ac701:
+  extends: .build-matrix
+  image: $IMAGE
   stage: synthesis
   before_script:
     - cd badger/tests && ls /non-free
@@ -21,6 +23,8 @@ badger_ac701:
       - badger/tests/ac701_rgmii_vtest.bit
 
 badger_ac701_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   tags:
     - deploy

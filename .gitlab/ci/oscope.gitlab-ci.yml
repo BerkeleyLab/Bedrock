@@ -24,6 +24,8 @@ oscope_cdc:
       - projects/oscope/marble_family/oscope_prep_cdc.txt
 
 oscope_top_bmb7:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/oscope/bmb7_cu && ls /non-free
   stage: synthesis
@@ -36,6 +38,8 @@ oscope_top_bmb7:
       - projects/oscope/bmb7_cu/oscope_top.bit
 
 oscope_top_marble:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/oscope/marble_family && ls /non-free
   stage: synthesis
@@ -49,6 +53,8 @@ oscope_top_marble:
 
 # LITEX_INSTALL_PATH is defined in the Docker image
 marble_ddr3_test:
+  extends: .build-matrix
+  image: $IMAGE
   stage: synthesis
   before_script:
     - cd $LITEX_INSTALL_PATH/litex-boards/litex_boards/targets
@@ -64,6 +70,8 @@ marble_ddr3_test:
       - berkeleylab_marble.bit
 
 litex_trigger_capture:
+  extends: .build-matrix
+  image: $IMAGE
   stage: synthesis
   before_script:
     - cd projects/trigger_capture
@@ -78,6 +86,8 @@ litex_trigger_capture:
       - projects/trigger_capture/csr.csv
 
 # oscope_program:
+#   extends: .build-matrix
+#   image: $IMAGE
 #   before_script:
 #     - cd projects/oscope/software/bmb7 && wget -r -nH http://sliderule.dhcp.lbl.gov:8000/{r1,configuration} && cd ..
 #   stage: program
