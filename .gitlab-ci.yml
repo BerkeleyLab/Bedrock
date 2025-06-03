@@ -8,7 +8,9 @@ stages:
 variables:
   XILINX_VIVADO: /non-free/Xilinx/Vivado/2020.2
   CI_REGISTRY: mohs.dhcp.lbl.gov
-  DEFAULT_IMAGE: $CI_REGISTRY/bedrock_testing_base_bookworm
+  IMAGE_BASE: bedrock_testing_base
+  IMAGE_VARIANT: bookworm
+  DEFAULT_IMAGE: ${CI_REGISTRY}/${IMAGE_BASE}_${IMAGE_VARIANT}
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
   FF_SCRIPT_SECTIONS: "true"
@@ -18,10 +20,12 @@ image: $DEFAULT_IMAGE:$CI_COMMIT_REF_NAME
 
 # build matrix for docker image generation
 .build-matrix:
+  variables:
+    IMAGE: ${CI_REGISTRY}/${IMAGE_BASE}_${IMAGE_VARIANT}
   parallel:
     matrix:
-      - IMAGE: $CI_REGISTRY/bedrock_testing_base_bookworm
-      - IMAGE: $CI_REGISTRY/bedrock_testing_base_trixie
+      - IMAGE_VARIANT: bookworm
+      - IMAGE_VARIANT: trixie
 
 include:
   - local: .gitlab/ci/badger.gitlab-ci.yml
