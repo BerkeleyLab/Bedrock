@@ -144,3 +144,10 @@ RUN apt-get update && \
     make && \
     rm -rf $HOME/.stack && \
     cp bin/sv2v /usr/local/bin/
+
+# Shady stuff to make vivado work with libtinfo6
+RUN apt-get update && \
+    apt-get install -y \
+        libtinfo6 && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -s libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5
