@@ -25,17 +25,20 @@ cmoc_test:
 # multiple parallel:matrix + Issue 439828 (https://gitlab.com/gitlab-org/gitlab/-/issues/439828)
 # the following is the best I could think of to merge 2 parallel:matrix lists:
 
-# Define the specific dictionary you want
+# 1. Define the specific dictionary you want
 .marble-targets:
   parallel:
     TARGET: [marblemini, marble]
 
-# Merge the above dictionary witht th ebuild matrix defined in .gitlab-ci.yml
+# 2. Merge the above dictionary with tth .build-matrix defined in .gitlab-ci.yml
+# with extends: https://docs.gitlab.com/ci/yaml/yaml_optimization/#merge-details
 .cmoc-top-matrix:
   extends:
     - .build-images
     - .marble-targets
 
+# 3. re-build the yaml structure of .build-matrix replacing "parallel:matrix"
+# with the newly created dictionary on 2.
 .cmoc-top-build-matrix:
   variables: !reference [.build-matrix, variables]
   parallel:
