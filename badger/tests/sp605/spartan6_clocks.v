@@ -6,7 +6,6 @@
 // -- Author     : Qiang Du
 // -- Company    : LBNL
 // -- Created    : 10-03-2014
-// -- Last Update: 10-03-2014 15:36:52
 // -- Standard   : Verilog
 // -------------------------------------------------------------------------------
 // -- Description:
@@ -81,6 +80,7 @@ DCM_SP #(
 );
 BUFG bufg125_tx(.I(xclk125_buf), .O(clk_eth));
 
+wire clk_1x_buf, clk_2x_buf;
 PLL_ADV #(
     .SIM_DEVICE("SPARTAN6"),
     .BANDWIDTH("OPTIMIZED"),
