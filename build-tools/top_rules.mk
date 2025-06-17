@@ -28,7 +28,7 @@ YOSYS_JSON_OPTION = -DBUGGY_FORLOOP
 # (that flag adjusts the behavior of dpram.v; I don't think yosys for-loop
 # is actually buggy, just tediously slow, and in this case unnecessary)
 YOSYS_JSON_PRECHECK = true
-READ_VERILOG = read_verilog
+YOSYS_READ_VERILOG = read_verilog
 
 VPI_CFLAGS := $(shell $(VERILOG_VPI) --cflags)
 VPI_LDFLAGS := $(shell $(VERILOG_VPI) --ldflags)
@@ -159,7 +159,7 @@ V%_tb: $(wildcard *.sv) $(wildcard *.v)
 %_yosys.json: %.v $(BUILD_DIR)/cdc_snitch_proc.ys
 	$(YOSYS_JSON_PRECHECK)
 	$(YOSYS) --version
-	$(YOSYS) $(YOSYS_QUIET) -p "$(READ_VERILOG) $(YOSYS_JSON_OPTION) $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
+	$(YOSYS) $(YOSYS_QUIET) -p "$(YOSYS_READ_VERILOG) $(YOSYS_JSON_OPTION) $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
 
 %_cdc.txt: $(BUILD_DIR)/cdc_snitch.py %_yosys.json
 	$(PYTHON) $^ -o $@
