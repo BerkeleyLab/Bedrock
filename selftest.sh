@@ -64,7 +64,7 @@ make -C board_support/bmb7_kintex jxj_gate_check
 make -C dsp/chirp all checks
 
 ## cmoc_test
-PYTHONPATH=$PWD/build-tools make -C cmoc all checks
+make -C cmoc all checks
 
 ## cordic_test
 make -C cordic clean all
@@ -76,7 +76,7 @@ make -C projects/ctrace
 make -C dsp/digaree
 
 ## dsp_hosted_test
-make -C dsp/hosted all checks
+PYTHONPATH=$PWD/build-tools make -C dsp/hosted all checks
 
 ## dsp_test
 make -C dsp all checks
