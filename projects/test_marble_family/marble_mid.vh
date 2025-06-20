@@ -1,3 +1,5 @@
+`define C_SYSCLK_SRC_sys_clk
+
 // Only Marble V2 has DDR ref clk
 wire ddrrefclk_unbuf, ddrrefclk;
 generate
@@ -51,11 +53,14 @@ wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
 
 // Sanity check for C_SYSCLK_SRC
 generate
-if (C_SYSCLK_SRC != "gtp_ref_clk" &&
-    C_SYSCLK_SRC != "ddr_ref_clk" &&
-    C_SYSCLK_SRC != "sys_clk") begin
-    C_SYSCLK_SRC_parameter_has_an_invalid_value();
-end
+`ifndef C_SYSCLK_SRC_gtp_ref_clk
+`ifndef C_SYSCLK_SRC_ddr_ref_clk
+`ifndef C_SYSCLK_SRC_sys_clk
+    // If none of the valid options are defined, throw an error
+    `error "C_SYSCLK_SRC is not defined or has an invalid value. Define one of: C_SYSCLK_SRC_gtp_ref_clk, C_SYSCLK_SRC_ddr_ref_clk, or C_SYSCLK_SRC_sys_clk."
+`endif
+`endif
+`endif
 endgenerate
 
 // If using ddr_ref_clk it must be a v2
