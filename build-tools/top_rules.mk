@@ -78,6 +78,7 @@ VIVADO_REMOTE_SYNTH = $(VIVADO_SYNTH)
 PLANAHEAD_SYNTH = planAhead -mode batch -nojou -nolog -source $(BUILD_DIR)/vivado_tcl/project_proc.tcl $(BUILD_DIR)/vivado_tcl/planahead_project.tcl -tclargs
 VIVADO_FLASH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/vivado_flash.tcl -tclargs
 VIVADO_CREATE_IP = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/lbl_ip.tcl $(BUILD_DIR)/vivado_tcl/create_ip.tcl -tclargs
+VIVADO_CHECK = $(VIVADO_CMD) -notrace -source $(BUILD_DIR)/vivado_tcl/vivado_syntax_check.tcl -tclargs
 OCTAVE_SILENT = $(OCTAVE) -q $<
 PS2PDF = ps2pdf -dEPSCrop $< $@
 CHECK = $(VVP) $<
