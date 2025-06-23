@@ -1,4 +1,5 @@
 `define C_SYSCLK_SRC_sys_clk
+`define C_CARRIER_REV "v2"
 
 // Only Marble V2 has DDR ref clk
 wire ddrrefclk_unbuf, ddrrefclk;
