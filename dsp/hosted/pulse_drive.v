@@ -9,14 +9,19 @@
 // Final output is then added to the feedback loop (mp_proc/xy_pi_clip) (P+I+pulse)
 module pulse_drive (
     input clk,
-    // XXX should be separate for X/Y
+    input iq,
+    // interleaved X/Y
     input signed [17:0] amp,      // external
+    output [0:0] amp_addr,  // external address for amp
     // are in clk cycles, max of 1 us (max value of 94)
     input [6:0] pwidth,          // external
     input bunch_arrival_trig,
-    // XXX should interleaved for xy_pi_clip
+    // interleaved X/Y for xy_pi_clip
     output signed [17:0] tri_out_xy
 );
+
+// to switch btw I/Q
+assign amp_addr = iq;
 
 reg [17:0] cnt = 0;
 reg active = 0;

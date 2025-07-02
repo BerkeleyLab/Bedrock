@@ -1,7 +1,7 @@
-[timestart] 0
-[size] 1920 1093
+[timestart] 422892
+[size] 1920 1043
 [pos] -1 -1
-*-19.287714 579000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-7.741745 423509 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] pulse_drive_tb.
 [sst_width] 233
 [signals_width] 174
@@ -13,9 +13,9 @@ pulse_drive_tb.dut.bunch_arrival_trig
 @24
 pulse_drive_tb.dut.amp[17:0]
 pulse_drive_tb.dut.pwidth[6:0]
-@c10024
+@c00025
 pulse_drive_tb.dut.tri_out_xy[17:0]
-@28
+@29
 (0)pulse_drive_tb.dut.tri_out_xy[17:0]
 (1)pulse_drive_tb.dut.tri_out_xy[17:0]
 (2)pulse_drive_tb.dut.tri_out_xy[17:0]
@@ -34,7 +34,7 @@ pulse_drive_tb.dut.tri_out_xy[17:0]
 (15)pulse_drive_tb.dut.tri_out_xy[17:0]
 (16)pulse_drive_tb.dut.tri_out_xy[17:0]
 (17)pulse_drive_tb.dut.tri_out_xy[17:0]
-@1401200
+@1401201
 -group_end
 @200
 -
@@ -42,7 +42,6 @@ pulse_drive_tb.dut.tri_out_xy[17:0]
 pulse_drive_tb.cc
 @28
 pulse_drive_tb.rep_state
-@29
 pulse_drive_tb.carry
 @420
 pulse_drive_tb.modulo

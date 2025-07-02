@@ -35,6 +35,10 @@ initial begin
 	$display("PASS");
 	$finish();
 end
+reg [2:0] state=0;
+wire iq=state[0];
+always @(posedge clk) state <= state+1;
+
 // Stub clk1x local bus to keep newad happy
 // We actually set register values directly with Verilog dot notation,
 // without cycling this bus.
@@ -49,20 +53,24 @@ reg bunch_arrival_trig=0;
 wire signed [17:0] tri_out_xy;
 pulse_drive dut // auto clk1x
 	(.clk(clk),
-	.bunch_arrival_trig(bunch_arrival_trig),
-	.tri_out_xy(tri_out_xy),
-	`AUTOMATIC_dut
+	 .iq(iq),
+	 .bunch_arrival_trig(bunch_arrival_trig),
+	 .tri_out_xy(tri_out_xy),
+	 `AUTOMATIC_dut
 );
 
 initial begin
 	#1;
-	dut_amp = (1 << 10);
+	dp_dut_amp.mem[0] = (1 << 10);
+	dp_dut_amp.mem[1] = (1 << 4);
 	dut_pwidth = 10;
 	@(cc==SIM_STOP-100000);
-	dut_amp = 10000;
+	dp_dut_amp.mem[0] = 10000;
+	dp_dut_amp.mem[1] = 5000;
 	dut_pwidth = 94;  // max of 1us
 	@(cc==SIM_STOP-50000);
-	dut_amp = (1 << 13);
+	dp_dut_amp.mem[0] = (1 << 13);
+	dp_dut_amp.mem[1] = (1 << 12);
 	dut_pwidth = 64;
 end
 
