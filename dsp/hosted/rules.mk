@@ -5,7 +5,7 @@ include $(CORDIC_DIR)/rules.mk
 VFLAGS_DEP += -I. -y . -y$(DSP_DIR) -y$(CORDIC_DIR)
 VFLAGS += -I. -y . -y$(DSP_DIR) -y$(CORDIC_DIR) -I$(AUTOGEN_DIR)
 
-TEST_BENCH = lp_tb lp_2notch_tb lp_notch_tb phs_avg_tb mp_proc_tb etrig_bridge_tb fdbk_core_tb
+TEST_BENCH = lp_tb lp_2notch_tb lp_notch_tb phs_avg_tb mp_proc_tb etrig_bridge_tb fdbk_core_tb pulse_drive_tb
 
 TGT_ := $(TEST_BENCH)
 
