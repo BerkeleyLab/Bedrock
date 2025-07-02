@@ -46,6 +46,9 @@ module xy_pi_clip #(
 	// 8-way muxed configuration
 	input signed [17:0] coeff,
 	input signed [17:0] lim,
+	// adaptive feed-forward at the drive
+	input ad_ffd_en,
+	input signed [17:0] tri_out_xy,
 	// feed-forward inputs
 	input ffd_en,
 	input signed [17:0] ff_ddrive, // FF drive (derivative) to be accumulated in I term

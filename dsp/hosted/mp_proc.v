@@ -31,6 +31,8 @@
 // drv_p = (sel_en ? in_mp : 0) + ph_offset
 // set_p and gain_p
 
+`include "mp_proc_auto.vh"
+
 module mp_proc #(
 	parameter thresh_shift = 9, // Threshold shift; typically 9 for SRF use
 	parameter ff_dshift = 0     // Deferred ff_ddrive downshift
@@ -61,6 +63,10 @@ module mp_proc #(
 	output [1:0] coeff_addr,  // external address for coeff
 	(* external *)
 	output [1:0] lim_addr,  // external address for lim
+	// adaptive feedforward added together with the P+I
+	(* external *)
+	input [0:0] ad_ffd_en,  // external
+	input bunch_arrival_trig,
 	// Feedforward integral hooks and setpoints
 	input               ffd_en,
 	input signed [17:0] ff_setm, // Magnitude setpoint
@@ -75,7 +81,8 @@ module mp_proc #(
 	output out_sync,
 	output signed [17:0] out_xy,
 	output signed [18:0] out_ph,
-	output [11:0] cmp_event
+	output [11:0] cmp_event,
+	`AUTOMATIC_self
 //  cmp_event[0]   |mag err| > 0.2%
 //  cmp_event[1]   |pha err| > 0.11 deg
 //  cmp_event[2]   |mag err| > 0.1%
@@ -89,6 +96,9 @@ module mp_proc #(
 //  cmp_event[10]  X drive < lim_X_lo
 //  cmp_event[11]  Y drive < lim_Y_lo
 );
+`undef AUTOMATIC_self
+
+`AUTOMATIC_decode
 
 // critical timing setup
 // Addressing of controls for dprams
@@ -165,13 +175,23 @@ reg_delay #(.dw(18), .len(7))
 	pipe_match(.clk(clk), .reset(1'b0), .gate(1'b1), .din(phout), .dout(out_ph_w));
 assign out_ph = {out_ph_w,1'b0};  // Hmmmm....
 
+wire signed [17:0] tri_out_xy;
+pulse_drive pulse_drive_i  // auto
+	(.clk(clk),
+	 .iq(state[0]),
+	 .bunch_arrival_trig(bunch_arrival_trig),
+	 .tri_out_xy(tri_out_xy),
+	 `AUTOMATIC_pulse_drive_i
+);
+
 wire pi_sync;  // not used
 wire signed [17:0] xy_drive;
 wire [3:0] clipped;
 xy_pi_clip #(.ff_dshift(ff_dshift)) pi (.clk(clk), .in_xy(mp_err2), .sync(stb[1]),
 	.out_xy(xy_drive), .o_sync(pi_sync), .coeff(coeff), .lim(lim), .clipped(clipped),
 	.ffd_en(ffd_en), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
-	.ffp_en(ffp_en), .ff_drive(ff_drive), .ff_phase(ff_phase)
+	.ffp_en(ffp_en), .ff_drive(ff_drive), .ff_phase(ff_phase),
+	.ad_ffd_en(ad_ffd_en), .tri_out_xy(tri_out_xy)
 );
 
 // terrible waste of a multiplier

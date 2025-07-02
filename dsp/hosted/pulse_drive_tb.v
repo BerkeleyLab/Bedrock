@@ -51,7 +51,7 @@ wire clk1x_write=0;
 `AUTOMATIC_decode
 reg bunch_arrival_trig=0;
 wire signed [17:0] tri_out_xy;
-pulse_drive dut // auto clk1x
+pulse_drive dut  // auto clk1x
 	(.clk(clk),
 	 .iq(iq),
 	 .bunch_arrival_trig(bunch_arrival_trig),

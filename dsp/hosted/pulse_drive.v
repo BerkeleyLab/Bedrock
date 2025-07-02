@@ -1,6 +1,6 @@
 `timescale 1ns / 1ns
 // this module is used to pulse the drive signal (XXX I should probably call it
-// something more meaningful) and should really belong in bedrock/dsp/hosted
+// something more meaningful)
 // includes software settable registers:
 // 1. X/Y amplitude - depends on the bunch charge and beam phase
 // 2. pulse width (triangular wave)

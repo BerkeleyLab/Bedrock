@@ -5,6 +5,7 @@
 `define ADDR_HIT_dut_setmp 0
 `define ADDR_HIT_dut_coeff 0
 `define ADDR_HIT_dut_lim 0
+`define ADDR_HIT_dut_ad_ffd_en 0
 
 `define AUTOMATIC_decode
 `define LB_DECODE_mp_proc_tb
@@ -142,6 +143,7 @@ mp_proc dut  // auto
 	.ffd_en(ffd_en), .ff_setm(ff_setm), .ff_setp(ff_setp),
 	.ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
 	.ffp_en(ffp_en), .ff_drive(ff_drive), .ff_phase(ff_phase),
+	.bunch_arrival_trig(1'd0),
 	`AUTOMATIC_dut
 );
 
