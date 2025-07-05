@@ -13,7 +13,7 @@ VERILOG_AUTOGEN += "cordicg_b22.v"
 rf_controller_auto: fdbk_core_auto piezo_control_auto lp_notch_auto
 rf_controller_tb_auto: rf_controller_auto lo_lut_f40.v lo_lut_f40_05.v
 
-fdbk_core_auto: cordicg_b22.v
+fdbk_core_auto: cordicg_b22.v mp_proc_auto
 cryomodule_auto: _autogen/config_romx.v cordicg_b22.v llrf_shell_auto rf_controller_auto fdbk_core_auto station_auto prng_auto cav_mode_auto cav_mech_auto cav_elec_auto lp_notch_auto lo_lut_f40.v lo_lut_f40_05.v
 
 CLEAN += cordicg_b22.v

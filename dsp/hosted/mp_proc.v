@@ -31,6 +31,9 @@
 // drv_p = (sel_en ? in_mp : 0) + ph_offset
 // set_p and gain_p
 
+`define AUTOMATIC_self
+`define AUTOMATIC_decode
+`define AUTOMATIC_pulse_drive
 `include "mp_proc_auto.vh"
 
 module mp_proc #(
@@ -176,12 +179,13 @@ reg_delay #(.dw(18), .len(7))
 assign out_ph = {out_ph_w,1'b0};  // Hmmmm....
 
 wire signed [17:0] tri_out_xy;
-pulse_drive pulse_drive_i  // auto
+(* lb_automatic *)
+pulse_drive pulse_drive // auto
 	(.clk(clk),
 	 .iq(state[0]),
 	 .bunch_arrival_trig(bunch_arrival_trig),
 	 .tri_out_xy(tri_out_xy),
-	 `AUTOMATIC_pulse_drive_i
+	 `AUTOMATIC_pulse_drive
 );
 
 wire pi_sync;  // not used

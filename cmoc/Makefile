@@ -13,7 +13,6 @@ NEWAD_ARGS += -y
 
 TEST_BENCH = xy_pi_clip_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb rf_controller_tb
 
-RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include rules.mk
 
 TGT_ := $(TEST_BENCH)

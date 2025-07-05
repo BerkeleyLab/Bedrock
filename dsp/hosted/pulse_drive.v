@@ -11,9 +11,12 @@ module pulse_drive (
     input clk,
     input iq,
     // interleaved X/Y
+    (* external *)
     input signed [17:0] amp,      // external
+    (* external *)
     output [0:0] amp_addr,  // external address for amp
     // are in clk cycles, max of 1 us (max value of 94)
+    (* external *)
     input [6:0] pwidth,          // external
     input bunch_arrival_trig,
     // interleaved X/Y for xy_pi_clip

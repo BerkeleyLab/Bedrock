@@ -98,7 +98,8 @@ xy_pi_clip dut(.clk(clk), .sync(sync), .in_xy(in_xy),
 	.coeff(coeff), .lim(lim),
 	.ffd_en(ffd_en), .ff_ddrive(ff_ddrive), .ff_dphase(ff_dphase),
 	.ffp_en(ffp_en), .ff_drive(ff_drive), .ff_phase(ff_phase),
-	.out_xy(out_xy)
+	.out_xy(out_xy),
+	.ad_ffd_en(1'b0), .tri_out_xy(18'd0)
 );
 
 endmodule

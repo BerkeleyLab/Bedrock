@@ -64,7 +64,6 @@ always @(posedge clk) stb <= {stb[6:0],sync};
 
 wire sync1=sync;
 wire signed [21:0] ser_data;
-
 // Decimate by 4 to allow for processing time in Cartesian coordinates
 // Put Xs on unused inputs in simulation to show data path clearly on waveform viewer
 `ifdef SIMULATE
@@ -114,6 +113,7 @@ mp_proc #(.thresh_shift(thresh_shift), .ff_dshift(ff_dshift)) mp_proc // auto
 	//
 	.out_xy(proc_out_xy), .out_ph(proc_out_ph),
 	.cmp_event(cmp_event),
+	.bunch_arrival_trig(1'b0),  // unused for now
 	`AUTOMATIC_mp_proc
 );
 

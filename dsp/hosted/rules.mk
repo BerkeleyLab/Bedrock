@@ -29,8 +29,8 @@ lp_notch_check: lp_notch_test.py lp_tb lp_notch_tb
 lp_2notch_check: lp_2notch_test.py lp_tb lp_2notch_tb
 	$(PYTHON) $<
 
-_dep/fdbk_core_tb.d: fdbk_core_tb_auto
-fdbk_core_tb: cordicg_b22.v
+_dep/fdbk_core_tb.d: fdbk_core_tb_auto mp_proc_auto
+fdbk_core_tb: cordicg_b22.v mp_proc_tb
 
 # No magic to generate fdbk_core.vcd, because running fdbk_core_tb
 # depends on in_file.  A plethora of such files are created by fdbk_core_test.py,
