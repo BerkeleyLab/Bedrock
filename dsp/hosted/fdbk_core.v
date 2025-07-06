@@ -40,6 +40,7 @@ module fdbk_core #(
 	output [11:0] cmp_event,  // see mp_proc.v
 	(* external *)
 	input [1:0] coarse_scale,  // external
+	input bunch_arrival_trig,
 	input chirp_en,
 	input signed [17:0] chirp_amp,
 	input signed [18:0] chirp_ph,
@@ -113,7 +114,7 @@ mp_proc #(.thresh_shift(thresh_shift), .ff_dshift(ff_dshift)) mp_proc // auto
 	//
 	.out_xy(proc_out_xy), .out_ph(proc_out_ph),
 	.cmp_event(cmp_event),
-	.bunch_arrival_trig(1'b0),  // unused for now
+	.bunch_arrival_trig(bunch_arrival_trig),  // unused for now
 	`AUTOMATIC_mp_proc
 );
 

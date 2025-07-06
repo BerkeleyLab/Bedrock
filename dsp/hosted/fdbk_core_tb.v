@@ -180,12 +180,14 @@ always @(posedge clk) chirp_ph <= chirp_ph + 111;
 wire sync1=(state==7);
 wire signed [17:0] out_xy;
 wire signed [17:0] ff_setm=0, ff_ddrive=0;  // TODO: Exercise FF pulse
+wire bunch_arrival_trig=0;
 
 (* lb_automatic *)
 fdbk_core #(.use_mp_proc(1), .use_ll_prop(0)) dut // auto
 	(.clk(clk),
 	.sync(sync1), .iq(iq), .in_xy(in1), .out_xy(out_xy),
 	.chirp_en(chirp_en), .chirp_amp(chirp_amp), .chirp_ph(chirp_ph),
+	.bunch_arrival_trig(bunch_arrival_trig),
 	// untested features
 	.ffd_en(1'b0),
 	.ff_setm(ff_setm),
