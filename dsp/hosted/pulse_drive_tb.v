@@ -1,7 +1,7 @@
 `timescale 1ns / 1ns
 
 `define ADDR_HIT_dut_amp 0
-`define ADDR_HIT_dut_pwidth 0
+`define ADDR_HIT_dut_wth 0
 
 `define LB_DECODE_pulse_drive_tb
 `include "pulse_drive_tb_auto.vh"
@@ -24,7 +24,7 @@ initial begin
 	if ($test$plusargs("trace")) begin
 		trace = 1;
 		out_file = $fopen("pulse_drive.dat", "w");
-	$fwrite(out_file, "# bunch_arrival_trig, dut_amp, dut_pwidth, dut.tri_out_xy");
+	$fwrite(out_file, "# bunch_arrival_trig, dut_amp, dut_wth, dut.tri_out_xy");
 	end
 	if (!$value$plusargs("delay=%d", delay_int)) delay_int = 0;
 	bunch_arrival_delay = delay_int[10:0];
@@ -63,15 +63,15 @@ initial begin
 	#1;
 	dp_dut_amp.mem[0] = (1 << 10);
 	dp_dut_amp.mem[1] = (1 << 4);
-	dut_pwidth = 10;
+	dut_wth = 10;
 	@(cc==SIM_STOP-100000);
 	dp_dut_amp.mem[0] = 10000;
 	dp_dut_amp.mem[1] = 5000;
-	dut_pwidth = 94;  // max of 1us
+	dut_wth = 94;  // max of 1us
 	@(cc==SIM_STOP-50000);
 	dp_dut_amp.mem[0] = (1 << 13);
 	dp_dut_amp.mem[1] = (1 << 12);
-	dut_pwidth = 64;
+	dut_wth = 64;
 end
 
 // for 1 MHz rep rate:
@@ -130,7 +130,7 @@ end
 
 always @(negedge clk) if (trace) begin
          $fwrite(out_file, "%d %d %d %d\n",
-                 bunch_arrival_trig, dut_amp, dut_pwidth, dut.tri_out_xy);
+                 bunch_arrival_trig, dut_amp, dut_wth, dut.tri_out_xy);
 end
 
 endmodule

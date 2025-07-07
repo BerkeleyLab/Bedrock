@@ -17,7 +17,7 @@ module pulse_drive (
     output [0:0] amp_addr,  // external address for amp
     // are in clk cycles, max of 1 us (max value of 94)
     (* external *)
-    input [6:0] pwidth,          // external
+    input [6:0] wth,          // external
     input bunch_arrival_trig,
     // interleaved X/Y for xy_pi_clip
     output signed [17:0] tri_out_xy
@@ -29,13 +29,13 @@ assign amp_addr = iq;
 reg [17:0] cnt = 0;
 reg active = 0;
 // Find the peak of the triangular wave (half of width)
-wire [6:0] midpoint = pwidth >> 1;
+wire [6:0] midpoint = wth >> 1;
 always @(posedge clk) begin
     if (bunch_arrival_trig) begin
         active <= 1;
         cnt <= 0;
     end else if (active) begin
-        if (cnt < (pwidth - 1))
+        if (cnt < (wth - 1))
             cnt <= cnt + 1;
         else begin
             cnt <= 0;
@@ -46,9 +46,9 @@ end
 
 reg signed [24:0] temp_tri = 0;
 always @(posedge clk) begin
-    if (active && (pwidth > 7'd1)) begin
-        if (cnt <= (pwidth-1)/2) temp_tri <= (2*cnt*amp)/(pwidth-1);
-        else temp_tri <= (2*(pwidth-1-cnt)*amp)/(pwidth-1);
+    if (active && (wth > 7'd1)) begin
+        if (cnt <= (wth-1)/2) temp_tri <= (2*cnt*amp)/(wth-1);
+        else temp_tri <= (2*(wth-1-cnt)*amp)/(wth-1);
     end else temp_tri <= 0;
 end
 

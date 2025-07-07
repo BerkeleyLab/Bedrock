@@ -33,7 +33,7 @@
 
 `define AUTOMATIC_self
 `define AUTOMATIC_decode
-`define AUTOMATIC_pulse_drive
+`define AUTOMATIC_pdrv
 `include "mp_proc_auto.vh"
 
 module mp_proc #(
@@ -180,12 +180,12 @@ assign out_ph = {out_ph_w,1'b0};  // Hmmmm....
 
 wire signed [17:0] tri_out_xy;
 (* lb_automatic *)
-pulse_drive pulse_drive // auto
+pulse_drive pdrv // auto
 	(.clk(clk),
 	 .iq(state[0]),
 	 .bunch_arrival_trig(bunch_arrival_trig),
 	 .tri_out_xy(tri_out_xy),
-	 `AUTOMATIC_pulse_drive
+	 `AUTOMATIC_pdrv
 );
 
 wire pi_sync;  // not used
