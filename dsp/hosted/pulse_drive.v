@@ -35,7 +35,7 @@ always @(posedge clk) begin
         active <= 1;
         cnt <= 0;
     end else if (active) begin
-        if (cnt < (wth - 1))
+        if (cnt < (wth - 1) && wth !== 0)
             cnt <= cnt + 1;
         else begin
             cnt <= 0;
