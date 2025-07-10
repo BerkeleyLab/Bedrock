@@ -3,6 +3,7 @@ module test_tx_mac #(
 	parameter big_endian=0
 ) (
 	input clk,
+	input ce,
 	// There is an implied DPRAM _not_ included in this module.
 	// These ports access its read port, with assumed 1-cycle latency
 	// The packet length is stored as the first word of a buffer.
@@ -35,38 +36,42 @@ reg odd_octet=0;
 wire even_octet = ~odd_octet;
 // There's a total of two cycles latency from setting buffer_point
 // to being able to use the result of reading that DPRAM entry.
-always @(posedge clk) case (mode)
-	0: if (start) begin
-		mode <= 1;
-		buffer_point <= buf_start_addr;
-	end
-	1: begin
-		mode <= 2;
-		buffer_point <= buffer_point + 1;
-	end
-	2: begin
-		mode <= 3;
-		len_req_r <= host_d;
-		odd_octet <= 0;
-		req_r <= 1;
-	end
-	3: if (strobe) begin
-		odd_octet <= ~odd_octet;
-		buffer_point <= buffer_point + even_octet;
-		len_req_r <= len_req_r-1;
-		if (len_req_r == 1) begin
-			mode <= 4;
-			done_r <= 1;
-			req_r <= 0;
+always @(posedge clk) begin
+	if (ce) begin
+		case (mode)
+		0: if (start) begin
+			mode <= 1;
+			buffer_point <= buf_start_addr;
 		end
-	end
-	4: begin
-		if (~start) begin
-			mode <= 0;
-			done_r <= 0;
+		1: begin
+			mode <= 2;
+			buffer_point <= buffer_point + 1;
 		end
+		2: begin
+			mode <= 3;
+			len_req_r <= host_d;
+			odd_octet <= 0;
+			req_r <= 1;
+		end
+		3: if (strobe) begin
+			odd_octet <= ~odd_octet;
+			buffer_point <= buffer_point + even_octet;
+			len_req_r <= len_req_r-1;
+			if (len_req_r == 1) begin
+				mode <= 4;
+				done_r <= 1;
+				req_r <= 0;
+			end
+		end
+		4: begin
+			if (~start) begin
+				mode <= 0;
+				done_r <= 0;
+			end
+		end
+		endcase
 	end
-endcase
+end
 
 assign host_addr = buffer_point;
 assign len_req = len_req_r;

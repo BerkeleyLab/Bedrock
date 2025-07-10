@@ -20,7 +20,11 @@ construct_tx_table.v: tx_gen.py $(ITABLES)
 # RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 rtefi_preblob.vh: collect_clients.py $(RTEFI_CLIENT_LIST)
 	$(PYTHON) $^ > $@
+
 rtefi_blob.v: rtefi_preblob.v rtefi_preblob.vh
+	$(VERILOG) -E -o $@ $<
+
+rtefi_blob_ce.v: rtefi_preblob_ce.v rtefi_preblob.vh
 	$(VERILOG) -E -o $@ $<
 
 # =====

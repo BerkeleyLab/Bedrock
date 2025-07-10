@@ -33,6 +33,7 @@ module udp_port_cam #(
 	parameter naw=3  // address width for abstract port memory
 ) (
 	input clk,
+	input ce,  // Clock enable strobe for slower line rates
 	input port_s,
 	input [7:0] data,
 	// port to config memory, single-cycle latency
@@ -52,7 +53,7 @@ reg [7:0] port_in1=0, port_in2=0;
 reg [naw:0] port_cnt=0;
 wire [naw:0] port_cnt_next = port_s ? 0 : port_cnt + 1;
 wire port_load = port_s | port_s_d;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	port_s_d <= port_s;
 	port_in1 <= port_load ? data : port_in2;
 	port_in2 <= port_in1;
@@ -67,7 +68,7 @@ wire equal = port_in1 == pno_d;
 reg eq_hold=0;
 reg [naw-1:0] port_p_r=0;
 reg port_v_r=0, port_h_r=0;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	eq_hold <= equal;
 	if (equal & eq_hold & port_cnt[0] & ~port_v_r) begin
 		port_h_r <= 1;

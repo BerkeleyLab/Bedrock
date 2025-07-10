@@ -94,9 +94,9 @@ rtefi_center #(
 	.udp_port6(udp_port6),
 	.udp_port7(udp_port7)
 ) center(
-	.rx_clk(rx_clk), .rxd(rxd),
+	.rx_clk(rx_clk), .rx_ce(1'b1), .rxd(rxd),
 	.rx_dv(rx_dv), .rx_er(rx_er),
-	.tx_clk(tx_clk) , .txd(txd),
+	.tx_clk(tx_clk), .tx_ce(1'b1), .txd(txd),
 	.tx_en(tx_en),
 	.enable_rx(enable_rx),
 	.config_clk(config_clk), .config_s(config_s), .config_p(config_p),

@@ -6,6 +6,7 @@
 
 module ones_chksum(
 	input clk,
+	input ce,
 	input clear,
 	input gate,
 	input [7:0] din,
@@ -15,7 +16,7 @@ module ones_chksum(
 
 reg [7:0] chksum=0, chksum1=0;
 reg chksum_carry=0;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	if (clear) {chksum_carry, chksum} <= 9'h0;
 	else if (gate) {chksum_carry, chksum} <=
 		chksum1 + din + chksum_carry;

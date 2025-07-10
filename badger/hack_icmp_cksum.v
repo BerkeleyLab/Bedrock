@@ -13,6 +13,7 @@
 
 module hack_icmp_cksum(
 	input clk,
+	input ce,
 	input kick,
 	input [7:0] idat,
 	output [7:0] odat
@@ -21,13 +22,13 @@ module hack_icmp_cksum(
 // Precompute the all-ones condition
 wire ones_i = &idat;
 reg ones_r=0;
-always @(posedge clk) ones_r <= ones_i;
+always @(posedge clk) if (ce) ones_r <= ones_i;
 wire all_ones = ones_i & ones_r;
 
 // Insert modified checksum into stream
 wire [15:0] x3;
 reg [7:0] dat1=0, dat2=0;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	dat1 <= kick ? x3[7:0] : idat;
 	dat2 <= kick ? x3[15:8] : dat1;
 end

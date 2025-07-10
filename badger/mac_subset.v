@@ -20,13 +20,14 @@ module mac_subset #(
 	// as needed by that step: strobe_s includes data only,
 	// strobe l includes time slots for GMII preamble and CRC.
 	input tx_clk,
+	input ce,
 	output strobe_s,
 	output strobe_l,
 	output [7:0] mac_data
 );
 
 reg host_start_=0;
-always @(posedge tx_clk) begin
+always @(posedge tx_clk) if (ce) begin
 	host_start_ <= tx_mac_start;
 end
 
@@ -38,6 +39,7 @@ test_tx_mac #(
 	.mac_aw(mac_aw)
 ) mac(
 	.clk(tx_clk),
+	.ce(ce),
 	.host_addr(host_raddr),
 	.host_d(host_rdata),
 	.start(host_start_),
@@ -60,7 +62,8 @@ precog #(
 	.PAW (11),
 	.LATENCY (latency+ifg)
 ) precog (
-	.clk (tx_clk),
+	.clk              (tx_clk),
+	.ce               (ce),
 	.tx_packet_width  (precog_width),
 	.scanner_busy     (scanner_busy_tx),
 	.request_to_send  (req),
@@ -72,9 +75,9 @@ precog #(
 // 4 cycle trailer (for CRC) on strobe_l compared to strobe_s.
 // TODO this should be moved to precog
 reg [stretch-1:0] strobe_sr1=0;
-always @(posedge tx_clk) strobe_sr1 <= {strobe_sr1[stretch-2:0], clear_to_send};
+always @(posedge tx_clk) if (ce) strobe_sr1 <= {strobe_sr1[stretch-2:0], clear_to_send};
 reg [stretch-1:0] strobe_sr2=0;
-always @(posedge tx_clk) strobe_sr2 <= {strobe_sr2[stretch-2:0], req};
+always @(posedge tx_clk) if (ce) strobe_sr2 <= {strobe_sr2[stretch-2:0], req};
 assign mac_strobe = strobe_sr1[stretch-1] & req;
 assign strobe_s = mac_strobe;
 assign strobe_l = clear_to_send & strobe_sr2[stretch-1];

@@ -29,6 +29,7 @@ precog #(
 	.LATENCY            (LATENCY)
 ) dut (
 	.clk                (clk),
+	.ce                 (1'b1),
 	.tx_packet_width    (tx_packet_width),
 	.scanner_busy       (scanner_busy),
 	.request_to_send    (request_to_send),

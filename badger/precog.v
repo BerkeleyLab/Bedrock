@@ -10,6 +10,7 @@ module precog #(
 	parameter LATENCY=11
 ) (
 	input clk,
+	input ce,  // Clock enable strobe for slower line rates
 	// during a gap of N cycles, `scanner_busy` goes low for N cycles
 	input scanner_busy,
 	// Minimum width of the gap. tx_packet_width must be <= LATENCY - 2

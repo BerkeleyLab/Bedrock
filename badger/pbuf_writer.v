@@ -18,6 +18,7 @@ module pbuf_writer #(
 	parameter paw=11  // packet address width, 11 IRL, maybe less for simulations
 ) (
 	input clk,
+	input ce,
 	// Simple flow of data from input state machine
 	// conforms to AXI-stream-lite, if I adjust the names?
 	input [7:0] data_in,
@@ -54,7 +55,7 @@ module pbuf_writer #(
 
 // Possibly stupid waste of 8 FF, but makes development much easier
 reg [7:0] status_r=0;
-always @(posedge clk) if (status_valid) status_r <= status_vec;
+always @(posedge clk) if (ce & status_valid) status_r <= status_vec;
 
 // Synthesize address and data for output DPRAM.
 // It's critical that we're able to fill in the badge once the packet has ended.
@@ -68,7 +69,7 @@ wire not_head = post_cnt==5;
 reg badge_stb_r=0;
 reg data_s_d=0;
 wire trig = data_s & ~data_s_d;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	data_s_d <= data_s;
 	// Setup counter to start writing the badge at the end of data
 	// Stagnate counter at 5, and if that's the case write data through
@@ -105,7 +106,7 @@ wire bank_ready = mac_bank != rx_mac_hbank_r;
 assign rx_mac_buf_status = {rx_mac_hbank_r, mac_bank};
 reg mac_save=0, mac_stopping=0;
 reg mac_queue=0;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	if (trig & bank_ready) mac_save <= 1;
 	if (trig) mac_a0 <= 4;
 	else if (post_cnt==1) mac_a0 <= 0;

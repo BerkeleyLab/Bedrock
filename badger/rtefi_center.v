@@ -40,11 +40,13 @@ module rtefi_center #(
 ) (
 	// GMII Input (Rx)
 	input rx_clk,
+	input rx_ce,
 	input [7:0] rxd,
 	input rx_dv,
 	input rx_er,
 	// GMII Output (Tx)
 	input tx_clk,
+	input tx_ce,
 	output [7:0] txd,
 	output tx_en,
 	// Configuration
@@ -112,7 +114,7 @@ wire sdata_s, sdata_l;
 wire [10:0] pack_len;
 wire [7:0] status_vec; wire status_valid;
 scanner #(.handle_arp(handle_arp), .handle_icmp(handle_icmp)) a_scan(
-	.clk(rx_clk), .ce(1'b1),
+	.clk(rx_clk), .ce(rx_ce),
 	.eth_in(eth_in_r), .eth_in_s(eth_in_s_r), .eth_in_e(eth_in_e_r),
 	.enable_rx(enable_rx),
 	.ip_a(ip_a), .ip_d(ip_d),
@@ -130,7 +132,7 @@ assign rx_mac_status_s = status_valid;
 // Second step: create data flow to DPRAM
 wire [paw-1:0] pbuf_a_rx, gray_state;
 wire [8:0] pbuf_din;
-pbuf_writer #(.paw(paw)) b_write(.clk(rx_clk),
+pbuf_writer #(.paw(paw)) b_write(.clk(rx_clk), .ce(rx_ce),
 	.data_in(sdata), .data_s(sdata_s), .data_f(sdata_l),
 	.pack_len(pack_len), .status_vec(status_vec), .status_valid(status_valid),
 	.mem_a(pbuf_a_rx), .mem_d(pbuf_din),
@@ -147,8 +149,8 @@ assign ibadge_data = pbuf_din;
 reg [8:0] pbuf[0:(1<<paw)-1];
 reg [8:0] pbuf_out=0;
 wire [paw-1:0] mem_a2;  // see below
-always @(posedge rx_clk) pbuf[pbuf_a_rx] <= pbuf_din;
-always @(posedge tx_clk) pbuf_out <= pbuf[mem_a2];
+always @(posedge rx_clk) if (rx_ce) pbuf[pbuf_a_rx] <= pbuf_din;
+always @(posedge tx_clk) if (tx_ce) pbuf_out <= pbuf[mem_a2];
 integer jx;
 initial for (jx=0; jx<(1<<paw); jx=jx+1) pbuf[jx]=0;
 
@@ -162,7 +164,7 @@ wire [2:0] udp_sel;
 wire [7:0] eth_data_out;
 wire eth_strobe_short, eth_strobe_long;
 localparam p_offset=480;  // see notes in construct.v
-construct #(.paw(paw), .p_offset(p_offset)) c_construct(.clk(tx_clk),
+construct #(.paw(paw), .p_offset(p_offset)) c_construct(.clk(tx_clk), .ce(tx_ce),
 	.gray_state(gray_state),
 	.ip_a(ip_mem_a_tx), .ip_d(ip_mem_d_tx),
 	.addr(mem_a2), .pbuf_out(pbuf_out),
@@ -174,7 +176,7 @@ construct #(.paw(paw), .p_offset(p_offset)) c_construct(.clk(tx_clk),
 
 // Data multiplexer
 wire xraw_s, xraw_l;  wire [7:0] raw_d;  // Output, still needs CRC
-xformer #(.n_lat(n_lat), .handle_icmp(handle_icmp)) d_xform(.clk(tx_clk),
+xformer #(.n_lat(n_lat), .handle_icmp(handle_icmp)) d_xform(.clk(tx_clk), .ce(tx_ce),
 	.pc(pc), .category(category), .udp_sel(udp_sel),
 	.idata(eth_data_out), .eth_strobe_short(eth_strobe_short), .eth_strobe_long(eth_strobe_long),
 	.len_c(len_c),
@@ -192,10 +194,10 @@ localparam precog_latency = (1<<paw) - p_offset + 4 + n_lat;
 wire [7:0] tx_mac_data;
 wire tx_mac_strobe_s, tx_mac_strobe_l;
 generate if (mac_aw > 1) begin : mac_b
-    mac_subset #(
+	mac_subset #(
 	.mac_aw(mac_aw),
 	.latency(precog_latency)
-    ) txmac (
+	) txmac (
 	.host_raddr(host_raddr),
 	.host_rdata(host_rdata),
 	.buf_start_addr(buf_start_addr),
@@ -203,10 +205,11 @@ generate if (mac_aw > 1) begin : mac_b
 	.tx_mac_done(tx_mac_done),
 	.scanner_busy(scanner_busy),
 	.tx_clk(tx_clk),
+	.ce(tx_ce),
 	.mac_data(tx_mac_data),
 	.strobe_s(tx_mac_strobe_s),
 	.strobe_l(tx_mac_strobe_l)
-    );
+	);
 end else begin : no_mac_b
 	assign tx_mac_strobe_s = 0;
 	assign tx_mac_strobe_l = 0;
@@ -222,7 +225,7 @@ wire [7:0] raw2_d = tx_mac_strobe_s ? tx_mac_data : raw_d;
 
 // Finally, add Ethernet CRC and GMII preamble
 wire opack_s;  wire [7:0] opack_d;
-ethernet_crc_add e_crc(.clk(tx_clk),
+ethernet_crc_add e_crc(.clk(tx_clk), .ce(tx_ce),
 	.raw_s(xraw2_s), .raw_l(xraw2_l), .raw_d(raw2_d),
 	.opack_s(opack_s), .opack_d(opack_d)
 );
@@ -230,7 +233,7 @@ ethernet_crc_add e_crc(.clk(tx_clk),
 // Make sure these outputs can be put into an IOB
 reg [7:0] eth_out_r=0;
 reg eth_out_s_r=0;
-always @(posedge tx_clk) begin
+always @(posedge tx_clk) if (tx_ce) begin
 	eth_out_r <= opack_d;
 	eth_out_s_r <= opack_s;
 end
@@ -244,7 +247,7 @@ assign tx_mon = opack_s;
 // Hook for testing, not intended to be connected in hardware
 reg [paw-1:0] in_use_timer=0;
 assign in_use = |in_use_timer;
-always @(posedge rx_clk) begin
+always @(posedge rx_clk) if (rx_ce) begin
 	if (in_use) in_use_timer <= in_use_timer - 1;
 	if (rx_mon) in_use_timer <= {paw{1'b1}};
 end

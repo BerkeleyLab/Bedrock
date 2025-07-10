@@ -220,7 +220,7 @@ wire final_octet = h_data_d1 & ~h_data;
 reg udp_port_stb=0;
 always @(posedge clk) if (ce) udp_port_stb <= pack_cnt == 36;
 wire [2:0] port_p0;  wire port_h, port_v;
-udp_port_cam #(.naw(3)) cam(.clk(clk),
+udp_port_cam #(.naw(3)) cam(.clk(clk), .ce(ce),
 	.port_s(udp_port_stb), .data(data_d1),
 	.pno_a(pno_a), .pno_d(pno_d),
 	.port_p(port_p0), .port_h(port_h), .port_v(port_v)
@@ -316,7 +316,7 @@ wire end_of_ip = cnt>32 && cnt == (length+14);
 
 // Standard one's-complement checksum
 wire ones;
-ones_chksum ck(.clk(clk), .clear(chksum_zero), .gate(chksum_gate),
+ones_chksum ck(.clk(clk), .ce(ce), .clear(chksum_zero), .gate(chksum_gate),
 	.din(data), .all_ones(ones));
 
 // Final state, should find FF FF at end of IP packet
@@ -454,7 +454,7 @@ always @(posedge clk) begin
 	end
 end
 wire chksum_all_ones;
-ones_chksum ck(.clk(clk), .clear(out_chksum_zero), .gate(out_chksum_gate),
+ones_chksum ck(.clk(clk), .ce(ce), .clear(out_chksum_zero), .gate(out_chksum_gate),
 	.din(data), .all_ones(chksum_all_ones));
 reg chksum_all_ones_d=0;
 reg chksum_fail=0;

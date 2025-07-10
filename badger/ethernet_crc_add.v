@@ -7,6 +7,7 @@
 // raw_l is also valid for a few cycles before, and 4 cycles after, that.
 module ethernet_crc_add(
 	input clk,
+	input ce,
 	input raw_s,
 	input raw_l,
 	input [7:0] raw_d,
@@ -16,7 +17,7 @@ module ethernet_crc_add(
 
 // Strobes are easy
 reg raw_s_d=0, raw_l_d=0;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	raw_s_d <= raw_s;
 	raw_l_d <= raw_l;
 end
@@ -34,9 +35,9 @@ crc8e_guts #(.wid(32)) crc8e(.clk(clk), .gate(gate_crc),
 // Multiplexing
 reg [1:0] crc_cnt=0;
 reg [7:0] opack_r=0;
-assign gate_crc = raw_s | raw_s_d | (crc_cnt != 0);
+assign gate_crc = ce & (raw_s | raw_s_d | (crc_cnt != 0));
 assign out_crc_sel = trail | (|crc_cnt);
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	crc_cnt <= out_crc_sel ? crc_cnt+1 : 0;
 	opack_r <= out_crc_sel ? crc_out : raw_s ? raw_d : 8'h55;
 end

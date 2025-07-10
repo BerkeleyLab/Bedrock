@@ -107,7 +107,7 @@ mac_subset #(.mac_aw(mac_aw), .latency(latency), .stretch(stretch), .ifg(ifg)) m
 	.tx_mac_start(tx_mac_start),
 	.tx_mac_done(done),
 	.scanner_busy(scanner_busy),
-	.tx_clk(tx_clk), .mac_data(mac_data),
+	.tx_clk(tx_clk), .ce(1'b1), .mac_data(mac_data),
 	.strobe_s(strobe_s), .strobe_l(strobe_l)
 );
 

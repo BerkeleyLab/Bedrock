@@ -63,7 +63,7 @@ end
 
 // DUT
 wire [7:0] odat;
-hack_icmp_cksum dut(.clk(clk), .kick(kick), .idat(idat), .odat(odat));
+hack_icmp_cksum dut(.clk(clk), .ce(1'b1), .kick(kick), .idat(idat), .odat(odat));
 
 reg [7:0] idat1, idat2, idat3, odat1;
 reg kick1=0, kick2=0;

@@ -18,6 +18,7 @@ module construct #(
 	// At the other end, p_offset + max(fp_offset) < (2048-MTU-guard)
 ) (
 	input clk,
+	input ce,
 	input [paw-1:0] gray_state,
 	// port to MAC/IP config, single-cycle latency
 	output [3:0] ip_a,
@@ -46,7 +47,7 @@ reg [paw-1:0] state=0;
 // verilator lint_off UNOPTFLAT
 wire [paw-1:0] new_state = gray_l ^ {1'b0, new_state[paw-1:1]};
 // verilator lint_restore
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	gray_l0 <= gray_state;
 	gray_l <= gray_l0;
 	state <= new_state;
@@ -55,7 +56,7 @@ end
 // Debugging hook
 reg [paw-1:0] old_state=0, state_diff=0;
 reg xdomain_fault_r=0;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	old_state <= state;
 	state_diff <= state - old_state;
 	// state_diff must be 0, 1, or 2 for things to work right
@@ -73,7 +74,7 @@ assign fp = state + p_offset;
 // cope with max 100 ppm frequency offset between input and output.
 reg [paw-1:0] fp_r=0;
 assign fp = packet_active ? fp_r+1 : state+p_offset;
-always @(posedge clk) fp_r <= fp;
+always @(posedge clk) if (ce) fp_r <= fp;
 // This will be really slow.  Have to pack an increment, mux, add,
 // and RAM access into a single cycle.
 `endif
@@ -103,7 +104,7 @@ reg sof_d=0;
 // Or to replace (live && pc_r==3) with sof_dd?  Need to measure to find out.
 // Could be worth breaking this up into 2 always blocks (badge and data)?
 // Not really, they both have to touch the "live" register.
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	pc_r <= next_pc;
 	sof_d <= sof;
 	if (sof) begin
@@ -122,7 +123,7 @@ end
 
 // Debug
 reg [2:0] sof_chain=0;
-always @(posedge clk) sof_chain <= {sof_chain[1:0], sof};
+always @(posedge clk) if (ce) sof_chain <= {sof_chain[1:0], sof};
 assign badge_stb = sof | (|sof_chain);
 assign badge_data = pbuf_out8;
 
@@ -139,7 +140,7 @@ assign ip_a = pc_r + cf_offset;
 // Pipelining not shown in doc/tx_path.eps
 reg [7:0] template_d=0;
 reg [1:0] out_d=0, chk_in_d=0;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	template_d <= template;
 	out_d <= out;
 	chk_in_d <= chk_in;
@@ -147,40 +148,44 @@ end
 
 // Multiplexers, need to stay consistent with tx_gen.py
 reg [7:0] d_chk=0;
-always @(posedge clk) case (chk_in_d)
-	2'b00: d_chk <= pbuf_out8;
-	2'b01: d_chk <= ip_d;
-	2'b10: d_chk <= template_d;
-	2'b11: d_chk <= 8'd0;
-endcase
+always @(posedge clk) if (ce) begin 
+	case (chk_in_d)
+		2'b00: d_chk <= pbuf_out8;
+		2'b01: d_chk <= ip_d;
+		2'b10: d_chk <= template_d;
+		2'b11: d_chk <= 8'd0;
+	endcase
+end
 wire [7:0] ip_head_chksum_data;
 // IP header checksum calculation
 reg chksum_zero=0, chksum_gate=0;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	chksum_zero <= pc_r <= 3;
 	chksum_gate <= (chk_in_d != 2'b11) & ~chksum_zero;
 end
-ones_chksum ck(.clk(clk), .clear(chksum_zero), .gate(chksum_gate),
+ones_chksum ck(.clk(clk), .ce(ce), .clear(chksum_zero), .gate(chksum_gate),
 	.din(d_chk), .sum(ip_head_chksum_data));
 
 reg [7:0] d_out_pre=0;
-always @(posedge clk) case (out_d)
-	2'b00: d_out_pre <= pbuf_out8;
-	2'b01: d_out_pre <= ip_d;
-	2'b10: d_out_pre <= template_d;
-	2'b11: d_out_pre <= 0;
-endcase
+always @(posedge clk) if (ce) begin
+	case (out_d)
+		2'b00: d_out_pre <= pbuf_out8;
+		2'b01: d_out_pre <= ip_d;
+		2'b10: d_out_pre <= template_d;
+		2'b11: d_out_pre <= 0;
+	endcase
+end
 // Last-minute insertion of IP header checksum result .. haha minute
 reg out_d_chk_sub=0;
-always @(posedge clk) out_d_chk_sub <= out_d == 2'b11;
+always @(posedge clk) if (ce) out_d_chk_sub <= out_d == 2'b11;
 wire [7:0] d_out = out_d_chk_sub ? ip_head_chksum_data : d_out_pre;
 // This could create a critical speed path
 
 // Close out timing within this module
-reg [7:0] eth_data_out_r=0;   always @(posedge clk) eth_data_out_r <= d_out;
-reg eth_strobe_short_r=0;     always @(posedge clk) eth_strobe_short_r <= o_strobe;
-reg pack_len_nz=0;     always @(posedge clk) pack_len_nz <= pack_len_r != 0;
-reg [5:0] pc_d=0;      always @(posedge clk) pc_d <= pc_r;
+reg [7:0] eth_data_out_r=0;   always @(posedge clk) if (ce) eth_data_out_r <= d_out;
+reg eth_strobe_short_r=0;     always @(posedge clk) if (ce) eth_strobe_short_r <= o_strobe;
+reg pack_len_nz=0;     always @(posedge clk) if (ce) pack_len_nz <= pack_len_r != 0;
+reg [5:0] pc_d=0;      always @(posedge clk) if (ce) pc_d <= pc_r;
 
 assign eth_data_out = eth_data_out_r;
 assign eth_strobe_short = eth_strobe_short_r;
@@ -192,14 +197,14 @@ assign pc = pc_d;
 reg xcheck_zero=0, xcheck_gate=0, xcheck_ones_d=0;
 reg xcheck_capture=0, xcheck_fault_r=0;
 wire xcheck_ones;
-always @(posedge clk) begin
+always @(posedge clk) if (ce) begin
 	xcheck_zero <= pc_r <= 4;
 	xcheck_gate <= pc_r >= 20 && pc_r < 40;
 	xcheck_ones_d <= xcheck_ones;
 	xcheck_capture <= pc_r == 40;
 	xcheck_fault_r <= xcheck_capture & ~xcheck_ones & ~xcheck_ones_d;
 end
-ones_chksum xchk(.clk(clk), .clear(xcheck_zero), .gate(xcheck_gate),
+ones_chksum xchk(.clk(clk), .ce(ce), .clear(xcheck_zero), .gate(xcheck_gate),
 	.din(eth_data_out), .all_ones(xcheck_ones));
 assign xcheck_fault = xcheck_fault_r;
 

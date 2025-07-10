@@ -51,7 +51,7 @@ wire [naw:0] pno_a;
 reg [7:0] pno_d=0;
 wire [naw-1:0] port_p;
 wire port_h, port_v;
-udp_port_cam #(.naw(naw)) dut(.clk(clk),
+udp_port_cam #(.naw(naw)) dut(.clk(clk), .ce(1'b1),
 	.port_s(port_s), .data(data),
 	.pno_a(pno_a), .pno_d(pno_d),
 	.port_p(port_p), .port_h(port_h), .port_v(port_v)

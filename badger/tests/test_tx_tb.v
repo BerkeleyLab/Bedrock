@@ -54,7 +54,7 @@ always @(posedge clk) host_d <= host_mem[host_addr];
 wire req;
 wire [10:0] len_req;
 wire [7:0] mac_data;
-test_tx_mac #(.mac_aw(mac_aw)) mac(.clk(clk),
+test_tx_mac #(.mac_aw(mac_aw)) mac(.clk(clk), .ce(1'b1),
 	.host_addr(host_addr), .host_d(host_d),
 	.start(start), .buf_start_addr(buf_start_addr), .done(done),
 	.req(req), .len_req(len_req),
