@@ -17,15 +17,15 @@ VERILOG_DEFINE_FLAGS =
 include $(COMMS_TOP_DIR)/rules.mk
 include $(BUILD_DIR)/top_rules.mk
 
-all: gen $(APP_NAME).bit
+all: $(APP_NAME).bit
 
 $(APP_NAME).bit: $(IP_TCL)
 
 hwload_ac701:
-	xc3sprog -c jtaghs1_fast $(BITFILE)
+	xc3sprog -c jtaghs1_fast $(SERIAL_NUM_OPT) $(BITFILE)
 
 hwtest_ac701:
-	ping -c2 $(SFP_IP) &&  cd ../test && python3 comms_top_test.py -t $(SFP_IP) -cf mem_test.cf
+	ping -c 2 $(SFP_IP) &&  cd ../test && $(PYTHON) comms_top_test.py -t $(SFP_IP) -cf mem_test.cf
 
 ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     ifneq (,$(findstring bits,$(MAKECMDGOALS)))
@@ -35,5 +35,5 @@ ifneq (,$(findstring bit,$(MAKECMDGOALS)))
     endif
 endif
 
-CLEAN += *.bit ../test/*.dat
+CLEAN += *.bit *.bin ../test/*.dat
 include $(BUILD_DIR)/bottom_rules.mk

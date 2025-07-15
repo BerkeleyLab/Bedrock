@@ -8,7 +8,7 @@ integer cc;
 integer pass_count=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
-		$dumpfile("banyan_tb.vcd");
+		$dumpfile("banyan.vcd");
 		$dumpvars(5,banyan_tb);
 	end
 	trace = $test$plusargs("trace");
@@ -18,7 +18,13 @@ initial begin
 		clk=1; #5;
 	end
 	// 1*1 + 70*2 + 28*4 + 8*8 = 317
-	if (pass_count == 317) $display("PASS"); else $display("FAIL %d", pass_count);
+	if (pass_count == 317) begin
+		$display("PASS");
+		$finish(0);
+	end else begin
+		$display("FAIL %d", pass_count);
+		$stop(0);
+	end
 end
 
 // Create input test data that is easy to understand

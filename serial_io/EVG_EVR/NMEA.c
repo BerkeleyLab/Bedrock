@@ -34,7 +34,7 @@ static int satellitesInView = -1;
 
 /*
  * Returns number of days since civil 1970-01-01
- * Ref: http://howardhinnant.github.io/date_algorithms.html#days_from_civil
+ * Ref: https://howardhinnant.github.io/date_algorithms.html#days_from_civil
  */
 static int
 days_from_civil(int y, unsigned m, unsigned d)
@@ -229,4 +229,3 @@ NMEAsatellitesInView(void)
 {
     return satellitesInView;
 }
-

@@ -21,7 +21,7 @@ initial begin
 		host_clk=0; #(HOST_CLK_PERIOD/2);
 		host_clk=1; #(HOST_CLK_PERIOD/2);
 	end
-	$finish;
+	$finish(0);
 end
 
 always begin sf_clk = ~sf_clk; #(SF_CLK_PERIOD/2); end
@@ -94,7 +94,7 @@ always @(posedge sf_clk) begin
 
 	if (trig_done && conveyor_cnt < data_len) begin
 		meas <= conveyor[conveyor_cnt];
-                conveyor_cnt <= conveyor_cnt + 1;
+		conveyor_cnt <= conveyor_cnt + 1;
 	end
 end
 

@@ -10,10 +10,13 @@ initial begin
 		$dumpfile("banyan_mem.vcd");
 		$dumpvars(7,banyan_mem_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<2000; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish(0);
 end
 
 // Create input test data that is easy to understand

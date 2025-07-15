@@ -15,7 +15,7 @@
          is deliberately not done here to avoid unnecessary loss of precision.
 */
 
-module ff_driver # (
+module ff_driver #(
    parameter CAV_SHIFT = 1,
    parameter CIC_SHIFT = 1,
    parameter MEM_REP = 1,

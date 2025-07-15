@@ -32,7 +32,7 @@ class c_llspi_ad9653(c_llspi, c_ad9653):
 
 
 # This class uses LEEP to interact with llspi.v
-# Indepenent of which peripheral chip is attached to llspi.
+# Independent of which peripheral chip is attached to llspi.
 # All of these methods are unmodified cut-and-paste from zest_setup.py
 class leep_llspi():
     def __init__(self, leep):

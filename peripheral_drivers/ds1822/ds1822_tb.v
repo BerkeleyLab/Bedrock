@@ -17,9 +17,13 @@ initial begin
 		#250; clk=1;
 		#250; clk=0;
 	end
-	$display("%s",errors==0?"PASS":"FAIL");
-	if (errors != 0) $stop();
-	$finish();
+	if (errors != 0) begin
+		$display("FAIL");
+		$stop(0);
+	end else begin
+		$display("PASS");
+		$finish(0);
+	end
 end
 
 tri1 DS1;

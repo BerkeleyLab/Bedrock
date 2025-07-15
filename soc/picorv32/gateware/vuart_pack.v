@@ -2,7 +2,7 @@
 //  virtual uart_wrap.v
 // --------------------------------------------------------------
 // Here we wrap the uart.v interface to the picorv32 address bus
-// Makes is sinmpler to instantiate UARTS
+// Makes it simpler to instantiate UARTs
 
 module vuart_pack #(
     parameter BASE_ADDR=8'h00

@@ -11,7 +11,7 @@ module wfm_tb;
     //  Handle the power on Reset
     //------------------------------------------------------------------------
     reg reset = 1;
-    integer pass=0;
+    reg pass=1;
     initial begin
         if ($test$plusargs("vcd")) begin
             $dumpfile("wfm.vcd");
@@ -20,10 +20,8 @@ module wfm_tb;
         repeat (10) @(posedge mem_clk);
         reset <= 0;
         #15000
-        pass = 0;
         $display("TIMEOUT\n");
-        $display("%s\n", pass ? "PASS" : "FAIL");
-        $finish();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -33,8 +31,13 @@ module wfm_tb;
     always @(posedge mem_clk) begin
         if (~reset && trap) begin
             $display("preliminary TRAP");
-            $display("%s\n", pass ? "PASS" : "FAIL");
-            $finish();
+            if (pass) begin
+                $display("PASS");
+                $finish(0);
+            end else begin
+                $display("FAIL");
+                $stop(0);
+            end
         end
     end
 
@@ -87,9 +90,10 @@ module wfm_tb;
         .mem_packed_ret( packed_mem_ret )  //CPU < MEM
     );
 
-    reg [31:0] adc_out_data=32'hdeadbeaf;
+    // N_CH=2, CH1: 16'hdead, CH0: 16'beaf
+    reg [31:0] adc_out_data= {16'hdead, 16'hbeaf};
     always @(posedge dsp_clk) begin
-        adc_out_data <= ~adc_out_data;
+        if (dut.counting) adc_out_data <= ~adc_out_data;
     end
     // --------------------------------------------------------------
     //  wfm_pack module
@@ -116,8 +120,11 @@ module wfm_tb;
     assign mem_read_stb = cpu.mem_ready && ~|cpu.mem_wstrb && cpu.mem_addr[31:24]==BASE_WFM;
     wire [8:0] v_addr = cpu.mem_addr[10:2];
     wire [15:0] v_rdata = cpu.mem_rdata[15:0];
+    // Read CH1 and check data
+    // wfm.c: SET_REG8(config_addr + WFM_CFG_BYTE_CHAN_SEL, 1);
     always @(posedge mem_clk) if (mem_read_stb) begin
-        $display("Time: %g ns: addr: 0x%x, data : 0x%x\n", $time, v_addr, v_rdata);
-        if (v_addr % 2 == 0 && v_rdata == 16'hdead) pass = 1;
+        if (v_addr % 2 == 0) pass &= (v_rdata == 16'hdead);
+        if (v_addr % 2 == 1) pass &= (v_rdata == ~16'hdead);
+        $display("Time: %g ns: addr: 0x%x, data : 0x%x %s\n", $time, v_addr, v_rdata, pass ? "PASS":"FAIL");
     end
 endmodule

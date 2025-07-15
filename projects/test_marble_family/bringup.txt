@@ -78,7 +78,7 @@ cmp /tmp/f2 /tmp/c2
 
 # LPC1776, seems to work OK using OpenOCD from either git master
 # or stock Debian Buster.
-git clone https://github.com/richardeoin/lpc-toolchain.git
+git clone https://github.com/richardeoin/lpc-toolchain
 git checkout LPC1769
 patch -p1 < marble-lpc1776.patch
 # apt-get install gcc-arm-none-eabi

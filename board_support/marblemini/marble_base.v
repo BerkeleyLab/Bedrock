@@ -17,10 +17,13 @@ module marble_base (
 
 	// Auxiliary I/O and status
 	input aux_clk,
+	input clk62,
+	input cfg_clk,
 	output phy_rstn,
 	input clk_locked,
+	input si570,
 
-	// SPI pins, can give access to configuration
+	// SPI pins to on-board microcontroller; can give access to configuration
 	input SCLK,
 	input CSB,
 	input MOSI,
@@ -34,13 +37,13 @@ module marble_base (
 	input boot_miso,
 	output cfg_d02,
 
-	// One I2C bus, everything gatewayed through a TCA9548
-	output [3:0] twi_scl,
+	// One I2C bus; everything gatewayed through a TCA9548A
+	inout  [3:0] twi_scl,
 	inout  [3:0] twi_sda,
 	inout  TWI_RST,
 	input  TWI_INT,
 
-	// White Rabbit DAC
+	// White Rabbit compatible DAC subsystem controlling VCXOs
 	output WR_DAC_SCLK,
 	output WR_DAC_DIN,
 	output WR_DAC1_SYNC,
@@ -49,6 +52,9 @@ module marble_base (
 	// UART to USB
 	// The RxD and TxD directions are with respect
 	// to the USB/UART chip, not the FPGA!
+	// Note that the freq_demo feature doesn't actually use FPGA_TxD.
+	// If you don't connect anything to FPGA_RxD, the synthesizer
+	// will drop the whole freq_demo feature.
 	output FPGA_RxD,
 	input FPGA_TxD,
 
@@ -74,14 +80,18 @@ module marble_base (
 	input [31:0] lb_data_in,
 
 	// Something physical
-	output [131:0] fmc_test,
+	inout [191:0] fmc_test,
 	output ZEST_PWR_EN,
+	output [2:0] ps_sync,
 	output [7:0] LED
 );
 
 parameter USE_I2CBRIDGE = 1;
 parameter MMC_CTRACE = 1;
+parameter GPS_CTRACE = 0;
+parameter use_ddr_pps = 0;
 parameter misc_config_default = 0;
+parameter default_enable_rx = 1;
 
 `ifdef VERILATOR
 parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4};  // 192.168.7.4
@@ -96,74 +106,51 @@ parameter [47:0] mac = 48'h12555500032d;
 `endif
 `endif
 
+// Basic clock setup
 wire tx_clk = vgmii_tx_clk;
 wire rx_clk = vgmii_rx_clk;
 
-// Configuration port
-wire config_clk = tx_clk;
-wire config_w, config_r;
-wire [7:0] config_a;
-wire [7:0] config_d;
-wire [7:0] spi_return;
-wire [3:0] spi_pins_debug;
-spi_gate spi(
-	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB), .MISO(MISO),
-	.config_clk(config_clk), .config_w(config_w), .config_r(config_r),
-	.config_a(config_a), .config_d(config_d), .tx_data(spi_return),
-	.spi_pins_debug(spi_pins_debug)
-);
-
-// Map generic configuration bus to application
-// 16-bit SPI word semantics:
-//   0 0 0 1 a a a a d d d d d d d d  ->  set MAC/IP config[a] = D
-//   0 0 1 0 0 0 0 0 x x x x x x x V  ->  set enable_rx to V
-//   0 0 1 0 0 0 1 0 x d d d d d d d  ->  set 7-bit mailbox page selector
-//   0 0 1 1 a a a a d d d d d d d d  ->  set UDP port config[a] = D
-//   0 1 0 0 a a a a d d d d d d d d  ->  mailbox read
-//   0 1 0 1 a a a a d d d d d d d d  ->  mailbox write
-parameter default_enable_rx = 1;
-reg enable_rx=default_enable_rx;  // special case initialization
-reg [6:0] mbox_page=0;
-always @(posedge config_clk) begin
-	if (config_w && (config_a == 8'h20)) enable_rx <= config_d[0];
-	if (config_w && (config_a == 8'h22)) mbox_page <= config_d[6:0];
-end
-wire config_s = config_w && (config_a[7:4] == 1);
-wire config_p = config_w && (config_a[7:4] == 3);
-wire config_mr = config_r && (config_a[7:4] == 4);
-wire config_mw = config_w && (config_a[7:4] == 5);
-wire [10:0] mbox_a = {mbox_page, config_a[3:0]};
-
-// Forward declarations
-wire led_user_mode, l1, l2;
 // Local bus
+wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;  // outputs from rtefi_blob
 assign lb_clk = tx_clk;
-//wire [23:0] lb_addr;
-wire [31:0] lb_data_muxed;
-wire lb_control_strobe, lb_control_rd, lb_control_rd_valid;
 assign lb_strobe = lb_control_strobe;
-assign lb_rd = lb_control_rd;
-assign lb_rd_valid = lb_control_rd_valid;
+wire config_clk = tx_clk;
 assign lb_write = lb_control_strobe & ~lb_control_rd;
+assign lb_rd_valid = lb_control_rd_valid;
+assign lb_rd = lb_control_rd;
 
-// Mailbox
-wire error;
-wire lb_mbox_sel = lb_addr[23:20] == 2;
-wire lb_mbox_wen = lb_mbox_sel & lb_write;
-// Local bus read-enable is a bit fragile, since we need to
-// match the latency configured deep inside Packet Badger's mem_gateway.
-reg lb_mbox_ren=0;
-always @(posedge lb_clk) begin
-	lb_mbox_ren <= lb_mbox_sel & lb_control_strobe & lb_control_rd;
-end
-wire [7:0] mbox_out1, mbox_out2;
-fake_dpram #(.aw(11), .dw(8)) xmem (
-	.clk(lb_clk),  // must be the same as config_clk
-	.addr1(mbox_a), .din1(config_d), .dout1(mbox_out1), .wen1(config_mw), .ren1(config_mr),
-	.addr2(lb_addr[10:0]), .din2(lb_data_out[7:0]), .dout2(mbox_out2), .wen2(lb_mbox_wen), .ren2(lb_mbox_ren),
-	.error(error)
+// Signals provided by mmc_mailbox
+wire [3:0] spi_pins_debug;
+wire enable_rx;
+wire [7:0] mbox_out2;
+wire config_s, config_p;
+wire [7:0] config_a, config_d;
+
+// Actual mmc_mailbox instance
+mmc_mailbox #(
+  .DEFAULT_ENABLE_RX(default_enable_rx)
+  ) mailbox_i (
+  .clk(config_clk), // input
+  // localbus
+  .lb_addr(lb_addr[10:0]), // input [10:0]
+  .lb_din(lb_data_out[7:0]), // input [7:0]
+  .lb_dout(mbox_out2), // output [7:0]
+  .lb_write(lb_write), // input
+  .lb_control_strobe(lb_control_strobe), // input
+  // SPI PHY
+  .sck(SCLK), // input
+  .ncs(CSB), // input
+  .pico(MOSI), // input
+  .poci(MISO), // output
+  // Config pins for badger (rtefi) interface
+  .config_s(config_s), // output
+  .config_p(config_p), // output
+  .config_a(config_a), // output [7:0]
+  .config_d(config_d), // output [7:0]
+  // Special pins
+  .enable_rx(enable_rx), // output
+  .spi_pins_debug(spi_pins_debug) // {MISO, din, sclk_d1, csb_d1};
 );
-assign spi_return = mbox_out1;  // data sent back to MMC vis SPI
 
 // Debugging hooks
 wire ibadge_stb, obadge_stb;
@@ -176,20 +163,37 @@ wire [1:0] rx_mac_buf_status;
 wire allow_mmc_eth_config;
 wire [31:0] lb_slave_data_read;
 
-//
+// for looking at start-up frequency of SI570
+wire [27:0] frequency_si570;
+freq_count freq_cnt_si570(.f_in(si570), .sysclk(lb_clk), .frequency(frequency_si570));
+
+// Signals provided to lb_marble_slave
+wire [3:0] rx_category_rx, rx_category;
+wire rx_category_s_rx, rx_category_s;
+
+// Signals provided by lb_marble_slave
+wire [1:0] led_user_mode;
+wire l1, l2;
+wire [4:0] ps_sync_config;
+
+// Actual lb_marble_slave instance
 lb_marble_slave #(
 	.USE_I2CBRIDGE(USE_I2CBRIDGE),
 	.MMC_CTRACE(MMC_CTRACE),
+	.GPS_CTRACE(GPS_CTRACE),
+	.use_ddr_pps(use_ddr_pps),
 	.misc_config_default(misc_config_default)
 ) slave(
 	.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
 	.data_out(lb_data_out), .data_in(lb_slave_data_read),
+	.aux_clk(aux_clk), .clk62(clk62),
 	.ibadge_clk(rx_clk),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
 	.mmc_pins(spi_pins_debug),
+	.rx_category_s(rx_category_s), .rx_category(rx_category),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
 	.twi_scl(twi_scl), .twi_sda(twi_sda),
@@ -201,7 +205,8 @@ lb_marble_slave #(
 	.zest_pwr_en(ZEST_PWR_EN),
 	.allow_mmc_eth_config(allow_mmc_eth_config),
 	.fmc_test(fmc_test),
-	.gps(GPS), .ext_config(ext_config),
+	.gps(GPS), .ext_config(ext_config), .frequency_si570(frequency_si570),
+	.ps_sync_config(ps_sync_config),
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
 );
 
@@ -265,6 +270,10 @@ mac_compat_dpram #(
 	.tx_mac_start(tx_mac_start)
 );
 
+// Be careful with clock domains:
+// rtefi_blob uses this in rx_clk, so send it a registered value.
+reg enable_rx_r=0;  always @(posedge tx_clk) enable_rx_r <= enable_rx | ~allow_mmc_eth_config;
+
 // Instantiate the Real Work
 parameter enable_bursts=1;
 
@@ -284,7 +293,7 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 // Simple combinational logic is OK, since all signals are in tx_clk domain
 // (config_clk == tx_clk == lb_clk).
 
-	.enable_rx(enable_rx | ~allow_mmc_eth_config),
+	.enable_rx(enable_rx_r),
 	.config_clk(config_clk),
 	.config_s(config_s & allow_mmc_eth_config),
 	.config_p(config_p & allow_mmc_eth_config),
@@ -319,10 +328,20 @@ assign vgmii_tx_er=1'b0;
 assign in_use = blob_in_use | boot_busy;
 
 // Frequency counter demo to UART
-wire [3:0] unk_clk = {1'b0, 1'b0, aux_clk, rx_clk};
+wire [3:0] unk_clk = {cfg_clk, si570, aux_clk, rx_clk};
 freq_demo freq_demo(
 	.refclk(tx_clk), .unk_clk(unk_clk),
 	.uart_tx(FPGA_RxD), .uart_rx(FPGA_TxD)
+);
+
+// For statistics-gathering purposes
+packet_categorize i_categorize(.clk(vgmii_rx_clk),
+	.strobe(rx_mac_status_s), .status(rx_mac_status_d),
+	.strobe_o(rx_category_s_rx), .category(rx_category_rx)
+);
+data_xdomain #(.size(4)) x_category(
+	.clk_in(vgmii_rx_clk), .gate_in(rx_category_s_rx), .data_in(rx_category_rx),
+	.clk_out(lb_clk), .gate_out(rx_category_s), .data_out(rx_category)
 );
 
 // Heartbeats and other LED
@@ -336,8 +355,13 @@ activity rx_act(.clk(rx_clk), .trigger(rx_mon), .led(rx_led));
 activity tx_act(.clk(tx_clk), .trigger(tx_mon), .led(tx_led));
 wire rx_h = rx_heartbeat[26];
 wire tx_h = tx_heartbeat[26];
-assign LED = {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, led1, led0};
-// assign LED = {scanner_debug, tx_led, rx_led, led1, led0};
+reg mod=0, reset=0;
+reg [31:0] cnt=0;
+always @(posedge rx_clk) begin
+    cnt <= reset ? 32'h0 : cnt + 1'b1;
+    mod <= cnt[0];
+end
+assign LED = (led_user_mode==2) ? cnt[30:23] & {8{mod}} : {~tx_h, tx_h, ~rx_h, rx_h, tx_led, rx_led, led1, led0};
 
 // Keep the PHY's reset pin low for the first 33 ms
 reg phy_rb=0;
@@ -347,12 +371,17 @@ always @(posedge tx_clk) begin
 end
 assign phy_rstn = phy_rb;
 
+ltm_sync ltm_sync_i(.clk(tx_clk),
+	.ps_config(ps_sync_config), .ps_sync(ps_sync));
+
 // One weird hack, even works in Verilator!
+`ifndef YOSYS
 always @(posedge tx_clk) begin
 	if (slave.stop_sim & ~in_use) begin
-		$display("hw_test_tb:  stopping based on localbus request");
-		$finish();
+		$display("marble_base:  stopping based on localbus request");
+		$finish(0);
 	end
 end
+`endif
 
 endmodule

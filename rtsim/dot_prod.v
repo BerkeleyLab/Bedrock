@@ -4,8 +4,10 @@ module dot_prod(
 	input clk,
 	input start,
 	input signed [17:0] x,  // positions from resonator.v
+	(*external*)
 	input signed [17:0] k_out,  // external
 	// 9 should be pcw-1
+	(*external*)
 	output [9:0] k_out_addr,  // external
 	output signed [17:0] result,
 	output strobe  // at time of res valid
@@ -40,6 +42,7 @@ always @(posedge clk) begin
 	if (zero) acc2 <= `SAT(acc1,23,19);
 	strobe_r <= zero;
 end
+`undef SAT
 
 assign result = acc2[19:2];
 assign strobe = strobe_r;

@@ -114,6 +114,7 @@ module patt_gen #(
          .sample_period_wi (6))
       i_multi_sampler (
          .clk             (clk),
+         .reset           (1'b0),
          .ext_trig        (~pgen_disable_r),
          .sample_period   (pgen_rate_enc),
          .dsample0_period (8'b0),

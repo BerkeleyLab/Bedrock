@@ -1,4 +1,4 @@
-`timescale  100 ps / 10 ps
+`timescale 100 ps / 10 ps
 //-------------------------------------
 // sp60x_clocks.v
 // Chip Lukes

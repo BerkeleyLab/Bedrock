@@ -18,10 +18,12 @@ module hw_test(
 	output phy_rstn,
 	input clk_locked,
 
-	// SPI pins, can give access to configuration
+	// SPI pins, which on Marble are a link to the on-board microcontroller
+	// and get used to set IP and MAC, among other things.
 	input SCLK,
 	input CSB,
 	input MOSI,
+	output MISO,
 
 	// SPI boot flash programming port
 	output boot_clk,
@@ -29,7 +31,7 @@ module hw_test(
 	output boot_mosi,
 	input boot_miso,
 
-	// Simulation-only, please ignore in synthesis
+	// Simulation-only; please ignore in synthesis
 	output in_use,
 
 	// Something physical
@@ -60,7 +62,7 @@ wire [7:0] config_a;
 wire [7:0] config_d;
 wire [7:0] spi_return=0;
 spi_gate spi(
-	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB),
+	.MOSI(MOSI), .SCLK(SCLK), .CSB(CSB), .MISO(MISO),
 	.config_clk(config_clk), .config_w(config_w),
 	.config_a(config_a), .config_d(config_d), .tx_data(spi_return)
 );
@@ -91,6 +93,9 @@ wire [15:0] rx_mac_data;
 wire rx_mac_hbank;
 wire [1:0] rx_mac_buf_status;
 //
+wire [3:0] rx_category_rx, rx_category;
+wire rx_category_s_rx, rx_category_s;
+//
 lb_demo_slave slave(.clk(lb_clk), .addr(lb_addr),
 	.control_strobe(lb_control_strobe), .control_rd(lb_control_rd),
 	.data_out(lb_data_out), .data_in(lb_data_in),
@@ -98,6 +103,8 @@ lb_demo_slave slave(.clk(lb_clk), .addr(lb_addr),
 	.ibadge_stb(ibadge_stb), .ibadge_data(ibadge_data),
 	.obadge_stb(obadge_stb), .obadge_data(obadge_data),
 	.xdomain_fault(xdomain_fault),
+	.rx_category_s(rx_category_s), .rx_category(rx_category),
+	.scratch_in(32'b0),
 	.tx_mac_done(tx_mac_done), .rx_mac_data(rx_mac_data),
 	.rx_mac_buf_status(rx_mac_buf_status), .rx_mac_hbank(rx_mac_hbank),
 	.led_user_mode(led_user_mode), .led1(l1), .led2(l2)
@@ -194,6 +201,16 @@ rtefi_blob #(.ip(ip), .mac(mac), .mac_aw(tx_mac_aw), .p3_enable_bursts(enable_bu
 assign vgmii_tx_er=1'b0;
 assign in_use = blob_in_use | boot_busy;
 
+// For statistics-gathering purposes
+packet_categorize i_categorize(.clk(vgmii_rx_clk),
+	.strobe(rx_mac_status_s), .status(rx_mac_status_d),
+	.strobe_o(rx_category_s_rx), .category(rx_category_rx)
+);
+data_xdomain #(.size(4)) x_category(
+	.clk_in(vgmii_rx_clk), .gate_in(rx_category_s_rx), .data_in(rx_category_rx),
+	.clk_out(lb_clk), .gate_out(rx_category_s), .data_out(rx_category)
+);
+
 // Heartbeats and other LED
 reg [26:0] rx_heartbeat=0, tx_heartbeat=0;
 always @(posedge rx_clk) rx_heartbeat <= rx_heartbeat+1;
@@ -219,7 +236,7 @@ assign phy_rstn = phy_rb;
 always @(posedge tx_clk) begin
 	if (slave.stop_sim & ~in_use) begin
 		$display("hw_test_tb:  stopping based on localbus request");
-		$finish();
+		$finish(0);
 	end
 end
 `endif

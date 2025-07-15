@@ -13,7 +13,7 @@
 //
 // ------------------------------------
 
-module chirp_wrap # (
+module chirp_wrap #(
    parameter DD_SHIFT = 16, // See comments in parab.v for dx
    parameter AMP_WI = 20,
    parameter PH_WI = 20,
@@ -45,6 +45,7 @@ module chirp_wrap # (
 
    // Latch onto single-cycle chirp_start until next ext_trig
    reg chirp_start_r = 0;
+   wire gate;
    always @(posedge clk) begin
       if (chirp_start)
          chirp_start_r <= 1;
@@ -68,7 +69,7 @@ module chirp_wrap # (
       end
    end
 
-   wire gate = ext_trig & active_r;
+   assign gate = ext_trig & active_r;
    wire reset = ~active_r | (cycle_zero & gate);
    assign chirp_status = active_r;  // module output,
 

@@ -23,7 +23,7 @@ module iserdes_tb;
         #150000
         pass = (dout == PATTERN[8*DW-1:0]);
         $display("TIMEOUT\nFAIL");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -39,7 +39,7 @@ module iserdes_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
     end
 
@@ -95,7 +95,7 @@ module iserdes_tb;
 
     // --------------------------------------------------------------
     // Simulate adc dco clock
-    // LTC2175: Max sampling rate 125MHz, 2-lanes 16-bit serialzation
+    // LTC2175: Max sampling rate 125MHz, 2-lanes 16-bit serialization
     // t_ser = 1/(8*fs) = 1ns
     // Operation fs = 114.574MHz
     // t_ser = 1.091ns

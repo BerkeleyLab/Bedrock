@@ -3,7 +3,11 @@
 // XXX Still under construction
 // Larry Doolittle, LBNL, August 2014
 // see llrf_shell.v
-
+`define AUTOMATIC_self
+`define AUTOMATIC_decode
+`define AUTOMATIC_lp_notch
+`define AUTOMATIC_fdbk_core
+`define AUTOMATIC_piezo
 `include "rf_controller_auto.vh"
 
 // lb_addr supports at least 4K words; see piezo_control.v for explanation why.
@@ -47,16 +51,25 @@ module rf_controller (
 	output mon_strobe,
 	output mon_boundary,
 	// host-writable control registers
+	(* external *)
 	input [31:0] phase_step,  // external
+	(* external *)
 	input [11:0] modulo,  // external
+	(* external, signal_type="single-cycle" *)
 	input ctlr_ph_reset,  // external single-cycle
+	(* external *)
 	input [7:0] wave_samp_per,  // external
+	(* external *)
 	input [11:0] chan_keep,  // external
+	(* external *)
 	input [2:0] wave_shift,  // external
+	(* external *)
 	input [1:0] use_fiber_iq,  // external
+	(* external *)
 	input [7:0] tag, // external
 	`AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 
@@ -153,6 +166,7 @@ fchan_subset #(.a_dw(20), .o_dw(20), .len(12)) fchan_subset(
 );
 
 // Process radios for (simple) piezo loop
+(* lb_automatic *)
 piezo_control piezo // auto
 	(.clk(clk),
 	.sr_in(sr_out_trunc[35:0]), .sr_valid(sr_valid),
@@ -183,15 +197,22 @@ fdownconvert down(.clk(clk), .mod2(iq),
 wire signed [17:0] fdbk_in = use_fiber_iq[0] ? {iq_recv,1'b0} : {field_xy,2'b0};
 // iq flag is synchronized via state_reset above
 wire signed [17:0] fdbk_out_xy;
+(* lb_automatic *)
 fdbk_core fdbk_core  // auto
 	(.clk(clk),
 	.sync(sync),
 	.iq(iq), .in_xy(fdbk_in), .out_xy(fdbk_out_xy), .cmp_event(cmp_event),
+	// unused features
+	.chirp_en(1'b0), .chirp_amp(18'b0), .chirp_ph(19'b0),
+	.ffd_en(1'b0), .ff_setm(18'b0), .ff_setp(18'b0), .ff_ddrive(18'b0), .ff_dphase(18'b0),
+	.ffp_en(1'b0), .ff_drive(18'b0), .ff_phase(18'b0),
+	//
 	`AUTOMATIC_fdbk_core
 );
 
 // Output low-pass and notch filter combo
 wire signed [19:0] drive_w;
+(* lb_automatic *)
 lp_notch lp_notch  // auto
 	(.clk(clk), .iq(iq),
 	.x(fdbk_out_xy), .y(drive_w),

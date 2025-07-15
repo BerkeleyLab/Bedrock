@@ -5,13 +5,16 @@ DSP_DIR = ../dsp
 .PHONY: all
 all: targets
 
-include $(BUILD_DIR)/top_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 
 ifneq (clean,$(MAKECMDGOALS))
 	-include $(DEPDIR)/resonator.bit.d
 endif
 
 VVP_FLAGS += +trace
+
+# -y for yosys
+NEWAD_ARGS += -y
 
 TEST_BENCH = beam_tb outer_prod_tb resonator_tb a_compress_tb cav_mode_tb cav_elec_tb rtsim_tb afilter_siso_tb
 

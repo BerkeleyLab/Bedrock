@@ -2,6 +2,13 @@
 
 `define LB_DECODE_cryomodule
 
+`define AUTOMATIC_decode
+`define AUTOMATIC_map
+`define AUTOMATIC_beam
+`define AUTOMATIC_cavity
+`define AUTOMATIC_llrf
+`define AUTOMATIC_cav_mech
+`define AUTOMATIC_tgen
 `include "cryomodule_auto.vh"
 
 // Combination of LLRF controller and cavity emulator.
@@ -59,6 +66,20 @@ module cryomodule(
 	input lb_read,
 	output [31:0] lb_out
 );
+`undef AUTOMATIC_self
+
+// Note that the following five parameters should all be in the range 0 to 255,
+// in order to be properly read out via config_data0, below.
+parameter circle_aw = 13; // each half of ping-pong buffer is 8K words
+// .. but also allows for testing
+// The next four parameters are all passed to vmod1
+parameter mode_count = 3;  // drives generate loop in cav_elec.v
+parameter mode_shift = 9;
+parameter n_mech_modes = 7;
+parameter df_scale = 9;
+parameter cavity_count = 2;
+parameter cavity_ln = 1;  // ceil(log2(cavity_count))
+
 wire [31:0] clk1x_data;
 wire [16:0] clk1x_addr;
 wire clk1x_write;
@@ -82,22 +103,9 @@ wire lb2_clk = clk1x;
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 `define UNIFORM(x) ((~|(x)) | &(x))  // All 0's or all 1's
 
-// Note that the following five parameters should all be in the range 0 to 255,
-// in order to be properly read out via config_data0, below.
-parameter circle_aw = 13; // each half of ping-pong buffer is 8K words
-// .. but also allows for testing
-// The next four parameters are all passed to vmod1
-parameter mode_count = 3;  // drives generate loop in cav_elec.v
-parameter mode_shift = 9;
-parameter n_mech_modes = 7;
-parameter df_scale = 9;
-parameter cavity_count = 2;
-parameter cavity_ln = 1;  // ceil(log2(cavity_count))
-
 parameter n_cycles = n_mech_modes * 2;
 parameter interp_span = 4;  // ceil(log2(n_cycles))
-`define SLOW_SR_LEN 4*8
-parameter sr_length = `SLOW_SR_LEN;
+parameter sr_length = 4*8;
 
 `ifndef SIMPLE_DEMO
 // Transfer local bus to clk2x domain
@@ -163,6 +171,7 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    // Beam timing generator
    // beam_timing output is limited to [0,phase_step].
    wire [11:0] beam_timing;
+   (* lb_automatic, gvar="cavity_n", gcnt=2, cd="clk2x" *)
    beam beam  // auto(cavity_n,2) clk2x
      (.clk(clk2x), .ena(iq), .reset(1'b0), .pulse(beam_timing),
       `AUTOMATIC_beam);
@@ -171,6 +180,7 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    wire signed [17:0] piezo_eig_drive;
    // Parameter settings here should be mirrored in param.py
    // Instantiating the Station module here:
+   (* lb_automatic, gvar="cavity_n", gcnt=2, cd="clk2x" *)
    station #(.mode_count(mode_count), .mode_shift(mode_shift), .n_mech_modes(n_mech_modes), .df_scale(df_scale)) cavity // auto(cavity_n,2) clk2x
      (.clk(clk2x),
       .beam_timing(beam_timing), .mech_x(mech_x), .cav_eig_drive(cav_eig_drive),
@@ -219,7 +229,7 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    wire [7:0] slow_out;
    // 0x2000 to 0x21ff for cavity 0
    // 0x2200 to 0x23ff for cavity 1
-   // Should be good upto 16 cavities
+   // Should be good up to 16 cavities
    wire lb_slow_read = lb_read & (lb_addr[16:9] == 'b10010000 + cavity_n);
    slow_bridge slow_bridge(.lb_clk(lb_clk), .lb_addr(lb_addr[14:0]),
 			   .lb_read(lb_slow_read), .lb_out(slow_bridge_out[cavity_n]),
@@ -229,10 +239,13 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    assign slow_data_ready[cavity_n] = circle_data_ready[cavity_n] & ~slow_invalid;  // XXX mixes domains, simulate to make sure it's glitch-free
    // Make our own additions to slow shift register
    // equivalence circle_stat: circle_fault 1, circle_wrap 1, circle_addr 14
-`define SLOW_SR_DATA { circle_count, circle_stat }
+   wire [sr_length-1:0] slow_sr_data = { circle_count, circle_stat };
+   // TODO: These `we_*` wires below, are taken from the decode signals that are auto generated
+   wire [7:0] slow_shell_out;
+
    reg [sr_length-1:0] slow_read=0;
    always @(posedge clk1x) if (slow_op) begin
-      slow_read <= slow_snap ? `SLOW_SR_DATA : {slow_read[sr_length-9:0],slow_shell_out};
+      slow_read <= slow_snap ? slow_sr_data : {slow_read[sr_length-9:0],slow_shell_out};
    end
    assign slow_out = slow_read[sr_length-1:sr_length-8];
 
@@ -240,21 +253,22 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    // Instantiate controller in clk domain
    wire ext_trig=buf_sync;
 
-   // TODO: These `we_*` wires below, are taken from the decode signals that are auto generated
-   wire [7:0] slow_shell_out;
 
    // Timing generator, interposes on local bus
    wire collision, collision1;
 
 `define USE_TGEN
 `ifdef USE_TGEN
+   (* lb_automatic, gvar="cavity_n", gcnt=2, cd="lb2", cd_indexed *)
    tgen tgen // auto(cavity_n,2) lb2[cavity_n]
      (.clk(clk1x), .trig(ext_trig), .collision(collision1),
       .lb_data(clk1x_data), .lb_write(clk1x_write), .lb_addr(clk1x_addr),
       .addr_padding(1'b0),
       .lbo_data(lb1_data[cavity_n]), .lbo_write(lb1_write[cavity_n]), .lbo_addr(lb1_addr[cavity_n]),
       // TODO: This is hard-coded to the tgen_0
-      //.delay_pc_addr_hit(`ADDR_HIT_tgen_0_delay_pc_XXX & (cavity_n == 0)),
+      // .delay_pc_addr_hit(`ADDR_HIT_tgen_0_delay_pc_XXX & (cavity_n == 0)),
+      // Note: use of we_tgen_0_delay_pc_XXX triggers warnings under newad -y
+      // since it's so tightly coupled to operation of newad.  Actually harmless.
       .dests_write(we_tgen_0_delay_pc_XXX & (cavity_n == 0)),
       `AUTOMATIC_tgen
       );
@@ -279,6 +293,7 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    assign collision = 0;
 `endif
 
+   (* lb_automatic, gvar="cavity_n", gcnt=2, cd="lb2", cd_indexed *)
    llrf_shell llrf // auto(cavity_n,2) lb2[cavity_n]
      (.clk(clk1x),
       .a_field(a_field), .a_forward(a_forward), .a_reflect(a_reflect),
@@ -358,6 +373,7 @@ end endgenerate
 reg signed [17:0] eig_drive0=0, total_eig_drive=0;
 wire signed [17:0] noise_eig_drive;
 wire res_clip;
+(* lb_automatic, cd="clk2x" *)
 cav_mech #(.n_mech_modes(n_mech_modes)) cav_mech // auto clk2x
   (.clk(clk2x),
    .start_eig(start_eig), .noise_eig_drive(noise_eig_drive), .eig_drive(total_eig_drive),
@@ -418,8 +434,15 @@ reg [16:0] lb_addr_d1=0;
 reg [31:0] lb_out_r=0;
 always @(posedge lb_clk) begin
 	lb_addr_d1 <= lb_addr;
-	lb_out_r <= (lb_addr_d1[16:14] == 3'b101) ? circle_out[lb_addr_d1[13]] : ((lb_addr_d1[16:14] == 3'b100) & lb_addr_d1[13]) ? slow_bridge_out[lb_addr_d1[9]] : lb_addr_d1[16]? rom_data: mirror_out_0;
+	// Note: use of mirror_out_0 triggers warnings under newad -y
+	// since it's so tightly coupled to operation of newad.  Actually harmless.
+	lb_out_r <= (lb_addr_d1[16:14] == 3'b101) ? circle_out[lb_addr_d1[13]] :
+		((lb_addr_d1[16:14] == 3'b100) & lb_addr_d1[13]) ? slow_bridge_out[lb_addr_d1[9]] :
+		lb_addr_d1[16] ? rom_data : mirror_out_0;
 end
 assign lb_out = lb_out_r;
+
+`undef SAT
+`undef UNIFORM
 
 endmodule

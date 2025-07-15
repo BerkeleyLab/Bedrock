@@ -48,7 +48,7 @@ module chitchat_txrx_wrap #(
    output [2:0]  rx_location,
    output [31:0] rx_rev_id,
 
-   output [2:0]  ccrx_fault,
+   output [3:0]  ccrx_fault,
    output [15:0] ccrx_fault_cnt,
    output        ccrx_los,
 
@@ -97,10 +97,10 @@ module chitchat_txrx_wrap #(
    wire [15:0]           rx_lback_frame_counter_x_rgtx, rx_lback_frame_counter_x_tgtx;
 
    // LB CDC signals
-   localparam LB_PACK_WI = 16 + 3;
+   localparam LB_PACK_WI = 16 + 4;
    wire [LB_PACK_WI-1:0] lb_pack, lb_pack_x_rgtx;
    wire [15:0]           rx_frame_counter_x_rgtx;
-   wire [2:0]            ccrx_fault_x_rgtx;
+   wire [3:0]            ccrx_fault_x_rgtx;
 
 
    // ----------------------
@@ -264,4 +264,3 @@ module chitchat_txrx_wrap #(
    assign txrx_latency     = txrx_latency_r_lb;
 
 endmodule
-

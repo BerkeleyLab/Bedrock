@@ -13,6 +13,7 @@ module i2c_analyze(
 	input sda,
 	input intp,
 	input rst,
+	output trig_out,  // edge sensitive
 	// command to i2c_bit, ignore at first, but really important
 	input bit_adv,
 	input [1:0] bit_cmd,
@@ -49,5 +50,6 @@ end
 
 assign trace = {count, data2};
 assign trace_push = wen & tick1;
+assign trig_out = diff;  // re-use logic
 
 endmodule

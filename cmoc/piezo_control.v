@@ -11,13 +11,19 @@ module piezo_control(
 	output [6:0] sat_count,
 	output signed [23:0] trace_out,
 	output trace_out_gate,   // use piezo_stb for boundary
+	(* external *)
 	input [15:0] piezo_dc,  // external
+	(* external *)
 	input [19:0] sf_consts,  // external
+	(* external *)
 	output [2:0] sf_consts_addr,  // external
+	(* external *)
 	input [0:0] trace_en,  // external
+	(* external *)
 	output [6:0] trace_en_addr  // external address for trace_en
 	//`AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 // Non-zero placeholder
 // Eventually intend to use reg_mac2 or similar;

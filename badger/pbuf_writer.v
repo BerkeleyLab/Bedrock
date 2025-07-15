@@ -76,6 +76,10 @@ always @(posedge clk) begin
 	if (trig) origin <= fp;
 	case (post_cnt)
 		// 12 unused bits, will find customers later, including authentication
+		// Note that the 0 to 1 transition in bit 7 position between states 0 and 1
+		// is absolutely CRITICALLY IMPORTANT to let the reader find the beginning
+		// of the packet even when it occasionally skips reading a word, in the
+		// case where the reader (Tx side) clock is slower than this clock.
 		0: pxd <= {1'b1, 1'b0, 7'b0};
 		1: pxd <= {1'b1, 1'b1, pack_len[6:0]};
 		2: pxd <= {1'b0, 4'd0, pack_len[10:7]};
@@ -94,15 +98,19 @@ assign mem_a = fpp;
 assign mem_d = pxd;
 assign badge_stb = badge_stb_r;
 
+// We need rx_mac_hbank in our own clk domain
+// Better to pull this step up to rtefi_center?
+wire rx_mac_hbank_r;
+reg_tech_cdc rx_mac_hbank_cdc(.I(rx_mac_hbank), .C(clk), .O(rx_mac_hbank_r));
+
 // MAC logic
 reg [10:0] mac_a0=0;
-reg mac_bank=0, rx_mac_hbank_r=1;
+reg mac_bank=0;
 wire bank_ready = mac_bank != rx_mac_hbank_r;
 assign rx_mac_buf_status = {rx_mac_hbank_r, mac_bank};
 reg mac_save=0, mac_stopping=0;
 reg mac_queue=0;
 always @(posedge clk) begin
-	rx_mac_hbank_r <= rx_mac_hbank;  // Likely clock domain crossing
 	if (trig & bank_ready) mac_save <= 1;
 	if (trig) mac_a0 <= 4;
 	else if (post_cnt==1) mac_a0 <= 0;
@@ -118,7 +126,7 @@ always @(posedge clk) begin
 		mac_queue <= 0;
 	end
 end
-assign rx_mac_d = pxd;
+assign rx_mac_d = pxd[7:0];
 assign rx_mac_a = {mac_bank, mac_a0};
 assign rx_mac_wen = mac_save;
 

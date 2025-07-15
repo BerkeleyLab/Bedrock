@@ -27,7 +27,8 @@ module jxj_gate #(
 	(* mark_debug = dbg *) output [31:0] lb_dout,
 	(* mark_debug = dbg *) input [31:0]  lb_din,
 	(* mark_debug = dbg *) output        lb_strobe,
-	(* mark_debug = dbg *) output        lb_rd
+	(* mark_debug = dbg *) output        lb_rd,
+	output lb_prefill
 );
 
 (* mark_debug = dbg *) reg [2:0] cnt8=0;  // cycling through 64 bits of nonce or ctl/address/data
@@ -39,7 +40,7 @@ reg [63:0] rx_sr=0;
 reg lb_strobe_r=0;
 assign lb_strobe = lb_strobe_r;
 (* mark_debug = dbg *) reg xfer_strobe=0;
-reg ctl_add_strobe=0, ctl_add_mode=0;
+reg ctl_add_strobe=0, ctl_add_mode=0, lb_prefill_r=0;
 
 always @(posedge clk) begin
 	if (rx_stb) begin
@@ -61,10 +62,14 @@ always @(posedge clk) begin
 	if (xfer_strobe) ctl_add_mode <= 0;
 
 	xfer_strobe <= rx_stb & (&cnt8) & ctl_add_mode;
+	// Experimental - fire at start of AXI packet
+	lb_prefill_r <= rx_stb & ~rx_active;
 end
+assign lb_prefill = lb_prefill_r;
 
 // Keep track of outstanding transactions to easily identify last tx
 reg [5:0] tx_pending=0;
+wire tx_done, fifo_re;
 always @(posedge clk) begin
    if (ctl_add_strobe && !(tx_done&fifo_re))
       tx_pending <= tx_pending + 1;
@@ -99,6 +104,7 @@ reg [63:0] tx_sr;
 (* mark_debug = dbg *) reg drive_fifo_tx=0;
 reg drive_fifo_done=0;
 wire tx_sr_load = tx_pipe[7];
+wire [31:0] ctl_add_dout;
 always @(posedge clk) begin
 	xfer_pipe <= {xfer_strobe , xfer_pipe[pipe_del+7:1]};
 	drive_fifo_tx <= |tx_pipe;
@@ -108,7 +114,6 @@ end
 
 // Store cmd+addr in FIFO to cope with varying pipe_del
 wire [31:0] ctl_add_din = rx_sr[63:32];
-wire [31:0] ctl_add_dout;
 
 shortfifo #(.dw(32), .aw(2)) i_ctl_add_fifo (
 	.clk(clk),
@@ -123,9 +128,8 @@ wire drive_fifo = drive_fifo_tx | rx_loopback;
 
 // One more FIFO.  Could be considered bufferbloat.
 (* mark_debug = dbg *) wire empty;
-wire tx_done;
 wire tx_rdy_l;
-wire fifo_re = tx_rdy_l&tx_stb;
+assign fifo_re = tx_rdy_l&tx_stb;
 
 shortfifo #(.dw(9), .aw(5)) fifo (
 	.clk(clk),

@@ -16,7 +16,7 @@ $(TARGET).elf: 0x0e0.lds $(OBJS)
 $(TARGET)_tb: $(SRC_V)
 $(TARGET).vcd $(TARGET)_check: $(TARGET)8.hex $(TARGET)32.hex _startup_adr.hex
 
-_startup_adr.hex:
+_startup_adr.hex: bootLoad.elf
 	$(RISCV_TOOLS_PREFIX)objdump -t bootLoad.elf | grep _startup_adr | sed "s/\\s.*$$//"  > _startup_adr.hex
 
 CLEAN += _startup_adr.hex

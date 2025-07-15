@@ -12,8 +12,8 @@ module iq_mixer_multichannel #(
    parameter NCHAN     = 2,  // Number of input channels
    parameter DWI       = 16, // Width of ADC input
    parameter DAVR      = 4,  // Guard bits to keep in the output
-   parameter DWLO      = 18) // Width of sin/cos input
-(
+   parameter DWLO      = 18  // Width of sin/cos input
+) (
    input                                clk,
    input  signed [NCHAN*DWI-1:0]        adc,
    input  signed [DWLO-1:0]             cos,
@@ -30,9 +30,7 @@ module iq_mixer_multichannel #(
          .dwi       (DWI),
          .davr      (DAVR),
          .dwlo      (DWLO)
-      )
-      i_mixer_cos
-      (
+      ) i_mixer_cos (
          .clk    (clk),
          .adcf   (adc[(ch_id+1)*DWI-1: ch_id*DWI]),
          .mult   (cos),
@@ -44,9 +42,7 @@ module iq_mixer_multichannel #(
          .dwi       (DWI),
          .davr      (DAVR),
          .dwlo      (DWLO)
-      )
-      i_mixer_sin
-      (
+      ) i_mixer_sin (
          .clk    (clk),
          .adcf   (adc[(ch_id+1)*DWI-1: ch_id*DWI]),
          .mult   (sin),

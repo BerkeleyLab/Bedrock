@@ -15,7 +15,7 @@ module biquad #(
     parameter DATA_COUNT        = 1,
     parameter COEFFICIENT_WIDTH = 25,
     parameter DEBUG             = "false"
-    ) (
+) (
     input                         sysClk,
     input                         sysCoefficientStrobe,
     input                   [2:0] sysCoefficientAddress,
@@ -27,7 +27,8 @@ module biquad #(
     (*mark_debug=DEBUG*) output reg                               S_TREADY,
     (*mark_debug=DEBUG*) output reg [(DATA_COUNT*DATA_WIDTH)-1:0] M_TDATA,
     (*mark_debug=DEBUG*) output reg                               M_TVALID,
-    (*mark_debug=DEBUG*) input                                    M_TREADY);
+    (*mark_debug=DEBUG*) input                                    M_TREADY
+);
 
 localparam MAC_WIDEN = 4;
 localparam MAC_WIDTH = DATA_WIDTH + COEFFICIENT_WIDTH + MAC_WIDEN;
@@ -51,14 +52,17 @@ end
 (*mark_debug=DEBUG*) reg [(DATA_COUNT*DATA_WIDTH)-1:0] u, uOld = 0, yOld = 0;
 
 // MAC parameter input multiplexer
+reg [2:0] state = 0;
 wire [(DATA_COUNT*DATA_WIDTH)-1:0] parameterMux = (state == 1) ? u :
                                                   (state == 2) ? u :
                                                   (state == 3) ? uOld :
                                                   (state == 4) ? yOld : M_TDATA;
 
+// Move sysReset to our clock domain
+wire reset;
+reg_tech_cdc reset_cdc(.I(sysReset), .C(dataClk), .O(reset));
+
 // Computation state machine
-(* ASYNC_REG="TRUE" *) reg reset_m, reset;
-reg [2:0] state = 0;
 reg enMAC = 0, ldMAC = 0;
 
 always @(posedge dataClk) begin
@@ -66,8 +70,6 @@ always @(posedge dataClk) begin
 end
 
 always @(posedge dataClk) begin
-    reset_m <= sysReset;
-    reset   <= reset_m;
     if (reset) begin
         state <= 0;
         u <= 0;
@@ -186,18 +188,18 @@ endmodule
 ///////////////////////////////////////////////////////////////////////////////
 // Multiply-accumulate unit
 // Template from Vivado
-module macc  # (
+module macc #(
     parameter SIZEA   = 25,
               SIZEB   = 28,
               SIZEOUT = 55
-   ) (
+) (
     input clk,
     input ce,
     input sload,
     input signed    [SIZEA-1:0] a,
     input signed    [SIZEB-1:0] b,
     output signed [SIZEOUT-1:0] accum_out
-   );
+);
 
 // Declare registers for intermediate values
 reg signed       [SIZEA-1:0] a_reg;

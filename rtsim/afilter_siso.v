@@ -1,3 +1,10 @@
+`define AUTOMATIC_self
+`define AUTOMATIC_outer_prod
+`define AUTOMATIC_resonator
+`define AUTOMATIC_dot
+
+`timescale 1ns / 1ns
+
 `include "afilter_siso_auto.vh"
 
 // afilter_siso: single-input single-output audio filter
@@ -34,6 +41,7 @@ reg_delay #(.dw(1), .len(10)) start_dot_g(.clk(clk), .reset(1'b0),  .gate(1'b1),
 
 // Take input detuning, expand to drive each filter
 wire signed [17:0] x_drive;
+(* lb_automatic *)
 outer_prod #(.pcw(pcw)) outer_prod  // auto
 	(.clk(clk), .start(start_out),
 	.x(u_in), .result(x_drive),
@@ -42,6 +50,7 @@ outer_prod #(.pcw(pcw)) outer_prod  // auto
 
 // Filter bank
 wire signed [17:0] res_x;
+(* lb_automatic *)
 resonator #(.pcw(pcw)) resonator // auto
 	(.clk(clk), .start(start_res),
 	.drive(x_drive),
@@ -50,6 +59,7 @@ resonator #(.pcw(pcw)) resonator // auto
 );
 
 // Combine bank results to get piezo drive
+(* lb_automatic *)
 dot_prod #(.pcw(pcw)) dot // auto
 	(.clk(clk), .start(start_dot), .x(res_x),
 	.result(y_out), .strobe(filter_done),

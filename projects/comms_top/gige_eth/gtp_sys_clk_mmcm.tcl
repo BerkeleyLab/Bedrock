@@ -7,4 +7,3 @@ set cfg_dict {
    CONFIG.CLKOUT1_REQUESTED_PHASE    {0.0}
    CONFIG.NUM_OUT_CLKS               {1}
 }
-

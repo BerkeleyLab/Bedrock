@@ -6,8 +6,7 @@
 // Ethernet core/local-bus provides access to ChitChat operating in loopback mode.
 // ------------------------------------
 
-module comms_top
-(
+module comms_top (
    input   sys_clk_p,       // 50 MHz clock
    input   sys_clk_n,
    input   kintex_data_in_p,
@@ -206,7 +205,7 @@ module comms_top
    // MGT Ethernet to Local-Bus bridge
    // ---------------------------------
    wire rx_mon, tx_mon;
-   wire [6:0] an_status;
+   wire [8:0] an_status;
 
    wire lb_valid, lb_rnw, lb_renable;
    wire [C_LBUS_ADDR_WIDTH-1:0] lb_addr;
@@ -229,6 +228,7 @@ module comms_top
       .cfg_valid     (1'b0),
       .cfg_addr      (5'b0),
       .cfg_wdata     (8'b0),
+      .cfg_reg       (8'b0),
 
       // Auto-Negotiation
       .an_disable    (1'b0),
@@ -263,7 +263,7 @@ module comms_top
    wire [15:0] txrx_latency;
 
    wire        rx_valid;
-   wire [2:0]  ccrx_fault;
+   wire [3:0]  ccrx_fault;
    wire [15:0] ccrx_fault_cnt;
    wire        ccrx_los;
 
@@ -470,4 +470,3 @@ wire [31:0] ctr_mem_out;
    assign LEDS = {lbus_led, an_status[0]};
 
 endmodule
-

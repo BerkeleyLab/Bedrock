@@ -4,7 +4,7 @@ CORDIC_DIR = .
 -include ../dir_list.mk
 include $(BUILD_DIR)/top_rules.mk
 
-all: cordic_ptor_check cordic_rtop_check cordic_bias_check cordic_slve_check perf.png
+all: cordic_ptor_check cordic_rtop_check cordic_bias_check cordic_fllw_check perf.png
 
 # Resource exported to projects that use us
 include rules.mk
@@ -27,7 +27,7 @@ cordic_rtop.dat: cordicg_tb
 cordic_bias.dat: cordicg_tb
 	$(VVP) $< +rmix=1 > $@
 
-cordic_slve.dat: cordicg_tb
+cordic_fllw.dat: cordicg_tb
 	$(VVP) $< +op=3 > $@
 
 cordic_ptor_check: cordic_check.py cordic_ptor.dat
@@ -45,7 +45,7 @@ cordic_bias_check: cordic_check.py cordic_bias.dat
 	@echo "Check of downconversion bias"
 	$(PYTHON) $< bias $(word 2, $^)
 
-cordic_slve_check: cordic_check.py cordic_slve.dat
+cordic_fllw_check: cordic_check.py cordic_fllw.dat
 	@echo
 	@echo "Check of follow mode"
 	$(PYTHON) $< $(word 2, $^)
@@ -75,7 +75,7 @@ perf.dat: perf_run.sh
 
 # perf_plot.py now checks for excess noise
 perf.png: perf_plot.py perf.dat
-	$(PYTHON) $<
+	$(PYTHON) $^
 
 CLEAN += cordicg_b[1-9]*.v cordicg_tb cordic_*.dat cordic_*.bit perf.png
 CLEAN_DIRS += _xilinx

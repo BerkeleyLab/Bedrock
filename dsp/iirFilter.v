@@ -8,7 +8,7 @@ module iirFilter #(
     parameter DATA_COUNT        = -1,
     parameter COEFFICIENT_WIDTH = -1,
     parameter DEBUG             = "false"
-    ) (
+) (
     input        sysClk,
     input        sysGPIO_Strobe,
     input [31:0] sysGPIO_Out,
@@ -19,7 +19,8 @@ module iirFilter #(
     (*mark_debug=DEBUG*) output wire                               S_TREADY,
     (*mark_debug=DEBUG*) output wire [(DATA_COUNT*DATA_WIDTH)-1:0] M_TDATA,
     (*mark_debug=DEBUG*) output wire                               M_TVALID,
-    (*mark_debug=DEBUG*) input                                     M_TREADY);
+    (*mark_debug=DEBUG*) input                                     M_TREADY
+);
 
 // Can't use $clog2 in localparam expression with this version of the tools.
 parameter STAGE_ADDRESS_WIDTH = $clog2(STAGES);

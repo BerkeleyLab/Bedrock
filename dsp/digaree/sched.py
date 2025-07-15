@@ -19,7 +19,7 @@ state_vars = {}   # need to be kept around forever
 
 def tobin(x, count=8):
     # Integer to binary; count is number of bits
-    # Credit to W.J. van der Laan in http://code.activestate.com/recipes/219300/
+    # Credit to W.J. van der Laan in https://code.activestate.com/recipes/219300/
     return "".join([str((x >> y) & 1) for y in range(count-1, -1, -1)])
 
 
@@ -30,7 +30,7 @@ def next_avail(n):
 
 
 def new_state_var(a):
-    state_vars[a] = 1
+    state_vars[a] = True
     becomes_valid[a] = 0
 
 
@@ -41,14 +41,16 @@ class afunc:
         self.shift = shift
         global n_count, max_pc, source, pipe_len
         n_count = n_count+1
-        pc = 0
+        pc0 = 0
         source[lhs] = self
         self.args = args
-        # print "// %s arglist (%s)"%(op,args)
+        if lhs in state_vars and lhs in last_used:
+            pc0 = last_used[lhs]
         for a in args:
-            if a != lhs and pc < becomes_valid[a]:
-                pc = becomes_valid[a]
-        pc = next_avail(pc)
+            if a != lhs and pc0 < becomes_valid[a]:
+                pc0 = becomes_valid[a]
+        pc = next_avail(pc0)
+        # print("// %s arglist (%s) pc %d -> %d" % (op, args, pc0, pc))
         self.pc = pc
         pc_in_use[pc] = self
         if pc > max_pc:
@@ -63,7 +65,7 @@ class afunc:
 
 
 def oplist(ov, fn, args):
-    # print "oplist (%s) (%s) (%s)"%(ov,fn,args)
+    # print("oplist (%s) (%s) (%s)" % (ov, fn, args))
     x = [xx.strip() for xx in args.split(",")]
     shift = int(x.pop())
     afunc(ov, fn, shift, x)
@@ -120,7 +122,9 @@ for line in fdata.split('\n'):
 
 print("// %d instructions, %d highest pc in use" % (n_count, max_pc))
 
-# somewhat special case applies to state variable, has to persist
+# Special case adjustment applies to state variables, that have to persist.
+# It's important that this adjustment happens after instruction scheduling,
+# but before register mapping.
 for var in state_vars:
     becomes_valid[var] = 0
     last_used[var] = max_pc
@@ -221,7 +225,7 @@ opcodes = {'nop': 0, 'inp': 0, 'set_ab': 1, 'set_cd': 2, 'mul': 4, 'inv': 5, 'ad
 
 
 def emit(pc, lhs, op, shift, a, b):
-    # print "// %d: %d = %s (%d, %d) << %d"%(pc, lhs, op, a, b, shift)
+    # print("// %d: %d = %s (%d, %d) << %d" % (pc, lhs, op, a, b, shift))
     # note the pipelining encoded here, matches sf_main.v and the
     # graphic printed above as comments.
     stream_ra[pc-4] = a

@@ -26,7 +26,7 @@ def banyan_ch_find(mask):
 # computations for a single layer; note the recursion
 def banyan_layer_permute(state):
     '''
-    Given a valid state, return the order of channels after balanced permuation
+    Given a valid state, return the order of channels after balanced permutation
     state: [(n, nth_bit), (n+1, (n+1)th_bit) ...]
     '''
     ch_count = sum(x[1] for x in state)
@@ -66,7 +66,7 @@ def vvp_parse_test(fd, verbose):
     '''
     feed this the output of vvp -n banyan_tb +trace +squelch
     '''
-    fail = 0
+    fail = False
     mask_seen = {}
     for ll in fd.readlines():
         ll = ll.rstrip()
@@ -79,18 +79,18 @@ def vvp_parse_test(fd, verbose):
             chk = banyan_ch_find(mask)
             fault = chk != vvp
             if fault | verbose:
-                print("{} {} {}".format(a[0], a[3], vvp), end="")
                 if fault:
-                    print("{} {} {}".format(" !=", chk, "FAULT"))
-                    fail = 1
+                    suffix = " != {} FAULT".format(chk)
+                    fail = True
                 else:
-                    print(".")
+                    suffix = "."
+                print("{} {} {}{}".format(a[0], a[3], vvp, suffix))
         mask_seen[mask] = 1
     # 107 = 1+70+28+8
     if fail or len(mask_seen) != 107:
-        print("{} {}".format("FAIL", len(mask_seen)))
-        sys.exit(fail)
-    print("PASS")
+        print("FAIL {}".format(len(mask_seen)))
+        sys.exit(1)
+    print("PASS  by banyan_ch_find vvp_parse_test()")
 
 
 if __name__ == "__main__":

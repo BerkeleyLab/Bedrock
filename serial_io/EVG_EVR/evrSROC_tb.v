@@ -9,6 +9,8 @@ module evrSROC_tb;
 
    localparam SIM_TIME = 1e6;
 
+   reg sysClk = 0;
+   reg evrClk = 0;
    reg fail=1;
    initial begin
       if ($test$plusargs("vcd")) begin
@@ -16,13 +18,15 @@ module evrSROC_tb;
          $dumpvars(5, evrSROC_tb);
       end
       while ($time < SIM_TIME) @(posedge sysClk);
-      $display("%s", fail ? "FAIL" : "PASS");
-      if (fail)$stop();
-      else $finish();
+      if (fail) begin
+        $display("FAIL");
+        $stop(0);
+      end else begin
+        $display("PASS");
+        $finish(0);
+      end
    end
 
-   reg sysClk = 0;
-   reg evrClk = 0;
    always #(SYS_CLK_PER/2) sysClk <= ~sysClk;
    always #(EVR_CLK_PER/2) evrClk <= ~evrClk;
 

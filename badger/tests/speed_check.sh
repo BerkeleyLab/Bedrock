@@ -1,7 +1,7 @@
 # Needs to be run from bash, to get the job control feature used in kill command
 # Tries to be robust, but be prepared to kill leftover jobs by hand.
 # Needs the usual help from su before starting:
-#  printf "tuntap add mode tap user $USER link set tap0 up\n address add 192.168.7.1 dev tap0\n route add 192.168.7.0/24 dev tap0\n" | sudo ip -batch -
+#  printf "tuntap add mode tap user $USER\n link set tap0 up\n address add 192.168.7.1 dev tap0\n route add 192.168.7.0/24 dev tap0\n" | sudo ip -batch -
 set -e
 case $BASH in
   *bash) : ;;
@@ -31,6 +31,6 @@ python3 badger_lb_io.py --ip $IP stop_sim
 echo "ok"
 sleep 1
 jobs
-kill %1 || echo "simulation already stopped, as requsted"
+kill %1 || echo "simulation already stopped, as requested"
 sleep 0.2
 echo "Success!"

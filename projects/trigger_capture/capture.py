@@ -15,7 +15,7 @@ from liteeth.common import convert_ip
 
 
 def trigger_hardware(n_points, cap_ip, cap_port,
-                    csr_csv = None):
+                     csr_csv = None):
     wb = RemoteClient(csr_csv=csr_csv)
     wb.open()
 

@@ -1,5 +1,9 @@
 `timescale 1ns / 1ns
-
+`define AUTOMATIC_self
+`define AUTOMATIC_decode
+`define AUTOMATIC_noise_couple
+`define AUTOMATIC_resonator
+`define AUTOMATIC_prng
 `include "cav_mech_auto.vh"
 
 module cav_mech(
@@ -13,6 +17,7 @@ module cav_mech(
   output res_clip,
   `AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 
@@ -21,13 +26,14 @@ parameter n_cycles = n_mech_modes * 2;
 
 // Couple randomness to mechanical drive
 wire signed [17:0] environment;  // filled in later
+(* lb_automatic *)
 outer_prod noise_couple  // auto
 	(.clk(clk), .start(start_outer), .x(environment), .result(noise_eig_drive),
 	 `AUTOMATIC_noise_couple
 );
 
-
 // Instantiate the mechanical resonance computer
+(* lb_automatic *)
 resonator resonator // auto
   (.clk(clk), .start(start_eig),
 	 .drive(eig_drive),
@@ -37,6 +43,7 @@ resonator resonator // auto
 // Pseudorandom number subsystem
 wire [31:0] rnda, rndb;
 
+(* lb_automatic *)
 prng prng  // auto
   (.clk(clk), .rnda(rnda), .rndb(rndb),
    `AUTOMATIC_prng);
@@ -56,4 +63,5 @@ always @(posedge clk) begin
 end
 assign environment = noise_out;
 
+`undef AUTOMATIC_prng
 endmodule // cav_mech

@@ -15,6 +15,7 @@ initial begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	// termination handled in another block
 end
 
 wire clear_to_send;
@@ -30,7 +31,7 @@ precog #(
 	.clk                (clk),
 	.tx_packet_width    (tx_packet_width),
 	.scanner_busy       (scanner_busy),
-	.request_to_send      (request_to_send),
+	.request_to_send    (request_to_send),
 	.clear_to_send      (clear_to_send)
 );
 
@@ -79,9 +80,13 @@ initial begin
 	repeat (100) @(posedge clk);
 	scanner_busy <= 1;
 	repeat (10) @(posedge clk);
-	$display("%s", fail ? "FAIL" : "PASS");
-	if (fail) $stop();
-	$finish();
+	if (fail) begin
+		$display("FAIL");
+		$stop(0);
+	end else begin
+		$display("PASS");
+		$finish(0);
+	end
 end
 
 endmodule

@@ -62,7 +62,7 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 	static int sleepctr=0;
 	static int sleepmax=1;
 	char in_txt[15], out_txt[15];
-	int ethernet_model_debug = 0;  /* adjustable */
+	const int ethernet_model_debug = 0;  /* adjustable */
 
 	if (out_valid) {
 		sprintf(out_txt, "0x%2.2x", (unsigned int)(out_octet&0xff));
@@ -166,20 +166,20 @@ int ethernet_model(int out_octet, int out_valid, int *in_octet, int *in_valid, i
 		const unsigned char *p=outbuf.buf;
 		while (*p==0x55 && p<(outbuf.buf+outbuf.cur)) { p++; }
 		if (p-outbuf.buf < 3) {
-			fprintf(stderr, "preamble too short, only found %ld x 0x55\n", p-outbuf.buf);
+			fprintf(stderr, "preamble too short, only found %ld x 0x55\n", (long int)(p-outbuf.buf));
 		} else if ((*p & 0xff) != 0xd5) {
-			fprintf(stderr, "output packet len %d missing SFD (%2.2x %2.2x)\n",
+			fprintf(stderr, "output packet len %u missing SFD (%2.2x %2.2x)\n",
 				outbuf.cur, outbuf.buf[0], *p);
 		} else if (nout=outbuf.buf+outbuf.cur-(p+5), nout < 64-4) {
-			fprintf(stderr, "output Ethernet packet len %d too short\n", nout+4);
+			fprintf(stderr, "output Ethernet packet len %u too short\n", nout+4);
 		} else if (check_crc32(p+1, nout)==0) {
-			fprintf(stderr, "output packet len %d CRC failed\n",
+			fprintf(stderr, "output packet len %u CRC failed\n",
 				outbuf.cur);
 		} else
 #endif
 		if (1 || ethernet_model_debug) {
 			int rc = write(tapfd, p+1, nout);
-			fprintf(stderr, "ethernet_model: Tx %d GMII octets, write rc=%d\n", outbuf.cur, rc);
+			fprintf(stderr, "ethernet_model: Tx %u GMII octets, write rc=%d\n", outbuf.cur, rc);
 			/* Note GMII octets include preamble and CRC, write rc includes neither */
 		}
 		outbuf.cur=0;

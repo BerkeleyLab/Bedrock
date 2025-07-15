@@ -12,7 +12,9 @@
 // Yet another API change: new input "reset", only used when strobe_in
 // is set, resets the state machine to unwound.
 
-module pdetect(
+module pdetect #(
+	parameter w=17
+) (
 	input clk,
 	input [w-1:0] ang_in,
 	input strobe_in,
@@ -20,7 +22,6 @@ module pdetect(
 	output reg [w-1:0] ang_out,
 	output reg strobe_out
 );
-parameter w=17;
 
 // coding is important, see usage of next bits below
 reg [1:0] state=0;

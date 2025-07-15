@@ -117,13 +117,13 @@ class cfileParser:
         print("ERROR: Bad arguments to command {}".format(cmd))
 
     def _pprint(self, cmd, args):
-        if (len(args) == 0):
+        if len(args) == 0:
             self._badarg(cmd)
             return
         print("\n> {}\n".format(" ".join(args)))
 
     def _pread(self, cmd, args):
-        if (len(args) != 1):
+        if len(args) != 1:
             self._badarg(cmd)
             return
         raddr = int(args[0].lstrip(':'), 0)
@@ -133,7 +133,7 @@ class cfileParser:
         print("{} {} RDATA = {} ({})".format(cmd, " ".join(args), d_hex, d_asc))
 
     def _pwrite(self, cmd, args):
-        if (len(args) != 2):
+        if len(args) != 2:
             self._badarg(cmd)
             return
         waddr = int(args[0].lstrip(':'), 0)
@@ -144,7 +144,7 @@ class cfileParser:
         print("{} {}".format(cmd, " ".join(args)))
 
     def _prdmem(self, cmd, args):
-        if (len(args) != 3):
+        if len(args) != 3:
             self._badarg(cmd)
             return
         base_addr = int(args[0].lstrip(':'), 0)
@@ -162,7 +162,7 @@ class cfileParser:
         print("{} {} : Successfully read {} memory positions".format(cmd, " ".join(args), read_length))
 
     def _pwait(self, cmd, args):
-        if (len(args) != 1):
+        if len(args) != 1:
             self._badarg(cmd)
             return
         tsleep = int(args[0])
@@ -171,7 +171,7 @@ class cfileParser:
         time.sleep(tsleep)
 
     def _pcmp(self, cmd, args):
-        if (len(args) != 2):
+        if len(args) != 2:
             self._badarg(cmd)
             return
 
@@ -241,7 +241,6 @@ parser.add_argument('-cf', '--cfile', default=None, help='Command file')
 args = parser.parse_args()
 
 UDPSock = socket(AF_INET, SOCK_DGRAM)
-UDPSock.bind(("0.0.0.0", 0))
 UDPSock.settimeout(2)
 
 print("Targeting %s:%s" % (args.target, args.port))

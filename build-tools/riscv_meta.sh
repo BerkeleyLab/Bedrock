@@ -1,6 +1,7 @@
 # riscv (riscv32-unknown-elf) production toolchain from scratch
 # Larry Doolittle <ldoolitt@recycle.lbl.gov>  2019-09-12
 # Tested good, sufficient for use with firmware in ATG's bedrock/soc/picorv32/
+# Retested on Debian Bullseye  2022-08-02
 #
 # Meant to run under any Bourne shell, e.g., bash, dash.
 # Works out-of-tree, with read-only access to sources,
@@ -11,31 +12,38 @@
 #  - run installs as third user
 #  - test in schroot
 #
+# If you're on Debian Bullseye, you might be happier with a simple
+#   apt-get install gcc-riscv64-unknown-elf picolibc-riscv64-unknown-elf
+# Same gcc version, in fact!  Slightly different configuration.
+#
 # I tried to peek at
-#   https://github.com/riscv/riscv-gnu-toolchain
+#   https://github.com/riscv-collab/riscv-gnu-toolchain
 # but that's kind of obfuscated.
 #   http://www.ifp.illinois.edu/~nakazato/tips/xgcc.html
-# is more to-the-point, but out-of-date.
+#   (link is dead, but document can be found at archive.org)
+# is more to-the-point, but out-of-date (2007).
 # The numbered flow below is straight from nakazato.
 # This script is meant to be as short, sweet, and concrete as possible.
 # You can cut-and-paste from it to follow along step-by-step.
 #
 # 1. What do you need?
 #
-# bootstrap tools on Debian Stretch or Buster:
+# bootstrap tools on Debian Stretch, Buster, or Bullseye:
 #   apt-get install build-essential libgmp-dev libmpfr-dev libmpc-dev
 #
 # Versions:
 #   binutils-2.32, released 2019-02-02
-#     http://www.gnu.org/software/binutils/
+#     https://www.gnu.org/software/binutils/
 #   gcc-8.3.0, released 2019-02-22
-#     http://www.gnu.org/software/gcc/
+#     https://www.gnu.org/software/gcc/
 #   newlib-3.1.0, released 2018-12-31
-#     ftp://sourceware.org/pub/newlib/index.html
+#     https://sourceware.org/newlib/
 #
 # 0ab6c55dd86a92ed561972ba15b9b70a8b9f75557f896446c82e8b36e473ee04  binutils-2.32.tar.xz
 # 64baadfe6cc0f4947a84cb12d7f0dfaf45bb58b7e92461639596c21e02d97d2c  gcc-8.3.0.tar.xz
 # fb4fa1cc21e9060719208300a61420e4089d6de6ef59cf533b57fe74801d102a  newlib-3.1.0.tar.gz
+#
+# See the companion riscv_prep.sh script that downloads and checks the above.
 #
 # 1a. How to use this script?
 #
@@ -54,7 +62,7 @@
 # have, but a 2.2 GHz i5 of mine with SSD took about 40 min using make -j3.
 #
 # My favorite way of running this script is
-#   drop_net sh toolchain2.sh $HOME/src 2>&1 | tee buildlog
+#   drop_net sh riscv_meta.sh $HOME/src 2>&1 | tee buildlog
 # where drop_net is optional, and beyond the scope of these instructions.
 #
 # When you're done, to get access to the binaries, $PATH needs to be set as below.
@@ -73,18 +81,18 @@ SRC=$1
 PREFIX=${2:-$HOME/opt}
 TARGET=riscv32-unknown-elf
 PATH=$PREFIX/bin:$PATH
-MAKE_J=-j3
+MAKE_J=${MAKE_J:--j3}
 #
 # 2a. Cross-check that this script has a chance of working
 #
 set -e
-test -r $SRC/binutils-2.32/COPYING
-test -r $SRC/gcc-8.3.0/COPYING
-test -r $SRC/newlib-3.1.0/COPYING
-mkdir -p $PREFIX
-touch $PREFIX/foo.$$
-rm $PREFIX/foo.$$
-# Don't bother testing writability of $PWD, the first line of step 3 will do that.
+test -r "$SRC/binutils-2.32/COPYING"
+test -r "$SRC/gcc-8.3.0/COPYING"
+test -r "$SRC/newlib-3.1.0/COPYING"
+mkdir -p "$PREFIX"
+touch "$PREFIX/foo.$$"
+rm "$PREFIX/foo.$$"
+# Don't bother testing writability of $PWD.  The first line of step 3 will do that.
 test ! -e binutils-2.32-bin
 test ! -e gcc-8.3.0-boot
 test ! -e newlib-3.1.0-bin
@@ -94,8 +102,8 @@ test ! -e gcc-8.3.0-bin
 #
 mkdir binutils-2.32-bin
 cd    binutils-2.32-bin
-$SRC/binutils-2.32/configure --target=$TARGET --prefix=$PREFIX --with-arch=rv32gc
-make $MAKE_J
+"$SRC"/binutils-2.32/configure --target="$TARGET" --prefix="$PREFIX" --with-arch=rv32gc
+make "$MAKE_J"
 make install
 cd ..
 #
@@ -103,8 +111,8 @@ cd ..
 #
 mkdir gcc-8.3.0-boot
 cd    gcc-8.3.0-boot
-$SRC/gcc-8.3.0/configure --target=$TARGET --prefix=$PREFIX --with-arch=rv32gc --without-headers --with-newlib --with-gnu-as --with-gnu-ld
-make $MAKE_J all-gcc
+"$SRC"/gcc-8.3.0/configure --target="$TARGET" --prefix="$PREFIX" --with-arch=rv32gc --without-headers --with-newlib --with-gnu-as --with-gnu-ld
+make "$MAKE_J" all-gcc
 make install-gcc
 cd ..
 #
@@ -112,8 +120,8 @@ cd ..
 #
 mkdir newlib-3.1.0-bin
 cd    newlib-3.1.0-bin
-$SRC/newlib-3.1.0/configure --target=$TARGET --prefix=$PREFIX
-make $MAKE_J all
+"$SRC"/newlib-3.1.0/configure --target="$TARGET" --prefix="$PREFIX"
+make "$MAKE_J" all
 make install
 cd ..
 #
@@ -121,8 +129,8 @@ cd ..
 #
 mkdir gcc-8.3.0-bin
 cd    gcc-8.3.0-bin
-$SRC/gcc-8.3.0/configure --target=$TARGET --prefix=$PREFIX --with-arch=rv32gc --with-newlib --with-gnu-as --with-gnu-ld --disable-shared --disable-libssp
-make $MAKE_J all
+"$SRC"/gcc-8.3.0/configure --target="$TARGET" --prefix="$PREFIX" --with-arch=rv32gc --with-newlib --with-gnu-as --with-gnu-ld --disable-shared --disable-libssp
+make "$MAKE_J" all
 make install
 # overwrites bootstrap binaries
 cd ..

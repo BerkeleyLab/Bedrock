@@ -1,0 +1,9 @@
+badger_cdc:
+  stage: test
+  script:
+    - make -C badger/tests hw_test_cdc.txt
+
+marble_cdc:
+  stage: test
+  script:
+    - make -C projects/test_marble_family marble_base_cdc.txt

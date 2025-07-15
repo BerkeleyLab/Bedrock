@@ -7,6 +7,7 @@ module a_compress_tb;
 reg clk;
 reg trace;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	trace = $test$plusargs("trace");
 	if ($test$plusargs("vcd")) begin
@@ -17,7 +18,9 @@ initial begin
 		clk=0; #3;
 		clk=1; #3;
 	end
+	$finish(0);
 end
+`endif //  `ifdef SIMULATE
 
 // Fake the drive signals
 reg signed [17:0] d_in=0;
@@ -43,8 +46,10 @@ a_compress a_compress(.clk(clk), .sat_ctl(sat_ctl),
 reg_delay #(.dw(18), .len(10))
 	match(.clk(clk), .reset(1'b0), .gate(1'b1), .din(d_in), .dout(d_check));
 
+`ifdef SIMULATE
 always @(posedge clk) if (trace) begin
 	if (cc>60 && ~iq) $display("%d %d", d_check, d_out);
 end
+`endif
 
 endmodule

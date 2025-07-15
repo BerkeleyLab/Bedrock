@@ -17,12 +17,13 @@
  *
  */
 
+/* verilator lint_save */
 /* verilator lint_off WIDTH */
 /* verilator lint_off PINMISSING */
 /* verilator lint_off CASEOVERLAP */
 /* verilator lint_off CASEINCOMPLETE */
 
-`timescale 1 ns / 1 ps
+`timescale 1 ns / 1 ns
 // `default_nettype none
 // `define DEBUGNETS
 // `define DEBUGREGS
@@ -3042,3 +3043,4 @@ module picorv32_wb #(
 		end
 	end
 endmodule
+/* verilator lint_restore */

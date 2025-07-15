@@ -1,6 +1,6 @@
 // DAC3283 Dual-Channel, 16-Bit, 800 MSPS, Digital-to-Analog Converter
 // LVDS PHY interface
-// [1]: http://www.ti.com/lit/ds/symlink/dac3283.pdf
+// [1]: https://www.ti.com/lit/ds/symlink/dac3283.pdf
 
 module dac3283 #(
     parameter [7:0] BASE_ADDR = 8'h0,
@@ -166,7 +166,7 @@ OSERDESE2 #(
     .SHIFTOUT2         ( ),
     .CLK               ( txclkmul2 ),
     .CLKDIV            ( txclk     ),
-    // place the bits in the right order for the serialisers
+    // place the bits in the right order for the serializers
     // the DAC expects: ch0 MSByte, ch0 LSB, ch1 MSB, ch1 LSB, ....
     // see page 21 [1]
     .D1                ( odata[ 8+i] ),

@@ -1,0 +1,54 @@
+[timestart] 4
+[size] 1091 707
+[pos] -1 -1
+*-22.341948 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.pps_lock.
+[sst_width] 214
+[signals_width] 158
+[sst_expanded] 1
+[sst_vpaned_height] 190
+@28
+TOP.run_request
+TOP.pps_in[1:0]
+TOP.dac_send
+TOP.pps_out
+TOP.pps_tick
+@24
+TOP.dac_data[15:0]
+@8024
+TOP.dac_data[15:0]
+@20000
+-
+@200
+-pps_lock
+@28
+TOP.pps_lock.arm
+TOP.pps_lock.run_request
+TOP.pps_lock.count_init
+TOP.pps_lock.dsp_on
+TOP.pps_lock.count_active
+TOP.pps_lock.dsp_ready
+TOP.pps_lock.pps_in[1:0]
+TOP.pps_lock.pps_edge1
+TOP.pps_lock.fine_phase
+@24
+TOP.pps_lock.phase_r[12:0]
+@8024
+TOP.pps_lock.phase_r[12:0]
+@20000
+-
+@200
+-pps_loop_filter
+@28
+TOP.pps_lock.plf.istrobe
+TOP.pps_lock.plf.arm
+TOP.pps_lock.plf.fir_enable
+@420
+TOP.pps_lock.plf.phase[12:0]
+TOP.pps_lock.plf.old_phase[12:0]
+TOP.pps_lock.plf.phase_filt[13:0]
+@28
+TOP.pps_lock.plf.istrobe3
+[pattern_trace] 1
+[pattern_trace] 0

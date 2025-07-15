@@ -141,15 +141,20 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 	.gmii_rxd(vgmii_rxd),
 	.gmii_rx_clk(vgmii_rx_clk),
 	.gmii_rx_dv(vgmii_rx_dv),
-	.gmii_rx_er(vgmii_rx_er)
+	.gmii_rx_er(vgmii_rx_er),
+
+	.clk_div(1'b0),
+	.idelay_ce(1'b0),
+	.idelay_value_in(5'b0)
 );
 
 wire BOOT_CCLK;
+wire cfg_clk;  // Just for fun, so we can measure its frequency
 `ifndef SIMULATE
-STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0));
-`else // !`ifndef SIMULATE
-   assign BOOT_CCLK = tx_clk;
-`endif // !`ifndef SIMULATE
+STARTUPE2 set_cclk(.USRCCLKO(BOOT_CCLK), .USRCCLKTS(1'b0), .CFGMCLK(cfg_clk));
+`else
+assign cfg_clk = 0;
+`endif
 
 // Placeholders
 wire ZEST_PWR_EN;
@@ -169,6 +174,35 @@ assign Pmod1 = LED;
 assign LD16 = 1;
 assign LD17 = 1;
 
+// vestiges of CERN FMC tester support
+wire old_scl1, old_scl2, old_sda1, old_sda2;
+// placeholders
+wire [1:0] FMC1_CK_P;
+wire [1:0] FMC1_CK_N;
+wire [1:0] FMC2_CK_P;
+wire [1:0] FMC2_CK_N;
+wire [23:0] FMC2_HA_P;
+wire [23:0] FMC2_HA_N;
+
+wire si570;
+`ifdef USE_SI570
+// Single-ended clock derived from programmable xtal oscillator
+ds_clk_buf #(
+        .GTX (1))
+i_ds_gtrefclk1 (
+        .clk_p   (GTREFCLK_P),
+        .clk_n   (GTREFCLK_N),
+        .clk_out (si570)
+);
+`else
+assign si570 = 0;
+`endif
+
+// Works
+reg bad_slow_clock=0;
+always @(posedge tx_clk) bad_slow_clock <= ~bad_slow_clock;
+wire clk62 = bad_slow_clock;
+
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
 marble_base #(
@@ -180,15 +214,16 @@ marble_base #(
 	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
 	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
 	.vgmii_rx_dv(vgmii_rx_dv), .vgmii_rx_er(vgmii_rx_er),
-	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked),
+	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked), .si570(si570),
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
-	.aux_clk(SYSCLK_P), .GPS(4'b0),
+	.aux_clk(SYSCLK_P), .clk62(clk62), .cfg_clk(cfg_clk),
+	.GPS(4'b0),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
-	.twi_scl({dum_scl, FMC2_LA_P[2] , FMC1_LA_P[2], TWI_SCL}),
-	.twi_sda({dum_sda, FMC2_LA_N[2], FMC1_LA_N[2], TWI_SDA}),
+	.twi_scl({dum_scl, old_scl1, old_scl2, TWI_SCL}),
+	.twi_sda({dum_sda, old_sda1, old_sda2, TWI_SDA}),
 	.TWI_RST(TWI_RST), .TWI_INT(TWI_INT),
 	.lb_clk(lb_clk),
 	.lb_addr(lb_addr),
@@ -198,11 +233,7 @@ marble_base #(
 	.lb_rd_valid(lb_rd_valid),
 	.lb_data_out(lb_data_out),
 	.lb_data_in(lb_din),
-	.fmc_test({
-		FMC2_LA_P[33:3], FMC2_LA_P[1:0],
-		FMC2_LA_N[33:3], FMC2_LA_N[1:0],
-		FMC1_LA_P[33:3], FMC1_LA_P[1:0],
-		FMC1_LA_N[33:3], FMC1_LA_N[1:0]}),
+	.fmc_test({FMC2_HA_P, FMC2_HA_N, FMC2_CK_P, FMC2_CK_N, FMC2_LA_P, FMC2_LA_N, FMC1_CK_P, FMC1_CK_N, FMC1_LA_P, FMC1_LA_N}),
 	.WR_DAC_SCLK(WR_DAC_SCLK), .WR_DAC_DIN(WR_DAC_DIN),
 	.WR_DAC1_SYNC(WR_DAC1_SYNC), .WR_DAC2_SYNC(WR_DAC2_SYNC),
 	.LED(LED)

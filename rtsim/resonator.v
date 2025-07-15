@@ -39,7 +39,9 @@ module resonator(
 	input signed [17:0] drive,
 	output signed [17:0] position,
 	output clip,
+	(* external *)
 	input [20:0] prop_const,  // external
+	(* external *)
 	output [9:0] prop_const_addr  // external
 );
 
@@ -125,6 +127,7 @@ always @(posedge clk) begin
 	sat_result <= `SAT(sum_result,36,35);
 	clip_r <= ~(~|sum_result[36:35] | &sum_result[36:35]);
 end
+`undef SAT
 
 assign ab_in = sat_result;
 assign position = sat_result[35:18];

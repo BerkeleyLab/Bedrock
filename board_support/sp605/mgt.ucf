@@ -1,6 +1,6 @@
 # Xilinx SP605 (Spartan-6 XC6SLX45T-FGG484)
-# as documented in ug526.pdf
-# http://www.xilinx.com/support/documentation/sp605.htm
+# as documented in UG526
+# https://docs.amd.com/v/u/en-US/ug526
 ##------- Pin Constraints -------
 
 ## GTP Mapping

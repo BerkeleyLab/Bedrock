@@ -1,21 +1,24 @@
 include ../dir_list.mk
 
-vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
+vpath %.v $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BEDROCK_DIR)/localbus $(BADGER_DIR)
+vpath %.c ../badger/tests
 
 .PHONY: all
 all: targets
-include $(BUILD_DIR)/top_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include $(BADGER_DIR)/rules.mk
 
-TEST_BENCH = xy_pi_clip_tb fdbk_core_tb tgen_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb rf_controller_tb
+NEWAD_ARGS += -y
+
+TEST_BENCH = xy_pi_clip_tb circle_buf_tb cryomodule_tb cryomodule_badger_tb rf_controller_tb
 
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v
 include rules.mk
 
 TGT_ := $(TEST_BENCH)
 
-NO_CHECK = tgen_check cryomodule_badger_check rf_controller_check
+NO_CHECK = cryomodule_badger_check rf_controller_check
 CHK_ = $(filter-out $(NO_CHECK), $(TEST_BENCH:%_tb=%_check))
 NO_LINT = $(NO_CHECK)
 LNT_ = $(filter-out $(NO_LINT), $(TEST_BENCH:%_tb=%_lint))
@@ -27,15 +30,7 @@ check_all: $(CHK_)
 lint: $(LNT_)
 bits: $(BITS_)
 
-_dep/fdbk_core_tb.d: fdbk_core_tb_auto
 _dep/rf_controller_tb.d: rf_controller_tb_auto
-
-
-fdbk_core.vcd: $(AUTOGEN_DIR)/regmap_fdbk_core_tb.json
-fdbk_core.vcd: fdbk_core_tb fdbk_core_test.py
-	$(PYTHON) fdbk_core_test.py
-fdbk_core_check: fdbk_core.vcd
-	echo DONE
 
 cryomodule_in.dat: cryomodule_test_setup.py $(AUTOGEN_DIR)/regmap_cryomodule.json
 	$(PYTHON) cryomodule_test_setup.py | sed -e 's/ *#.*//' | grep . > $@
@@ -45,16 +40,21 @@ VVP_FLAGS_cryomodule.dat = +pfile=cryomodule_p.dat
 cryomodule.out: cryomodule_tb cryomodule_in.dat
 cryomodule.dat: cryomodule.out
 cryomodule.vcd: cryomodule_in.dat
-cryomodule_tb: $(AUTOGEN_DIR)/config_romx.v $(AUTOGEN_DIR)/cryomodule_auto.vh
+cryomodule_tb: $(AUTOGEN_DIR)/config_romx.v cryomodule_auto
 cryomodule_check: cryomodule.dat
 	$(PYTHON) verify_cryomodule.py
 
 $(AUTOGEN_DIR)/config_romx.v:
 	mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/config_crunch.py --OUTPUT=$@
 
-VFLAGS_DEP += -y $(BADGER_DIR) -Wno-macro-redefinition
+VFLAGS_DEP += -y $(BADGER_DIR)
 
-cryomodule_badger_tb.v: $(RTEFI_V) $(AUTOGEN_DIR)/config_romx.v cordicg_b22.v cryomodule_auto
+VFLAGS_cryomodule_badger_tb = -m ./tap-vpi
+
+cryomodule_badger_tb: $(RTEFI_V) $(AUTOGEN_DIR)/config_romx.v cordicg_b22.v cryomodule_auto tap-vpi.vpi
+
+CFLAGS_tap-vpi.o = $(VPI_CFLAGS) -D_POSIX_C_SOURCE=200809L
+tap-vpi.vpi: ethernet_model.o tap_alloc.o crc32.o
 
 CLEAN += $(RTEFI_CLEAN)
 
@@ -80,6 +80,7 @@ endif
 # endif
 
 CLEAN += $(TGT_) $(CHK_) *.bit *.in *.vcd
-CLEAN += fdbk_core*.dat lim_step_file_in.dat setmp_step_file_in.dat cryomodule_in.dat cryomodule_p.dat cryomodule.dat $(RTEFI_CLEAN)
+CLEAN += *.o tap-vpi.vpi
+CLEAN += cryomodule_in.dat cryomodule_p.dat cryomodule.dat $(RTEFI_CLEAN)
 CLEAN_DIRS += _xilinx
 include $(BUILD_DIR)/bottom_rules.mk

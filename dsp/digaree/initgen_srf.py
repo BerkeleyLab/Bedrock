@@ -68,32 +68,33 @@ for vx in range(1, len(v_series)):
 # print "# scaled dVdT (dvdt)", dVdt/ffs/cv*2
 print("#")
 print("# # (scaled)     SI   analog state equation")
-print("# (%+8.5f)  %9.2f  MV    Re(V) (v_r)" % (V.real/cv, V.real*1e-6))
-print("# (%+8.5f)  %9.2f  MV    Im(V) (v_i)" % (V.imag/cv, V.imag*1e-6))
-print("# (%+8.5f)  %9.2f  MV/s  Re(dV/dt) (dvdt_r)" % (dVdt.real/ffs/cv*2, dVdt.real*1e-6))
-print("# (%+8.5f)  %9.2f  MV/s  Im(dV/dt) (dvdt_i)" % (dVdt.imag/ffs/cv*2, dVdt.imag*1e-6))
+print("# (%+9.6f)  %9.2f  MV    Re(V) (v_r)" % (V.real/cv, V.real*1e-6))
+print("# (%+9.6f)  %9.2f  MV    Im(V) (v_i)" % (V.imag/cv, V.imag*1e-6))
+print("# (%+9.6f)  %9.2f  MV/s  Re(dV/dt) (dvdt_r)" % (dVdt.real/ffs/cv*2, dVdt.real*1e-6))
+print("# (%+9.6f)  %9.2f  MV/s  Im(dV/dt) (dvdt_i)" % (dVdt.imag/ffs/cv*2, dVdt.imag*1e-6))
 drive_product = (b*K) / ffs / cv * 2
-print("# (%+8.5f)  %9.2f  MV/s  Re(b*K) (x3_r)" % (drive_product.real, (b*K*1e-6).real))
-print("# (%+8.5f)  %9.2f  MV/s  Im(b*K) (x3_i)" % (drive_product.imag, (b*K*1e-6).imag))
+print("# (%+9.6f)  %9.2f  MV/s  Re(b*K) (x3_r)" % (drive_product.real, (b*K*1e-6).real))
+print("# (%+9.6f)  %9.2f  MV/s  Im(b*K) (x3_i)" % (drive_product.imag, (b*K*1e-6).imag))
 rate_diff = (dVdt - b*K) / ffs / cv * 4
-print("# (%+8.5f)  %9.2f  MV/s  Re(difference) (x4_r)" % (rate_diff.real, ((dVdt - b*K)*1e-6).real))
-print("# (%+8.5f)  %9.2f  MV/s  Im(difference) (x4_i)" % (rate_diff.imag, ((dVdt - b*K)*1e-6).imag))
+print("# (%+9.6f)  %9.2f  MV/s  Re(difference) (x4_r)" % (rate_diff.real, ((dVdt - b*K)*1e-6).real))
+print("# (%+9.6f)  %9.2f  MV/s  Im(difference) (x4_i)" % (rate_diff.imag, ((dVdt - b*K)*1e-6).imag))
 # print "# difference (x4)", dVdt/ffs/cv*2 - b*K/ffs/cv*2
 # print "# SI final", a
 # print "# normalized final", a/ffs
 # print "# integer final", int(real(ai)), int(imag(ai))
 
-print("# (%+8.5f)  %9.2f  /s  Re(a)  (a_r)" % (a.real/ffs, a.real))
-print("# (%+8.5f)  %9.2f  /s  Im(a)  (a_i)" % (a.imag/ffs, a.imag))
+print("# (%+9.6f)  %9.2f  /s  Re(a)  (a_r)" % (a.real/ffs, a.real))
+print("# (%+9.6f)  %9.2f  /s  Im(a)  (a_i)" % (a.imag/ffs, a.imag))
 print("# where  difference = dV/dt - b*K  and  a = difference / V")
 print("#")
 
 # At one point we planned to send delta-V to the computer, rather than
 # let it compute differences.  Instead we are now set up to figure the
 # differences in the computer with a [-2 -1 0 1 2] FIR, with zero extra
-# hardware footrpint.
+# hardware footprint.
 
 sclv = 2*cv*cv/(T*fir_gain)/omega0/RoverQ
+sclv /= 32  # put in a factor of 4 with barrel shifter XXX ???
 sclf = ck**2
 sclr = cr**2
 print("# Full scale power values in SI")
@@ -101,7 +102,7 @@ print("# %8.1f W  sclv" % sclv)
 print("# %8.1f W  sclf" % sclf)
 print("# %8.1f W  sclr" % sclr)
 # Any output unit is a good output unit, if all the terms use it
-maxscale = max(sclf, sclr) * 1.0001
+maxscale = max(sclv, max(sclf, sclr)) * 1.0001
 print("# Full scale power values in internal units of %.1f W" % maxscale)
 sclv = sclv / maxscale
 sclf = sclf / maxscale
@@ -112,10 +113,10 @@ print("# %8.4f    sclr" % sclr)
 
 net = abs(K)**2 - abs(R)**2 - dUdt
 print("# # (scaled)   SI Power balance")
-print("# (%+8.5f)  %6.1f W  Forward (powf)" % (abs(K)**2/maxscale, abs(K)**2))
-print("# (%+8.5f)  %6.1f W  Reverse (powr)" % (abs(R)**2/maxscale, abs(R)**2))
-print("# (%+8.5f)  %6.1f W  dU/dt (dudt)" % (dUdt/maxscale, dUdt))
-print("# (%+8.5f)  %6.1f W  net absorbed (diss)" % (net/maxscale, net))
+print("# (%+9.6f)  %6.1f W  Forward (powf)" % (abs(K)**2/maxscale, abs(K)**2))
+print("# (%+9.6f)  %6.1f W  Reverse (powr)" % (abs(R)**2/maxscale, abs(R)**2))
+print("# (%+9.6f)  %6.1f W  dU/dt (dudt)" % (dUdt/maxscale, dUdt))
+print("# (%+9.6f)  %6.1f W  net absorbed (diss)" % (net/maxscale, net))
 
 # allowed cavity dissipation and/or measurement error tolerance
 diss_allow = 30  # Watts
@@ -162,5 +163,5 @@ xprint("h", 3, 1/16.0)  # "two" supports inverse function
 # next three set scaling of the power-balance code
 xprint("h", 4, sclr)
 xprint("h", 5, sclf)
-xprint("h", 6, sclv/32)  # put in a factor of 4 with barrel shifter
+xprint("h", 6, sclv)
 xprint("h", 7, powt)

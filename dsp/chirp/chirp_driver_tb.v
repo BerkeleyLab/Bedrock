@@ -19,6 +19,7 @@ module chirp_driver_tb;
          clk=0; #5;
          clk=1; #5;
       end
+      $finish(0);
    end
 
    reg chirp_start=0;
@@ -58,10 +59,10 @@ module chirp_driver_tb;
    localparam FAST_DDPHASE = 395824; // 7.2e-7 * 2**(PH_WI+DD_SHIFT-1)
 
    localparam [15:0] CHIRP_RATE = 3; // Technically 8, but set as fast as possible for simulation. Min is 3
+   wire [LEN_WI-1:0] run_len = (full_sim) ? SLOW_RUN_LEN : FAST_RUN_LEN;
    wire [AMP_WI-1:0] amp_max = 600000;  // account for CORDIC gain
    wire [AMP_WI-1:0] amp_slope = 600000/(run_len/8); // .125 of total run length
 
-   wire [LEN_WI-1:0] run_len = (full_sim) ? SLOW_RUN_LEN : FAST_RUN_LEN;
    wire signed [PH_WI-1:0] dphase = (full_sim) ? SLOW_DPHASE : FAST_DPHASE;
    wire signed [PH_WI-1:0] ddphase = (full_sim) ? SLOW_DDPHASE : FAST_DDPHASE;
 

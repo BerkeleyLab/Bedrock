@@ -10,7 +10,6 @@ from functools import reduce
 
 from .base import DeviceBase, print_reg
 
-caget = caput = camonitor = None
 try:
     from cothread.catools import caget as _caget, caput as _caput
     from cothread.catools import camonitor, FORMAT_TIME, DBR_CHAR_STR
@@ -104,7 +103,7 @@ class CADevice(DeviceBase):
             pvname = str(info['output'])
 
             # CA only has signed integers
-            value = numpy.asarray(value, dtype='i')
+            value = numpy.array(value).astype(dtype='i')
 
             caput(pvname, value, wait=True, timeout=self.timeout)
 
@@ -176,7 +175,7 @@ class CADevice(DeviceBase):
         # make list of masks for each bit which is set.
         chans = [2**(11 - n) for n in range(12)
                  if self.pv_read('circle_data', 'enable%d' % n)]
-        return reduce(lambda l, r: l | r, chans, 0)
+        return reduce(lambda ll, r: ll | r, chans, 0)
 
     def wait_for_acq(self, toggle_tag=False, tag=False, timeout=5.0,
                      instance=[]):

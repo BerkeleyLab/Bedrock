@@ -1,5 +1,9 @@
 `timescale 1ns / 1ns
 `define LB_DECODE_rtsim
+`define AUTOMATIC_decode
+`define AUTOMATIC_beam
+`define AUTOMATIC_station
+`define AUTOMATIC_cav_mech
 `include "rtsim_auto.vh"
 
 module rtsim(
@@ -26,9 +30,24 @@ assign lb_clk = clk;
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 `define UNIFORM(x) ((~|(x)) | &(x))  // All 0's or all 1's
 
+// Configure number of modes processed
+// I don't make it host-settable (at least not yet),
+// because of its interaction with interp_span.
+parameter n_mech_modes = 7;
+parameter n_cycles = n_mech_modes * 2;
+parameter interp_span = 4;  // ceil(log2(n_cycles))
+parameter mode_count = 3;
+
+// Allow tweaks to the cavity electrical eigenmode time scale
+parameter mode_shift=18;
+
+// Control how much frequency shifting is possible with mechanical displacement
+parameter df_scale=0;     // see cav_freq.v
+
 // Beam timing generator
 // beam_timing output is limited to [0,phase_step].
 wire [11:0] beam_timing;
+(* lb_automatic *)
 beam beam  // auto
   (.clk(clk), .ena(iq), .reset(1'b0), .pulse(beam_timing),
    `AUTOMATIC_beam);
@@ -44,25 +63,12 @@ reg_delay #(.dw(1), .len(0)) start_outer_g(.clk(clk), .gate(1'b1), .reset(1'b0),
 wire start_eig;
 reg_delay #(.dw(1), .len(1)) start_eig_g(.clk(clk), .gate(1'b1), .reset(1'b0), .din(start), .dout(start_eig));
 
-// Configure number of modes processed
-// I don't make it host-settable (at least not yet),
-// because of its interaction with interp_span.
-parameter n_mech_modes = 7;
-parameter n_cycles = n_mech_modes * 2;
-parameter interp_span = 4;  // ceil(log2(n_cycles))
-parameter mode_count = 3;
-
-// Allow tweaks to the cavity electrical eigenmode time scale
-parameter mode_shift=18;
-
-// Control how much frequency shifting is possible with mechanical displacement
-parameter df_scale=0;     // see cav_freq.v
-
 // Instantiate simulator in clk domain
 wire signed [17:0] cav_eig_drive, mech_x;
 wire signed [17:0] piezo_eig_drive;
 // Parameter settings here should be mirrored in param.py
 // Instantiating the Station module here:
+(* lb_automatic *)
 station #(.mode_count(mode_count), .mode_shift(mode_shift), .n_mech_modes(n_mech_modes), .df_scale(df_scale)) station // auto
   (.clk(clk),
    .beam_timing(beam_timing), .mech_x(mech_x), .cav_eig_drive(cav_eig_drive),
@@ -76,6 +82,7 @@ station #(.mode_count(mode_count), .mode_shift(mode_shift), .n_mech_modes(n_mech
 reg signed [17:0] eig_drive0=0, eig_drive=0;
 wire signed [17:0] noise_eig_drive;
 wire res_clip;
+(* lb_automatic *)
 cav_mech #(.n_mech_modes(n_mech_modes)) cav_mech // auto
   (.clk(clk),
    .start_eig(start_eig), .noise_eig_drive(noise_eig_drive), .eig_drive(eig_drive),
@@ -94,6 +101,8 @@ always @(posedge clk) begin
   eig_drive <= eig_drive0;
   edrive_clip <= ~`UNIFORM(sum_eig_drive[19:17]);
 end
+`undef UNIFORM
+`undef SAT
 
 // Reserve space for several possible clipping status signals
 // Caller should take care of latching, reporting, and clearing.

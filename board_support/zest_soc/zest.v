@@ -1,9 +1,15 @@
 module zest #(
-    parameter PH_DIFF_ADV = 4693,  // ADV: 500*11/48 / 200/2*(1<<14) = 4693
-    parameter N_ADC = 2,
-    parameter N_CH = N_ADC*4,
-    parameter FCNT_WIDTH = 15,
-    parameter [7:0] BASE_ADDR = 8'h05
+    parameter [7:0] BASE_ADDR = 8'h05,
+    parameter DSP_FREQ_MHZ = 119.0,
+    parameter FCNT_WIDTH = 16,  // to speed up simulation. 125M / 2**16 = 1.9kHz update rate.
+    parameter PH_DIFF_DW = 13,
+    parameter real DAC_INTERP_COEFF_R = 1.0,
+    parameter TRANSPARENT_DAC = 0,
+    localparam integer  N_ADC = 2,
+    localparam integer  N_CH = N_ADC*4,
+    localparam real     CLKIN_PERIOD = 1000.0 / DSP_FREQ_MHZ / 2,    // ns
+    localparam integer  PH_DIFF_ADV = DSP_FREQ_MHZ / 200.0 * (2**PH_DIFF_DW),
+    localparam [14:0]  DAC_INTERP_COEFF = DAC_INTERP_COEFF_R / 2 * (2**14)
 ) (
     // Hardware pins
     // U24 74LVC8T245
@@ -34,9 +40,13 @@ module zest #(
     input               AD7794_DOUT,
     input               DAC_SDO,
 
+    // From U1 LMK0801
+    // CLKout4_7 divider group
     input               CLK_TO_FPGA_P,
     input               CLK_TO_FPGA_N,
 
+    // U2/U3 AD9563
+    // CLKout0_3 divider group
     input [N_CH-1:0]    ADC_D0_P,
     input [N_CH-1:0]    ADC_D0_N,
     input [N_CH-1:0]    ADC_D1_P,
@@ -46,6 +56,8 @@ module zest #(
     input [N_ADC-1:0]   ADC_FCO_P,
     input [N_ADC-1:0]   ADC_FCO_N,
 
+    // U4 AD9781
+    // CLKout4_7 divider group
     output [13:0]       DAC_D_P,
     output [13:0]       DAC_D_N,
     output              DAC_DCI_P,
@@ -58,6 +70,7 @@ module zest #(
     output [N_ADC-1:0]   clk_div_out,
     output [N_CH-1:0]    adc_out_clk,
     output [16*N_CH-1:0] adc_out_data,
+    output               dac_clk_out,
     input  [13:0]        dac_in_data_i,
     input  [13:0]        dac_in_data_q,
 
@@ -76,11 +89,15 @@ module zest #(
 //   .REFCLK       ( clk_200      ),
 //   .RDY          (              )
 // );
+initial begin
+    $display("CLKIN_PERIOD: %f ns, PH_DIFF_ADV: %d", CLKIN_PERIOD, PH_DIFF_ADV);
+end
 
 wire [32:0] mem_packed_rets [N_CH-1:0];
 wire [32:0] mem_packed_ret_spi;
 wire [32:0] mem_packed_ret_sfr;
 wire [32:0] mem_packed_ret_wfm;
+wire [32:0] mem_packed_ret_awg;
 reg  [32:0] mem_packed_ret_r=0;
 integer jx;
 always @(*) begin
@@ -91,7 +108,8 @@ end
 assign mem_packed_ret = mem_packed_ret_r |
     mem_packed_ret_sfr |
     mem_packed_ret_spi |
-    mem_packed_ret_wfm;
+    mem_packed_ret_wfm |
+    mem_packed_ret_awg;
 
 //--------------------------------------------------------------
 // BASE2 Address offsets
@@ -100,10 +118,12 @@ assign mem_packed_ret = mem_packed_ret_r |
 /// #define ZEST_BASE2_SFR   0x200000
 /// #define ZEST_BASE2_SPI   0x210000
 /// #define ZEST_BASE2_WFM   0x220000
+/// #define ZEST_BASE2_AWG   0x230000
 localparam [7:0] BASE_ADC = 8'h00;
 localparam [7:0] BASE_SFR = 8'h20;
 localparam [7:0] BASE_SPI = 8'h21;
 localparam [7:0] BASE_WFM = 8'h22;
+localparam [7:0] BASE_AWG = 8'h23;
 
 //--------------------------------------------------------------
 // PicoRV SPI master
@@ -134,12 +154,12 @@ zest_spi_dio_pack #(
 );
 
 //--------------------------------------------------------------
-// PicoRV SFR (GPIO output pins)
+// PicoRV SFR (GPIO pins)
 //--------------------------------------------------------------
-wire [31:0] sfRegsWrStr, sfRegsOut, sfRegsInp;
+wire [2*32-1:0] sfRegsWrStr, sfRegsOut, sfRegsInp;
 
 sfr_pack #(
-    .N_REGS         ( 1 ),
+    .N_REGS         ( 2 ),
     .BASE_ADDR      ( BASE_ADDR ),
     .BASE2_ADDR     ( BASE_SFR)
 ) sfr_reset (
@@ -152,6 +172,7 @@ sfr_pack #(
     .sfRegsWrStr    ( sfRegsWrStr )
 );
 
+// SFR_OUT_REG0
 /// #define SFR_OUT_BYTE_PH_SEL     0
 /// #define SFR_OUT_BYTE_FCLK_SEL   1
 /// #define SFR_OUT_BYTE_CSB_SEL    2
@@ -160,10 +181,12 @@ sfr_pack #(
 /// #define SFR_OUT_BIT_ADC_SYNC    26
 /// #define SFR_OUT_BIT_PWR_SYNC    27
 /// #define SFR_OUT_BIT_PWR_ENB     28
-/// #define SFR_WST_BIT_BUFR_A_RST  29
-/// #define SFR_WST_BIT_BUFR_B_RST  30
-/// #define SFR_IN_BYTE_PCNT        0
-/// #define SFR_IN_BYTE_FCNT        2
+/// #define SFR_OUT_BIT_BUFR_A_RST  29
+/// #define SFR_OUT_BIT_BUFR_B_RST  30
+/// #define SFR_OUT_BIT_DSPCLK_RST  31
+/// #define SFR_IN_REG_PCNT         0
+/// #define SFR_IN_REG_FCNT         1
+/// #define SFR_IN_BIT_DSPCLK_LOCKED 16
 wire [7:0] phs_sel  = sfRegsOut[7:0];
 wire [7:0] fclk_sel = sfRegsOut[15:8];
 wire [7:0] csb_sel  = sfRegsOut[(2*8)+:8];
@@ -173,6 +196,17 @@ wire adc_sync       = sfRegsOut[26];
 wire pwr_sync       = sfRegsOut[27];
 wire pwr_en_b       = sfRegsOut[28];
 wire [1:0] bufr_reset= sfRegsOut[30:29];
+wire dspclk_reset   = sfRegsOut[31];
+// SFR_OUT_REG1
+/// #define SFR_OUT_REG1            1
+/// #define SFR_OUT_BIT_DAC0_SRCSEL 0
+/// #define SFR_OUT_BIT_DAC0_ENABLE 1
+/// #define SFR_OUT_BIT_DAC1_SRCSEL 2
+/// #define SFR_OUT_BIT_DAC1_ENABLE 3
+wire dac0_src_sel   = sfRegsOut[32*1+0];
+wire dac0_enable    = sfRegsOut[32*1+1];
+wire dac1_src_sel   = sfRegsOut[32*1+2];
+wire dac1_enable    = sfRegsOut[32*1+3];
 
 // Chip Select Bar for SPI
 wire [6:0] ic_csb = ~(1 << csb_sel);
@@ -210,26 +244,35 @@ assign ADC_SYNC     = adc_sync;
 assign PWR_SYNC     = pwr_sync;
 assign PWR_EN       = ~pwr_en_b;
 
-wire [12:0] phdiff [3:0];
-wire [15:0] f_clks [3:0];
-assign sfRegsInp[    0+:16] = phdiff[phs_sel];        // SFR_IN_BYTE_PCNT
-assign sfRegsInp[(2*8)+:16] = f_clks[fclk_sel];       // SFR_IN_BYTE_FCNT
+// ADC0_DIV, ADC1_DIV, DAC_DCO
+wire signed [PH_DIFF_DW-1:0] phdiff [N_ADC:0];
+wire [N_ADC:0] phdiff_err;
+// DSP_CLK, ADC0_DIV, ADC1_DIV, DAC_DCO
+wire [27:0] f_clks [N_ADC+1:0];
+wire pll_locked;
+
+assign sfRegsInp[ 0+:PH_DIFF_DW] = phdiff[phs_sel];        // SFR_IN_REG_PCNT
+assign sfRegsInp[32+:32] = f_clks[fclk_sel];       // SFR_IN_REG_FCNT
+assign sfRegsInp[16] = pll_locked;          // SFR_IN_BIT_DSPCLK_LOCKED
 
 //--------------------------------------------------------------
 // CLK
 //--------------------------------------------------------------
-wire clk_to_fpga;
-IBUFDS #(
-    .DIFF_TERM("TRUE")
-) ibuf_clk(
-    .I      (CLK_TO_FPGA_P),
-    .IB     (CLK_TO_FPGA_N),
-    .O      (clk_to_fpga)
-);
+wire dac_dco_clk;
 
-BUFG bufg_i (
-    .I      (clk_to_fpga),
-    .O      (dsp_clk_out)
+xilinx7_clocks #(
+    .DIFF_CLKIN("TRUE"),
+    .CLKIN_PERIOD(CLKIN_PERIOD),  // REFCLK: about 240 MHz
+    .MULT     (5),      // 240 X 5   = 1200 MHz
+    .DIV0     (10),     // 1200 / 10 =  120 MHz
+    .DIV1     (5)       // 1200 / 5  =  240 MHz
+) clocks_i (
+    .sysclk_p (DAC_DCO_P),
+    .sysclk_n (DAC_DCO_N),
+    .reset    (dspclk_reset),
+    .clk_out1 (dac_dco_clk),
+    .clk_out2 (dsp_clk_out),    // 90 deg
+    .locked   (pll_locked)
 );
 
 //--------------------------------------------------------------
@@ -258,12 +301,11 @@ zest_clk_map #(
 );
 
 freq_count #(
-    .refcnt_width   (FCNT_WIDTH),
-    .freq_width     (16)
+    .refcnt_width   (FCNT_WIDTH)
 ) fcnt_dsp (
     .sysclk     (clk),
     .f_in       (dsp_clk_out),
-	.frequency  (f_clks[0])
+	.frequency  (f_clks[3])
 );
 
 genvar ix;
@@ -277,23 +319,23 @@ generate for (ix=0; ix<N_ADC; ix=ix+1) begin: ic_map
         .clk_div_buf  (clk_div_buf[ix])
     );
 
-    phase_diff #(.adv(PH_DIFF_ADV)) phase_diff_i (
+    phase_diff #(.dw(PH_DIFF_DW+1), .delta(33)) phase_diff_i (
         .uclk1      (dsp_clk_out),
-        .ext_div1   (1'b0),
         .uclk2      (clk_div[ix]),
-        .ext_div2   (1'b0),
+        .uclk2g     (1'b1),
+        .adv        (PH_DIFF_ADV),
         .sclk       (clk_200),
         .rclk       (clk),
+        .err        (phdiff_err[ix]),
         .phdiff_out (phdiff[ix])
     );
 
     freq_count #(
-        .refcnt_width   (FCNT_WIDTH),
-        .freq_width     (16)
+        .refcnt_width   (FCNT_WIDTH)
     ) fcnt_dco_i (
         .sysclk     (clk),
         .f_in       (clk_div[ix]),
-        .frequency  (f_clks[ix+1])
+        .frequency  (f_clks[ix])
     );
 end endgenerate
 
@@ -356,43 +398,86 @@ wfm_pack #(
 //--------------------------------------------------------------
 // DAC
 //--------------------------------------------------------------
-wire dac_dco_clk;
-wire dac_dco_buf;
-IBUFDS #(
-    .DIFF_TERM("TRUE")
-) ibuf_dco(
-    .I      (DAC_DCO_P),
-    .IB     (DAC_DCO_N),
-    .O      (dac_dco_buf)
-);
 
-BUFG dco_bufg (
-    .I      (dac_dco_buf),
-    .O      (dac_dco_clk)
-);
-
-phase_diff #(.adv(PH_DIFF_ADV)) phase_diff_dac (
-    .uclk1      (dsp_clk_out),
-    .ext_div1   (1'b0),
-    .uclk2      (dac_dco_clk),
-    .ext_div2   (1'b0),
+// F_RATIO = 2. See phasex_tb.v
+phase_diff #(
+    .dw             (PH_DIFF_DW+1),
+    .order1         (2),
+    .order2         (1),
+    .delta          (33)
+) phase_diff_dac (
+    .uclk1      (dac_dco_clk),
+    .uclk2      (dsp_clk_out),
+    .uclk2g     (1'b1),
+    .adv        (PH_DIFF_ADV),
     .sclk       (clk_200),
     .rclk       (clk),
+    .err        (phdiff_err[2]),
     .phdiff_out (phdiff[2])
 );
 
 freq_count #(
-    .refcnt_width   (FCNT_WIDTH),
-    .freq_width     (16)
+    .refcnt_width   (FCNT_WIDTH)
 ) fcnt_dac_i (
     .sysclk     (clk),
     .f_in       (dac_dco_clk),
-    .frequency  (f_clks[3])
+    .frequency  (f_clks[2])
 );
 
+assign dac_clk_out = dac_dco_clk;
+
+// interpolator, crossing from dsp_clk to dac_clk domain
+wire signed [13:0] dac0_in_data;
+zest_dac_interp #(.DW(14), .transparent(TRANSPARENT_DAC)) dac_interp_a (
+    .dsp_clk        (dsp_clk_out),
+    .din            (dac_in_data_i),
+    .coeff          (DAC_INTERP_COEFF),
+    .dac_clk        (dac_clk_out),
+    .dout           (dac0_in_data)
+);
+
+wire signed [13:0] dac1_in_data;
+zest_dac_interp #(.DW(14), .transparent(TRANSPARENT_DAC)) dac_interp_b (
+    .dsp_clk        (dsp_clk_out),
+    .din            (dac_in_data_q),
+    .coeff          (DAC_INTERP_COEFF),
+    .dac_clk        (dac_clk_out),
+    .dout           (dac1_in_data)
+);
+
+// DMA to generate arbitrary waveform for DAC BIST
+wire [13:0] awg_out_data;
+wire awg_out_valid;
+
+awg_pack #(
+    .BASE_ADDR     (BASE_ADDR),
+    .BASE2_ADDR    (BASE_AWG)
+) awg_i (
+    // Data interface
+    .dsp_clk        (dac_clk_out),
+    .d_out_data     (awg_out_data),
+    .d_out_valid    (awg_out_valid),
+    // PicoRV32 packed MEM Bus interface
+    .clk           (clk),
+    .rst           (rst),
+    .mem_packed_fwd( mem_packed_fwd ),
+    .mem_packed_ret( mem_packed_ret_awg )
+);
+
+// pipeline awg_out_data for better timing
+reg [13:0] awg_out_data1=0;
+always @(posedge dac_clk_out) begin
+    awg_out_data1 <= awg_out_valid ? awg_out_data : 14'h0;
+end
+
+// Mux DAC data source
+wire [13:0] dac0_in_data_mux = dac0_enable ? (dac0_src_sel ? awg_out_data1 : dac0_in_data) : 14'h0;
+wire [13:0] dac1_in_data_mux = dac1_enable ? (dac1_src_sel ? awg_out_data1 : dac1_in_data) : 14'h0;
+
+// UG471 Fig 2-19, D2 @ rising edge == dac0, match AD9781 datasheet Fig 57.
 wire [14:0] dac_oddr_buf;
-wire [14:0] dac_oddr_d1 = {1'b0, dac_in_data_i};
-wire [14:0] dac_oddr_d2 = {1'b1, dac_in_data_q};
+wire [14:0] dac_oddr_d1 = {1'b0, dac1_in_data_mux};     // Q DAC
+wire [14:0] dac_oddr_d2 = {1'b1, dac0_in_data_mux};     // I DAC
 wire [14:0] dac_oddr_out_p;
 wire [14:0] dac_oddr_out_n;
 assign DAC_DCI_P = dac_oddr_out_p[14];
@@ -402,8 +487,8 @@ assign DAC_D_N   = dac_oddr_out_n[13:0];
 
 genvar iy;
 generate for (iy=0; iy < 15; iy=iy+1) begin: in_cell
-	ODDR oddr(
-        .C  (dsp_clk_out),
+	ODDR #(.DDR_CLK_EDGE("SAME_EDGE")) oddr(
+        .C  (dac_clk_out),
         .CE (1'b1),
         .D1 (dac_oddr_d1[iy]),
         .D2 (dac_oddr_d2[iy]),

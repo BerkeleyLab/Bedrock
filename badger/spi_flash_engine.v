@@ -50,6 +50,7 @@ reg [8:0] block_len=0;
 reg [8:0] bytes_remaining=0;
 reg word=0;
 reg icap_en=0;
+reg word2=0, word3=0, word4=0;
 always @(posedge clk) begin
 	if (pack_write_ack & word & ~running) begin
 		running<=1;
@@ -68,7 +69,7 @@ end
 
 reg [6:0] subtick=0;
 reg [7:0] sr=0;
-reg tick=0, tick2=0, tick3=0, tick4=0, word2=0, word3=0, word4=0;
+reg tick=0, tick2=0, tick3=0, tick4=0;
 reg spi_clk_r=0, spi_clk_rr=0, spi_miso_r=0, spi_cs_pre=0, spi_cs_r=0, in_bit=0;
 wire [7:0] sr_next = {sr[6:0], in_bit};
 always @(posedge clk) begin
@@ -100,11 +101,12 @@ assign spi_mosi=sr[7]&spi_cs_r;
 wire [7:0] pack_data_in_rev={
 	pack_data_in[0], pack_data_in[1], pack_data_in[2], pack_data_in[3],
 	pack_data_in[4], pack_data_in[5], pack_data_in[6], pack_data_in[7]};
-reg odd=0, icap_clk=0, icap_we=0, icap_en2=0;
+reg odd=0, icap_clk=0;
+// reg icap_we=0, icap_en2=0;  // when were these used?
 reg [7:0] icap_upper_data=0;
 always @(posedge clk) begin
-	if (word2) icap_en2 <= icap_en;
-	if (word3) icap_we <= icap_en2 & odd;
+	// if (word2) icap_en2 <= icap_en;
+	// if (word3) icap_we <= icap_en2 & odd;
 	if (word3) icap_upper_data <= pack_data_in_rev;
 	if (word & icap_en) odd <= ~odd;
 	icap_clk <= subtick[6] & odd & ~word2;
@@ -113,21 +115,22 @@ wire [15:0] icap_wdata = {icap_upper_data,pack_data_in_rev};
 wire [15:0] icap_result;
 wire icap_busy;
 
-generate if (xc6slx == 1) begin: ICAP6
+generate if (xc6slx == 1) begin : ICAP6
     // 16-bit I port (for writing) and O port (for reading)
     ICAP_SPARTAN6 intern(.CLK(icap_clk),
 	.CE(~icap_en), // icap_en is active high, CE "pin" is active low
 	.WRITE(1'b0), // funny name for a pin where "0" means write
 	.I(icap_wdata),
 	.O(icap_result), .BUSY(icap_busy));
-end else if (seven == 1) begin: ICAP7
+end else if (seven == 1) begin : ICAP7
     // see UG953 and
     // https://opencores.org/projects/wbicapetwo by Dan Gisselquist
+    wire [15:0] o_padding;  // half of the O port not used, since we configure width as X16
     ICAPE2 #(.ICAP_WIDTH("X16")) reconfig(.CLK(icap_clk),
 	.CSIB(~icap_en), .RDWRB(1'b0),
-	.I(icap_wdata), .O(icap_result));
+	.I(icap_wdata), .O({o_padding, icap_result}));
     assign icap_busy=0;
-end else begin
+end else begin : no_ICAP
     assign icap_result=0;
     assign icap_busy=0;
 end endgenerate

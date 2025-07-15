@@ -59,15 +59,14 @@ class SDRAMLoopbackSoC(BaseSoC):
         self.sync += counter_sys.eq(counter_sys+1)
         self.comb += self.user_leds[1].eq(counter_sys[26])
 
-        self.platform.add_period_constraint(self.platform.lookup_request("ZEST_CLK_TO_FPGA", 1, loose=True).p, 8.7)
+        self.platform.add_period_constraint(self.platform.lookup_request("ZEST_CLK_TO_FPGA", 1, loose=True).p, 4.3)
         self.platform.add_false_path_constraints(self.crg.cd_sys.clk,
                                                  self.cd_adc.clk,
                                                  self.crg.cd_idelay.clk,
                                                  self.platform.lookup_request("ZEST_CLK_TO_FPGA", 1, loose=True).p,
                                                  self.platform.lookup_request("ZEST_ADC_DCO", 0, loose=True).p,
                                                  self.platform.lookup_request("ZEST_ADC_DCO", 1, loose=True).p,
-                                                 self.platform.lookup_request("ZEST_DAC_DCO", loose=True).p
-        )
+                                                 self.platform.lookup_request("ZEST_DAC_DCO", loose=True).p)
 
         # self.dsp_clk_out      = Signal()
         # self.clk_div_out      = Signal(2)
@@ -121,10 +120,7 @@ class SDRAMLoopbackSoC(BaseSoC):
         self.submodules.data_pipe = DataPipe(ddr_wr_port, ddr_rd_port, udp_port, adc_source, adc_dw)
         self.add_csr("data_pipe")
 
-        self.add_rom("bootrom",
-                     origin=0x20000000,
-                     size=2**14,
-                     contents=get_mem_data("firmware/app.bin", endianness="little"))
+        self.init_rom("rom", contents=get_mem_data("firmware/app.bin", endianness="little"))
         self.add_constant("ROM_BOOT_ADDRESS", 0x20000000)
 
 

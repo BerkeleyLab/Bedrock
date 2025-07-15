@@ -99,10 +99,12 @@ void spi_model(unsigned char *SCLK, unsigned char *CSB, unsigned char *MOSI, uns
 		unsigned word_ix;
 		unsigned pattern_ix;
 		uint16_t tx_word;
-	} state = {0};
+	} state = {0, 0, 0, 0};
 	static int cc=0;
 	// Write "1234ABCD" to first half of page 3
+	// (well, the high bit is set for the 1234 part)
 	// this should show up at (Ethernet) local bus 2097200 - 2097207
+	// a.k.a. spi_mbox + 0x30 through spi_mbox + 0x37
 	// End with two read instructions.  Should check correctness here.
 	const uint16_t pattern[] = {0x2203, 0x50b1, 0x51b2, 0x52b3, 0x53b4, 0x5441, 0x5542, 0x5643, 0x5744, 0x4411, 0x4111};
 	const unsigned pattern_len = sizeof(pattern) / sizeof(pattern[0]);

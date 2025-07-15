@@ -10,7 +10,7 @@ if [ -z "$arch" ]; then
     arch=s3
 fi
 
-if [ -z "$XILINX" -a -z "$XILINX_SETTINGS" ]; then
+if [ -z "$XILINX" ] && [ -z "$XILINX_SETTINGS" ]; then
     echo "set up for Xilinx first" >&2
     exit 1
 fi
@@ -28,7 +28,7 @@ fi
 set -e
 
 mkdir -p _xilinx
-test -L _xilinx/root || ln -sf $PWD _xilinx/root
+test -L _xilinx/root || ln -sf "$PWD" _xilinx/root
 cd _xilinx
 
 # First argument is the name of the design.  This both names
@@ -67,7 +67,7 @@ test -n "$CLOCK_PIN" || eval CLOCK_PIN=\$CLOCK_$arch
 #  -shift_extract YES
 #  -xor_collapse YES
 #  -slice_packing YES
-cat <<EOT >$DESIGN.xst
+cat <<EOT >"$DESIGN.xst"
 set -tmpdir "."
 set -xsthdpdir "."
 run
@@ -128,38 +128,38 @@ ucf=""
 # Important usage note: put all -Dfoo flags before the list of Verilog
 # input files!
 BOMB=""
-echo "\`define TARGET_$arch 1" >$DESIGN.prj
+echo "\`define TARGET_$arch 1" >"$DESIGN.prj"
 for s; do
     case $s in
        -D*) echo "\`define ${s#-D} 1"
             if test -n "$toplevel"; then echo "warning: $s follows .v file on $0 command line" >&2; fi
             ;;
-       *.v) if test -r root/$s; then
+       *.v) if test -r "root/$s"; then
             echo "\`include \"root/$s\""
-            elif test -r $s; then
+            elif test -r "$s"; then
                 echo "\`include \"$s\""
             else
                 BOMB="$BOMB $s"
             fi
-            if test -z "$toplevel"; then toplevel=$s; fi
+            if test -z "$toplevel"; then toplevel="$s"; fi
             ;;
        # foo.vh is a Verilog include file.  These don't get listed
        # in the project file.  They do need to get found in the _xilinx
        # directory.  This will probably break if a path is specified.
-       *.vh) if test -r root/$s; then
-                ln -sf root/$s .
-            elif test -r $s; then
-                ln -sf $s .
+       *.vh) if test -r "root/$s"; then
+                ln -sf "root/$s" .
+            elif test -r "$s"; then
+                ln -sf "$s" .
             else
                 BOMB="$BOMB $s"
             fi
             ;;
        # let people list .ucf files, check their presence, but don't do
        # much about it.  The first such file listed is provided to ngdbuild.
-       *.ucf) if test -r root/$s; then
-            if test -z "$ucf"; then ucf=root/$s; fi
-            elif test -r $s; then
-            if test -z "$ucf"; then ucf=$s; fi
+       *.ucf) if test -r "root/$s"; then
+            if test -z "$ucf"; then ucf="root/$s"; fi
+            elif test -r "$s"; then
+            if test -z "$ucf"; then ucf="$s"; fi
             else
                 BOMB="$BOMB $s"
              fi
@@ -167,13 +167,13 @@ for s; do
        default) echo "error: unknown argument $s" >&2
             ;;
     esac
-done >>$DESIGN.prj
+done >>"$DESIGN.prj"
 
 if [ -n "$XILINX_SETTINGS" ]; then
     # XXX want to warn the user if bash is running in sh-compatible mode (incompatible with XST 12.2 setup script)
     set --  # clear shell arguments to avoid confusing Xilinx
     echo "sourcing $XILINX_SETTINGS"
-    . $XILINX_SETTINGS
+    . "$XILINX_SETTINGS"
 fi;
 
 if [ -z "$XILINX" ]; then
@@ -181,16 +181,16 @@ if [ -z "$XILINX" ]; then
     exit 1
 fi
 
-echo "\`include \"$XILINX/verilog/src/iSE/unisim_comp.v\"" >>$DESIGN.prj
+echo "\`include \"$XILINX/verilog/src/iSE/unisim_comp.v\"" >>"$DESIGN.prj"
 
 # If the ${DESIGN}.ucf file doesn't exist, create one based on
 # comments in the top level Verilog.
-if test -z "$ucf"; then ucf=root/${DESIGN}.ucf; fi
-if [ ! -r $ucf ]; then
+if test -z "$ucf"; then ucf="root/${DESIGN}.ucf"; fi
+if [ ! -r "$ucf" ]; then
     ucf=${DESIGN}.ucf
-    perl -ne 'if (/(\w+)[,;]\s+\/\/ timespec\s+(.+)/) {print "NET \"$1\" LOC=\"'${CLOCK_PIN}'\";\nNET \"$1\" TNM_NET = \"CLK_1\";\nTIMESPEC \"TS_CLK_1\" = PERIOD \"CLK_1\" $2 HIGH 50%;\n"}' root/$toplevel >$ucf
+    perl -ne 'if (/(\w+)[,;]\s+\/\/ timespec\s+(.+)/) {print "NET \"$1\" LOC=\"'"${CLOCK_PIN}"'\";\nNET \"$1\" TNM_NET = \"CLK_1\";\nTIMESPEC \"TS_CLK_1\" = PERIOD \"CLK_1\" $2 HIGH 50%;\n"}' "$toplevel" >"$ucf"
 fi
-test -r $ucf || BOMB="$BOMB $ucf"
+test -r "$ucf" || BOMB="$BOMB $ucf"
 
 # Now that we have scanned for all the files we need,
 # tell the user and abort if any are missing
@@ -206,42 +206,44 @@ fi
 # export XIL_PLACE_ALLOW_LOCAL_BUFG_ROUTING=1
 
 echo "setup complete, starting Xilinx flow"
-xst -ifn $DESIGN.xst -ofn $DESIGN.syr
+xst -ifn "$DESIGN.xst" -ofn "$DESIGN.syr"
 # synthesized output is in $DESIGN.ngc
-ngdbuild -dd . -uc $ucf -p $PART $DESIGN.ngc $DESIGN.ngd
+ngdbuild -dd . -uc "$ucf" -p "$PART" "$DESIGN.ngc" "$DESIGN.ngd"
 # was "-cm area"
 # add "-w" to allow overwriting ${DESIGN}_map.ncd, as of xst-9.2
 # (doesn't work for Spartan3 !)
 
 # Infrastructure to handle incremental synthesis
-# Worked sometimes, for some XST versions, but generally quirky
-if [ -f "${DESIGN}_map.ncd" ]; then
-  #mv ${DESIGN}_map.ncd guide.ncd
-  #SMART="-smartguide guide.ncd"
-  rm "${DESIGN}_map.ncd"
-  SMART=""
-else
-  SMART=""
-fi
+# Worked sometimes, for some XST versions, but was generally quirky.
+# Inconsistent with reproducible-build paradigm.  $SMART options to
+# map and par below also make shellcheck bark.  Just skip it all.
+# if [ -f "${DESIGN}_map.ncd" ]; then
+#   #mv ${DESIGN}_map.ncd guide.ncd
+#   #SMART="-smartguide guide.ncd"
+#   rm "${DESIGN}_map.ncd"
+#   SMART=""
+# else
+#   SMART=""
+# fi
 
-#ISE not supporting multithread for spartan3
-if [ $PART = $PART_s3 ]; then
+# ISE does not support multithread for spartan3
+if [ "$PART" = "$PART_s3" ]; then
     # drop "-k 4 -c 100 -tx off" for XST 11.1
-    map -p $PART -timing -ol high -pr b ${SMART} -o ${DESIGN}_map.ncd $DESIGN.ngd $DESIGN.pcf
+    map -p "$PART" -timing -ol high -pr b -o "${DESIGN}_map.ncd" "$DESIGN.ngd" "$DESIGN.pcf"
     # drop "-t 1" for XST 12.1
-    par -w -ol high ${SMART} ${DESIGN}_map.ncd $DESIGN.ncd $DESIGN.pcf
+    par -w -ol high "${DESIGN}_map.ncd" "$DESIGN.ncd" "$DESIGN.pcf"
 else
     # drop "-k 4 -c 100 -tx off" for XST 11.1
-    map -mt 2 -p $PART -timing -ol high -pr b ${SMART} -o ${DESIGN}_map.ncd $DESIGN.ngd $DESIGN.pcf
+    map -mt 2 -p "$PART" -timing -ol high -pr b -o "${DESIGN}_map.ncd" "$DESIGN.ngd" "$DESIGN.pcf"
     # drop "-t 1" for XST 12.1
-    par -mt 4 -w -ol high ${SMART} ${DESIGN}_map.ncd $DESIGN.ncd $DESIGN.pcf
+    par -mt 4 -w -ol high "${DESIGN}_map.ncd" "$DESIGN.ncd" "$DESIGN.pcf"
 fi
 
 # optional (timing report)
-trce -e 3 -l 3 $DESIGN.ncd -o $DESIGN.twr $DESIGN.pcf
+trce -e 3 -l 3 "$DESIGN.ncd" -o "$DESIGN.twr" "$DESIGN.pcf"
 
-if grep "All constraints were met\." $DESIGN.par &&
-   grep "All signals are completely routed\." $DESIGN.par; then
+if grep "All constraints were met\." "$DESIGN.par" &&
+   grep "All signals are completely routed\." "$DESIGN.par"; then
       echo "PAR success confirmed for $DESIGN"
 else
       echo "PAR apparently failed for $DESIGN"
@@ -256,7 +258,7 @@ if [ "$arch" = "s6" ]; then
 else
     case "$PART" in
         # LLRF46 needs -g StartUpClk:CClk per page 1 of
-        # http://www.dimtel.com/_media/support/llrf4/packet46.pdf
+        # https://www.dimtel.com/_media/support/llrf4/packet46.pdf
         # otherwise the DAC outputs get messed up.
         xc6slx*) BG_OPT="-g StartUpClk:CClk" ;;
         *)       BG_OPT="-g StartUpClk:JtagClk" ;;
@@ -265,5 +267,5 @@ fi
 
 # BG_OPT="$BG_OPT -g UnConstrainedPins:Allow"
 echo "Using bitgen options $BG_OPT"
-bitgen -w $BG_OPT $DESIGN.ncd
-#promgen -w -spi -p mcs -o $DESIGN.mcs -s 16384 -u 0 $DESIGN.bit
+bitgen -w $BG_OPT "$DESIGN.ncd"
+#promgen -w -spi -p mcs -o "$DESIGN.mcs" -s 16384 -u 0 "$DESIGN.bit"

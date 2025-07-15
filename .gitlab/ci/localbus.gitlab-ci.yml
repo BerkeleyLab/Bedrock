@@ -1,0 +1,4 @@
+localbus:
+  stage: test
+  script:
+    - make -C localbus

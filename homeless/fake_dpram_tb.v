@@ -9,11 +9,13 @@ initial begin
 		$dumpfile("fake_dpram.vcd");
 		$dumpvars(5,fake_dpram_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<120; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$finish();
+	$display("PASS");
+	$finish(0);
 end
 
 parameter aw=4;

@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2106 Osprey DCS
+// Copyright (c) 2016 Osprey DCS
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -110,9 +110,13 @@ begin
     sendEvent(EVCODE_SECONDS_MARKER);
     check(32'h1234567A);
     #1000 ;
-    $display("%s", fail ? "FAIL" : "PASS");
-    if (fail)$stop();
-    else $finish();
+    if (fail) begin
+      $display("FAIL");
+      $stop(0);
+    end else begin
+      $display("PASS");
+      $finish(0);
+    end
 end
 
 task setAction;

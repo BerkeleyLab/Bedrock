@@ -37,7 +37,7 @@
 //  .     .      .       .      .       out_y
 module xy_pi_clip #(
 	parameter ff_dshift = 0 // Deferred ff_ddrive downshift
-)(
+) (
 	input clk,  // timespec 6.8 ns
 	input sync,  // high for the first of the xy pair
 	input signed [17:0] in_xy,
@@ -99,6 +99,7 @@ always @(posedge clk) begin
 end
 
 wire signed [29:0] mr_sat = `SAT(mr_ff,42,29);
+`undef SAT
 
 reg signed [35:0] mr=0;
 reg signed [30:0] lim1=0;

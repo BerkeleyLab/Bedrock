@@ -42,13 +42,16 @@ lb_marble_slave #(.USE_I2CBRIDGE(1), .twi_q0(4), .twi_q1(0), .twi_q2(2), .led_cw
 	.clk(clk), .addr(addr),
 	.control_strobe(control_strobe), .control_rd(control_rd),
 	.data_out(data_out), .data_in(data_in),
+	.aux_clk(1'b0), .clk62(clk),
 	.ibadge_clk(1'b0),
 	.ibadge_stb(1'b0), .ibadge_data(8'b0),
 	.obadge_stb(1'b0), .obadge_data(8'b0),
 	.tx_mac_done(1'b0), .rx_mac_data(16'b0),
 	.rx_mac_buf_status(2'b0),
 	.xdomain_fault(1'b0),
+	.frequency_si570(28'd3333),
 	.mmc_pins(4'b0),
+	.rx_category_s(1'b0), .rx_category(4'b0),
 	.twi_scl({dum_scl, TWI_SCL}), .twi_sda({dum_sda, TWI_SDA}),
 	.gps(4'b00z0),
 	.twi_int(TWI_INT), .twi_rst(TWI_RST)
@@ -62,8 +65,8 @@ i2c_slave_model #(.I2C_ADR(SADR), .debug(0)) hw_slave(.scl(TWI_SCL), .sda(TWI_SD
 // One weird hack, even works in Verilator!
 always @(posedge clk) begin
 	if (slave.stop_sim & ~in_use & ~raw_l) begin
-		$display("hw_test_tb:  stopping based on localbus request");
-		$finish();
+		$display("lb_marble_slave_tb:  stopping based on localbus request");
+		$finish(0);
 	end
 end
 

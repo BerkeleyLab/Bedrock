@@ -160,6 +160,9 @@ assign r = sat;
 assign valid_o = valid_r;
 assign sat_happened = valid_r & sat_happened_r;
 
+`undef SAT
+`undef UNSAT
+
 endmodule
 
 // ALU and register file, no instruction sequencing

@@ -1,7 +1,6 @@
 module gmii_gtp #(
     parameter dw = 10
-)
-(
+) (
     // gmii side
     input gmii_tx_clk,
     input gmii_rx_clk,

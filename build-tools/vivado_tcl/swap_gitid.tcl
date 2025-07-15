@@ -1,3 +1,5 @@
+# Functions related to Vivado and git
+
 # Revise config_romx git ID in-place using BRAM INIT_xx values
 # Absolutely depends on ROM contents that come out of bedrock/build-tools/build_rom.py
 # Two distinct cases:
@@ -19,6 +21,9 @@
 variable GITID_LENGTH 40
 variable INIT_LENGTH  69
 variable RECORD_MARKER 800A
+# Default string in case of missing git repo.  It's made to have sense
+# as 8 and 24 digits and to avoid to run bit_stamp_mod
+variable NO_GIT_RETURN_VAL "aaaaaaaaaaaaaaaaaaaaaaaa0000000000000000"
 
 # Comment about INIT_LENGTH: that's the length of the string Vivado uses
 # to describe the (partial) initial contents of a Xilinx block memory.
@@ -26,7 +31,6 @@ variable RECORD_MARKER 800A
 # "256'h388F5DDA0643504C420409D89060EF550D6BEE390AB3F9B0CD799F8FFF2C1F0A"
 # i.e., 64 hex digits describing 256 data bits, plus the Verilog-inspired
 # leading "256'h", for a total of 69 characters.
-
 
 # Checks if GIT ID has a proper length
 proc check_gitid {gitid} {
@@ -36,7 +40,6 @@ proc check_gitid {gitid} {
     }
 
 }
-
 
 # Checks if init files has a proper length and proper record markers at the correct place
 proc check_init {init0 init1 rowwidth} {
@@ -68,7 +71,6 @@ proc check_init {init0 init1 rowwidth} {
         }
     }
 }
-
 
 proc reorder_bits {gitid rowwidth} {
     if {!($rowwidth == 8 || $rowwidth == 16)} {
@@ -108,9 +110,7 @@ proc reorder_bits {gitid rowwidth} {
     }
 }
 
-
 proc gitid_proc {old_commit new_commit init0 init1 rowwidth} {
-
     # Security checks
     check_gitid $old_commit
     check_gitid $new_commit
@@ -120,7 +120,6 @@ proc gitid_proc {old_commit new_commit init0 init1 rowwidth} {
     lassign [reorder_bits $old_commit $rowwidth] old_msb old_lsb
 
     switch $rowwidth {
-
         8 {
             # Check that the existing INIT values match $old_commit -- this is key!
             if {[string range $init0 25 44] != $old_msb} {
@@ -164,14 +163,12 @@ proc gitid_proc {old_commit new_commit init0 init1 rowwidth} {
     puts "INFO: new 1 $new_init1"
     puts "INFO: --"
     return "$new_init0 $new_init1"
-
 }
 
 
 # Above this point are general string handling functions,
 # which can be tested by a vanilla tclsh.  See test_swap_gitid.tcl.
 # The functions below need Vivado and a routed design.
-
 
 # Checks if vivado has finished implementation
 proc check_impl {} {
@@ -181,32 +178,38 @@ proc check_impl {} {
     }
 }
 
-
 proc check_bmem {pattern width} {
     set c [get_cells -hier -filter {PRIMITIVE_TYPE =~ BMEM.*.*} $pattern]
-    if {[llength $c] != 1} {
-        puts "ERROR: Unexpected number of $pattern!"
-        return 0
+    set xc {}
+    foreach cc $c {
+        set n [get_property READ_WIDTH_A $cc]
+        if {$n == $width} {
+            lappend xc $cc
+        } else {
+            puts "Ignoring instance $cc where Read Width is $width (not $n)"
+        }
     }
-    set n [get_property READ_WIDTH_A $c]
-    if {$n != $width} {
-        puts "ERROR: Read Width of $pattern must be $width (not $n)!"
-        return 0
-    }
-    return $c
+    return $xc
 }
 
 proc swap_gitid {old_commit new_commit rowwidth dry_run} {
-
     # Checks if implementation stage is there
     check_impl
 
     switch $rowwidth {
-
         8 {
             set c0 [check_bmem "*dxx_reg_0" 9]
             set c1 [check_bmem "*dxx_reg_1" 9]
-            if {$c0 == 0 || $c1 == 0} {return 0}
+            if {$c0 == {} && $c1 == {}} {
+                puts "no relevant 8Kx8 BRAM found"
+                return 0
+            }
+            set lc0 [llength $c0]
+            set lc1 [llength $c1]
+            if {$lc0 != 1 || $lc1 != 1} {
+                puts "ERROR: swap_gitid can't handle case $rowwidth $lc0 $lc1 yet!"
+                return 0
+            }
             set init0 [get_property INIT_00 $c0]
             set init1 [get_property INIT_00 $c1]
             set xx [gitid_proc $old_commit $new_commit $init0 $init1 $rowwidth]
@@ -222,21 +225,143 @@ proc swap_gitid {old_commit new_commit rowwidth dry_run} {
 
         16 {
             set c0 [check_bmem "*dxx_reg" 18]
-            if {$c0 == 0} {return 0}
-            set init0 [get_property INIT_00 $c0]
-            set init1 [get_property INIT_01 $c0]
-            set xx [gitid_proc $old_commit $new_commit $init0 $init1 $rowwidth]
-            if {[llength $xx] != 2} {return 0}
-            lassign $xx init0x init1x
-            if {$dry_run != 1} {
-                set_property INIT_00 $init0x $c0
-                set_property INIT_01 $init1x $c0
-            } else {
-                puts "Dry run only"
+            if {$c0 == {}} {
+                puts "no relevant 4Kx16 BRAM found"
+                return 0
+            }
+            foreach cc $c0 {
+                puts "trying $cc"
+                set init0 [get_property INIT_00 $cc]
+                set init1 [get_property INIT_01 $cc]
+                set xx [gitid_proc $old_commit $new_commit $init0 $init1 $rowwidth]
+                if {[llength $xx] != 2} {return 0}
+                lassign $xx init0x init1x
+                if {$dry_run != 1} {
+                    set_property INIT_00 $init0x $cc
+                    set_property INIT_01 $init1x $cc
+                } else {
+                    puts "Dry run only"
+                }
             }
         }
 
     }
     puts OK
     return 1
+}
+
+##########################
+# On to functions that use info about the current git commit
+# to set file names and embedded gitid strings
+
+# Return full 40-digit commit id and timestamp as tcl array.
+# Recommend use -> array set array_name [get_full_git_id]
+proc get_full_git_id {} {
+    set id [get_dirty_git_id 40]
+    set time [get_git_timestamp]
+    return [list id $id time $time]
+}
+
+# Provide the timestamp of current git commit
+# sometimes called SOURCE_DATE_EPOCH
+proc get_git_timestamp {} {
+    if [catch {exec git log -1 --pretty=%ct} result] {
+        return 0
+    } else {
+        return $result
+    }
+}
+
+# Returns the N-digit git id sha ending with '-dirty' in case of local
+# modification (or the first N-digit of NO_GIT_RETURN_VAL in case it's
+# executed outside a git project)
+proc get_dirty_git_id {N} {
+    if [catch {exec git describe --always --abbrev=$N --dirty --exclude "*"} result] {
+        return [string range $::NO_GIT_RETURN_VAL 0 $N-1]-dirty
+    } else {
+        return $result
+    }
+}
+
+# Returns the N-digit git id sha or the first N-digit of NO_GIT_RETURN_VAL
+# in case it's executed outside a git project
+proc get_git_id {N} {
+    return [regsub {\-dirty} [get_dirty_git_id $N] ""]
+}
+
+# Utility for local modification presence check
+proc is_git_dirty {gitid} {
+    switch -glob -- $gitid {
+        *-dirty      {return 1}
+        default      {return 0}
+    }
+}
+
+# Generate 40-hex-digit git commit id, where the last 16 digits
+# are zeros in case of local modification.
+# This result is normally headed for swap_gitid.
+proc generate_extended_git_id {git_id dirtiness} {
+    if {[string length $git_id] < 40} {
+        error "generate_extended_git_id error: [
+            ]received a git id shorter than 40 digits!"
+    }
+    set rr $git_id
+    if {$dirtiness} {
+        set rr [string range $git_id 0 23]0000000000000000
+    }
+    return [string toupper $rr]
+}
+
+# Print git hash in huge and colored way
+proc git_id_print {gitid_arg} {
+    set orange_color "\033\[93m"
+    set reset_color "\033\[0m"
+    puts "#[string repeat "-" 48]${orange_color}"
+    puts "  gitid $gitid_arg"
+    puts "${reset_color}#[string repeat "-" 48]"
+}
+
+# Primary access to the assembled info about this git repo
+proc get_git_context {} {
+    # single-source-of-truth
+    array set git_status [get_full_git_id]
+    # everything else derived from that
+    set git_id_short [string range $git_status(id) 0 7]
+    set git_dirty [is_git_dirty $git_status(id)]
+    set dirty_suffix ""
+    if {$git_dirty} {set dirty_suffix "-dirty"}
+    set new_commit [generate_extended_git_id $git_status(id) $git_dirty]
+    # return list is an array (recommend use of array set)
+    return [list short_id $git_id_short dirty $git_dirty suffix[
+        ] $dirty_suffix full_id $new_commit time $git_status(time)]
+}
+
+# function to handle get_git_context as list instead of an array
+# i.e. set git_as_list [array_to_list [get_git_context]]
+proc array_to_list {array_arg} {
+    array set array_tmp $array_arg
+    foreach key [array names array_tmp] {
+        lappend array_list $array_tmp($key)
+    }
+    return $array_list
+}
+
+# Convert $filename_base.x.bit to $filename_base.bit,
+# using bit_stamp_mod or not, as appropriate.
+proc apply_bit_stamp_mod {filename_base git_dirty source_stamp} {
+    if {! [file readable $filename_base.x.bit]} {
+        error "bitfile $filename_base.x.bit missing; no action taken"
+    }
+    if {$git_dirty} {
+        puts "modified code; not coercing bitfile header timestamp"
+    } elseif [file executable ./bit_stamp_mod] {
+        puts "pristine code; setting bitfile header timestamp to $source_stamp"
+        puts [exec ./bit_stamp_mod -s $source_stamp $filename_base.bit < $filename_base.x.bit]
+        file delete $filename_base.x.bit
+        puts [exec sha256sum $filename_base.bit]
+        return
+    } else {
+        puts "bit_stamp_mod not available; not coercing bitfile header timestamp"
+    }
+    file rename -force $filename_base.x.bit $filename_base.bit
 }

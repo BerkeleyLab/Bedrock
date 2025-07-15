@@ -10,8 +10,8 @@ module iq_deinterleaver_multichannel #(
    parameter NCHAN     = 2,
    parameter SCALE_WI  = 18,
    parameter DWI       = 16,
-   parameter DAVR      = 4)
-(
+   parameter DAVR      = 4
+) (
    input                         clk,
    input  signed [SCALE_WI-1:0]  scale_in,
    input  signed [NCHAN*DWI-1:0] iq_data_in,
@@ -29,9 +29,7 @@ module iq_deinterleaver_multichannel #(
          .scale_wi  (SCALE_WI),
          .dwi       (DWI),
          .davr      (DAVR)
-      )
-      i_iq_deinterleaver
-      (
+      ) i_iq_deinterleaver (
          .clk        (clk),
          .scale_in   (scale_in),
          .iq_data_in (iq_data_in[(ch_id+1)*DWI-1:ch_id*DWI]),

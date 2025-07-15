@@ -1,6 +1,12 @@
+`timescale 1ns / 1ns
+
 // Simple first-order CIC filter and decimator
 // Note that this module is configured with unsigned input and output!
-module cic_simple_us(
+module cic_simple_us #(
+	parameter ext_roll=0,  // if set, use roll port instead of internal divider
+	parameter dw=16,
+	parameter ex=10  // decimate by 2^ex, up to 2^ex when using ext_roll
+) (
 	input clk,
 	input [dw-1:0] data_in,
 	input data_in_gate,
@@ -8,9 +14,6 @@ module cic_simple_us(
 	output [dw-1:0] data_out,
 	output data_out_gate
 );
-parameter ext_roll=0;  // if set, use roll port instead of internal divider
-parameter dw=16;
-parameter ex=10;  // decimate by 2^ex, up to 2^ex when using ext_roll
 
 reg [dw+ex-1:0] data_int=0, data_int_h=0, diff=0;
 reg [ex-1:0] div=0;

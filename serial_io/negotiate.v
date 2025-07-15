@@ -20,7 +20,7 @@ module negotiate(
    output reg        lacr_send,
    // mode control
    output reg        operate,
-   output reg [8:0]  an_status
+   output [8:0]      an_status
 );
    // 10 ms link_timer = 10e6/8
    parameter TIMER_TICKS = 1250000;
@@ -48,10 +48,13 @@ module negotiate(
                     AN_LINK_OK = 4,
                     AN_ABORT   = 5;
 
-   reg [2:0] an_state = AN_RESTART, n_an_state;
+   reg [2:0] an_state = AN_RESTART, n_an_state = AN_RESTART;
 
-   initial lacr_send=0;
-   initial operate=0;
+   initial begin
+     lacr_out=0;
+     lacr_send=0;
+     operate=0;
+   end
 
    wire an_rst;
    // Detect physical link
@@ -86,7 +89,7 @@ module negotiate(
    end
 
    // Ack/Abl and consistency flags
-   reg [15:0] lacr_ability;
+   reg [15:0] lacr_ability=0;
    reg ack_match=0, abl_match=0;
    reg consistency_match=0;
    always @(posedge rx_clk) begin
@@ -124,9 +127,10 @@ module negotiate(
    wire abl_mismatch = ~lacr_ability[FD_BITPOS];
 
    reg [TIMER_LOG2-1:0] link_timer = 0;
-   reg link_timer_on=0, link_timer_done;
-   reg link_timer_start;
+   reg link_timer_on=0, link_timer_done=0;
+   reg link_timer_start=0;
    reg wdog_an_disable=0;
+   wire wdog_timeout;
 
    always @(posedge rx_clk) begin
       link_timer_done <= 0;
@@ -152,10 +156,10 @@ module negotiate(
 
    wire idle_match = 1; // TODO: Perform actual idle marker check
 
-   reg n_lacr_send; // lacr_send in the rx clock domain
-   reg n_send_ack;
-   reg n_send_breaklink;
-   reg n_operate;
+   reg n_lacr_send=0;  // lacr_send in the rx clock domain
+   reg n_send_ack=0;
+   reg n_send_breaklink=0;
+   reg n_operate=0;
    always @(*) begin
       n_lacr_send      = 0;
       n_send_ack       = 0;
@@ -210,7 +214,6 @@ module negotiate(
    localparam WATCHDOG_LOG2 = TIMER_LOG2+3;
 
    reg [WATCHDOG_LOG2-1:0] wdog_cnt=0;
-   wire wdog_timeout;
    always @(posedge rx_clk) begin
       // Clear on FWD progress or on first pulse in after last AN
       if ((n_an_state > an_state && an_state != AN_RESTART) || los)
@@ -234,11 +237,11 @@ module negotiate(
                              an_state==AN_ACK, an_state==AN_IDLE, an_state==AN_LINK_OK};
 
    // Register comb signals in rx_clk before transferring to tx_clk
-   reg lacr_send_r=0; // lacr_send in the rx clock domain
-   reg send_ack_r;
-   reg send_breaklink_r;
-   reg operate_r=0;
-   reg [8:0] an_status_r=0;
+   (* ASYNC_REG = "TRUE" *) reg lacr_send_r=0; // lacr_send in the rx clock domain
+   (* ASYNC_REG = "TRUE" *) reg send_ack_r=0;
+   (* ASYNC_REG = "TRUE" *) reg send_breaklink_r=0;
+   (* ASYNC_REG = "TRUE" *) reg operate_r=0;
+   (* ASYNC_REG = "TRUE" *) reg [8:0] an_status_r=0;
    always @(posedge rx_clk) begin
        operate_r        <= n_operate;
        lacr_send_r      <= n_lacr_send;
@@ -247,18 +250,20 @@ module negotiate(
        an_status_r      <= an_status_l;
    end
 
-   reg send_ack, send_breaklink;
+   reg send_ack=0, send_breaklink=0;
+   (* ASYNC_REG = "TRUE" *) reg [8:0] an_status_x=0;
    always @(posedge tx_clk) begin
       operate        <= operate_r;
       lacr_send      <= lacr_send_r;
       send_ack       <= send_ack_r;
       send_breaklink <= send_breaklink_r;
-      an_status      <= an_status_r;
+      an_status_x    <= an_status_r;
    end
+   assign an_status = an_status_x;
 
    // 16-bit Ethernet configuration register as documented in
    // Networking Protocol Fundamentals, by James Long
-   // and http://grouper.ieee.org/groups/802/3/z/public/presentations/nov1996/RTpcs8b_sum5.pdf
+   // and https://grouper.ieee.org/groups/802/3/z/public/presentations/nov1996/RTpcs8b_sum5.pdf
    reg  FD=1;   // Full Duplex capable
    wire HD=0;   // Half Duplex capable
    wire PS1=0;  // Pause 1

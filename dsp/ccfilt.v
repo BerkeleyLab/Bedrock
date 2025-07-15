@@ -57,6 +57,7 @@ always @(posedge clk) begin
 end
 reg valid3=0;
 always @(posedge clk) valid3 <= valid2;
+`undef UNIFORM
 
 `ifdef SIMULATE
 reg [3:0] ch_id=0;
@@ -81,17 +82,19 @@ always @(posedge clk) begin
 	valid4 <= valid3;
 end
 
+`undef SAT
+
 // Instantiate half-band filter .. or not
 wire [outw-1:0] d5;
 wire valid5;
 reg [4-1:0] delay_v45=0;   // seems half_filter take 4 cycles?
 reg [outw*4-1:0] delay_d45=0;
 generate
-if (use_hb) begin
+if (use_hb) begin: g_use_hb
 	half_filt #(.len(dsr_len))
 		hb(.clk(clk), .ind(d4), .ing(valid4), .outd(d5), .outg(valid5), .reset(reset));
 end
-else if (use_delay) begin
+else if (use_delay) begin: g_use_delay
 	always@(posedge clk) begin
 		delay_v45 <= {delay_v45[4-2:0],valid4};
 		delay_d45 <= {delay_d45[outw*(4-1)-1:0],d4};
@@ -100,7 +103,7 @@ else if (use_delay) begin
 	assign d5 = delay_d45[outw*4-1:outw*(4-1)];
 	assign valid5 = delay_v45[4-1];
 end
-else begin
+else begin: g_use_short
 	assign d5 = d4;
 	assign valid5 = valid4;
 end

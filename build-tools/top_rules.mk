@@ -2,12 +2,13 @@
 GCC_FLAGS = -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
 	-Wshadow -Waggregate-return -Wmissing-prototypes -Wnested-externs \
 	-Wall -W -Wno-unused -Winline -Wwrite-strings -Wundef -pedantic
-CF_ALL = -Wall -O2 -W -fPIC -g -std=c99 -D_GNU_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
-LF_ALL = -lm ${LDFLAGS_$@}
+GCC_FLAGS += -Wformat -Wformat-signedness
+CF_ALL = -Wall -O2 -fPIC -g -std=c99 -D_DEFAULT_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
+LF_ALL = ${LDFLAGS_$@}
 
 ICARUS_SUFFIX =
 VERILOG_VPI = iverilog-vpi$(ICARUS_SUFFIX)
-VERILOG = iverilog$(ICARUS_SUFFIX) -Wall
+VERILOG = iverilog$(ICARUS_SUFFIX) -Wall -Wno-macro-redefinition
 VG_ALL = -DSIMULATE
 V_TB = -Wno-timescale
 VFLAGS = ${VFLAGS_$@} -I$(AUTOGEN_DIR)
@@ -17,7 +18,18 @@ VERILATOR = verilator -Wall -Wno-fatal
 GTKWAVE = gtkwave
 VPIEXT = vpi
 PYTHON = python3
+PERL = perl
 AWK = awk
+XCIRCUIT = xcircuit
+SV2V = sv2v
+YOSYS = yosys
+YOSYS_QUIET = -q
+YOSYS_JSON_OPTION = -DBUGGY_FORLOOP
+# (that flag adjusts the behavior of dpram.v; I don't think yosys for-loop
+# is actually buggy, just tediously slow, and in this case unnecessary)
+YOSYS_JSON_PRECHECK = true
+YOSYS_READ_VERILOG = read_verilog
+
 VPI_CFLAGS := $(shell $(VERILOG_VPI) --cflags)
 VPI_LDFLAGS := $(shell $(VERILOG_VPI) --ldflags)
 DEPDIR = _dep
@@ -38,7 +50,9 @@ VERILOG_TB = $(VERILOG) $(VG_ALL) $(V_TB) ${VFLAGS} -o $@ $(filter %v, $^)
 VERILOG_TB_VPI = $(VERILOG) $(VG_ALL) $(VPI_TGT) ${VFLAGS} -o $@ $(filter %.v, $^)
 VERILOG_SIM = cd `dirname $@` && $(VVP) `basename $<` $(VVP_FLAGS)
 VERILOG_VIEW = $(GTKWAVE) $(GTKW_OPT) $^
-VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS) | $(AWK) -f $(filter %.awk, $^)
+VERILOG_CHECK = $(VVP) $< $(VVP_FLAGS)
+# FIXME This hack does not work with vpath
+VERILOG_TBLINT = $(PYTHON) $(BUILD_DIR)/tblint.py $(if $(realpath $<.v),$<.v,$<.sv)
 VERILOG_RUN = $(VVP) $@
 #VPI_LINK = $(VERILOG_VPI) --name=$(basename $@) $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
 VPI_LINK = $(CXX) -std=gnu99 -o $@ $^ $(LL_TGT) $(LF_ALL) $(VPI_LDFLAGS)
@@ -47,9 +61,11 @@ MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@
 VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I.
 # keep -Wno-TIMESCALEMOD separate, since it's a new flag not supported by Verilator 4.010 in Debian Buster
 VLATOR_TIMESCALEMOD = -Wno-TIMESCALEMOD
+# new flag for Verilator v4.226 and beyond
+VLATOR_TIMING = --timing
 VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY $(VLATOR_TIMESCALEMOD)
 VERILATOR_LINT = $(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $(filter %.v %.sv, $^)
-VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN --MMD --Mdir $(DEPDIR)
+VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN $(VLATOR_TIMING) --MMD --Mdir $(DEPDIR)
 VERILATOR_SIM = $(VERILATOR) --trace-fst -O2 $(VLATOR_LINT_IGNORE) $(VG_ALL) +define+VERILATOR_SIM
 
 FMC_MAP = awk -F\" 'NR==FNR{a[$$2]=$$4;next}$$4 in a{printf "NET %-15s LOC = %-4s | IOSTANDARD = %10s; \# %s\n",$$2,a[$$4],$$6,$$4}'
@@ -64,7 +80,7 @@ VIVADO_FLASH = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/vivado_flash.tcl -t
 VIVADO_CREATE_IP = $(VIVADO_CMD) -source $(BUILD_DIR)/vivado_tcl/lbl_ip.tcl $(BUILD_DIR)/vivado_tcl/create_ip.tcl -tclargs
 OCTAVE_SILENT = $(OCTAVE) -q $<
 PS2PDF = ps2pdf -dEPSCrop $< $@
-CHECK = $(VVP) $< | awk -f $(filter %.awk, $^)
+CHECK = $(VVP) $<
 BIT2RBF = bit2rbf $@ < $<
 GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 
@@ -82,14 +98,11 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 %.a: %.o
 	$(ARCH)
 
-%_tb: %_tb.v %_tb_auto
+# Sorry about the conditional; I couldn't find any other way to make newad work.
+ifndef NO_DEFAULT_TB_RULE
+%_tb: %_tb.v
 	$(VERILOG_TB)
-
-%_tb_auto: $(AUTOGEN_DIR)/addr_map_%_tb.vh $(AUTOGEN_DIR)/%_tb_auto.vh %_auto
-	@echo .
-
-%_auto: $(AUTOGEN_DIR)/addr_map_%.vh $(AUTOGEN_DIR)/%_auto.vh
-	@echo .
+endif
 
 %_live: %_tb.v
 	$(VERILOG_TB)
@@ -109,7 +122,7 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 %_view: %.vcd %.gtkw
 	$(VERILOG_VIEW)
 
-%_check: %_tb $(BUILD_DIR)/testcode.awk
+%_check: %_tb
 	$(VERILOG_CHECK)
 
 %_lint: %.v %_auto
@@ -126,6 +139,10 @@ V%_tb: $(wildcard *.sv) $(wildcard *.v)
 %.pdf: %.eps
 	$(PS2PDF)
 
+# Kind of weird to use xcircuit's rc file for this purpose, but it does work.
+%.svg: %.eps
+	cd $(dir $@) && echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
+
 %.rbf: %.bit
 	$(BIT2RBF)
 
@@ -137,6 +154,15 @@ V%_tb: $(wildcard *.sv) $(wildcard *.v)
 
 %.dat: %_tb
 	$(VVP) $< $(VVP_FLAGS) > $@
+
+# cdc_snitch
+%_yosys.json: %.v $(BUILD_DIR)/cdc_snitch_proc.ys
+	$(YOSYS_JSON_PRECHECK)
+	$(YOSYS) --version
+	$(YOSYS) $(YOSYS_QUIET) -p "$(YOSYS_READ_VERILOG) $(YOSYS_JSON_OPTION) $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
+
+%_cdc.txt: $(BUILD_DIR)/cdc_snitch.py %_yosys.json
+	$(PYTHON) $^ -o $@
 
 ifeq ($(XILINX_TOOL), VIVADO)
 %_$(DAUGHTER).xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/%.xdc  $(BOARD_SUPPORT_DIR)/$(DAUGHTER)/fmc.map
@@ -175,7 +201,7 @@ else
 	promgen -w -spi -p mcs -o $@ -s 16384 -u 0 $<
 endif
 
-UNISIM_CRAP = 'BUFGCE|IOBUF|BUFG|IBUF|IBUFDS_GTE2|ICAPE2|IOBUF|STARTUPE2|MMCME2_BASE'
+UNISIM_CRAP = 'BUFG|BUFGCE|BUFG_GT|BUFH|BUFIO|BUFR|FD|IBUF|IBUFDS|IBUFDS_GTE2|IBUFDS_GTE4|IBUFGDS|IDDR|IDELAYE2|IOBUF|MMCME2_BASE|MMCME4_ADV|OBUF|OBUFDS|ODDR'
 
 # Auto-generated verilog entities shall be set by globally appending to this variable
 $(DEPDIR)/%.bit.d: %.v $(VERILOG_AUTOGEN)
@@ -194,46 +220,11 @@ LB_AW = 10
 EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
 COMMA := ,
-NEWAD_DIRS = .
-NEWAD_ARGS = -d $(subst $(SPACE),$(COMMA),$(NEWAD_DIRS)) -i $< -w $(LB_AW)
 
-define NEWAD_O
-mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -o $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
-endef
-define NEWAD_A
-mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -a $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
-endef
-define NEWAD_L
-mkdir -p $(AUTOGEN_DIR); $(PYTHON) $(BUILD_DIR)/newad.py -l -r $@ $(NEWAD_ARGS) $(NEWAD_ARGS_$*)
-endef
-define REV_JSON
-$(PYTHON) $(BUILD_DIR)/reverse_json.py $< > $@
-endef
-
-$(AUTOGEN_DIR)/%_auto.vh: %.sv
-	$(NEWAD_O)
-$(AUTOGEN_DIR)/%_auto.vh: %.v
-	$(NEWAD_O)
-
-$(AUTOGEN_DIR)/addr_map_%.vh: %.sv
-	$(NEWAD_A)
-$(AUTOGEN_DIR)/addr_map_%.vh: %.v
-	$(NEWAD_A)
-
-$(AUTOGEN_DIR)/regmap_%.json: %.sv
-	$(NEWAD_L)
-$(AUTOGEN_DIR)/regmap_%.json: %.v
-	$(NEWAD_L)
-
-$(AUTOGEN_DIR)/scalar_%_regmap.json: %.sv
-	$(REV_JSON)
-$(AUTOGEN_DIR)/scalar_%_regmap.json: %.v
-	$(REV_JSON)
-
-# http://www.graphviz.org/content/dot-language
+# https://graphviz.org/doc/info/lang.html
 # apt-get install graphviz
 %.ps:   %.dot
 	dot -Tps $< -o $@
 
 %_support.vh: $(BS_HARDWARE_DIR)/%_support.in
-	perl $(BUILD_DIR)/regmap_proc.pl $< > $@
+	$(PERL) $(BUILD_DIR)/regmap_proc.pl $< > $@

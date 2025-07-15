@@ -151,6 +151,9 @@
               `ifdef GT1_ENABLE gt1_txresetdone & gt1_rxresetdone, `else 1'b0, `endif
               `ifdef GT0_ENABLE gt0_txresetdone & gt0_rxresetdone `else 1'b0 `endif };
 
+   // practice good preprocessor hygiene
+   `undef Q_GT_MODULE
+
 `else // SIMULATE
 
    // Instantiate dummy components to help dependency generation and basic syntax checking
@@ -162,4 +165,3 @@
       .pll1_lock ());
 
 `endif // SIMULATE
-

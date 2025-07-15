@@ -29,8 +29,9 @@ CMP :10 0xdeadbeef
 PRINT "RX Location:"
 CMP :9 0x3
 
-PRINT "RX Frame counter:"
+PRINT "RX Frame counter and errors:"
 RDW :2
+RDW :5
 
 PRINT "Latency:"
 RDW :3
@@ -58,7 +59,7 @@ CMP :16 0x0
 
 PRINT "Fault count:"
 CMP :4 0x0
-CMP :5 0x0
+RDW :5
 CMP :6 0x0
 
 WAIT 2
@@ -69,4 +70,3 @@ WAIT 1
 
 PRINT "Check for LOS==1"
 CMP :6 0x1
-

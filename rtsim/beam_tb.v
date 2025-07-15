@@ -6,6 +6,7 @@ reg clk;
 reg reset;
 integer cc;
 reg trace;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("beam.vcd");
@@ -13,11 +14,15 @@ initial begin
 	end
 	trace = $test$plusargs("trace");
 	reset=0;
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<1500; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish(0);
 end
+`endif //  `ifdef SIMULATE
 
 // Beam pulse rate = 1300 MHz / 1400 = 928.57 kHz
 // Clock rate = 1320 MHz / 14 = 94.286 MHz
@@ -30,6 +35,7 @@ beam dut(.clk(clk), .ena(1'b1), .reset(reset),
 	.phase_step(phase_step), .modulo(modulo),
 	.phase_init(12'b0));
 
+`ifdef SIMULATE
 always @(posedge clk) begin
 	#1;
 	if (trace && (pulse!=0)) $display(cc,pulse);
@@ -38,5 +44,6 @@ end
 // Keep from having to look at 3000 boring cycles at the beginning
 // of a simulation
 initial begin #1; dut.phase=-26; end
+`endif
 
 endmodule

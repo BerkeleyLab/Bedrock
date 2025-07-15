@@ -7,6 +7,9 @@ module spi_test_tb;
     localparam CLK_PERIOD = 8;    // Simulated clock period in [ns]
     localparam MAX_SIM    = 84000;   // ns
     localparam N_MODELS   = 2;
+    localparam ROM0 = 32'hdeadbeaf;
+    localparam ROM1 = 24'h123456;
+
     reg mem_clk=1;
     always #(CLK_PERIOD/2)   mem_clk = ~mem_clk;
 
@@ -42,7 +45,7 @@ module spi_test_tb;
         bit_reverse(ROM1, rom1r);
         #MAX_SIM;
         $display("TIMEOUT\nFAIL\n");
-        $stop();
+        $stop(0);
     end
 
     // --------------------------------------------------------------
@@ -89,7 +92,7 @@ module spi_test_tb;
                 $finish;
             end
             $display("FAIL");
-            $stop;
+            $stop(0);
         end
     end
 
@@ -131,8 +134,6 @@ module spi_test_tb;
     // --------------------------------------------------------------
     //  SPI model (hardware)
     // --------------------------------------------------------------
-    localparam ROM0 = 32'hdeadbeaf;
-    localparam ROM1 = 24'h123456;
     spi_model #(.ID(0), .CPOL(0), .DW(32)) spi_model0_inst (
         .ROM  (ROM0),
         .cs   (spi_cs[0]  ),

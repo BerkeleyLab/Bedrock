@@ -36,7 +36,11 @@
 // At the moment, there is no check that they complete, so any pipelining
 // that takes place is outside the purview of this module.
 
-module mem_gateway(
+module mem_gateway #(
+	parameter read_pipe_len=3,  // minimum allowed value is 1
+	parameter n_lat=8,  // minimum allowed value is 5 + read_pipe_len
+	parameter enable_bursts=0
+) (
 	input clk,   // timespec 6.8 ns
 	// client interface with RTEFI, see doc/clients.eps
 	input [10:0] len_c,
@@ -50,15 +54,12 @@ module mem_gateway(
 	output control_rd,
 	output control_write,
 	output control_rd_valid,
+	output control_prefill,
 	// length of control_pipe_rd is read_pipe_len+1, see above
 	output [read_pipe_len:0] control_pipe_rd,
 	output [31:0] data_out,
 	input [31:0] data_in
 );
-
-parameter read_pipe_len=3;  // minimum allowed value is 1
-parameter n_lat=8;  // minimum allowed value is 5 + read_pipe_len
-parameter enable_bursts=0;
 
 // Pipeline match
 wire [7:0] pdata;
@@ -132,5 +133,13 @@ wire [7:0] xdata = osr[31:24];  // Data to be transmitted
 reg_delay #(.len(n_lat-read_pipe_len-5), .dw(8)) finale(.clk(clk),
 	.gate(1'b1), .reset(1'b0),
 	.din(xdata), .dout(odata));
+
+// Experimental - leading edge detect on raw_l
+reg raw_l_r=0, control_prefill_r;
+always @(posedge clk) begin
+	raw_l_r <= raw_l;
+	control_prefill_r <= raw_l & ~raw_l_r;
+end
+assign control_prefill = control_prefill_r;
 
 endmodule

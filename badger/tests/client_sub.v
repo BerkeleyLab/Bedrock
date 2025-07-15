@@ -5,7 +5,7 @@
 module client_sub(
 	output clk,
 	// Synthesized data to DUT
-	output [10:0] len_c,
+	output reg [10:0] len_c,
 	output [7:0] idata,
 	output raw_l,
 	output raw_s,
@@ -50,7 +50,8 @@ reg [7:0] oxd=0;  // o for origin
 reg payload_short=0, payload=0;
 reg udp_iflag=0;
 reg [7:0] udp_idata;
-reg [10:0] udp_count, len_c=0;
+reg [10:0] udp_count;
+initial len_c=0;
 always @(posedge clk) begin
 	len_c <= 11'bx;
 	oxd <= 8'hxx;

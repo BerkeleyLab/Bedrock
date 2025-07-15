@@ -29,10 +29,9 @@ d_in[N]+--->  S  +---+           |
 module serializer_multichannel #(
    parameter n_chan = 8, // Number of channels to serialize
    parameter dw = 16,
-   parameter l_to_r=1) // l_to_r=1: Channel shifting starts with CH0 (default)
+   parameter l_to_r=1  // l_to_r=1: Channel shifting starts with CH0 (default)
                        // l_to_r=0: Channel shifting starts with last CH
-(
-
+) (
    input                 clk,
    input                 sample_in, // Sampling signal which determines when to push inputs to belt
    input [n_chan*dw-1:0] data_in,   // Flattened array of unprocessed data streams
@@ -49,10 +48,11 @@ module serializer_multichannel #(
 
    genvar ch_id;
    generate for (ch_id=0; ch_id < n_chan; ch_id=ch_id+1) begin : g_serializer
-      if (l_to_r == 0) // CH0 first
+      if (l_to_r == 0) begin : g_l_to_r  // CH0 first
          assign sr_in[ch_id] = data_in[(n_chan-ch_id)*dw-1: (n_chan-ch_id-1)*dw];
-      else
+      end else begin : g_r_to_l
          assign sr_in[ch_id] = data_in[(ch_id+1)*dw-1: ch_id*dw];
+      end
 
       serialize #(
          .dwi(dw))

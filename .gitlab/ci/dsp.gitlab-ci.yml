@@ -1,9 +1,21 @@
 dsp_test:
   before_script:
-    - cd dsp && export PYTHONPATH=../build-tools/
+    - cd dsp
   stage: test
   script:
     - make && make checks
+
+dsp_hosted_test:
+  before_script:
+    - cd dsp/hosted && export PYTHONPATH=../../build-tools/
+  stage: test
+  script:
+    - make && make checks
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - dsp/hosted/fdbk_core_plot.pdf
 
 digaree_test:
   before_script:

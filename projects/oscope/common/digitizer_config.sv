@@ -12,7 +12,8 @@ module digitizer_config(
 	input         lb_rd,
 	input [23:0]  lb_addr,
 	input [31:0]  lb_dout,
-		      zest_cfg_if.master zif_cfg,
+
+	zest_cfg_if.master zif_cfg,
 
 	// clocks for frequency and phase measurement
 	input         clk200,
@@ -44,40 +45,65 @@ module digitizer_config(
 	output [1:0]  clk_status,
 
 	// software-settable
-	input [31:0]  periph_config, // external
-	input [15:0]  bitslip, // external
-	input [1:0]   U15_spi_read_and_start_r, // external
-	//input       U15_spi_read_r,   // external
-	input [31:0]  U15_spi_data_addr_r, // external
-	//input [15:0] U15_spi_addr_r,   // external
-	input [1:0]   U18_spi_read_and_start_r, // external
-	//input       U18_spi_read_r,   // external
-	input [31:0]  U18_spi_data_addr_r, // external
-	//input  [7:0] U18_spi_addr_r,   // external
-	input         U2_clk_reset_r, // external
-	input         U3_clk_reset_r, // external
-	input [1:0]   adc_mmcm, // external single-cycle
-	input         U2_iserdes_reset_r, // external
-	input         U3_iserdes_reset_r, // external
-	input         U4_reset_r, // external
-	input         mmcm_reset_r, // external
-	input         idelayctrl_reset_r, // external
-	// lb_clk domain
-	input [7:0]   banyan_mask, // external
-	input         phasex_trig, // external single-cycle
-	input         llspi_we, // external we-strobe
-	input         llspi_re, // -- external strobe
-	input         clk_status_we, // external we-strobe
-	input [4:0]   scanner_debug, // external
-	input         autoset_enable, // -- external
-	input         scan_trigger, // -- external single-cycle
-	input         scan_trigger_we, // external we-strobe
-	// lb_clk domain, but only because I flag_xdomain to adc_clk
-	input         rawadc_trig, // external single-cycle
-	input [9:0]   adc_downsample_ratio, // external
 	// adc_clk domain
-	input [9:0]   sync_ad7794_cset, // external
-	input [5:0]   sync_tps62210_cset  // external
+	(* external *)
+	input [31:0] periph_config,    // external
+	(* external *)
+	input [15:0] bitslip,          // external
+	(* external *)
+	input [31:0] U15_spi_data_addr_r,   // external
+	(* external *)
+	input [31:0] U18_spi_data_addr_r,   // external
+	(* external *)
+	input        U2_clk_reset_r,   // external
+	(* external *)
+	input        U3_clk_reset_r,   // external
+	(* external, signal_type="single-cycle" *)
+	input [1:0]   adc_mmcm, // external single-cycle
+	(* external *)
+	input        U2_iserdes_reset_r, // external
+	(* external *)
+	input        U3_iserdes_reset_r, // external
+	(* external *)
+	input        U4_reset_r,         // external
+	(* external *)
+	input        mmcm_reset_r,       // external
+	(* external *)
+	input        idelayctrl_reset_r, // external
+
+	// lb_clk domain
+	// newad-force lb domain
+	(* external, cd="lb" *)
+	input [1:0] U15_spi_read_and_start_r,  // external
+	(* external, cd="lb" *)
+	input [1:0] U18_spi_read_and_start_r,  // external
+	(* external, cd="lb" *)
+	input [7:0] banyan_mask, // external
+	(* external, signal_type="single-cycle", cd="lb" *)
+	input phasex_trig, // external single-cycle
+	(* external, signal_type="we-strobe", cd="lb" *)
+	input llspi_we,  // external we-strobe
+	input llspi_re,  // -- external strobe
+	(* external, signal_type="we-strobe", cd="lb" *)
+	input clk_status_we,  // external we-strobe
+	(* external, cd="lb" *)
+	input [4:0] scanner_debug, // external
+	input autoset_enable,  // -- external
+	input scan_trigger,  // -- external single-cycle
+	(* external, signal_type="we-strobe", cd="lb" *)
+	input scan_trigger_we,  // external we-strobe
+	// lb_clk domain, but only because I flag_xdomain to adc_clk
+	(* external, signal_type="single-cycle", cd="lb" *)
+	input rawadc_trig,  // external single-cycle
+
+	// adc_clk domain
+	// newad-force clk1x domain
+	(* external *)
+	input [9:0] adc_downsample_ratio,  // external
+	(* external *)
+	input [9:0] sync_ad7794_cset,  // external
+	(* external *)
+	input [5:0] sync_tps62210_cset  // external
 );
 
 assign zif_cfg.U15_sclk_in    = 1'b0;
@@ -193,6 +219,12 @@ assign clk_status = clk_status_r;
 flag_xdomain rawadc_trig_xdomain (.clk1(lb_clk), .flagin_clk1(rawadc_trig),
 	.clk2(adc_clk), .flagout_clk2(rawadc_trig_x));
 
+// One more clock-domain change, so idelay_scanner can run in pure lb_clk domain
+wire [127:0] permuted_data;  // from banyan_mem
+wire [15:0] scanner_adc_val = permuted_data[15:0];
+reg [15:0] scanner_adc_val_r=0;
+always @(posedge lb_clk) scanner_adc_val_r <= scanner_adc_val;
+
 // 16 idelay registers mapped to lb_addr 112-127
 // See idelay_base in static_oscope_regmap.json
 wire scan_running;
@@ -201,8 +233,6 @@ wire [4:0] hw_data;
 wire hw_strobe;
 wire [7:0] scanner_banyan_mask;
 wire [2:0] scanner_adc_num;  // not used
-wire [127:0] permuted_data;  // from banyan_mem
-wire [15:0] scanner_adc_val = permuted_data[15:0];
 wire lb_idelay_write = lb_strobe & ~lb_rd & (lb_addr[23:4] == 20'h19007);
 idelay_scanner #(.use_decider(1)) scanner(
 	.lb_clk(lb_clk), .lb_addr(lb_addr[3:0]), .lb_data(lb_dout[4:0]),
@@ -214,7 +244,7 @@ idelay_scanner #(.use_decider(1)) scanner(
 	.debug_sel(scanner_debug[4]), .debug_addr(scanner_debug[3:0]),
 	.hw_addr(hw_addr), .hw_data(hw_data), .hw_strobe(hw_strobe),
 	.banyan_mask(scanner_banyan_mask), .adc_num(scanner_adc_num),
-	.adc_clk(adc_clk), .adc_val(scanner_adc_val)
+	.adc_clk(lb_clk), .adc_val(scanner_adc_val_r)
 );
 
 // process the output hw_ bus from idelay_scanner, sending to IDELAYE2
@@ -289,20 +319,16 @@ assign zif_cfg.U2_dco_clk_in = zif_cfg.U2_dco_clk_out;
 
 `define CONFIG_PHASE_DIFF
 `ifdef CONFIG_PHASE_DIFF
+wire err_ff_U2, err_ff_U3;
+wire [12:0] phdiff_out_U2, phdiff_out_U3;
+wire [13:0] vfreq_out_U2, vfreq_out_U3;
 // Measure the phases of the two BUFR outputs relative to adc_clk (U2's BUFR after MMCM and BUFG)
-wire [12:0] clk_phase_diff_out_U2,  clk_phase_diff_out_U3;
-wire [13:0] clk_phase_diff_freq_U2, clk_phase_diff_freq_U3;
-wire        clk_phase_diff_locked_U2,  clk_phase_diff_locked_U3;
-phase_diff phase_diff_U2(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U2_clk_div_bufr), .sclk(clk200),
-	.rclk(lb_clk), .phdiff_out(clk_phase_diff_out_U2),
-    .ext_div1(1'b0), .ext_div2(1'b0),
-	.vfreq_out(clk_phase_diff_freq_U2), .locked(clk_phase_diff_locked_U2));
-assign phase_status_U2 = {~clk_phase_diff_locked_U2, clk_phase_diff_freq_U2,4'b0, clk_phase_diff_out_U2};
-phase_diff phase_diff_U3(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U3_clk_div_bufr), .sclk(clk200),
-	.rclk(lb_clk), .phdiff_out(clk_phase_diff_out_U3),
-    .ext_div1(1'b0), .ext_div2(1'b0),
-	.vfreq_out(clk_phase_diff_freq_U3), .locked(clk_phase_diff_locked_U3));
-assign phase_status_U3 = {~clk_phase_diff_locked_U3,clk_phase_diff_freq_U3,4'b0,clk_phase_diff_out_U3};
+phase_diff #(.delta(33)) phase_diff_U2(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U2_clk_div_bufr), .uclk2g(1'b1), .sclk(clk200),
+	.rclk(lb_clk), .adv(14'd3862), .phdiff_out(phdiff_out_U2), .vfreq_out(vfreq_out_U2), .err_ff(err_ff_U2));
+phase_diff #(.delta(33)) phase_diff_U3(.uclk1(zif_cfg.U2_clk_div_bufg), .uclk2(zif_cfg.U3_clk_div_bufr), .uclk2g(1'b1), .sclk(clk200),
+	.rclk(lb_clk), .adv(14'd3862), .phdiff_out(phdiff_out_U3), .vfreq_out(vfreq_out_U3), .err_ff(err_ff_U3));
+assign phase_status_U2 = {err_ff_U2, vfreq_out_U2, 4'b0, phdiff_out_U2};
+assign phase_status_U3 = {err_ff_U3, vfreq_out_U3, 4'b0, phdiff_out_U3};
 `else
 assign phase_status_U2 = 0;
 assign phase_status_U3 = 0;
@@ -310,7 +336,9 @@ assign phase_status_U3 = 0;
 
 `define CONFIG_BANYAN
 `ifdef CONFIG_BANYAN
-// Banyan-routed memory, simple one-shot fill for now
+// Banyan-routed memory, that features a simple one-shot fill.
+// Use rawadc_trig for a direct asynchronous fill, or rawadc_trig_req
+// to start filling at the next external trigger (ext_trig).
 parameter banyan_aw = 14;  // 8 blocks of RAM, each 16K x 16
 reg banyan_run=0, banyan_run_d=0;
 wire rollover, full;

@@ -1,6 +1,6 @@
 // trivial substitute for xilinx unisim models
 // for more info refer to
-// https://www.xilinx.com/support/documentation/user_guides/ug471_7Series_SelectIO.pdf
+// https://docs.amd.com/go/en-US/ug471_7Series_SelectIO
 
 module IDDR #(
     parameter DDR_CLK_EDGE="SAME_EDGE_PIPELINED"
@@ -21,14 +21,17 @@ initial begin
     end
 end
 
+// verilator lint_save
+// verilator lint_off MULTIDRIVEN
 reg [1:0] r;
+// verilator lint_restore
 reg [1:0] r1;
-assign {Q2, Q1} = r1;
-
 always @(posedge C) begin
     r[0] <= D;
     r1   <= r;
 end
 always @(negedge C) r[1] <= D;
+
+assign {Q2, Q1} = r1;
 
 endmodule

@@ -9,10 +9,13 @@ initial begin
 		$dumpfile("badge_trace.vcd");
 		$dumpvars(5,badge_trace_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<150; cc=cc+1) begin
 		clk=0; #4;
 		clk=1; #4;
 	end
+	$display("PASS");
+	$finish(0);
 end
 
 wire ibadge_clk=clk;

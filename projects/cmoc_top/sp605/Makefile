@@ -24,9 +24,9 @@ larger_shell_mgt_sp605.bit: s6_gtp_params.vh $(AUTOGEN_DIR)/config_romx.v
 #mgt_base.ucf: larger_extra.ucf
 endif
 
-vpath %.v $(APP_DIR) $(RTSIM_DIR) $(DSP_DIR) $(BADGER_DIR)
+vpath %.v $(APP_DIR) $(RTSIM_DIR) $(DSP_DIR) $(DSP_DIR)/hosted $(BADGER_DIR)
 
-include $(BUILD_DIR)/top_rules.mk
+include $(BUILD_DIR)/newad_top_rules.mk
 include $(BADGER_DIR)/rules.mk
 include $(BS_HARDWARE_DIR)/rules.mk
 include $(FPGA_FAMILY_DIR)/$(FPGA_FAMILY)/rules.mk

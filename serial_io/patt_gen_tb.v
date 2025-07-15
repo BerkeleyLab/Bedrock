@@ -25,6 +25,7 @@ module patt_gen_tb;
 
    integer SEED;
    integer tx_cnt=0;
+   reg     pgen_disable = 1;
 
    initial begin
       if ($test$plusargs("vcd")) begin
@@ -43,7 +44,7 @@ module patt_gen_tb;
       $display("%d successfully matched patterns", tx_cnt);
       if (fail || tx_cnt < 80) begin
          $display("FAIL");
-         $stop;
+         $stop(0);
       end else begin
          $display("PASS");
          $finish;
@@ -56,8 +57,7 @@ module patt_gen_tb;
    // ----------------------
    // Generate stimulus
    // ----------------------
-   reg         pgen_disable = 1;
-   wire [4:0]  pgen_rate;
+   wire [4:0]  pgen_rate_maybe, pgen_rate;
    wire        pgen_test_mode;
    wire [2:0]  pgen_inc_step;
    wire [15:0] pgen_usr_data;
@@ -69,6 +69,7 @@ module patt_gen_tb;
    integer rand_setup;
 
    // Generate a random setup and wait for match
+   wire    rx_match;
    always @(posedge cc_clk) begin
       if (match_tout==0 || (match_cnt >= MATCH_THRES)) begin
          if (match_tout==0 && pgen_disable==0) begin
@@ -88,7 +89,9 @@ module patt_gen_tb;
       end
    end
 
-   assign {pgen_rate, pgen_test_mode, pgen_inc_step, pgen_usr_data} = rand_setup;
+   assign {pgen_rate_maybe, pgen_test_mode, pgen_inc_step, pgen_usr_data} = rand_setup;
+   // pgen_rate = 1 is invalid
+   assign pgen_rate = (pgen_rate_maybe == 1) ? 2 : pgen_rate_maybe;
 
    flag_xdomain i_flag_xdomain (
       .clk1 (tx_clk), .flagin_clk1 (rx_valid),
@@ -100,7 +103,6 @@ module patt_gen_tb;
    wire        tx_valid;
    wire [15:0] tx_data;
    wire [15:0] rx_data;
-   wire        rx_match;
    wire [15:0] rx_err_cnt;
 
    patt_gen #(
@@ -130,6 +132,12 @@ module patt_gen_tb;
    reg [15:0] pgen_usr_data_dly  [DELAY_REG-1:0];
    reg        rx_valid_dly       [DELAY_DATA-1:0];
    reg [15:0] rx_data_dly        [DELAY_DATA-1:0];
+
+   // Initialize delay pipe so simulation doesn't start with a bunch of Xs
+   integer ix;
+   initial begin
+      for (ix=0; ix<DELAY_DATA; ix=ix+1) rx_valid_dly[ix] = 0;
+   end
 
    integer i;
    always @(posedge cc_clk) begin

@@ -17,7 +17,7 @@ module construct #(
 	// allowance Rx/Tx frequency offset.
 	// At the other end, p_offset + max(fp_offset) < (2048-MTU-guard)
 ) (
-	input clk,
+	input clk,  // timespec 6.8 ns
 	input [paw-1:0] gray_state,
 	// port to MAC/IP config, single-cycle latency
 	output [3:0] ip_a,
@@ -39,15 +39,16 @@ module construct #(
 	output eth_strobe_short  // doesn't
 );
 
-// Capture state across clock domains, convert back to binary
-reg [paw-1:0] gray_l=0, state=0;
+// Capture state across clock domains, then convert back to binary
+wire [paw-1:0] gray_l;
+// Better to pull this first step up to rtefi_center?
+reg_tech_cdc gcx[paw-1:0] (.C(clk), .I(gray_state), .O(gray_l));
+// verilator lint_save
 // verilator lint_off UNOPTFLAT
 wire [paw-1:0] new_state = gray_l ^ {1'b0, new_state[paw-1:1]};
-// verilator lint_on UNOPTFLAT
-always @(posedge clk) begin
-	gray_l <= gray_state;
-	state <= new_state;
-end
+// verilator lint_restore
+reg [paw-1:0] state=0;
+always @(posedge clk) state <= new_state;
 
 // Debugging hook
 reg [paw-1:0] old_state=0, state_diff=0;

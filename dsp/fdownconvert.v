@@ -13,7 +13,10 @@
 // | I | =  |  sin[n + 1]\theta   -sin n\theta |  X  | a_data[n]   |
 // | Q |    | -cos[n + 1]\theta    cos n\theta |     | a_data[n+1] |
 // Larry Doolittle, LBNL, 2014
-module fdownconvert(
+module fdownconvert #(
+	parameter a_dw=16,  // XXX don't change this
+	parameter o_dw=16   // XXX don't change this
+) (
 	input clk,  // timespec 6.66 ns
 	input mod2,
 	input signed [17:0] cosd,  // LO input
@@ -28,9 +31,6 @@ module fdownconvert(
 	output o_trig,
 	output time_err   // TODO: Explain this
 );
-
-parameter a_dw=16; // XXX don't change this
-parameter o_dw=16; // XXX don't change this
 
 // reordering logic, generate the delayed signals for the above matrix multiplication
 reg signed [17:0] cosd_d1=0, cosd_d2=0, cosd_r=0;
@@ -72,6 +72,8 @@ always @(posedge clk) begin
 	last_mod2 <= mod2;
 	time_err_r <= (mod2 ^ ~last_mod2) | ~a_gate;
 end
+
+`undef SAT
 
 assign o_data = iq_out0;
 assign o_gate = 1'b1;

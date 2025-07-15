@@ -13,9 +13,8 @@
 #define LEN_MOD (981)
 #define LEN_F(x) (492+((x)*8)%LEN_MOD)
 #define NEXT(x) ((x*3+1)&0xff)
-static unsigned udp_handle(char *data, unsigned data_len)
+static unsigned udp_handle(const char *data, unsigned data_len)
 {
-	unsigned u;
 	unsigned key = data[0]&0xff;
 	unsigned sta = key;
 	unsigned want_len = LEN_F(key);
@@ -31,17 +30,18 @@ static unsigned udp_handle(char *data, unsigned data_len)
 		printf("length not %u", want_len);
 		fail++;
 	}
-	if (1) for (u=0; u<data_len; u++) {
+	if (1) for (unsigned u=0; u<data_len; u++) {
 		unsigned want_d = sta ^ (u&0xff);
-		if ((data[u]&0xff) != want_d) {
-			printf("data[%u]=%2.2x!=%2.2x\n", u, data[u]&0xff, want_d);
+		unsigned actual_d = data[u]&0xff;
+		if (actual_d != want_d) {
+			printf("data[%u]=%2.2x!=%2.2x\n", u, actual_d, want_d);
 			fail++;
 		}
 		sta = NEXT(sta);
 	}
 	if (fail || PRINT_PER_RX_PACKET) printf("udp_handle  length=%u  key=%u  ", data_len, key);
 	if (fail) {
-		printf("%d FAIL\n", fail);
+		printf("%u FAIL\n", fail);
 	} else {
 		if (PRINT_PER_RX_PACKET) printf("PASS\n");
 	}
@@ -69,8 +69,8 @@ static void primary_loop(int usd, unsigned npack, unsigned juggle)
 	struct sockaddr sa_xmit;
 	unsigned int sa_xmit_len;
 	struct timeval to;
-	int i, pack_len;
-	int debug1=0;
+	int pack_len;
+	const int debug1=0;
 	unsigned probes_sent=0, probes_recv=0, probes_fail=0;
 	unsigned timeouts=0;
 	static char incoming[1500];
@@ -78,16 +78,15 @@ static void primary_loop(int usd, unsigned npack, unsigned juggle)
 	for (probes_sent=0; probes_sent<juggle; probes_sent++) {
 		send_packet(usd, probes_sent);
 	}
-	to.tv_sec=0;
-	to.tv_usec=0;
 	for (;npack == 0 || probes_recv < npack;) {
+		int i;
 		FD_ZERO(&fds_r);
 		FD_SET(usd,&fds_r);
 		FD_ZERO(&fds_e);
 		FD_SET(usd,&fds_e);
 		to.tv_sec=0;
 		to.tv_usec=10000;
-		i=select(usd+1,&fds_r,NULL,&fds_e,&to);
+		i = select(usd+1,&fds_r,NULL,&fds_e,&to);
 		  /* Wait on read or error */
 		if (debug1) printf("select returns %d,", i);
 		if ((i!=1)||(!FD_ISSET(usd,&fds_r))) {
@@ -122,6 +121,7 @@ static void primary_loop(int usd, unsigned npack, unsigned juggle)
 		}
 		to.tv_sec=0;
 		to.tv_usec=0;
+		/* Remember there's a continue statement above */
 	}
 	printf("%u packets sent, %u received, %u failed, %u timeouts\n",
 		probes_sent, probes_recv, probes_fail, timeouts);
@@ -130,7 +130,7 @@ static void primary_loop(int usd, unsigned npack, unsigned juggle)
 static void stuff_net_addr(struct in_addr *p, char *hostname)
 {
 	struct hostent *server;
-	server=gethostbyname(hostname);
+	server = gethostbyname(hostname);
 	if (server == NULL) {
 		herror(hostname);
 		exit(1);

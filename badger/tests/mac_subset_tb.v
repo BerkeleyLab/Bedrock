@@ -21,9 +21,13 @@ initial begin
 		clk=0; #4;  // 125 MHz
 		clk=1; #4;
 	end
-	$display("%s", fail ? "FAIL" : "PASS");
-	if (fail) $stop();
-	$finish();
+	if (fail) begin
+		$display("FAIL");
+		$stop(0);
+	end else begin
+		$display("PASS");
+		$finish(0);
+	end
 end
 
 // Fake scanner
@@ -60,6 +64,7 @@ reg [15:0] host_wdata;
 
 // Host bus driven from file
 reg wval, wait_mode=0;
+wire done;
 always @(posedge clk) begin
 	host_write <= 0;
 	case (1)
@@ -93,7 +98,6 @@ mac_compat_dpram #(
 );
 
 // DUT
-wire done;
 wire [7:0] mac_data;
 wire strobe_s, strobe_l;
 mac_subset #(.mac_aw(mac_aw), .latency(latency), .stretch(stretch), .ifg(ifg)) mac(

@@ -1,4 +1,7 @@
-module lmk01801 #(parameter flip_clk=0, parameter SPIMODE="passthrough") (
+module lmk01801 #(
+   parameter flip_clk=0,
+   parameter SPIMODE="passthrough"
+) (
    input CLKOUT3_INV,
    input CLKOUT3,
    output CLKUWIRE,
@@ -13,7 +16,7 @@ module lmk01801 #(parameter flip_clk=0, parameter SPIMODE="passthrough") (
 );
 
 generate
-if (SPIMODE=="passthrough")begin
+if (SPIMODE=="passthrough")begin: passthrough
    assign CLKUWIRE  = clkuwire_in;
    assign LEUWIRE   = leuwire_in;
    assign DATAUWIRE = datauwire_inout;
@@ -34,4 +37,3 @@ IBUFDS #(.DIFF_TERM("TRUE")) ibuf_clk (
 BUFG bufg_i (.I(clk_ibufgds), .O(clkout));
 `endif
 endmodule
-

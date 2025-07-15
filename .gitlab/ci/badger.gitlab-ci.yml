@@ -1,0 +1,28 @@
+badger_test:
+  stage: test
+  before_script:
+    - cd badger/tests && make clean && sh ./tap-setup.sh
+  script:
+    - make && bash tftp_test.sh && bash speed_check.sh
+
+badger_ac701:
+  stage: synthesis
+  before_script:
+    - cd badger/tests && ls /non-free
+  script:
+    - PATH=$XILINX_VIVADO/bin:$PATH make ac701_rgmii_vtest.bit
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 2 days
+    paths:
+      - badger/tests/_xilinx/ac701_rgmii_test.reports
+      - badger/tests/ac701_rgmii_vtest.bit
+
+badger_ac701_run:
+  stage: program
+  tags:
+    - deploy
+  dependencies:
+    - badger_ac701
+  script:
+    - cd badger/tests && test -r ac701_rgmii_vtest.bit && SERIAL_NUM_OPT="-s 210203356870" sh teststand_ac701.sh

@@ -1,0 +1,66 @@
+[timestart] 0
+[size] 959 1015
+[pos] -1 -1
+*-6.000000 35 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] phs_avg_tb.
+[treeopen] phs_avg_tb.dut.
+[sst_width] 212
+[signals_width] 445
+[sst_expanded] 1
+[sst_vpaned_height] 395
+@28
+phs_avg_tb.clk
+@420
+phs_avg_tb.cc
+@200
+-MUL1
+@28
+phs_avg_tb.dut.iq
+@420
+phs_avg_tb.dut.kx[15:0]
+phs_avg_tb.dut.kx1[15:0]
+phs_avg_tb.dut.x[16:0]
+phs_avg_tb.dut.prod_x[32:0]
+phs_avg_tb.dut.xmr[22:0]
+@200
+-
+-MUL2
+@420
+phs_avg_tb.dut.ky[15:0]
+phs_avg_tb.dut.ky1[15:0]
+phs_avg_tb.dut.y[16:0]
+phs_avg_tb.dut.prod_y[32:0]
+phs_avg_tb.dut.ymr[22:0]
+@200
+-
+-Final addition
+@28
+phs_avg_tb.dut.clk
+@420
+phs_avg_tb.dut.x[16:0]
+phs_avg_tb.dut.kx[15:0]
+phs_avg_tb.dut.xmr[22:0]
+phs_avg_tb.dut.y[16:0]
+phs_avg_tb.dut.ky[15:0]
+phs_avg_tb.dut.ymr[22:0]
+phs_avg_tb.dut.sum[23:0]
+phs_avg_tb.dut.sum1[23:0]
+phs_avg_tb.dut.sum_f[24:0]
+phs_avg_tb.dut.sum_filt[24:0]
+phs_avg_tb.dut.intg[24:0]
+phs_avg_tb.dut.z[18:0]
+@200
+-
+-Check bit-width
+@420
+phs_avg_tb.kx_i[15:0]
+phs_avg_tb.dut.kx1[15:0]
+@28
+phs_avg_tb.xmul_val
+@421
+phs_avg_tb.ky_i[15:0]
+phs_avg_tb.dut.ky1[15:0]
+@28
+phs_avg_tb.ymul_val
+[pattern_trace] 1
+[pattern_trace] 0

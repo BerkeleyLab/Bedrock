@@ -4,6 +4,7 @@ module adc_em(
 	input strobe,
 	input signed [17:0] in,
 	input [12:0] rnd,  // randomness
+	(* external *)
 	input signed [9:0] offset,  // external
 	output signed [15:0] adc
 );
@@ -50,6 +51,7 @@ always @(posedge clk) sum <= in + (awgn <<< 3) + offset;
 wire signed [14:0] sum_trunc = sum[18:4];
 reg signed [13:0] sat=0;
 always @(posedge clk) sat <= `SAT(sum_trunc,14,13);
+`undef SAT
 
 // Adjustable delay
 wire signed [13:0] dval;

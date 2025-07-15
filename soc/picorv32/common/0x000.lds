@@ -40,6 +40,15 @@ SECTIONS {
 
     .theRest : {
         . = ALIGN(4);
+        /*
+        We should peek at picolibc.ld to see how they construct an
+        honest .tdata section.  Note that we don't actually use multiple
+        threads; we're just trying to stay compatible with the copy of
+        picolibc shipped by Debian in picolibc-riscv64-unknown-elf.
+        This simple case is good enough for now, so random() can use
+        some memory to hold its state.
+        */
+        __tls_base = .;
         *(*);
         . = ALIGN(4);
     }

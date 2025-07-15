@@ -13,7 +13,7 @@
 
 #define F_CLK                  100000000     // [Hz] for CMODA7
 
-#define BOOTLOADER_DELAY       16
+#define BOOTLOADER_DELAY       160
 #define BOOTLOADER_BAUDRATE    9216000       // Used for fast simulation
 
 #endif

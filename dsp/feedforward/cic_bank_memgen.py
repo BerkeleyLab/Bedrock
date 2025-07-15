@@ -94,7 +94,7 @@ def gen_array(pulse_vals, print_me=True):
     filln = 4*512 - len(pulse_vals)
     pulse_vals += [0] * filln
 
-    if (print_me):
+    if print_me:
         for x in pulse_vals:
             print(x)
 
@@ -110,4 +110,4 @@ if __name__ == "__main__":
 
     gen_array(pulse_vals)  # print the values, do not store array
     # output to cic_bankx_in.dat, which is read by
-    # both cic_bank (compled from cic_bank.c) and cic_bankx_tb.
+    # both cic_bank (compiled from cic_bank.c) and cic_bankx_tb.

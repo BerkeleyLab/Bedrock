@@ -1,5 +1,14 @@
 `timescale 1ns / 1ns
-
+`define AUTOMATIC_self
+`define AUTOMATIC_decode
+`define AUTOMATIC_piezo_couple
+`define AUTOMATIC_compr
+`define AUTOMATIC_amp_lp
+`define AUTOMATIC_cav_elec
+`define AUTOMATIC_prng
+`define AUTOMATIC_a_cav
+`define AUTOMATIC_a_for
+`define AUTOMATIC_a_rfl
 `include "station_auto.vh"
 
 // Single cavity emulator
@@ -48,14 +57,13 @@ module station(
   // Local Bus for simulator configuration
   `AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 
-`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
-`define UNIFORM(x) ((~|(x)) | &(x))  // All 0's or all 1's
-
 // Virtual Piezo
 // Couple the piezo to mechanical drive
+(* lb_automatic *)
 outer_prod piezo_couple  // auto
 	(.clk(clk), .start(start_outer), .x(piezo), .result(piezo_eig_drive),
 	 `AUTOMATIC_piezo_couple
@@ -63,6 +71,7 @@ outer_prod piezo_couple  // auto
 
 // Amplifier compression step
 wire signed [17:0] compress_out;
+(* lb_automatic *)
 a_compress compr // auto
 	(.clk(clk), .iq(iq), .d_in(drive), .d_out(compress_out),
 	`AUTOMATIC_compr);
@@ -72,6 +81,7 @@ wire signed [17:0] ampf_in = compress_out_d; // was drive
 
 // Amplifier low-pass filter, maximum bandwidth 3.75 MHz
 wire signed [17:0] amp_out1;
+(* lb_automatic *)
 lp_pair #(.shift(2)) amp_lp  // auto
 	(.clk(clk), .drive(ampf_in), .drive2(24'b0), .res(amp_out1), `AUTOMATIC_amp_lp);
 
@@ -91,6 +101,7 @@ parameter df_scale=0;     // see cav_freq.v
 
 // Instantiate one cavity
 wire signed [17:0] field, forward, reflect;
+(* lb_automatic *)
 cav_elec #(.mode_shift(mode_shift), .interp_span(interp_span), .df_scale(df_scale), .mode_count(mode_count)) cav_elec // auto
 	(.clk(clk),
 	.iq(iq), .drive(amp_out1), .beam_timing(beam_timing),
@@ -101,17 +112,22 @@ cav_elec #(.mode_shift(mode_shift), .interp_span(interp_span), .df_scale(df_scal
 
 // Pseudorandom number subsystem
 wire [31:0] rnda, rndb;
+(* lb_automatic *)
 prng prng  // auto
 	(.clk(clk), .rnda(rnda), .rndb(rndb),
 	`AUTOMATIC_prng);
 
 // ADCs themselves
 // Offsets could be allowed to drift
+(* lb_automatic *)
 adc_em #(.del(1)) a_cav // auto
 	(.clk(clk), .strobe(iq), .in(field),   .rnd(rnda[12: 0]), .adc(a_field), `AUTOMATIC_a_cav);
+(* lb_automatic *)
 adc_em #(.del(1)) a_for // auto
 	(.clk(clk), .strobe(iq), .in(forward), .rnd(rnda[25:13]), .adc(a_forward), `AUTOMATIC_a_for);
+(* lb_automatic *)
 adc_em #(.del(1)) a_rfl // auto
 	(.clk(clk), .strobe(iq), .in(reflect), .rnd(rndb[12: 0]), .adc(a_reflect), `AUTOMATIC_a_rfl);
 
+`undef AUTOMATIC_prng
 endmodule

@@ -10,14 +10,20 @@ initial begin
 		$dumpfile("freq_demo.vcd");
 		$dumpvars(5,freq_demo_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<24000; cc=cc+1) begin
 		clk=0; #4;
 		clk=1; #4;
 	end
 	// $display("%d tests passed", passed);
 	// $display("%s", fail ? "FAIL" : "PASS");
-	if (fail) $stop();
-	$finish();
+	if (fail) begin
+		$display("FAIL");
+		$stop(0);
+	end else begin
+		$display("PASS");
+		$finish(0);
+	end
 end
 
 // Create a couple of "unknown" clocks for freq_multi_count to measure

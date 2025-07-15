@@ -1,0 +1,24 @@
+[timestart] 0
+[size] 1396 600
+[pos] -1 -1
+*-10.372059 2884 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] ltm_sync_tb.
+[sst_width] 214
+[signals_width] 174
+[sst_expanded] 1
+[sst_vpaned_height] 151
+@24
+ltm_sync_tb.ps_config[4:0]
+@800028
+ltm_sync_tb.ps_sync[2:0]
+@28
+(0)ltm_sync_tb.ps_sync[2:0]
+(1)ltm_sync_tb.ps_sync[2:0]
+(2)ltm_sync_tb.ps_sync[2:0]
+@24
+ltm_sync_tb.dut.state[4:0]
+ltm_sync_tb.dut.ps_sync_count[4:0]
+@1001200
+-group_end
+[pattern_trace] 1
+[pattern_trace] 0

@@ -40,4 +40,4 @@ gige_sfp_ac701_run:
   dependencies:
     - gige_sfp_ac701
   script:
-    - cd projects/comms_top/gige_eth && make hwload_ac701 && make hwtest_ac701
+    - cd projects/comms_top/gige_eth && make hwload_ac701 SERIAL_NUM_OPT="-s 210203356870" && sleep 7 && make hwtest_ac701

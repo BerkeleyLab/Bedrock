@@ -1,6 +1,8 @@
 `timescale 1ns / 1ns
 
 `define LB_DECODE_afilter_siso_tb
+`define AUTOMATIC_decode
+`define AUTOMATIC_afilter_siso
 `include "afilter_siso_tb_auto.vh"
 
 module afilter_siso_tb;
@@ -8,18 +10,20 @@ module afilter_siso_tb;
 reg clk;
 wire lb_clk = clk;
 integer cc;
+`ifdef SIMULATE
 initial begin
 	if ($test$plusargs("vcd")) begin
-                $dumpfile("afilter_siso.vcd");
-                $dumpvars(5, afilter_siso_tb);
-        end
-        for (cc=0; cc<400; cc=cc+1) begin
-                clk=0; #4;
-                clk=1; #4;
-        end
-        $display("WARNING: Not a self checking TB, will always PASS. Relies on external post-processing.");
-        $display("PASS");
+		$dumpfile("afilter_siso.vcd");
+		$dumpvars(5, afilter_siso_tb);
+	end
+	for (cc=0; cc<400; cc=cc+1) begin
+		clk=0; #4;
+		clk=1; #4;
+	end
+	$display("WARNING: Not a self-checking testbench. Will always PASS. Relies on external post-processing.");
+	$display("PASS");
 end
+`endif //  `ifdef SIMULATE
 
 // Local bus
 reg [31:0] lb_data=0;
@@ -39,6 +43,7 @@ always @(posedge clk) if (cc>60) u_in <= 30000;
 // Device Under Test
 wire filter_done, res_clip;
 wire signed [17:0] y_out;
+(* lb_automatic *)
 afilter_siso afilter_siso // auto
 	(.clk(clk), .reset(1'b0), .run_filter(run_filter),
 	.u_in(u_in),
@@ -46,6 +51,7 @@ afilter_siso afilter_siso // auto
 	`AUTOMATIC_afilter_siso
 );
 
+`ifdef SIMULATE
 // Read localbus commands from external file
 reg [255:0] file1_name;
 integer file1;
@@ -64,7 +70,9 @@ always @(posedge clk) begin
 	lb_addr <= 15'bx;
 	control_cnt <= control_cnt+1;
 	if (control_cnt > wait_horizon && control_cnt%3==1 && rc==2) begin
+		`ifdef SIMULATE
 		rc = $fscanf(file1, "%d %x\n", ca, cd);
+		`endif
 		if (rc==2) begin
 			// https://en.wikipedia.org/wiki/555_timer_IC
 			if (ca == 555) begin
@@ -81,5 +89,6 @@ always @(posedge clk) begin
 end
 
 always @(negedge clk) if (filter_done) $display("output %d %d", $time, y_out);
+`endif
 
 endmodule

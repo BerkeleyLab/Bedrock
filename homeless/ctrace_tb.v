@@ -9,10 +9,13 @@ initial begin
 		$dumpfile("ctrace.vcd");
 		$dumpvars(5,ctrace_tb);
 	end
+	$display("Non-checking testbench.  Will always PASS");
 	for (cc=0; cc<2000; cc=cc+1) begin
 		clk=0; #5;
 		clk=1; #5;
 	end
+	$display("PASS");
+	$finish(0);
 end
 
 parameter dw = 4;

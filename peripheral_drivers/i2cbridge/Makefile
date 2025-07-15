@@ -12,7 +12,10 @@ PYTHON = python3
 include i2cbridge_rules.mk
 
 # Only used to pick up dpram.v from LBNL's bedrock
-vpath %.v ../../dsp
+# Could just say DSP_DIR = ../.. , except in case of out-of-tree builds
+BEDROCK_DIR := $(dir $(lastword $(MAKEFILE_LIST)))../..
+DSP_DIR = $(BEDROCK_DIR)/dsp
+vpath %.v $(DSP_DIR)
 
 %_tb: %_tb.v
 	$(VERILOG) ${VFLAGS_$@} -o $@ $(filter %.v, $^)
@@ -76,6 +79,21 @@ repro_pdf: blocks.pdf
 blocks.svg: blocks.eps
 	inkscape --export-plain-svg $@ $<
 
+DEMO_PY=demo_assem.py
+
+demo_assem.in: $(DEMO_PY)
+	$(PYTHON) $< > $@
+
+map.vh: $(DEMO_PY)
+	$(PYTHON) $< v > $@
+
+map.h: $(DEMO_PY)
+	$(PYTHON) $< c > $@
+
+map.json: $(DEMO_PY)
+	$(PYTHON) $< j > $@
+
 clean:
 	rm -f *_tb *.vcd *.dat *.bit *.pdf *.pyc init.in
-	rm -rf _xilinx
+	rm -rf _xilinx __pycache__
+	rm -rf map.vh map.h map.json demo_assem.in

@@ -8,7 +8,8 @@ vpath %.v $(FPGA_FAMILY_DIR)/xilinx $(BOARD_SUPPORT_DIR)/zest_soc $(BOARD_SUPPOR
 
 BLOCK_RAM_SIZE = 16384
 SRC_V   = memory_pack.v mpack.v munpack.v picorv32.v pico_pack.v spi_engine.v
-SRC_V  += idelays_pack.v freq_count.v flag_xdomain.v data_xdomain.v dpram.v phase_diff.v phaset.v
+SRC_V  += idelays_pack.v freq_count.v freq_gcount.v flag_xdomain.v data_xdomain.v dpram.v phase_diff.v phaset.v
+SRC_V  += reg_tech_cdc.v
 SRC_V  += zest.v zest_clk_map.v zest_spi_dio_pack.v
 SRC_V  += dco_buf.v iserdes_pack.v idelay_wrap.v wfm_pack.v
 SRC_V  += $(VIVADO_BASE)/data/verilog/src/glbl.v
@@ -37,6 +38,6 @@ $(TARGET)_tb: $(TARGET)_tb.v $(SRC_V)
 $(TARGET).vcd: $(TARGET)_tb $(TARGET)32.hex
 	xsim -nolog -R $< -testplusarg vcd
 
-CLEAN += xelab.pb xsim*.jou xsim*.log webtalk*.jou webtalk*.log vivado*.log xvlog.pb
+CLEAN += xelab.pb xsim*.jou xsim*.log webtalk*.jou webtalk*.log vivado*.log xvlog.pb zest_test_tb.wdb
 CLEAN_DIRS += xsim.dir .Xil _xilinx
 include $(BUILD_DIR)/bottom_rules.mk

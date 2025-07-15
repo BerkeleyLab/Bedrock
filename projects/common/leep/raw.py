@@ -105,6 +105,23 @@ def yscale_rfs(wave_samp_per=1):
         raise RuntimeError("yscale_rfs(%s) %s" % (wave_samp_per, e))
 
 
+def _int(s):
+    try:
+        # Catch actual ints
+        return int(s)
+    except ValueError:
+        pass
+    if hasattr(s, 'startswith'):
+        try:
+            if s.startswith('0x'):
+                return int(s, 16)
+            elif s.startswith('0b'):
+                return int(s, 2)
+        except ValueError:
+            pass
+    return None
+
+
 class LEEPDevice(DeviceBase):
     backend = 'leep'
     init_rom_addr = 0x800
@@ -132,10 +149,12 @@ class LEEPDevice(DeviceBase):
 
         self._readrom()
 
-        try:
-            app_string = self.regmap["__metadata__"]["application"]
-        except KeyError:
-            app_string = "Unknown"
+        app_string = "Unknown"
+        if self.regmap is not None:
+            try:
+                app_string = self.regmap["__metadata__"]["application"]
+            except KeyError:
+                pass
         self.rfs = False
         self.resctrl = False
         self.injector = False
@@ -146,58 +165,79 @@ class LEEPDevice(DeviceBase):
         else:
             self.rfs = True
 
+    def close(self):
+        self.sock.close()
+        super(LEEPDevice, self).close()
+
+    def _decode(self, reg, instance=[]):
+        """Returns (name, addr, len, infodict)"""
+        info = {  # Default info dict
+            "addr_width": 0,  # TODO enable variable read size
+            "data_width": 32,
+            "sign": "unsigned",
+        }
+        _reg = _int(reg)
+        if _reg is not None:
+            return "0x{:x}".format(_reg), _reg, 1, info
+        if instance is not None:
+            reg = self.expand_regname(reg, instance=instance)
+        info = self.get_reg_info(reg, instance=None)
+        size = 2**info.get('addr_width', 0)
+        base_addr = info['base_addr']
+        if isinstance(base_addr, (bytes, unicode)):
+            base_addr = int(base_addr, 0)
+        return reg, base_addr, size, info
+
     @print_reg
-    def reg_write(self, ops, instance=[]):
+    def reg_write_offset(self, ops, instance=[]):
 
         assert isinstance(ops, (list, tuple))
 
         addrs, values = [], []
-        for name, value in ops:
-            if instance is not None:
-                name = self.expand_regname(name, instance=instance)
-            info = self.get_reg_info(name, instance=None)
-            L = 2**info.get('addr_width', 0)
-
-            base_addr = info['base_addr']
-            if isinstance(base_addr, (bytes, unicode)):
-                base_addr = int(base_addr, 0)
-
-            value = numpy.asarray(value, dtype='I')
-
-            if L > 1:
-                _log.debug('reg_write %s <- %s ...', name, value[:10])
-                assert value.ndim == 1 and value.shape[0] == L, \
-                       ('must write whole register', value.shape, L)
-                # array register
-                for A, V in enumerate(value, base_addr):
-                    addrs.append(A)
-                    values.append(V)
-            else:
-                assert value.ndim == 0, 'scalar register'
-                _log.debug('reg_write %s <- %s', name, value)
-                addrs.append(base_addr)
-                values.append(value)
+        for op in ops:
+            name, value = op[:2]
+            offset = 0
+            if len(op) > 2:
+                offset = op[2]
+            name, base_addr, size = self._decode(name, instance)[:3]
+            if not hasattr(value, '__len__'):
+                value = [value]
+            value = numpy.array(value).astype('I')
+            _log.debug('reg_write %s <- %s', name, value)
+            for A, V in enumerate(value, base_addr+offset):
+                addrs.append(A)
+                values.append(V)
 
         addrs = numpy.asarray(addrs)
         values = numpy.asarray(values)
 
         self.exchange(addrs, values)
 
-    @print_reg
-    def reg_read(self, names, instance=[]):
+    def reg_write(self, ops, instance=[]):
+        return self.reg_write_offset([(op[0], op[1], 0) for op in ops], instance=instance)
+
+    def reg_read_size(self, name_sizes, instance=[]):
+        """'name_sizes' is iterable of (name, size, offset) where:
+            'name' can be either a string reg name or an int address
+            'size' can be an int number of elements of 'data_width' to read, or None.
+            'offset' can be int positive address offset or None (alias of 0)
+        If 'size' is None, then (2**aw) elements will be read (where 'aw' is the
+        'addr_width' of the register).
+        If 'name' is an address (int) then a 'size' of None implies 'size' 1."""
         addrs = []
         lens = []
-        for name in names:
-            if instance is not None:
-                name = self.expand_regname(name, instance=instance)
-            info = self.get_reg_info(name, instance=None)
-            L = 2**info.get('addr_width', 0)
-
-            lens.append((info, L))
-            base_addr = info['base_addr']
-            if isinstance(base_addr, (bytes, str, unicode)):
-                base_addr = int(base_addr, 0)
-            addrs.extend(range(base_addr, base_addr + L))
+        for name_size in name_sizes:
+            name, size = name_size[:2]
+            offset = 0
+            if len(name_size) > 2:
+                offset = name_size[2]
+            name, base_addr, L, info = self._decode(name, instance)
+            if size is None:
+                size = L
+            else:
+                size = int(size)
+            lens.append((info, size))
+            addrs.extend(range(base_addr + offset, base_addr + offset + size))
 
         raw = self.exchange(addrs)
 
@@ -217,13 +257,20 @@ class LEEPDevice(DeviceBase):
                 data[neg] |= mask
                 # cast to signed
                 data = data.astype('i4')
-            _log.debug('reg_read %s -> %s ...', names[i], data[:10])
+            _log.debug('reg_read %s -> %s ...', name_sizes[i][0], data[:10])
             # unwrap scalar from ndarray
-            if info.get('addr_width', 0) == 0:
+            # if info.get('addr_width', 0) == 0:
+            # TODO - does this break anything?
+            if L <= 1:
                 data = data[0]
             ret.append(data)
 
         return ret
+
+    @print_reg
+    def reg_read(self, names, instance=[]):
+        name_sizes = [(name, None) for name in names]
+        return self.reg_read_size(name_sizes, instance)
 
     def set_decimate(self, dec, instance=[]):
         if self.rfs:
@@ -250,7 +297,7 @@ class LEEPDevice(DeviceBase):
         nch = info['data_width']
         # list of channel numbers to mask
         if isinstance(chans, list):
-            chans = reduce(lambda l, r: l | r,
+            chans = reduce(lambda ll, r: ll | r,
                            [2**(nch - 1 - n) for n in chans], 0)
         self.reg_write([('chan_keep', chans)], instance=instance)
 
@@ -339,7 +386,7 @@ class LEEPDevice(DeviceBase):
         """
         info = self.get_reg_info('chan_keep', instance=instance)
         nch = info['data_width']
-        interested = reduce(lambda l, r: l | r,
+        interested = reduce(lambda ll, r: ll | r,
                             [2**(nch - 1 - n) for n in chans], 0)
 
         if self.rfs:
@@ -452,7 +499,7 @@ class LEEPDevice(DeviceBase):
             msg[2 * i] = A
             msg[2 * i + 1] = V or 0
 
-        tosend = msg.tostring()
+        tosend = msg.tobytes()
         _spam.debug("%s Send (%d) %s", self.dest, len(tosend), repr(tosend))
         self.sock.sendto(tosend, self.dest)
 
@@ -467,12 +514,13 @@ class LEEPDevice(DeviceBase):
                 _log.error("Reply truncated %d %d", len(tosend), len(reply))
                 continue
 
-            reply = numpy.fromstring(reply, be32)
+            reply = numpy.frombuffer(reply, be32)
             if (msg[:2] != reply[:2]).any():
                 _log.error('Ignore reply w/o matching nonce %s %s',
                            msg[:2], reply[:2])
                 continue
             elif (msg[2::2] != reply[2::2]).any():
+                print(f"  msg[2::2] = {msg[2::2]}\n  reply[2::2] = {reply[2::2]}")
                 _log.error('reply addresses are out of order')
                 continue
 
@@ -494,6 +542,10 @@ class LEEPDevice(DeviceBase):
         else:
             values = list(values)
 
+        if len(values) > len(addrs):
+            base = addrs[0]
+            addrs = [base+n for n in range(len(values))]
+
         ret = numpy.zeros(len(addrs), be32)
         for i in range(0, len(addrs), 127):
             A, B = addrs[i:i + 127], values[i:i + 127]
@@ -509,8 +561,8 @@ class LEEPDevice(DeviceBase):
         values_preamble = numpy.array(values)
         self._checkrom(values, True)
         if self.size_rom != 0:
-            total_rom_size = (self.hash_descriptor_size
-                              + self.size_desc + self.size_rom)
+            total_rom_size = (self.hash_descriptor_size +
+                              self.size_desc + self.size_rom)
             stop_addr = end_addr + total_rom_size - self.preamble_max_size
             values_json = self.exchange(range(end_addr, stop_addr))
             preamble_json = numpy.concatenate((values_preamble, values_json))
@@ -547,7 +599,7 @@ class LEEPDevice(DeviceBase):
                 raise RomError("Truncated ROM Descriptor")
 
             if type == 1:
-                blob = blob.tostring()
+                blob = blob.tobytes().decode()
                 self.size_desc = size
                 if self.descript is None:
                     self.descript = blob
@@ -569,7 +621,7 @@ class LEEPDevice(DeviceBase):
                 else:
                     _log.debug("Found JSON blob in ROM")
                     self.regmap = json.loads(zlib.decompress(
-                        blob.tostring()).decode('ascii'))
+                        blob.tobytes()).decode('ascii'))
 
             elif type == 3:
                 self.size_rom = size
@@ -581,20 +633,25 @@ class LEEPDevice(DeviceBase):
         self.descript = None
         self.codehash = None
         self.jsonhash = None
-        self.regmap = None
+        self.regmap   = None
+        self._has_rom = False
 
         # Try to read ROM at both addresses before raising error
         try:
             _log.debug("Trying with init_addr %d", self.init_rom_addr)
             self.the_rom = self._trysize(self.init_rom_addr)
         except (RuntimeError, ValueError, RomError):
+            self.the_rom = []
             _log.debug("Trying with max_addr %d", self.max_rom_addr)
             try:
                 self.the_rom = self._trysize(self.max_rom_addr)
             except RomError as e:
-                _log.error("raw.py: %s. Quitting." % str(e))
-                raise
+                self.the_rom = []
+                _log.error("raw.py: {}. Register name decoding disabled.".format(str(e)))
             except (RuntimeError, ValueError):
-                msg = "Could not read ROM using either start addresses"
-                raise ValueError(msg)
-        _log.debug("ROM was successfully read")
+                self.the_rom = []
+                _log.debug("Could not read ROM using either start addresses")
+        if len(self.the_rom) > 0:
+            _log.debug("ROM was successfully read")
+            self._has_rom = True
+        return

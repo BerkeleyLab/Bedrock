@@ -3,5 +3,5 @@
 # Run this from any directory in which you have write privs.
 # Nothing gets written to the reference tree.
 # Alert!  The reference tree really needs to be clean for this to work right.
-D=`dirname $0`
-make -f $D/Makefile VPATH=$D DIG_DIR=$D $*
+D=$(dirname "$0")
+make -f "$D/Makefile" VPATH="$D" DIG_DIR="$D" "$@"

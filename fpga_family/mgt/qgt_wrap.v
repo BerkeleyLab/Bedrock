@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+`timescale 1ns / 1ns
 
 // ------------------------------------
 // QGT_WRAP.v
@@ -14,7 +14,7 @@
 `define Q0
 `Q_REDEFINE(0)
 
-module q0_gt_wrap # (
+module q0_gt_wrap #(
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
@@ -23,7 +23,7 @@ module q0_gt_wrap # (
    parameter GT1_BUF = 0,
    parameter GT2_BUF = 0,
    parameter GT3_BUF = 0
-)(
+) (
    input         drpclk_in,
    input         soft_reset,
    input         gtrefclk0,
@@ -40,8 +40,8 @@ module q0_gt_wrap # (
    `ifdef GT3_ENABLE
    `GTi_PORTS(3, GT3_WI)
    `endif
-   output        gt_cpll_locked,
-   output        gt_txrx_resetdone
+   output [3:0]   gt_cpll_locked,
+   output [3:0]   gt_txrx_resetdone
 );
 `include "qgt_wrap_stub.vh"
 
@@ -51,7 +51,7 @@ endmodule
 `define Q1
 `Q_REDEFINE(1)
 
-module q1_gt_wrap # (
+module q1_gt_wrap #(
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
@@ -60,7 +60,7 @@ module q1_gt_wrap # (
    parameter GT1_BUF = 0,
    parameter GT2_BUF = 0,
    parameter GT3_BUF = 0
-)(
+) (
    input         drpclk_in,
    input         soft_reset,
    input         gtrefclk0,
@@ -88,7 +88,7 @@ endmodule
 `define Q2
 `Q_REDEFINE(2)
 
-module q2_gt_wrap # (
+module q2_gt_wrap #(
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
@@ -97,7 +97,7 @@ module q2_gt_wrap # (
    parameter GT1_BUF = 0,
    parameter GT2_BUF = 0,
    parameter GT3_BUF = 0
-)(
+) (
    input         drpclk_in,
    input         soft_reset,
    input         gtrefclk0,
@@ -125,7 +125,7 @@ endmodule
 `define Q3
 `Q_REDEFINE(3)
 
-module q3_gt_wrap # (
+module q3_gt_wrap #(
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
@@ -134,7 +134,7 @@ module q3_gt_wrap # (
    parameter GT1_BUF = 0,
    parameter GT2_BUF = 0,
    parameter GT3_BUF = 0
-)(
+) (
    input         drpclk_in,
    input         soft_reset,
    input         gtrefclk0,
@@ -162,7 +162,7 @@ endmodule
 
 `else // SIMULATE
 
-module qgt_wrap # (
+module qgt_wrap #(
    parameter GT0_WI = 20,
    parameter GT1_WI = 20,
    parameter GT2_WI = 20,
@@ -171,7 +171,7 @@ module qgt_wrap # (
    parameter GT1_BUF = 0,
    parameter GT2_BUF = 0,
    parameter GT3_BUF = 0
-)(
+) (
    input         drpclk_in,
    input         soft_reset,
    input         gtrefclk0,
@@ -184,4 +184,3 @@ module qgt_wrap # (
 endmodule
 
 `endif // SIMULATE
-

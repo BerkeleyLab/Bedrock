@@ -1,11 +1,12 @@
 # Commentary in ../tests/Makefile
 XCIRCUIT = xcircuit
 XVFB = xvfb-run -a -s "-screen 0 1440x900x24"
+PANDOC = pandoc
 
 all: svg
 .PHONY: svg html
 
-svg: rtefi.svg clients.svg mem_gateway.svg memory.svg tx_path.svg precog_upg.svg
+svg: rtefi.svg stack.svg clients.svg mem_gateway.svg memory.svg tx_path.svg precog_upg.svg
 
 html: ../index.html ../status.html
 
@@ -14,10 +15,10 @@ html: ../index.html ../status.html
 	echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
 
 ../index.html: ../README.md
-	pandoc -t html $< | sed -e 's,status\.md,status.html,g' > $@
+	$(PANDOC) -t html $< | sed -e 's,status\.md,status.html,g' > $@
 
 ../status.html: ../status.md
-	pandoc -t html -o $@ $<
+	$(PANDOC) -t html -o $@ $<
 
 clean:
 	rm -f *.svg *.html

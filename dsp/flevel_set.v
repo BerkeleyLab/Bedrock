@@ -4,7 +4,11 @@
 //% Provide LO at cosd and sind ports
 // Essentially a dot product of the LO signal [cosd, sind] with [i_data, q_data]
 // N.B.: full-scale negative is an invalid LO value.
-module flevel_set(
+module flevel_set #(
+	parameter i_dw=17, // XXX don't change this
+	parameter q_dw=17, // XXX don't change this
+	parameter o_dw=16  // XXX don't change this
+) (
 	input clk,
 	input signed [17:0] cosd,  // LO input
 	input signed [17:0] sind,  // LO input
@@ -18,10 +22,6 @@ module flevel_set(
 	output o_gate, o_trig, // carrier
 	output time_err
 );
-
-parameter i_dw=17; // XXX don't change this
-parameter q_dw=17; // XXX don't change this
-parameter o_dw=16; // XXX don't change this
 
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 reg signed [34:0] cosp = 0, sinp = 0;  // 17-bit i_data * 18-bit cosd
@@ -40,6 +40,8 @@ reg time_err_r=0;
 always @(posedge clk) begin
 	time_err_r <= ~i_gate | ~q_gate;
 end
+
+`undef SAT
 
 assign o_data = sum2[16:1];
 assign o_gate = 1'b1;

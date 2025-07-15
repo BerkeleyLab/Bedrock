@@ -28,8 +28,13 @@ initial begin
 		clk=1; #4;
 	end
 	if (checked < 10) fail=1;
-	$display("%s", fail ? "FAIL" : "PASS");
-	if (fail) $stop;
+	if (fail) begin
+		$display("FAIL");
+		$stop(0);
+	end else begin
+		$display("PASS");
+		$finish(0);
+	end
 end
 
 integer rc, inp;

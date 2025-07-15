@@ -15,6 +15,7 @@ initial begin
 	        clk=0; #3;
 	        clk=1; #3;
 	end
+	$finish(0);
 end
 
 // Initialization port

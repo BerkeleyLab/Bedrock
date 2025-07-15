@@ -15,6 +15,7 @@ module serializer_multichannel_tb;
    reg clk;
    integer cc, errors;
    integer seed_int;
+   integer sample_count=0;
    initial begin
       if ($test$plusargs("vcd")) begin
          $dumpfile("serializer_multichannel.vcd");
@@ -36,8 +37,14 @@ module serializer_multichannel_tb;
          $display("ERROR: No input was sampled, nothing was tested.");
          errors = errors + 1;
       end
-      $display("%d errors  %s", errors, errors>0 ? "FAIL" : "PASS");
-      $finish;
+      $display("%d errors", errors);
+      if (errors > 0) begin
+        $display("FAIL");
+        $stop(0);
+      end else begin
+        $display("PASS");
+        $finish(0);
+      end
    end
 
    // --------------------------
@@ -46,7 +53,6 @@ module serializer_multichannel_tb;
    reg [DWIDTH-1:0] d_in[NCHAN-1:0];
    wire [NCHAN*DWIDTH-1:0] d_in_flat;
    reg sample_in;
-   integer sample_count=0;
    integer count_on=0, count_max=0;
 
    always @(negedge clk) begin

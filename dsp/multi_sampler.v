@@ -16,8 +16,8 @@ module multi_sampler #(
    parameter dsample1_en=0,
    parameter dsample1_wi=8,
    parameter dsample2_en=0,
-   parameter dsample2_wi=8)
-(
+   parameter dsample2_wi=8
+) (
    input                        clk,
    input                        reset,
    input                        ext_trig,
@@ -69,7 +69,7 @@ module multi_sampler #(
             ds0_count <= (ds0_count == 1) ? dsample0_period : ds0_count-1;
       end
       assign dsample0_stb = ds0_count==1;
-   end else begin
+   end else begin : ng_dsample0
       assign dsample0_stb = 0;
    end endgenerate
 
@@ -79,7 +79,7 @@ module multi_sampler #(
             ds1_count <= (ds1_count == 1) ? dsample1_period : ds1_count-1;
       end
       assign dsample1_stb = ds1_count==1;
-   end else begin
+   end else begin : ng_dsample1
       assign dsample1_stb = 0;
    end endgenerate
 
@@ -89,9 +89,8 @@ module multi_sampler #(
             ds2_count <= (ds2_count == 1) ? dsample2_period : ds2_count-1;
       end
       assign dsample2_stb = ds2_count==1;
-   end else begin
+   end else begin : ng_dsample2
       assign dsample2_stb = 0;
    end endgenerate
 
 endmodule
-

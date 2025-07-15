@@ -4,7 +4,7 @@
 #
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Path setup --------------------------------------------------------------
 
@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Bedrock'
-copyright = '2022, LBNL ATG'
+copyright = '2023, LBNL ATG'
 author = 'LBNL ATG'
 
 # The short X.Y version
@@ -48,6 +48,7 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.intersphinx',
     'm2r2',
+    'sphinx_rtd_theme',
 ]
 
 # If true, figures, tables and code-blocks are automatically numbered if they
@@ -87,7 +88,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

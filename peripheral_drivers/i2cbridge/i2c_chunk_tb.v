@@ -29,9 +29,14 @@ initial begin
 	worked = worked + (chunk.dpram.mem[12'h801] === 8'ha5);
 	worked = worked + (chunk.dpram.mem[12'h802] === 8'h5a);
 	worked = worked + (chunk.dpram.mem[12'h820] === 8'ha5);
-	$display("%d worked, %s", worked, (worked==4) ? "PASS" : "FAIL");
-	if (worked != 4) $stop();
-	$finish();
+	$display("%d worked", worked);
+	if (worked != 4) begin
+		$display("FAIL");
+		$stop(0);
+	end else begin
+		$display("PASS");
+		$finish(0);
+	end
 end
 
 parameter SADR = 7'b0010_000;
@@ -46,8 +51,9 @@ wire [7:0] lb_dout;
 wire scl, sda_drive;
 tri1 sda = sda_drive ? 1'bz : 1'b0;
 wire sda_sense = sda;
+wire scl_sense = scl;
 
-reg trig=0, run=0, freeze=0;
+reg trig=0, run=0, freeze=0, trace_cmd=0;
 integer file1, rc=1;
 reg [7:0] fval;
 reg [11:0] dest_p=0;
@@ -68,10 +74,17 @@ initial begin
 			@(posedge clk);
 		end
 	end
-	run <= 1;
-	trig <= 1;
+	@(posedge clk) begin
+		run <= 1;
+		trig <= 1;
+		trace_cmd <= 1;
+	end
 	#5000;
-	trig <= 0;
+	@(posedge clk) trig <= 0;
+	#50000;
+	@(posedge clk) trace_cmd <= 0;
+	#3700000;
+	trace_cmd <= 1;
 end
 
 // Instantiate device under test
@@ -79,9 +92,11 @@ wire [3:0] hw_config;
 i2c_chunk #(.tick_scale(4), .q1(0), .q2(2)) chunk (.clk(clk),
 	.lb_addr(lb_addr), .lb_din(lb_din), .lb_write(lb_write),
 	.lb_dout(lb_dout),
-	.run_cmd(run), .freeze(freeze), .hw_config(hw_config),
-	.scl(scl), .sda_drive(sda_drive), .sda_sense(sda_sense),
-	.intp(1'b0), .rst(1'b1)
+	.run_cmd(run), .trace_cmd(trace_cmd), .freeze(freeze),
+	.hw_config(hw_config),
+	.scl(scl), .sda_drive(sda_drive),
+	.sda_sense(sda_sense), .scl_sense(scl_sense),
+	.trig_mode(1'b0), .intp(1'b0), .rst(1'b1)
 );
 
 // One device on the bus

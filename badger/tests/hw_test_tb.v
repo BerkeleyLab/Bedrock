@@ -18,6 +18,7 @@ assign continue_sim = 1;
 assign continue_sim = cc<3800;
 `endif
 initial begin
+	$display("Non-checking testbench.  Will always PASS");
 	trace = $test$plusargs("trace");
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("hw_test.vcd");
@@ -27,6 +28,8 @@ initial begin
 		clk=0; #4;  // 125 MHz * 8bits/cycle -> 1 Gbit/sec
 		clk=1; #4;
 	end
+	$display("PASS");
+	$finish(0);
 end
 
 // Create flow of packets

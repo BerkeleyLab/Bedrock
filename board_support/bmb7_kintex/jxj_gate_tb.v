@@ -29,9 +29,13 @@ module jxj_gate_tb;
          clk=0; #10;
          clk=1; #10;
       end
-      $display("%s", fail ? "FAIL" : "PASS");
-      if (fail) $stop;
-      $finish();
+      if (fail) begin
+        $display("FAIL");
+        $stop(0);
+      end else begin
+        $display("PASS");
+        $finish(0);
+      end
    end
 
    // Simple test data that reads registers 0 through 3
@@ -75,13 +79,13 @@ module jxj_gate_tb;
    reg [23:0] lb_addr_r;
    wire [31:0] lb_dout;
    reg [31:0] lb_din;
-   wire lb_strobe, lb_rd;
+   wire lb_strobe, lb_rd, lb_prefill;
 
    jxj_gate dut(.clk(clk),
       .rx_din(rx_din), .rx_stb(rx_stb), .rx_end(rx_end),
       .tx_dout(tx_dout), .tx_rdy(tx_rdy), .tx_end(tx_end), .tx_stb(tx_stb),
       .lb_addr(lb_addr), .lb_dout(lb_dout), .lb_din(lb_din),
-      .lb_strobe(lb_strobe), .lb_rd(lb_rd)
+      .lb_strobe(lb_strobe), .lb_rd(lb_rd), .lb_prefill(lb_prefill)
    );
 
    // Simulate Rx data

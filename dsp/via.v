@@ -1,4 +1,4 @@
-//https://forums.xilinx.com/t5/Welcome-Join/synthesizable-verilog-connecting-inout-pins/td-p/284628
+// https://adaptivesupport.amd.com/s/question/0D52E00006iHrFnSAK/synthesizable-verilog-connecting-inout-pins?language=en_US
 /*module via (w, w)
 inout w;
 wire w;
@@ -17,4 +17,3 @@ module via (.a(w), .b(w));
 inout w;
 wire w;
 endmodule
-

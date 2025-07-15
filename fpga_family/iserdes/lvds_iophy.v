@@ -1,6 +1,6 @@
 module lvds_iophy #(
    parameter flip_d=0
-)(
+) (
    input            d_p,
    input            d_n,
    output reg [7:0] dout,
@@ -90,6 +90,11 @@ always @ (posedge clk_div) begin
    dout[7]<=flip_d?~Q8:Q8;
 end
 
+`else
+// Does almost nothing except establish some causality,
+// and keep yosys from thinking this module is a white box.
+always @ (posedge clk_div) dout <= {8{d_p}};  // horribly stupid
+assign idelay_value_out = 0;  // theoretically in clk_div domain, also
 `endif // SIMULATE
 
 endmodule

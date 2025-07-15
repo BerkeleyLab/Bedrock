@@ -131,7 +131,7 @@ static void console_service(void)
 	prompt();
 }
 
-extern t_zest_init zest_init_data;
+extern zest_init_t zest_init_data;
 
 int main(void)
 {

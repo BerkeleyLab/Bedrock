@@ -6,7 +6,7 @@
 ////  Authors: Richard Herveille (richard@asics.ws) www.asics.ws ////
 ////           John Sheahan (jrsheahan@optushome.com.au)         ////
 ////                                                             ////
-////  Downloaded from: http://www.opencores.org/projects/i2c/    ////
+////  Downloaded from: https://opencores.org/projects/i2c/       ////
 ////                                                             ////
 /////////////////////////////////////////////////////////////////////
 ////                                                             ////
@@ -352,5 +352,3 @@ module i2c_slave_model (scl, sda);
 	endspecify
 
 endmodule
-
-
