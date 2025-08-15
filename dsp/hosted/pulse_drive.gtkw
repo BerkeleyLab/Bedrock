@@ -1,21 +1,25 @@
-[timestart] 422892
-[size] 1920 1043
+[timestart] 0
+[size] 1920 1093
 [pos] -1 -1
-*-7.741745 423509 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-18.741745 525295 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] pulse_drive_tb.
 [sst_width] 233
 [signals_width] 174
 [sst_expanded] 1
-[sst_vpaned_height] 298
+[sst_vpaned_height] 299
 @28
 pulse_drive_tb.dut.clk
 pulse_drive_tb.dut.bunch_arrival_trig
+@420
+pulse_drive_tb.ampy[17:0]
+pulse_drive_tb.ampx[17:0]
 @24
+pulse_drive_tb.width[6:0]
+@25
 pulse_drive_tb.dut.amp[17:0]
-pulse_drive_tb.dut.pwidth[6:0]
-@c00025
+@c10024
 pulse_drive_tb.dut.tri_out_xy[17:0]
-@29
+@28
 (0)pulse_drive_tb.dut.tri_out_xy[17:0]
 (1)pulse_drive_tb.dut.tri_out_xy[17:0]
 (2)pulse_drive_tb.dut.tri_out_xy[17:0]
@@ -34,7 +38,7 @@ pulse_drive_tb.dut.tri_out_xy[17:0]
 (15)pulse_drive_tb.dut.tri_out_xy[17:0]
 (16)pulse_drive_tb.dut.tri_out_xy[17:0]
 (17)pulse_drive_tb.dut.tri_out_xy[17:0]
-@1401201
+@1401200
 -group_end
 @200
 -

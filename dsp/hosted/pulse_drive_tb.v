@@ -59,19 +59,16 @@ pulse_drive dut  // auto clk1x
 	 `AUTOMATIC_dut
 );
 
+reg signed [17:0] ampx, ampy;
+reg [6:0] width;
 initial begin
+	if (!$value$plusargs("ampx=%d", ampx)) ampx = 1 << 10;
+	if (!$value$plusargs("ampy=%d", ampy)) ampy = 1 << 4;
+	if (!$value$plusargs("width=%d", width)) width = 10;
 	#1;
-	dp_dut_amp.mem[0] = (1 << 10);
-	dp_dut_amp.mem[1] = (1 << 4);
-	dut_wth = 10;
-	@(cc==SIM_STOP-100000);
-	dp_dut_amp.mem[0] = 10000;
-	dp_dut_amp.mem[1] = 5000;
-	dut_wth = 94;  // max of 1us
-	@(cc==SIM_STOP-50000);
-	dp_dut_amp.mem[0] = (1 << 13);
-	dp_dut_amp.mem[1] = (1 << 12);
-	dut_wth = 64;
+	dp_dut_amp.mem[0] = ampx;
+	dp_dut_amp.mem[1] = ampy;
+	dut_wth = width;
 end
 
 // for 1 MHz rep rate:
