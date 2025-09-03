@@ -1,7 +1,6 @@
 create_ip -name gtwizard -vendor xilinx.com -library ip -version 3.6 -module_name evr_gt
 
 set_property -dict {
-set cfg_dict {
 	CONFIG.advanced_clocking {false}
 	CONFIG.example_chipscope {0}
 	CONFIG.gt0_pll0_fbdiv {1}
