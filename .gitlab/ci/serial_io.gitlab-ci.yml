@@ -1,5 +1,6 @@
 serial_io_test:
   before_script:
+    - pip install numpy scipy cocotb==1.9.2 pytest cocotb-bus
     - cd serial_io
   stage: test
   script:

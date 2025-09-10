@@ -1,6 +1,6 @@
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge
+from cocotb.triggers import ClockCycles
 
 
 class TB:
@@ -40,7 +40,6 @@ class TB:
 # timeout_time=total amount of time for the outputs to settle down
 @cocotb.test(timeout_time=5, timeout_unit='us')
 async def test_reset(dut):
-    tb = TB(dut)
     # Toggle reset_all directly
     for value in [0, 1]:
         dut.reset_all.value = value
