@@ -37,13 +37,11 @@ class TB:
         self.dut.reset_all.value = 0
 
 
-# timeout_time=total amount of time for the outputs to settle down
 @cocotb.test(timeout_time=5, timeout_unit='us')
 async def test_reset(dut):
-    # Toggle reset_all directly
-    for value in [0, 1]:
-        dut.reset_all.value = value
-        await ClockCycles(dut.sys_clk, 5)
+    tb = TB(dut)  # Instantiate TB
+    await tb.cycle_reset()
+
     # Wait for alignment
     await ClockCycles(dut.sys_clk, 100)
     reset_rx_done = dut.rx_reset_done_sys.value.integer
@@ -57,7 +55,6 @@ async def test_reset(dut):
 @cocotb.test(timeout_time=6, timeout_unit='us')
 async def test_freq_counter(dut):
     tb = TB(dut)
-    await tb.cycle_reset()
 
     # Wait for the frequency counter to stabilize
     await ClockCycles(dut.sys_clk, 500)

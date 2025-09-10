@@ -28,7 +28,7 @@ module evr_wrapper #(
     wire [31:0] gt_rx_reset_cnt;
     wire [0:0]  evr_timestamp_valid;
     wire [15:0] evr_evcnt;
-    wire [63:0] evr_live_ts_dsp; 
+    wire [63:0] evr_live_ts_dsp;
     wire [31:0] gt_ref_freq;
     wire [31:0] gt_rx_freq;
     wire [0:0]  reset_all;
