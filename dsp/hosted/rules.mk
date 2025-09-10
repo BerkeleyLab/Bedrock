@@ -43,6 +43,14 @@ fdbk_core_plot.pdf: fdbk_core_tb fdbk_core_test.py $(AUTOGEN_DIR)/regmap_fdbk_co
 fdbk_core_check: fdbk_core_plot.pdf
 	@echo DONE
 
+# cocotb testbench for pulse_drive.v
+DUT      = pulse_drive_wrapper
+TOPLEVEL = $(DUT)
+MODULE   = test_$(DUT)
+VERILOG_SOURCES += $(DUT).v pulse_drive.v
+
+include ../../cocotb_inc.mk
+
 CLEAN += $(TGT_) $(CHK_) *_tb *.pyc *.bit *.in *.vcd
 CLEAN += lp_out.dat notch_test.dat non_iq_interleaved_piloop.out
 CLEAN += fdbk_core_plot.pdf fdbk_core*.dat cordicg_b*.v lim_step_file_in.dat setmp_step_file_in.dat
