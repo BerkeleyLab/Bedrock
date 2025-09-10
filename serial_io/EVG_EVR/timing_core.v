@@ -1,6 +1,8 @@
 module timing_core #(
     parameter integer EVSTROBE_COUNT = 254,
-    parameter ACCELERATOR_TYPE = "LINAC"
+    // applicable only to synchrotron facilties
+    parameter HARMONIC_N = 304, // Must be divisible by 4
+    parameter SYSCLK_FREQUENCY = 125000000
 ) (
     // evr_clk domain
     input             evr_clk,
@@ -99,73 +101,61 @@ module timing_core #(
     flag_xdomain i_hb (.clk1(evr_clk), .flagin_clk1(evstrobe_evr[EVCODE_HEARTBEAT_MARKER]),
                         .clk2(dsp_clk), .flagout_clk2(hb_strobe_dsp));
 
-    generate
-        if (ACCELERATOR_TYPE=="SYNCHROTON") begin : synchrotron_inst
-	    // Orbit clock recovery
-	    // Validates PPS and Heartbeat events by testing that they're close to 1 Hz in the
-	    // destination clock domain
-	    wire oc_valid_evr, oc_evr;
-	    evrSROC #(
-		    // XXX these should be paramters?
-		    .SYSCLK_FREQUENCY(125000000),
-		    .SROC_DIVIDER(304/4))
-	    i_evrAROC (
-		    .sysClk                  (sys_clk),
-		    .evrClk                  (evr_clk),
-		    .evrHeartbeatMarker      (evstrobe_evr[EVCODE_HEARTBEAT_MARKER]),
-		    .evrPulsePerSecondMarker (pps_strobe_evr),
+    // Following will only apply to synchroton facilities
+    // Orbit clock recovery
+    // Validates PPS and Heartbeat events by testing that they're close to 1 Hz in the
+    // destination clock domain
+    wire oc_valid_evr, oc_evr;
+    evrSROC #(
+	    .SYSCLK_FREQUENCY(SYSCLK_FREQUENCY),
+	    .SROC_DIVIDER(HARMONIC_N/4))
+    i_evrAROC (
+	    .sysClk                  (sys_clk),
+	    .evrClk                  (evr_clk),
+	    .evrHeartbeatMarker      (evstrobe_evr[EVCODE_HEARTBEAT_MARKER]),
+	    .evrPulsePerSecondMarker (pps_strobe_evr),
 
-		    .heartBeatValid          (hb_valid_sys),  // in sys_clk
-		    .pulsePerSecondValid     (pps_valid_sys),  // in sys_clk
-		    .evrSROCsynced           (oc_valid_evr),  // in evr_clk
-		    .evrSROC                 (oc_evr)  // in evr_clk
-	    );
+	    .heartBeatValid          (hb_valid_sys),  // in sys_clk
+	    .pulsePerSecondValid     (pps_valid_sys),  // in sys_clk
+	    .evrSROCsynced           (oc_valid_evr),  // in evr_clk
+	    .evrSROC                 (oc_evr)  // in evr_clk
+    );
 
-	    freq_count #(.refcnt_width (16)) fcnt_oc_clk (
-		    .sysclk     (sys_clk),
-		    .f_in       (oc_evr),
-		    .frequency  (oc_evr_frequency)
-	    );
+    freq_count #(.refcnt_width (16)) fcnt_oc_clk (
+	    .sysclk     (sys_clk),
+	    .f_in       (oc_evr),
+	    .frequency  (oc_evr_frequency)
+    );
 
-	    reg_tech_cdc i_ocv (.I(oc_valid_evr), .C(sys_clk), .O(oc_valid_sys));
-	    // Live timestamp and orbit clock trigger
-	    // Orbit clock is simply synchronized (after an optional delay) to dsp_clk domain
-	    // alongside the exact timestamp derived from the timing stream.
-	    // The synchronization delay is variable, but predictable, and
-	    // depends on where the orbit clock rising-edge falls w.r.t dsp_clk
-	    reg oc_evr_r=0;
-	    always @(posedge evr_clk) oc_evr_r <= oc_evr;
-	    wire oc_trig_evr_l = oc_evr & ~oc_evr_r;
+    reg_tech_cdc i_ocv (.I(oc_valid_evr), .C(sys_clk), .O(oc_valid_sys));
+    // Live timestamp and orbit clock trigger
+    // Orbit clock is simply synchronized (after an optional delay) to dsp_clk domain
+    // alongside the exact timestamp derived from the timing stream.
+    // The synchronization delay is variable, but predictable, and
+    // depends on where the orbit clock rising-edge falls w.r.t dsp_clk
+    reg oc_evr_r=0;
+    always @(posedge evr_clk) oc_evr_r <= oc_evr;
+    wire oc_trig_evr_l = oc_evr & ~oc_evr_r;
 
-	    // Optionally delay oc_trig and pick right timestamp in evr_clk domain
-	    reg [6:0] oc_cnt_evr=0;
-	    reg oc_trig_delay_inprog=0;
-	    always @(posedge evr_clk) begin
-	        if (oc_trig_evr_l) begin
-	            oc_cnt_evr <= 1;
-	            oc_trig_delay_inprog <= 1;
-	        end else if (oc_trig_delay_inprog) begin
-	            oc_cnt_evr <= oc_cnt_evr + 1;
-	            if (oc_cnt_evr == oc_delay_evr) oc_trig_delay_inprog <= 0;
-	        end
-	    end
-	    wire oc_trig_evr = oc_trig_delay_inprog && (oc_cnt_evr == oc_delay_evr);
-
-	    data_xdomain #(.size(64)) i_oc_sync (
-		    .clk_in   (evr_clk), .gate_in  (oc_trig_evr),
-		    .data_in  (live_ts_evr),
-		    .clk_out  (dsp_clk), .gate_out (oc_trig_dsp),
-		    .data_out (oc_ts_dsp)
-	    );
-    end else if (ACCELERATOR_TYPE=="LINAC") begin : linac_inst
-	    // TODO: Does this make sense???
-	    assign hb_valid_sys  = 1'b0;
-            assign pps_valid_sys = 1'b0;
-            assign oc_valid_sys  = 1'b0;
-            assign oc_trig_dsp   = 1'b0;
-	    assign oc_ts_dsp     = 64'd0;
-	    assign oc_evr_frequency = 28'd0;
+    // Optionally delay oc_trig and pick right timestamp in evr_clk domain
+    reg [6:0] oc_cnt_evr=0;
+    reg oc_trig_delay_inprog=0;
+    always @(posedge evr_clk) begin
+        if (oc_trig_evr_l) begin
+            oc_cnt_evr <= 1;
+            oc_trig_delay_inprog <= 1;
+        end else if (oc_trig_delay_inprog) begin
+            oc_cnt_evr <= oc_cnt_evr + 1;
+            if (oc_cnt_evr == oc_delay_evr) oc_trig_delay_inprog <= 0;
+        end
     end
-endgenerate
+    wire oc_trig_evr = oc_trig_delay_inprog && (oc_cnt_evr == oc_delay_evr);
+
+    data_xdomain #(.size(64)) i_oc_sync (
+	    .clk_in   (evr_clk), .gate_in  (oc_trig_evr),
+	    .data_in  (live_ts_evr),
+	    .clk_out  (dsp_clk), .gate_out (oc_trig_dsp),
+	    .data_out (oc_ts_dsp)
+    );
 
 endmodule
