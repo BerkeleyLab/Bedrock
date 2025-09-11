@@ -3,7 +3,7 @@ from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, Timer
 import random
 
-ADC_CLK_CYCLE_NS = 14/1320e-3
+ADC_CLK_CYCLE_NS = 10.606
 
 # Fractional cycles per trigger for each repetition rate
 # TODO: Expand this to additional rep rates
