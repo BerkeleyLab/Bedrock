@@ -52,6 +52,6 @@ always @(posedge clk) begin
     end else temp_tri <= 0;
 end
 
-assign tri_out_xy = temp_tri[17:0];
+assign tri_out_xy = temp_tri[24:8];
 
 endmodule

@@ -89,8 +89,8 @@ async def pulse_drive_fractional_cycles(dut):
                 cocotb.log.info(
                     f"Trigger #{trigger_count}: "
                     f"Integer cycles = {cycle_counter}, "
-                    f"Real cycles = {real_cycles:.6f}, "
-                    f"Target = {cycles_per_trigger:.6f}, "
+                    f"Real cycles = {real_cycles:.2f}, "
+                    f"Target = {cycles_per_trigger:.2f}, "
                     f"ampx={dut.ampx.value.signed_integer}, "
                     f"ampy={dut.ampy.value.signed_integer}, "
                     f"wth={int(dut.wth.value)}"
@@ -115,7 +115,7 @@ async def pulse_drive_fractional_cycles(dut):
 
                 cocotb.log.info(
                     f"Switching to {current_rate} Hz, "
-                    f"target cycles = {cycles_per_trigger:.6f}, "
+                    f"target cycles = {cycles_per_trigger:.2f}, "
                     f"new ampx={dut.ampx.value.signed_integer}, "
                     f"ampy={dut.ampy.value.signed_integer}, "
                     f"wth={int(dut.wth.value)}"

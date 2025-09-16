@@ -1,16 +1,19 @@
 [timestart] 0
-[size] 1920 1082
+[size] 1920 1033
 [pos] -1 -1
-*-27.142729 355438878 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-27.206739 1116005744 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] pulse_drive_wrapper.
 [sst_width] 278
 [signals_width] 174
 [sst_expanded] 1
-[sst_vpaned_height] 305
+[sst_vpaned_height] 288
 @28
 pulse_drive_wrapper.clk
 pulse_drive_wrapper.iq
 pulse_drive_wrapper.bunch_arrival_trig
+@25
+pulse_drive_wrapper.dut.wth[6:0]
+@28
 pulse_drive_wrapper.amp_addr
 @c00420
 pulse_drive_wrapper.amp[17:0]
@@ -40,9 +43,7 @@ pulse_drive_wrapper.ampx[17:0]
 pulse_drive_wrapper.ampy[17:0]
 @10420
 pulse_drive_wrapper.tri_out_xy[17:0]
-@10421
 pulse_drive_wrapper.tri_out_x[17:0]
-@10420
 pulse_drive_wrapper.tri_out_y[17:0]
 [pattern_trace] 1
 [pattern_trace] 0
