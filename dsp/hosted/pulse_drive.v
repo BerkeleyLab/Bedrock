@@ -30,16 +30,28 @@ reg [17:0] cnt = 0;
 reg active = 0;
 // Find the peak of the triangular wave (half of width)
 wire [6:0] midpoint = wth >> 1;
+reg ramp_up = 0;  // 1 = ramping up, 0 = ramping down
 always @(posedge clk) begin
-    if (bunch_arrival_trig) begin
+    if (bunch_arrival_trig && !active) begin
+        // Start new triangle
         active <= 1;
         cnt <= 0;
-    end else if (active) begin
-        if (cnt < (wth - 1) && wth !== 0)
-            cnt <= cnt + 1;
-        else begin
-            cnt <= 0;
-            active <= 0;
+        ramp_up <= 1;
+    // Retrigger: always start ramping up from current value
+    end else if (bunch_arrival_trig && active) ramp_up <= 1;
+    else if (active) begin
+        if (ramp_up) begin
+            if (cnt < (wth-1) && wth !== 0) begin
+                cnt <= cnt + 1;
+                // hit midpoint, start ramping down
+                if (cnt == ((wth-1)>>1)) ramp_up <= 0;
+            end else begin
+                cnt <= 0;
+                active <= 0;
+            end
+        end else begin  // ramping down
+            if (cnt > 0) cnt <= cnt - 1;
+            else active <= 0;
         end
     end
 end
@@ -47,11 +59,11 @@ end
 reg signed [24:0] temp_tri = 0;
 always @(posedge clk) begin
     if (active && (wth > 7'd1)) begin
-        if (cnt <= (wth-1)/2) temp_tri <= (2*cnt*amp)/(wth-1);
+        if (cnt <= midpoint) temp_tri <= (2*cnt*amp)/(wth-1);
         else temp_tri <= (2*(wth-1-cnt)*amp)/(wth-1);
     end else temp_tri <= 0;
 end
 
-assign tri_out_xy = temp_tri[24:8];
+assign tri_out_xy = temp_tri[24:8] + temp_tri[7];
 
 endmodule

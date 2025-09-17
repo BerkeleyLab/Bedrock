@@ -1,17 +1,17 @@
 [timestart] 0
-[size] 1920 1033
+[size] 1920 962
 [pos] -1 -1
-*-27.206739 1116005744 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-27.129992 323122396 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] pulse_drive_wrapper.
 [sst_width] 278
-[signals_width] 174
+[signals_width] 214
 [sst_expanded] 1
-[sst_vpaned_height] 288
+[sst_vpaned_height] 271
 @28
 pulse_drive_wrapper.clk
 pulse_drive_wrapper.iq
 pulse_drive_wrapper.bunch_arrival_trig
-@25
+@24
 pulse_drive_wrapper.dut.wth[6:0]
 @28
 pulse_drive_wrapper.amp_addr
@@ -41,9 +41,46 @@ pulse_drive_wrapper.amp[17:0]
 @420
 pulse_drive_wrapper.ampx[17:0]
 pulse_drive_wrapper.ampy[17:0]
+@24
+pulse_drive_wrapper.dut.midpoint[6:0]
+@28
+pulse_drive_wrapper.dut.active
+@24
+pulse_drive_wrapper.dut.cnt[17:0]
+@29
+pulse_drive_wrapper.dut.ramp_up
 @10420
 pulse_drive_wrapper.tri_out_xy[17:0]
+@c10420
 pulse_drive_wrapper.tri_out_x[17:0]
+@28
+(0)pulse_drive_wrapper.tri_out_x[17:0]
+(1)pulse_drive_wrapper.tri_out_x[17:0]
+(2)pulse_drive_wrapper.tri_out_x[17:0]
+(3)pulse_drive_wrapper.tri_out_x[17:0]
+(4)pulse_drive_wrapper.tri_out_x[17:0]
+(5)pulse_drive_wrapper.tri_out_x[17:0]
+(6)pulse_drive_wrapper.tri_out_x[17:0]
+(7)pulse_drive_wrapper.tri_out_x[17:0]
+(8)pulse_drive_wrapper.tri_out_x[17:0]
+(9)pulse_drive_wrapper.tri_out_x[17:0]
+(10)pulse_drive_wrapper.tri_out_x[17:0]
+(11)pulse_drive_wrapper.tri_out_x[17:0]
+(12)pulse_drive_wrapper.tri_out_x[17:0]
+(13)pulse_drive_wrapper.tri_out_x[17:0]
+(14)pulse_drive_wrapper.tri_out_x[17:0]
+(15)pulse_drive_wrapper.tri_out_x[17:0]
+(16)pulse_drive_wrapper.tri_out_x[17:0]
+(17)pulse_drive_wrapper.tri_out_x[17:0]
+@1401200
+-group_end
+@20000
+-
+-
+@10420
 pulse_drive_wrapper.tri_out_y[17:0]
+@20000
+-
+-
 [pattern_trace] 1
 [pattern_trace] 0
