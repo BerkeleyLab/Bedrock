@@ -27,6 +27,7 @@ WTH_MAX = (2**7) - 1
 # Frequency at which to randomize amplitudes and widths
 RANDOMIZE_INTERVAL = 3
 
+
 @cocotb.test()
 async def pulse_drive_fractional_cycles(dut):
     # Generate bunch_arrival_trig with fractional cycle accuracy,
