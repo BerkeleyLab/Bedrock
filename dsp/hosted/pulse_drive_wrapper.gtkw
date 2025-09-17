@@ -1,7 +1,7 @@
 [timestart] 0
 [size] 1920 962
 [pos] -1 -1
-*-27.129992 323122396 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-26.957039 44227020 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] pulse_drive_wrapper.
 [sst_width] 278
 [signals_width] 214
@@ -43,11 +43,14 @@ pulse_drive_wrapper.ampx[17:0]
 pulse_drive_wrapper.ampy[17:0]
 @24
 pulse_drive_wrapper.dut.midpoint[6:0]
+@25
+pulse_drive_wrapper.dut.up[6:0]
+pulse_drive_wrapper.dut.down[6:0]
 @28
 pulse_drive_wrapper.dut.active
 @24
 pulse_drive_wrapper.dut.cnt[17:0]
-@29
+@28
 pulse_drive_wrapper.dut.ramp_up
 @10420
 pulse_drive_wrapper.tri_out_xy[17:0]

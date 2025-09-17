@@ -30,6 +30,11 @@ reg [17:0] cnt = 0;
 reg active = 0;
 // Find the peak of the triangular wave (half of width)
 wire [6:0] midpoint = wth >> 1;
+// separate odd vs even widths
+// for odd widths there will be single clock cycle of flatness
+wire [6:0] up = midpoint;
+wire [6:0] down = wth-midpoint-1;
+
 reg ramp_up = 0;  // 1 = ramping up, 0 = ramping down
 always @(posedge clk) begin
     if (bunch_arrival_trig && !active) begin
@@ -59,7 +64,7 @@ end
 reg signed [24:0] temp_tri = 0;
 always @(posedge clk) begin
     if (active && (wth > 7'd1)) begin
-        if (cnt <= midpoint) temp_tri <= (2*cnt*amp)/(wth-1);
+        if (cnt <= up) temp_tri <= (2*cnt*amp)/(wth-1);
         else temp_tri <= (2*(wth-1-cnt)*amp)/(wth-1);
     end else temp_tri <= 0;
 end
