@@ -10,7 +10,7 @@ TEST_BENCH = lp_tb lp_2notch_tb lp_notch_tb phs_avg_tb mp_proc_tb etrig_bridge_t
 TGT_ := $(TEST_BENCH)
 
 NO_CHECK = lp_check
-CHK_ += non_iq_interleaved_piloop_pycheck lp_notch_check lp_2notch_check
+CHK_ += non_iq_interleaved_piloop_pycheck lp_notch_check lp_2notch_check fdbk_core_check
 
 .PHONY: targets checks bits check_all clean_all
 targets: $(TGT_)
