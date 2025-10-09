@@ -9,10 +9,10 @@ module IBUFDS_GTE4(
     output ODIV2
 );
 	parameter DIFF_TERM = "FALSE";
-	buf B1(O, I);
+    buf B1(O, I);
 
-	reg x=0;
-	always @(posedge I) x<=~x;
-	buf B2(ODIV2, x);
+    reg x=0;
+    always @(posedge I) x<=~x;
+    buf B2(ODIV2, x);
 
 endmodule
