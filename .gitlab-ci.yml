@@ -1,4 +1,5 @@
 stages:
+  - check
   - build
   - test
   - synthesis

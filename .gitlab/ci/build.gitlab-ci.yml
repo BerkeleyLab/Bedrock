@@ -1,11 +1,10 @@
 check_image:
   image: docker:stable
-  stage: build
+  stage: check
   script: |
     export DOCKER_CLI_EXPERIMENTAL=enabled
     docker manifest inspect \
       $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME > /dev/null && exit 0 || exit 1
-  allow_failure: true
 
 build:
   image: docker:stable
@@ -28,8 +27,6 @@ build:
     docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
     docker push $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
     docker push $CONTAINER_IMAGE:latest
-  needs:
-    - job: check_image
   rules:
     - when: on_failure
     - if: '$CI_COMMIT_BRANCH == "master"'
