@@ -1,10 +1,14 @@
 check_image:
   image: docker:stable
-  stage: check
+  stage: build
   script: |
     export DOCKER_CLI_EXPERIMENTAL=enabled
     docker manifest inspect \
-      $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME > /dev/null && exit 0 || exit 1
+      $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME > /dev/null && DOCKER_IMAGE_EXISTS=1 || DOCKER_IMAGE_EXISTS=0
+    echo "DOCKER_IMAGE_EXISTS=${DOCKER_IMAGE_EXISTS}" > build.env
+  artifacts:
+    reports:
+      dotenv: build.env
 
 build:
   image: docker:stable
@@ -27,8 +31,10 @@ build:
     docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
     docker push $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
     docker push $CONTAINER_IMAGE:latest
+  needs:
+    - check_image
   rules:
-    - when: on_failure
+    - if: '$DOCKER_IMAGE_EXISTS == "1"'
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: $CI_COMMIT_BRANCH
       changes:
