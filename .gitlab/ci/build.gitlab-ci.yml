@@ -20,6 +20,7 @@ build:
     - echo $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
     - echo $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
     - echo $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+    - echo "DOCKER_IMAGE_EXISTS=${DOCKER_IMAGE_EXISTS}"
   script: |
     docker pull $CONTAINER_IMAGE:latest || true
     docker build --cache-from $CONTAINER_IMAGE:latest \
@@ -34,7 +35,7 @@ build:
   needs:
     - check_image
   rules:
-    - if: '$DOCKER_IMAGE_EXISTS == "1"'
+    - if: '$DOCKER_IMAGE_EXISTS == "0"'
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: $CI_COMMIT_BRANCH
       changes:

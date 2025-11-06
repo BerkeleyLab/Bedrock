@@ -11,6 +11,7 @@ variables:
   CONTAINER_IMAGE: $CI_REGISTRY/bedrock_testing_base_bookworm
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
+  FF_SCRIPT_SECTIONS: "true"
 
 image: $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
 
