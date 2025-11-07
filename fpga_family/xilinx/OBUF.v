@@ -1,5 +1,7 @@
 module OBUF #(
-    parameter IOSTANDARD = "DEFAULT"
+    parameter integer DRIVE = 12,
+    parameter IOSTANDARD = "DEFAULT",
+    parameter SLEW = "SLOW"
 ) (
     output O,
     input I
