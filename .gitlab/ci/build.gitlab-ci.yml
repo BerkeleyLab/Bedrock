@@ -2,7 +2,7 @@ check_rebuild:
   image: docker:stable
   stage: build
   script: |
-    echo "DOCKER_IMAGE_BUILD=1" > build.env
+    echo "DOCKER_IMAGE_REBUILD=1" > build.env
   artifacts:
     reports:
       dotenv: build.env
@@ -20,12 +20,8 @@ check_exists:
     export DOCKER_CLI_EXPERIMENTAL=enabled
     docker manifest inspect \
       $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME > /dev/null && \
-    docker manifest inspect \
-      $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA > /dev/null && \
-    docker manifest inspect \
-      $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA > /dev/null && \
-    DOCKER_IMAGE_BUILD=0 || DOCKER_IMAGE_BUILD=1
-    echo "DOCKER_IMAGE_BUILD=${DOCKER_IMAGE_BUILD}" > build.env
+    DOCKER_IMAGE_EXISTS=1 || DOCKER_IMAGE_EXISTS=0
+    echo "DOCKER_IMAGE_EXISTS=${DOCKER_IMAGE_BUILD}" > build.env
   artifacts:
     reports:
       dotenv: build.env
@@ -46,8 +42,11 @@ build:
     - job: check_exists
       optional: true
   script: |
-    echo "DOCKER_IMAGE_BUILD=${DOCKER_IMAGE_BUILD}"
-    if [ "$DOCKER_IMAGE_BUILD" == "0" ]; then
+    echo "DOCKER_IMAGE_REBUILD=${DOCKER_IMAGE_REBUILD}"
+    echo "DOCKER_IMAGE_EXISTS=${DOCKER_IMAGE_EXISTS}"
+    if [ -n "$DOCKER_IMAGE_REBUILD" ] && \
+        [ "$DOCKER_IMAGE_REBUILD" == "0" ] && \
+        [ "$DOCKER_IMAGE_EXISTS" == "1"]; then
       exit 0
     fi
     docker pull $CONTAINER_IMAGE:latest || true
