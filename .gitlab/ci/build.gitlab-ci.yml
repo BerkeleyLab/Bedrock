@@ -47,7 +47,7 @@ build:
       optional: true
   script: |
     echo "DOCKER_IMAGE_BUILD=${DOCKER_IMAGE_BUILD}"
-    if $DOCKER_IMAGE_BUILD == "1"; then
+    if [ "$DOCKER_IMAGE_BUILD" == "0" ]; then
       exit 0
     fi
     docker pull $CONTAINER_IMAGE:latest || true
