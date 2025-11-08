@@ -1,8 +1,6 @@
 Overview
 ========
 
-test
-
 Bedrock generated documentation: https://berkeleylab.github.io/Bedrock/
 
 [Bedrock](https://gitlab.lbl.gov/hdl-libraries/bedrock) is largely an accumulation
