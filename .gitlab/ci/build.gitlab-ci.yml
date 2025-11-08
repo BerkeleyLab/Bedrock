@@ -44,7 +44,7 @@ build:
   script: |
     echo "DOCKER_IMAGE_REBUILD=${DOCKER_IMAGE_REBUILD}"
     echo "DOCKER_IMAGE_EXISTS=${DOCKER_IMAGE_EXISTS}"
-    if [ \( -z "$DOCKER_IMAGE_REBUILD" || "$DOCKER_IMAGE_REBUILD" == "0" \) && \
+    if [ \( -z "$DOCKER_IMAGE_REBUILD" -o "$DOCKER_IMAGE_REBUILD" == "0" \) -a \
         "$DOCKER_IMAGE_EXISTS" == "1" ]; then
       exit 0
     fi
