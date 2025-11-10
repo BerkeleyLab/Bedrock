@@ -1,3 +1,33 @@
+check_rebuild:
+  extends: .build-matrix
+  image: docker:stable
+  stage: build
+  script: |
+    echo "DOCKERFILE=${DOCKERFILE}"
+    echo "DOCKER_IMAGE_REBUILD=1" > build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: $CI_COMMIT_BRANCH
+      changes:
+        - ${DOCKERFILE}
+        - .gitlab/ci/build.gitlab-ci.yml
+
+check_exists:
+  extends: .build-matrix
+  image: docker:stable
+  stage: build
+  script: |
+    export DOCKER_CLI_EXPERIMENTAL=enabled
+    docker manifest inspect $IMAGE:$CI_COMMIT_REF_NAME > /dev/null && \
+        DOCKER_IMAGE_EXISTS=1 || DOCKER_IMAGE_EXISTS=0
+    echo "DOCKER_IMAGE_EXISTS=${DOCKER_IMAGE_EXISTS}" > build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
 build:
   extends: .build-matrix
   image: docker:stable
@@ -10,11 +40,27 @@ build:
     - cat /etc/hosts
     - cat /etc/resolv.conf
     - docker info
-    - docker info
-    - echo $IMAGE:$CI_COMMIT_REF_NAME
-    - echo $IMAGE:$CI_COMMIT_SHORT_SHA
-    - echo $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+    - echo $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
+    - echo $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
+    - echo $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+  needs:
+    - job: check_rebuild
+      optional: true
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: ['$[[ matrix.IMAGE_VARIANT ]]']
+    - job: check_exists
+      optional: true
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: ['$[[ matrix.IMAGE_VARIANT ]]']
   script: |
+    echo "DOCKER_IMAGE_REBUILD=${DOCKER_IMAGE_REBUILD}"
+    echo "DOCKER_IMAGE_EXISTS=${DOCKER_IMAGE_EXISTS}"
+    if [ \( -z "$DOCKER_IMAGE_REBUILD" -o "$DOCKER_IMAGE_REBUILD" == "0" \) -a \
+        "$DOCKER_IMAGE_EXISTS" == "1" ]; then
+      exit 0
+    fi
     IMAGE_BASENAME=${IMAGE##*/}
     docker pull $IMAGE:latest || true
     docker build --cache-from $IMAGE:latest \
@@ -27,9 +73,3 @@ build:
     docker push $IMAGE:$CI_COMMIT_REF_NAME
     docker push $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
     docker push $IMAGE:latest
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-    - if: $CI_COMMIT_BRANCH
-      changes:
-        - Dockerfile*
-        - .gitlab/ci/build.gitlab-ci.yml

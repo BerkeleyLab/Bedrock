@@ -26,6 +26,7 @@ image: $DEFAULT_IMAGE:$CI_COMMIT_REF_NAME
 .build-matrix:
   variables:
     IMAGE: ${CI_REGISTRY}/${IMAGE_BASE}_${IMAGE_VARIANT}
+    DOCKERFILE: Dockerfile.${IMAGE_BASE}_${IMAGE_VARIANT}
   parallel:
     matrix:
       - !reference [.build-images, parallel]
