@@ -58,4 +58,3 @@ build:
     docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
     docker push $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
     docker push $CONTAINER_IMAGE:latest
-
