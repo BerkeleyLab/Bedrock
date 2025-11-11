@@ -13,6 +13,7 @@ check_rebuild:
     - if: $CI_COMMIT_BRANCH
       changes:
         - ${DOCKERFILE}
+        - build-tools/litex_meta.sh
         - .gitlab/ci/build.gitlab-ci.yml
 
 check_exists:
