@@ -10,6 +10,7 @@ build:
     - cat /etc/hosts
     - cat /etc/resolv.conf
     - docker info
+    - docker info
     - echo $IMAGE:$CI_COMMIT_REF_NAME
     - echo $IMAGE:$CI_COMMIT_SHORT_SHA
     - echo $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
