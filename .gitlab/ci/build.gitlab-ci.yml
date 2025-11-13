@@ -51,7 +51,6 @@ build:
         matrix:
           - IMAGE_VARIANT: ['$[[ matrix.IMAGE_VARIANT ]]']
     - job: check_exists
-      optional: true
       parallel:
         matrix:
           - IMAGE_VARIANT: ['$[[ matrix.IMAGE_VARIANT ]]']
