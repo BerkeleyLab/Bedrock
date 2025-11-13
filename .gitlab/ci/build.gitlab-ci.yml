@@ -29,8 +29,20 @@ check_exists:
     reports:
       dotenv: build.env
 
-build:
-  extends: .build-matrix
+# With Gitlab 16.8 we should be able to do"
+#  extends: .build-matrix
+#  needs:
+#    - job: check_rebuild
+#      optional: true
+#      parallel:
+#        matrix:
+#          - IMAGE_VARIANT: ['$[[ matrix.IMAGE_VARIANT ]]']
+#    - job: check_exists
+#      parallel:
+#        matrix:
+#          - IMAGE_VARIANT: ['$[[ matrix.IMAGE_VARIANT ]]']
+
+.build:
   image: docker:stable
   stage: build
   services:
@@ -44,16 +56,6 @@ build:
     - echo $IMAGE:$CI_COMMIT_REF_NAME
     - echo $IMAGE:$CI_COMMIT_SHORT_SHA
     - echo $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
-  needs:
-    - job: check_rebuild
-      optional: true
-      parallel:
-        matrix:
-          - IMAGE_VARIANT: ['$[[ matrix.IMAGE_VARIANT ]]']
-    - job: check_exists
-      parallel:
-        matrix:
-          - IMAGE_VARIANT: ['$[[ matrix.IMAGE_VARIANT ]]']
   script: |
     echo "DOCKER_IMAGE_REBUILD=${DOCKER_IMAGE_REBUILD}"
     echo "DOCKER_IMAGE_EXISTS=${DOCKER_IMAGE_EXISTS}"
@@ -73,3 +75,35 @@ build:
     docker push $IMAGE:$CI_COMMIT_REF_NAME
     docker push $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
     docker push $IMAGE:latest
+
+build_bookworm:
+  extends: .build
+  variables:
+    IMAGE_VARIANT: bookworm
+    IMAGE: ${CI_REGISTRY}/${IMAGE_BASE}_${IMAGE_VARIANT}
+  needs:
+    - job: check_rebuild
+      optional: true
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: bookworm
+    - job: check_exists
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: bookworm
+
+build_trixie:
+  extends: .build
+  variables:
+    IMAGE_VARIANT: trixie
+    IMAGE: ${CI_REGISTRY}/${IMAGE_BASE}_${IMAGE_VARIANT}
+  needs:
+    - job: check_rebuild
+      optional: true
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: trixie
+    - job: check_exists
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: trixie
