@@ -44,7 +44,6 @@ cmoc_test:
   parallel:
     matrix:
       - !reference [.cmoc-top-matrix, parallel]
-  rules: !reference [.build-matrix, rules]
 
 cmoc_top:
   extends: .cmoc-top-build-matrix
