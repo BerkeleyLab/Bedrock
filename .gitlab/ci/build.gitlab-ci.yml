@@ -41,9 +41,9 @@ build:
     - cat /etc/hosts
     - cat /etc/resolv.conf
     - docker info
-    - echo $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
-    - echo $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
-    - echo $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+    - echo $IMAGE:$CI_COMMIT_REF_NAME
+    - echo $IMAGE:$CI_COMMIT_SHORT_SHA
+    - echo $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
   needs:
     - job: check_rebuild
       optional: true
