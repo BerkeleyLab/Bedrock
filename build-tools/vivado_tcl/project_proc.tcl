@@ -261,6 +261,14 @@ proc project_write_bitstream {platform} {
         set_property BITSTREAM.CONFIG.CONFIGRATE $::project_cfgrate [get_designs impl_1]
     }
 
+    if {[string first "qf2pre" $platform] != -1} {
+        puts "INFO: QF2-Pre board detected, setting custom USERID."
+        set UID 32'hFEED0070
+        puts "INFO: USERID set to $UID"
+        set_property BITSTREAM.CONFIG.USERID $UID [get_designs impl_1]
+        set_property BITSTREAM.CONFIG.USR_ACCESS NONE [get_designs impl_1]
+    }
+
     write_bitstream -force [current_project].bit
 
     if {($::project_cfgmem_interface ne "none" && $::project_cfgmem_size ne "none")} {
