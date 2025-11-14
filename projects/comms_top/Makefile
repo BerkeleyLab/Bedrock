@@ -24,7 +24,7 @@ include $(BUILD_DIR)/top_rules.mk
 $(APP_NAME).bit: $(IP_TCL)
 
 hwload:
-	ln -s $(QF2_TOOLS)/qf2_python .; $(PYTHON) -m qf2_python.scripts.program_kintex -t $(QF2_IP) -b $(BIT)
+	ln -s $(QF2_TOOLS)/qf2_python_latest .; $(PYTHON) -m qf2_python_latest.scripts.program_kintex_7 -t $(QF2_IP) -b $(BIT)
 
 hwtest:
 	cd test; ./comms_top_test.py -t $(FIB_IP) -cf comms_test.cf && ./runloop 5 ./comms_top_test.py -cf comms_test.cf
