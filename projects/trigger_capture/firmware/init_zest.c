@@ -97,7 +97,7 @@ t_reg32 regmap_amc7823[] = {
 #define FCNT_EXP DSP_FREQ_MHZ * (1<<16) / 125
 
 // ADC0_DIV, ADC1_DIV, DAC_DCO, DSP_CLK
-uint16_t fcnt_exp[4] = {
+uint32_t fcnt_exp[4] = {
     FCNT_EXP,
     FCNT_EXP,
     FCNT_EXP * 2,
