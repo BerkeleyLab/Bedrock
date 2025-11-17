@@ -23,7 +23,7 @@ comms_top_run:
   script:
     - cd projects/comms_top
     - sh qf2_070_3_setup.sh
-    - make QF2_TOOLS=qf2_users QF2_IP=192.168.1.30 hwload && sleep 8 && make hwtest
+    - make QF2_TOOLS=qf2-pre-users QF2_IP=192.168.1.30 hwload && sleep 8 && make hwtest
 
 gige_sfp_ac701:
   extends: .build-matrix
