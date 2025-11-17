@@ -32,7 +32,7 @@ def make_check():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Test a_compress')
+    parser = argparse.ArgumentParser(description='Test half_filt')
     parser.add_argument('-c', '--check', action='store_true', default=True,
                         help='Purely run the check')
     args = parser.parse_args()

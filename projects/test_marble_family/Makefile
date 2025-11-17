@@ -92,8 +92,9 @@ mmc_mailbox_tb: mmc_mailbox.v $(HOMELESS_DIR)/fake_dpram.v $(DSP_DIR)/dpram.v $(
 # subset that is interesting to test live on network
 AD5662_V = ad5662_lock.v pps_lock.v pps_loop_filter.v ad5662.v
 LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v reg_tech_cdc.v freq_count.v freq_gcount.v multi_counter.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
-                    gps_test.v simpleuart.v fake_dpram.v xadc_tempvoltmon.v dna.v
-lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v fake_xadc.v udp-vpi.vpi IDDR.v
+                    gps_test.v simpleuart.v fake_dpram.v
+LB_MARBLE_SLAVE_VX = xadc_tempvoltmon.v dna.v  # not used in CDC exercise with yosys
+lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) $(LB_MARBLE_SLAVE_VX) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v fake_xadc.v udp-vpi.vpi IDDR.v
 VFLAGS_lb_marble_slave_tb = -m ./udp-vpi
 net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=8030 +vcd
@@ -106,7 +107,8 @@ net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_trx.dat
 	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py -a localhost -p 0 --sim --ramtest --stop --rlen=34
 
 # syntax-check only, with no actual test bench code
-MARBLE_BASE_V = marble_base.v packet_categorize.v data_xdomain.v flag_xdomain.v ltm_sync.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V) mmc_mailbox.v
+MARBLE_BASE_V0 = marble_base.v packet_categorize.v data_xdomain.v flag_xdomain.v ltm_sync.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V) mmc_mailbox.v
+MARBLE_BASE_V = $(MARBLE_BASE_V0) $(LB_MARBLE_SLAVE_VX)
 marble_base_tb: $(MARBLE_BASE_V) fake_xadc.v IDDR.v
 VFLAGS_marble_base_tb =
 
@@ -124,7 +126,7 @@ marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) fake_xadc.v $(FP
 
 # =====
 # check of basic CDC-correctness
-marble_base_yosys.json: marble_base_shell.v $(MARBLE_BASE_V)
+marble_base_yosys.json: marble_base_shell.v $(MARBLE_BASE_V0)
 # exercise with make marble_base_cdc.txt
 
 # =====

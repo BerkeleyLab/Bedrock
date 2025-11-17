@@ -24,6 +24,7 @@
 `include "fdbk_core_auto.vh"
 
 module fdbk_core #(
+	parameter thresh_shift = 9, // Threshold shift; typically 9 for SRF use
 	parameter ff_dshift = 0, // Deferred ff_ddrive downshift
 	// Knobs to use/bypass CORDIC multiplexer, Magnitude/Phase processor (slow),
 	// and Low-Latency Processor (bypassing conversion to polar coordinates)
@@ -98,10 +99,8 @@ wire sync3 = stb[1];
 
 // Instantiate magnitude and phase processor
 // XXX: Review thresh_shift for SRF use
-// .thresh_shift (6) in lcls2_llrf sel4v
-
 (* lb_automatic *)
-mp_proc #(.ff_dshift(ff_dshift)) mp_proc // auto
+mp_proc #(.thresh_shift(thresh_shift), .ff_dshift(ff_dshift)) mp_proc // auto
 	(.clk(clk), .sync(sync3),
 	.in_mp(out_mp), // .state(state),
 	// Feedforward - not well tested

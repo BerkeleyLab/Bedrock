@@ -39,8 +39,8 @@ def wait_for_bit(dev, mask, equal, timeout=520, sim=False, progress=".", verbose
         else:
             sleep(0.02)
         updated = dev.reg_read(["twi_status"])[0]
-        if verbose:
-            print("%d updated? %d" % (ix, updated))
+        # if verbose:
+        #     print("%d updated? %d" % (ix, updated))
         if (updated & mask) == equal:
             if verbose:
                 sys.stdout.write("OK\n")
