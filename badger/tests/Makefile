@@ -337,7 +337,7 @@ $(LB_DEMO_JSON): $(LB_STATIC_JSON) $(LB_SCALAR_JSON)
 	$(PYTHON) $(BEDROCK_BUILD_TOOLS)/merge_json.py -o $@ -i $^
 
 fake_config_romx.v: $(LB_DEMO_JSON)
-	$(PYTHON) $(BEDROCK_BUILD_TOOLS)/build_rom.py --mod_prefix fake_ -j $^ -v $@
+	$(PYTHON) -m leep.build_rom --mod_prefix fake_ -j $^ -v $@
 
 CLEAN += $(LB_DEMO_JSON)
 CLEAN += $(LB_SCALAR_JSON)
