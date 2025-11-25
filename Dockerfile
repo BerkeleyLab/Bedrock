@@ -133,6 +133,10 @@ RUN mkdir ${LITEX_INSTALL_PATH} && \
     cd ${LITEX_INSTALL_PATH} && \
     sh /litex_meta.sh
 
+# Install leep
+RUN apt-get update && \
+    pip3 install git+https://github.com/BerkeleyLab/leep.git
+
 # Install sv2v
 RUN apt-get update && \
     apt-get install -y \
