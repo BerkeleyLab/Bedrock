@@ -4,7 +4,6 @@ import numpy as np
 bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
-sys.path.append(bedrock_dir + "projects/common")
 from c2vcd import produce_vcd
 from fmc_test_l import fmc_decode
 

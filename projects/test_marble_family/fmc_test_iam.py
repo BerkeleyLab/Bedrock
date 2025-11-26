@@ -2,9 +2,6 @@
 # https://www.iamelectronic.com/shop/produkt/fpga-mezzanine-card-fmc-loopback-module/
 # Still doesn't cover LA_1 to GBTCLK0_M2C or LA_18 to GBTCLK1_M2C (HPC)
 
-import sys
-bedrock_dir = "../../"
-sys.path.append(bedrock_dir + "projects/common")
 import leep
 import time
 from grok_iam import check_row

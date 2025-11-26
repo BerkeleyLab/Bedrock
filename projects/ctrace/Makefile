@@ -50,7 +50,7 @@ wctrace_n_tb: wctrace_tb.v $(WCTRACE_SOURCES)
 	$(VERILOG_TB)
 
 config_romx.v: wctrace_top_regmap.json
-	$(PYTHON) $(BUILD_DIR)/build_rom.py --placeholder_rev -v $@ -j $< -d "wctrace live demo"
+	$(PYTHON) -m leep.build_rom --placeholder_rev -v $@ -j $< -d "wctrace live demo"
 
 VC_INCLUDES = $(foreach var,$(INC_DIRS),-CFLAGS -I$(var))
 
