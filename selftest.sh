@@ -88,12 +88,6 @@ make -C dsp/feedforward
 make -C homeless all checks
 make -C homeless/freq_demo
 
-## leep_test
-(cd projects/common && PYTHONPATH=../../build-tools python3 -m unittest -v)
-
-## leep_test2
-make -C projects/common/leep
-
 ## localbus
 make -C localbus
 

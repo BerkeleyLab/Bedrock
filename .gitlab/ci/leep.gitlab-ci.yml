@@ -1,6 +1,0 @@
-leep_test2:
-  extends: .build-matrix
-  image: $IMAGE
-  stage: test
-  script:
-    - make -C projects/common/leep && make -C projects/common/leep clean

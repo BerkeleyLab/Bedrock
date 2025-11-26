@@ -3,8 +3,6 @@
 # to degrees Celsius.
 import sys
 import re
-bedrock_dir = "../../"
-sys.path.append(bedrock_dir + "projects/common")
 import leep
 
 

@@ -48,14 +48,6 @@ include:
   - local: .gitlab/ci/cdc_check.gitlab-ci.yml
   - local: .gitlab/ci/localbus.gitlab-ci.yml
   - local: .gitlab/ci/ctrace.gitlab-ci.yml
-  - local: .gitlab/ci/leep.gitlab-ci.yml
-
-leep_test:
-  extends: .build-matrix
-  image: $IMAGE
-  stage: test
-  script:
-    - cd projects/common && PYTHONPATH=../../build-tools python3 -m unittest -v
 
 flake8:
   extends: .build-matrix

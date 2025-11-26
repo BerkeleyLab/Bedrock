@@ -86,8 +86,8 @@ oscope_prep_yosys.json: $(FPGA_FAMILY_DIR)/xilinx/IBUFGDS.v
 # exercise with make dep && make oscope_prep_cdc.txt
 # =====
 
-$(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
-	$(PYTHON) $< -v $@ -j $(APP_NAME)_regmap.json
+$(AUTOGEN_DIR)/config_romx.v: $(APP_NAME)_regmap.json
+	$(PYTHON) -m leep.build_rom -v $@ -j $(APP_NAME)_regmap.json
 
 scalar_$(APP_NAME)_regmap.json: $(OSCOPE_COMMON_DIR)/application_top.sv
 	$(PYTHON) $(BUILD_DIR)/reverse_json.py $< > $@
