@@ -24,6 +24,8 @@ comms_top_run:
     - cd projects/comms_top
     - sh qf2_070_3_setup.sh
     - make QF2_TOOLS=qf2-pre-users QF2_IP=192.168.1.30 hwload && sleep 8 && make hwtest
+  environment: hw_qf2_pre
+  resource_group: hw_qf2_pre
 
 gige_sfp_ac701:
   extends: .build-matrix
@@ -49,3 +51,5 @@ gige_sfp_ac701_run:
     - gige_sfp_ac701
   script:
     - cd projects/comms_top/gige_eth && make hwload_ac701 SERIAL_NUM_OPT="-s 210203356870" && sleep 7 && make hwtest_ac701
+  environment: hw_ac701
+  resource_group: hw_ac701

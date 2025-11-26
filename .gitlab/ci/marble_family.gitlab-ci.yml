@@ -41,6 +41,8 @@ marble_mini_run:
     - cd projects/test_marble_family && ln -s marble1.*.bit marble1.bit
   script:
     - make marble1_hwload && sleep 8 && make marble1_hwtest
+  environment: hw_marble_mini
+  resource_group: hw_marble_mini
 
 marble_v2_synth:
   extends:
@@ -70,6 +72,8 @@ marble_run:
   script:
     - make marble2_hwload SERIAL=39 && sleep 8 && make marble2_hwtest SERIAL=39
     - make -C i2c live_oneshot SERIAL=39
+  environment: hw_marble
+  resource_group: hw_marble
 
 marble_i2c_check:
   extends: .build-matrix

@@ -53,3 +53,5 @@ soc_picorv32_cmod_a7_run:
     - cd soc/picorv32/project/cmod_a7
   script:
     - xc3sprog -c jtaghs1_fast -s 210328A6DA47 synth/system_top.bit && python3 hw_test.py 210328A6DA47
+  environment: hw_cmod_a7
+  resource_group: hw_cmod_a7
