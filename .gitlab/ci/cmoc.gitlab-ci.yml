@@ -1,4 +1,6 @@
 rtsim_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd rtsim && make clean && make
   stage: test
@@ -6,21 +8,46 @@ rtsim_test:
     - make clean && make checks && make rtsim.dat
 
 cmoc_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd cmoc
   stage: test
   script:
     - make && make checks
 
+# Because Gitlab doesn't support using extends with
+# multiple parallel:matrix + Issue 439828 (https://gitlab.com/gitlab-org/gitlab/-/issues/439828)
+# the following is the best I could think of to merge 2 parallel:matrix lists:
+
+# 1. Define the specific dictionary you want
+.marble-targets:
+  parallel:
+    TARGET: [marblemini, marble]
+
+# 2. Merge the above dictionary with tth .build-matrix defined in .gitlab-ci.yml
+# with extends: https://docs.gitlab.com/ci/yaml/yaml_optimization/#merge-details
+.cmoc-top-matrix:
+  extends:
+    - .build-images
+    - .marble-targets
+
+# 3. re-build the yaml structure of .build-matrix replacing "parallel:matrix"
+# with the newly created dictionary on 2.
+.cmoc-top-build-matrix:
+  variables: !reference [.build-matrix, variables]
+  parallel:
+    matrix:
+      - !reference [.cmoc-top-matrix, parallel]
+
 cmoc_top:
+  extends: .cmoc-top-build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/cmoc_top/marblemini && ls /non-free
   stage: synthesis
   script:
     - XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH make HARDWARE=${TARGET} cmoc_top.bit
-  parallel:
-    matrix:
-      - TARGET: [marblemini, marble]
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 1 week

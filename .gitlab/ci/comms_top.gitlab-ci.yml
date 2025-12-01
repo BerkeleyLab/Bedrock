@@ -1,4 +1,6 @@
 comms_top:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/comms_top && ls /non-free
   stage: synthesis
@@ -11,6 +13,8 @@ comms_top:
       - projects/comms_top/comms_top.bit
 
 comms_top_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   tags:
     - deploy
@@ -19,9 +23,13 @@ comms_top_run:
   script:
     - cd projects/comms_top
     - sh qf2_070_3_setup.sh
-    - make QF2_TOOLS=qf2_users QF2_IP=192.168.1.30 hwload && sleep 8 && make hwtest
+    - make QF2_TOOLS=qf2-pre-users QF2_IP=192.168.1.30 hwload && sleep 8 && make hwtest
+  environment: hw_qf2_pre
+  resource_group: hw_qf2_pre
 
 gige_sfp_ac701:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/comms_top/gige_eth && ls /non-free
   stage: synthesis
@@ -34,6 +42,8 @@ gige_sfp_ac701:
       - projects/comms_top/gige_eth/gige_top.bit
 
 gige_sfp_ac701_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   tags:
     - deploy
@@ -41,3 +51,5 @@ gige_sfp_ac701_run:
     - gige_sfp_ac701
   script:
     - cd projects/comms_top/gige_eth && make hwload_ac701 SERIAL_NUM_OPT="-s 210203356870" && sleep 7 && make hwtest_ac701
+  environment: hw_ac701
+  resource_group: hw_ac701

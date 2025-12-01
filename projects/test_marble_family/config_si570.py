@@ -9,7 +9,6 @@ import numpy as np
 bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
-sys.path.append(bedrock_dir + "projects/common")
 import leep
 import assem
 import testcase

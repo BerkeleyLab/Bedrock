@@ -1,4 +1,6 @@
 marble_sim:
+  extends: .build-matrix
+  image: $IMAGE
   stage: test
   script:
     - make -C projects/test_marble_family all net_slave_check
@@ -13,7 +15,10 @@ marble_sim:
     expire_in: 2 days
 
 marble_mini_synth:
-  extends: .bitgen
+  extends:
+    - .build-matrix
+    - .bitgen
+  image: $IMAGE
   script:
     - PATH=$XILINX_VIVADO/bin:$PATH make marble1.bit
   artifacts:
@@ -25,6 +30,8 @@ marble_mini_synth:
       - projects/test_marble_family/_xilinx/marble1.runs/impl_1/marble_top_*.rpt
 
 marble_mini_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   tags:
     - deploy
@@ -34,9 +41,14 @@ marble_mini_run:
     - cd projects/test_marble_family && ln -s marble1.*.bit marble1.bit
   script:
     - make marble1_hwload && sleep 8 && make marble1_hwtest
+  environment: hw_marble_mini
+  resource_group: hw_marble_mini
 
 marble_v2_synth:
-  extends: .bitgen
+  extends:
+    - .build-matrix
+    - .bitgen
+  image: $IMAGE
   script:
     - PATH=$XILINX_VIVADO/bin:$PATH make marble2.bit
   artifacts:
@@ -48,6 +60,8 @@ marble_v2_synth:
       - projects/test_marble_family/_xilinx/marble2.runs/impl_1/marble_top_*.rpt
 
 marble_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   tags:
     - deploy
@@ -58,8 +72,12 @@ marble_run:
   script:
     - make marble2_hwload SERIAL=39 && sleep 8 && make marble2_hwtest SERIAL=39
     - make -C i2c live_oneshot SERIAL=39
+  environment: hw_marble
+  resource_group: hw_marble
 
 marble_i2c_check:
+  extends: .build-matrix
+  image: $IMAGE
   stage: test
   script:
     - make -C projects/test_marble_family/i2c tests

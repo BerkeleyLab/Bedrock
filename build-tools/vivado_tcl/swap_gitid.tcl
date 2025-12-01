@@ -1,7 +1,7 @@
 # Functions related to Vivado and git
 
 # Revise config_romx git ID in-place using BRAM INIT_xx values
-# Absolutely depends on ROM contents that come out of bedrock/build-tools/build_rom.py
+# Absolutely depends on ROM contents that come out of build_rom.py
 # Two distinct cases:
 #   rowwidth = 8  for the case where the ROM is built with 2 x 8Kx8 BRAM (e.g., prc)
 #   rowwidth = 16 for the case where the ROM is built with 1 x 4Kx16 BRAM (e.g., marble1)

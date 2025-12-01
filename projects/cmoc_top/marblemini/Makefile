@@ -42,8 +42,8 @@ cmoc_top.v: marble_features_defs.vh marble_features_params.vh $(AUTOGEN_DIR)/con
 download: cmoc_top.bit
 	openocd -f $(BOARD_SUPPORT_DIR)/$(HARDWARE)/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $^; exit"
 
-$(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
-	$(PYTHON) $< -v $@ -j $(APP_NAME)_regmap.json
+$(AUTOGEN_DIR)/config_romx.v: $(APP_NAME)_regmap.json
+	$(PYTHON) -m leep.build_rom -v $@ -j $(APP_NAME)_regmap.json
 
 $(DEPDIR)/$(TARGET).d: $(AUTOGEN_DIR)/config_romx.v
 
