@@ -1,4 +1,6 @@
 dsp_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp
   stage: test
@@ -6,6 +8,8 @@ dsp_test:
     - make && make checks
 
 dsp_hosted_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp/hosted && export PYTHONPATH=../../build-tools/
   stage: test
@@ -18,6 +22,8 @@ dsp_hosted_test:
       - dsp/hosted/fdbk_core_plot.pdf
 
 digaree_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp/digaree
   stage: test
@@ -25,6 +31,8 @@ digaree_test:
     - make
 
 feedforward_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp/feedforward
   stage: test
@@ -32,6 +40,8 @@ feedforward_test:
     - make
 
 chirp_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp/chirp
   stage: test
