@@ -49,5 +49,4 @@ set_property -dict [list \
     CONFIG.ENABLE_OPTIONAL_PORTS cplllock_out \
 ] [get_ips evr_gt]
 
-# Generate output products for the IP core
-generate_target all [get_ips evr_gt]
+generate_target all [get_files evr_gt.xci]
