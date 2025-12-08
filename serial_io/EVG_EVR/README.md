@@ -69,7 +69,7 @@ The K28.5 character is used by EVRs to synchronize to the correct word boundary 
   * Of these, 33 timing slots are used to transmit pulse ID or other control patterns
 
 ## Transceiver configuration (TODO: Make GTY also generic and add GTP)
-The `gt_tcl` directory contains all the TCL scripts required for GTX/GTY transceiver configuration.
+The `gt_tcl` directory contains all the TCL scripts required for GTX/GTY transceiver configuration. **Only RX channel is enabled**
 * Example usage:
   To use `evr_gtx.tcl`, you must pass the reference frequency as a parameter.
   The script will then automatically compute the line rate based on the provided reference frequency.

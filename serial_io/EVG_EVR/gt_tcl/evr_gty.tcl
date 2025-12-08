@@ -8,9 +8,9 @@ if {![string is double -strict $REFCLK_FREQ]} {
 set REFCLK_FREQ [format "%.3f" $REFCLK_FREQ]
 puts "REFCLK_FREQ provided: $REFCLK_FREQ MHz"
 
-set CPLL_FBDIV 4
+set CPLL_FBDIV 16
 set CPLL_REFCLK_DIV 1
-set TXOUT_DIV 2
+set TXOUT_DIV 10
 
 set LINE_RATE_MHz  [expr {($REFCLK_FREQ * $CPLL_FBDIV / $CPLL_REFCLK_DIV) / $TXOUT_DIV}]
 set LINE_RATE_Gbps [expr {$LINE_RATE_MHz * 10.0 / 1000.0}]
@@ -39,15 +39,15 @@ set_property -dict [list \
     CONFIG.RX_INT_DATA_WIDTH 20 \
     CONFIG.RX_BUFFER_MODE 0 \
     CONFIG.RX_JTOL_FC 1.4997001 \
-    CONFIG.RX_REFCLK_SOURCE X0Y4 clk1+2 \
-    CONFIG.TX_REFCLK_SOURCE X0Y4 clk1+2 \
+    CONFIG.RX_REFCLK_SOURCE {X0Y4 clk1+2} \
+    CONFIG.TX_REFCLK_SOURCE {X0Y4 clk1+2} \
     CONFIG.LOCATE_TX_USER_CLOCKING CORE \
     CONFIG.LOCATE_RX_USER_CLOCKING CORE \
     CONFIG.TXPROGDIV_FREQ_SOURCE CPLL \
     CONFIG.TXPROGDIV_FREQ_VAL 125 \
     CONFIG.FREERUN_FREQUENCY 100 \
     CONFIG.ENABLE_OPTIONAL_PORTS cplllock_out \
-} [get_ips evr_gt]
+] [get_ips evr_gt]
 
 # Generate output products for the IP core
 generate_target all [get_ips evr_gt]
