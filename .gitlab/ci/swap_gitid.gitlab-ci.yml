@@ -1,4 +1,6 @@
 swap_gitid_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd build-tools/vivado_tcl
   stage: test

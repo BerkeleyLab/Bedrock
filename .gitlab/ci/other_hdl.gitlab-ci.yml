@@ -1,6 +1,8 @@
 # grab-bag of other Verilog/HDL simulation tests
 
 cordic_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd cordic && make clean
   stage: test
@@ -8,12 +10,16 @@ cordic_test:
     - make all
 
 freq_demo:
+  extends: .build-matrix
+  image: $IMAGE
   stage: test
   script:
     - make -C homeless/freq_demo
     - make -C homeless all checks
 
 peripheral_test:
+  extends: .build-matrix
+  image: $IMAGE
   stage: test
   script:
     - make -C peripheral_drivers
@@ -22,6 +28,8 @@ peripheral_test:
     - make -C peripheral_drivers/i2cbridge
 
 xilinx_test:
+  extends: .build-matrix
+  image: $IMAGE
   stage: test
   script:
     - make -C fpga_family/xilinx

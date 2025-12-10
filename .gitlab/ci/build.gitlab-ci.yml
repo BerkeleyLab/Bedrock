@@ -1,27 +1,109 @@
-build:
+check_rebuild:
+  extends: .build-matrix
   image: docker:stable
   stage: build
-  before_script:
-    - cat /etc/hosts
-    - cat /etc/resolv.conf
-    - docker info
-    - echo $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
-    - echo $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
-    - echo $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
   script: |
-    docker pull $CONTAINER_IMAGE:latest || true
-    docker build --cache-from $CONTAINER_IMAGE:latest \
-        -t $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME \
-        -t $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA \
-        -t $CONTAINER_IMAGE:latest \
-        .
-    docker run --rm $CONTAINER_IMAGE bash -c 'echo -n "Debian version: "; cat "/etc/debian_version"'
-    docker push $CONTAINER_IMAGE:$CI_COMMIT_REF_NAME
-    docker push $CONTAINER_IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
-    docker push $CONTAINER_IMAGE:latest
+    echo "DOCKERFILE=${DOCKERFILE}"
+    echo "DOCKER_IMAGE_REBUILD=1" > build.env
+  artifacts:
+    reports:
+      dotenv: build.env
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: $CI_COMMIT_BRANCH
       changes:
-        - Dockerfile*
+        - ${DOCKERFILE}
+        - build-tools/litex_meta.sh
         - .gitlab/ci/build.gitlab-ci.yml
+
+check_exists:
+  extends: .build-matrix
+  image: docker:stable
+  stage: build
+  script: |
+    export DOCKER_CLI_EXPERIMENTAL=enabled
+    docker manifest inspect $IMAGE:$CI_COMMIT_REF_NAME > /dev/null && \
+        DOCKER_IMAGE_EXISTS=1 || DOCKER_IMAGE_EXISTS=0
+    echo "DOCKER_IMAGE_EXISTS=${DOCKER_IMAGE_EXISTS}" > build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+# With Gitlab 16.8 we should be able to do"
+#  extends: .build-matrix
+#  needs:
+#    - job: check_rebuild
+#      optional: true
+#      parallel:
+#        matrix:
+#          - IMAGE_VARIANT: ['$[[ matrix.IMAGE_VARIANT ]]']
+#    - job: check_exists
+#      parallel:
+#        matrix:
+#          - IMAGE_VARIANT: ['$[[ matrix.IMAGE_VARIANT ]]']
+
+.build:
+  image: docker:stable
+  stage: build
+  services:
+    - name: mohs.dhcp.lbl.gov/docker:20.10.12-dind
+      command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
+      alias: docker
+  before_script:
+    - cat /etc/hosts
+    - cat /etc/resolv.conf
+    - docker info
+    - echo $IMAGE:$CI_COMMIT_REF_NAME
+    - echo $IMAGE:$CI_COMMIT_SHORT_SHA
+    - echo $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+  script: |
+    echo "DOCKER_IMAGE_REBUILD=${DOCKER_IMAGE_REBUILD}"
+    echo "DOCKER_IMAGE_EXISTS=${DOCKER_IMAGE_EXISTS}"
+    if [ \( -z "$DOCKER_IMAGE_REBUILD" -o "$DOCKER_IMAGE_REBUILD" == "0" \) -a \
+        "$DOCKER_IMAGE_EXISTS" == "1" ]; then
+      exit 0
+    fi
+    IMAGE_BASENAME=${IMAGE##*/}
+    docker pull $IMAGE:latest || true
+    docker build --cache-from $IMAGE:latest \
+        -t $IMAGE:$CI_COMMIT_REF_NAME \
+        -t $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA \
+        -t $IMAGE:latest \
+        -f Dockerfile.${IMAGE_BASENAME} \
+        .
+    docker run --rm $IMAGE bash -c 'echo -n "Debian version: "; cat "/etc/debian_version"'
+    docker push $IMAGE:$CI_COMMIT_REF_NAME
+    docker push $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+    docker push $IMAGE:latest
+
+build_bookworm:
+  extends: .build
+  variables:
+    IMAGE_VARIANT: bookworm
+    IMAGE: ${CI_REGISTRY}/${IMAGE_BASE}_${IMAGE_VARIANT}
+  needs:
+    - job: check_rebuild
+      optional: true
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: bookworm
+    - job: check_exists
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: bookworm
+
+build_trixie:
+  extends: .build
+  variables:
+    IMAGE_VARIANT: trixie
+    IMAGE: ${CI_REGISTRY}/${IMAGE_BASE}_${IMAGE_VARIANT}
+  needs:
+    - job: check_rebuild
+      optional: true
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: trixie
+    - job: check_exists
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: trixie

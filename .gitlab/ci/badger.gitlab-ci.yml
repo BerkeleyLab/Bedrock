@@ -1,4 +1,6 @@
 badger_test:
+  extends: .build-matrix
+  image: $IMAGE
   stage: test
   before_script:
     - cd badger/tests && make clean && sh ./tap-setup.sh
@@ -6,6 +8,8 @@ badger_test:
     - make && bash tftp_test.sh && bash speed_check.sh
 
 badger_ac701:
+  extends: .build-matrix
+  image: $IMAGE
   stage: synthesis
   before_script:
     - cd badger/tests && ls /non-free
@@ -19,6 +23,8 @@ badger_ac701:
       - badger/tests/ac701_rgmii_vtest.bit
 
 badger_ac701_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   tags:
     - deploy
@@ -26,3 +32,5 @@ badger_ac701_run:
     - badger_ac701
   script:
     - cd badger/tests && test -r ac701_rgmii_vtest.bit && SERIAL_NUM_OPT="-s 210203356870" sh teststand_ac701.sh
+  environment: hw_ac701
+  resource_group: hw_ac701

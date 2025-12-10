@@ -1,4 +1,0 @@
-leep_test2:
-  stage: test
-  script:
-    - make -C projects/common/leep && make -C projects/common/leep clean

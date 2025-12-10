@@ -4,7 +4,6 @@ import numpy as np
 bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
-sys.path.append(bedrock_dir + "projects/common")
 from c2vcd import produce_vcd
 from fmc_test_l import fmc_decode
 
@@ -39,8 +38,8 @@ def wait_for_bit(dev, mask, equal, timeout=520, sim=False, progress=".", verbose
         else:
             sleep(0.02)
         updated = dev.reg_read(["twi_status"])[0]
-        if verbose:
-            print("%d updated? %d" % (ix, updated))
+        # if verbose:
+        #     print("%d updated? %d" % (ix, updated))
         if (updated & mask) == equal:
             if verbose:
                 sys.stdout.write("OK\n")

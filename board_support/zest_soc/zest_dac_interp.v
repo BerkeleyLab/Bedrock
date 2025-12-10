@@ -1,6 +1,5 @@
 module zest_dac_interp #(
-    parameter integer DW=14,
-    parameter transparent=0
+    parameter integer DW=14
 ) (
     input dsp_clk,
     input signed [DW-1:0] din,
@@ -8,9 +7,6 @@ module zest_dac_interp #(
     input dac_clk,
     output signed [DW-1:0] dout
 );
-generate if (transparent) begin : no_cdc
-    assign dout = din;
-end else begin : add_cdc
     // input is: s0, s1, s2, ...
     // dac_clk is 2x of dsp_clk, phase aligned
     wire signed [DW-1:0] d1;
@@ -41,6 +37,5 @@ end else begin : add_cdc
         dout_r <= ~tick ? r1[DW-1:0] : d3;
     end
     assign dout = dout_r;
-end endgenerate
 
 endmodule

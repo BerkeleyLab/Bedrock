@@ -1,4 +1,6 @@
 make_docs:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd build-tools/make-demo && make clean
   stage: test
@@ -6,6 +8,8 @@ make_docs:
     - make check consistency
 
 sphinx_docs:
+  extends: .build-matrix
+  image: $IMAGE
   stage: docs
   before_script: |
     apt-get update
@@ -16,9 +20,10 @@ sphinx_docs:
         gtkwave \
         texlive-binaries
     python3 -m pip install \
-        sphinx==5.0.2 \
+        standard-imghdr \
+        sphinx==8.1.3 \
         sphinx_rtd_theme \
-        m2r2==0.3.2
+        m2r2==0.3.4
     sed -i -e '/pattern="PS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
         -e '/pattern="PDF"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
         -e '/pattern="EPS"/ s/rights=".*" pattern=/rights="read|write" pattern=/g' \
