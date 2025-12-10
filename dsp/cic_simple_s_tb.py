@@ -10,7 +10,7 @@
 '''
 
 import numpy as np
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge
@@ -65,7 +65,8 @@ async def cic_simple_s_test_noise(dut):
     test_trace(filtered_trace_time,
                filtered_trace,
                trace_time,
-               original_trace)
+               original_trace,
+               original_noisy=trace)
 
 
 def prepare_traces():
@@ -84,7 +85,9 @@ def prepare_traces():
 def test_trace(filtered_trace_time,
                filtered_trace,
                trace_time,
-               original_trace):
+               original_trace,
+               original_noisy = None,
+               plot=False):
     '''
         Asserts the equality of filtered_trace and original_trace
     '''
@@ -94,12 +97,18 @@ def test_trace(filtered_trace_time,
     max_diff = np.max(np.abs(filtered_trace - original_decimated))
     print('Max diff', max_diff)
 
-    assert max_diff < MAX_ERR
+    if plot:
+        plt.figure()
+        if original_noisy is not None:
+            plt.plot(trace_time, original_noisy, label='original_trace')
+        else:
+            plt.plot(trace_time, original_trace, label='original_trace')
+        plt.plot(filtered_trace_time, original_decimated, label='original_decimated')
+        plt.plot(filtered_trace_time, filtered_trace, label='filtered_trace')
+        plt.legend()
+        plt.show()
 
-    # plt.figure()
-    # plt.plot(filtered_trace)
-    # plt.plot(original_decimated)
-    # plt.show()
+    assert max_diff < MAX_ERR
 
 
 async def run_simulation(dut, trace):
@@ -115,15 +124,15 @@ async def run_simulation(dut, trace):
     await RisingEdge(dut.clk)
 
     for i, value in enumerate(trace):
-        if i % 1000 == 0:
+        if i % 2000 == 0:
             print(i, '/', len(trace))
 
         dut.data_in_gate.value = True
         dut.data_in.value = int(value)
 
         for j in range(SAMPLE_RATE):
-            if dut.data_out_gate.value.integer:
-                filtered_trace.append(dut.data_out.value.signed_integer)
+            if dut.data_out_gate.value:
+                filtered_trace.append(dut.data_out.value.to_signed())
                 filtered_trace_time.append(i*SAMPLE_RATE + j)
 
             await RisingEdge(dut.clk)
