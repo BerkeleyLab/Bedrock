@@ -100,7 +100,7 @@ reg sof_d=0;
 // Would it take fewer resources to replace sof_d with (live && pc_r == 2)?
 // Or to replace (live && pc_r==3) with sof_dd?  Need to measure to find out.
 // Could be worth breaking this up into 2 always blocks (badge and data)?
-// Not really, they both have to touch the "live" register.
+// Not really, since they both have to touch the "live" register.
 always @(posedge clk) begin
 	pc_r <= next_pc;
 	sof_d <= sof;
@@ -185,7 +185,7 @@ assign eth_strobe_short = eth_strobe_short_r;
 assign eth_strobe_long = pack_len_nz && pc_r > 3 && category != 0;
 assign pc = pc_d;
 
-// Debug only, will be dropped if you don't hook up the xcheck_fault port:
+// Debug only; will be dropped if you don't hook up the xcheck_fault port:
 // Cross-check the IP header checksum we just computed
 reg xcheck_zero=0, xcheck_gate=0, xcheck_ones_d=0;
 reg xcheck_capture=0, xcheck_fault_r=0;
