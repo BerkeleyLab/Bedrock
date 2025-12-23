@@ -102,6 +102,9 @@ GIT_VERSION = $(shell git describe --abbrev=4 --dirty --always --tags)
 ifndef NO_DEFAULT_TB_RULE
 %_tb: %_tb.v
 	$(VERILOG_TB)
+
+%_tb: %_tb.sv %.sv
+	$(VERILOG_TB)
 endif
 
 %_live: %_tb.v
