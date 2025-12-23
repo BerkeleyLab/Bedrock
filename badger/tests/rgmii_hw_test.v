@@ -5,7 +5,9 @@ module rgmii_hw_test(
 	// 200 MHz typical
 	input SYSCLK_P,
 `ifndef MARBLE_TEST
+`ifndef ECP5_VERSA
 	input SYSCLK_N,
+`endif
 `endif
 
 	// RGMII Tx port

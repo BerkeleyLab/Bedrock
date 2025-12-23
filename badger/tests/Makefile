@@ -271,6 +271,15 @@ marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d badger.tcl 
 	mv _xilinx/marblem_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
 # =====
+# ECP5/nextpnr; see https://github.com/YosysHQ/nextpnr
+# very much Work-In-Progress (WIP)
+%.json: %.v
+rgmii_hw_test.json: rgmii_hw_test.v $(HW_TEST_V) lattice/gmii_to_rgmii.v lattice/gmii_clock_handle.v
+	$(YOSYS) -DECP5_VERSA -p "synth_ecp5 -json $@ -top rgmii_hw_test" $(filter %.v, $^)
+%_out.config: %.json lattice/versa.lpf
+	nextpnr-ecp5 --json $< --lpf $(word 2, $^) --textcfg $@ --um-45k --package CABGA381 --freq 125
+
+# =====
 # On-line test using Icarus and Linux's tun/tap feature
 rtefi_live: rtefi_pipe_tb.v $(RTEFI_V) fake_config_romx.v mac_compat_dpram.v tap-vpi.vpi
 	$(VERILOG) -m ./tap-vpi -DLINUX_TUN -o $@ $(filter %.v, $^)
@@ -431,6 +440,7 @@ CLEAN += crc8e_guts.vh spellme* crc8e_guts_y.v rtefi_live Vrtefi_blob Vmem_gatew
 CLEAN += stests.dat *3.dat pcap2v host_mem_gen host_mem test_tx.out mac_subset.out host_cmds_gen
 CLEAN += host_cmds.dat retrigger.dat selfmac_in.dat xfer1 lorem_ipsum.hex spi_flash.grab udprtx
 CLEAN += cluster_run.out hw_test_cdc.txt hw_test_yosys.json
+CLEAN += rgmii_hw_test.json rgmii_hw_test_out.config
 CLEAN += $(RTEFI_CLEAN)
 CLEAN += *.html *.pdf *.log *.bit
 CLEAN_DIRS += obj_dir _xilinx .Xil
