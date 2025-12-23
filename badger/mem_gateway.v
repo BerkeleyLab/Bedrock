@@ -37,8 +37,8 @@
 // that takes place is outside the purview of this module.
 
 module mem_gateway #(
-	parameter read_pipe_len=3,  // minimum allowed value is 1
-	parameter n_lat=8,  // minimum allowed value is 5 + read_pipe_len
+	parameter read_pipe_len=4,  // minimum allowed value is 1
+	parameter n_lat=9,  // minimum allowed value is 5 + read_pipe_len
 	parameter enable_bursts=0
 ) (
 	input clk,   // timespec 6.8 ns

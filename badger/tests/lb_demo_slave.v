@@ -79,10 +79,11 @@ freq_count #(.refcnt_width(27), .freq_width(32)) f_count1(.f_in(ibadge_clk),
 	.sysclk(clk), .frequency(tx_freq));
 
 // Configuration ROM
-wire [15:0] config_rom_out;
+wire [15:0] config_rom_out0;
 fake_config_romx rom(
-	.clk(clk), .address(addr[10:0]), .data(config_rom_out)
+	.clk(clk), .address(addr[10:0]), .data(config_rom_out0)
 );
+reg [15:0] config_rom_out=0;  always @(posedge clk) config_rom_out <= config_rom_out0;  // pipeline
 
 // Remove any doubt about what clock domain these are in;
 // also keeps reverse_json.py happy.
@@ -114,11 +115,12 @@ always @(posedge clk) scratch_in_r <= scratch_in;
 
 // Very basic pipelining of two-cycle read process
 reg [23:0] addr_r=0;
-reg do_rd_r=0, do_rd_r2=0, do_rd_r3=0;
+reg do_rd_r=0, do_rd_r2=0, do_rd_r3=0, do_rd_r4=0;
 always @(posedge clk) begin
 	do_rd_r <= do_rd;
 	do_rd_r2 <= do_rd_r;
 	do_rd_r3 <= do_rd_r2;
+	do_rd_r4 <= do_rd_r3;
 	addr_r <= addr;
 end
 
@@ -154,18 +156,37 @@ end
 
 // Second read cycle
 reg [31:0] lb_data_in=0;
+reg [1:0] cycle3=0;
 always @(posedge clk) if (do_rd_r) begin
 	casez (addr_r)
 		// Semi-standard address for 2K x 16 configuration ROM
 		// xxx800 through xxxfff
-		24'b????_????_????_1???_????_????: lb_data_in <= config_rom_out;
-		24'h00????: lb_data_in <= mirror_out_0;
+		// 24'b????_????_????_1???_????_????: lb_data_in <= config_rom_out;
+		// 24'h00????: lb_data_in <= mirror_out_0;
 		24'h01????: lb_data_in <= ibadge_out;
 		24'h02????: lb_data_in <= obadge_out;
-		24'h03????: lb_data_in <= rx_mac_data;
+		// 24'h03????: lb_data_in <= rx_mac_data;
 		24'h041???: lb_data_in <= rx_counters;
 		24'h11????: lb_data_in <= reg_bank_0;
 		default: lb_data_in <= 32'hdeadbeef;
+	endcase
+	casez (addr_r)
+		24'b????_????_????_1???_????_????: cycle3 <= 0;
+		24'h00????: cycle3 <= 1;
+		24'h03????: cycle3 <= 2;
+		default: cycle3 <= 3;
+	endcase
+end
+reg [15:0] rx_mac_data_r=0;  always @(posedge clk) rx_mac_data_r <= rx_mac_data;
+
+// Third read cycle
+reg [31:0] lb_data_in3=0;
+always @(posedge clk) if (do_rd_r2) begin
+	case (cycle3)
+		0: lb_data_in3 <= config_rom_out;
+		1: lb_data_in3 <= mirror_out_0;
+		2: lb_data_in3 <= rx_mac_data_r;
+		3: lb_data_in3 <= lb_data_in;  // second-cycle decoder
 	endcase
 end
 
@@ -215,20 +236,20 @@ assign led_user_mode = led_user_r;
 assign led1 = l1;
 assign led2 = l2;
 wire drive_data_in;
-assign data_in = drive_data_in ? lb_data_in : 32'bx;
+assign data_in = drive_data_in ? lb_data_in3 : 32'bx;
 assign rx_mac_hbank = rx_mac_hbank_r;
 
 // Bus activity trace output
 `ifdef SIMULATE
-assign drive_data_in = do_rd_r3;
-reg [2:0] sr=0;
+assign drive_data_in = do_rd_r4;
+reg [3:0] sr=0;
 reg [23:0] addr_rr=0;
 always @(posedge clk) begin
-	sr <= {sr[1:0], do_rd};
+	sr <= {sr[2:0], do_rd};
 	addr_rr <= addr_r;
 	if (control_strobe & ~control_rd)
 		$display("Localbus write r[%x] = %x", addr, data_out);
-	if (sr[2])
+	if (sr[3])
 		$display("Localbus read  r[%x] = %x", addr_rr, data_in);
 end
 `else

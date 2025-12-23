@@ -14,7 +14,7 @@ module mem_gateway_wrap(
 	output [7:0] n_lat_expose  // work around a limitation in Verilator
 );
 
-parameter n_lat=10;
+parameter n_lat=11;
 assign n_lat_expose = n_lat;
 
 // DUT

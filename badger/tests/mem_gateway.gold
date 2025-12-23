@@ -8,8 +8,8 @@
 78
 10
 11
-Localbus read  r[112230] = 48656c6c
 22
+Localbus read  r[112230] = 48656c6c
 30
 48
 65
@@ -17,8 +17,8 @@ Localbus read  r[112230] = 48656c6c
 6c
 10
 11
-Localbus read  r[112233] = 283a3a29
 22
+Localbus read  r[112233] = 283a3a29
 33
 28
 3a
@@ -26,8 +26,8 @@ Localbus read  r[112233] = 283a3a29
 29
 10
 11
-Localbus read  r[112232] = 726c6421
 22
+Localbus read  r[112232] = 726c6421
 32
 72
 6c
@@ -35,8 +35,8 @@ Localbus read  r[112232] = 726c6421
 21
 10
 11
-Localbus read  r[112231] = 6f20776f
 22
+Localbus read  r[112231] = 6f20776f
 31
 6f
 20
@@ -57,9 +57,10 @@ Localbus write r[112234] = 41424344
 04
 10
 11
-Localbus read  r[112235] = 00000000
 22
+Localbus read  r[112235] = 00000000
 35
+00
 00
 00
 Localbus read  r[112236] = 00000000
@@ -73,7 +74,6 @@ Localbus read  r[112237] = 00000000
 00
 00
 Localbus read  r[112238] = 00000000
-00
 00
 00
 00

@@ -8,7 +8,7 @@
 `include "rtefi_preblob.vh"
 module rtefi_blob #(
 	parameter paw = 11,  // packet (memory) address width, nominal 11
-	parameter n_lat = 8,  // latency of client pipeline
+	parameter n_lat = 9,  // latency of client pipeline
 	parameter mac_aw = 10,  // sets size (in 16-bit words) of DPRAM in Tx MAC
 	// See comments in rtefi_center.v
 	parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4},  // 192.168.7.4
