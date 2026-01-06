@@ -46,6 +46,8 @@ The K28.5 character is used by EVRs to synchronize to the correct word boundary 
   * Marble board or Xilinx ZCU208 FPGA board
   * GTX or GTY transceivers
   * SI570 programmable on-board oscillator for reference clock generation
+    * ALS: GTX - MO / 4 = 124.91 MHz, GTY - 156.1375 MHz
+    * ALS-U: MO / 4 = 125.1 MHz
 
 * Distributed Data Bus Usage:
   * Bit 0 - General-purpose signal
@@ -56,11 +58,9 @@ The K28.5 character is used by EVRs to synchronize to the correct word boundary 
 ## LCLS-I Implementation
 * EVR Hardware:
   * Marble board
-  * SI570 programmable on-board oscillator programmed to 119 MHz
-
-* Reference Frequency Derivation:
-  * Master Oscillator (MO) frequency: 476 MHz
-  * 119 MHz = MO / 4 = 476 MHz / 4
+  * SI570 programmable on-board oscillator for reference clock generation
+    * Master Oscillator (MO) frequency: 476 MHz
+    * MO / 4 = 476 MHz / 4 = 119 MHz
 
 * Timing Pattern Transmission:
   * LCLS-I sends timing pattern frames at 120 Hz
@@ -68,11 +68,13 @@ The K28.5 character is used by EVRs to synchronize to the correct word boundary 
   * `119 MHz / 360 Hz = 330,000 clock cycles` per 360 Hz period
   * Of these, 33 timing slots are used to transmit pulse ID or other control patterns
 
-## Transceiver configuration (TODO: Make GTY also generic and add GTP)
+## Transceiver configuration
 The `gt_tcl` directory contains all the TCL scripts required for GTX/GTY transceiver configuration. **Only RX channel is enabled**
 * Example usage:
   To use `evr_gtx.tcl`, you must pass the reference frequency as a parameter.
   The script will then automatically compute the line rate based on the provided reference frequency.
+
+TODO: Add support for GTP
 
 #### Notes on Distributed Bus Usage
 The 8-bit distributed bus exists because some timing signals need to be broadcast continuously and in parallel with event codes.
