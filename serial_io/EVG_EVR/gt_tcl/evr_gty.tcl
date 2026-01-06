@@ -14,6 +14,7 @@ set TXOUT_DIV 10
 
 set LINE_RATE_MHz  [expr {($REFCLK_FREQ * $CPLL_FBDIV / $CPLL_REFCLK_DIV) / $TXOUT_DIV}]
 set LINE_RATE_Gbps [expr {$LINE_RATE_MHz * 10.0 / 1000.0}]
+set TXPROG_FREQ    [expr {$LINE_RATE_MHz / 2.0}]
 
 puts "----------------------------------------"
 puts "GT Wizard Auto Config:"
@@ -44,7 +45,7 @@ set_property -dict [list \
     CONFIG.LOCATE_TX_USER_CLOCKING CORE \
     CONFIG.LOCATE_RX_USER_CLOCKING CORE \
     CONFIG.TXPROGDIV_FREQ_SOURCE CPLL \
-    CONFIG.TXPROGDIV_FREQ_VAL 125 \
+    CONFIG.TXPROGDIV_FREQ_VAL $TXPROG_FREQ \
     CONFIG.FREERUN_FREQUENCY 100 \
     CONFIG.ENABLE_OPTIONAL_PORTS cplllock_out \
 ] [get_ips evr_gt]
