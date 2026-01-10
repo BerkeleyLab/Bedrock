@@ -1,4 +1,6 @@
 dsp_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp
   stage: test
@@ -6,6 +8,8 @@ dsp_test:
     - make && make checks
 
 dsp_hosted_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - pip install cocotb==1.9.2 pytest cocotb-bus
     - cd dsp/hosted && export PYTHONPATH=../../build-tools/
@@ -19,6 +23,8 @@ dsp_hosted_test:
       - dsp/hosted/fdbk_core_plot.pdf
 
 digaree_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp/digaree
   stage: test
@@ -26,6 +32,8 @@ digaree_test:
     - make
 
 feedforward_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp/feedforward
   stage: test
@@ -33,6 +41,8 @@ feedforward_test:
     - make
 
 chirp_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp/chirp
   stage: test

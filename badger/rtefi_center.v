@@ -212,9 +212,11 @@ generate if (mac_aw > 1) begin : mac_b
 	.strobe_l(tx_mac_strobe_l)
     );
 end else begin : no_mac_b
+	assign host_raddr = 0;
 	assign tx_mac_strobe_s = 0;
 	assign tx_mac_strobe_l = 0;
 	assign tx_mac_data = 0;
+	assign tx_mac_done = 0;
 end endgenerate
 
 // Slide data from Tx MAC in here

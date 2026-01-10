@@ -1,4 +1,4 @@
-FROM debian:12.8-slim AS testing_base_bookworm
+FROM debian:trixie-slim AS testing_base_trixie
 
 # Vivado needs libtinfo5, at least for Artix?
 RUN apt-get update && \
@@ -10,7 +10,7 @@ RUN apt-get update && \
     build-essential \
     yosys \
     verilator \
-    libtinfo5 \
+    libtinfo6 \
     wget \
     iputils-ping \
     iproute2 \
@@ -133,6 +133,11 @@ RUN mkdir ${LITEX_INSTALL_PATH} && \
     cd ${LITEX_INSTALL_PATH} && \
     sh /litex_meta.sh
 
+# Install leep from public repo until we have
+# a PyPi home for it
+RUN pip3 install \
+    git+https://github.com/BerkeleyLab/leep.git
+
 # Install sv2v
 RUN apt-get update && \
     apt-get install -y \
@@ -144,3 +149,10 @@ RUN apt-get update && \
     make && \
     rm -rf $HOME/.stack && \
     cp bin/sv2v /usr/local/bin/
+
+# Shady stuff to make vivado work with libtinfo6
+RUN apt-get update && \
+    apt-get install -y \
+        libtinfo6 && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -s libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5

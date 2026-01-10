@@ -61,7 +61,7 @@ scalar_marble_regmap.json: lb_marble_slave.v
 marble_regmap.json: static_regmap.json scalar_marble_regmap.json
 	$(PYTHON) $(BUILD_DIR)/merge_json.py -o $@ -i $(filter %.json, $^)
 config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOURCE))
-	$(PYTHON) $(BUILD_DIR)/build_rom.py --placeholder_rev -v $@ -j $< -d "Marble Testing"
+	$(PYTHON) -m leep.build_rom --placeholder_rev -v $@ -j $< -d "Marble Testing"
 
 # gen_features.py rules (note the use of PHONY targets)
 # actual file outputs are marble_features_params.vh and marble_features_defs.vh
