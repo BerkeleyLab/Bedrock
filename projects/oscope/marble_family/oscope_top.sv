@@ -1,8 +1,8 @@
 `include "oscope_features_defs.vh"
 
 module oscope_top(
-	input        GTPREFCLK_P,
-	input        GTPREFCLK_N,
+	input        GTREFCLK_P,
+	input        GTREFCLK_N,
 	input        SYSCLK_P,
 
 	// RGMII
@@ -76,12 +76,12 @@ module oscope_top(
 `include "oscope_features_params.vh"
 
 assign VCXO_EN = 1;
-wire gtpclk0, gtpclk;
-// Gateway GTP refclk to fabric
-IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0));
+wire gtclk0, gtclk;
+// Gateway GT refclk to fabric
+IBUFDS_GTE2 passi_125(.I(GTREFCLK_P), .IB(GTREFCLK_N), .CEB(1'b0), .O(gtclk0));
 // Vivado fails, with egregiously useless error messages,
 // if you don't put this BUFG in the chain to the MMCM.
-BUFG passg_125(.I(gtpclk0), .O(gtpclk));
+BUFG passg_125(.I(gtclk0), .O(gtclk));
 
 parameter in_phase_tx_clk = 1;
 // Standardized interface, hardware-dependent implementation
@@ -92,8 +92,8 @@ wire pll_reset = 0;  // or RESET?
 (* dont_touch = "true" *)
 wire clk200; // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz
 
-`define USE_GTPCLK
-`ifdef USE_GTPCLK
+`define USE_GTCLK
+`ifdef USE_GTCLK
 xilinx7_clocks #(
         .DIFF_CLKIN("BYPASS"),
         .CLKIN_PERIOD(8),  // REFCLK = 125 MHz
@@ -101,7 +101,7 @@ xilinx7_clocks #(
         .DIV0     (8),       // 1 GHz / 8 = 125 MHz
         .DIV1     (5)       // 1 GHz / 5 = 200 MHz
 ) clocks_i(
-        .sysclk_p (gtpclk),
+        .sysclk_p (gtclk),
         .sysclk_n (1'b0),
         .reset    (pll_reset),
         .clk_out0 (tx_clk),
