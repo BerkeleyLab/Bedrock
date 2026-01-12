@@ -9,12 +9,12 @@ BUFG ddrg_125(.I(ddrrefclk_unbuf), .O(ddrrefclk));
 end
 endgenerate
 
-// For Marblemini, GTPREFCLKs are routed directly to MGTCLK pins,
+// For Marblemini, GTREFCLKs are routed directly to MGTCLK pins,
 // so using them does not depend on the clock switch configuration
 // either
 wire gtpclk0, gtpclk;
-// Gateway GTP refclk to fabric
-IBUFDS_GTE2 passi_125(.I(GTPREFCLK_P), .IB(GTPREFCLK_N), .CEB(1'b0), .O(gtpclk0));
+// Gateway GT refclk to fabric
+IBUFDS_GTE2 passi_125(.I(GTREFCLK_P), .IB(GTREFCLK_N), .CEB(1'b0), .O(gtpclk0));
 // Vivado fails, with egregiously useless error messages,
 // if you don't put this BUFG in the chain to the MMCM.
 BUFG passg_125(.I(gtpclk0), .O(gtpclk));
@@ -25,8 +25,8 @@ wire si570;
 ds_clk_buf #(
 	.GTX (1))
 i_ds_gtrefclk1 (
-	.clk_p   (GTREFCLK_P),
-	.clk_n   (GTREFCLK_N),
+	.clk_p   (SIREFCLK_P),
+	.clk_n   (SIREFCLK_N),
 	.clk_out (si570)
 );
 `else
@@ -83,7 +83,7 @@ end
 else begin
 
 wire clk125;
-// Use GTPREFCLK_P
+// Use GTREFCLK_P
 if (C_SYSCLK_SRC == "gtp_ref_clk") begin
 assign clk125 = gtpclk;
 end
