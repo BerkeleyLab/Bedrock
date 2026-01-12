@@ -4,8 +4,8 @@
 `include "marble_features_defs.vh"
 
 module cmoc_top(
-	input GTPREFCLK_P,
-	input GTPREFCLK_N,
+	input GTREFCLK_P,
+	input GTREFCLK_N,
 `ifdef MARBLE_V2
 	input DDR_REF_CLK_P,
 	input DDR_REF_CLK_N,
@@ -14,8 +14,8 @@ module cmoc_top(
 
 	// SI570 clock inputs
 	`ifdef USE_SI570
-	input GTREFCLK_P,
-	input GTREFCLK_N,
+	input SIREFCLK_P,
+	input SIREFCLK_N,
 	`endif
 
 	// RGMII Tx port

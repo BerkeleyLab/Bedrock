@@ -18,9 +18,9 @@ __marble_defs: &marble_defs
 __marble_params: &marble_params
     carrier: "Marble"
     carrier_rev: "v2"
-    # Options are gtp_ref_clk, ddr_ref_clk, or sys_clk
+    # Options are gt_ref_clk, ddr_ref_clk, or sys_clk
     # sys_clk is only usable if use_rgmii_idelay: 0
-    # ddr_ref_clk is recommended over gtp_ref_clk to avoid having basic
+    # ddr_ref_clk is recommended over gt_ref_clk to avoid having basic
     #   boot and communications depend on ADN4600 programming
     sysclk_src: "ddr_ref_clk"
 
@@ -33,9 +33,9 @@ marblemini:
         <<: *base_params
         carrier: "Marble Mini"
         carrier_rev: "v1"
-        # Options are gtp_ref_clk or sys_clk
+        # Options are gt_ref_clk or sys_clk
         # sys_clk is only usable if use_rgmii_idelay: 0
-        sysclk_src: "gtp_ref_clk"
+        sysclk_src: "gt_ref_clk"
 
 marble:
     defs:

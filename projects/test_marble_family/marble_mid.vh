@@ -12,12 +12,12 @@ endgenerate
 // For Marblemini, GTREFCLKs are routed directly to MGTCLK pins,
 // so using them does not depend on the clock switch configuration
 // either
-wire gtpclk0, gtpclk;
+wire gtclk0, gtclk;
 // Gateway GT refclk to fabric
-IBUFDS_GTE2 passi_125(.I(GTREFCLK_P), .IB(GTREFCLK_N), .CEB(1'b0), .O(gtpclk0));
+IBUFDS_GTE2 passi_125(.I(GTREFCLK_P), .IB(GTREFCLK_N), .CEB(1'b0), .O(gtclk0));
 // Vivado fails, with egregiously useless error messages,
 // if you don't put this BUFG in the chain to the MMCM.
-BUFG passg_125(.I(gtpclk0), .O(gtpclk));
+BUFG passg_125(.I(gtclk0), .O(gtclk));
 
 wire si570;
 `ifdef USE_SI570
@@ -51,7 +51,7 @@ wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
 
 // Sanity check for C_SYSCLK_SRC
 generate
-if (C_SYSCLK_SRC != "gtp_ref_clk" &&
+if (C_SYSCLK_SRC != "gt_ref_clk" &&
     C_SYSCLK_SRC != "ddr_ref_clk" &&
     C_SYSCLK_SRC != "sys_clk") begin
     C_SYSCLK_SRC_parameter_has_an_invalid_value bad_1();
@@ -84,8 +84,8 @@ else begin
 
 wire clk125;
 // Use GTREFCLK_P
-if (C_SYSCLK_SRC == "gtp_ref_clk") begin
-assign clk125 = gtpclk;
+if (C_SYSCLK_SRC == "gt_ref_clk") begin
+assign clk125 = gtclk;
 end
 // Use DDR_REF_CLK_P, preferred because it does not depend
 // on the ADN4600 clock switch configuration. Only available
