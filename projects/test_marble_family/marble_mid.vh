@@ -201,15 +201,23 @@ localparam C_USE_I2CBRIDGE = 1;
 `else
 localparam C_USE_I2CBRIDGE = 0;
 `endif
+
 `ifdef MMC_CTRACE
 localparam C_MMC_CTRACE = 1;
 `else
 localparam C_MMC_CTRACE = 0;
 `endif
+
 `ifdef GPS_CTRACE
 localparam C_GPS_CTRACE = 1;
 `else
 localparam C_GPS_CTRACE = 0;
+`endif
+
+`ifdef USE_FIBER
+localparam C_USER_FIBER = 1;
+`else
+localparam C_USER_FIBER = 0;
 `endif
 
 // Real, portable implementation

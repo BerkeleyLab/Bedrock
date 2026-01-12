@@ -18,6 +18,14 @@ module marble_top(
 	input GTREFCLK_N,
 	`endif
 
+	// only for Marble
+`ifdef MARBLE_V2
+	`ifdef USE_FIBER
+	 input [15:0] QSFP1,
+         input [15:0] QSFP2,
+	`endif
+`endif
+
 	// RGMII Tx port
 	output [3:0] RGMII_TXD,
 	output RGMII_TX_CTRL,
