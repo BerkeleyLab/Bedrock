@@ -6,22 +6,22 @@ module evr_gt_wrapper #(
     parameter integer CHECK_TIMEOUT = 125000
 ) (
     // GT ports
-    input wire         gt_refclk_p,
-    input wire         gt_refclk_n,
-    input wire         gt_rxp_in,
-    input wire         gt_rxn_in,
-    output wire        gt_refclk_out,
+    input       gt_refclk_p,
+    input       gt_refclk_n,
+    input       gt_rxp_in,
+    input       gt_rxn_in,
+    output      gt_refclk_out,
 
     // sys_clk domain
-    input wire         sys_clk,
-    input              soft_reset,
-    output             rx_reset_done_sys,
-    output             rx_aligned_sys,
-    output             cplllocked_sys,
-    output wire [31:0] rx_fsm_reset_cnt,
+    input       sys_clk,
+    (*mark_debug=DEBUG*) input          soft_reset,
+    (*mark_debug=DEBUG*) output         rx_reset_done_sys,
+    (*mark_debug=DEBUG*) output         rx_aligned_sys,
+    (*mark_debug=DEBUG*) output         cplllocked_sys,
+    (*mark_debug=DEBUG*) output [31:0]  rx_fsm_reset_cnt,
 
     // rx_usrclk domain
-    output wire        rx_usrclk,
+    output             rx_usrclk,
     output reg [15:0]  rxdata = 0,
     output reg [1:0]   rxcharisk = 0
 );
@@ -46,6 +46,7 @@ module evr_gt_wrapper #(
     (*mark_debug=DEBUG*) wire soft_reset_all, rx_fsm_reset_out;
     // sys_clk domain
     evr_reset_fsm #(
+        .DEBUG          ("true"),
         .COMMAS_NEEDED  (60),
         .CHECK_TIMEOUT  (CHECK_TIMEOUT)
     ) evr_reset_fsm_i (

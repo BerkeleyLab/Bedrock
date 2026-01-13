@@ -42,6 +42,7 @@ module evr_wrapper #(
     wire cplllocked_sys;
 
     evr_gt_wrapper #(
+        .DEBUG("true"),
         .GT_TYPE(GT_TYPE)
     ) evr_gt_wrapper (
         .gt_refclk_p        (gt_refclk_p),
