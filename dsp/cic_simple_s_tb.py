@@ -7,6 +7,8 @@
     * pathlib
     * matplotlib
     * numpy
+
+    Option to plot results in test_trace function
 '''
 
 import numpy as np
