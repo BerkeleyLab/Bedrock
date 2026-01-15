@@ -46,7 +46,7 @@ module evr_gt_wrapper #(
     (*mark_debug=DEBUG*) wire soft_reset_all, rx_fsm_reset_out;
     // sys_clk domain
     evr_reset_fsm #(
-        .DEBUG          ("true"),
+        .DEBUG          (DEBUG),
         .COMMAS_NEEDED  (60),
         .CHECK_TIMEOUT  (CHECK_TIMEOUT)
     ) evr_reset_fsm_i (

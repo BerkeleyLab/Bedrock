@@ -1,4 +1,5 @@
 module evr_wrapper #(
+    parameter DEBUG = "false",
     parameter GT_TYPE = "GTY",
     parameter integer FCNT_WIDTH = 24  // freq_count update rate: 125e6 / 2**24 = 1.9 kHz
 ) (
@@ -42,7 +43,7 @@ module evr_wrapper #(
     wire cplllocked_sys;
 
     evr_gt_wrapper #(
-        .DEBUG("true"),
+        .DEBUG(DEBUG),
         .GT_TYPE(GT_TYPE)
     ) evr_gt_wrapper (
         .gt_refclk_p        (gt_refclk_p),
