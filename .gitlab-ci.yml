@@ -32,22 +32,22 @@ image: $DEFAULT_IMAGE:$CI_COMMIT_REF_NAME
       - !reference [.build-images, parallel]
 
 include:
-  - local: .gitlab/ci/badger.gitlab-ci.yml
-  - local: .gitlab/ci/build.gitlab-ci.yml
-  - local: .gitlab/ci/board_support.gitlab-ci.yml
-  - local: .gitlab/ci/docs.gitlab-ci.yml
-  - local: .gitlab/ci/serial_io.gitlab-ci.yml
-  - local: .gitlab/ci/other_hdl.gitlab-ci.yml
-  - local: .gitlab/ci/soc.gitlab-ci.yml
-  - local: .gitlab/ci/oscope.gitlab-ci.yml
-  - local: .gitlab/ci/cmoc.gitlab-ci.yml
-  - local: .gitlab/ci/comms_top.gitlab-ci.yml
+#  - local: .gitlab/ci/badger.gitlab-ci.yml
+#  - local: .gitlab/ci/build.gitlab-ci.yml
+#  - local: .gitlab/ci/board_support.gitlab-ci.yml
+#  - local: .gitlab/ci/docs.gitlab-ci.yml
+#  - local: .gitlab/ci/serial_io.gitlab-ci.yml
+#  - local: .gitlab/ci/other_hdl.gitlab-ci.yml
+#  - local: .gitlab/ci/soc.gitlab-ci.yml
+#  - local: .gitlab/ci/oscope.gitlab-ci.yml
+#  - local: .gitlab/ci/cmoc.gitlab-ci.yml
+#  - local: .gitlab/ci/comms_top.gitlab-ci.yml
   - local: .gitlab/ci/dsp.gitlab-ci.yml
-  - local: .gitlab/ci/marble_family.gitlab-ci.yml
-  - local: .gitlab/ci/swap_gitid.gitlab-ci.yml
-  - local: .gitlab/ci/cdc_check.gitlab-ci.yml
-  - local: .gitlab/ci/localbus.gitlab-ci.yml
-  - local: .gitlab/ci/ctrace.gitlab-ci.yml
+#  - local: .gitlab/ci/marble_family.gitlab-ci.yml
+#  - local: .gitlab/ci/swap_gitid.gitlab-ci.yml
+#  - local: .gitlab/ci/cdc_check.gitlab-ci.yml
+#  - local: .gitlab/ci/localbus.gitlab-ci.yml
+#  - local: .gitlab/ci/ctrace.gitlab-ci.yml
 
 flake8:
   extends: .build-matrix

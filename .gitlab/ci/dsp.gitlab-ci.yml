@@ -52,7 +52,7 @@ cic_simple_s_test:
   extends: .build-matrix
   image: $IMAGE
   before_script:
-    - pip install numpy scipy cocotb==1.9.2 pytest cocotb-bus matplotlib
+    - pip install numpy scipy cocotb==2.0.1 pytest cocotb-bus matplotlib
     - cd dsp
   stage: test
   script:
