@@ -16,8 +16,8 @@ class MovingAverage(Module):
         self.data_valid = Signal(name='data_valid')
 
         # Workaround to rename default sys_clk and sys_rst to clk and rst
-        self.clk = Signal()
-        self.rst = Signal()
+        self.clk = Signal(name="clk")
+        self.rst = Signal(name="rst")
         self.clock_domains.cd_sys = ClockDomain("sys")
         self.comb += self.cd_sys.clk.eq(self.clk)
         self.comb += self.cd_sys.rst.eq(self.rst)
