@@ -54,7 +54,7 @@ badger_ac701_run:
       parallel:
         matrix:
           - TARGET: ac701
-            IMAGE: $IMAGE
+            IMAGE: !reference [.build-images, parallel, IMAGE]
       artifacts: true
   script:
     - cd badger/tests && test -r ac701_rgmii_vtest.bit && SERIAL_NUM_OPT="-s 210203356870" sh teststand_ac701.sh
