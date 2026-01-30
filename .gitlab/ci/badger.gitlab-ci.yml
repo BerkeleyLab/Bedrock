@@ -22,6 +22,12 @@ badger_test:
     matrix:
       - !reference [.badger-matrix, parallel]
 
+.badger-run-matrix:
+  variables: !reference [.build-matrix, variables]
+  parallel:
+    matrix:
+      - !reference [.build-images, parallel]
+
 badger_top:
   extends: .badger-build-matrix
   image: $IMAGE
@@ -37,12 +43,6 @@ badger_top:
       - badger/tests/_xilinx/${TARGET}_rgmii_test.reports
       - badger/tests/${TARGET}_rgmii_vtest.bit
 
-.badger-run-matrix:
-  variables: !reference [.build-matrix, variables]
-  parallel:
-    matrix:
-      - !reference [.build-images, parallel]
-
 badger_ac701_run:
   extends: .badger-run-matrix
   image: $IMAGE
@@ -54,7 +54,7 @@ badger_ac701_run:
       parallel:
         matrix:
           - TARGET: ac701
-            IMAGE: !reference [.build-images, parallel, IMAGE]
+            IMAGE_VARIANT: !reference [.build-images, parallel, IMAGE_VARIANT]
       artifacts: true
   script:
     - cd badger/tests && test -r ac701_rgmii_vtest.bit && SERIAL_NUM_OPT="-s 210203356870" sh teststand_ac701.sh
