@@ -271,6 +271,14 @@ marblem_rgmii_vtest.bit: marblem_rgmii_test.tcl marblem_rgmii_test.d badger.tcl 
 	mv _xilinx/marblem_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
 
 # =====
+SYNTH_SOURCE_OBSIDIAN = rgmii_hw_test.v gmii_to_rgmii.v $(HW_TEST_V) marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v
+obsidian_rgmii_test.d: $(SYNTH_SOURCE_OBSIDIAN) obsidian/obsidian_rgmii.xdc
+	echo $^ | tr ' ' '\n' > $@
+obsidian_rgmii_vtest.bit: obsidian_rgmii_test.tcl obsidian_rgmii_test.d badger.tcl $(SYNTH_SOURCE_OBSIDIAN) obsidian/obsidian_rgmii.xdc
+	$(SYNTH_VIVADO) $<
+	mv _xilinx/obsidian_rgmii_test.runs/impl_1/rgmii_hw_test.bit $@
+
+# =====
 # On-line test using Icarus and Linux's tun/tap feature
 rtefi_live: rtefi_pipe_tb.v $(RTEFI_V) fake_config_romx.v mac_compat_dpram.v tap-vpi.vpi
 	$(VERILOG) -m ./tap-vpi -DLINUX_TUN -o $@ $(filter %.v, $^)
