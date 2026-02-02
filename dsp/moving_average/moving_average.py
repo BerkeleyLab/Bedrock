@@ -3,7 +3,6 @@ Migen based
 '''
 from migen import Signal, Module, Array, If, ClockDomain, run_simulation
 from migen.fhdl import verilog
-from litex.gen import Signed
 from sys import stderr
 
 
@@ -12,13 +11,13 @@ class MovingAverage(Module):
         self._dw = dw
         self.MAX_DELAY_BITS = MAX_DELAY_BITS
         self._SREG_LEN = 2**MAX_DELAY_BITS
-        self.i, self.o = (Signed(self._dw, name='i'),
-                          Signed(self._dw, name='o'))
+        self.i, self.o = (Signal(bits_sign=(self._dw, True), name='i'),
+                          Signal(bits_sign=(self._dw, True), name='o'))
         self.data_valid = Signal(name='data_valid')
 
         # Workaround to rename default sys_clk and sys_rst to clk and rst
-        self.clk = Signal()
-        self.rst = Signal()
+        self.clk = Signal(name="clk")
+        self.rst = Signal(name="rst")
         self.clock_domains.cd_sys = ClockDomain("sys")
         self.comb += self.cd_sys.clk.eq(self.clk)
         self.comb += self.cd_sys.rst.eq(self.rst)
@@ -29,8 +28,8 @@ class MovingAverage(Module):
         self.comb += delay_tap.eq(1 << self.log_downsample_ratio)
 
         # Dynamic delay shift register
-        out_val = Signal(self._dw)
-        delay_reg = Array(Signal(self._dw, reset=0) for _ in range(self._SREG_LEN))
+        out_val = Signal(bits_sign=(self._dw, True))
+        delay_reg = Array(Signal(bits_sign=(self._dw, True), reset=0) for _ in range(self._SREG_LEN))
         src = self.i
         for x in range(self._SREG_LEN):
             self.sync += delay_reg[x].eq(src)
@@ -46,7 +45,7 @@ class MovingAverage(Module):
         self.comb += [If(counter == delay_tap - 1,
                          self.data_valid.eq(1))]
 
-        moving_average_full = Signal(self._dw + self.MAX_DELAY_BITS)
+        moving_average_full = Signal(bits_sign=(self._dw + self.MAX_DELAY_BITS, True))
         self.sync += moving_average_full.eq(moving_average_full + self.i - out_val)
         self.comb += [self.o.eq(moving_average_full >> self.log_downsample_ratio)]
 

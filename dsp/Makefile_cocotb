@@ -1,0 +1,22 @@
+# Cocotb Makefile,
+# Modify it to add more test modules
+# to run a testbench: make TESTBENCH=<testname> -f Makefile_cocotb
+
+# Default selected testbench
+TESTBENCH ?= cic_simple_s_tb
+TOPLEVEL_LANG ?= verilog
+SIM ?= icarus
+
+ifeq ($(TESTBENCH),cic_simple_s_tb)
+	VERILOG_SOURCES = $(shell pwd)/cic_simple_s.v
+	TOPLEVEL = cic_simple_s
+	MODULE = cic_simple_s_tb
+
+	# Generic Parameters
+	COMPILE_ARGS += -Pcic_simple_s.ext_roll=0
+  COMPILE_ARGS +=	-Pcic_simple_s.dw=16
+	COMPILE_ARGS += -Pcic_simple_s.ex=5
+endif
+# More tests can be added beyond this point by adding more switches for $(TESTBENCH)
+
+include $(shell cocotb-config --makefiles)/Makefile.sim
