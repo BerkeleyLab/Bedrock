@@ -97,12 +97,6 @@ Ports
    * - lim[17:0]
      - Input
      - 
-   * - ad_ffd_en
-     - Input
-     - 
-   * - tri_out_xy[17:0]
-     - Input
-     - 
    * - ffd_en
      - Input
      - 
