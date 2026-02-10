@@ -5,7 +5,6 @@
 # tested on marble_mmc branch marble_v1_4 commit 80a96fc6
 # but also backward compatible because of default values
 import sys
-import numpy as np
 bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
@@ -185,9 +184,10 @@ def compute_si570(addr, key, verbose=False, debug=False):
     ib = 3*32  # init result memory base, derived from set_resx(3)
     a = result[ib+1:ib+7]
 
-    hs_div = (a[0] >> 5) + 4
-    n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6)) + 1
-    rfreq = np.uint64((((a[1] & 0x3f) << 32) | (a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5])) / (2**28)
+    hs_div = int(a[0] >> 5) + 4
+    n1 = int(((a[0] & 0x1f) << 2) | (a[1] >> 6)) + 1
+    rfreq_int = (int(a[1]) & 0x3f) << 32 | int(a[2]) << 24 | int(a[3]) << 16 | int(a[4]) << 8 | int(a[5])
+    rfreq = float(rfreq_int) / float(2**28)
 
     freq_default = addr.reg_read(["frequency_si570"])
     default = (freq_default[0]/2**24.0)*125

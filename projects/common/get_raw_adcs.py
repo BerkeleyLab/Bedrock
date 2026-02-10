@@ -216,7 +216,7 @@ def process_adcs(dev, npt, mask_int, freq=7/33.0):  # ,block,timestamp):
 
 
 def slow_chain_unpack(readlist):
-    nums = [256*readlist[ix]+readlist[ix+1] for ix in range(0, 32, 2)]
+    nums = [int(readlist[ix])*256 + int(readlist[ix+1]) for ix in range(0, 32, 2)]
     nums = [x if x < 32768 else x-65536 for x in nums]
     timestamp = 0
     for ix in range(8):
