@@ -135,7 +135,7 @@ RUN mkdir ${LITEX_INSTALL_PATH} && \
 
 # Install leep from PyPi
 RUN pip3 install \
-    leep==1.0.0
+    leep==1.0.1
 
 # Install sv2v
 RUN apt-get update && \
