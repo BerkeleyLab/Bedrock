@@ -68,7 +68,8 @@ def get_raw_adcs_run(dev, filewritepath='raw_adcs_', ext_trig=False, freq=7/33.0
             print("difference %6.2f" % diff1)
         if save_data is True:
             # ISO 8601  2016-06-02T16:06:14Z
-            datetimestr = datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00', 'Z') + " " + str(timestamp)
+            dt_now = datetime.datetime.now(datetime.timezone.utc)
+            datetimestr = dt_now.isoformat().replace('+00:00', 'Z') + " " + str(timestamp)
             header = "\n".join([datetimestr, chan_txt])
 
             data_dir = start_time.strftime(filewritepath + '%Y%m%d_%H%M%S')
