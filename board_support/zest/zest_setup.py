@@ -158,7 +158,8 @@ class c_zest:
             if not self.pntest4():
                 return False
         self.adc_twos_comp(twoscomp=True)
-        print('test pattern %s' % self.set_test_mode('00000000'))
+        print('test pattern %s' % "".join([
+              str(item) for sublist in self.set_test_mode('00001100') or [] for item in sublist]))
         if not self.amc7823_print(check_channels=[1, 2, 3, 4, 5, 6, 7]):
             return False
         return True
@@ -575,7 +576,8 @@ class c_zest:
         return ix if False else self.top2idelay(lane, ix % 2)[0]
 
     def adc_idelay1(self, dbg1=0):
-        print('test pattern %s' % self.set_test_mode('00001100'))
+        print('test pattern %s' % "".join([
+              str(item) for sublist in self.set_test_mode('00001100') or [] for item in sublist]))
         print('Type 1 (firmware) idelay scan')
         if True:  # not needed after powerup, but will clear old values if re-scanning
             self.set_idelays(16*[0])
@@ -605,7 +607,8 @@ class c_zest:
         return all([2 == (x >> 5) for x in idelay_mirror])  # all channels scan success!
 
     def adc_idelay0(self):
-        print('test pattern %s' % self.set_test_mode('00001100'))
+        print('test pattern %s' % "".join([
+              str(item) for sublist in self.set_test_mode('00001100') or [] for item in sublist]))
         print('Type 0 (software) idelay scan')
         print("idelay  scan   " + "  ".join(self.chan_list))
         idelay_dict = {}
@@ -651,7 +654,8 @@ class c_zest:
         return success, adc_values
 
     def adc_bufr_reset(self):
-        print('test pattern %s' % self.set_test_mode('00001100'))
+        print('test pattern %s' % "".join([
+              str(item) for sublist in self.set_test_mode('00001100') or [] for item in sublist]))
         adc_values = self.adc_reg(verbose=True)
         print('0x%x %s %s' % (adc_values[0], adc_values[0] != 0x4339, adc_values[0] != 0xa19c))
         s1, adc_values = self.adc_bufr_reset1(
@@ -661,7 +665,8 @@ class c_zest:
         return s1 and s2
 
     def adc_bitslip(self):
-        print('bitslip: test pattern %s' % self.set_test_mode('00001100'))
+        print('bitslip test pattern %s' % "".join([
+              str(item) for sublist in self.set_test_mode('00001100') or [] for item in sublist]))
         index = 0
         bitslip = self.bitslip_calc()
         print(format(bitslip, '016b'))
