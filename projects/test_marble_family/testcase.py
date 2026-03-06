@@ -1,6 +1,5 @@
 from time import sleep
 import sys
-import numpy as np
 bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
@@ -12,7 +11,7 @@ from fmc_test_l import fmc_decode
 # return an n-long array of 16-bit values, still integer
 # constructed assuming 8-bit values are arranged in pairs, msb-first
 def merge_16(a):
-    aa = [x1*256+x2 for x1, x2 in zip(a[0::2], a[1::2])]
+    aa = [int(x1)*256 + int(x2) for x1, x2 in zip(a[0::2], a[1::2])]
     return aa
 
 
@@ -180,9 +179,9 @@ def compute_si570(freq_default, a):
     # DCO frequency range: 4850 - 5670MHz
     # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
     # N1 values: 1, 2, 4, 6, 8...128
-    hs_div = (a[0] >> 5) + 4
-    n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6)) + 1
-    rfreq = np.uint64((((a[1] & 0x3f) << 32) | (a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5])) / (2**28)
+    hs_div = int(a[0] >> 5) + 4
+    n1 = int(((a[0] & 0x1f) << 2) | (a[1] >> 6)) + 1
+    rfreq = float(int((a[1] & 0x3f) << 32 | a[2] << 24 | a[3] << 16 | a[4] << 8 | a[5])) / float(2**28)
 
     default = (freq_default[0]/2**24.0)*125
     fxtal = default * hs_div * n1 / rfreq
