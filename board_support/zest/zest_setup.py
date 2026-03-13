@@ -1042,7 +1042,7 @@ if __name__ == "__main__":
                         help='Run MMCM scan')
     parser.add_argument('--strict', action='store_true', dest='strict', default=False,
                         help='Strict checks on test results')
-    parser.add_argument('-t', '--timeout', type=float, default=0.1,
+    parser.add_argument('-t', '--timeout', type=float, default=5.0,
                         help='LEEP network timeout')
     parser.add_argument('-f', '--ref_freq', dest='ref_freq', default=50., type=float,
                         help='Reference oscillator (in MHz)')

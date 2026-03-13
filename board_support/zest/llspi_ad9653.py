@@ -92,7 +92,7 @@ if __name__ == "__main__":
     if leep_addr is None:
         leep_addr = "leep://" + str(ip_addr)
 
-    leep = leep.open(leep_addr, timeout=2.0, instance=[])
+    leep = leep.open(leep_addr, timeout=5.0, instance=[])
     leepll = leep_llspi(leep)  # temporary(?) stand-in for c_zest
     U2_adc_spi = c_llspi_ad9653(2)
 
