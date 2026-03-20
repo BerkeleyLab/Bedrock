@@ -119,6 +119,12 @@ endif
 %.vcd: %_tb
 	$(VERILOG_SIM) +vcd $(VCD_ARGS)
 
+%.fst: %_tb
+	$(VERILOG_SIM) +fst $(FST_ARGS)
+
+%_view: %.fst %.gtkw
+	$(VERILOG_VIEW)
+
 %_view: %.vcd %.gtkw
 	$(VERILOG_VIEW)
 
