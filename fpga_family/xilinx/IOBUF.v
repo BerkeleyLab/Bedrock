@@ -1,4 +1,8 @@
-module IOBUF (
+module IOBUF #(
+    parameter integer DRIVE = 12,
+    parameter IOSTANDARD = "DEFAULT",
+    parameter SLEW = "SLOW"
+) (
 	output O,
 	inout IO,
 	input I,
