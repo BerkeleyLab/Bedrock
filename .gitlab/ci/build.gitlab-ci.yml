@@ -45,6 +45,9 @@ check_exists:
 .build:
   image: docker:stable
   stage: build
+  variables:
+    # for port 2375
+    DOCKER_TLS_CERTDIR: ""
   services:
     - name: mohs.dhcp.lbl.gov/docker:29.4.0-dind
       command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
@@ -52,6 +55,7 @@ check_exists:
   before_script:
     - cat /etc/hosts
     - cat /etc/resolv.conf
+    - sleep 15
     - docker info
     - echo $IMAGE:$CI_COMMIT_REF_NAME
     - echo $IMAGE:$CI_COMMIT_SHORT_SHA
@@ -75,6 +79,7 @@ check_exists:
     docker push $IMAGE:$CI_COMMIT_REF_NAME
     docker push $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
     docker push $IMAGE:latest
+
 
 build_bookworm:
   extends: .build
