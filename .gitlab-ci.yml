@@ -7,7 +7,7 @@ stages:
 
 variables:
   XILINX_VIVADO: /non-free/Xilinx/Vivado/2020.2
-  CI_REGISTRY: mohs.dhcp.lbl.gov
+  CI_REGISTRY: mohs.dhcp.lbl.gov/docker:29.4.0-dind
   IMAGE_BASE: bedrock_testing_base
   IMAGE_VARIANT: bookworm
   DEFAULT_IMAGE: ${CI_REGISTRY}/${IMAGE_BASE}_${IMAGE_VARIANT}
