@@ -28,6 +28,22 @@ NMEAtest_check: NMEAtest
         '$$GPRMC,010455.000,A,3754.7666,N,12201.4667,W,0.01,0.00,220420,,,D*7C'\
         '$$GPGSV,1,1,00*79'
 
+# cocotb testbench for evr_gt_wrapper.v and timing_core.v
+DUT      = evr_wrapper
+TOPLEVEL = $(DUT)
+MODULE   = test_$(DUT)
+VERILOG_SOURCES += $(DUT).v
+VERILOG_SOURCES += evr_gt_wrapper.v
+VERILOG_SOURCES += timing_core.v
+VERILOG_SOURCES += $(DSP_DIR)/freq_count.v $(DSP_DIR)/freq_gcount.v
+VERILOG_SOURCES += tinyEVR.v evr_ts_cdc.v evrSROC.v
+VERILOG_SOURCES += $(DSP_DIR)/data_xdomain.v $(DSP_DIR)/flag_xdomain.v $(DSP_DIR)/reg_tech_cdc.v
+
+export PARAM_FCNT_WIDTH := 8
+export PARAM_GT_TYPE    := \"GT_SIM\"
+
+include cocotb_inc.mk
+
 CLEAN += NMEAtest NMEAtest.o NMEA.o tinyEVR_tb evrSROC_tb evr_ts_cdc_tb
 
 include $(BUILD_DIR)/bottom_rules.mk

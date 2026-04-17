@@ -53,6 +53,7 @@ eventMarkerWatchdog #(.SYSCLK_FREQUENCY(SYSCLK_FREQUENCY),
                .isValid(pulsePerSecondValid));
 endmodule
 
+// to capture valid flags for a specific event
 module eventMarkerWatchdog #(
     parameter SYSCLK_FREQUENCY = 100000000,
     parameter DEBUG            = "false"

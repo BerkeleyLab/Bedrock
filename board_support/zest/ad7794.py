@@ -90,6 +90,7 @@ class c_ad7794(object):
         return val | 0x0000ff
 
     def conv_volt(self, readout, chan):
+        readout = int(readout)
         vref = 0.0
         if chan == 6 or self.REFSEL == 2:
             vref = 1.17

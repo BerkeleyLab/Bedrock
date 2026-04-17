@@ -47,7 +47,7 @@ typedef struct marble_init_t {
     marble_init_byte_t pca9555_misc_data;   // u39
     marble_init_byte_t adn4600_data;
     uint64_t si570_freq_hz;
-    bool enable_evr_gtx;
+    bool enable_evr_gt;
     bool enable_poll_status;
 } marble_init_t;
 

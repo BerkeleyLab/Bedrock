@@ -7,29 +7,55 @@ badger_test:
   script:
     - make && bash tftp_test.sh && bash speed_check.sh
 
-badger_ac701:
-  extends: .build-matrix
+.badger-targets:
+  parallel:
+    TARGET: [ac701, obsidian]
+
+.badger-matrix:
+  extends:
+    - .build-images
+    - .badger-targets
+
+.badger-build-matrix:
+  variables: !reference [.build-matrix, variables]
+  parallel:
+    matrix:
+      - !reference [.badger-matrix, parallel]
+
+.badger-run-matrix:
+  variables: !reference [.build-matrix, variables]
+  parallel:
+    matrix:
+      - !reference [.build-images, parallel]
+
+badger_top:
+  extends: .badger-build-matrix
   image: $IMAGE
   stage: synthesis
   before_script:
     - cd badger/tests && ls /non-free
   script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make ac701_rgmii_vtest.bit
+    - PATH=$XILINX_VIVADO/bin:$PATH make ${TARGET}_rgmii_vtest.bit
   artifacts:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 2 days
     paths:
-      - badger/tests/_xilinx/ac701_rgmii_test.reports
-      - badger/tests/ac701_rgmii_vtest.bit
+      - badger/tests/_xilinx/${TARGET}_rgmii_test.reports
+      - badger/tests/${TARGET}_rgmii_vtest.bit
 
 badger_ac701_run:
-  extends: .build-matrix
+  extends: .badger-run-matrix
   image: $IMAGE
   stage: program
   tags:
     - deploy
-  dependencies:
-    - badger_ac701
+  needs:
+    - job: badger_top
+      parallel:
+        matrix:
+          - IMAGE_VARIANT: !reference [.build-images, parallel, IMAGE_VARIANT]
+            TARGET: ac701
+      artifacts: true
   script:
     - cd badger/tests && test -r ac701_rgmii_vtest.bit && SERIAL_NUM_OPT="-s 210203356870" sh teststand_ac701.sh
   environment: hw_ac701

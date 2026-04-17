@@ -68,7 +68,8 @@ def get_raw_adcs_run(dev, filewritepath='raw_adcs_', ext_trig=False, freq=7/33.0
             print("difference %6.2f" % diff1)
         if save_data is True:
             # ISO 8601  2016-06-02T16:06:14Z
-            datetimestr = datetime.datetime.utcnow().isoformat()+"Z "+str(timestamp)
+            dt_now = datetime.datetime.now(datetime.timezone.utc)
+            datetimestr = dt_now.isoformat().replace('+00:00', 'Z') + " " + str(timestamp)
             header = "\n".join([datetimestr, chan_txt])
 
             data_dir = start_time.strftime(filewritepath + '%Y%m%d_%H%M%S')
@@ -216,7 +217,7 @@ def process_adcs(dev, npt, mask_int, freq=7/33.0):  # ,block,timestamp):
 
 
 def slow_chain_unpack(readlist):
-    nums = [256*readlist[ix]+readlist[ix+1] for ix in range(0, 32, 2)]
+    nums = [int(readlist[ix])*256 + int(readlist[ix+1]) for ix in range(0, 32, 2)]
     nums = [x if x < 32768 else x-65536 for x in nums]
     timestamp = 0
     for ix in range(8):
