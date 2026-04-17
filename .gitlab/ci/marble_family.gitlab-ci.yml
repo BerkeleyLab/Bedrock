@@ -6,6 +6,13 @@ marble_sim:
     - make -C projects/test_marble_family all net_slave_check
     - make -C projects/test_marble_family/pps_lock
 
+marble_i2c_check:
+  extends: .build-matrix
+  image: $IMAGE
+  stage: test
+  script:
+    - make -C projects/test_marble_family/i2c tests
+
 .bitgen:
   stage: synthesis
   before_script:
@@ -20,14 +27,44 @@ marble_mini_synth:
     - .bitgen
   image: $IMAGE
   script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make marble1.bit
+    - PATH=$XILINX_VIVADO/bin:$PATH make CONFIG=marblemini bit
   artifacts:
     paths:
       - projects/test_marble_family/marble*.bit
       - projects/test_marble_family/vivado.log
-      - projects/test_marble_family/_xilinx/marble1.runs/*.rpt
-      - projects/test_marble_family/_xilinx/marble1.runs/synth_1/marble_top_*.rpt
-      - projects/test_marble_family/_xilinx/marble1.runs/impl_1/marble_top_*.rpt
+      - projects/test_marble_family/_xilinx/marblemini.runs/*.rpt
+      - projects/test_marble_family/_xilinx/marblemini.runs/synth_1/marble_top_*.rpt
+      - projects/test_marble_family/_xilinx/marblemini.runs/impl_1/marble_top_*.rpt
+
+marble_v2_synth:
+  extends:
+    - .build-matrix
+    - .bitgen
+  image: $IMAGE
+  script:
+    - PATH=$XILINX_VIVADO/bin:$PATH make CONFIG=marble bit
+  artifacts:
+    paths:
+      - projects/test_marble_family/marble*.bit
+      - projects/test_marble_family/vivado.log
+      - projects/test_marble_family/_xilinx/marble.runs/*.rpt
+      - projects/test_marble_family/_xilinx/marble.runs/synth_1/marble_top_*.rpt
+      - projects/test_marble_family/_xilinx/marble.runs/impl_1/marble_top_*.rpt
+
+.marble_fiber_synth:
+  extends:
+    - .build-matrix
+    - .bitgen
+  image: $IMAGE
+  script:
+    - PATH=$XILINX_VIVADO/bin:$PATH make CONFIG=marble_fiber bit
+  artifacts:
+    paths:
+      - projects/test_marble_family/marble*.bit
+      - projects/test_marble_family/vivado.log
+      - projects/test_marble_family/_xilinx/marble_fiber.runs/*.rpt
+      - projects/test_marble_family/_xilinx/marble_fiber.runs/synth_1/marble_top_*.rpt
+      - projects/test_marble_family/_xilinx/marble_fiber.runs/impl_1/marble_top_*.rpt
 
 marble_mini_run:
   extends: .build-matrix
@@ -38,26 +75,11 @@ marble_mini_run:
   dependencies:
     - marble_mini_synth
   before_script:
-    - cd projects/test_marble_family && ln -s marble1.*.bit marble1.bit
+    - cd projects/test_marble_family && ln -s marblemini.*.bit marblemini.bit
   script:
-    - make marble1_hwload && sleep 8 && make marble1_hwtest
+    - make CONFIG=marblemini hwload && sleep 8 && make CONFIG=marblemini hwtest
   environment: hw_marble_mini
   resource_group: hw_marble_mini
-
-marble_v2_synth:
-  extends:
-    - .build-matrix
-    - .bitgen
-  image: $IMAGE
-  script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make marble2.bit
-  artifacts:
-    paths:
-      - projects/test_marble_family/marble*.bit
-      - projects/test_marble_family/vivado.log
-      - projects/test_marble_family/_xilinx/marble2.runs/*.rpt
-      - projects/test_marble_family/_xilinx/marble2.runs/synth_1/marble_top_*.rpt
-      - projects/test_marble_family/_xilinx/marble2.runs/impl_1/marble_top_*.rpt
 
 marble_run:
   extends: .build-matrix
@@ -68,16 +90,9 @@ marble_run:
   dependencies:
     - marble_v2_synth
   before_script:
-    - cd projects/test_marble_family && ln -s marble2.*.bit marble2.bit
+    - cd projects/test_marble_family && ln -s marble.*.bit marble.bit
   script:
-    - make marble2_hwload SERIAL=39 && sleep 8 && make marble2_hwtest SERIAL=39
+    - make CONFIG=marble hwload SERIAL=39 && sleep 8 && make CONFIG=marble hwtest SERIAL=39
     - make -C i2c live_oneshot SERIAL=39
   environment: hw_marble
   resource_group: hw_marble
-
-marble_i2c_check:
-  extends: .build-matrix
-  image: $IMAGE
-  stage: test
-  script:
-    - make -C projects/test_marble_family/i2c tests
