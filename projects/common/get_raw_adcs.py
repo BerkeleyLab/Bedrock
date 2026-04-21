@@ -270,7 +270,7 @@ if __name__ == "__main__":
                         help='Number of acquisitions')
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', default=False,
                         help='Verbose mode')
-    parser.add_argument('-t', '--timeout', type=float, default=0.1,
+    parser.add_argument('-t', '--timeout', type=float, default=5.0,
                         help='LEEP network timeout')
 
     args = parser.parse_args()

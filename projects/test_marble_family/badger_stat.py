@@ -47,7 +47,7 @@ As implemented in multi_counter.v and packet_categorize.v''')
     print("Packet badger stats from", leep_addr)
 
     try:
-        dev = leep.open(leep_addr)
+        dev = leep.open(leep_addr, timeout=5.0)
     except OSError as err:
         print("Leep initialization error:", err)
         sys.exit(1)

@@ -292,7 +292,7 @@ if __name__ == "__main__":
     leep_addr = "leep://" + str(args.addr) + str(":") + str(args.port)
     print(leep_addr)
 
-    addr = leep.open(leep_addr, instance=[])
+    addr = leep.open(leep_addr, timeout=5.0, instance=[])
 
     # dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
 
