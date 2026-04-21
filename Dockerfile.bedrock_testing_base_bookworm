@@ -137,6 +137,9 @@ RUN mkdir ${LITEX_INSTALL_PATH} && \
 RUN pip3 install \
     leep==1.0.2
 
+# Install cocotb and related packages
+RUN pip3 install pytest cocotb cocotb-bus
+
 # Install sv2v
 RUN apt-get update && \
     apt-get install -y \
