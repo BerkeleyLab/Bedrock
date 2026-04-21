@@ -4,6 +4,33 @@ include $(I2CBRIDGE_DIR)/i2cbridge_rules.mk
 # Unisims not provided
 UNISIMS_DIR = broken
 
+APP_NAME = marble
+GTX_TCL :=
+# Select between marblemini, marble
+# XXX needs support for marble_fiber
+CONFIG ?= marblemini
+ifeq ($(CONFIG),marblemini)
+  CARRIER       := marble1
+  BOARD_DIR     := marblemini
+  BOARD_TOP_CSV := marble_mini_top.csv
+  XDC_FILTER    :=
+  IP_ADDR       := 192.168.19.31
+  HWLOAD_CMD     = openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
+  HWTEST_EXTRA   = $(PYTHON) testcase.py -a $(IP_ADDR) --trx --marble 0
+else ifneq (,$(filter marble,$(CONFIG)))
+  CARRIER       := marble2
+  BOARD_DIR     := marble
+  BOARD_TOP_CSV := marble_top.csv
+  XDC_FILTER    := | sed -e '/FMC._.[AK]_/s/IOSTANDARD LVCMOS25/IOSTANDARD LVCMOS25 PULLTYPE PULLUP/'
+  SERIAL        ?= ""
+  IP_ADDR       := 192.168.19.$(SERIAL)
+  ZEST_SN       ?= "LBNL DIGITIZER V1.0 SN  024"
+  HWLOAD_CMD     = openocd -c "adapter driver ftdi; ftdi_serial 0000$(SERIAL);" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
+  HWTEST_EXTRA   = $(PYTHON) testcase.py -a $(IP_ADDR) --trx --si570 && sn="$$($(PYTHON) zest_sn.py -a $(IP_ADDR) -p 803)" && echo "$$sn" && test "$$sn" = $(ZEST_SN)
+else
+  $(error Unknown CONFIG '$(CONFIG)'. Please choose 'marblemini', or 'marble')
+endif
+
 # It seems like the variable VERILOG_TB from $(BUILD_DIR)/top_rules.mk is intended to be
 # used for this exact recipe.  But other local additions to variables like "VERILOG" cause
 # its expansion to now include multiple copies of the same flag/arg so it looks a little
@@ -63,14 +90,10 @@ marble_regmap.json: static_regmap.json scalar_marble_regmap.json
 config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOURCE))
 	$(PYTHON) -m leep.build_rom --placeholder_rev -v $@ -j $< -d "Marble Testing"
 
-# gen_features.py rules (note the use of PHONY targets)
-# actual file outputs are marble_features_params.vh and marble_features_defs.vh
-marble1_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^) -c marblemini --split
-
-marble2_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble --split
-.PHONY: marble1_features marble2_features
+# gen_features.py rules utilizing $(CONFIG)
+$(APP_NAME)_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c $(CONFIG) --split
+.PHONY: $(APP_NAME)_features
 
 # ====
 # tmds_test, requires access to unisims (or unisims_lrd)
@@ -121,8 +144,8 @@ marble_base_lint: $(MARBLE_BASE_V) fake_xadc.v IDDR.v
 	$(VERILATOR) --lint-only -DSIMULATE $(VLATOR_LINT_IGNORE) $^
 
 # You'd better have a verilator in the v5 series!
-marble_top_lint: marble_top.v marble2_features $(MARBLE_BASE_V) fake_xadc.v $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
-	$(VERILATOR) --lint-only --timing $(VLATOR_LINT_IGNORE) -DSIMULATE -y $(FPGA_FAMILY_DIR)/xilinx $(filter-out marble2_features, $^)
+marble_top_lint: marble_top.v $(APP_NAME)_features $(MARBLE_BASE_V) fake_xadc.v $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
+	$(VERILATOR) --lint-only --timing $(VLATOR_LINT_IGNORE) -DSIMULATE -y $(FPGA_FAMILY_DIR)/xilinx $(filter-out $(APP_NAME)_features, $^)
 
 # =====
 # check of basic CDC-correctness
@@ -130,14 +153,12 @@ marble_base_yosys.json: marble_base_shell.v $(MARBLE_BASE_V0)
 # exercise with make marble_base_cdc.txt
 
 # =====
-# constraint
+# constraint files and bitfile generation targets mappings
 pin_map_fmc.csv: pin_map_fmc.py
 	$(PYTHON) $< > $@
-marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marblemini/%, Marble.xdc pin_map.csv) pin_map_fmc.csv marble_mini_top.csv
-	$(PYTHON) $^ > $@
 
-marble2.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marble/%, Marble.xdc pin_map.csv) pin_map_fmc.csv marble_top.csv
-	$(PYTHON) $^ | sed -e '/FMC._.[AK]_/s/IOSTANDARD LVCMOS25/IOSTANDARD LVCMOS25 PULLTYPE PULLUP/' > $@
+$(APP_NAME)_$(CARRIER).xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/$(BOARD_DIR)/%, Marble.xdc pin_map.csv) pin_map_fmc.csv $(BOARD_TOP_CSV)
+	$(PYTHON) $^ $(XDC_FILTER) > $@
 
 # =====
 # Initialization file for i2cbridge
@@ -160,63 +181,36 @@ Vmarble_base: $(MARBLE_BASE_V) fake_xadc.v marble_base_sim.cpp ethernet_model.c 
 # =====
 # bitfile
 MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_trx.dat ../../fpga_family/ds_clk_buf.v
-# MARBLE_SYNTH_SOURCE += scrap_dev.v
-marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
+
+$(APP_NAME)_$(CARRIER).d: $(MARBLE_SYNTH_SOURCE) $(APP_NAME)_$(CARRIER).xdc
 	echo $^ | tr ' ' '\n' > $@
 
-marble1.bit: marble.tcl marble1.d marble1_features bit_stamp_mod
-	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
+# Target is now $(CONFIG).bit (e.g. marblemini.bit or marble.bit)
+$(CONFIG).bit: marble.tcl $(APP_NAME)_$(CARRIER).d $(APP_NAME)_features bit_stamp_mod
+	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) $(CONFIG) $(APP_NAME) $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl $(GTX_TCL)
 
-marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
-	echo $^ | tr ' ' '\n' > $@
-
-marble2.bit: marble.tcl marble2.d marble2_features bit_stamp_mod
-	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
+.PHONY: bit
+bit: $(CONFIG).bit
 
 # =====
-# bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'
+# bitfile loading and testing
 
-# Default IP address set from microcontroller
-RGMII_IP = 192.168.19.31
-BIT = marble1.bit
+.PHONY: hwload hwtest
+hwload:
+	@echo "Loading $(APP_NAME).bit onto $(CONFIG)..."
+	$(HWLOAD_CMD)
 
-# add the Marble serial number
-marble1_hwload:
-	openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT}; exit"
-
-marble1_hwtest: udprtx
-	ping -c 2 ${RGMII_IP}
-	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
-	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py -a ${RGMII_IP} --trx --marble 0
-
-
-# =====
-# Marble bitfile loading and testing; bitfile specified by doing 'make BIT=marble2.bit marble2_hwload'
-
-# Default IP address set from microcontroller
-SERIAL = ""
-MARBLE_IP = 192.168.19.${SERIAL}
-BIT2 = marble2.bit
-# Stored in the Zest board installed on mohs CI test stand; here, we just check that we can read it
-ZEST_SN = "LBNL DIGITIZER V1.0 SN  024"
-
-marble2_hwload:
-	@echo "Using Marble with serial number ${SERIAL}"
-	openocd -c "adapter driver ftdi; ftdi_serial 0000${SERIAL};" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT2}; exit"
-
-marble2_hwtest: udprtx
-	ping -c 2 ${MARBLE_IP}
-	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${MARBLE_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
-	./udprtx ${MARBLE_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py -a ${MARBLE_IP} --trx --si570
-	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = ${ZEST_SN}
+hwtest: udprtx
+	ping -c 2 $(IP_ADDR)
+	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://$(IP_ADDR):803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
+	./udprtx $(IP_ADDR) 100000 8  # should take under 3 seconds
+	$(HWTEST_EXTRA)
 
 dna_tb: dna_tb.v dna.v
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
-	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble_features*.vh marble*.json vivado*
+	rm -f pin_map_fmc.csv $(APP_NAME)_*.xdc $(APP_NAME).bit marble_features*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
 	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx marble_base_cdc.txt
 	rm -rf _xilinx .Xil obj_dir __pycache__
