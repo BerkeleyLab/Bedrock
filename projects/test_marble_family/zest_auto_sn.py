@@ -87,7 +87,7 @@ if __name__ == "__main__":
         exit(0)
     leep_addr = "leep://" + args.addr + ":" + str(args.port)
     # print(leep_addr)
-    dev = leep.open(leep_addr)
+    dev = leep.open(leep_addr, timeout=5.0)
     if args.write:
         old_sn = run_eeprom(dev, ss)
         print("Previous SN : %s" % old_sn)

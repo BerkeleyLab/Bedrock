@@ -144,7 +144,7 @@ if __name__ == "__main__":
         print("must supply IP address")
         exit(1)
     leep_addr = "leep://" + ip_addr + ":" + str(port)
-    fpga = leep.open(leep_addr)
+    fpga = leep.open(leep_addr, timeout=5.0)
     # signals, tw, tstep should be runtime config
     # this static configuration matches GPS_CTRACE option in lb_marble_slave.v
     signals = ["pps", "uart"]

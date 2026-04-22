@@ -160,7 +160,7 @@ if __name__ == "__main__":
     if not args.test:
         leep_addr = "leep://" + args.addr + ":" + str(args.port)
         try:
-            leep_dev = leep.open(leep_addr)
+            leep_dev = leep.open(leep_addr, timeout=5.0)
         except OSError as err:
             print("Leep initialization error:", err)
             sys.exit(1)
