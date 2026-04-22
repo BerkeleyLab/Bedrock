@@ -138,7 +138,10 @@ RUN pip3 install \
     leep==1.0.2
 
 # Install cocotb and related packages
-RUN pip3 install cocotb cocotb-bus pytest
+RUN pip3 install \
+    cocotb \
+    cocotb-bus \
+    pytest
 
 # Install sv2v
 RUN apt-get update && \
