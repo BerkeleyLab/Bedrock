@@ -43,14 +43,7 @@ RUN apt-get update && \
 
 # Allow pip to install packages
 RUN mkdir -p $HOME/.config/pip && \
-Processing triggers for libc-bin (2.41-12+deb13u2) ...
-␛[91m/bin/sh: 1: COPY: not found
-␛[0mThe command '/bin/sh -c apt-get update &&     apt-get install -y         ninja-build         gcc-aarch64-linux-gnu         ghdl &&     rm -rf /var/lib/apt/lists/* && COPY build-tools/litex_meta.sh /' returned a non-zero code: 127
-section_end:1776968203:step_script
-␛[0Ksection_start:1776968203:cleanup_file_variables
-␛[0K␛[0K␛[36;1mCleaning up project directory and file based variables␛[0;m␛[0;m
-section_end:1776968203:cleanup_file_variables
-␛[0K␛[31;1mERRO    printf "[global]\nbreak-system-packages = true\n" > \
+    printf "[global]\nbreak-system-packages = true\n" > \
         $HOME/.config/pip/pip.conf && \
     cat $HOME/.config/pip/pip.conf
 
