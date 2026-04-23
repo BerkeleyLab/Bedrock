@@ -32,6 +32,7 @@ RUN apt-get update && \
     libftdi1-dev \
     libusb-dev \
     openocd \
+    meson \
     pkg-config && \
     rm -rf /var/lib/apt/lists/* && \
     python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
@@ -122,8 +123,6 @@ RUN apt-get update && \
         gcc-aarch64-linux-gnu \
         ghdl && \
     rm -rf /var/lib/apt/lists/* && \
-    pip3 install \
-        meson==1.11.1
 
 COPY build-tools/litex_meta.sh /
 
@@ -140,8 +139,7 @@ RUN pip3 install \
 # Install cocotb and related packages
 RUN pip3 install \
     cocotb==2.0.1 \
-    cocotb-bus==0.3.0 \
-    pytest==9.0.3
+    cocotb-bus==0.3.0
 
 # Install sv2v
 RUN apt-get update && \
