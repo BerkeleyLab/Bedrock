@@ -122,7 +122,7 @@ RUN apt-get update && \
         ninja-build \
         gcc-aarch64-linux-gnu \
         ghdl && \
-    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY build-tools/litex_meta.sh /
 
