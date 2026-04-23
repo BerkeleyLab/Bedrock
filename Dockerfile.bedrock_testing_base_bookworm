@@ -122,8 +122,9 @@ RUN apt-get update && \
         gcc-aarch64-linux-gnu \
         ghdl && \
     rm -rf /var/lib/apt/lists/* && \
+    # stock Bookworm comes with 1.6.0
     pip3 install \
-        meson
+        meson==1.11.1
 
 COPY build-tools/litex_meta.sh /
 
@@ -139,9 +140,9 @@ RUN pip3 install \
 
 # Install cocotb and related packages
 RUN pip3 install \
-    cocotb \
-    cocotb-bus \
-    pytest
+    cocotb==2.0.1 \
+    cocotb-bus==0.3.0 \
+    pytest==9.0.3
 
 # Install sv2v
 RUN apt-get update && \
