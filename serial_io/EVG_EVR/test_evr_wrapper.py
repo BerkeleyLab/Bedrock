@@ -6,20 +6,20 @@ from cocotb.triggers import ClockCycles
 class TB:
     def __init__(self, dut):
         self.dut = dut
-        self.fcnt_width = dut.FCNT_WIDTH.value
+        self.fcnt_width = int(dut.FCNT_WIDTH.value)
         # update this to try different reference frequency
         self.gt_refclk_freq = 125e6
         gt_refclk = Clock(
-            dut.gt_refclk_p, 1e12 // self.gt_refclk_freq, units="ps")
-        cocotb.start_soon(Clock(dut.sys_clk, 10, units="ns").start())
-        cocotb.start_soon(Clock(dut.dsp_clk, 4, units="ns").start())
+            dut.gt_refclk_p, 1e12 // self.gt_refclk_freq, unit="ps")
+        cocotb.start_soon(Clock(dut.sys_clk, 10, unit="ns").start())
+        cocotb.start_soon(Clock(dut.dsp_clk, 4, unit="ns").start())
         cocotb.start_soon(gt_refclk.start())
 
         # Init other DUT inputs
-        self.dut.gt_rxp.setimmediatevalue(0)
-        self.dut.gt_rxn.setimmediatevalue(0)
-        self.dut.evcode.setimmediatevalue(0)
-        self.dut.evr_oc_delay.setimmediatevalue(0)
+        self.dut.gt_rxp.value = 0
+        self.dut.gt_rxn.value = 0
+        self.dut.evcode.value = 0
+        self.dut.evr_oc_delay.value = 0
 
     def convert_freq_to_hz(self, f_cnt, f_ref=100e6):
         return (f_cnt / 2**self.fcnt_width) * f_ref
@@ -44,11 +44,11 @@ async def test_reset(dut):
 
     # Wait for alignment
     await ClockCycles(dut.sys_clk, 100)
-    reset_rx_done = dut.rx_reset_done_sys.value.integer
+    reset_rx_done = int(dut.rx_reset_done_sys.value)
     assert reset_rx_done == 1, "reset_rx_done is not set"
 
     await ClockCycles(dut.sys_clk, 150)
-    rx_aligned = dut.rx_aligned_sys.value.integer
+    rx_aligned = int(dut.rx_aligned_sys.value)
     assert rx_aligned == 1, "rx_aligned is not set"
 
 
@@ -60,8 +60,8 @@ async def test_freq_counter(dut):
     await ClockCycles(dut.sys_clk, 500)
 
     # Read raw counter values directly
-    gt_refclk_freq = tb.convert_freq_to_hz(dut.gt_ref_freq.value.integer)
-    gt_rx_freq = tb.convert_freq_to_hz(dut.gt_rx_freq.value.integer)
+    gt_refclk_freq = tb.convert_freq_to_hz(dut.gt_ref_freq.value.to_unsigned())
+    gt_rx_freq = tb.convert_freq_to_hz(dut.gt_rx_freq.value.to_unsigned())
 
     dut._log.info(f"gt_ref_freq: {gt_refclk_freq/1e6} MHz")
     dut._log.info(f"gt_rx_freq:  {gt_rx_freq/1e6} MHz")

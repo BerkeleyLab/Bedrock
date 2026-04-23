@@ -93,7 +93,7 @@ Recommended:
 *  Verilator
 *  YoSys
 
-Full list: see [dependencies.txt](dependencies.txt) and [Dockerfile](Dockerfile).
+Full list: see [dependencies.txt](dependencies.txt) and [Dockerfile](Dockerfile.bedrock_testing_base_trixie).
 
 On contributing
 ===============
