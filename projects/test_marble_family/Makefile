@@ -10,18 +10,14 @@ GTX_TCL :=
 # XXX needs support for marble_fiber
 CONFIG ?= marblemini
 ifeq ($(CONFIG),marblemini)
-  CARRIER       := marble1
   BOARD_DIR     := marblemini
   BOARD_TOP_CSV := marble_mini_top.csv
-  XDC_FILTER    :=
   IP_ADDR       := 192.168.19.31
   HWLOAD_CMD     = openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
   HWTEST_EXTRA   = $(PYTHON) testcase.py -a $(IP_ADDR) --trx --marble 0
 else ifneq (,$(filter marble,$(CONFIG)))
-  CARRIER       := marble2
   BOARD_DIR     := marble
   BOARD_TOP_CSV := marble_top.csv
-  XDC_FILTER    := | sed -e '/FMC._.[AK]_/s/IOSTANDARD LVCMOS25/IOSTANDARD LVCMOS25 PULLTYPE PULLUP/'
   SERIAL        ?= ""
   IP_ADDR       := 192.168.19.$(SERIAL)
   ZEST_SN       ?= "LBNL DIGITIZER V1.0 SN  024"
@@ -88,7 +84,7 @@ scalar_marble_regmap.json: lb_marble_slave.v
 marble_regmap.json: static_regmap.json scalar_marble_regmap.json
 	$(PYTHON) $(BUILD_DIR)/merge_json.py -o $@ -i $(filter %.json, $^)
 config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOURCE))
-	$(PYTHON) -m leep.build_rom --placeholder_rev -v $@ -j $< -d "Marble Testing"
+	$(PYTHON) -m leep.build_rom --placeholder_rev -v $@ -j $< -d "$(CONFIG) testing"
 
 # gen_features.py rules utilizing $(CONFIG)
 $(APP_NAME)_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
@@ -157,8 +153,12 @@ marble_base_yosys.json: marble_base_shell.v $(MARBLE_BASE_V0)
 pin_map_fmc.csv: pin_map_fmc.py
 	$(PYTHON) $< > $@
 
-$(APP_NAME)_$(CARRIER).xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/$(BOARD_DIR)/%, Marble.xdc pin_map.csv) pin_map_fmc.csv $(BOARD_TOP_CSV)
-	$(PYTHON) $^ $(XDC_FILTER) > $@
+$(CONFIG).xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/$(BOARD_DIR)/%, Marble.xdc pin_map.csv) pin_map_fmc.csv $(BOARD_TOP_CSV)
+ifeq ($(CONFIG),marblemini)
+	$(PYTHON) $^ > $@
+else
+	$(PYTHON) $^ | sed -e '/FMC._.[AK]_/s/IOSTANDARD LVCMOS25/IOSTANDARD LVCMOS25 PULLTYPE PULLUP/' > $@
+endif
 
 # =====
 # Initialization file for i2cbridge
@@ -182,11 +182,11 @@ Vmarble_base: $(MARBLE_BASE_V) fake_xadc.v marble_base_sim.cpp ethernet_model.c 
 # bitfile
 MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_trx.dat ../../fpga_family/ds_clk_buf.v
 
-$(APP_NAME)_$(CARRIER).d: $(MARBLE_SYNTH_SOURCE) $(APP_NAME)_$(CARRIER).xdc
+$(CONFIG).d: $(MARBLE_SYNTH_SOURCE) $(CONFIG).xdc
 	echo $^ | tr ' ' '\n' > $@
 
 # Target is now $(CONFIG).bit (e.g. marblemini.bit or marble.bit)
-$(CONFIG).bit: marble.tcl $(APP_NAME)_$(CARRIER).d $(APP_NAME)_features bit_stamp_mod
+$(CONFIG).bit: marble.tcl $(CONFIG).d $(APP_NAME)_features bit_stamp_mod
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) $(CONFIG) $(APP_NAME) $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl $(GTX_TCL)
 
 .PHONY: bit
@@ -197,7 +197,7 @@ bit: $(CONFIG).bit
 
 .PHONY: hwload hwtest
 hwload:
-	@echo "Loading $(APP_NAME).bit onto $(CONFIG)..."
+	@echo "Loading $(CONFIG).bit onto $(CONFIG)..."
 	$(HWLOAD_CMD)
 
 hwtest: udprtx
@@ -210,7 +210,7 @@ dna_tb: dna_tb.v dna.v
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
-	rm -f pin_map_fmc.csv $(APP_NAME)_*.xdc $(APP_NAME).bit marble_features*.vh marble*.json vivado*
+	rm -f pin_map_fmc.csv marble*.xdc *.bit marble_features*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
 	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx marble_base_cdc.txt
 	rm -rf _xilinx .Xil obj_dir __pycache__
