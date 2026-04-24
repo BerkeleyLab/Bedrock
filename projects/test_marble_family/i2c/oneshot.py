@@ -71,7 +71,7 @@ def decode(prog):
 
 def decodeI2CProgram(args):
     """Readout current I2C program and decode"""
-    dev = leep.open(args.dest)
+    dev = leep.open(args.dest, timeout=5.0)
     # Read program memory
     name_sizes = ((I2C_PROG[0], 0x400, I2C_PROG[1]),)  # (name, size, offset)
     prog = dev.reg_read_size(name_sizes)[0]
@@ -189,7 +189,7 @@ def doI2CXact(args):
     if args.dest == "test":
         print("Test done.")
         return 0
-    dev = leep.open(args.dest)
+    dev = leep.open(args.dest, timeout=5.0)
     stop(dev)
     program(dev, prog)
     run(dev)

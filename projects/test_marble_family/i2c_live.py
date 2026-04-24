@@ -7,7 +7,7 @@ from c2vcd import produce_vcd
 
 
 class i2c_live:
-    def __init__(self, host, timeout=1.02, port=803,
+    def __init__(self, host, timeout=5.0, port=803,
                  retry=120, sim=False, i2c_base=0x040000,
                  force_burst=False, allow_burst=True):
         self.dev = lbus_access.lbus_access(

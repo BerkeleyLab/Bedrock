@@ -32,6 +32,7 @@ RUN apt-get update && \
     libftdi1-dev \
     libusb-dev \
     openocd \
+    meson \
     pkg-config && \
     rm -rf /var/lib/apt/lists/* && \
     python3 -c "import numpy; print('LRD Test %f' % numpy.pi)" && \
@@ -121,9 +122,7 @@ RUN apt-get update && \
         ninja-build \
         gcc-aarch64-linux-gnu \
         ghdl && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip3 install \
-        meson
+    rm -rf /var/lib/apt/lists/*
 
 COPY build-tools/litex_meta.sh /
 
@@ -136,6 +135,11 @@ RUN mkdir ${LITEX_INSTALL_PATH} && \
 # Install leep from PyPi
 RUN pip3 install \
     leep==1.0.2
+
+# Install cocotb and related packages
+RUN pip3 install \
+    cocotb==2.0.1 \
+    cocotb-bus==0.3.0
 
 # Install sv2v
 RUN apt-get update && \
