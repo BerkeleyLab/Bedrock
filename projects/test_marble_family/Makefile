@@ -13,16 +13,12 @@ ifeq ($(CONFIG),marblemini)
   BOARD_DIR     := marblemini
   BOARD_TOP_CSV := marble_mini_top.csv
   IP_ADDR       := 192.168.19.31
-  HWLOAD_CMD     = openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
-  HWTEST_EXTRA   = $(PYTHON) testcase.py -a $(IP_ADDR) --trx --marble 0
 else ifneq (,$(filter marble,$(CONFIG)))
   BOARD_DIR     := marble
   BOARD_TOP_CSV := marble_top.csv
   SERIAL        ?= ""
   IP_ADDR       := 192.168.19.$(SERIAL)
   ZEST_SN       ?= "LBNL DIGITIZER V1.0 SN  024"
-  HWLOAD_CMD     = openocd -c "adapter driver ftdi; ftdi_serial 0000$(SERIAL);" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
-  HWTEST_EXTRA   = $(PYTHON) testcase.py -a $(IP_ADDR) --trx --si570 && sn="$$($(PYTHON) zest_sn.py -a $(IP_ADDR) -p 803)" && echo "$$sn" && test "$$sn" = $(ZEST_SN)
 else
   $(error Unknown CONFIG '$(CONFIG)'. Please choose 'marblemini', or 'marble')
 endif
@@ -198,19 +194,28 @@ bit: $(CONFIG).bit
 .PHONY: hwload hwtest
 hwload:
 	@echo "Loading $(CONFIG).bit onto $(CONFIG)..."
-	$(HWLOAD_CMD)
+ifeq ($(CONFIG),marblemini)
+	openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
+else
+	openocd -c "adapter driver ftdi; ftdi_serial 0000$(SERIAL);" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
+endif
 
 hwtest: udprtx
 	ping -c 2 $(IP_ADDR)
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://$(IP_ADDR):803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx $(IP_ADDR) 100000 8  # should take under 3 seconds
-	$(HWTEST_EXTRA)
+ifeq ($(CONFIG),marblemini)
+	$(PYTHON) testcase.py -a $(IP_ADDR) --trx --marble 0
+else
+	$(PYTHON) testcase.py -a $(IP_ADDR) --trx --si570
+	sn="$$($(PYTHON) zest_sn.py -a $(IP_ADDR) -p 803)" && echo "$$sn" && test "$$sn" = $(ZEST_SN)
+endif
 
 dna_tb: dna_tb.v dna.v
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
-	rm -f pin_map_fmc.csv marble*.xdc *.bit marble_features*.vh marble*.json vivado*
+	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble_features*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
 	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx marble_base_cdc.txt
 	rm -rf _xilinx .Xil obj_dir __pycache__
