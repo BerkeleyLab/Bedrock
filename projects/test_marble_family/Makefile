@@ -7,25 +7,18 @@ UNISIMS_DIR = broken
 APP_NAME = marble
 GTX_TCL :=
 # Select between marblemini, marble, and marble_fiber
+# XXX needs support for marble_fiber
 CONFIG ?= marblemini
 ifeq ($(CONFIG),marblemini)
-  CARRIER       := marble1
   BOARD_DIR     := marblemini
   BOARD_TOP_CSV := marble_mini_top.csv
-  XDC_FILTER    :=
   IP_ADDR       := 192.168.19.31
-  HWLOAD_CMD     = openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
-  HWTEST_EXTRA   = $(PYTHON) testcase.py -a $(IP_ADDR) --trx --marble 0
 else ifneq (,$(filter marble marble_fiber,$(CONFIG)))
-  CARRIER       := marble2
   BOARD_DIR     := marble
   BOARD_TOP_CSV := marble_top.csv
-  XDC_FILTER    := | sed -e '/FMC._.[AK]_/s/IOSTANDARD LVCMOS25/IOSTANDARD LVCMOS25 PULLTYPE PULLUP/'
   SERIAL        ?= ""
   IP_ADDR       := 192.168.19.$(SERIAL)
   ZEST_SN       ?= "LBNL DIGITIZER V1.0 SN  024"
-  HWLOAD_CMD     = openocd -c "adapter driver ftdi; ftdi_serial 0000$(SERIAL);" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
-  HWTEST_EXTRA   = $(PYTHON) testcase.py -a $(IP_ADDR) --trx --si570 && sn="$$($(PYTHON) zest_sn.py -a $(IP_ADDR) -p 803)" && echo "$$sn" && test "$$sn" = $(ZEST_SN)
   ifeq ($(CONFIG),marble_fiber)
     # XXX missing QSFP tcl
     GTX_TCL     :=
@@ -91,7 +84,7 @@ scalar_marble_regmap.json: lb_marble_slave.v
 marble_regmap.json: static_regmap.json scalar_marble_regmap.json
 	$(PYTHON) $(BUILD_DIR)/merge_json.py -o $@ -i $(filter %.json, $^)
 config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOURCE))
-	$(PYTHON) -m leep.build_rom --placeholder_rev -v $@ -j $< -d "Marble Testing"
+	$(PYTHON) -m leep.build_rom --placeholder_rev -v $@ -j $< -d "$(CONFIG) testing"
 
 # gen_features.py rules utilizing $(CONFIG)
 $(APP_NAME)_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
@@ -160,8 +153,12 @@ marble_base_yosys.json: marble_base_shell.v $(MARBLE_BASE_V0)
 pin_map_fmc.csv: pin_map_fmc.py
 	$(PYTHON) $< > $@
 
-$(APP_NAME)_$(CARRIER).xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/$(BOARD_DIR)/%, Marble.xdc pin_map.csv) pin_map_fmc.csv $(BOARD_TOP_CSV)
-	$(PYTHON) $^ $(XDC_FILTER) > $@
+$(CONFIG).xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/$(BOARD_DIR)/%, Marble.xdc pin_map.csv) pin_map_fmc.csv $(BOARD_TOP_CSV)
+ifeq ($(CONFIG),marblemini)
+	$(PYTHON) $^ > $@
+else
+	$(PYTHON) $^ | sed -e '/FMC._.[AK]_/s/IOSTANDARD LVCMOS25/IOSTANDARD LVCMOS25 PULLTYPE PULLUP/' > $@
+endif
 
 # =====
 # Initialization file for i2cbridge
@@ -185,11 +182,11 @@ Vmarble_base: $(MARBLE_BASE_V) fake_xadc.v marble_base_sim.cpp ethernet_model.c 
 # bitfile
 MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_trx.dat ../../fpga_family/ds_clk_buf.v
 
-$(APP_NAME)_$(CARRIER).d: $(MARBLE_SYNTH_SOURCE) $(APP_NAME)_$(CARRIER).xdc
+$(CONFIG).d: $(MARBLE_SYNTH_SOURCE) $(CONFIG).xdc
 	echo $^ | tr ' ' '\n' > $@
 
-# Target is now $(CONFIG).bit (e.g. marblemini.bit or marble_fiber.bit)
-$(CONFIG).bit: marble.tcl $(APP_NAME)_$(CARRIER).d $(APP_NAME)_features bit_stamp_mod
+# Target is now $(CONFIG).bit (e.g. marblemini.bit or marble.bit)
+$(CONFIG).bit: marble.tcl $(CONFIG).d $(APP_NAME)_features bit_stamp_mod
 	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) $(CONFIG) $(APP_NAME) $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl $(GTX_TCL)
 
 .PHONY: bit
@@ -200,14 +197,23 @@ bit: $(CONFIG).bit
 
 .PHONY: hwload hwtest
 hwload:
-	@echo "Loading $(APP_NAME).bit onto $(CONFIG)..."
-	$(HWLOAD_CMD)
+	@echo "Loading $(CONFIG).bit onto $(CONFIG)..."
+ifeq ($(CONFIG),marblemini)
+	openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
+else
+	openocd -c "adapter driver ftdi; ftdi_serial 0000$(SERIAL);" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
+endif
 
 hwtest: udprtx
 	ping -c 2 $(IP_ADDR)
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://$(IP_ADDR):803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx $(IP_ADDR) 100000 8  # should take under 3 seconds
-	$(HWTEST_EXTRA)
+ifeq ($(CONFIG),marblemini)
+	$(PYTHON) testcase.py -a $(IP_ADDR) --trx --marble 0
+else
+	$(PYTHON) testcase.py -a $(IP_ADDR) --trx --si570
+	sn="$$($(PYTHON) zest_sn.py -a $(IP_ADDR) -p 803)" && echo "$$sn" && test "$$sn" = $(ZEST_SN)
+endif
 
 dna_tb: dna_tb.v dna.v
 
