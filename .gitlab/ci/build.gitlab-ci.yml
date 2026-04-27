@@ -45,8 +45,9 @@ check_exists:
 .build:
   image: docker:stable
   stage: build
+  variables:
   services:
-    - name: mohs.dhcp.lbl.gov/docker:20.10.12-dind
+    - name: mohs.dhcp.lbl.gov/docker:29.4.0-dind
       command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
       alias: docker
   before_script:
@@ -75,6 +76,7 @@ check_exists:
     docker push $IMAGE:$CI_COMMIT_REF_NAME
     docker push $IMAGE:$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
     docker push $IMAGE:latest
+
 
 build_bookworm:
   extends: .build
