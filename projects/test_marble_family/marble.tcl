@@ -2,8 +2,7 @@ set outputDir ./_xilinx
 file mkdir $outputDir
 
 # Provision to source additional TCL scripts
-# Currently used for swap_gitid.tcl
-foreach aux_tcl [lrange $argv 2 end] {
+foreach aux_tcl [lrange $argv 3 end] {
     puts "Sourcing $aux_tcl"
     source $aux_tcl
 }
@@ -20,11 +19,16 @@ git_id_print $new_commit
 set flist [lindex $argv 0]
 puts "Obtaining dependencies from $flist"
 
-# Read in build identifier
+# Read in build identifier (this is $(CONFIG) from the Makefile)
 set build_id [lindex $argv 1]
-puts "Building for $build_id"
+puts "Building for config: $build_id"
 
-if { $build_id == "marble1" } {
+# Read in the app_name (e.g., 'marble') from the Makefile
+set app_name [lindex $argv 2]
+puts "Base application name: $app_name"
+
+# Map the config names to the correct part
+if { $build_id == "marblemini" } {
    set part "xc7a100t-fgg484-2"
 } else {
    set part "xc7k160t-ffg676-2"
@@ -40,12 +44,13 @@ regsub -all "\n" $file_data " " file_data
 puts $file_data
 add_files $file_data
 set_property top "marble_top" [current_fileset]
-set_property verilog_define [list "CHIP_FAMILY_7SERIES"] [current_fileset]
 
 # Get shorter git commit ID for verilog and bitfile filename
 set gitid_for_filename $git_status(short_id)$git_status(suffix)
 set gitid_for_verilog 32'h$git_status(short_id)
-set new_defs [list "GIT_32BIT_ID=$gitid_for_verilog" "REVC_1W"]
+
+set new_defs [list "CHIP_FAMILY_7SERIES" "GIT_32BIT_ID=$gitid_for_verilog" "REVC_1W"]
+set_property verilog_define $new_defs [current_fileset]
 
 launch_runs synth_1
 wait_on_run synth_1
@@ -77,9 +82,6 @@ proc project_rpt {project_name} {
 open_run impl_1
 set my_proj_name "${build_id}.runs"
 project_rpt $my_proj_name
-
 swap_gitid $old_commit $new_commit 16 0
-
 write_bitstream -force $build_id.$gitid_for_filename.x.bit
-
 apply_bit_stamp_mod $build_id.$gitid_for_filename $git_status(dirty) $git_status(time)
