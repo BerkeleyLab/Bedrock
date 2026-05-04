@@ -7,8 +7,8 @@ include $(PICORV_DIR)/rules.mk
 VIVADO_BASE = $(dir $(shell which vivado))..
 BLOCK_RAM_SIZE     = 2048
 SRC_V   = memory2_pack.v mpack.v munpack.v picorv32.v pico_pack.v sfr_pack.v
-SRC_V  += fmc11x/iserdes_pack.v fmc11x/idelay_wrap.v fmc11x/dco_buf.v
-SRC_V  += flag_xdomain.v dpram.v
+SRC_V  += $(BOARD_SUPPORT_DIR)/fmc11x/iserdes_pack.v $(BOARD_SUPPORT_DIR)/fmc11x/idelay_wrap.v $(BOARD_SUPPORT_DIR)/fmc11x/dco_buf.v
+SRC_V  += flag_xdomain.v dpram.v reg_tech_cdc.v
 SRC_V  += $(VIVADO_BASE)/data/verilog/src/glbl.v
 CFLAGS += -DSIMULATION
 

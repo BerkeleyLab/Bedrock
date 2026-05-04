@@ -65,8 +65,6 @@ module zest #(
     // Data interface
     // dsp_clk_out domain
     output               dsp_clk_out,
-    output [N_ADC-1:0]   clk_div_out,
-    output [N_CH-1:0]    adc_out_clk,
     output [16*N_CH-1:0] adc_out_data,
     // dac_clk_out domain
     output               dac_clk_out,
@@ -339,6 +337,7 @@ generate for (ix=0; ix<N_ADC; ix=ix+1) begin: ic_map
 end endgenerate
 
 wire [15:0] adc_out [N_CH-1:0];
+wire [15:0] adc_out_dsp [N_CH-1:0];
 genvar ch;
 generate for (ch=0; ch<N_CH; ch=ch+1) begin: ch_map
     assign in_n[ch] = {ADC_D1_P[ch], ADC_D0_P[ch]};  // inverted due to hardware
@@ -364,20 +363,23 @@ generate for (ch=0; ch<N_CH; ch=ch+1) begin: ch_map
         .mem_packed_fwd ( mem_packed_fwd ),
         .mem_packed_ret ( mem_packed_rets[ch] )
     );
+    // latch to dsp_clk domain
+    reg_tech_cdc rtc[15:0] (
+        .C(dsp_clk_out),
+        .I(adc_out[ch][15:0]),
+        .O(adc_out_dsp[ch][15:0])
+    );
     // assign adc_out_data[16*ch+:16] = adc_out[ch]; // inverted by 0x14=0x7
 end endgenerate
     // Remap to SMA order
-    assign adc_out_data[16*7+:16] = adc_out[4]; // J11 to ADC1 A
-    assign adc_out_data[16*6+:16] = adc_out[5]; // J10 to ADC1 B
-    assign adc_out_data[16*5+:16] = adc_out[6]; //  J9 to ADC1 C
-    assign adc_out_data[16*4+:16] = adc_out[7]; //  J8 to ADC1 D
-    assign adc_out_data[16*3+:16] = adc_out[0]; //  J7 to ADC0 A
-    assign adc_out_data[16*2+:16] = adc_out[1]; //  J6 to ADC0 B
-    assign adc_out_data[16*1+:16] = adc_out[2]; //  J5 to ADC0 C
-    assign adc_out_data[16*0+:16] = adc_out[3]; //  J4 to ADC0 D
-
-assign adc_out_clk = clk_div_data;
-assign clk_div_out = clk_div;
+    assign adc_out_data[16*7+:16] = adc_out_dsp[4]; // J11 to ADC1 A
+    assign adc_out_data[16*6+:16] = adc_out_dsp[5]; // J10 to ADC1 B
+    assign adc_out_data[16*5+:16] = adc_out_dsp[6]; //  J9 to ADC1 C
+    assign adc_out_data[16*4+:16] = adc_out_dsp[7]; //  J8 to ADC1 D
+    assign adc_out_data[16*3+:16] = adc_out_dsp[0]; //  J7 to ADC0 A
+    assign adc_out_data[16*2+:16] = adc_out_dsp[1]; //  J6 to ADC0 B
+    assign adc_out_data[16*1+:16] = adc_out_dsp[2]; //  J5 to ADC0 C
+    assign adc_out_data[16*0+:16] = adc_out_dsp[3]; //  J4 to ADC0 D
 
 wfm_pack #(
     .BASE_ADDR      ( BASE_ADDR ),
