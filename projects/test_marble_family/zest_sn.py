@@ -67,7 +67,7 @@ def hw_test_prog(rom_addr=0, new_sn=None):
 def run_eeprom(dev, new_sn, verbose=False, debug=False):
     # using keyword just to keep print consistent
     prog = hw_test_prog(new_sn=new_sn)
-    result = testcase.run_testcase(dev, prog, result_len=359, debug=debug, verbose=verbose)
+    result = testcase.run_testcase(dev, prog, result_len=361, debug=debug, verbose=verbose)
     if debug:
         print(" ".join(["%2.2x" % p for p in prog]))
         print("")
