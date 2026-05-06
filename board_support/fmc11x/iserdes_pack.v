@@ -145,7 +145,9 @@ generate for (ix=0; ix < DW; ix=ix+1) begin: in_cell
     // Remap to bitwise_out
     // Supports Ad9653 Table 23 and Figure 2, in ZEST.
     // Supports LTC2175 in FMC11x.
-    for (jx=0;jx<8;jx=jx+1) assign bitwise_out[DW*jx+ix] = dq[jx];
+    for (jx=0;jx<8;jx=jx+1) begin
+        assign bitwise_out[DW*jx+ix] = dq[jx];
+    end
 
     // XXX cross domains, data has to be a static training pattern
     always @(posedge clk) begin
