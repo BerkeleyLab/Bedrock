@@ -173,8 +173,6 @@ class Zest(Module, AutoCSR):
         self.DAC_DCO_P        = dac_dco.p
         self.DAC_DCO_N        = dac_dco.n
         self.dsp_clk_out      = Signal()
-        self.clk_div_out      = Signal(2)
-        self.adc_out_clk      = Signal(8)
         self.adc_out_data     = Signal(128)
         self.dac_in_data_i    = Signal(14)
         self.dac_in_data_q    = Signal(14)
@@ -241,8 +239,6 @@ class Zest(Module, AutoCSR):
                                   i_DAC_DCO_P=self.DAC_DCO_P,
                                   i_DAC_DCO_N=self.DAC_DCO_N,
                                   o_dsp_clk_out=self.dsp_clk_out,
-                                  o_clk_div_out=self.clk_div_out,
-                                  o_adc_out_clk=self.adc_out_clk,
                                   o_adc_out_data=self.adc_out_data,
                                   i_dac_in_data_i=self.dac_in_data_i,
                                   i_dac_in_data_q=self.dac_in_data_q,
