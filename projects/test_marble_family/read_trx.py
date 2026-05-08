@@ -51,6 +51,7 @@ def qsfp_poll(s, port_n):
     a += s.read(0xa0, 42, 8)  # Tx bias, lane[0,1,2,3]
     a += s.read(0xa0, 50, 8)  # Tx pwr,  lane[0,1,2,3]
     a += s.read(0xa0, 34, 8)  # Rx pwr,  lane[0,1,2,3]
+    a += s.read(0xa0, 86, 1)  # Tx Disable, lane[0,1,2,3]
     return a
 
 

@@ -173,7 +173,7 @@ def compute_si570(addr, key, verbose=False, debug=False):
     # using keyword just to keep print consistent
     _, si570_addr, polarity, config_addr, _ = decode_settings(mbox, verbose)
     prog = hw_test_prog(si570_addr, polarity, config_addr)
-    result = testcase.run_testcase(addr, prog, result_len=359, debug=debug, verbose=verbose)
+    result = testcase.run_testcase(addr, prog, result_len=361, debug=debug, verbose=verbose)
     if debug:
         print(" ".join(["%2.2x" % p for p in prog]))
         print("")

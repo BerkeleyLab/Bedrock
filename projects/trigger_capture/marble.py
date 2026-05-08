@@ -69,8 +69,6 @@ class SDRAMLoopbackSoC(BaseSoC):
                                                  self.platform.lookup_request("ZEST_DAC_DCO", loose=True).p)
 
         # self.dsp_clk_out      = Signal()
-        # self.clk_div_out      = Signal(2)
-        # self.adc_out_clk      = Signal(8)
         # self.adc_out_data     = Signal(128)
         # self.dac_in_data_i    = Signal(14)
         # self.dac_in_data_q    = Signal(14)

@@ -266,7 +266,7 @@ def print_result(result, args, board_type, si570_dfreq, poll_only=False):
             for ix in range(transceiver):
                 print("########################################################################")
                 if board_type:
-                    pitch = 28
+                    pitch = 29
                 else:
                     pitch = 10
                 hx = 16 + pitch*ix
@@ -332,7 +332,7 @@ if __name__ == "__main__":
     parser.add_argument('--vcd', type=str, help='VCD file to capture')
     parser.add_argument('--fmc', action='store_true', help='connect to Zest')
     parser.add_argument('--fmc_tester', action='store_true', help='connect to CERN FMC tester')
-    parser.add_argument('--rlen', type=int, default=359, help='result array length')
+    parser.add_argument('--rlen', type=int, default=361, help='result array length')
     parser.add_argument('--squelch', action='store_true', help='squelch non-LA FMC pins')
 
     args = parser.parse_args()
