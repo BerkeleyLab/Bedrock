@@ -164,7 +164,7 @@ def print_ina219(title, a):
     shuntr = 0.02  # Ohm
     aa = merge_16(a)
     aa[0] = aa[0] if aa[0] < 32768 else aa[0]-65536  # only current is signed
-    current = float(aa[0])/32768.0*0.32/shuntr
+    current = abs(float(aa[0])/32768.0*0.32/shuntr)
     busv = float(aa[1] & 0xfff8)/65536.0*32.0
     print("%s:  current %6.3f A   voltage %7.3f V" % (title, current, busv))
 
@@ -380,7 +380,6 @@ if __name__ == "__main__":
             wait_for_new(dev, sim=sim)
             result = read_result(dev, result_len=args.rlen)
             print_result(result, args, board_type, si570_dfreq, poll_only=True)
-
     else:
         if args.debug:
             print(" ".join(["%2.2x" % p for p in prog]))
