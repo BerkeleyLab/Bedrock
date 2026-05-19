@@ -29,5 +29,5 @@ echo "d859db819bc3dba4a7120be7e2c4b60fea107fa22b54aebb5678ccc8c6a13666  litex_se
 # go ahead and run it.
 python3 litex_setup.py --init --update --tag 2025.08 --config standard
 cd pythondata-software-picolibc && git checkout 2025.08 && git submodule update --init --recursive && cd ..
-python3 litex_setup.py install
+PIP_NO_BUILD_ISOLATION=1 python3 litex_setup.py install
 echo "DONE"
