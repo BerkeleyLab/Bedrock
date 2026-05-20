@@ -51,21 +51,6 @@ marble_v2_synth:
       - projects/test_marble_family/_xilinx/marble.runs/synth_1/marble_top_*.rpt
       - projects/test_marble_family/_xilinx/marble.runs/impl_1/marble_top_*.rpt
 
-.marble_fiber_synth:
-  extends:
-    - .build-matrix
-    - .bitgen
-  image: $IMAGE
-  script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make CONFIG=marble_fiber bit
-  artifacts:
-    paths:
-      - projects/test_marble_family/marble*.bit
-      - projects/test_marble_family/vivado.log
-      - projects/test_marble_family/_xilinx/marble_fiber.runs/*.rpt
-      - projects/test_marble_family/_xilinx/marble_fiber.runs/synth_1/marble_top_*.rpt
-      - projects/test_marble_family/_xilinx/marble_fiber.runs/impl_1/marble_top_*.rpt
-
 marble_mini_run:
   extends: .build-matrix
   image: $IMAGE

@@ -214,12 +214,6 @@ localparam C_GPS_CTRACE = 1;
 localparam C_GPS_CTRACE = 0;
 `endif
 
-`ifdef USE_FIBER
-localparam C_USER_FIBER = 1;
-`else
-localparam C_USER_FIBER = 0;
-`endif
-
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
 marble_base #(

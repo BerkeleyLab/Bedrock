@@ -31,7 +31,6 @@ puts "Base application name: $app_name"
 if { $build_id == "marblemini" } {
    set part "xc7a100t-fgg484-2"
 } else {
-   # This naturally handles both "marble" and "marble_fiber"
    set part "xc7k160t-ffg676-2"
 }
 puts "Synthesizing for part $part"

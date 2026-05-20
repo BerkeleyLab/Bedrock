@@ -41,16 +41,6 @@ marble:
     defs:
         <<: *base_defs
         <<: *marble_defs
-        USE_FIBER: 0
-    params:
-        <<: *base_params
-        <<: *marble_params
-
-marble_fiber:
-    defs:
-        <<: *base_defs
-        <<: *marble_defs
-        USE_FIBER: 1
     params:
         <<: *base_params
         <<: *marble_params
