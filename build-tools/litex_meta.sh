@@ -22,15 +22,10 @@ EOT
 
 # Now that we're quite sure we have the litex_setup we want,
 # go ahead and run it.
-pwd
-git clone https://github.com/litex-hub/pythondata-cpu-picorv32.git
-cd pythondata-cpu-picorv32
-pip3 install --break-system-packages setuptools wheel
-PYTHONPATH=. pip3 install --no-build-isolation --break-system-packages -e .
-cd ..
-
 python3 litex_setup.py --init --update --tag 2025.08 --config standard
 cd pythondata-software-picolibc && git checkout 2025.08 && git submodule update --init --recursive && cd ..
 python3 litex_setup.py install --break-system-packages
+git clone https://github.com/litex-hub/pythondata-cpu-picorv32.git
+cd pythondata-cpu-picorv32 && PYTHONPATH=. pip3 install --no-build-isolation --break-system-packages -e . && cd ..
 
 echo "DONE"
