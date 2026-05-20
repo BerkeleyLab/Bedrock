@@ -25,8 +25,8 @@ EOT
 pwd
 git clone https://github.com/litex-hub/pythondata-cpu-picorv32.git
 cd pythondata-cpu-picorv32
-pip3 install setuptools wheel
-pip3 install --no-build-isolation -e .
+pip3 install --break-system-packages setuptools wheel
+PYTHONPATH=. pip3 install --no-build-isolation --break-system-packages -e .
 cd ..
 
 python3 litex_setup.py --init --update --tag 2025.08 --config standard
