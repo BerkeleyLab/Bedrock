@@ -8,11 +8,10 @@
 set -e
 
 rm -f litex_setup.py
-# Commit 05ddccb206 is tag: 2025.08, dated 2025-10-03
 # See https://github.com/enjoy-digital/litex
 wget https://raw.githubusercontent.com/enjoy-digital/litex/4b67db328dba1076751e7bf3250f9c2fdca0093e/litex_setup.py
 echo "396fd82e6fc584eadf2e4bb6005e361b62225583bac903aff0026fedf03e33ee litex_setup.py" | sha256sum -c
-# patch two lines, to keep picorv32 in "standard" config, and disable auto-update
+# patch one line to disable auto-update
 patch litex_setup.py << EOT
 526c526
 <     if not args.dev:
