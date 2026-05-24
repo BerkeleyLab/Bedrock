@@ -30,22 +30,25 @@ SECTIONS {
         *(.sbss);
         . = ALIGN(4);
         *(.bss);
+        . = ALIGN(4);
         _bss_end = .;
     }
 
-    /*
-    get rid of some unneeded sections to save space
-    */
-    ./DISCARD/ : {
-        *(.riscv.attributes);
-        *(.comment);
+    .rodata : {
+        . = ALIGN(4);
+        *(.rodata .rodata.*)
+        *(.srodata .srodata.*)
     }
 
+    .data : {
+        . = ALIGN(4);
+        *(.data .data.*)
+        *(.sdata .sdata.*)
+    }
+
+    /* catch anything else left over here */
     .theRest : {
         . = ALIGN(4);
-        /*
-        See comments in 0x000.lds
-        */
         __tls_base = .;
         *(*);
         . = ALIGN(4);
