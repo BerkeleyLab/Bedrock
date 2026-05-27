@@ -1,5 +1,8 @@
 include ../../../dir_list.mk
 
+DOUBLEBIT ?= 0
+export DOUBLEBIT
+
 HARDWARE = ac701
 COMMUNICATION = gtp
 
@@ -13,7 +16,8 @@ BITFILE = $(APP_NAME).bit
 # Set auto-generated dependencies before including top_rules.mk
 VERILOG_AUTOGEN +=
 
-VERILOG_DEFINE_FLAGS =
+VERILOG_DEFINE_FLAGS = -DDOUBLEBIT=$(DOUBLEBIT)
+
 include $(COMMS_TOP_DIR)/rules.mk
 include $(BUILD_DIR)/top_rules.mk
 

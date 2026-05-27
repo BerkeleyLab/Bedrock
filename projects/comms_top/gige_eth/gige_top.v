@@ -24,12 +24,16 @@ module gige_top (
    output [3:0] LED
 );
 
+`ifndef DOUBLEBIT
+   `define DOUBLEBIT 0
+`endif
+
 `include "comms_features.vh"
 `include "comms_pack.vh"
 
    localparam IPADDR   = {8'd192, 8'd168, 8'd1, 8'd179};
    localparam MACADDR  = 48'h00105ad155b5;
-   localparam DOUBLEBIT = 0;  // XXX DOUBLEBIT = 1 fails hardware test
+   localparam DOUBLEBIT = `DOUBLEBIT;
 
 `define AC701
 `ifdef AC701
