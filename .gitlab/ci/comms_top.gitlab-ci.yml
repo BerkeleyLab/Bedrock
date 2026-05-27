@@ -27,13 +27,25 @@ comms_top_run:
   environment: hw_qf2_pre
   resource_group: hw_qf2_pre
 
-gige_sfp_ac701:
-  extends: .build-matrix
-  image: $IMAGE
-  stage: synthesis
+.doublebit-targets:
+  parallel:
+    DOUBLEBIT: ["0", "1"]
+
+.gige-top-matrix:
+  extends:
+    - .build-images
+    - .doublebit-targets
+
+.gige-top-build-matrix:
+  variables: !reference [.build-matrix, variables]
   parallel:
     matrix:
-      - DOUBLEBIT: ["0", "1"]
+      - !reference [.gige-top-matrix, parallel]
+
+gige_sfp_ac701:
+  extends: .gige-top-build-matrix
+  image: $IMAGE
+  stage: synthesis
   before_script:
     - cd projects/comms_top/gige_eth && ls /non-free
   script:
@@ -45,14 +57,11 @@ gige_sfp_ac701:
       - projects/comms_top/gige_eth/gige_top.bit
 
 gige_sfp_ac701_run:
-  extends: .build-matrix
+  extends: .gige-top-build-matrix
   image: $IMAGE
   stage: program
   tags:
     - deploy
-  parallel:
-    matrix:
-      - DOUBLEBIT: ["0", "1"]
   needs:
     - job: gige_sfp_ac701
   script:
