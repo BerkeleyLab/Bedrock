@@ -115,6 +115,11 @@ uint8_t i2c_rx(int ack)
 //-------------------------------------------------
 int i2c_write_regs(uint8_t i2cAddr, uint8_t regAddr, uint8_t *buffer, uint16_t len)
 {
+    // confirm the bus is not floating/stuck low
+    SDA1();
+    SCL1();
+    if (SDAR() == 0) return 0;
+
     int ret=1;
     i2c_start();
     ret &= i2c_tx((i2cAddr << 1) | I2C_W);
