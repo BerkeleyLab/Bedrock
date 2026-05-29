@@ -14,6 +14,7 @@ SECTIONS {
     }
 
     .text : {
+        . = ALIGN(4);
         _startup_adr = .;
         KEEP(*startup.o(.text));
         KEEP(*startup_irq.o(.text));
@@ -27,7 +28,20 @@ SECTIONS {
         *(.sbss);
         . = ALIGN(4);
         *(.bss);
+        . = ALIGN(4);
         _bss_end = .;
+    }
+
+    .rodata : {
+        . = ALIGN(4);
+        *(.rodata .rodata.*)
+        *(.srodata .srodata.*)
+    }
+
+    .data : {
+        . = ALIGN(4);
+        *(.data .data.*)
+        *(.sdata .sdata.*)
     }
 
     /*
