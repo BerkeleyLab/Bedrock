@@ -32,6 +32,18 @@ SECTIONS {
         _bss_end = .;
     }
 
+    .rodata : {
+        . = ALIGN(4);
+        *(.rodata .rodata.*)
+        *(.srodata .srodata.*)
+    }
+
+    .data : {
+        . = ALIGN(4);
+        *(.data .data.*)
+        *(.sdata .sdata.*)
+    }
+
     /*
     get rid of some unneeded sections to save space
     */

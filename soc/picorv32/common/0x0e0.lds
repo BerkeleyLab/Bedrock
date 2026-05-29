@@ -46,9 +46,19 @@ SECTIONS {
         *(.sdata .sdata.*)
     }
 
-    /* catch anything else left over here */
+    /*
+    get rid of some unneeded sections to save space
+    */
+    ./DISCARD/ : {
+        *(.riscv.attributes);
+        *(.comment);
+    }
+
     .theRest : {
         . = ALIGN(4);
+        /*
+        See comments in 0x000.lds
+        */
         __tls_base = .;
         *(*);
         . = ALIGN(4);
