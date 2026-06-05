@@ -5,8 +5,6 @@ include $(I2CBRIDGE_DIR)/i2cbridge_rules.mk
 UNISIMS_DIR = broken
 
 APP_NAME = marble
-GT_SOURCE :=
-GTX_TCL   := gtx_marble_top.tcl
 # Select between marblemini, marble, and fiber_marble
 CONFIG ?= marblemini
 ifeq ($(CONFIG),marblemini)
@@ -19,6 +17,7 @@ else ifneq (,$(filter marble fiber_marble,$(CONFIG)))
   SERIAL        ?= ""
   IP_ADDR       := 192.168.19.$(SERIAL)
   ZEST_SN       ?= "LBNL DIGITIZER V1.0 SN  024"
+  GTX_TCL       := gtx_marble_top.tcl
 else
   $(error Unknown CONFIG '$(CONFIG)'. Please choose 'marblemini', 'marble', or 'fiber_marble')
 endif

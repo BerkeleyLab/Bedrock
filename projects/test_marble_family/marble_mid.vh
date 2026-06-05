@@ -323,8 +323,10 @@ i_qsfp1_gt_wrap (
 );
 
 `ifdef SIMULATE
+`ifdef USE_FIBER
 assign QSFP1_TX_3_N = 0;
 assign QSFP1_TX_3_P = 0;
+`endif
 `endif
 
 // -----------------------------------
@@ -389,8 +391,8 @@ generate if (C_USE_FIBER == 1) begin : mgt_is_gt
         assign vgmii_txd      = mgt_mac_txd;
         assign vgmii_tx_en    = mgt_mac_tx_en;
         assign vgmii_tx_er    = mgt_mac_tx_er;
-        assign gmii_txd_mgt   = 8'b0;
-        assign gmii_tx_en_mgt = 1'b0;
+        assign gmii_txd       = 8'b0;
+        assign gmii_tx_en     = 1'b0;
     end
 endgenerate
 `endif
