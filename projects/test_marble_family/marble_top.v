@@ -18,11 +18,15 @@ module marble_top(
 	input SIREFCLK_N,
 	`endif
 
-	// only for Marble
+	// only for Marble, QSFP1 lane 3
+	// maybe there should be an option to select
+	// lane at synthesis time?
 `ifdef MARBLE_V2
 	`ifdef USE_FIBER
-	 input [15:0] QSFP1,
-         input [15:0] QSFP2,
+	 input QSFP1_TX_3_N,
+	 input QSFP1_TX_3_P,
+	 input QSFP1_RX_3_N,
+	 input QSFP1_RX_3_P,
 	`endif
 `endif
 

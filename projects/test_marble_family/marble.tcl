@@ -2,7 +2,9 @@ set outputDir ./_xilinx
 file mkdir $outputDir
 
 # Provision to source additional TCL scripts
-foreach aux_tcl [lrange $argv 3 end] {
+# source swap_gitid.tcl only
+if {[llength $argv] >= 4} {
+    set aux_tcl [lindex $argv 3]
     puts "Sourcing $aux_tcl"
     source $aux_tcl
 }
@@ -37,6 +39,13 @@ if { $build_id == "marblemini" } {
 puts "Synthesizing for part $part"
 
 create_project $build_id $outputDir -part $part -force
+
+# source gtx_marble_top.tcl only
+if {[llength $argv] >= 4} {
+    set aux_tcl [lindex $argv 4]
+    puts "Sourcing $aux_tcl"
+    source $aux_tcl
+}
 
 set fp [open $flist r]
 set file_data [read $fp]

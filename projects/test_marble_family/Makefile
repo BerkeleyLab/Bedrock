@@ -7,7 +7,6 @@ UNISIMS_DIR = broken
 APP_NAME = marble
 GTX_TCL :=
 # Select between marblemini, marble, and marble_fiber
-# XXX needs support for marble_fiber
 CONFIG ?= marblemini
 ifeq ($(CONFIG),marblemini)
   BOARD_DIR     := marblemini
@@ -20,8 +19,7 @@ else ifneq (,$(filter marble marble_fiber,$(CONFIG)))
   IP_ADDR       := 192.168.19.$(SERIAL)
   ZEST_SN       ?= "LBNL DIGITIZER V1.0 SN  024"
   ifeq ($(CONFIG),marble_fiber)
-    # XXX missing QSFP tcl
-    GTX_TCL     :=
+    GTX_TCL     := gtx_marble_top.tcl
   endif
 else
   $(error Unknown CONFIG '$(CONFIG)'. Please choose 'marblemini', 'marble', or 'marble_fiber')
@@ -219,7 +217,7 @@ dna_tb: dna_tb.v dna.v
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
-	rm -f pin_map_fmc.csv $(APP_NAME)_*.xdc $(APP_NAME).bit marble_features*.vh marble*.json vivado*
+	rm -f pin_map_fmc.csv $(APP_NAME)*.xdc $(APP_NAME).bit marble_features*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
 	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx marble_base_cdc.txt
 	rm -rf _xilinx .Xil obj_dir __pycache__

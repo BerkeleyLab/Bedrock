@@ -61,6 +61,10 @@ LTM_CLKIN12  LTM_CLKIN[1]
 LTM_CLKIN3   LTM_CLKIN[2]
 
 # Literal output follows
+set_property PACKAGE_PIN B5 [get_ports {QSFP1_RX_3_N}]
+set_property PACKAGE_PIN B6 [get_ports {QSFP1_RX_3_P}]
+set_property PACKAGE_PIN A3 [get_ports {QSFP1_TX_3_N}]
+set_property PACKAGE_PIN A4 [get_ports {QSFP1_TX_3_P}]
 
 set_clock_groups -name async_clks -asynchronous \
   -group [get_clocks -include_generated_clocks sys_clk] \
