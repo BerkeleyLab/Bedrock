@@ -23,10 +23,10 @@ module marble_top(
 	// lane at synthesis time?
 `ifdef MARBLE_V2
 	`ifdef USE_FIBER
-	 input QSFP1_TX_3_N,
-	 input QSFP1_TX_3_P,
 	 input QSFP1_RX_3_N,
 	 input QSFP1_RX_3_P,
+	 output QSFP1_TX_3_N,
+	 output QSFP1_TX_3_P,
 	`endif
 `endif
 

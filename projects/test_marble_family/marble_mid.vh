@@ -35,11 +35,10 @@ assign si570 = 0;
 
 parameter in_phase_tx_clk = 1;
 // Standardized interface, hardware-dependent implementation
-wire tx_clk, tx_clk90, clk62;
+wire tx_clk, tx_clk90, clk62_5;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
 wire test_clk;
-wire clk_out1;
 wire clk200;  // clk200 should be 200MHz +/- 10MHz or 300MHz +/- 10MHz,
 // used for calibrating IODELAY cells
 
@@ -94,6 +93,8 @@ else if (C_SYSCLK_SRC == "ddr_ref_clk") begin
 assign clk125 = ddrrefclk;
 end
 
+`ifdef MARBLE_MINI
+wire clk_out1;
 xilinx7_clocks #(
 	.DIFF_CLKIN("BYPASS"),
 	.CLKIN_PERIOD(8),  // REFCLK = 125 MHz
@@ -114,18 +115,38 @@ xilinx7_clocks #(
 	.clk_out3f(test_clk),  // not buffered, straight from MMCM
 	.locked   (clk_locked)
 );
-end
-endgenerate
 
 `ifdef USE_IDELAYCTRL
 assign clk200 = clk_out1;
 reg bad_slow_clock=0;
 always @(posedge tx_clk) bad_slow_clock <= ~bad_slow_clock;
-assign clk62 = bad_slow_clock;  // sample-size of two says readout of dna still works
+assign clk62_5 = bad_slow_clock;  // sample-size of two says readout of dna still works
 `else
 assign clk200 = 0;
-assign clk62 = clk_out1;  // better tested way to give dna primitive the clock it wants
+assign clk62_5 = clk_out1;  // better tested way to give dna primitive the clock it wants
 `endif
+`endif
+
+`ifdef MARBLE_V2
+xilinx7_clocks #(
+    .DIFF_CLKIN("BYPASS"),
+    .CLKIN_PERIOD(8),  // REFCLK = 125 MHz
+    .MULT     (8),     // 125 MHz X 8 = 1 GHz on-chip VCO
+    .DIV0     (16),    // 1 GHz / 16 = 62.5 MHz
+    .DIV1     (5)      // 1 GHz / 5 = 200 MHz
+) clocks_i(
+    .sysclk_p (clk125),
+    .sysclk_n (1'b0),
+    .reset    (pll_reset),
+    .clk_out0 (clk62_5),
+    .clk_out1 (clk200),
+    .clk_out2 (),
+    .clk_out3f(test_clk),  // not buffered, straight from MMCM
+    .locked   ()
+);
+`endif
+end
+endgenerate
 
 // Double-data-rate conversion
 wire vgmii_tx_clk, vgmii_tx_clk90, vgmii_rx_clk;
@@ -215,9 +236,163 @@ localparam C_GPS_CTRACE = 0;
 `endif
 
 `ifdef USE_FIBER
-localparam C_USER_FIBER = 1;
+localparam C_USE_FIBER = 1;
 `else
-localparam C_USER_FIBER = 0;
+localparam C_USE_FIBER = 0;
+`endif
+
+`ifdef MARBLE_V2
+// MGT Fiber Ethernet related (Marble only)
+localparam GTX_ETHERNET_WI = 20;
+wire qsfp1_gt_tx_pll_lock, qsfp1_gt_rx_pll_lock;
+wire qsfp1_gt_tx_usr_clk, qsfp1_gt_rx_usr_clk;
+(* DONT_TOUCH *) wire qsfp1_gt_rx_out_clk, qsfp1_gt_tx_out_clk;
+(* DONT_TOUCH *) wire gmii_tx_clk, gmii_tx_clk90, gmii_rx_clk;
+wire [GTX_ETHERNET_WI-1:0]  qsfp1_gt_rxd, qsfp1_gt_txd;
+`ifndef BYPASS_REAL_WORK
+mgt_eth_clks i_mgt_eth_clks_tx (
+   .reset       (~qsfp1_cpll_locked[3]),
+   .mgt_out_clk (qsfp1_gt_tx_out_clk),  // From transceiver (125 MHz)
+   .gmii_clk    (gmii_tx_clk),         // Buffered 125 MHz
+   .gmii_clk90  (gmii_tx_clk90),       // Buffered 125 MHz, 90 deg
+   .pll_lock    (qsfp1_gt_tx_pll_lock)
+);
+
+mgt_eth_clks i_mgt_eth_clks_rx (
+   .reset       (~qsfp1_cpll_locked[3]),
+   .mgt_out_clk (qsfp1_gt_rx_out_clk),
+   .gmii_clk    (gmii_rx_clk),
+   .pll_lock    (qsfp1_gt_rx_pll_lock)
+);
+assign qsfp1_gt_tx_usr_clk = gmii_tx_clk;
+assign qsfp1_gt_rx_usr_clk = gmii_rx_clk;
+`endif
+
+wire [27:0] frequency_gt_rx_out, frequency_gt_tx_out;
+freq_count rxqsfp1_freq_count(.f_in(qsfp1_gt_rx_usr_clk), .sysclk(lb_clk), .frequency(frequency_gt_rx_out));
+freq_count txqsfp1_freq_count(.f_in(qsfp1_gt_tx_usr_clk), .sysclk(lb_clk), .frequency(frequency_gt_tx_out));
+
+// Define Marble clocks using that same i_mgt_eth_clks_tx MMCM,
+// so it gets used for both the copper and fiber Ethernet interface.
+assign vgmii_tx_clk = gmii_tx_clk;
+assign vgmii_tx_clk90 = gmii_tx_clk90;
+assign tx_clk = gmii_tx_clk;
+assign tx_clk90 = gmii_tx_clk90;
+
+wire [3:0] qsfp1_cpll_locked;
+wire [3:0] qsfp1_txrx_resetdone;
+wire qsfp1_soft_reset_i;
+wire qsfp1_sysclk = clk62_5;  // not lb_clk, since that's circular on Marble
+assign clk_locked = qsfp1_gt_tx_pll_lock;  // reset Ethernet PHY when FPGA clock glitches
+
+`ifndef SIMULATE
+q1_gt_wrap #(
+`else
+qgt_wrap #(
+`endif
+   .GT3_WI (GTX_ETHERNET_WI)
+)
+i_qsfp1_gt_wrap (
+   // Common Pins
+   .drpclk_in               (qsfp1_sysclk),
+   .soft_reset              (qsfp1_soft_reset_i),
+   .gtrefclk0               (gtclk0),
+   .gtrefclk1               (1'b0),
+   `ifndef SIMULATE
+   .gt3_refclk0             (gtclk0),
+   .gt3_refclk1             (1'b0),
+   .gt3_rxoutclk_out        (qsfp1_gt_rx_out_clk),
+   .gt3_rxusrclk_in         (qsfp1_gt_rx_usr_clk),
+   .gt3_txoutclk_out        (qsfp1_gt_tx_out_clk),
+   .gt3_txusrclk_in         (qsfp1_gt_tx_usr_clk),
+   .gt3_rxusrrdy_in         (qsfp1_gt_rx_pll_lock),
+   .gt3_rxdata_out          (qsfp1_gt_rxd),
+   .gt3_txusrrdy_in         (qsfp1_gt_tx_pll_lock),
+   .gt3_txdata_in           (qsfp1_gt_txd),
+   .gt3_rxn_in              (QSFP1_RX_3_N),
+   .gt3_rxp_in              (QSFP1_RX_3_P),
+   .gt3_txn_out             (QSFP1_TX_3_N),
+   .gt3_txp_out             (QSFP1_TX_3_P),
+   .gt3_rxfsm_resetdone_out (),
+   .gt3_txfsm_resetdone_out (),
+   .gt3_rxbufstatus         (),
+   .gt3_txbufstatus         (),
+   `endif
+   .gt_txrx_resetdone       (qsfp1_txrx_resetdone),
+   .gt_cpll_locked          (qsfp1_cpll_locked)
+);
+
+`ifdef SIMULATE
+assign QSFP1_TX_3_N = 0;
+assign QSFP1_TX_3_P = 0;
+`endif
+
+// -----------------------------------
+// Instantiate eth_gtx_hook here
+// -----------------------------------
+reg  [8:0] an_status_lb_clk;
+wire [8:0] an_status_l;
+wire [8:0] eth_an_status;
+wire [7:0] gmii_rxd, gmii_txd;
+wire [15:0] lacr_rx;
+wire gmii_tx_en, gmii_rx_dv;
+
+`ifndef BYPASS_REAL_WORK
+eth_gtx_hook #(.JUMBO_DW(14), .GTX_DW(20), .DOUBLEBIT(1)) hook(
+    .gtx_tx_clk   (qsfp1_gt_tx_usr_clk),
+    .gtx_rxd      (qsfp1_gt_rxd),
+    .gtx_txd      (qsfp1_gt_txd),
+
+    .gmii_tx_clk  (gmii_tx_clk),
+    .gmii_rx_clk  (gmii_rx_clk),
+
+    .an_disable   (1'b0),
+    .rx_err_los   (1'b0),
+    .an_status_l  (an_status_l),
+    .lacr_rx      (lacr_rx),
+
+    .gmii_rxd     (gmii_rxd),
+    .gmii_rx_dv   (gmii_rx_dv),
+    .gmii_txd     (gmii_txd),
+    .gmii_tx_en   (gmii_tx_en)
+);
+`else
+assign an_status_l = 0;
+`endif
+
+// Cross quasi-static an_status to lb_clk so it can be read out by Host
+always @(posedge lb_clk) an_status_lb_clk <= an_status_l;
+assign eth_an_status = an_status_lb_clk;
+
+// Management GMII Switch
+wire       mgt_mac_rx_clk, mgt_mac_tx_clk;
+wire [7:0] mgt_mac_rxd,    mgt_mac_txd;
+wire       mgt_mac_rx_dv,  mgt_mac_tx_en;
+wire       mgt_mac_rx_er,  mgt_mac_tx_er;
+generate if (C_USE_FIBER == 1) begin : mgt_is_gt
+        assign mgt_mac_rx_clk = gmii_rx_clk;
+        assign mgt_mac_rxd    = gmii_rxd;
+        assign mgt_mac_rx_dv  = gmii_rx_dv;
+        assign mgt_mac_rx_er  = 1'b0;  // GT hook doesn't provide rx_er
+        assign mgt_mac_tx_clk = gmii_tx_clk;
+        assign gmii_txd       = mgt_mac_txd;
+        assign gmii_tx_en     = mgt_mac_tx_en;
+        assign vgmii_txd      = 8'b0;
+        assign vgmii_tx_en    = 1'b0;
+        assign vgmii_tx_er    = 1'b0;
+    end else begin : mgt_is_copper
+        assign mgt_mac_rx_clk = vgmii_rx_clk;
+        assign mgt_mac_rxd    = vgmii_rxd;
+        assign mgt_mac_rx_dv  = vgmii_rx_dv;
+        assign mgt_mac_rx_er  = vgmii_rx_er;
+        assign mgt_mac_tx_clk = tx_clk;
+        assign vgmii_txd      = mgt_mac_txd;
+        assign vgmii_tx_en    = mgt_mac_tx_en;
+        assign vgmii_tx_er    = mgt_mac_tx_er;
+        assign gmii_txd_mgt   = 8'b0;
+        assign gmii_tx_en_mgt = 1'b0;
+    end
+endgenerate
 `endif
 
 // Real, portable implementation
@@ -230,15 +405,15 @@ marble_base #(
 	.use_ddr_pps(1),
 	.misc_config_default(C_MISC_CONFIG_DEFAULT)
 ) base(
-	.vgmii_tx_clk(tx_clk), .vgmii_txd(vgmii_txd),
-	.vgmii_tx_en(vgmii_tx_en), .vgmii_tx_er(vgmii_tx_er),
-	.vgmii_rx_clk(vgmii_rx_clk), .vgmii_rxd(vgmii_rxd),
-	.vgmii_rx_dv(vgmii_rx_dv), .vgmii_rx_er(vgmii_rx_er),
+	.vgmii_tx_clk(mgt_mac_tx_clk), .vgmii_txd(mgt_mac_txd),
+	.vgmii_tx_en(mgt_mac_tx_en), .vgmii_tx_er(mgt_mac_tx_er),
+	.vgmii_rx_clk(mgt_mac_rx_clk), .vgmii_rxd(mgt_mac_rxd),
+	.vgmii_rx_dv(mgt_mac_rx_dv), .vgmii_rx_er(mgt_mac_rx_er),
 	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked), .si570(si570),
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),
 	.cfg_d02(CFG_D02), .mmc_int(MMC_INT), .ZEST_PWR_EN(ZEST_PWR_EN),
-	.aux_clk(SYSCLK_P), .clk62(clk62), .cfg_clk(cfg_clk),
+	.aux_clk(SYSCLK_P), .clk62(clk62_5), .cfg_clk(cfg_clk),
 	.SCLK(SCLK), .CSB(CSB), .MOSI(MOSI), .MISO(MISO),
 	.FPGA_RxD(FPGA_RxD), .FPGA_TxD(FPGA_TxD),
 	.twi_scl({dum_scl, old_scl1, old_scl2, TWI_SCL}),

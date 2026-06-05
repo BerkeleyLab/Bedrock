@@ -46,7 +46,7 @@ marble:
         <<: *base_params
         <<: *marble_params
 
-marble_fiber:
+fiber_marble:
     defs:
         <<: *base_defs
         <<: *marble_defs

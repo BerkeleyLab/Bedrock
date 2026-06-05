@@ -41,7 +41,7 @@ puts "Synthesizing for part $part"
 create_project $build_id $outputDir -part $part -force
 
 # source gtx_marble_top.tcl only
-if {[llength $argv] >= 4} {
+if {[llength $argv] >= 5} {
     set aux_tcl [lindex $argv 4]
     puts "Sourcing $aux_tcl"
     source $aux_tcl
@@ -60,7 +60,8 @@ set gitid_for_filename $git_status(short_id)$git_status(suffix)
 set gitid_for_verilog 32'h$git_status(short_id)
 
 set new_defs [list "CHIP_FAMILY_7SERIES" "GIT_32BIT_ID=$gitid_for_verilog" "REVC_1W"]
-set_property verilog_define $new_defs [current_fileset]
+set cur_defs [get_property verilog_define [current_fileset]]
+set_property verilog_define [list {*}$new_defs {*}$cur_defs] [current_fileset]
 
 launch_runs synth_1
 wait_on_run synth_1

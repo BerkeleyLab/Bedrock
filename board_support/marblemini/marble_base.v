@@ -87,6 +87,7 @@ module marble_base (
 );
 
 parameter USE_I2CBRIDGE = 1;
+parameter USE_FIBER = 0;
 parameter MMC_CTRACE = 1;
 parameter GPS_CTRACE = 0;
 parameter use_ddr_pps = 0;

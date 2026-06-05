@@ -51,20 +51,20 @@ marble_v2_synth:
       - projects/test_marble_family/_xilinx/marble.runs/synth_1/marble_top_*.rpt
       - projects/test_marble_family/_xilinx/marble.runs/impl_1/marble_top_*.rpt
 
-.marble_fiber_synth:
+fiber_marble_synth:
   extends:
     - .build-matrix
     - .bitgen
   image: $IMAGE
   script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make CONFIG=marble_fiber bit
+    - PATH=$XILINX_VIVADO/bin:$PATH make CONFIG=fiber_marble bit
   artifacts:
     paths:
       - projects/test_marble_family/marble*.bit
       - projects/test_marble_family/vivado.log
-      - projects/test_marble_family/_xilinx/marble_fiber.runs/*.rpt
-      - projects/test_marble_family/_xilinx/marble_fiber.runs/synth_1/marble_top_*.rpt
-      - projects/test_marble_family/_xilinx/marble_fiber.runs/impl_1/marble_top_*.rpt
+      - projects/test_marble_family/_xilinx/fiber_marble.runs/*.rpt
+      - projects/test_marble_family/_xilinx/fiber_marble.runs/synth_1/marble_top_*.rpt
+      - projects/test_marble_family/_xilinx/fiber_marble.runs/impl_1/marble_top_*.rpt
 
 marble_mini_run:
   extends: .build-matrix
@@ -93,6 +93,22 @@ marble_run:
     - cd projects/test_marble_family && ln -s marble.*.bit marble.bit
   script:
     - make CONFIG=marble hwload SERIAL=39 && sleep 8 && make CONFIG=marble hwtest SERIAL=39
+    - make -C i2c live_oneshot SERIAL=39
+  environment: hw_marble
+  resource_group: hw_marble
+
+fiber_marble_run:
+  extends: .build-matrix
+  image: $IMAGE
+  stage: program
+  tags:
+    - deploy
+  dependencies:
+    - fiber_marble_synth
+  before_script:
+    - cd projects/test_marble_family && ln -s fiber_marble.*.bit fiber_marble.bit
+  script:
+    - make CONFIG=fiber_marble hwload SERIAL=39 && sleep 8 && make CONFIG=fiber_marble hwtest SERIAL=39
     - make -C i2c live_oneshot SERIAL=39
   environment: hw_marble
   resource_group: hw_marble
