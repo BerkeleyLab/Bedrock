@@ -251,6 +251,8 @@ wire qsfp1_gt_tx_pll_lock, qsfp1_gt_rx_pll_lock;
 wire qsfp1_gt_tx_usr_clk, qsfp1_gt_rx_usr_clk;
 (* DONT_TOUCH *) wire qsfp1_gt_rx_out_clk, qsfp1_gt_tx_out_clk;
 wire [GTX_ETHERNET_WI-1:0]  qsfp1_gt_rxd, qsfp1_gt_txd;
+// No one (in Makefile) cares about extensive simulations yet
+// so this can be safely ignored atleast for now
 `ifndef BYPASS_REAL_WORK
 mgt_eth_clks i_mgt_eth_clks_tx (
    .reset       (~qsfp1_cpll_locked[3]),
@@ -270,10 +272,6 @@ assign qsfp1_gt_tx_usr_clk = gmii_tx_clk;
 assign qsfp1_gt_rx_usr_clk = gmii_rx_clk;
 `endif
 
-wire [27:0] frequency_gt_rx_out, frequency_gt_tx_out;
-freq_count rxqsfp1_freq_count(.f_in(qsfp1_gt_rx_usr_clk), .sysclk(lb_clk), .frequency(frequency_gt_rx_out));
-freq_count txqsfp1_freq_count(.f_in(qsfp1_gt_tx_usr_clk), .sysclk(lb_clk), .frequency(frequency_gt_tx_out));
-
 // Define Marble clocks using that same i_mgt_eth_clks_tx MMCM,
 // so it gets used for both the copper and fiber Ethernet interface.
 assign vgmii_tx_clk = gmii_tx_clk;
@@ -283,6 +281,8 @@ assign tx_clk90 = gmii_tx_clk90;
 
 wire [3:0] qsfp1_cpll_locked;
 wire [3:0] qsfp1_txrx_resetdone;
+// XXX Should this be exposed to the user?
+// Maybe not, otherwise one would loose ability to communicate to the board
 wire qsfp1_soft_reset_i;
 wire qsfp1_sysclk = clk62_5;  // not lb_clk, since that's circular on Marble
 assign clk_locked = qsfp1_gt_tx_pll_lock;  // reset Ethernet PHY when FPGA clock glitches
@@ -363,37 +363,38 @@ assign an_status_l = 0;
 `endif
 
 // Cross quasi-static an_status to lb_clk so it can be read out by Host
+// XXX again, not exposed to the user
 always @(posedge lb_clk) an_status_lb_clk <= an_status_l;
 assign eth_an_status = an_status_lb_clk;
 `endif
 
 // Management GMII Switch
-wire       mgt_mac_rx_clk, mgt_mac_tx_clk;
-wire [7:0] mgt_mac_rxd,    mgt_mac_txd;
-wire       mgt_mac_rx_dv,  mgt_mac_tx_en;
-wire       mgt_mac_rx_er,  mgt_mac_tx_er;
-generate if (C_USE_FIBER == 1) begin : mgt_is_gt
-        assign mgt_mac_rx_clk = gmii_rx_clk;
-        assign mgt_mac_rxd    = gmii_rxd;
-        assign mgt_mac_rx_dv  = gmii_rx_dv;
-        assign mgt_mac_rx_er  = 1'b0;  // GT hook doesn't provide rx_er
-        assign mgt_mac_tx_clk = gmii_tx_clk;
-        assign gmii_txd       = mgt_mac_txd;
-        assign gmii_tx_en     = mgt_mac_tx_en;
-        assign vgmii_txd      = 8'b0;
-        assign vgmii_tx_en    = 1'b0;
-        assign vgmii_tx_er    = 1'b0;
+wire       mgt_rx_clk, mgt_tx_clk;
+wire [7:0] mgt_rxd,    mgt_txd;
+wire       mgt_rx_dv,  mgt_tx_en;
+wire       mgt_rx_er,  mgt_tx_er;
+generate if (C_USE_FIBER == 1) begin : mgt_is_fiber
+        assign mgt_rx_clk  = gmii_rx_clk;
+        assign mgt_rxd     = gmii_rxd;
+        assign mgt_rx_dv   = gmii_rx_dv;
+        assign mgt_rx_er   = 1'b0;
+        assign mgt_tx_clk  = gmii_tx_clk;
+        assign gmii_txd    = mgt_txd;
+        assign gmii_tx_en  = mgt_tx_en;
+        assign vgmii_txd   = 8'b0;
+        assign vgmii_tx_en = 1'b0;
+        assign vgmii_tx_er = 1'b0;
     end else begin : mgt_is_copper
-        assign mgt_mac_rx_clk = vgmii_rx_clk;
-        assign mgt_mac_rxd    = vgmii_rxd;
-        assign mgt_mac_rx_dv  = vgmii_rx_dv;
-        assign mgt_mac_rx_er  = vgmii_rx_er;
-        assign mgt_mac_tx_clk = tx_clk;
-        assign vgmii_txd      = mgt_mac_txd;
-        assign vgmii_tx_en    = mgt_mac_tx_en;
-        assign vgmii_tx_er    = mgt_mac_tx_er;
-        assign gmii_txd       = 8'b0;
-        assign gmii_tx_en     = 1'b0;
+        assign mgt_rx_clk  = vgmii_rx_clk;
+        assign mgt_rxd     = vgmii_rxd;
+        assign mgt_rx_dv   = vgmii_rx_dv;
+        assign mgt_rx_er   = vgmii_rx_er;
+        assign mgt_tx_clk  = tx_clk;
+        assign vgmii_txd   = mgt_txd;
+        assign vgmii_tx_en = mgt_tx_en;
+        assign vgmii_tx_er = mgt_tx_er;
+        assign gmii_txd    = 8'b0;
+        assign gmii_tx_en  = 1'b0;
     end
 endgenerate
 
@@ -407,10 +408,10 @@ marble_base #(
 	.use_ddr_pps(1),
 	.misc_config_default(C_MISC_CONFIG_DEFAULT)
 ) base(
-	.vgmii_tx_clk(mgt_mac_tx_clk), .vgmii_txd(mgt_mac_txd),
-	.vgmii_tx_en(mgt_mac_tx_en), .vgmii_tx_er(mgt_mac_tx_er),
-	.vgmii_rx_clk(mgt_mac_rx_clk), .vgmii_rxd(mgt_mac_rxd),
-	.vgmii_rx_dv(mgt_mac_rx_dv), .vgmii_rx_er(mgt_mac_rx_er),
+	.vgmii_tx_clk(mgt_tx_clk), .vgmii_txd(mgt_txd),
+	.vgmii_tx_en(mgt_tx_en), .vgmii_tx_er(mgt_tx_er),
+	.vgmii_rx_clk(mgt_rx_clk), .vgmii_rxd(mgt_rxd),
+	.vgmii_rx_dv(mgt_rx_dv), .vgmii_rx_er(mgt_rx_er),
 	.phy_rstn(PHY_RSTN), .clk_locked(clk_locked), .si570(si570),
 	.boot_clk(BOOT_CCLK), .boot_cs(BOOT_CS_B),
 	.boot_mosi(BOOT_MOSI), .boot_miso(BOOT_MISO),

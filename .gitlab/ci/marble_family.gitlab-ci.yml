@@ -60,7 +60,7 @@ marble_fiber_synth:
   before_script:
     - cd projects/test_marble_family && ln -s ${CONFIG}.*.bit ${CONFIG}.bit
   script:
-    - make CONFIG=${CONFIG} hwload ${SERIAL_ARG} && sleep 8 && make CONFIG=${CONFIG} hwtest ${SERIAL_ARG}
+    - make CONFIG=${CONFIG} hwload ${SERIAL_ARG} && sleep 10 && make CONFIG=${CONFIG} hwtest ${SERIAL_ARG}
     - if [ -n "$RUN_I2C" ]; then make -C i2c live_oneshot ${SERIAL_ARG}; fi
 
 marble_mini_run:
