@@ -5,13 +5,13 @@ include $(I2CBRIDGE_DIR)/i2cbridge_rules.mk
 UNISIMS_DIR = broken
 
 APP_NAME = marble
-# Select between marblemini, marble, and fiber_marble
+# Select between marblemini, marble, and marble_fiber
 CONFIG ?= marblemini
 ifeq ($(CONFIG),marblemini)
   BOARD_DIR     := marblemini
   BOARD_TOP_CSV := marble_mini_top.csv
   IP_ADDR       := 192.168.19.31
-else ifneq (,$(filter marble fiber_marble,$(CONFIG)))
+else ifneq (,$(filter marble marble_fiber,$(CONFIG)))
   BOARD_DIR     := marble
   BOARD_TOP_CSV := marble_top.csv
   SERIAL        ?= ""
@@ -19,7 +19,7 @@ else ifneq (,$(filter marble fiber_marble,$(CONFIG)))
   ZEST_SN       ?= "LBNL DIGITIZER V1.0 SN  024"
   GTX_TCL       := gtx_marble_top.tcl
 else
-  $(error Unknown CONFIG '$(CONFIG)'. Please choose 'marblemini', 'marble', or 'fiber_marble')
+  $(error Unknown CONFIG '$(CONFIG)'. Please choose 'marblemini', 'marble', or 'marble_fiber')
 endif
 
 # It seems like the variable VERILOG_TB from $(BUILD_DIR)/top_rules.mk is intended to be

@@ -11,7 +11,8 @@
 #
 ###############################
 
-set MGT_CONFIG_DIR "../../fpga_family/mgt"
+set script_dir [file dirname [info script]]
+set MGT_CONFIG_DIR "$script_dir/../../fpga_family/mgt"
 source $MGT_CONFIG_DIR/mgt_gen.tcl
 
 set gt_type "GTX"
