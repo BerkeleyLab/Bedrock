@@ -21,94 +21,77 @@ marble_i2c_check:
     name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     expire_in: 2 days
 
-marble_mini_synth:
+.synth_base:
   extends:
     - .build-matrix
     - .bitgen
   image: $IMAGE
   script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make CONFIG=marblemini bit
+    - PATH=$XILINX_VIVADO/bin:$PATH make CONFIG=${CONFIG} bit
   artifacts:
     paths:
       - projects/test_marble_family/marble*.bit
       - projects/test_marble_family/vivado.log
-      - projects/test_marble_family/_xilinx/marblemini.runs/*.rpt
-      - projects/test_marble_family/_xilinx/marblemini.runs/synth_1/marble_top_*.rpt
-      - projects/test_marble_family/_xilinx/marblemini.runs/impl_1/marble_top_*.rpt
+      - projects/test_marble_family/_xilinx/${CONFIG}.runs/*.rpt
+      - projects/test_marble_family/_xilinx/${CONFIG}.runs/synth_1/marble_top_*.rpt
+      - projects/test_marble_family/_xilinx/${CONFIG}.runs/impl_1/marble_top_*.rpt
+
+marble_mini_synth:
+  extends: .synth_base
+  variables:
+    CONFIG: marblemini
 
 marble_v2_synth:
-  extends:
-    - .build-matrix
-    - .bitgen
-  image: $IMAGE
-  script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make CONFIG=marble bit
-  artifacts:
-    paths:
-      - projects/test_marble_family/marble*.bit
-      - projects/test_marble_family/vivado.log
-      - projects/test_marble_family/_xilinx/marble.runs/*.rpt
-      - projects/test_marble_family/_xilinx/marble.runs/synth_1/marble_top_*.rpt
-      - projects/test_marble_family/_xilinx/marble.runs/impl_1/marble_top_*.rpt
+  extends: .synth_base
+  variables:
+    CONFIG: marble
 
 marble_fiber_synth:
-  extends:
-    - .build-matrix
-    - .bitgen
+  extends: .synth_base
+  variables:
+    CONFIG: marble_fiber
+
+.run_base:
+  extends: .build-matrix
   image: $IMAGE
+  stage: program
+  tags:
+    - deploy
+  before_script:
+    - cd projects/test_marble_family && ln -s ${CONFIG}.*.bit ${CONFIG}.bit
   script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make CONFIG=marble_fiber bit
-  artifacts:
-    paths:
-      - projects/test_marble_family/marble*.bit
-      - projects/test_marble_family/vivado.log
-      - projects/test_marble_family/_xilinx/marble_fiber.runs/*.rpt
-      - projects/test_marble_family/_xilinx/marble_fiber.runs/synth_1/marble_top_*.rpt
-      - projects/test_marble_family/_xilinx/marble_fiber.runs/impl_1/marble_top_*.rpt
+    - make CONFIG=${CONFIG} hwload ${SERIAL_ARG} && sleep 8 && make CONFIG=${CONFIG} hwtest ${SERIAL_ARG}
+    - if [ -n "$RUN_I2C" ]; then make -C i2c live_oneshot ${SERIAL_ARG}; fi
 
 marble_mini_run:
-  extends: .build-matrix
-  image: $IMAGE
-  stage: program
-  tags:
-    - deploy
+  extends: .run_base
   dependencies:
     - marble_mini_synth
-  before_script:
-    - cd projects/test_marble_family && ln -s marblemini.*.bit marblemini.bit
-  script:
-    - make CONFIG=marblemini hwload && sleep 8 && make CONFIG=marblemini hwtest
   environment: hw_marble_mini
   resource_group: hw_marble_mini
+  variables:
+    CONFIG: marblemini
+    SERIAL_ARG: ""
+    RUN_I2C: ""
 
 marble_run:
-  extends: .build-matrix
-  image: $IMAGE
-  stage: program
-  tags:
-    - deploy
+  extends: .run_base
   dependencies:
     - marble_v2_synth
-  before_script:
-    - cd projects/test_marble_family && ln -s marble.*.bit marble.bit
-  script:
-    - make CONFIG=marble hwload SERIAL=39 && sleep 8 && make CONFIG=marble hwtest SERIAL=39
-    - make -C i2c live_oneshot SERIAL=39
   environment: hw_marble
   resource_group: hw_marble
+  variables:
+    CONFIG: marble
+    SERIAL_ARG: "SERIAL=39"
+    RUN_I2C: "true"
 
 marble_fiber_run:
-  extends: .build-matrix
-  image: $IMAGE
-  stage: program
-  tags:
-    - deploy
+  extends: .run_base
   dependencies:
     - marble_fiber_synth
-  before_script:
-    - cd projects/test_marble_family && ln -s marble_fiber.*.bit marble_fiber.bit
-  script:
-    - make CONFIG=marble_fiber hwload SERIAL=39 && sleep 8 && make CONFIG=marble_fiber hwtest SERIAL=39
-    - make -C i2c live_oneshot SERIAL=39
   environment: hw_marble
   resource_group: hw_marble
+  variables:
+    CONFIG: marble_fiber
+    SERIAL_ARG: "SERIAL=39"
+    RUN_I2C: "true"

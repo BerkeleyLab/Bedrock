@@ -7,9 +7,8 @@ XILINX_TOOL := VIVADO
 APP_NAME = cmoc
 
 HARDWARE ?= marblemini
-MGT_TCL :=
 ifeq ($(HARDWARE),marble)
-    MGT_TCL = $(TEST_MARBLE_FAMILY)/gtx_marble_top.tcl
+    MGT_TCL := $(TEST_MARBLE_FAMILY)/gtx_marble_top.tcl
 endif
 
 APP_DIR = $(TOP_DIR)/cmoc
