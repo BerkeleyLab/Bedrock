@@ -3,6 +3,15 @@ LTM_CLKIN12  LTM_CLKIN[1]
 LTM_CLKIN3   LTM_CLKIN[2]
 
 # Literal output follows
+set_property PACKAGE_PIN B5 [get_ports {QSFP1_RX_3_N}]
+set_property PACKAGE_PIN B6 [get_ports {QSFP1_RX_3_P}]
+set_property PACKAGE_PIN A3 [get_ports {QSFP1_TX_3_N}]
+set_property PACKAGE_PIN A4 [get_ports {QSFP1_TX_3_P}]
+
+create_generated_clock -divide_by 1 -source [get_pins {i_mgt_eth_clks_tx/i_mgt_eth_mmcm/clk_in}] \
+-name "GMII_TX_CLK" [get_pins {i_mgt_eth_clks_tx/i_gmii_clk_buf/O}]
+create_generated_clock -divide_by 1 -source [get_pins {i_mgt_eth_clks_rx/i_mgt_eth_mmcm/clk_in}] \
+-name "GMII_RX_CLK" [get_pins {i_mgt_eth_clks_rx/i_gmii_clk_buf/O}]
 
 create_clock -name clk1x -period 13.32 [get_nets clk_1x_90]
 create_clock -name clk2x -period  6.66 [get_nets clk_2x_0]
@@ -13,4 +22,8 @@ set_clock_groups -name async_clks -asynchronous \
   -group [get_clocks -include_generated_clocks rx_clk] \
   -group [get_clocks -include_generated_clocks {clk1x clk2x}] \
   -group [get_clocks -include_generated_clocks ddr_clk] \
-  -group [get_clocks -include_generated_clocks SI57X_A]
+  -group [get_clocks -include_generated_clocks SI57X_A] \
+  -group [get_clocks -include_generated_clocks -of [get_pins {i_qsfp1_gt_wrap/i_gt3/inst/q1_gt3_i/gt0_q1_gt3_i/gtxe2_i/TXOUTCLK}]] \
+  -group [get_clocks -include_generated_clocks -of [get_pins {i_qsfp1_gt_wrap/i_gt3/inst/q1_gt3_i/gt0_q1_gt3_i/gtxe2_i/RXOUTCLK}]] \
+  -group [get_clocks -include_generated_clocks {GMII_TX_CLK}] \
+  -group [get_clocks -include_generated_clocks {GMII_RX_CLK}]

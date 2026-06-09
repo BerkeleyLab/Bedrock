@@ -1,12 +1,16 @@
 TOP_DIR = ../../..
 include $(TOP_DIR)/dir_list.mk
 .PHONY: all
-all: $(TARGET)
+all: $(TARGET) cmoc_top_$(HARDWARE).bit
 
 XILINX_TOOL := VIVADO
 APP_NAME = cmoc
 
-HARDWARE = marblemini
+HARDWARE ?= marblemini
+MGT_TCL :=
+ifeq ($(HARDWARE),marble)
+    MGT_TCL = $(TEST_MARBLE_FAMILY)/gtx_marble_top.tcl
+endif
 
 APP_DIR = $(TOP_DIR)/cmoc
 DSP_DIR = $(TOP_DIR)/dsp
@@ -31,14 +35,17 @@ system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)
 	@echo "Building for $(HARDWARE); Use make HARDWARE=marble(mini) otherwise"
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
-CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json marble_features*.vh $(RTEFI_CLEAN)
+CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.prm cmoc_top*.bin cmoc_top*.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json marble_features*.vh $(RTEFI_CLEAN)
 CLEAN += *.log *.jou
 CLEAN_DIRS += _xilinx
 
-cmoc_top.bit: $(AUTOGEN_DIR)/config_romx.v $(TEST_MARBLE_FAMILY)/gtx_marble_top.tcl
+cmoc_top.bit: $(AUTOGEN_DIR)/config_romx.v $(MGT_TCL)
 cmoc_top.v: marble_features_defs.vh marble_features_params.vh $(AUTOGEN_DIR)/config_romx.v rtefi_blob.v construct_tx_table.v cryomodule_auto
 
-download: cmoc_top.bit
+cmoc_top_$(HARDWARE).bit: cmoc_top.bit
+	mv cmoc_top.bit $@
+
+download: cmoc_top_$(HARDWARE).bit
 	openocd -f $(BOARD_SUPPORT_DIR)/$(HARDWARE)/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $^; exit"
 
 $(AUTOGEN_DIR)/config_romx.v: $(APP_NAME)_regmap.json

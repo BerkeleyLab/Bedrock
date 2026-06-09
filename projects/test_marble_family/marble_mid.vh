@@ -241,13 +241,15 @@ localparam C_USE_FIBER = 1;
 localparam C_USE_FIBER = 0;
 `endif
 
+(* DONT_TOUCH *) wire gmii_tx_clk, gmii_tx_clk90, gmii_rx_clk;
+wire gmii_tx_en, gmii_rx_dv;
+wire [7:0] gmii_rxd, gmii_txd;
 `ifdef MARBLE_V2
 // MGT Fiber Ethernet related (Marble only)
 localparam GTX_ETHERNET_WI = 20;
 wire qsfp1_gt_tx_pll_lock, qsfp1_gt_rx_pll_lock;
 wire qsfp1_gt_tx_usr_clk, qsfp1_gt_rx_usr_clk;
 (* DONT_TOUCH *) wire qsfp1_gt_rx_out_clk, qsfp1_gt_tx_out_clk;
-(* DONT_TOUCH *) wire gmii_tx_clk, gmii_tx_clk90, gmii_rx_clk;
 wire [GTX_ETHERNET_WI-1:0]  qsfp1_gt_rxd, qsfp1_gt_txd;
 `ifndef BYPASS_REAL_WORK
 mgt_eth_clks i_mgt_eth_clks_tx (
@@ -335,9 +337,7 @@ assign QSFP1_TX_3_P = 0;
 reg  [8:0] an_status_lb_clk;
 wire [8:0] an_status_l;
 wire [8:0] eth_an_status;
-wire [7:0] gmii_rxd, gmii_txd;
 wire [15:0] lacr_rx;
-wire gmii_tx_en, gmii_rx_dv;
 
 `ifndef BYPASS_REAL_WORK
 eth_gtx_hook #(.JUMBO_DW(14), .GTX_DW(20), .DOUBLEBIT(1)) hook(
@@ -365,6 +365,7 @@ assign an_status_l = 0;
 // Cross quasi-static an_status to lb_clk so it can be read out by Host
 always @(posedge lb_clk) an_status_lb_clk <= an_status_l;
 assign eth_an_status = an_status_lb_clk;
+`endif
 
 // Management GMII Switch
 wire       mgt_mac_rx_clk, mgt_mac_tx_clk;
@@ -395,7 +396,6 @@ generate if (C_USE_FIBER == 1) begin : mgt_is_gt
         assign gmii_tx_en     = 1'b0;
     end
 endgenerate
-`endif
 
 // Real, portable implementation
 // Consider pulling 3-state drivers out of this
