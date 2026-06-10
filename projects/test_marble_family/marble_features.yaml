@@ -21,8 +21,8 @@ __marble_params: &marble_params
     # Options are gt_ref_clk, ddr_ref_clk, or sys_clk
     # sys_clk is only usable if use_rgmii_idelay: 0
     # ddr_ref_clk is recommended over gt_ref_clk to avoid having basic
-    #   boot and communications depend on ADN4600 programming
-    sysclk_src: "ddr_ref_clk"
+    # boot and communications depend on ADN4600 programming
+    sysclk_src: "gt_ref_clk"
 
 marblemini:
     defs:
