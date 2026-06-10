@@ -42,6 +42,7 @@ CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.prm c
 CLEAN += *.log *.jou
 CLEAN_DIRS += _xilinx
 
+# XXX doesn't support swap_gitid.tcl yet
 cmoc_top.bit: $(AUTOGEN_DIR)/config_romx.v $(MGT_TCL)
 cmoc_top.v: marble_features_defs.vh marble_features_params.vh $(AUTOGEN_DIR)/config_romx.v rtefi_blob.v construct_tx_table.v cryomodule_auto
 

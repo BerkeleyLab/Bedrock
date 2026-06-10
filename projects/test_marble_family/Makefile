@@ -200,7 +200,7 @@ else
 endif
 
 hwtest: udprtx
-	ping -c 2 $(IP_ADDR)
+	timeout 30 bash -c 'until ping -c 2 -W 1 $(IP_ADDR); do echo "Pinging $(IP_ADDR) failed, retrying..."; sleep 1; done'
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://$(IP_ADDR):803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx $(IP_ADDR) 100000 8  # should take under 3 seconds
 ifeq ($(CONFIG),marblemini)
