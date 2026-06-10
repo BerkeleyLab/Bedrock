@@ -252,7 +252,7 @@ wire qsfp1_gt_tx_usr_clk, qsfp1_gt_rx_usr_clk;
 (* DONT_TOUCH *) wire qsfp1_gt_rx_out_clk, qsfp1_gt_tx_out_clk;
 wire [GTX_ETHERNET_WI-1:0]  qsfp1_gt_rxd, qsfp1_gt_txd;
 // No one (in Makefile) cares about extensive simulations yet
-// so this can be safely ignored atleast for now
+// so this can be safely ignored, at least for now
 `ifndef BYPASS_REAL_WORK
 mgt_eth_clks i_mgt_eth_clks_tx (
    .reset       (~qsfp1_cpll_locked[3]),
@@ -282,7 +282,7 @@ assign tx_clk90 = gmii_tx_clk90;
 wire [3:0] qsfp1_cpll_locked;
 wire [3:0] qsfp1_txrx_resetdone;
 // XXX Should this be exposed to the user?
-// Maybe not, otherwise one would loose ability to communicate to the board
+// Maybe not, otherwise one would lose ability to communicate to the board
 wire qsfp1_soft_reset_i;
 wire qsfp1_sysclk = clk62_5;  // not lb_clk, since that's circular on Marble
 assign clk_locked = qsfp1_gt_tx_pll_lock;  // reset Ethernet PHY when FPGA clock glitches
