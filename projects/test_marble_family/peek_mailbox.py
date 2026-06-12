@@ -3,10 +3,16 @@
 # DEPRECATED. Use marble_mmc/scripts/decodembox.py for current mailbox compatibility
 from sys import argv
 import leep
+import time
 
 
 def peek_mailbox(addr):
-    foo = addr.reg_read(["spi_mbox"])[0]
+    for _ in range(10):
+        foo = addr.reg_read(["spi_mbox"])[0]
+        # confirm gitid is not garbage
+        if foo[60] != 0x80:
+            break
+        time.sleep(0.5)
     # XXX Want to set up a check that the counter is incrementing
     # Maybe make raw output optional?
     for page in range(5):

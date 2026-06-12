@@ -196,7 +196,7 @@ hwload:
 ifeq ($(CONFIG),marblemini)
 	openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
 else
-	openocd -c "adapter driver ftdi; ftdi_serial 0000$(SERIAL);" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
+	openocd -c "adapter driver ftdi; ftdi_serial $$(printf '%06d' $(SERIAL));" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
 endif
 
 hwtest: udprtx
@@ -208,6 +208,7 @@ ifeq ($(CONFIG),marblemini)
 else
 	$(PYTHON) testcase.py -a $(IP_ADDR) --trx --si570
 	sn="$$($(PYTHON) zest_sn.py -a $(IP_ADDR) -p 803)" && echo "$$sn" && test "$$sn" = $(ZEST_SN)
+	$(PYTHON) peek_mailbox.py leep://$(IP_ADDR):803
 endif
 
 dna_tb: dna_tb.v dna.v

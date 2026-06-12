@@ -6,10 +6,10 @@ if { [info exists ::env(DOUBLEBIT)] } {
 
 if { $doublebit == 1 } {
     set clk_freq 125.0
-    puts "INFO: Configuring mgt_eth_mmcm for 2.5G (125 MHz)"
+    puts "INFO: Configuring mgt_eth_mmcm for 125 MHz"
 } else {
     set clk_freq 62.5
-    puts "INFO: Configuring mgt_eth_mmcm for 1.25G (62.5 MHz)"
+    puts "INFO: Configuring mgt_eth_mmcm for 62.5 MHz"
 }
 
 set cfg_dict [list \
