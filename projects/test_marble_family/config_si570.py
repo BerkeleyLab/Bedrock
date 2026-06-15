@@ -191,6 +191,7 @@ def compute_si570(addr, key, verbose=False, debug=False, config_status=False):
     rfreq_int = (int(a[1]) & 0x3f) << 32 | int(a[2]) << 24 | int(a[3]) << 16 | int(a[4]) << 8 | int(a[5])
     rfreq = float(rfreq_int) / float(2**28)
 
+    sleep(1.5)
     freq_default = addr.reg_read(["frequency_si570"])
     default = (freq_default[0]/2**24.0)*125
     # keep everything in MHz
