@@ -11,7 +11,14 @@ set ip_version [lindex $argv 2]
 set my_ip_files [lrange $argv 3 end]
 
 ip_create $ip_name $ip_path
-ip_files $ip_name $my_ip_files
+
+set ip_tcl_src [lsearch -all -inline -glob $my_ip_files "*.tcl"]
+foreach ip_tcl $ip_tcl_src {
+    source $ip_tcl
+}
+set my_src_files [lsearch -all -inline -not -glob $my_ip_files "*.tcl"]
+
+ip_files $ip_name $my_src_files
 update_compile_order -fileset sources_1
 
 if {![info exists ip_vendor]} {
