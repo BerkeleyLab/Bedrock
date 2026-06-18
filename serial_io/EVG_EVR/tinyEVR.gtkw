@@ -1,7 +1,7 @@
 [dumpfile] "tinyEVR.vcd"
 [timestart] 8297
 [size] 1445 611
-[pos] 3 0
+[pos] -1 -1
 *-5.000000 8376 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tinyEVR_tb.
 [treeopen] tinyEVR_tb.tinyEVR.

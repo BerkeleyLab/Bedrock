@@ -24,7 +24,7 @@ unsigned xorshift32(unsigned *state)
 int cmd_memtest(volatile unsigned *base, unsigned len, unsigned stride, unsigned cycles)
 {
     // adapted from:
-    // https://github.com/cliffordwolf/picorv32/blob/master/picosoc/firmware.c
+    // https://github.com/YosysHQ/picorv32/blob/master/picosoc/firmware.c
     unsigned state;
     volatile uint8_t *base_byte = (volatile uint8_t*)base;
 
@@ -68,7 +68,7 @@ int cmd_memtest(volatile unsigned *base, unsigned len, unsigned stride, unsigned
 
 // A simple Sieve of Eratosthenes
 // copied from:
-// https://github.com/cliffordwolf/picorv32/blob/master/firmware/sieve.c
+// https://github.com/YosysHQ/picorv32/blob/master/firmware/sieve.c
 static unsigned bitmap[BITMAP_SIZE/32];
 static unsigned hash;
 

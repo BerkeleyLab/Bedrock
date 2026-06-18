@@ -32,7 +32,7 @@ class c_llspi_ad9653(c_llspi, c_ad9653):
 
 
 # This class uses LEEP to interact with llspi.v
-# Indepenent of which peripheral chip is attached to llspi.
+# Independent of which peripheral chip is attached to llspi.
 # All of these methods are unmodified cut-and-paste from zest_setup.py
 class leep_llspi():
     def __init__(self, leep):
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     if leep_addr is None:
         leep_addr = "leep://" + str(ip_addr)
 
-    leep = leep.open(leep_addr, timeout=2.0, instance=[])
+    leep = leep.open(leep_addr, timeout=5.0, instance=[])
     leepll = leep_llspi(leep)  # temporary(?) stand-in for c_zest
     U2_adc_spi = c_llspi_ad9653(2)
 

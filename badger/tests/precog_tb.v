@@ -10,14 +10,12 @@ initial begin
 		$dumpfile("precog.vcd");
 		$dumpvars(5,precog_tb);
 	end
-	$display("Non-checking testbench.  Will always PASS");
 	while (1) begin
 		cc = cc + 1;
 		clk=0; #5;
 		clk=1; #5;
 	end
-	$display("PASS");
-	$finish(0);
+	// termination handled in another block
 end
 
 wire clear_to_send;
@@ -33,7 +31,7 @@ precog #(
 	.clk                (clk),
 	.tx_packet_width    (tx_packet_width),
 	.scanner_busy       (scanner_busy),
-	.request_to_send      (request_to_send),
+	.request_to_send    (request_to_send),
 	.clear_to_send      (clear_to_send)
 );
 

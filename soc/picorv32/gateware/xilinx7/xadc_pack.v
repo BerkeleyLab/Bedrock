@@ -117,12 +117,10 @@ assign dwe_in = den_in && mem_write;
 
 assign reset_in = (reset || xadc_reset);
 // event mode
-(* ASYNC_REG="TRUE" *) reg trig_m=0, trig=0;
-always @(posedge clk) begin
-    trig_m <= trigger_in;
-    trig <= trig_m;
-end
+wire trig;
+reg_tech_cdc trig_cdc(.I(trigger_in), .C(clk), .O(trig));
 
+`ifndef YOSYS
 XADC #(
     .INIT_40(16'h0000), // config reg 0, no average
     .INIT_41(16'h21A0), // config reg 1
@@ -173,5 +171,14 @@ XADC #(
         .VP             (vp_in),
         .VN             (vn_in)
 );
+`else
+    assign channel_out = 5'h3;
+    assign alm_int = 0;
+    assign do_out = 16'hbeaf;
+    assign drdy_out = 1'b1;
+    assign eoc_out = 0;
+    assign eos_out = 0;
+    assign ot_out = 0;
+`endif
 
 endmodule

@@ -232,7 +232,7 @@ module zest_wrap #(parameter u15_u18_spi_mode="passthrough") (
    generate if (u15_u18_spi_mode == "passthrough") begin: passthrough
      assign zif.U18_DIN  = zif_cfg.U18_mosi_out | zif_cfg.U15_mosi_out;
      assign zif.U18_SCLK = zif_cfg.U18_sclk_out | zif_cfg.U15_sclk_out;
-   end else begin
+   end else begin: no_passthrough
      assign zif.U18_DIN  = zif_cfg.U15_U18_mosi;
      assign zif.U18_SCLK = zif_cfg.U15_U18_sclk;
    end endgenerate

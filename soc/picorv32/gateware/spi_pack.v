@@ -9,7 +9,7 @@ module spi_pack #(
     output          spi_sck,  // serial clock
     output          spi_copi,  // controller out / peripheral in
     input           spi_cipo,  // controller in / peripheral out
-	output [31:0]   spi_cfg_reg,
+    output [31:0]   spi_cfg_reg,
     // PicoRV32 packed MEM Bus interface
     input  [68:0]   mem_packed_fwd,  //CPU > SPI
     output [32:0]   mem_packed_ret   //CPU < SPI

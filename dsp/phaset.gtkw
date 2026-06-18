@@ -1,0 +1,30 @@
+[timestart] 0
+[size] 1000 600
+[pos] 0 0
+*-25.448893 12500000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] phaset_tb.
+[sst_width] 213
+[signals_width] 211
+[sst_expanded] 1
+[sst_vpaned_height] 154
+@28
+phaset_tb.track.div
+phaset_tb.track.msb
+phaset_tb.track.nsb
+phaset_tb.track.move
+phaset_tb.track.dn
+phaset_tb.track.up
+@8024
+phaset_tb.track.phase[13:0]
+@20000
+-
+@28
+phaset_tb.fault
+@8420
+phaset_tb.phase_unw
+@20000
+-
+@28
+phaset_tb.fail
+[pattern_trace] 1
+[pattern_trace] 0

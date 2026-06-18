@@ -43,8 +43,8 @@ module dec_8b10b (datain, dispin, dataout, dispout, code_err, disp_err) ;
   wire p04 = !ai & !bi & !ci & !di ;
 
   wire disp6a = p31 | (p22 & dispin) ; // pos disp if p22 and was pos, or p31.
-   wire disp6a2 = p31 & dispin ;  // disp is ++ after 4 bits
-   wire disp6a0 = p13 & ! dispin ; // -- disp after 4 bits
+  wire disp6a2 = p31 & dispin ;  // disp is ++ after 4 bits
+  wire disp6a0 = p13 & ! dispin ; // -- disp after 4 bits
 
   wire disp6b = (((ei & ii & ! disp6a0) | (disp6a & (ei | ii)) | disp6a2 |
 		  (ei & ii & di)) & (ei | ii | di)) ;
@@ -153,7 +153,7 @@ module dec_8b10b (datain, dispin, dataout, dispout, code_err, disp_err) ;
   assign dataout = {xko, xho, xgo, xfo, xeo, xdo, xco, xbo, xao} ;
 
   // my disp err fires for any legal codes that violate disparity, may fire for illegal codes
-   assign disp_err = ((dispin & disp6p) | (disp6n & !dispin) |
+  assign disp_err = ((dispin & disp6p) | (disp6n & !dispin) |
 		      (dispin & !disp6n & fi & gi) |
 		      (dispin & ai & bi & ci) |
 		      (dispin & !disp6n & disp4p) |

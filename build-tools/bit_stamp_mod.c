@@ -50,7 +50,7 @@ static void find_key(int key, FILE *o)
 {
 	int c;
 	if ((c = getchar()) != key) {
-		fprintf(stderr,"find_key found 0x%.2x instead of 0x%.2x\n",c,key);
+		fprintf(stderr, "find_key found 0x%.2x instead of 0x%.2x\n", (unsigned)c, (unsigned)key);
 		exit(1);
 	}
 	if (o) fputc(c, o);

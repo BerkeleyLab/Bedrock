@@ -1,7 +1,7 @@
 `timescale 1ns / 1ns
 
 // DMTD-inspired investigation into clock phasing
-// No on-chip analysis, that could be added later once we see the captured patterns
+// No on-chip analysis, but that could be added later once we see the captured patterns
 module phasex #(
 	parameter aw=10
 ) (
@@ -38,11 +38,14 @@ end
 wire wen = run & (&count[2:0]);
 wire [aw-1:0] waddr = count[aw+2:3];
 
+// Safely cross clock domains
+wire [1:0] snap;
+reg_tech_cdc #(.POST_STAGES(0)) snap1(.I(div1), .C(sclk), .O(snap[0]));
+reg_tech_cdc #(.POST_STAGES(0)) snap2(.I(div2), .C(sclk), .O(snap[1]));
+
 // Data flow logic, also in sclk domain
 reg [15:0] shiftr=0;
-reg [1:0] snap=0;
 always @(posedge sclk) begin
-	snap <= {div2, div1};  // safely crosses clock domain
 	if (run) shiftr <= {shiftr[13:0], snap};
 end
 

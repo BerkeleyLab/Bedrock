@@ -1,7 +1,7 @@
 // Ten Output High Performance Clock Synchronizer,
 // Jitter Cleaner, and Clock Distributor
 // Controlled over SPI, used on FMC150
-// See: http://www.ti.com/lit/ds/scas858c/scas858c.pdf
+// See: https://www.ti.com/lit/ds/scas858c/scas858c.pdf
 
 #ifndef CDCE72010_H
 #define CDCE72010_H

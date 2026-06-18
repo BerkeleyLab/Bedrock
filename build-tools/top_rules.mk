@@ -2,7 +2,8 @@
 GCC_FLAGS = -Wstrict-prototypes -Wpointer-arith -Wcast-align -Wcast-qual \
 	-Wshadow -Waggregate-return -Wmissing-prototypes -Wnested-externs \
 	-Wall -W -Wno-unused -Winline -Wwrite-strings -Wundef -pedantic
-CF_ALL = -Wall -O2 -fPIC -g -std=c99 -D_GNU_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
+GCC_FLAGS += -Wformat -Wformat-signedness
+CF_ALL = -Wall -O2 -fPIC -g -std=c99 -D_DEFAULT_SOURCE $(GCC_FLAGS) ${CFLAGS_$@}
 LF_ALL = ${LDFLAGS_$@}
 
 ICARUS_SUFFIX =
@@ -17,7 +18,18 @@ VERILATOR = verilator -Wall -Wno-fatal
 GTKWAVE = gtkwave
 VPIEXT = vpi
 PYTHON = python3
+PERL = perl
 AWK = awk
+XCIRCUIT = xcircuit
+SV2V = sv2v
+YOSYS = yosys
+YOSYS_QUIET = -q
+YOSYS_JSON_OPTION = -DBUGGY_FORLOOP
+# (that flag adjusts the behavior of dpram.v; I don't think yosys for-loop
+# is actually buggy, just tediously slow, and in this case unnecessary)
+YOSYS_JSON_PRECHECK = true
+YOSYS_READ_VERILOG = read_verilog
+
 VPI_CFLAGS := $(shell $(VERILOG_VPI) --cflags)
 VPI_LDFLAGS := $(shell $(VERILOG_VPI) --ldflags)
 DEPDIR = _dep
@@ -49,9 +61,11 @@ MAKEDEP = $(VERILOG) $(V_TB) $(VG_ALL) ${VFLAGS} $(VFLAGS_DEP) -o /dev/null -M$@
 VLATORFLAGS = $(subst -y,-y ,${VFLAGS}) $(subst -y,-y ,${VFLAGS_DEP}) -y . -I.
 # keep -Wno-TIMESCALEMOD separate, since it's a new flag not supported by Verilator 4.010 in Debian Buster
 VLATOR_TIMESCALEMOD = -Wno-TIMESCALEMOD
+# new flag for Verilator v4.226 and beyond
+VLATOR_TIMING = --timing
 VLATOR_LINT_IGNORE = -Wno-PINMISSING -Wno-WIDTH -Wno-REDEFMACRO -Wno-PINCONNECTEMPTY $(VLATOR_TIMESCALEMOD)
 VERILATOR_LINT = $(VERILATOR) $(VG_ALL) ${VLATORFLAGS} ${VLATOR_LINT_IGNORE} --lint-only $(filter %.v %.sv, $^)
-VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN --MMD --Mdir $(DEPDIR)
+VERILATOR_MAKEDEP = $(VERILATOR_LINT) -Wno-DECLFILENAME -Wno-UNUSED -Wno-CASEINCOMPLETE -Wno-UNDRIVEN $(VLATOR_TIMING) --MMD --Mdir $(DEPDIR)
 VERILATOR_SIM = $(VERILATOR) --trace-fst -O2 $(VLATOR_LINT_IGNORE) $(VG_ALL) +define+VERILATOR_SIM
 
 FMC_MAP = awk -F\" 'NR==FNR{a[$$2]=$$4;next}$$4 in a{printf "NET %-15s LOC = %-4s | IOSTANDARD = %10s; \# %s\n",$$2,a[$$4],$$6,$$4}'
@@ -125,6 +139,10 @@ V%_tb: $(wildcard *.sv) $(wildcard *.v)
 %.pdf: %.eps
 	$(PS2PDF)
 
+# Kind of weird to use xcircuit's rc file for this purpose, but it does work.
+%.svg: %.eps
+	cd $(dir $@) && echo "page load $<; svg; exit" > .xcircuitrc; $(XVFB) $(XCIRCUIT); rm .xcircuitrc
+
 %.rbf: %.bit
 	$(BIT2RBF)
 
@@ -136,6 +154,15 @@ V%_tb: $(wildcard *.sv) $(wildcard *.v)
 
 %.dat: %_tb
 	$(VVP) $< $(VVP_FLAGS) > $@
+
+# cdc_snitch
+%_yosys.json: %.v $(BUILD_DIR)/cdc_snitch_proc.ys
+	$(YOSYS_JSON_PRECHECK)
+	$(YOSYS) --version
+	$(YOSYS) $(YOSYS_QUIET) -p "$(YOSYS_READ_VERILOG) $(YOSYS_JSON_OPTION) $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
+
+%_cdc.txt: $(BUILD_DIR)/cdc_snitch.py %_yosys.json
+	$(PYTHON) $^ -o $@
 
 ifeq ($(XILINX_TOOL), VIVADO)
 %_$(DAUGHTER).xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/%.xdc  $(BOARD_SUPPORT_DIR)/$(DAUGHTER)/fmc.map
@@ -174,7 +201,7 @@ else
 	promgen -w -spi -p mcs -o $@ -s 16384 -u 0 $<
 endif
 
-UNISIM_CRAP = 'BUFG|BUFGCE|BUFG_GT|BUFH|FD|IBUF|IBUFDS|IBUFDS_GTE2|IBUFDS_GTE4|IBUFGDS|IDDR|IDELAYE2|IOBUF|MMCME2_BASE|MMCME4_ADV|OBUF|OBUFDS'
+UNISIM_CRAP = 'BUFG|BUFGCE|BUFG_GT|BUFH|BUFIO|BUFR|FD|IBUF|IBUFDS|IBUFDS_GTE2|IBUFDS_GTE4|IBUFGDS|IDDR|IDELAYE2|IOBUF|MMCME2_BASE|MMCME4_ADV|OBUF|OBUFDS|ODDR'
 
 # Auto-generated verilog entities shall be set by globally appending to this variable
 $(DEPDIR)/%.bit.d: %.v $(VERILOG_AUTOGEN)
@@ -194,10 +221,10 @@ EMPTY :=
 SPACE := $(EMPTY) $(EMPTY)
 COMMA := ,
 
-# http://www.graphviz.org/content/dot-language
+# https://graphviz.org/doc/info/lang.html
 # apt-get install graphviz
 %.ps:   %.dot
 	dot -Tps $< -o $@
 
 %_support.vh: $(BS_HARDWARE_DIR)/%_support.in
-	perl $(BUILD_DIR)/regmap_proc.pl $< > $@
+	$(PERL) $(BUILD_DIR)/regmap_proc.pl $< > $@

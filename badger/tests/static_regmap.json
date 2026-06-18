@@ -33,5 +33,12 @@
         "sign": "unsigned",
         "base_addr": 7,
         "data_width": 32
+    },
+    "rx_counters": {
+        "access": "r",
+        "addr_width": 4,
+        "sign": "unsigned",
+        "base_addr": "0x41000",
+        "data_width": 20
     }
 }

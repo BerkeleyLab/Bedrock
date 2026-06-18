@@ -15,7 +15,7 @@ reg gate_check=0;
 reg [8:0] count=0;  // XXX generous, but not general
 
 always @(posedge clk) begin
-        gate_check <= gate;
+	gate_check <= gate;
 	count <= count + gate;
 	if (trig && gate_check) begin
 		time_err_r <= (count+gate) != gpt;

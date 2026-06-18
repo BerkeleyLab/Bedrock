@@ -23,6 +23,7 @@ module piezo_control(
 	output [6:0] trace_en_addr  // external address for trace_en
 	//`AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 // Non-zero placeholder
 // Eventually intend to use reg_mac2 or similar;

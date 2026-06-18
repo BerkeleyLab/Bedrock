@@ -48,7 +48,7 @@ module ad9781 (
 );
 parameter SPIMODE="passthrough";
 generate
-if (SPIMODE=="passthrough")begin
+if (SPIMODE=="passthrough")begin: passthrough
 	assign CSB  = csb_in;
 	assign SCLK = sclk_in;
 	assign sdo_out = SDO;

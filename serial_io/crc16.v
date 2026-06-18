@@ -13,7 +13,7 @@ module crc16(
       // D is the 16-bit input data (msb-first)
       // crc and O are the new and old 16-bit CRC
       // Generating polynomial is 0x1021 (normal form, leading 1 suppressed)
-      // Reference: http://en.wikipedia.org/wiki/Cyclic_redundancy_check
+      // Reference: https://en.wikipedia.org/wiki/Cyclic_redundancy_check
       crc[0]  <= D[0]^O[0]^D[4]^O[4]^D[8]^O[8]^D[11]^O[11]^D[12]^O[12];
       crc[1]  <= D[1]^O[1]^D[5]^O[5]^D[9]^O[9]^D[12]^O[12]^D[13]^O[13];
       crc[2]  <= D[2]^O[2]^D[6]^O[6]^D[10]^O[10]^D[13]^O[13]^D[14]^O[14];

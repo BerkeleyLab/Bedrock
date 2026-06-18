@@ -148,15 +148,15 @@ reg clki0,clki1,clki2,clki3,clki4,clki5,locked_i;
 
 	// Generate in-phase clocks according to parameters
 	initial begin
-		clki0 <= 1;
-		clki1 <= 1;
-		clki2 <= 1;
-		clki3 <= 1;
-		clki4 <= 1;
-		clki5 <= 1;
-		clki5 <= 1;
-		locked_i <= 0;
-		locked_i <= #(clkin_period+0.1) 1; // Lock right after edge
+		clki0 = 1;
+		clki1 = 1;
+		clki2 = 1;
+		clki3 = 1;
+		clki4 = 1;
+		clki5 = 1;
+		clki5 = 1;
+		locked_i = 0;
+		locked_i = #(clkin_period+0.1) 1; // Lock right after edge
 	end
 	initial begin
 	end

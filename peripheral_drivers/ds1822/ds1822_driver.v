@@ -84,7 +84,7 @@ end
 `define RCL 10
 `define WRS 11
 `define CFG 12
-reg [3:0] command=0;  // really combinatorial
+reg [3:0] command;  // really combinatorial
 wire [5:0] command_address;
 always @(command_address) case (command_address)
 `ifndef REVC_1W

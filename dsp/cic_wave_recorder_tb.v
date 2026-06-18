@@ -184,9 +184,7 @@ module cic_wave_recorder_tb;
       .lsb_mask      (1),
       .buf_stat_w    (16),
       .buf_auto_flip (1)
-      )
-   dut
-   (
+   ) dut (
       .iclk         (iclk),
       .reset        (reset),
       .stb_in       (ext_trig),

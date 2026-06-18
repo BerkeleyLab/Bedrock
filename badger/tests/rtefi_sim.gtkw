@@ -1,76 +1,75 @@
 [timestart] 103956
 [size] 1204 747
-[pos] 3 3
+[pos] -1 -1
 *-5.645828 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.rtefi_blob.
 [treeopen] TOP.rtefi_blob.center.
-[sst_width] 210
+[sst_width] 269
 [signals_width] 211
 [sst_expanded] 1
 [sst_vpaned_height] 206
 @200
 -Input
 @28
-TOP.rtefi_blob.center.a.eth_in_s
+TOP.rtefi_blob.center.a_scan.eth_in_s
 @22
-TOP.rtefi_blob.center.a.udp_p.cnt[10:0]
+TOP.rtefi_blob.center.a_scan.udp_p.cnt[10:0]
 @24
-TOP.rtefi_blob.center.a.udp_length[15:0]
+TOP.rtefi_blob.center.a_scan.udp_length[15:0]
 @200
 -scanner
 @28
-TOP.rtefi_blob.center.a.category[1:0]
-TOP.rtefi_blob.center.a.pass_ethmac
-TOP.rtefi_blob.center.a.crc_zero
-TOP.rtefi_blob.center.a.pass_ip0
-TOP.rtefi_blob.center.a.pass_ipdst
+TOP.rtefi_blob.center.a_scan.category[1:0]
+TOP.rtefi_blob.center.a_scan.pass_ethmac
+TOP.rtefi_blob.center.a_scan.crc_zero
+TOP.rtefi_blob.center.a_scan.pass_ip0
+TOP.rtefi_blob.center.a_scan.pass_ipdst
 @24
-TOP.rtefi_blob.center.a.pack_cnt[10:0]
-TOP.rtefi_blob.center.a.ip_length[15:0]
+TOP.rtefi_blob.center.a_scan.pack_cnt[10:0]
+TOP.rtefi_blob.center.a_scan.ip_length[15:0]
 @28
-TOP.rtefi_blob.center.a.ip_len_check
-TOP.rtefi_blob.center.a.pass_ip
-TOP.rtefi_blob.center.a.pass_udp0
-TOP.rtefi_blob.center.a.udp_len_check
-TOP.rtefi_blob.center.a.port_h
-TOP.rtefi_blob.center.a.pass_udp
+TOP.rtefi_blob.center.a_scan.ip_len_check
+TOP.rtefi_blob.center.a_scan.pass_ip
+TOP.rtefi_blob.center.a_scan.pass_udp0
+TOP.rtefi_blob.center.a_scan.udp_len_check
+TOP.rtefi_blob.center.a_scan.port_h
+TOP.rtefi_blob.center.a_scan.pass_udp
 @200
 -Output
 @28
-TOP.rtefi_blob.center.c.sof
-TOP.rtefi_blob.center.c.live
+TOP.rtefi_blob.center.c_construct.sof
+TOP.rtefi_blob.center.c_construct.live
 @24
-TOP.rtefi_blob.center.c.pc[5:0]
+TOP.rtefi_blob.center.c_construct.pc[5:0]
 @28
-TOP.rtefi_blob.center.c.o_strobe
+TOP.rtefi_blob.center.c_construct.o_strobe
 @24
-TOP.rtefi_blob.center.c.category[1:0]
-TOP.rtefi_blob.center.c.udp_sel[2:0]
+TOP.rtefi_blob.center.c_construct.category[1:0]
+TOP.rtefi_blob.center.c_construct.udp_sel[2:0]
 @22
-TOP.rtefi_blob.center.c.pack_len_r[10:0]
+TOP.rtefi_blob.center.c_construct.pack_len_r[10:0]
 @28
-TOP.rtefi_blob.center.crc.gate_crc
+TOP.rtefi_blob.center.e_crc.gate_crc
 @200
 -xformer
 @28
-TOP.rtefi_blob.center.xform.istrobe_s
-TOP.rtefi_blob.center.xform.l_strobe1
-TOP.rtefi_blob.center.xform.ostrobe_s
-TOP.rtefi_blob.center.xform.ostrobe_l
-TOP.rtefi_blob.center.xform.len_soon
+TOP.rtefi_blob.center.d_xform.l_strobe1
+TOP.rtefi_blob.center.d_xform.ostrobe_s
+TOP.rtefi_blob.center.d_xform.ostrobe_l
+TOP.rtefi_blob.center.d_xform.len_soon
 @24
-TOP.rtefi_blob.center.xform.pdata_count[10:0]
+TOP.rtefi_blob.center.d_xform.pdata_count[10:0]
 @28
-TOP.rtefi_blob.center.xform.pdata_down
+TOP.rtefi_blob.center.d_xform.pdata_down
 @200
 -CRC
 @28
-TOP.rtefi_blob.center.crc.raw_s
-TOP.rtefi_blob.center.crc.raw_l
+TOP.rtefi_blob.center.e_crc.raw_s
+TOP.rtefi_blob.center.e_crc.raw_l
 @22
-TOP.rtefi_blob.center.crc.raw_d[7:0]
-TOP.rtefi_blob.center.crc.opack_d[7:0]
+TOP.rtefi_blob.center.e_crc.raw_d[7:0]
+TOP.rtefi_blob.center.e_crc.opack_d[7:0]
 @200
 -UDP p2
 @28

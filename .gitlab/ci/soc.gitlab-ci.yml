@@ -1,4 +1,6 @@
 soc_picorv32_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd soc/picorv32/test
   stage: test
@@ -13,6 +15,8 @@ soc_picorv32_test:
 #     - XILINX_VIVADO=/non-free/Xilinx/Vivado/2019.1 PATH=$XILINX_VIVADO/bin:$PATH make
 
 soc_picorv32_kc705:
+  extends: .build-matrix
+  image: $IMAGE
   stage: synthesis
   before_script:
     - cd soc/picorv32/project/kc705/synth
@@ -26,6 +30,8 @@ soc_picorv32_kc705:
       - soc/picorv32/project/kc705/synth/system_top.bit
 
 soc_picorv32_cmod_a7:
+  extends: .build-matrix
+  image: $IMAGE
   stage: synthesis
   before_script:
     - cd soc/picorv32/project/cmod_a7/synth
@@ -38,6 +44,8 @@ soc_picorv32_cmod_a7:
       - soc/picorv32/project/cmod_a7/synth/system_top.bit
 
 soc_picorv32_cmod_a7_run:
+  extends: .build-matrix
+  image: $IMAGE
   stage: program
   dependencies:
     - soc_picorv32_cmod_a7
@@ -45,3 +53,5 @@ soc_picorv32_cmod_a7_run:
     - cd soc/picorv32/project/cmod_a7
   script:
     - xc3sprog -c jtaghs1_fast -s 210328A6DA47 synth/system_top.bit && python3 hw_test.py 210328A6DA47
+  environment: hw_cmod_a7
+  resource_group: hw_cmod_a7

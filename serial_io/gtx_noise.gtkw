@@ -1,0 +1,31 @@
+[timestart] 0
+[size] 1118 557
+[pos] -1 -1
+*-5.006674 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] gtx_noise_tb.
+[sst_width] 269
+[signals_width] 174
+[sst_expanded] 1
+[sst_vpaned_height] 142
+@28
+gtx_noise_tb.clk
+@22
+gtx_noise_tb.gtx_d[15:0]
+@28
+gtx_noise_tb.gtx_k[1:0]
+gtx_noise_tb.gtx_e[1:0]
+gtx_noise_tb.gtx_n[1:0]
+@200
+-DUT
+@22
+gtx_noise_tb.dut.white_noise[9:0]
+@28
+gtx_noise_tb.dut.white_disp
+@22
+gtx_noise_tb.dut.x_data[8:0]
+gtx_noise_tb.dut.x_data_r[8:0]
+@28
+gtx_noise_tb.dut.x_code_err
+gtx_noise_tb.dut.x_code_err_r
+[pattern_trace] 1
+[pattern_trace] 0

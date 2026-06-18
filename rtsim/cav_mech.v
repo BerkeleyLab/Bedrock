@@ -17,6 +17,7 @@ module cav_mech(
   output res_clip,
   `AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 
@@ -62,4 +63,5 @@ always @(posedge clk) begin
 end
 assign environment = noise_out;
 
+`undef AUTOMATIC_prng
 endmodule // cav_mech

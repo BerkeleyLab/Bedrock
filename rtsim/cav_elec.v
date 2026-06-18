@@ -61,6 +61,7 @@ module cav_elec(
 	input [11:0] modulo,  // external
 	`AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 `AUTOMATIC_map
@@ -192,6 +193,7 @@ always @(posedge clk) begin
 	if (~iq) refl_r  <= `SAT(refl_sum,   20,17);
 	if ( iq) fwd_r   <= `SAT(fwd_ref,    18,17);
 end
+`undef SAT
 
 assign field   = iq ? probe_r : 0;
 assign forward = iq ? fwd_r   : 0;

@@ -19,10 +19,10 @@ class c_lmk01801:
             CLKout0_3_PD="0",
             POWERDOWN="0",
             RESET="0"):
-        return eval('0b' + "01001000" + CLKin1_MUX + CLKin1_DIV + CLKin0_MUX
-                    + CLKin0_DIV + "11" + CLKin1_BUF_TYPE + CLKin0_BUF_TYPE
-                    + CLKout12_13_PD + CLKout8_11_PD + CLKout4_7_PD
-                    + CLKout0_3_PD + POWERDOWN + RESET)
+        return eval('0b' + "01001000" + CLKin1_MUX + CLKin1_DIV + CLKin0_MUX +
+                    CLKin0_DIV + "11" + CLKin1_BUF_TYPE + CLKin0_BUF_TYPE +
+                    CLKout12_13_PD + CLKout8_11_PD + CLKout4_7_PD +
+                    CLKout0_3_PD + POWERDOWN + RESET)
 
     # Register R1 and R2, see section 8.5, especially Tables 8-13 and 8-14
     def R1(
@@ -68,8 +68,8 @@ class c_lmk01801:
            CLKout12_13_ADLY="000000"):
         return eval('0b' + "00010" + SYNC1_AUTO + SYNC0_AUTO + SYNC1_FAST +
                     SYNC0_FAST + "011" + NO_SYNC_CLKout12_13 +
-                    NO_SYNC_CLKout8_11 + NO_SYNC_CLKout4_7 + NO_SYNC_CLKout0_3
-                    + SYNC1_POL_INV + SYNC0_POL_INV + "0" + SYNC1_QUAL +
+                    NO_SYNC_CLKout8_11 + NO_SYNC_CLKout4_7 + NO_SYNC_CLKout0_3 +
+                    SYNC1_POL_INV + SYNC0_POL_INV + "0" + SYNC1_QUAL +
                     CLKout12_13_HS + CLKout12_13_ADLY)
 
     # Register R4, see section 8.7, especially table 8-22
@@ -85,8 +85,8 @@ class c_lmk01801:
             CLKout8_11_DIV="001",  # 1
             CLKout4_7_DIV="001",   # 1
             CLKout0_3_DIV="001"):  # 2
-        return eval('0b' + "0000" + CLKout12_13_DIV + "00" + CLKout13_ADLY_SEL
-                    + CLKout12_ADLY_SEL + CLKout8_11_DIV + CLKout4_7_DIV +
+        return eval('0b' + "0000" + CLKout12_13_DIV + "00" + CLKout13_ADLY_SEL +
+                    CLKout12_ADLY_SEL + CLKout8_11_DIV + CLKout4_7_DIV +
                     CLKout0_3_DIV)
 
     # Register 15, see section 8.9, especially table 8-27

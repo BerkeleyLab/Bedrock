@@ -34,7 +34,7 @@ parameter dw=7;
 wire [dw:0] f_read;
 wire [3:0] pps_cnt;
 gps_test #(.dw(dw), .arms(dw-3)) dut(.gps_pins(gps_pins),
-	.clk(clk), .lb_addr(10'd0), .buf_reset(1'b0),
+	.clk(clk), .lb_addr(10'd0),
 	.f_read(f_read), .pps_cnt(pps_cnt)
 );
 wire [dw-1:0] f_out = f_read[dw-1:0];

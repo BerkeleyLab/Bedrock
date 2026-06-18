@@ -14,7 +14,8 @@ module cryomodule_badger (
     // Ethernet configuration port
     input eth_cfg_clk,
     input [9:0] eth_cfg_set,
-    output [7:0] eth_status
+    output [7:0] eth_status,
+    output thinking
 );
 
 parameter ip ={8'd192, 8'd168, 8'd7, 8'd4};
@@ -30,7 +31,7 @@ wire [23:0] rtefi_lb_addr;
 wire [31:0] rtefi_lb_data_out;
 wire [31:0] rtefi_lb_data_in;
 
-
+// TODO: Add option to let MMC set the IP address and MAC
 rtefi_blob #(.ip(ip), .mac(mac)) badger(
 	// GMII Input (Rx)
 	.rx_clk(gmii_rx_clk),
@@ -58,10 +59,11 @@ rtefi_blob #(.ip(ip), .mac(mac)) badger(
 	.p3_control_rd(rtefi_lb_control_rd),
 	.p3_control_rd_valid(rtefi_lb_control_rd_valid),
 	.p3_data_out(rtefi_lb_data_out),
-	.p3_data_in(rtefi_lb_data_in)
+	.p3_data_in(rtefi_lb_data_in),
 	// // Dumb stuff to get LEDs blinking
 	// output rx_mon,
 	// output tx_mon,
+	.in_use(thinking)
 );
 
 

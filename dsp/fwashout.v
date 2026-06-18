@@ -7,6 +7,7 @@
 // Evaluating gain at f_s*7/33 using python3:
 // from numpy import exp, pi; cut=4; N=2**cut; p=(N-1)/N
 // z=exp(2j*pi*7/33); gain=(z-1)/z/(z-p); print(abs(gain))
+// 1.031390721958454
 module fwashout #(
 	parameter a_dw = 16,
 	parameter o_dw = 16,
@@ -32,6 +33,7 @@ end
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 wire signed [a_dw+cut-1:0] clipped=`SAT(sub,a_dw+cut,a_dw+cut-1);
 assign o_data = clipped[a_dw+cut-1:cut];
+`undef SAT
 
 // Intended for raw ADC inputs.
 // Could go back and make this module handle other data patterns

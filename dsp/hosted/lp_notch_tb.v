@@ -24,6 +24,10 @@ wire y_zero;
 reg big=0;
 real dth = 0.0;
 
+wire signed [19:0] y;
+reg signed [17:0] y1=0, y_i=0, y_q=0;
+reg signed [17:0] x1=0, x_i=0, x_q=0;
+
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("lp_notch.vcd");
@@ -93,7 +97,6 @@ reg lb_write=0;
 
 `AUTOMATIC_decode
 
-wire signed [19:0] y;
 (* lb_automatic *)
 lp_notch dut // auto
 	(.clk(clk), .iq(iq), .x(x), .y(y), `AUTOMATIC_dut);
@@ -127,8 +130,6 @@ end
 // Write a comprehensible output file
 // One line per pair of clock cycles
 // Also gives the timing diagram something comprehensible to look at and graph
-reg signed [17:0] y1=0, y_i=0, y_q=0;
-reg signed [17:0] x1=0, x_i=0, x_q=0;
 always @(posedge clk) begin
 	x1 <= x;
 	y1 <= y;

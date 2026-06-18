@@ -110,7 +110,7 @@ void udp_receiver(int *in_octet, int *in_valid, int *in_count, int thinking)
 
 struct udp_state *udp_setup_r(unsigned short udp_port_, int badger_client_)
 {
-	struct udp_state *ust = US_P calloc(sizeof (struct udp_state), 1);
+	struct udp_state *ust = US_P calloc(1, sizeof (struct udp_state));
 	ust->sleepctr=0;
 	ust->sleepmax=10;
 	fprintf(stderr, "udp_receiver initializing UDP port %u. Interface mode: ", udp_port_);
@@ -121,8 +121,8 @@ struct udp_state *udp_setup_r(unsigned short udp_port_, int badger_client_)
 	}
 	ust->badger_client = badger_client_;
 	/* following could be combined by making second argument to calloc a 2? */
-	struct pbuf *inbuf  = ust->inbuf  = PBUF_P calloc(sizeof(struct pbuf), 1);
-	struct pbuf *outbuf = ust->outbuf = PBUF_P calloc(sizeof(struct pbuf), 1);
+	struct pbuf *inbuf  = ust->inbuf  = PBUF_P calloc(1, sizeof(struct pbuf));
+	struct pbuf *outbuf = ust->outbuf = PBUF_P calloc(1, sizeof(struct pbuf));
 	if (!inbuf || !outbuf) {
 		perror("calloc");
 		exit(1);
@@ -132,7 +132,6 @@ struct udp_state *udp_setup_r(unsigned short udp_port_, int badger_client_)
 		exit(1);
 	}
 	setup_receive(ust->udpfd, INADDR_ANY, udp_port_);
-	/* setup_transmit(udpfd, lskdjfsdlj, 2000); */
 	fcntl(ust->udpfd, F_SETFL, O_NONBLOCK);
 	return ust;
 }
@@ -140,7 +139,7 @@ struct udp_state *udp_setup_r(unsigned short udp_port_, int badger_client_)
 void udp_receiver_r(struct udp_state *ust, int *in_octet, int *in_valid, int *in_count, int thinking)
 {
 	int val = 0;
-	int udp_model_debug = 0;  /* adjustable */
+	const int udp_model_debug = 0;  /* adjustable */
 	struct pbuf *inbuf = ust->inbuf;  /* makes source look cleaner; maybe optimizes away */
 
 	if (inbuf->cur == inbuf->len) {
@@ -158,20 +157,20 @@ void udp_receiver_r(struct udp_state *ust, int *in_octet, int *in_valid, int *in
 			fprintf(stderr, "udp_model: Rx %d udp bytes, source port %u\n", rc, ust->src_addr.sin_port);
 			if (0) {
 				for (unsigned jx=0; jx<ust->src_addrlen; jx++) {
-					fprintf(stderr, " %2.2x", ((char *) &(ust->src_addr))[jx]);
+					fprintf(stderr, " %2.2x", ((unsigned char *) &(ust->src_addr))[jx]);
 				}
 			}
 			inbuf->len = rc;
 			inbuf->cur = 0;
 			ust->sleepctr = 0;
-			ust->preamble_cnt = 18;  /* should be 44(?) but I'm easily bored. */
+			ust->preamble_cnt = 28;  /* should be 44(?) but I'm easily bored. */
 			if (udp_model_debug) {
 				fputs("Rx:", stderr);
 				print_buf(stderr, inbuf);
 			}
 		}
 	}
-	if (ust->badger_client) { // Badger client interface
+	if (ust->badger_client) {  /* Badger client interface */
 		if (ust->preamble_cnt > 0) {
 			--(ust->preamble_cnt);
 			if (in_valid) *in_valid = 1;
@@ -182,6 +181,15 @@ void udp_receiver_r(struct udp_state *ust, int *in_octet, int *in_valid, int *in
 			--(ust->postfix_cnt);
 			if (in_valid) *in_valid = 1;
 			if (in_count) *in_count = 0;
+			return;
+		}
+	} else {
+		/* Even Raw mode needs a well-defined minimum time between packets */
+		if (ust->preamble_cnt > 0) {
+			--(ust->preamble_cnt);
+			if (in_valid) *in_valid = 0;
+			if (in_count) *in_count = 0;
+			if (in_octet) *in_octet = 0;
 			return;
 		}
 	}
@@ -220,9 +228,9 @@ void udp_sender(int out_octet, int out_end)
 void udp_sender_r(struct udp_state *ust, int out_octet, int out_end)
 {
 	struct pbuf *outbuf = ust->outbuf;  /* makes source look cleaner; maybe optimizes away */
-	int udp_model_debug = 0;  /* adjustable */
+	const int udp_model_debug = 0;  /* adjustable */
 	if (1) {
-		if (udp_model_debug) fprintf(stderr, "Trying to write %2.2x\n", out_octet);
+		if (udp_model_debug) fprintf(stderr, "Trying to write %2.2x\n", (unsigned) out_octet);
 		outbuf->buf[outbuf->cur] = out_octet;
 		if (outbuf->cur < ETH_MAXLEN) outbuf->cur++;
 		else fprintf(stderr, "Ethernet output packet too long\n");
@@ -235,7 +243,7 @@ void udp_sender_r(struct udp_state *ust, int out_octet, int out_end)
 		}
 		int rc = sendto(ust->udpfd, outbuf->buf, outbuf->cur, 0, (struct sockaddr *) &(ust->src_addr), ust->src_addrlen);
 		if (rc < 0) perror("sendto");
-		fprintf(stderr, "udp_model: Tx len %d, write rc=%d\n", outbuf->cur, rc);
+		fprintf(stderr, "udp_model: Tx len %u, write rc=%d\n", outbuf->cur, rc);
 		outbuf->cur=0;
 	}
 }

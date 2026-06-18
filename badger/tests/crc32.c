@@ -11,18 +11,14 @@ static uint32_t crc_table[256];
 /* Generate the CRC table. Must be called before calculating the CRC value. */
 void init_crc32(uint32_t poly)
 {
-  uint32_t crc;
-  int i, j;
-
-  for(i = 0; i < 256; i++) {
-    crc = i;
-    for(j = 8; j > 0; j--) {
-      if(crc & 1) crc = (crc >> 1) ^ poly;
+  for(unsigned i = 0; i < 256; i++) {
+    uint32_t crc = i;
+    for(int j = 8; j > 0; j--) {
+      if (crc & 1) crc = (crc >> 1) ^ poly;
       else crc >>= 1;
     }
     crc_table[i] = crc;
   }
-
   crc_table_init = 1;
 }
 

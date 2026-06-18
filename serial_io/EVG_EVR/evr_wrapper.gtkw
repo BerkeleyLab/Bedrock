@@ -1,0 +1,33 @@
+[timestart] 0
+[size] 1920 1033
+[pos] -38 -38
+*-20.301397 1390001 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 278
+[signals_width] 206
+[sst_expanded] 1
+[sst_vpaned_height] 308
+@420
+evr_wrapper.GT_TYPE
+evr_wrapper.FCNT_WIDTH
+@28
+evr_wrapper.gt_refclk_p
+evr_wrapper.dsp_clk
+evr_wrapper.sys_clk
+evr_wrapper.reset_all
+evr_wrapper.evr_charisk[1:0]
+@22
+evr_wrapper.evr_chars[15:0]
+@28
+evr_wrapper.rx_aligned_sys
+evr_wrapper.rx_reset_done_sys
+@22
+evr_wrapper.gt_rx_reset_cnt[31:0]
+@28
+evr_wrapper.gt_refclk_out
+evr_wrapper.evr_clk
+@22
+evr_wrapper.gt_ref_freq[27:0]
+evr_wrapper.gt_rx_freq[27:0]
+evr_wrapper.oc_evr_frequency[27:0]
+[pattern_trace] 1
+[pattern_trace] 0

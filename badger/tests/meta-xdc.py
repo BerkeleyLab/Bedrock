@@ -7,7 +7,7 @@ import re
 
 converter = {"DIFF_HSTL_II_25": ("LVDS_25", "LVCMOS25")}
 
-# original .xdc netlist fle
+# original .xdc netlist file
 xdc_map = {}
 
 
@@ -28,7 +28,7 @@ def merge(xdc_info, vport, force_diff=False):
             if force_diff:
                 diff = True
             else:
-                # Figure out if the port name "looks" differntial
+                # Figure out if the port name "looks" differential
                 # XXX will need to add the case of foo_n[1]
                 diff = len(vport) > 3 and vport[-2:] == "_N" or vport[-2:] == "_P"
             ios2 = converter[ios][0] if diff else converter[ios][1]

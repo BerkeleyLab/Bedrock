@@ -66,6 +66,20 @@ module cryomodule(
 	input lb_read,
 	output [31:0] lb_out
 );
+`undef AUTOMATIC_self
+
+// Note that the following five parameters should all be in the range 0 to 255,
+// in order to be properly read out via config_data0, below.
+parameter circle_aw = 13; // each half of ping-pong buffer is 8K words
+// .. but also allows for testing
+// The next four parameters are all passed to vmod1
+parameter mode_count = 3;  // drives generate loop in cav_elec.v
+parameter mode_shift = 9;
+parameter n_mech_modes = 7;
+parameter df_scale = 9;
+parameter cavity_count = 2;
+parameter cavity_ln = 1;  // ceil(log2(cavity_count))
+
 wire [31:0] clk1x_data;
 wire [16:0] clk1x_addr;
 wire clk1x_write;
@@ -89,22 +103,9 @@ wire lb2_clk = clk1x;
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 `define UNIFORM(x) ((~|(x)) | &(x))  // All 0's or all 1's
 
-// Note that the following five parameters should all be in the range 0 to 255,
-// in order to be properly read out via config_data0, below.
-parameter circle_aw = 13; // each half of ping-pong buffer is 8K words
-// .. but also allows for testing
-// The next four parameters are all passed to vmod1
-parameter mode_count = 3;  // drives generate loop in cav_elec.v
-parameter mode_shift = 9;
-parameter n_mech_modes = 7;
-parameter df_scale = 9;
-parameter cavity_count = 2;
-parameter cavity_ln = 1;  // ceil(log2(cavity_count))
-
 parameter n_cycles = n_mech_modes * 2;
 parameter interp_span = 4;  // ceil(log2(n_cycles))
-`define SLOW_SR_LEN 4*8
-parameter sr_length = `SLOW_SR_LEN;
+parameter sr_length = 4*8;
 
 `ifndef SIMPLE_DEMO
 // Transfer local bus to clk2x domain
@@ -238,13 +239,13 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
    assign slow_data_ready[cavity_n] = circle_data_ready[cavity_n] & ~slow_invalid;  // XXX mixes domains, simulate to make sure it's glitch-free
    // Make our own additions to slow shift register
    // equivalence circle_stat: circle_fault 1, circle_wrap 1, circle_addr 14
-`define SLOW_SR_DATA { circle_count, circle_stat }
+   wire [sr_length-1:0] slow_sr_data = { circle_count, circle_stat };
    // TODO: These `we_*` wires below, are taken from the decode signals that are auto generated
    wire [7:0] slow_shell_out;
 
    reg [sr_length-1:0] slow_read=0;
    always @(posedge clk1x) if (slow_op) begin
-      slow_read <= slow_snap ? `SLOW_SR_DATA : {slow_read[sr_length-9:0],slow_shell_out};
+      slow_read <= slow_snap ? slow_sr_data : {slow_read[sr_length-9:0],slow_shell_out};
    end
    assign slow_out = slow_read[sr_length-1:sr_length-8];
 
@@ -435,8 +436,13 @@ always @(posedge lb_clk) begin
 	lb_addr_d1 <= lb_addr;
 	// Note: use of mirror_out_0 triggers warnings under newad -y
 	// since it's so tightly coupled to operation of newad.  Actually harmless.
-	lb_out_r <= (lb_addr_d1[16:14] == 3'b101) ? circle_out[lb_addr_d1[13]] : ((lb_addr_d1[16:14] == 3'b100) & lb_addr_d1[13]) ? slow_bridge_out[lb_addr_d1[9]] : lb_addr_d1[16]? rom_data: mirror_out_0;
+	lb_out_r <= (lb_addr_d1[16:14] == 3'b101) ? circle_out[lb_addr_d1[13]] :
+		((lb_addr_d1[16:14] == 3'b100) & lb_addr_d1[13]) ? slow_bridge_out[lb_addr_d1[9]] :
+		lb_addr_d1[16] ? rom_data : mirror_out_0;
 end
 assign lb_out = lb_out_r;
+
+`undef SAT
+`undef UNIFORM
 
 endmodule

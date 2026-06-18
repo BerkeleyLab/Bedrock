@@ -26,6 +26,11 @@ GEN_DIR = _gen_rst
 GEN_MD_DIR = _gen_md
 GEN_SRC_DIR = _gen_src_rst
 
+# Works for now, but is an indication that our makefiles need work
+VCD_ARGS = $(VCD_ARGS_$@)
+VCD_ARGS_tgen.vcd = +tgen_seq=../localbus/tgen_seq.dat
+
+# No need to specify directory for each of these, thanks to the magic of make's vpath.
 SRC = \
    afterburner.v \
    async_to_sync_reset_shift.v \
@@ -52,6 +57,7 @@ SRC = \
    double_inte_smp.v \
    double_inte.v \
    dpram.v \
+   evr_ts_cdc.v \
    fchan_subset.v \
    fdownconvert.v \
    fifo.v \
@@ -81,6 +87,7 @@ SRC = \
    mon_2chiq.v \
    mon_chans.v \
    multiply_accumulate.v \
+   multi_counter.v \
    multi_sampler.v \
    pdetect.v \
    ph_acc.v \
@@ -94,6 +101,7 @@ SRC = \
    serializer_multichannel.v \
    serialize.v \
    shortfifo.v \
+   tgen.v \
    timestamp.v \
    tt800.v \
    upconv.v \
@@ -107,7 +115,7 @@ SRC = \
    # lp_notch.v  # must generate _auto files
    # lp.v # must generate _auto files
    # mp_proc.v # must generate _auto files
-   #via.v # not properly formatted for portfind.py
+   # via.v # not properly formatted for portfind.py
 
 STATIC_RST = \
    rtsim-module.rst \
@@ -139,7 +147,10 @@ SRC_MD = \
    dsp/README.md \
    board_support/zest/README.md \
    board_support/bmb7_kintex/README.md \
+   localbus/README.md \
+   localbus/jit_rad.md \
    fpga_family/xilinx/README.md \
+   build-tools/cdc_snitch.md \
    build-tools/newad.md
 
 SRC_SVG = \
@@ -149,9 +160,12 @@ SRC_SVG = \
   badger/doc/tx_path.svg \
   badger/doc/precog_upg.svg \
   peripheral_drivers/i2cbridge/i2c_chunk.svg \
-  peripheral_drivers/i2cbridge/blocks.svg
+  peripheral_drivers/i2cbridge/blocks.svg \
+  build-tools/cdc_BAD.svg \
+  build-tools/cdc_OK1.svg \
+  build-tools/cdc_OKX.svg
 
-DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR)
+DIRS       = $(DSP_DIR) $(BADGER_DIR) $(CORDIC_DIR) $(PICORV_DIR) $(HOMELESS_DIR) $(SERIAL_IO_DIR)/EVG_EVR $(BEDROCK_DIR)/localbus
 VFLAGS     += -y. -I. $(addprefix -y, $(DIRS)) $(addprefix -I, $(DIRS)) -y$(AUTOGEN_DIR)
 
 vpath %.v $(DIRS)
@@ -293,5 +307,5 @@ clean::
 include $(BUILD_DIR)/bottom_rules.mk
 
 CLEAN += $(SRC_RST) $(RST) $(BLOCK_EPS) $(BLOCK_PNG) $(TIMING_PNG) $(GEN_TB) $(addsuffix *, $(DEP_TB)) $(VCD) \
-		 cordicg_b22.v *_tb *.out
+		 cordicg_b22.v *_tb *.out *.pdf
 CLEAN_DIRS += $(GEN_DIR) $(GEN_SRC_DIR) $(GEN_MD_DIR)

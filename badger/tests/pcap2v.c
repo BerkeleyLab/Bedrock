@@ -7,7 +7,7 @@
 #include <string.h>
 #include "crc32.h"
 
-void print_stream(pcap_t *pbuf)
+static void print_stream(pcap_t *pbuf)
 {
 	const unsigned char *packet_data;
 	struct pcap_pkthdr header;
@@ -21,7 +21,7 @@ void print_stream(pcap_t *pbuf)
 		if (memcmp(fpga_mac, packet_data+6, 6) == 0) continue;
 		p_crc = calc_crc32(packet_data, header.len);
 		if (0) {  /* debug */
-			printf("got  %4d %8.8x", header.len, p_crc);
+			printf("got  %4u %8.8x", header.len, p_crc);
 			printf("  source mac");
 			for (ix=0; ix<6; ix++) printf(" %2.2X", packet_data[ix+6]);
 			printf("  dest mac");
@@ -44,7 +44,7 @@ void print_stream(pcap_t *pbuf)
 		total++;
 		/* if (total > 80) break; */
 	}
-	printf("tests %d\n", total);
+	printf("tests %u\n", total);
 }
 
 int main(int argc, char *argv[])

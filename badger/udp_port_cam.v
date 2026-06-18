@@ -32,7 +32,7 @@
 module udp_port_cam #(
 	parameter naw=3  // address width for abstract port memory
 ) (
-	input clk,
+	input clk,  // timespec 6.8 ns
 	input port_s,
 	input [7:0] data,
 	// port to config memory, single-cycle latency

@@ -31,9 +31,8 @@ void mdio_init(void){
 }
 
 void mdio_tx32(const uint32_t dat) {
-    bool bit;
     for (size_t i=32; i; i--){
-        bit = CHECK_BIT(dat, i-1);
+        bool bit = CHECK_BIT(dat, i-1);
         SET_MDIO(bit);
         MDC0();
         MDC1();
@@ -73,12 +72,11 @@ void mdio_write_reg( uint8_t phyAddr, uint8_t regAddr, uint16_t regVal) {
 uint16_t mdio_read_reg( uint8_t phyAddr, uint8_t regAddr) {
     uint16_t assem = 0;
     uint16_t dat = 0;
-    bool bit;
 
     assem = MDIO_ST<<14 | MDIO_OP_R<<12 | (phyAddr & 0x1f)<<7 | (regAddr & 0x1f)<<2 | 0;
     mdio_start();
     for (size_t i=16; i>2; i-- ){
-        bit = CHECK_BIT(assem, i-1);
+        bool bit = CHECK_BIT(assem, i-1);
         SET_MDIO(bit);
         MDC0();
         MDC1();

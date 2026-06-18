@@ -32,6 +32,8 @@ CLEAN_DIRS += _xilinx
 CLEAN_DIRS += ./.Xil
 CLEAN_DIRS += ./obj_dir
 
+VLATOR_LINT_IGNORE += -Wno-UNUSED -Wno-DECLFILENAME
+
 vpath %.v $(DSP_DIR)
 
 include $(BS_HARDWARE_DIR)/rules.mk
@@ -55,17 +57,17 @@ Voscope_top_leep: Voscope_top_tb $(APP_NAME)_regmap.json
 	@echo "----- Oscope leep list self-test -----"
 	timeout 20 ./$< &
 	PYTHONPATH=$(PROJECTS_DIR)/common/ $(PYTHON) -m leep.cli leep://localhost:3010 list > leep_list.txt
-	awk -F'"' '/ {/{print $$2}' $(APP_NAME)_regmap.json | cmp leep_list.txt -
+	$(AWK) -F'"' '/ {/{print $$2}' $(APP_NAME)_regmap.json | cmp leep_list.txt -
 
 Voscope_top_live: Voscope_top_tb $(APP_NAME)_regmap.json
 	@echo "----- Oscope build rom live test -----"
 	timeout 20 ./$< &
-	PYTHONPATH=$(PROJECTS_DIR)/common/ $(PYTHON) $(BUILD_DIR)/build_rom.py --live -a localhost -p 3010
+	PYTHONPATH=$(PROJECTS_DIR)/common/ $(PYTHON) -m leep.build_rom --live -a localhost -p 3010
 
 system_top.xdc: $(APP_NAME)_orig_special.xdc $(APP_NAME)_common.xdc
 
-$(AUTOGEN_DIR)/config_romx.v: $(BUILD_DIR)/build_rom.py $(APP_NAME)_regmap.json
-	$(PYTHON) $< -v $@ -j $(APP_NAME)_regmap.json
+$(AUTOGEN_DIR)/config_romx.v: $(APP_NAME)_regmap.json
+	$(PYTHON) -m leep.build_rom -v $@ -j $(APP_NAME)_regmap.json
 
 scalar_$(APP_NAME)_regmap.json: $(OSCOPE_COMMON_DIR)/application_top.sv
 	$(PYTHON) $(BUILD_DIR)/reverse_json.py $< > $@

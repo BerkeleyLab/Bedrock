@@ -24,6 +24,7 @@ always @(posedge clk) begin
 	if (~iq) mag1 <= sqr2+sqr3+1;
 	mag2 <= `SAT(mag1,19,18);
 end
+`undef SAT
 // mag2 must be positive!
 assign mag2_out = mag2;
 

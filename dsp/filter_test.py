@@ -118,12 +118,12 @@ def check_tf(freq, gain, phase, tb_cfg, plot=False):
     fmeas = c_est
     fspec = tb_cfg["fcorner"]
     diff = (np.log10(fmeas) - np.log10(fspec))/np.log10(fspec)
-    if (abs(diff) > 0.1):
+    if abs(diff) > 0.1:
         print("FAIL: Measured 3dB corner (%.1f) too far from spec (%.1f)!" % (fmeas, fspec))
         fail = True
     sspec = tb_cfg["slope"]
     diff = (slope - sspec)/sspec
-    if (abs(diff) > 0.1):
+    if abs(diff) > 0.1:
         print("FAIL: Measured slope (%.3f) too far from spec (%.3f)!" % (slope, sspec))
         fail = True
 

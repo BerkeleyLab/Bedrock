@@ -7,7 +7,7 @@
 module llspi #(
 	parameter dbg = "false",
 	parameter pace_set = 6,   // Can override to 2 or 3 for testing
-	parameter infifo_aw=5
+	parameter infifo_aw = 5
 ) (
 	input clk,  // timespec 5.3 ns
 	// Physical FMC pins connected to digitizer board
@@ -139,7 +139,7 @@ spi_eater eater(.clk(clk), .pace(pace), .empty(empty),
 
 // Read results get pushed into this FIFO
 wire [7:0] result_unlatched;
-wire [3:0] result_count;
+wire [4:0] result_count;
 shortfifo #(.dw(8), .aw(4)) output_fifo(.clk(clk),
 	.we(result_we), .din(result),
 	.re(result_re), .dout(result_unlatched),
@@ -148,6 +148,8 @@ shortfifo #(.dw(8), .aw(4)) output_fifo(.clk(clk),
 always @(posedge clk) if (result_re) host_result <= result_unlatched;
 
 // Status register available for host polling
-assign status = {3'b0, empty, result_count};
+// If you push 16 results into shortfifo, don't expect to get
+// a useful result from this status register!
+assign status = {3'b0, empty, result_count[3:0]};
 
 endmodule

@@ -46,7 +46,7 @@ always @(posedge clk) case (mode)
 	end
 	2: begin
 		mode <= 3;
-		len_req_r <= host_d;
+		len_req_r <= host_d[10:0];
 		odd_octet <= 0;
 		req_r <= 1;
 	end

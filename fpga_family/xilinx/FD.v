@@ -1,4 +1,8 @@
-module FD (output Q, input C, input D);
+module FD (
+	output Q,
+	input C,
+	input D
+);
 
 parameter INIT = 0;
 reg r = INIT;

@@ -42,6 +42,7 @@ always @(posedge clk) begin
 	sum_iq <= prod_iq_lim + drive_iq;
 	sum_iq_s <= `SAT(sum_iq,18,17);
 end
+`undef SAT
 
 assign out_iq=sum_iq_s;
 

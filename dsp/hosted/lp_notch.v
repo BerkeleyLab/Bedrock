@@ -16,6 +16,7 @@ module lp_notch(
 	output signed [19:0] y,
 	`AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 

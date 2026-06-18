@@ -117,10 +117,10 @@ module spi_mon #(
    // Instruction decoding
    reg start=0;
    reg [2:0] word=0, word_r=0;
-   reg [1:0] rsvd;
-   reg rnw;
-   reg [3:0] hw_sel, hw_sel_r=0;
-   reg [31:0] spi_cmd;
+   reg [1:0] rsvd=0;
+   reg rnw=0;
+   reg [3:0] hw_sel=0, hw_sel_r=0;
+   reg [31:0] spi_cmd=0;
    reg spi_cmd_v=0;
    always @(posedge clk) begin
       if (!en) begin

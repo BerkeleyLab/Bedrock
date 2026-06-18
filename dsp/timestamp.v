@@ -101,8 +101,8 @@ assign shift_in2 = aux_reg ? (apost8 ? ashiftd : axmit ? asnap_out : 0) : shift_
 // Making an explicit copy like this avoids a warning when dw != 8
 assign shift_out=snap_out;
 
-// More-or-less equivalent to
-// define SLOW_SR_DATA { time1, time2, time3, time4, atime1, atime2, atime3, atime4 }
-// but uses far fewer resources
+// More-or-less equivalent to adding
+//   { time1, time2, time3, time4, atime1, atime2, atime3, atime4 }
+// to slow_sr_data, but uses far fewer resources
 
 endmodule

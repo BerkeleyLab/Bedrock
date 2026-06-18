@@ -1,0 +1,114 @@
+[timestart] 8597700
+[size] 1008 600
+[pos] -1 -1
+*-14.893795 8616000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] awg_tb.
+[treeopen] awg_tb.cpu.
+[treeopen] awg_tb.cpu.picorv32_core.
+[sst_width] 253
+[signals_width] 282
+[sst_expanded] 1
+[sst_vpaned_height] 151
+@800200
+-cpu
+@c00820
+awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+@28
+(0)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(1)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(2)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(3)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(4)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(5)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(6)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(7)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(8)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(9)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(10)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(11)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(12)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(13)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(14)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(15)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(16)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(17)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(18)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(19)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(20)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(21)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(22)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(23)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(24)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(25)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(26)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(27)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(28)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(29)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(30)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(31)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(32)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(33)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(34)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(35)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(36)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(37)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(38)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(39)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(40)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(41)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(42)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(43)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(44)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(45)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(46)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(47)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(48)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(49)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(50)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(51)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(52)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(53)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(54)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(55)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(56)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(57)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(58)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(59)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(60)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(61)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(62)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+(63)awg_tb.cpu.picorv32_core.dbg_ascii_instr[63:0]
+@1401200
+-group_end
+@22
+awg_tb.cpu.picorv32_core.dbg_mem_addr[31:0]
+@28
+awg_tb.cpu.picorv32_core.dbg_mem_instr
+awg_tb.cpu.picorv32_core.dbg_mem_valid
+@22
+awg_tb.cpu.picorv32_core.dbg_mem_wdata[31:0]
+@c00022
+awg_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+@28
+(0)awg_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+(1)awg_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+(2)awg_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+(3)awg_tb.cpu.picorv32_core.dbg_mem_wstrb[3:0]
+@1401200
+-group_end
+@28
+awg_tb.cpu.picorv32_core.dbg_mem_ready
+@22
+awg_tb.cpu.picorv32_core.dbg_mem_rdata[31:0]
+@1000200
+-cpu
+@28
+awg_tb.dut.mem_addr_hit
+awg_tb.dsp_clk
+awg_tb.dut.trig
+awg_tb.cpu.trap
+awg_tb.dut.d_out_valid
+@25
+awg_tb.dut.d_out_data[15:0]
+[pattern_trace] 1
+[pattern_trace] 0

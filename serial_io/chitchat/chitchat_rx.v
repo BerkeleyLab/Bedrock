@@ -22,11 +22,13 @@ module chitchat_rx #(
    input  [1:0]  gtx_k, // Signals per-byte comma char
 
    // Status outputs
-   output [2:0]  ccrx_fault,     // Error during decoding [0] - Incorrect protocol,
-                                 //                       [1] - CRC fail,
-                                 //                       [2] - Incorrect frame number
+   output [3:0]  ccrx_fault,     // Error during decoding [0] - Timeout,
+                                 //                       [1] - Incorrect protocol,
+                                 //                       [2] - CRC fail,
+                                 //                       [3] - Incorrect frame number
    output [15:0] ccrx_fault_cnt,
-   output        ccrx_los,        // Loss of sync - No comma characters for one period
+   output        ccrx_los,        // Loss of sync - invalid input
+                                  // will auto-recover after a few valid frames
    output        ccrx_frame_drop, // Signal dropped frame
 
    // Application-level outputs
@@ -71,8 +73,8 @@ module chitchat_rx #(
       .crc  (crc_rx)
    );
 
-   // Error checking
-   integer link_up_cnt = 0;
+   // Error checking; LINK_UP_CNT defined in chitchat_pack.vh
+   reg [7:0] link_up_cnt = 0;
    wire    link_up     = link_up_cnt == LINK_UP_CNT;
    wire    link_up_inc = (link_up_cnt < LINK_UP_CNT) ? 1 : 0;
 
@@ -81,18 +83,20 @@ module chitchat_rx #(
    wire crc_fault = last & ~crc_zero;
 
    reg         los_r   = 0;
-   reg  [2:0]  fault_r = 0;
+   reg  [3:0]  fault_r = 0, fault_rr = 0;
    reg  [15:0] fault_cnt_r = 0;
-   wire [2:0]  faults      = {wrong_frame, crc_fault, wrong_prot};
+   wire [3:0]  faults      = {wrong_frame, crc_fault, wrong_prot, timeout};
 
    always @(posedge clk) begin
       rx_valid_r   <= 0;
       frame_drop_r <= 0;
+      los_r <= ~link_up;
       if (last | timeout) begin
-         los_r <= timeout;
-         if (|faults || timeout) begin
+         if (|faults) begin
             link_up_cnt  <= 0;
             frame_drop_r <= last;
+            fault_r      <= faults; // Latch decoding errors
+            fault_cnt_r  <= fault_cnt_r + 1;
          end else begin
             link_up_cnt  <= link_up_cnt + link_up_inc;
             rx_valid_r   <= link_up;
@@ -100,10 +104,9 @@ module chitchat_rx #(
             fault_r      <= 0; // Clear decoding errors
          end
       end
-      if (|link_up_cnt && |faults) begin
-         fault_r      <= faults; // Latch decoding errors
-         fault_cnt_r  <= fault_cnt_r + 1;
-      end
+      // Time-align with los_r, and hold on to the last fault
+      // as link_up_count increments (when there are no new faults).
+      if (|faults || link_up) fault_rr <= fault_r;
    end
 
    // Output value unpacking
@@ -122,6 +125,9 @@ module chitchat_rx #(
    reg [15:0] rx_frame_counter_r = 0;
    reg [15:0] rx_loopback_frame_counter_r;
 
+   // Notice pipelining - these are captured when word_count == 0
+   wire mismatch_protocol = gtx_dd[15:15-3] != CC_PROTOCOL_CAT;
+   wire mismatch_gatetype = gtx_d[15:15-2] != RX_GATEWARE_TYPE;
    always @(posedge clk) begin
       last               <= 0;
       gtx_dd             <= gtx_d;
@@ -135,11 +141,9 @@ module chitchat_rx #(
          // Pipeline decoding of Word 0 since next gtx_k arrives before
          // current frame has been fully decoded
          {protocol_cat, rx_protocol_ver_r, comma_pad}  <= gtx_dd;
-         wrong_prot <= gtx_dd[15:15-3] != CC_PROTOCOL_CAT;
-
          // Word 1
          {rx_gateware_type_r, rx_location_r, reserved} <= gtx_d;
-         wrong_prot <= gtx_d[15:15-2] != RX_GATEWARE_TYPE;
+         wrong_prot <= mismatch_protocol | mismatch_gatetype;
       end
 
       if (word_count==2) rx_rev_id_r <= {gtx_dd, gtx_d};
@@ -159,7 +163,7 @@ module chitchat_rx #(
    end
 
    // Drive output pins
-   assign ccrx_fault      = fault_r;
+   assign ccrx_fault      = fault_rr;
    assign ccrx_los        = los_r;
    assign ccrx_fault_cnt  = fault_cnt_r;
    assign ccrx_frame_drop = frame_drop_r;

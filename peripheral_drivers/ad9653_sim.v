@@ -16,13 +16,14 @@ always @(posedge clk) begin
 	sr <= {sr[22:0], SDIO_OLM};
 	if (state==0) write_mode <= ~SDIO_OLM;
 end
+reg drive_sdio_r=0;
 always @(negedge CSB) begin
 	state <= 0;
 	write_mode <= 0;
 	drive_sdio_r <= 0;
 end
 
-reg drive_sdio_r=0, sdio_odata=0;
+reg sdio_odata=0;
 always @(negedge clk) begin
 	drive_sdio_r <= ~write_mode & (state > 15);
 	sdio_odata <= ~state[0]^state[2];  // XXX totally bogus

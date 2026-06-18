@@ -57,11 +57,9 @@ module station(
   // Local Bus for simulator configuration
   `AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
-
-`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
-`define UNIFORM(x) ((~|(x)) | &(x))  // All 0's or all 1's
 
 // Virtual Piezo
 // Couple the piezo to mechanical drive
@@ -131,4 +129,5 @@ adc_em #(.del(1)) a_for // auto
 adc_em #(.del(1)) a_rfl // auto
 	(.clk(clk), .strobe(iq), .in(reflect), .rnd(rndb[12: 0]), .adc(a_reflect), `AUTOMATIC_a_rfl);
 
+`undef AUTOMATIC_prng
 endmodule

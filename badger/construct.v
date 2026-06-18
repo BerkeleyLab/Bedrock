@@ -17,7 +17,7 @@ module construct #(
 	// allowance Rx/Tx frequency offset.
 	// At the other end, p_offset + max(fp_offset) < (2048-MTU-guard)
 ) (
-	input clk,
+	input clk,  // timespec 6.8 ns
 	input [paw-1:0] gray_state,
 	// port to MAC/IP config, single-cycle latency
 	output [3:0] ip_a,
@@ -39,15 +39,16 @@ module construct #(
 	output eth_strobe_short  // doesn't
 );
 
-// Capture state across clock domains, convert back to binary
-reg [paw-1:0] gray_l=0, state=0;
+// Capture state across clock domains, then convert back to binary
+wire [paw-1:0] gray_l;
+// Better to pull this first step up to rtefi_center?
+reg_tech_cdc gcx[paw-1:0] (.C(clk), .I(gray_state), .O(gray_l));
+// verilator lint_save
 // verilator lint_off UNOPTFLAT
 wire [paw-1:0] new_state = gray_l ^ {1'b0, new_state[paw-1:1]};
-// verilator lint_on UNOPTFLAT
-always @(posedge clk) begin
-	gray_l <= gray_state;
-	state <= new_state;
-end
+// verilator lint_restore
+reg [paw-1:0] state=0;
+always @(posedge clk) state <= new_state;
 
 // Debugging hook
 reg [paw-1:0] old_state=0, state_diff=0;
@@ -99,7 +100,7 @@ reg sof_d=0;
 // Would it take fewer resources to replace sof_d with (live && pc_r == 2)?
 // Or to replace (live && pc_r==3) with sof_dd?  Need to measure to find out.
 // Could be worth breaking this up into 2 always blocks (badge and data)?
-// Not really, they both have to touch the "live" register.
+// Not really, since they both have to touch the "live" register.
 always @(posedge clk) begin
 	pc_r <= next_pc;
 	sof_d <= sof;
@@ -184,7 +185,7 @@ assign eth_strobe_short = eth_strobe_short_r;
 assign eth_strobe_long = pack_len_nz && pc_r > 3 && category != 0;
 assign pc = pc_d;
 
-// Debug only, will be dropped if you don't hook up the xcheck_fault port:
+// Debug only; will be dropped if you don't hook up the xcheck_fault port:
 // Cross-check the IP header checksum we just computed
 reg xcheck_zero=0, xcheck_gate=0, xcheck_ones_d=0;
 reg xcheck_capture=0, xcheck_fault_r=0;

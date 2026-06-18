@@ -135,7 +135,7 @@ There have been [many attempts](https://en.wikipedia.org/wiki/List_of_build_auto
 continuing today, to build on, enhance, or replace make.
 Two in particular attempt to address the needs of an HDL environment.
 
- * [Hdlmake](https://www.ohwr.org/project/hdl-make/wikis/home)
+ * [Hdlmake](https://ohwr.org/project/hdl-make/-/wikis/home)
  * [FuseSoC](https://pypi.org/project/fusesoc/)
 
 Our experiments with these tools have generally been frustrating.

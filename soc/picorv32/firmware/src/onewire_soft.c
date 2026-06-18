@@ -202,9 +202,8 @@ bool onewire_search(uint8_t *newAddr)
     uint8_t id_bit_number;
     uint8_t last_zero, rom_byte_number;
     bool    search_result;
-    uint8_t id_bit, cmp_id_bit;
 
-    unsigned char rom_byte_mask, search_direction;
+    unsigned char rom_byte_mask;
 
     // initialize for search
     id_bit_number = 1;
@@ -234,13 +233,14 @@ bool onewire_search(uint8_t *newAddr)
         // loop to do the search
         do {
             // read a bit and its complement
-            id_bit = onewire_bit(1);
-            cmp_id_bit = onewire_bit(1);
+            uint8_t id_bit = onewire_bit(1);
+            uint8_t cmp_id_bit = onewire_bit(1);
 
             // check for no devices on 1-wire
             if ((id_bit == 1) && (cmp_id_bit == 1)) {
                 break;
             } else {
+                unsigned char search_direction;
                 // all devices coupled have 0 or 1
                 if (id_bit != cmp_id_bit) {
                     search_direction = id_bit;  // bit write value for search

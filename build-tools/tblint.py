@@ -252,7 +252,7 @@ def testMatch(argv):
 
 def doLint(argv):
     USAGE = ("python3 {0} filename\n" +
-            "  Use python3 {0} --selftest to run regex syntax tests").format(argv[0])
+             "  Use python3 {0} --selftest to run regex syntax tests").format(argv[0])
     if len(argv) < 2:
         print(USAGE)
         print(SYNTAX_RULES)

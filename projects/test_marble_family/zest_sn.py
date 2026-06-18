@@ -2,9 +2,7 @@
 # using Marble i2c bridge functionality.
 # More, generally, interacts with EEPROM address 0xa0 on FMC 1.
 import sys
-# bedrock_dir = "../../"
-import os
-bedrock_dir = os.path.dirname(__file__) + "/../../"
+bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
 import assem
@@ -69,7 +67,7 @@ def hw_test_prog(rom_addr=0, new_sn=None):
 def run_eeprom(dev, new_sn, verbose=False, debug=False):
     # using keyword just to keep print consistent
     prog = hw_test_prog(new_sn=new_sn)
-    result = testcase.run_testcase(dev, prog, result_len=359, debug=debug, verbose=verbose)
+    result = testcase.run_testcase(dev, prog, result_len=361, debug=debug, verbose=verbose)
     if debug:
         print(" ".join(["%2.2x" % p for p in prog]))
         print("")
@@ -88,8 +86,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(
         description="Utility for configuring Zest (FMC) serial string with i2cbridge attached to Packet Badger")
-    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
-    parser.add_argument('-p', '--port', type=int, default=803, help='Port number')
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='Port number (default 803)')
     parser.add_argument('-s', '--new_sn', type=str, default=None, help='New FMC serial ID')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
     parser.add_argument('-d', '--debug', action='store_true', help='print raw arrays')
@@ -99,7 +97,7 @@ if __name__ == "__main__":
     # dev = lbus_access.lbus_access(args.addr, port=args.port, timeout=3.0, allow_burst=False)
     leep_addr = "leep://" + args.addr + ":" + str(args.port)
     # print(leep_addr)
-    dev = leep.open(leep_addr)
+    dev = leep.open(leep_addr, timeout=5.0)
 
     sn = run_eeprom(dev, args.new_sn, verbose=args.verbose, debug=args.debug)
     print(sn)

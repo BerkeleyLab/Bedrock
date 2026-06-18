@@ -41,11 +41,8 @@ uint32_t AD7193_GetDataContinuous() {
 }
 
 uint32_t * AD7193_GetDataContinuousArray() {
-    int ix;
-    uint32_t val;
-
-    for (ix = 0; ix < 8; ix++) {
-        val = AD7193_GetDataContinuous();
+    for (int ix = 0; ix < 8; ix++) {
+        uint32_t val = AD7193_GetDataContinuous();
         adcValues[val & 0xf] = val >> 8;
     };
     return adcValues;

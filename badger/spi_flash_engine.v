@@ -101,11 +101,12 @@ assign spi_mosi=sr[7]&spi_cs_r;
 wire [7:0] pack_data_in_rev={
 	pack_data_in[0], pack_data_in[1], pack_data_in[2], pack_data_in[3],
 	pack_data_in[4], pack_data_in[5], pack_data_in[6], pack_data_in[7]};
-reg odd=0, icap_clk=0, icap_we=0, icap_en2=0;
+reg odd=0, icap_clk=0;
+// reg icap_we=0, icap_en2=0;  // when were these used?
 reg [7:0] icap_upper_data=0;
 always @(posedge clk) begin
-	if (word2) icap_en2 <= icap_en;
-	if (word3) icap_we <= icap_en2 & odd;
+	// if (word2) icap_en2 <= icap_en;
+	// if (word3) icap_we <= icap_en2 & odd;
 	if (word3) icap_upper_data <= pack_data_in_rev;
 	if (word & icap_en) odd <= ~odd;
 	icap_clk <= subtick[6] & odd & ~word2;

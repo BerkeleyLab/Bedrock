@@ -69,7 +69,7 @@ def add_to_global_map(name, base_addr, sign, aw, dw, description):
 
 
 def generate_addresses(
-    fd, names, base, low_res=False, gen_mirror=False, plot_map=False
+    fd, names, base, low_res=False, gen_mirror=False, plot_map=False, lb_width=24
 ):
     """
     Generate addresses with increasing bitwidth
@@ -89,9 +89,9 @@ def generate_addresses(
         bitwidth = gch[k][0]
         register_array_size = 1 << gch[k][0]
         if (
-            gen_mirror
-            and mirror_base == -1
-            and register_array_size <= MIN_MIRROR_ARRAY_SIZE
+            gen_mirror and
+            mirror_base == -1 and
+            register_array_size <= MIN_MIRROR_ARRAY_SIZE
         ):
             mirror_base = base
             mirror_bit_len = mirror_size.bit_length()
@@ -113,10 +113,13 @@ def generate_addresses(
                 )
             mirror_clk_prefix = "lb"  # TODO: This is a hack
             if fd:
+                # Note the historical, buggy definition of lb_width as one less than
+                # the actual address bus bit-width.
+                mirror_pattern = (mirror_base & (2**(lb_width+1)-1)) >> mirror_bit_len
                 s = (
                     "`define MIRROR_WIDTH %d\n"
                     "`define ADDR_HIT_MIRROR (%s_addr[`LB_HI:`MIRROR_WIDTH]==%d)\n"
-                    % (mirror_bit_len, mirror_clk_prefix, mirror_base >> mirror_bit_len)
+                    % (mirror_bit_len, mirror_clk_prefix, mirror_pattern)
                 )
                 fd.write(s)
         sign = gch[k][2]
@@ -146,6 +149,9 @@ def generate_addresses(
                 "`define ADDR_HIT_%s (%s_addr%s[`LB_HI:%d]==%d) "
                 "// %s bitwidth: %d, base_addr: %d\n"
             )
+            # Note the historical, buggy definition of lb_width as one less than
+            # the actual address bus bit-width.
+            addr_pattern = (next_addr & (2**(lb_width+1)-1)) >> bitwidth
             fd.write(
                 s
                 % (
@@ -153,7 +159,7 @@ def generate_addresses(
                     gch[k][4],
                     gch[k][5],
                     bitwidth,
-                    next_addr >> bitwidth,
+                    addr_pattern,
                     gch[k][1],
                     bitwidth,
                     next_addr,
@@ -179,7 +185,7 @@ g_hierarchy = ["xxxx", "station", "cav4_elec", ["mode_", 3]]
 
 
 def address_allocation(
-    fd, hierarchy, names, address, low_res=False, gen_mirror=False, plot_map=False
+    fd, hierarchy, names, address, low_res=False, gen_mirror=False, plot_map=False, lb_width=24
 ):
     """
     NOTE: The whole hierarchy thing is currently being bypassed
@@ -194,7 +200,7 @@ def address_allocation(
     (b) generate addresses for signals outside the hierarchy (out_mod)
     """
     if hierarchy == len(g_hierarchy):
-        return generate_addresses(fd, names, address, low_res, gen_mirror, plot_map)
+        return generate_addresses(fd, names, address, low_res, gen_mirror, plot_map, lb_width)
     h = g_hierarchy[hierarchy]
     in_mod, out_mod = [], []
     if type(h) is list:
@@ -209,15 +215,16 @@ def address_allocation(
                 low_res,
                 gen_mirror,
                 plot_map,
+                lb_width,
             )
         out_mod = [n for n in names if prefix not in n]
     else:
         for n in names:
             (in_mod if h in n else out_mod).append(n)
         address = address_allocation(
-            fd, hierarchy + 1, in_mod, address, low_res, gen_mirror, plot_map
+            fd, hierarchy + 1, in_mod, address, low_res, gen_mirror, plot_map, lb_width
         )
-    return generate_addresses(fd, out_mod, address, low_res, gen_mirror, plot_map)
+    return generate_addresses(fd, out_mod, address, low_res, gen_mirror, plot_map, lb_width)
 
 
 from parser import Parser
@@ -260,9 +267,9 @@ def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror, use_yos
     # Below only applies for modules with genvar constructions
     if modname in vfile_parser.self_map:
         obuf.write(
-            "`define AUTOMATIC_map "
-            + " ".join(vfile_parser.self_map[modname] if modname in vfile_parser.self_map else [])
-            + "\n"
+            "`define AUTOMATIC_map " +
+            " ".join(vfile_parser.self_map[modname] if modname in vfile_parser.self_map else []) +
+            "\n"
         )
     if fo:
         with open(fo, "w") as fd:
@@ -276,7 +283,7 @@ def write_address_header(
     addr_bufs = StringIO()
     addr_bufs.write("`define LB_HI %d\n" % lb_width)
     address_allocation(
-        addr_bufs, 0, sorted(gch.keys()), base_addr, low_res, gen_mirror, plot_map
+        addr_bufs, 0, sorted(gch.keys()), base_addr, low_res, gen_mirror, plot_map, lb_width
     )
     with open(output_file, "w") as fd:
         fd.write(addr_bufs.getvalue())
@@ -363,7 +370,7 @@ def main(argv):
         "--lb_width",
         type=int,
         default=10,
-        help="Set the address width of the local bus from which the generated registers are decoded",
+        help="One less than the address width of the local bus (from which the generated registers are decoded)",
     )
     parser.add_argument(
         "-b",

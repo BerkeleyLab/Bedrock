@@ -27,6 +27,7 @@ module rtefi_center #(
 	// plug-ins.  Generally the UDP port numbers should be "well known",
 	// but the case can be made to have them run-time override-able (without
 	// resynthesizing) to help cope with unexpected network issues.
+	// When a udp_port number is set to 0, that port is disabled.
 	parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4},  // 192.168.7.4
 	parameter [47:0] mac = 48'h12555500012d,
 	parameter udp_port0 = 7,
@@ -48,6 +49,8 @@ module rtefi_center #(
 	output [7:0] txd,
 	output tx_en,
 	// Configuration
+	// When changing configuration (like IP) at run time with these ports,
+	// it's recommended to turn off enable_rx during that process.
 	input enable_rx,
 	input config_clk,
 	input [3:0] config_a,
@@ -105,7 +108,7 @@ end
 
 // First real step: scan the input packet
 wire [3:0] ip_a;  reg [7:0] ip_d=0;  // MAC/IP config, Rx side
-wire [3:0] pno_a; reg [7:0] pno_d;  // UDP port numbers
+wire [3:0] pno_a; reg [7:0] pno_d=0;  // UDP port numbers
 wire [7:0] sdata;
 wire scanner_busy;
 wire sdata_s, sdata_l;
@@ -123,6 +126,9 @@ scanner #(.handle_arp(handle_arp), .handle_icmp(handle_icmp)) a_scan(
 );
 assign rx_mac_status_d = status_vec;
 assign rx_mac_status_s = status_valid;
+`ifdef SIMULATE
+// always @(negedge rx_clk) if (status_valid) $display("Rx scanner status %x", status_vec);
+`endif
 
 // Second step: create data flow to DPRAM
 wire [paw-1:0] pbuf_a_rx, gray_state;
@@ -137,22 +143,20 @@ pbuf_writer #(.paw(paw)) b_write(.clk(rx_clk),
 	.gray_state(gray_state),
 	.badge_stb(ibadge_stb)
 );
-assign ibadge_data = pbuf_din;
+assign ibadge_data = pbuf_din[7:0];
 
 // 1 MTU DPRAM; note the ninth bit used to mark Start of Frame.
-// Also note the lack of a write-enable, just write every cycle.
+// Also note the lack of a write-enable; just write every cycle.
+// I hate jumbo frames.  Expect paw=11, so memory is big enough to hold 1500 MTU.
 reg [8:0] pbuf[0:(1<<paw)-1];
-reg [8:0] pbuf_out;
-`ifndef YOSYS
-initial pbuf_out=0;
-`endif
+reg [8:0] pbuf_out=0;
 wire [paw-1:0] mem_a2;  // see below
 always @(posedge rx_clk) pbuf[pbuf_a_rx] <= pbuf_din;
 always @(posedge tx_clk) pbuf_out <= pbuf[mem_a2];
 integer jx;
 initial for (jx=0; jx<(1<<paw); jx=jx+1) pbuf[jx]=0;
 
-// Third step, sift through that packet's data to
+// Third step: sift through that packet's data to
 // synthesize the reply packet's header
 wire [3:0] ip_mem_a_tx;  reg[7:0] ip_mem_d_tx=0;  // MAC/IP config, Tx side
 // Signals sent from construct to xformer
@@ -208,9 +212,11 @@ generate if (mac_aw > 1) begin : mac_b
 	.strobe_l(tx_mac_strobe_l)
     );
 end else begin : no_mac_b
+	assign host_raddr = 0;
 	assign tx_mac_strobe_s = 0;
 	assign tx_mac_strobe_l = 0;
 	assign tx_mac_data = 0;
+	assign tx_mac_done = 0;
 end endgenerate
 
 // Slide data from Tx MAC in here
@@ -241,7 +247,7 @@ assign tx_en = eth_out_s_r;
 assign rx_mon = eth_in_s_r;
 assign tx_mon = opack_s;
 
-// Hook for testing, not intended to be connected in hardware
+// Hook for testing; not intended to be connected in hardware
 reg [paw-1:0] in_use_timer=0;
 assign in_use = |in_use_timer;
 always @(posedge rx_clk) begin

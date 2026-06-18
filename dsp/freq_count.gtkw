@@ -3,11 +3,12 @@
 [pos] -1 -1
 *-6.533834 3870 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] freq_count_tb.
-[sst_width] 210
+[sst_width] 213
 [signals_width] 174
 [sst_expanded] 1
 [sst_vpaned_height] 154
 @28
+freq_count_tb.clk
 freq_count_tb.f_in
 @22
 freq_count_tb.diff_stream[15:0]
@@ -15,12 +16,14 @@ freq_count_tb.diff_stream[15:0]
 freq_count_tb.diff_stream_strobe
 @24
 freq_count_tb.frequency[27:0]
+@28
+freq_count_tb.mut.freq_strobe
 @22
-freq_count_tb.mut.gray1[3:0]
-freq_count_tb.mut.gray3[3:0]
+freq_count_tb.mut.work.gray1[3:0]
+freq_count_tb.mut.work.gray3[3:0]
 @24
-freq_count_tb.mut.diff1[3:0]
+freq_count_tb.mut.work.diff1[3:0]
 freq_count_tb.mut.refcnt[5:0]
-freq_count_tb.mut.accum[27:0]
+freq_count_tb.mut.work.accum[27:0]
 [pattern_trace] 1
 [pattern_trace] 0

@@ -4,6 +4,7 @@
 #----------------------------
 # send:    "ok\n"
 # receive: "g"                         Wait max. BOOTLOADER_DELAY cycles, then jump into user app
+#  (or receive "q" and jump without delay to user app)
 # send:    "o\n"
 # receive: <N[3]><N[2]><N[1]><N[0]>    N = number of bytes to write to mem
 # receive: <D[0]> ...      <D[N-1]>    Receive data and write it to mem starting at _startup_adr
@@ -39,12 +40,14 @@ start_bootloader:
 
     # Wait for start character
     li    t0, 'g'            # the start char. to wait for
+    li    t4, 'q'            # the abort char., also to wait for
     li    t1, 0              # t1 = 0, timeout counter
     li    t2, BOOTLOADER_DELAY# t2 max. timeout count
 wait_loop:
     bgeu  t1, t2, finished   # if( t1 > max. timeout ) goto finished
     addi  t1, t1, 1          # t1++
     lw    t3, 0x08(gp)       # Get character from UART into t3
+    beq   t3, t4, finished   # skip the timeout
     bne   t3, t0, wait_loop  # check t3 != 'g'
 
     # When we are here, we have received 'g' and not timed out

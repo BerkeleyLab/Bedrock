@@ -15,7 +15,5 @@ set_property -dict "PACKAGE_PIN T24 IOSTANDARD LVCMOS33" [get_ports {LED[1]}]
 set_property -dict "PACKAGE_PIN T25 IOSTANDARD LVCMOS33" [get_ports {LED[2]}]
 set_property -dict "PACKAGE_PIN R26 IOSTANDARD LVCMOS33" [get_ports {LED[3]}]
 
-set_property -dict "PACKAGE_PIN U4 IOSTANDARD LVCMOS15" [get_ports {RESET}]
-
 # UG471 page 50
-set_property INTERNAL_VREF 0.90 [get_banks BANK13]
+set_property INTERNAL_VREF 0.90 [get_iobanks 13]

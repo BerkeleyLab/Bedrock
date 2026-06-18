@@ -92,8 +92,8 @@ module enc_8b10b (datain, dispin, dataout, dispout) ;
   //    K29 is 11101
   //    K30 is 11110 - so K23/27/29/30 are ei & l31
   wire illegalk = ki &
-		  (ai | bi | !ci | !di | !ei) & // not K28.0->7
-		  (!fi | !gi | !hi | !ei | !l31) ; // not K23/27/29/30.7
+                  (ai | bi | !ci | !di | !ei) & // not K28.0->7
+                  (!fi | !gi | !hi | !ei | !l31) ; // not K23/27/29/30.7
 
   // now determine whether to do the complementing
   // complement if prev disp is - and pd1s6 is set, or + and nd1s6 is set

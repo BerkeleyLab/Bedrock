@@ -9,6 +9,8 @@ module evrSROC_tb;
 
    localparam SIM_TIME = 1e6;
 
+   reg sysClk = 0;
+   reg evrClk = 0;
    reg fail=1;
    initial begin
       if ($test$plusargs("vcd")) begin
@@ -25,8 +27,6 @@ module evrSROC_tb;
       end
    end
 
-   reg sysClk = 0;
-   reg evrClk = 0;
    always #(SYS_CLK_PER/2) sysClk <= ~sysClk;
    always #(EVR_CLK_PER/2) evrClk <= ~evrClk;
 

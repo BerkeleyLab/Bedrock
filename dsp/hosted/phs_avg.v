@@ -28,7 +28,7 @@
 // real when iq==1 and imaginary when iq==0.
 
 module phs_avg #(
-    parameter dwi = 17
+	parameter dwi = 17
 ) (
 	input clk,  // timespec 6.66 ns
 	input reset,
@@ -50,11 +50,11 @@ assign ky_addr = iq;
 reg signed [dwj-1:0] kx1 = 0, ky1 = 0;
 reg signed [(dwi+dwj)-1:0] prod_x = 0, prod_y = 0;
 always @(posedge clk) begin
-        // Delay gains, to multiply I*R
-        kx1 <= kx;
-        ky1 <= ky;
-        prod_x <= x * kx1;
-        prod_y <= y * ky1;
+	// Delay gains, to multiply I*R
+	kx1 <= kx;
+	ky1 <= ky;
+	prod_x <= x * kx1;
+	prod_y <= y * ky1;
 end
 
 wire signed [dwi+5:0] xmr = prod_x[(dwi+dwj)-2:dwj-7];
@@ -64,11 +64,11 @@ reg signed [dwi+6:0] sum = 0, sum1 = 0;
 reg signed [dwi+7:0] sum_f = 0;
 reg signed [dwi+intg_scale:0] intg = 0;
 always @(posedge clk) begin
-        sum <= xmr + ymr;
-        sum1 <= sum;
-        sum_f <= sum1 + sum;  // 2-tap filter [1, 1]
-        if (reset) intg <= 0;
-        else intg <= (sum_f >>> 1) + intg; // Integrator
+	sum <= xmr + ymr;
+	sum1 <= sum;
+	sum_f <= sum1 + sum;  // 2-tap filter [1, 1]
+	if (reset) intg <= 0;
+	else intg <= (sum_f >>> 1) + intg; // Integrator
 end
 assign sum_filt = sum_f;
 assign z = intg[dwi+intg_scale:intg_scale-1];

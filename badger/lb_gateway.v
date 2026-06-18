@@ -22,6 +22,7 @@ module lb_gateway #(
     output        lb_read,
     output        lb_rvalid,
     output        lb_pre_rvalid,
+    output        lb_prefill,
     output [31:0] lb_wdata,
     input  [31:0] lb_rdata
 );
@@ -44,6 +45,7 @@ mem_gateway #(
     .control_rd      (control_rd),
     .control_rd_valid(lb_rvalid),
     .control_pipe_rd (control_pipe_rd),
+    .control_prefill (lb_prefill),
     .data_out        (lb_wdata),
     .data_in         (lb_rdata)
 );

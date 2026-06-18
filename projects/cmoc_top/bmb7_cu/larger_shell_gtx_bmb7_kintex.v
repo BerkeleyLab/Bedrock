@@ -27,23 +27,41 @@ wire port_50006_word_read;
 wire port_50007_word_read;
 
 k7_s6 bmb7_U7(
-.K7_S6_IO_0(bus_bmb7_U7[16]),.K7_S6_IO_1(bus_bmb7_U7[5]),.K7_S6_IO_2(bus_bmb7_U7[6]),.K7_S6_IO_3(bus_bmb7_U7[8]),.K7_S6_IO_4(bus_bmb7_U7[3]),.K7_S6_IO_5(bus_bmb7_U7[14]),.K7_S6_IO_6(bus_bmb7_U7[18]),.K7_S6_IO_7(bus_bmb7_U7[9]),.K7_S6_IO_8(bus_bmb7_U7[1]),.K7_S6_IO_9(bus_bmb7_U7[4]),.K7_S6_IO_10(bus_bmb7_U7[12]),.K7_S6_IO_11(bus_bmb7_U7[0]),.K7_TO_S6_CLK_0(bus_bmb7_U7[11]),.K7_TO_S6_CLK_1(bus_bmb7_U7[10]),.K7_TO_S6_CLK_2(bus_bmb7_U7[17]),.S6_TO_K7_CLK_0(bus_bmb7_U7[7]),.S6_TO_K7_CLK_1(bus_bmb7_U7[15]),.S6_TO_K7_CLK_2(bus_bmb7_U7[2]),.S6_TO_K7_CLK_3(bus_bmb7_U7[13])
-,.port_50006_word_k7tos6(port_50006_word_k7tos6)
-,.port_50006_word_s6tok7(port_50006_word_s6tok7)
-,.port_50006_tx_available(port_50006_tx_available)
-,.port_50006_tx_complete(port_50006_tx_complete)
-,.port_50006_rx_available(port_50006_rx_available)
-,.port_50006_rx_complete(port_50006_rx_complete)
-,.port_50006_word_read(port_50006_word_read)
-,.port_50007_word_k7tos6(port_50007_word_k7tos6)
-,.port_50007_word_s6tok7(port_50007_word_s6tok7)
-,.port_50007_tx_available(port_50007_tx_available)
-,.port_50007_tx_complete(port_50007_tx_complete)
-,.port_50007_rx_available(port_50007_rx_available)
-,.port_50007_rx_complete(port_50007_rx_complete)
-,.port_50007_word_read(port_50007_word_read)
-,.clkout(bmb7_U7_clkout)
-,.clk4xout(bmb7_U7_clk4xout)
+    .K7_S6_IO_0(bus_bmb7_U7[16]),
+    .K7_S6_IO_1(bus_bmb7_U7[5]),
+    .K7_S6_IO_2(bus_bmb7_U7[6]),
+    .K7_S6_IO_3(bus_bmb7_U7[8]),
+    .K7_S6_IO_4(bus_bmb7_U7[3]),
+    .K7_S6_IO_5(bus_bmb7_U7[14]),
+    .K7_S6_IO_6(bus_bmb7_U7[18]),
+    .K7_S6_IO_7(bus_bmb7_U7[9]),
+    .K7_S6_IO_8(bus_bmb7_U7[1]),
+    .K7_S6_IO_9(bus_bmb7_U7[4]),
+    .K7_S6_IO_10(bus_bmb7_U7[12]),
+    .K7_S6_IO_11(bus_bmb7_U7[0]),
+    .K7_TO_S6_CLK_0(bus_bmb7_U7[11]),
+    .K7_TO_S6_CLK_1(bus_bmb7_U7[10]),
+    .K7_TO_S6_CLK_2(bus_bmb7_U7[17]),
+    .S6_TO_K7_CLK_0(bus_bmb7_U7[7]),
+    .S6_TO_K7_CLK_1(bus_bmb7_U7[15]),
+    .S6_TO_K7_CLK_2(bus_bmb7_U7[2]),
+    .S6_TO_K7_CLK_3(bus_bmb7_U7[13]),
+    .port_50006_word_k7tos6(port_50006_word_k7tos6),
+    .port_50006_word_s6tok7(port_50006_word_s6tok7),
+    .port_50006_tx_available(port_50006_tx_available),
+    .port_50006_tx_complete(port_50006_tx_complete),
+    .port_50006_rx_available(port_50006_rx_available),
+    .port_50006_rx_complete(port_50006_rx_complete),
+    .port_50006_word_read(port_50006_word_read),
+    .port_50007_word_k7tos6(port_50007_word_k7tos6),
+    .port_50007_word_s6tok7(port_50007_word_s6tok7),
+    .port_50007_tx_available(port_50007_tx_available),
+    .port_50007_tx_complete(port_50007_tx_complete),
+    .port_50007_rx_available(port_50007_rx_available),
+    .port_50007_rx_complete(port_50007_rx_complete),
+    .port_50007_word_read(port_50007_word_read),
+    .clkout(bmb7_U7_clkout),
+    .clk4xout(bmb7_U7_clk4xout)
 );
 
 wire clk_1x_90, clk_2x_0, clk_eth, clk_eth_90;

@@ -2,19 +2,14 @@
 
 // No sign handling here, and the DAC is offset binary.
 // So the caller needs to provide offset binary inputs.
-module dac_cells(
-	clk,
-	data0,
-	data1,
-	dac
+module dac_cells #(
+	parameter width=16
+) (
+	input clk,
+	input  [width-1:0] data0,
+	input  [width-1:0] data1,
+	output [width-1:0] dac
 );
-
-parameter width=16;
-
-input  clk;
-input  [width-1:0] data0;
-input  [width-1:0] data1;
-output [width-1:0] dac;
 
 wire rst=0;
 wire set=0;

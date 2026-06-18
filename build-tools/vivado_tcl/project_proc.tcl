@@ -91,6 +91,26 @@ proc project_create {platform_name project_name} {
         set project_cfgmem_size "none"
         set project_cfgrate "none"
     }
+    if [regexp "lbl208" $platform_name] {
+        set platform "lbl208"
+        set project_part "xczu47dr-ffvg1517-1-e"
+        set project_spi_buswidth "none"
+        set project_cfgmem_interface "none"
+        set project_cfgmem_size "none"
+        set project_cfgrate "none"
+    }
+    if [regexp "arty_a7_35t" $platform_name] {
+        set platform "arty_a7_35t"
+        set project_part "xc7a35ticsg324-1L"
+    }
+    if [regexp "arty_a7_100t" $platform_name] {
+        set platform "arty_a7_100t"
+        set project_part "xc7a100tcsg324-1"
+    }
+    if [regexp "obsidian" $platform_name] {
+        set platform "obsidian_a35"
+        set project_part "xc7a50tcsg325-1"
+    }
     # planahead
     #
     if {$platform eq "ml605"} {
@@ -237,7 +257,7 @@ proc project_rpt {project_name} {
     report_datasheet -v -file ./_xilinx/$project_name/imp_datasheet.rpt
     report_cdc -v -details -file ./_xilinx/$project_name/cdc_report.rpt
     report_timing_summary -delay_type min_max -report_unconstrained -check_timing_verbose -max_paths 10 -input_pins -file ./_xilinx/$project_name/imp_timing.rpt
-    # http://xillybus.com/tutorials/vivado-timing-constraints-error
+    # https://xillybus.com/tutorials/vivado-timing-constraints-error
     if {! [string match -nocase {*timing constraints are met*} [report_timing_summary -no_header -no_detailed_paths -return_string]]} {
         puts "Timing constraints weren't met. Please check your design."
         exit 2
@@ -251,6 +271,14 @@ proc project_write_bitstream {platform} {
 
     if {($::project_cfgrate ne "none")} {
         set_property BITSTREAM.CONFIG.CONFIGRATE $::project_cfgrate [get_designs impl_1]
+    }
+
+    if {[string first "qf2pre" $platform] != -1} {
+        puts "INFO: QF2-Pre board detected, setting custom USERID."
+        set UID 32'hFEED0070
+        puts "INFO: USERID set to $UID"
+        set_property BITSTREAM.CONFIG.USERID $UID [get_designs impl_1]
+        set_property BITSTREAM.CONFIG.USR_ACCESS NONE [get_designs impl_1]
     }
 
     write_bitstream -force [current_project].bit

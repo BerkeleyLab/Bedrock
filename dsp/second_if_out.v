@@ -4,6 +4,7 @@
 // but this is tuned for the LCLS-II configuration where it
 // needs to generate 145 MHz, even though the input lo (cosa,sina)
 // is at 20 MHz (7/33 of clk rate).  Only DAC1 is provided.
+// The clk input port is assumed 1320 MHz / 14 = 94.3 MHz.
 module second_if_out #(
    parameter IF_OUT_CONFIG=2 // 0 - 1300 MHz mode (145 MHz IF)
                              // 1 - 3900 MHz mode (60 MHz IF)
@@ -57,16 +58,20 @@ endcase
 // Interpolate between points, given that we know the phase step
 // is 61/264 (image 203/264) in the double-data-rate DAC clock domain;
 // that's the desired analog output:  1320/14*203/132 = 145 MHz.
-// Use 1/16 as an approximation for 5/528 * 2*pi.
+// Use 1/16 (0.0625) as an approximation for 5/528 * 2*pi (0.0595).
 
 reg signed [17:0] cosb1=0, sinb1=0, cosb2=0, sinb2=0;
 always @(posedge clk) begin
-	// multiply by 1+i/16
+	// multiply by 1+i/16 \approx exp(i*5/528*2*pi)
 	cosb1 <= cosb - (sinb>>>4);
 	sinb1 <= sinb + (cosb>>>4);
-	// multiply by i+1/16
+	// multiply by i+1/16 \approx exp(i*(1/4-5/528)*2*pi)
 	cosb2 <= ~sinb + (cosb>>>4);
 	sinb2 <= cosb + (sinb>>>4);
+	// So we have successfully constructed a phase separation between
+	// those two points of about ((1/4-5/528) - (5/528))*2*pi radians
+	// = (61/264)*2*pi radians. The two amplitudes balance, and have only
+	// increased from nominal by a factor of sqrt(1+1/16^2) = 1.00195.
 end
 
 // ---------------------------------

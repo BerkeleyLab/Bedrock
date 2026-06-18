@@ -34,7 +34,7 @@ sudo ip link set dev tap0 up
   * to demonstrate DHCP, uncomment `dhcp_start(&netif);` and run a DHCP server
     on the local TAP0 network
 
-### (Bridging)[https://wiki.archlinux.org/index.php/Network_bridge] tap0
+### (Bridging)[https://wiki.archlinux.org/title/Network_bridge] tap0
 A bridge is like a virtual network switch, connecting two or more links together (here tap0 and eth0). This allows the Verilog simulation to access the Internet.
 
 ```bash

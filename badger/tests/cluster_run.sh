@@ -16,7 +16,6 @@ sleep 1
 
 # Note that unlike speed_check.sh teststand_ac701.sh tftp_test.sh
 # this script uses leep commands from outside the badger directory
-export PYTHONPATH=$(dirname $0):$(dirname $0)/../../projects/common
 (
 $PYTHON -m leep.cli leep://localhost:3010 gitid
 $PYTHON -m leep.cli leep://localhost:3011 gitid

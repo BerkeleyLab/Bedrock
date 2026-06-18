@@ -82,7 +82,7 @@ def write_vlog(basename, cfg_dict, split=False, verbose=False):
     # Use include guard for defines only
     FD.write("`ifndef __%(n)s__\n`define __%(n)s__\n\n" % {'n': basename.upper()})
     for d, v in d_dict.items():
-        if (v == 0):
+        if v == 0:
             FD.write("//")
         FD.write(d_string % d.upper())
     FD.write("\n`endif // __%s__\n" % basename.upper())

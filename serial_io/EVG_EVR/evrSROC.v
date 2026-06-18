@@ -53,6 +53,7 @@ eventMarkerWatchdog #(.SYSCLK_FREQUENCY(SYSCLK_FREQUENCY),
                .isValid(pulsePerSecondValid));
 endmodule
 
+// to capture valid flags for a specific event
 module eventMarkerWatchdog #(
     parameter SYSCLK_FREQUENCY = 100000000,
     parameter DEBUG            = "false"
@@ -64,12 +65,13 @@ module eventMarkerWatchdog #(
 localparam UPPER_LIMIT = (SYSCLK_FREQUENCY * 11) / 10;
 localparam LOWER_LIMIT = (SYSCLK_FREQUENCY *  9) / 10;
 (*mark_debug=DEBUG*) reg [$clog2(LOWER_LIMIT+1)-1:0] watchdog;
-(* ASYNC_REG="TRUE" *) reg marker_m, marker;
-(* mark_debug=DEBUG *) reg marker_d;
 
+// Cross clock domains
+wire marker;
+reg_tech_cdc marker_cdc(.I(evrMarker), .C(sysClk), .O(marker));
+
+(* mark_debug=DEBUG *) reg marker_d=0;
 always @(posedge sysClk) begin
-    marker_m <= evrMarker;
-    marker   <= marker_m;
     marker_d <= marker;
     if (marker && !marker_d) begin
         watchdog <= 0;

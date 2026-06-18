@@ -23,14 +23,16 @@ set gt_type "GTX"
 set quad 0
 set gt 0
 set en8b10b 0
+set endrp 0
 set pll_type "CPLL"
-add_gt_protocol $gt_type $MGT_CONFIG_DIR/gtx_ethernet.tcl $quad $gt $en8b10b $pll_type
+add_gt_protocol $gt_type $MGT_CONFIG_DIR/gtx_ethernet.tcl $quad $gt $en8b10b $endrp $pll_type
 
 set quad 0
 set gt 1
 set en8b10b 1
+set endrp 0
 set pll_type "CPLL"
-add_gt_protocol $gt_type $MGT_CONFIG_DIR/gtx_chitchat.tcl $quad $gt $en8b10b $pll_type
+add_gt_protocol $gt_type $MGT_CONFIG_DIR/gtx_chitchat.tcl $quad $gt $en8b10b $endrp $pll_type
 
 # proc add_aux_ip {ipname config_file module_name}
 add_aux_ip clk_wiz $MGT_CONFIG_DIR/mgt_eth_clk.tcl mgt_eth_mmcm

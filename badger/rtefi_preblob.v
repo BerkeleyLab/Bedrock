@@ -6,7 +6,23 @@
 // hand-edit it!
 //
 `include "rtefi_preblob.vh"
-module rtefi_blob(
+module rtefi_blob #(
+	parameter paw = 11,  // packet (memory) address width, nominal 11
+	parameter n_lat = 8,  // latency of client pipeline
+	parameter mac_aw = 10,  // sets size (in 16-bit words) of DPRAM in Tx MAC
+	// See comments in rtefi_center.v
+	parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4},  // 192.168.7.4
+	parameter [47:0] mac = 48'h12555500012d,
+`BLOB_PARAMS
+	parameter udp_port0 = 7,
+	parameter udp_port1 = 801,
+	parameter udp_port2 = 802,
+	parameter udp_port3 = 803,
+	parameter udp_port4 = 804,
+	parameter udp_port5 = 0,
+	parameter udp_port6 = 0,
+	parameter udp_port7 = 0
+) (
 	// GMII Input (Rx)
 	input rx_clk,
 	input [7:0] rxd,
@@ -59,22 +75,6 @@ module rtefi_blob(
 	// Simulation-only
 	output in_use
 );
-
-parameter paw = 11;  // packet (memory) address width, nominal 11
-parameter n_lat = 8;  // latency of client pipeline
-parameter mac_aw = 10;  // sets size (in 16-bit words) of DPRAM in Tx MAC
-// See comments in rtefi_center.v
-parameter [31:0] ip = {8'd192, 8'd168, 8'd7, 8'd4};  // 192.168.7.4
-parameter [47:0] mac = 48'h12555500012d;
-parameter udp_port0 = 7;
-parameter udp_port1 = 801;
-parameter udp_port2 = 802;
-parameter udp_port3 = 803;
-parameter udp_port4 = 804;
-parameter udp_port5 = 0;
-parameter udp_port6 = 0;
-parameter udp_port7 = 0;
-`BLOB_PARAMS
 
 wire [10:0] len_c;
 wire [6:0] raw_l;

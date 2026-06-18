@@ -45,7 +45,7 @@ int main(int argc, char** argv, char** env) {
 		Verilated::traceEverOn(true);
 		tfp = new VerilatedVcdC;
 		top->trace(tfp, 8, 0);  // Trace 8 levels of hierarchy
-		tfp->open("Vatb.vcd");
+		tfp->open("cluster_sim.vcd");
 	}
 
 	int cluster_n = 0;  // will be filled in from cluster_n_expose port

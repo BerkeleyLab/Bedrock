@@ -1,0 +1,45 @@
+# Yosys script to convert a design to flat gates and memories,
+# in support of the clock-domain-crossing analysis performed by cdc_snitch.py.
+
+# See "CDC detection with yosys" #3956
+# https://github.com/YosysHQ/yosys/discussions/3956
+
+# You need a mechanism outside this script to do the read_verilog
+# and write_json steps.  Unix/make users should be able to accomplish that
+# with a makefile action like
+#    $(YOSYS) -p "read_verilog $(filter %.v, $^); script cdc_snitch_proc.ys; write_json $@"
+
+# only checked with yosys-0.23
+
+hierarchy -simcheck -auto-top
+
+select t:$meminit_v2
+delete
+select -clear
+
+proc
+opt -purge
+stat
+
+select t:$memrd t:$memrd_v2 t:$memwr_v2
+setattr -set keep_hierarchy 1
+select -clear
+
+flatten -wb
+opt -fast -purge
+synth -run :coarse
+techmap
+# the following sub-steps are a good-enough (for this purpose) equivalent to
+#   opt -fast -purge
+# but run much faster
+opt_expr
+opt_merge
+opt_reduce
+opt_dff
+opt_clean -purge
+opt_expr
+opt_clean -purge
+
+hierarchy -check
+stat
+check

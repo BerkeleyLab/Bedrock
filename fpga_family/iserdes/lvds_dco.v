@@ -1,4 +1,6 @@
-module lvds_dco #(parameter flip_dco=0) (
+module lvds_dco #(
+parameter flip_dco=0
+) (
 input clk_reset,  // for resetting BUFR divider state
 input mmcm_reset,  // be safe
 output mmcm_locked,
@@ -49,5 +51,11 @@ assign clk_div_to_bufg = clk_div_bufr;
 `endif
 
 BUFG bufg_i(.I(clk_div_to_bufg), .O(clk_div_bufg));
+`else
+// Does almost nothing except establish some causality,
+// and keep yosys from thinking this module is a white box.
+assign clk_div_bufg = dco_p;
+assign clk_div_bufr = dco_p;
+assign dco_clk_out = dco_p;
 `endif
 endmodule

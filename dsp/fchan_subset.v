@@ -27,14 +27,16 @@ module fchan_subset #(
 wire [len-1:0] keep_use;
 genvar ix;
 generate
-	if (KEEP_OLD==1)
-		for (ix=0; ix<len; ix=ix+1) begin : G_KEEP_OLD
+	if (KEEP_OLD==1) begin : G_KEEP_OLD
+		for (ix=0; ix<len; ix=ix+1) begin
 			assign keep_use[ix] = keep[len-1-ix];
 		end
-	else
-		for (ix=0; ix<len; ix=ix+1) begin : G_NKEEP_OLD
+	end
+	else begin : G_NKEEP_OLD
+		for (ix=0; ix<len; ix=ix+1) begin
 			assign keep_use[ix] = keep[ix];
 		end
+	end
 endgenerate
 
 reg [len-1:0] live=0;

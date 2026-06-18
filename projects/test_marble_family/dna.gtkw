@@ -1,0 +1,28 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Fri Jul 26 23:55:03 2024
+[*]
+[dumpfile] "/home/larry/empire/work/bedrock/projects/test_marble_family/dna.vcd"
+[dumpfile_mtime] "Fri Jul 26 23:52:32 2024"
+[dumpfile_size] 23215
+[savefile] "/home/larry/empire/work/bedrock/projects/test_marble_family/dna.gtkw"
+[timestart] 0
+[size] 1256 595
+[pos] -50 -28
+*-9.490321 2635 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] dna_tb.
+[sst_width] 214
+[signals_width] 257
+[sst_expanded] 1
+[sst_vpaned_height] 150
+@28
+dna_tb.dna_i.dna_clk
+dna_tb.dna_i.dout
+dna_tb.dna_i.shift
+dna_tb.dna_i.r_done
+@22
+dna_tb.dna_i.r_dna[63:0]
+@24
+dna_tb.dna_i.bcnt[6:0]
+[pattern_trace] 1
+[pattern_trace] 0

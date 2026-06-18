@@ -1,6 +1,5 @@
 `timescale 1ns / 1ns
 
-`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 /// TL;DR
 /// accumulated += ((constant * signal) >>> downscale) + correction
 ///
@@ -10,7 +9,12 @@
 /// Useful in times of high "natural" integration gain: like running with a superconducting cavity
 ///
 /// `correction` comes from some externally-supplied feedforward, maybe derived from the previous pulse
-module multiply_accumulate (
+module multiply_accumulate #(
+	parameter CW = 17,
+	parameter KW = 18,  // Constant Width
+	parameter SW = 18,  // Signal Width
+	parameter OW = 21   // OutputWidth: Desired bitwidth of the accumulator
+) (
 	input clk,
 	input reset,
 	input enable,
@@ -20,10 +24,8 @@ module multiply_accumulate (
 	input signed [SW-1:0] signal,
 	output signed [OW-1:0] accumulated
 );
-parameter CW = 17;
-parameter KW = 18;  // Constant Width
-parameter SW = 18;  // Signal Width
-parameter OW = 21;  // OutputWidth: Desired bitwidth of the accumulator
+
+`define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
 
 reg signed [KW+SW-1: 0] integrator_in_large=0;
 reg signed [OW-1: 0] integrator_sum=0;
@@ -39,6 +41,8 @@ always @ (posedge clk) begin
 		integrator_sum <= `SAT(integrator_sum_pre, OW, OW-1);
 	end
 end
+
+`undef SAT
 
 assign accumulated = integrator_sum;
 

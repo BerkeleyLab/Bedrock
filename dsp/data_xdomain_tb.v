@@ -6,6 +6,7 @@ reg clk1;
 integer cc1;
 reg fail=0;
 integer npt=2000;
+reg [16:0] err_cnt=0;
 initial begin
 	if ($test$plusargs("vcd")) begin
 		$dumpfile("data_xdomain.vcd");
@@ -60,7 +61,6 @@ reg [4:0] index_out=0;
 reg gate_out2_d=1'b0;
 reg match_found=1'b0;
 reg check_en=1'b0;
-reg [16:0] err_cnt=0;
 always @(posedge clk1) begin
 	if(gate_in1) begin
 		data_in_array[index_in] <= data_in;

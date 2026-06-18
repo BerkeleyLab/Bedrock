@@ -35,7 +35,8 @@ interface zest_if (
    assign {U2_D1NA, U2_D1NB, U2_D1NC, U2_D1ND} = {U2[14], U2[4],  U2[26], U2[11]};
    assign {U2_D1PA, U2_D1PB, U2_D1PC, U2_D1PD} = {U2[17], U2[8],  U2[5],  U2[12]};
    assign {U2_DCON, U2_DCOP, U2_FCON, U2_FCOP} = {U2[9],  U2[15], U2[10], U2[6]};
-   assign {U3[10], U2[22], U4[26]} = {U2_PDWN, U2_CSB, U2_SCLK};
+   assign {U2[22], U4[26]} = {U2_CSB, U2_SCLK};
+   // don't set U3[10] to U2_PDWN, since it's set to U3_PDWN below
 
    wire U3_D0NA, U3_D0NB, U3_D0NC, U3_D0ND, U3_D0PA, U3_D0PB, U3_D0PC, U3_D0PD,
         U3_D1NA, U3_D1NB, U3_D1NC, U3_D1ND, U3_D1PA, U3_D1PB, U3_D1PC, U3_D1PD,
@@ -77,9 +78,9 @@ interface zest_if (
    wire U18_DOUT_RDY = U18[1];
    assign {U18[0], U18[2], U18[3], U18[4]} = {U18_CLK, U18_CS, U18_DIN, U18_SCLK};
 
-   // NOTE: Semantics of PMOD and HDMI connectors are application-dependent and
+   // NOTE: Semantics of Pmod and HDMI connectors are application-dependent and
    //       thus not handled here
-   // PMOD - J18, J17
+   // Pmod - J18, J17
    // J19: HDMI
 
    // U33U1: TPS62110 DC-DC converter

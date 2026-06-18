@@ -1,11 +1,31 @@
 oscope_top_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/oscope/bmb7_cu
   stage: test
   script:
     - make Voscope_top_tb && make Voscope_top_leep && make clean
 
+# We know the design doesn't yet get evaluated as CDC-clean, at least in part
+# due to Verilog inout ports being poorly supported by our tools.
+# Please take out the error bypass (echo) if this ever gets fixed.
+oscope_cdc:
+  extends: .build-matrix
+  image: $IMAGE
+  before_script:
+    - cd projects/oscope/marble_family
+  stage: test
+  script:
+    - make dep && make oscope_prep_yosys.json && (make oscope_prep_cdc.txt || echo "Found CDC violation, as expected; continuing")
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - projects/oscope/marble_family/oscope_prep_cdc.txt
+
 oscope_top_bmb7:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd projects/oscope/bmb7_cu && ls /non-free
   stage: synthesis
@@ -18,8 +38,10 @@ oscope_top_bmb7:
       - projects/oscope/bmb7_cu/oscope_top.bit
 
 oscope_top_marble:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
-    - cd projects/oscope/marble_family && ls /non-free && apt-get update && apt-get install -y yosys
+    - cd projects/oscope/marble_family && ls /non-free
   stage: synthesis
   script:
     - verilator -V && XILINX_VIVADO=$XILINX_VIVADO PATH=$XILINX_VIVADO/bin:$PATH make oscope_top.bit
@@ -29,18 +51,30 @@ oscope_top_marble:
     paths:
       - projects/oscope/marble_family/oscope_top.bit
 
-litex_trigger_capture:
+# LITEX_INSTALL_PATH is defined in the Docker image
+marble_ddr3_test:
+  extends: .build-matrix
+  image: $IMAGE
   stage: synthesis
   before_script:
-    - mkdir /litex_setup_dir && cd /litex_setup_dir
-    - wget https://raw.githubusercontent.com/enjoy-digital/litex/70c5be6fb8/litex_setup.py && python3 litex_setup.py init
-    - cd litex && git checkout 70c5be6fb8 && cd ..
-    - cd liteeth && git checkout 8ba5cf06a6fb3979a6cde5ed46c10e91a053ba3f && cd ..
-    - cd litedram && git checkout 2b0f806c96ff089bd8c51da8e223bfff23434ee1 && cd ..
-    - cd liteiclink && git checkout bba716a9c06cc0870d90b31c6aa3bd0982377fcb && cd ..
-    - cd litescope && git checkout 457f0875db0c1a0ff0e20659fe81b5bf696875d4 && cd ..
-    - apt-get update && apt-get install -y ninja-build && pip3 install meson==0.64.1 && python3 litex_setup.py install
-    - cd /builds/hdl-libraries/bedrock/projects/trigger_capture
+    - cd $LITEX_INSTALL_PATH/litex-boards/litex_boards/targets
+  script:
+    - XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && python3 berkeleylab_marble.py --build
+    - echo $CI_PROJECT_DIR
+    - cp $LITEX_INSTALL_PATH/litex-boards/litex_boards/targets/build/berkeleylab_marble/gateware/berkeleylab_marble.bit $CI_PROJECT_DIR/
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    when: always
+    paths:
+      - berkeleylab_marble.bit
+
+litex_trigger_capture:
+  extends: .build-matrix
+  image: $IMAGE
+  stage: synthesis
+  before_script:
+    - cd projects/trigger_capture
   script:
     XILINXD_LICENSE_FILE=$XILINXD_LICENSE_FILE PATH=$XILINX_VIVADO/bin:$PATH && make marble.bit
   artifacts:
@@ -52,10 +86,12 @@ litex_trigger_capture:
       - projects/trigger_capture/csr.csv
 
 # oscope_program:
+#   extends: .build-matrix
+#   image: $IMAGE
 #   before_script:
 #     - cd projects/oscope/software/bmb7 && wget -r -nH http://sliderule.dhcp.lbl.gov:8000/{r1,configuration} && cd ..
 #   stage: program
 #   dependencies:
 #     - oscope_top_bmb7
 #   script:
-#     - export PYTHONPATH=$PYTHONPATH:../../../build-tools/:../../../dsp && python prc.py -a 192.168.1.121 -r -b ../bmb7_cu/oscope_top.bit
+#     - export PYTHONPATH=$PYTHONPATH:../../../build-tools/:../../../dsp && python3 prc.py -a 192.168.1.121 -r -b ../bmb7_cu/oscope_top.bit

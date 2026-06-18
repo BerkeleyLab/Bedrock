@@ -42,6 +42,7 @@ always @(posedge clk) begin
 	if (zero) acc2 <= `SAT(acc1,23,19);
 	strobe_r <= zero;
 end
+`undef SAT
 
 assign result = acc2[19:2];
 assign strobe = strobe_r;

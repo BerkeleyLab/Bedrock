@@ -7,7 +7,7 @@ proc project_rpt {project_name} {
     # Generate implementation timing & power report
     report_power -file ./vivado_project/$project_name.imp_power.rpt
     report_timing_summary -delay_type min_max -report_unconstrained -check_timing_verbose -max_paths 10 -input_pins -file ./vivado_project/$project_name.imp_timing.rpt
-    # http://xillybus.com/tutorials/vivado-timing-constraints-error
+    # https://xillybus.com/tutorials/vivado-timing-constraints-error
     if {! [string match -nocase {*timing constraints are met*} [report_timing_summary -no_header -no_detailed_paths -return_string]]} {
         puts "Timing constraints weren't met. Please check your design."
         exit 2

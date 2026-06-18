@@ -137,8 +137,8 @@ def ad7794_status():
     print("0 107")
     print("0 048")
     print("0 187")
-    print("0 055")  # padding, supposed to cme back 00
-    print("0 055")  # padding, supposed to cme back 0a
+    print("0 055")  # padding, supposed to come back 00
+    print("0 055")  # padding, supposed to come back 0a
     print("0 100")
 
 

@@ -1,12 +1,14 @@
-[timestart] 1871
+[timestart] 1570
 [size] 1461 622
 [pos] -1 -1
-*-10.410047 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-10.410047 2710 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] jxj_gate_tb.
 [sst_width] 228
-[signals_width] 208
+[signals_width] 261
 [sst_expanded] 1
 [sst_vpaned_height] 163
+@420
+jxj_gate_tb.ci
 @28
 jxj_gate_tb.rx_stb
 jxj_gate_tb.rx_end
@@ -15,6 +17,7 @@ jxj_gate_tb.rx_din[7:0]
 @200
 -Local Bus
 @28
+jxj_gate_tb.lb_prefill
 jxj_gate_tb.lb_strobe
 jxj_gate_tb.lb_rd
 @22
@@ -30,7 +33,6 @@ jxj_gate_tb.dut.rx_sr[63:0]
 jxj_gate_tb.dut.xfer_pipe[10:0]
 @28
 jxj_gate_tb.dut.tx_sr_load
-jxj_gate_tb.dut.xfer_read_mode
 @200
 -Data to FIFO
 @28
@@ -39,7 +41,7 @@ jxj_gate_tb.dut.drive_fifo
 jxj_gate_tb.dut.drive_fifo_data[7:0]
 @200
 -FIFO readout
-@25
+@24
 jxj_gate_tb.dut.tx_pending[5:0]
 @28
 jxj_gate_tb.dut.empty

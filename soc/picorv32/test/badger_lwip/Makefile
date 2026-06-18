@@ -51,7 +51,7 @@ CFLAGS += -DLWIP_DEBUG
 # builds an hardware emulator for running / debugging lwip
 # -DETHERNET_MODEL_DEBUG
 V$(TARGET): $(SRC_V) $(TARGET)_sim.cpp ethernet_model.c tap_alloc.c crc32.c
-	verilator  --trace -cc --exe --top-module $(TARGET)_tb \
+	$(VERILATOR) --trace -cc --exe --top-module $(TARGET)_tb \
 	           -Wno-PINMISSING -Wno-WIDTH -Wno-CASEINCOMPLETE \
 	           -DBLOCK_RAM_SIZE=$(BLOCK_RAM_SIZE) \
 	           -CFLAGS "-I$(BADGER_DIR)/tests" \

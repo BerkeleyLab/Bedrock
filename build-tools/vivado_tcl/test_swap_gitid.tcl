@@ -51,5 +51,19 @@ if {$result_init0 != $golden_init0_16 || $result_init1 != $golden_init1_16} {
     puts "Results for rowwidth=16 output is CORRECT!"
 }
 
+# Test procedure for git context extraction
+if [catch get_git_context result] {
+    puts stderr "Results for get_git_context is WRONG! Error during execution."
+    set rc 1
+} else {
+    array set git_status $result
+    puts "Git context information as \[key\] : \[value\]"
+    foreach key [array names git_status] {
+        puts "    $key : $git_status($key)"
+    }
+    puts "Results for get_git_context is CORRECT!"
+}
+
+
 if {$rc == 0} {puts PASS}
 exit $rc

@@ -1,6 +1,6 @@
-#from https://fmchub.github.io/appendix/VITA57_FMC_HPC_LPC_SIGNALS_AND_PINOUT.html
-#  compactible with KC705 UG810 Appendix B
-#  compactible with FMC116_112_user_manual.pdf Table 8.
+# from https://fmchub.github.io/appendix/VITA57_FMC_HPC_LPC_SIGNALS_AND_PINOUT.html
+#  compatible with KC705 UG810 Appendix B
+#  compatible with FMC116_112_user_manual.pdf Table 8
 
 CLK0_M2C_N      H5
 CLK0_M2C_P      H4

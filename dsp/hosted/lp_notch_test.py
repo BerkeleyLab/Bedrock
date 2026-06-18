@@ -97,7 +97,7 @@ class notch_setup:
             Abp_zn = cl0_bp.response(zn)
             # solve for the final gains
             mat = numpy.array([[Alp_dc, Abp_dc], [Alp_zn, Abp_zn]])
-            target_gains = numpy.array([[self.gain], [self.ngain]])
+            target_gains = numpy.array([self.gain, self.ngain])
             raw_gains = numpy.linalg.inv(mat).dot(target_gains)
             # prevent the low-pass component from clipping
             if abs(raw_gains[0]) > 0.99:

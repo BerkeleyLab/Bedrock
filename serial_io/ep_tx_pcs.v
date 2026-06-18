@@ -56,7 +56,6 @@ input [15:0] ep_lacr_tx_val_i, // Link Autonegotiation Control Register, TX_VAL 
 input ep_lacr_tx_en_i // Link Autonegotiation Control Register, TX_EN field
 );
 
-
 `include "endpoint.vh"
 
 // TX state machine definitions
@@ -72,9 +71,14 @@ parameter [3:0]
   TX_EPD = 8,
   TX_EXTEND = 9;
 
+initial begin
+  tx_odata_reg=0;
+  tx_is_k=0;
+end
+
 reg [3:0] tx_state=TX_COMMA;
-reg tx_cr_alternate;
-reg tx_odd_length;
+reg tx_cr_alternate=0;
+reg tx_odd_length=0;
 
 // Two stages of passive data pipeline
 reg [7:0] tx_data_p=0, tx_data_p2=0;

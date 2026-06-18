@@ -23,7 +23,7 @@ def decode_header(fname):
             print("ERROR: Unexpected magic number")
             exit(-1)
 
-        h = FH.read(3)  # Skip lengh + token
+        h = FH.read(3)  # Skip length + token
         # Design info
         hl = int(hexfromba((FH.read(2))), 16)
         dsgn_info = FH.read(hl)[0:-1].decode('utf-8')  # Strip null byte

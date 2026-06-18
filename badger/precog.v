@@ -34,8 +34,8 @@ localparam ST_WAIT_FALLING = 3;
 
 always @(posedge clk) begin
 	clear_to_send <= 0;
-	if (gap_width < 2^PAW - 1)
-		gap_width <= scanner_busy ? 0 : gap_width + 1;
+	if (scanner_busy) gap_width <= 0;
+	else if (~(&gap_width)) gap_width <= gap_width + 1;
 	case (state)
 		ST_WAIT_RTS: begin
 			tx_packet_width_l <= tx_packet_width;

@@ -1,0 +1,33 @@
+[timestart] 0
+[size] 1150 707
+[pos] -1 -1
+*-23.233957 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] phase_diff_tb.
+[treeopen] phase_diff_tb.track.
+[sst_width] 269
+[signals_width] 219
+[sst_expanded] 1
+[sst_vpaned_height] 191
+@8024
+phase_diff_tb.phase_diff[15:0]
+@20000
+-
+@420
+phase_diff_tb.vfreq_out[16:0]
+@200
+-trackers
+@8024
+phase_diff_tb.track.phaset_out1[16:0]
+@20000
+-
+@28
+phase_diff_tb.track.fault1
+@8024
+phase_diff_tb.track.phaset_out2[16:0]
+@20000
+-
+@28
+phase_diff_tb.track.fault2
+phase_diff_tb.track.tick
+[pattern_trace] 1
+[pattern_trace] 0

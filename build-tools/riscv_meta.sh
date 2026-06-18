@@ -17,9 +17,10 @@
 # Same gcc version, in fact!  Slightly different configuration.
 #
 # I tried to peek at
-#   https://github.com/riscv/riscv-gnu-toolchain
+#   https://github.com/riscv-collab/riscv-gnu-toolchain
 # but that's kind of obfuscated.
 #   http://www.ifp.illinois.edu/~nakazato/tips/xgcc.html
+#   (link is dead, but document can be found at archive.org)
 # is more to-the-point, but out-of-date (2007).
 # The numbered flow below is straight from nakazato.
 # This script is meant to be as short, sweet, and concrete as possible.
@@ -32,11 +33,11 @@
 #
 # Versions:
 #   binutils-2.32, released 2019-02-02
-#     http://www.gnu.org/software/binutils/
+#     https://www.gnu.org/software/binutils/
 #   gcc-8.3.0, released 2019-02-22
-#     http://www.gnu.org/software/gcc/
+#     https://www.gnu.org/software/gcc/
 #   newlib-3.1.0, released 2018-12-31
-#     ftp://sourceware.org/pub/newlib/index.html
+#     https://sourceware.org/newlib/
 #
 # 0ab6c55dd86a92ed561972ba15b9b70a8b9f75557f896446c82e8b36e473ee04  binutils-2.32.tar.xz
 # 64baadfe6cc0f4947a84cb12d7f0dfaf45bb58b7e92461639596c21e02d97d2c  gcc-8.3.0.tar.xz

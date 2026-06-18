@@ -94,7 +94,7 @@ make sure the Write Protect switch is off, use the --id feature
 to check that the FREEZE bit is off (may require a power-cycle), and
 
 ```sh
-python3 spi_test.py --ip $IP --add 0 --program $BITFILE --force_write_enable
+python3 spi_test.py --ip $IP --program $BITFILE --force_write_enable
 ```
 
 and then turn the Write Protect switch on.
@@ -103,14 +103,14 @@ To program an application image in the second half of the 16 MByte
 flash chip, leave the Write Protect switch on, and
 
 ```sh
-python3 spi_test.py --ip $IP --add 8388608 --program $BITFILE
+python3 spi_test.py --ip $IP --upper --program $BITFILE
 ```
 
 When running the golden bitfile after a power cycle or hardware reset,
 reboot to that second-half bitfile with
 
 ```sh
-python3 spi_test.py --ip $IP --reboot7 --add 8388608
+python3 spi_test.py --ip $IP --reboot7 --upper
 ```
 
 If you get in trouble, make liberal use of
@@ -128,6 +128,7 @@ With a Kintex 7K160 and its 6693 kByte bitfile,
 * 1 second boot from flash (SPI_BUSWIDTH 2, CONFIGRATE 33)
 * 4 second program via USB JTAG (openocd adapter_khz 15000)
 * 146 second program flash via Ethernet and spi_flash.v
+* 40 second verify flash via Ethernet and spi_flash.v
 
 So while flash is great for deploying production bitfiles, it's not
 the best choice for edit/synthesize/test development cycles.

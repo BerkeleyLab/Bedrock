@@ -2,9 +2,9 @@
 #include "spi_memio.h"
 
 static uint8_t memio_rxtx8( uint32_t base_addr, uint8_t val ){
-    uint8_t bitVal, ret = 0;
+    uint8_t ret = 0;
     for (int i=0; i<=7; i++){
-        bitVal = (val&0x80) != 0;
+        uint8_t bitVal = (val&0x80) != 0;
         MEMIO_PIN_SET( base_addr, 0b0001, 0, 0, bitVal );
         MEMIO_PIN_SET( base_addr, 0b0001, 0, 1, bitVal );
         ret = (ret<<1) | ((MEMIO_PIN_GET(base_addr)>>1)&0x01);

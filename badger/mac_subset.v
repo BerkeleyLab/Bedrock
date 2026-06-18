@@ -49,6 +49,11 @@ test_tx_mac #(
 	.mac_data(mac_data)
 );
 
+// Move scanner_busy to tx_clk domain for use by precog
+// Better to pull this step up to rtefi_center?
+wire scanner_busy_tx;
+reg_tech_cdc scanner_busy_cdc(.I(scanner_busy), .C(tx_clk), .O(scanner_busy_tx));
+
 // Instantiate precog
 wire clear_to_send;
 wire [10:0] precog_width = len_req + 2*ifg;
@@ -58,7 +63,7 @@ precog #(
 ) precog (
 	.clk (tx_clk),
 	.tx_packet_width  (precog_width),
-	.scanner_busy     (scanner_busy),
+	.scanner_busy     (scanner_busy_tx),
 	.request_to_send  (req),
 	.clear_to_send    (clear_to_send)
 );

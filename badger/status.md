@@ -24,23 +24,22 @@ Synthesized by XST 14.7 for Spartan-6:
 
 | **module**         |**LUTs**|**RAMB16**|
 |:-------------------:|:-----:|:--------:|
-|  scanner.v          |  275  |   |
-|  construct.v        |  192  |   |
-|  xformer.v          |   93  |   |
-|  ethernet_crc_add.v |   94  |   |
-|  udp_port_cam_v     |   31  |   |
-|  rtefi_blob.v       | 1024  | 2 |
-|  gmii_hw_test.v     | 1242  | 4 |
+|  scanner.v          |  271  |     |
+|  construct.v        |  192  |     |
+|  xformer.v          |   93  |     |
+|  ethernet_crc_add.v |   94  |     |
+|  udp_port_cam_v     |   31  |     |
+|  rtefi_blob.v       | 1044  |  2  |
+|  gmii_hw_test.v     | 1582  | 6.5 |
 
 This Verilog code is intentionally portable and standards-based.
 It has been tested using:
 
-* verilator 3.900 (stock Debian stretch)
-* verilator 4.008 (git from December 2018)
-* iverilog 10.1 (stock Debian stretch)
-* iverilog 11.0 (git from December 2018)
+* verilator 3.900 through 5.032 (including 5.006 in stock Debian 12 bookworm)
+* iverilog 10.1 through 12.0 (including 11.0 in stock Debian 12 bookworm)
+* yosys 0.23 through 0.52 (including 0.23 in stock Debian 12 bookworm)
 * Xilinx XST 14.7
-* Xilinx Vivado 2015.3, 2017.4, 2018.1
+* Xilinx Vivado 2015.3, 2017.4, 2018.1, 2020.2
 
 All the .eps files here are created with and editable by xcircuit.
 

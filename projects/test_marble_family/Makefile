@@ -4,6 +4,25 @@ include $(I2CBRIDGE_DIR)/i2cbridge_rules.mk
 # Unisims not provided
 UNISIMS_DIR = broken
 
+APP_NAME = marble
+GTX_TCL :=
+# Select between marblemini, marble
+# XXX needs support for marble_fiber
+CONFIG ?= marblemini
+ifeq ($(CONFIG),marblemini)
+  BOARD_DIR     := marblemini
+  BOARD_TOP_CSV := marble_mini_top.csv
+  IP_ADDR       := 192.168.19.31
+else ifneq (,$(filter marble,$(CONFIG)))
+  BOARD_DIR     := marble
+  BOARD_TOP_CSV := marble_top.csv
+  SERIAL        ?= ""
+  IP_ADDR       := 192.168.19.$(SERIAL)
+  ZEST_SN       ?= "LBNL DIGITIZER V1.0 SN  024"
+else
+  $(error Unknown CONFIG '$(CONFIG)'. Please choose 'marblemini', or 'marble')
+endif
+
 # It seems like the variable VERILOG_TB from $(BUILD_DIR)/top_rules.mk is intended to be
 # used for this exact recipe.  But other local additions to variables like "VERILOG" cause
 # its expansion to now include multiple copies of the same flag/arg so it looks a little
@@ -32,7 +51,8 @@ SYNTH_VIVADO = $(VIVADOEXEC) -mode batch -source
 
 # =====
 # Attention!!!!
-vpath %.v $(BADGER_DIR)/tests $(HOMELESS_DIR) $(DSP_DIR) $(SERIAL_IO_DIR) $(I2CBRIDGE_DIR) $(PERIPH_DRIVERS_DIR) $(BOARD_SUPPORT_DIR)/marblemini $(HOMELESS_DIR)/freq_demo ./pps_lock ../../fpga_family/ds_clk_buf.v
+vpath %.v $(BADGER_DIR)/tests $(HOMELESS_DIR) $(DSP_DIR) $(SERIAL_IO_DIR) $(I2CBRIDGE_DIR) $(PERIPH_DRIVERS_DIR) \
+  $(BOARD_SUPPORT_DIR)/marblemini $(HOMELESS_DIR)/freq_demo ./pps_lock $(FPGA_FAMILY) $(FPGA_FAMILY_DIR)/xilinx
 vpath %.c $(BADGER_DIR)/tests $(BUILD_DIR)
 
 # =====
@@ -40,11 +60,13 @@ vpath %.c $(BADGER_DIR)/tests $(BUILD_DIR)
 include $(HOMELESS_DIR)/freq_demo/freq_demo_rules.mk
 
 # This must go in front of include $(BADGER_DIR)/rules.mk
-all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check marble_base_lint
+all: lb_marble_slave_tb marble_base_tb no_multiple_drivers_check marble_base_lint gps_test_tb ltm_sync_tb Vmarble_base dna_check mmc_mailbox_check
 
 # =====
 # gps_test, too simple to need testing ... right
 gps_test_tb: gps_test.v simpleuart.v dpram.v
+
+ltm_sync_tb: ltm_sync.v
 
 # Packet Badger synthesizable code
 RTEFI_CLIENT_LIST = hello.v speed_test.v mem_gateway.v spi_flash.v
@@ -58,16 +80,12 @@ scalar_marble_regmap.json: lb_marble_slave.v
 marble_regmap.json: static_regmap.json scalar_marble_regmap.json
 	$(PYTHON) $(BUILD_DIR)/merge_json.py -o $@ -i $(filter %.json, $^)
 config_romx.v: marble_regmap.json $(filter-out config_romx.v, $(MARBLE_SYNTH_SOURCE))
-	$(PYTHON) $(BUILD_DIR)/build_rom.py --placeholder_rev -v $@ -j $< -d "Marble Testing"
+	$(PYTHON) -m leep.build_rom --placeholder_rev -v $@ -j $< -d "$(CONFIG) testing"
 
-# gen_features.py rules (note the use of PHONY targets)
-# actual file outputs are marble_features_params.vh and marble_features_defs.vh
-marble1_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_mini --split
-
-marble2_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
-	$(PYTHON) $< -i $(filter %.yaml, $^) -c marble_v2 --split
-.PHONY: marble1_features marble2_features
+# gen_features.py rules utilizing $(CONFIG)
+$(APP_NAME)_features: $(BUILD_DIR)/gen_features.py marble_features.yaml
+	$(PYTHON) $< -i $(filter %.yaml, $^) -c $(CONFIG) --split
+.PHONY: $(APP_NAME)_features
 
 # ====
 # tmds_test, requires access to unisims (or unisims_lrd)
@@ -82,11 +100,16 @@ CFLAGS_udp_model.o = $(VPI_CFLAGS)
 udp-vpi.vpi: udp_model.o
 
 # =====
+# MMC mailbox self-checking testbench
+mmc_mailbox_tb: mmc_mailbox.v $(HOMELESS_DIR)/fake_dpram.v $(DSP_DIR)/dpram.v $(BADGER_DIR)/tests/spi_gate.v $(PERIPH_DRIVERS_DIR)/spi_master.v
+
+# =====
 # subset that is interesting to test live on network
 AD5662_V = ad5662_lock.v pps_lock.v pps_loop_filter.v ad5662.v
-LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v freq_count.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
-										gps_test.v simpleuart.v fake_dpram.v xadc_tempmon.v dna.v
-lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v udp-vpi.vpi
+LB_MARBLE_SLAVE_V = lb_marble_slave.v dpram.v reg_tech_cdc.v freq_count.v freq_gcount.v multi_counter.v config_romx.v $(I2CBRIDGE_V) $(AD5662_V) \
+                    gps_test.v simpleuart.v fake_dpram.v
+LB_MARBLE_SLAVE_VX = xadc_tempvoltmon.v dna.v  # not used in CDC exercise with yosys
+lb_marble_slave_tb: $(LB_MARBLE_SLAVE_V) $(LB_MARBLE_SLAVE_VX) mem_gateway.v reg_delay.v client_sub.v i2c_slave_model.v fake_xadc.v udp-vpi.vpi IDDR.v
 VFLAGS_lb_marble_slave_tb = -m ./udp-vpi
 net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 	$(VVP) $< +udp_port=8030 +vcd
@@ -96,12 +119,12 @@ net_slave_run: lb_marble_slave_tb udp-vpi.vpi
 # Depends on UDP port 8030 not being tied up.
 # It would be nice to have a "quiet" option to udp-vpi.
 net_slave_check: lb_marble_slave_tb udp-vpi.vpi read_trx.dat
-	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py --sim --ramtest --stop --rlen=34
+	$(VVP) $< +udp_port=8030 2>/dev/null & sleep 1 && $(PYTHON) testcase.py -a localhost -p 0 --sim --ramtest --stop --rlen=34
 
-# =====
-# syntax-check only, no actual test bench code
-MARBLE_BASE_V = marble_base.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V)
-marble_base_tb: $(MARBLE_BASE_V)
+# syntax-check only, with no actual test bench code
+MARBLE_BASE_V0 = marble_base.v packet_categorize.v data_xdomain.v flag_xdomain.v ltm_sync.v $(RTEFI_V) activity.v base_rx_mac.v spi_gate.v mac_compat_dpram.v ctrace.v $(LB_MARBLE_SLAVE_V) $(FREQ_DEMO_V) mmc_mailbox.v
+MARBLE_BASE_V = $(MARBLE_BASE_V0) $(LB_MARBLE_SLAVE_VX)
+marble_base_tb: $(MARBLE_BASE_V) fake_xadc.v IDDR.v
 VFLAGS_marble_base_tb =
 
 .PHONY: no_multiple_drivers_check
@@ -109,18 +132,29 @@ no_multiple_drivers_check: marble_base_tb
 	$(AWK) '$$NF=="drivers" && $$(NF-1)>1 {print $$0; code=1}BEGIN{code=0}END{exit(code)}' $<
 	@echo "PASS"
 
-marble_base_lint: $(MARBLE_BASE_V)
+marble_base_lint: $(MARBLE_BASE_V) fake_xadc.v IDDR.v
 	$(VERILATOR) --lint-only -DSIMULATE $(VLATOR_LINT_IGNORE) $^
 
+# You'd better have a verilator in the v5 series!
+marble_top_lint: marble_top.v $(APP_NAME)_features $(MARBLE_BASE_V) fake_xadc.v $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(SERIAL_IO_DIR)/gmii_to_rgmii.v
+	$(VERILATOR) --lint-only --timing $(VLATOR_LINT_IGNORE) -DSIMULATE -y $(FPGA_FAMILY_DIR)/xilinx $(filter-out $(APP_NAME)_features, $^)
+
 # =====
-# constraint
+# check of basic CDC-correctness
+marble_base_yosys.json: marble_base_shell.v $(MARBLE_BASE_V0)
+# exercise with make marble_base_cdc.txt
+
+# =====
+# constraint files and bitfile generation targets mappings
 pin_map_fmc.csv: pin_map_fmc.py
 	$(PYTHON) $< > $@
-marble1.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marblemini/%, Marble.xdc pin_map.csv) pin_map_fmc.csv marble_mini_top.csv
-	$(PYTHON) $^ > $@
 
-marble2.xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/marble/%, Marble.xdc pin_map.csv) pin_map_fmc.csv marble_top.csv
+$(CONFIG).xdc: $(BADGER_DIR)/tests/meta-xdc.py $(patsubst %,$(BOARD_SUPPORT_DIR)/$(BOARD_DIR)/%, Marble.xdc pin_map.csv) pin_map_fmc.csv $(BOARD_TOP_CSV)
+ifeq ($(CONFIG),marblemini)
 	$(PYTHON) $^ > $@
+else
+	$(PYTHON) $^ | sed -e '/FMC._.[AK]_/s/IOSTANDARD LVCMOS25/IOSTANDARD LVCMOS25 PULLTYPE PULLUP/' > $@
+endif
 
 # =====
 # Initialization file for i2cbridge
@@ -130,9 +164,9 @@ read_trx.dat: read_trx.py
 # Build a testbench with Verilator that can be put on the (simulated) network as 192.168.7.4
 # marble_base.v is over in board_support/marblemini, but most of the infrastructure,
 # including lb_marble_slave.v, is here.
-Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
+Vmarble_base: $(MARBLE_BASE_V) fake_xadc.v marble_base_sim.cpp ethernet_model.c tap_alloc.c crc32.c
 	rm -f ethernet_model.o tap_alloc.o crc32.o  # can't leave C version around for C++ to find
-	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -DSIMULATE -cc --exe $^
+	$(VERILATOR) --trace-fst $(VLATOR_LINT_IGNORE) -DSIMULATE -cc -CFLAGS -Wno-logical-op --exe $^
 	MAKEFLAGS="" make -C obj_dir -f Vmarble_base.mk USER_CPPFLAGS="-I $(BADGER_DIR)/tests"
 	mv obj_dir/$@ $@
 # Recipe:
@@ -143,62 +177,45 @@ Vmarble_base: $(MARBLE_BASE_V) marble_base_sim.cpp ethernet_model.c tap_alloc.c 
 # =====
 # bitfile
 MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_trx.dat ../../fpga_family/ds_clk_buf.v
-marble1.d: $(MARBLE_SYNTH_SOURCE) marble1.xdc
+
+$(CONFIG).d: $(MARBLE_SYNTH_SOURCE) $(CONFIG).xdc
 	echo $^ | tr ' ' '\n' > $@
 
-marble1.bit: marble.tcl marble1.d marble1_features bit_stamp_mod
-	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble1 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
-	G=marble1.$$(git rev-parse --short=8 --verify HEAD); if git diff | grep -q .; then echo "modified code; not coercing bitfile header timestamp"; mv $$G.x.bit $$G.bit; else ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) $$G.bit < $$G.x.bit && rm $$G.x.bit && sha256sum $$G.bit; fi
+# Target is now $(CONFIG).bit (e.g. marblemini.bit or marble.bit)
+$(CONFIG).bit: marble.tcl $(CONFIG).d $(APP_NAME)_features bit_stamp_mod
+	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) $(CONFIG) $(APP_NAME) $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl $(GTX_TCL)
 
-marble2.d: $(MARBLE_SYNTH_SOURCE) marble2.xdc
-	echo $^ | tr ' ' '\n' > $@
-
-marble2.bit: marble.tcl marble2.d marble2_features bit_stamp_mod
-	$(SYNTH_VIVADO) $< -tclargs $(filter %.d, $^) marble2 $(BUILD_DIR)/vivado_tcl/swap_gitid.tcl
-	G=marble2.$$(git rev-parse --short=8 --verify HEAD); if git diff | grep -q .; then echo "modified code; not coercing bitfile header timestamp"; mv $$G.x.bit $$G.bit; else ./bit_stamp_mod -s $$(git log -1 --pretty=%ct) $$G.bit < $$G.x.bit && rm $$G.x.bit && sha256sum $$G.bit; fi
+.PHONY: bit
+bit: $(CONFIG).bit
 
 # =====
-# bitfile loading and testing; bitfile specified by doing 'make BIT=marble1.bit marble1_hwload'
+# bitfile loading and testing
 
-# Default IP address set from microcontroller
-RGMII_IP = 192.168.19.31
-BIT = marble1.bit
+.PHONY: hwload hwtest
+hwload:
+	@echo "Loading $(CONFIG).bit onto $(CONFIG)..."
+ifeq ($(CONFIG),marblemini)
+	openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
+else
+	openocd -c "adapter driver ftdi; ftdi_serial 0000$(SERIAL);" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
+endif
 
-# add the Marble serial number
-marble1_hwload:
-	openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT}; exit"
+hwtest: udprtx
+	ping -c 2 $(IP_ADDR)
+	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://$(IP_ADDR):803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
+	./udprtx $(IP_ADDR) 100000 8  # should take under 3 seconds
+ifeq ($(CONFIG),marblemini)
+	$(PYTHON) testcase.py -a $(IP_ADDR) --trx --marble 0
+else
+	$(PYTHON) testcase.py -a $(IP_ADDR) --trx --si570
+	sn="$$($(PYTHON) zest_sn.py -a $(IP_ADDR) -p 803)" && echo "$$sn" && test "$$sn" = $(ZEST_SN)
+endif
 
-marble1_hwtest: udprtx
-	ping -c 2 ${RGMII_IP}
-	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${RGMII_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
-	./udprtx ${RGMII_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py -a ${RGMII_IP} -p 803 --trx --marble 0
-
-
-# =====
-# Marble bitfile loading and testing; bitfile specified by doing 'make BIT=marble2.bit marble2_hwload'
-
-# Default IP address set from microcontroller
-SERIAL = ""
-MARBLE_IP = 192.168.19.${SERIAL}
-BIT2 = marble2.bit
-# Stored in the Zest board installed on mohs CI test stand; here, we just check that we can read it
-ZEST_SN = "LBNL DIGITIZER V1.0 SN  024"
-
-marble2_hwload:
-	@echo "Using Marble with serial number ${SERIAL}"
-	openocd -c "adapter driver ftdi; ftdi_serial 0000${SERIAL};" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 ${BIT2}; exit"
-
-marble2_hwtest: udprtx
-	ping -c 2 ${MARBLE_IP}
-	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://${MARBLE_IP}:803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
-	./udprtx ${MARBLE_IP} 100000 8  # should take under 3 seconds
-	$(PYTHON) testcase.py -a ${MARBLE_IP} -p 803 --trx --si570
-	sn="$$($(PYTHON) zest_sn.py -a ${MARBLE_IP} -p 803)" && echo "$$sn" && test "$$sn" = ${ZEST_SN}
+dna_tb: dna_tb.v dna.v
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
-	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble*.vh marble*.json vivado*
+	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble_features*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
-	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx
+	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx marble_base_cdc.txt
 	rm -rf _xilinx .Xil obj_dir __pycache__

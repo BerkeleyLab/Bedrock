@@ -1,8 +1,8 @@
 // RGMII Hardware Test
 // mostly just instantiates hw_test
-// Initial target is AC701
+// Initial target is AC701; also used for Marble-Mini and Obsidian
 module rgmii_hw_test(
-	// 200 MHz typical
+	// 200 MHz differential on AC701
 	input SYSCLK_P,
 `ifndef MARBLE_TEST
 	input SYSCLK_N,
@@ -46,12 +46,14 @@ module rgmii_hw_test(
 `ifdef MARBLE_TEST
 assign VCXO_EN = 1;
 wire SYSCLK_N = 0;
+`endif
+`ifdef USE_IN_PHASE_PHY_CLK
 parameter in_phase_tx_clk = 1;
 `else
 parameter in_phase_tx_clk = 0;
 `endif
 
-// Standardized interface, hardware-dependent implementation
+// Standardized interface, with hardware-dependent implementation
 wire tx_clk, tx_clk90;
 wire clk_locked;
 wire pll_reset = 0;  // or RESET?
@@ -84,7 +86,11 @@ gmii_to_rgmii #(.in_phase_tx_clk(in_phase_tx_clk)) gmii_to_rgmii_i(
 	.gmii_rxd(vgmii_rxd),
 	.gmii_rx_clk(vgmii_rx_clk),
 	.gmii_rx_dv(vgmii_rx_dv),
-	.gmii_rx_er(vgmii_rx_er)
+	.gmii_rx_er(vgmii_rx_er),
+
+	.clk_div(1'b0),
+	.idelay_ce(1'b0),
+	.idelay_value_in(5'b0)
 );
 
 `ifdef CHIP_FAMILY_7SERIES

@@ -1,9 +1,16 @@
+#!/bin/sh
 # The "find" commands below check that the source code satisfies:
 #  no hidden files
 #  filenames are only alphanumeric, plus hyphen, underscore, and period
 #  files don't contain trailing spaces or tabs, non-tab followed by tab, or non-printing-ASCII chars
-set -e
-! find . -path ./.git -prune -o -name ".*" -and -not -name "." -and -not -name ".git*" -print | grep . || exit 1
-! find . -path ./.git -prune -o -printf "%f\n" | grep "[^-A-Za-z0-9._]" || exit 1
-! find . -path ./.git -prune -o -name "*.eps" -o -name "*.pdf" -o -type f -print | grep -v -E ".gold$|.tgz$" | LC_ALL=C xargs grep -n -E "`printf \"\t$| $|[^[:alnum:][:punct:] \t]\"`" || exit 1
-! find * -name "*.v" -o -name "*.vh" -o -name "*.c" -o -name "*.h" -o -name "*.S" | LC_ALL=C xargs grep -n "`printf \"[^\t]\t\"`"
+! (
+find . -path ./.git -prune -o -name ".*" -and -not -name "." -and -not -name ".git*" -print
+find . -path ./.git -prune -o -printf "%f\n" | grep "[^-A-Za-z0-9._]"
+find . -path ./.git -prune -o -name "*.eps" -o -name "*.pdf" -o -type f -print | grep -v -E ".gold$|.tgz$" | LC_ALL=C xargs grep -n -E "$(printf '\t$| $|[^[:alnum:][:punct:] \t]')"
+find -- * \( -name "*.v" -o -name "*.vh" -o -name "*.c" -o -name "*.h" -o -name "*.cpp" -o -name "*.S" -o -name "*.mk" -o -name "Makefile" \) -print0 | LC_ALL=C xargs -0 grep -n "$(printf '[^\t]\t')"
+) | grep .
+#
+# If forbidding special Unicode characters seems harsh, please read and
+# contemplate CVE-2021-42574 and CVE-2021-42694: Trojan Source Attack.
+# If and when we come across a use case that demands such characters in
+# this code base, maybe we can work out a whitelist mechanism.

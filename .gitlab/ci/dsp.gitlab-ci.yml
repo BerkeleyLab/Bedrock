@@ -1,4 +1,6 @@
 dsp_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp
   stage: test
@@ -6,13 +8,22 @@ dsp_test:
     - make && make checks
 
 dsp_hosted_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
-    - cd dsp/hosted
+    - cd dsp/hosted && export PYTHONPATH=../../build-tools/
   stage: test
   script:
     - make && make checks
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    expire_in: 1 week
+    paths:
+      - dsp/hosted/fdbk_core_plot.pdf
 
 digaree_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp/digaree
   stage: test
@@ -20,6 +31,8 @@ digaree_test:
     - make
 
 feedforward_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp/feedforward
   stage: test
@@ -27,8 +40,19 @@ feedforward_test:
     - make
 
 chirp_test:
+  extends: .build-matrix
+  image: $IMAGE
   before_script:
     - cd dsp/chirp
   stage: test
   script:
     - make && make checks
+
+cic_simple_s_test:
+  extends: .build-matrix
+  image: $IMAGE
+  before_script:
+    - cd dsp
+  stage: test
+  script:
+    - make TESTBENCH=cic_simple_s_tb -f Makefile_cocotb

@@ -1,0 +1,28 @@
+[timestart] 0
+[size] 1166 445
+[pos] 763 125
+*-23.377670 3480000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] etrig_bridge_tb.
+[treeopen] etrig_bridge_tb.UUT.
+[sst_width] 233
+[signals_width] 198
+[sst_expanded] 1
+[sst_vpaned_height] 93
+@28
+etrig_bridge_tb.UUT.adc_clk
+etrig_bridge_tb.UUT.lb_clk
+etrig_bridge_tb.UUT.trign_0
+etrig_bridge_tb.UUT.trign_1
+@29
+etrig_bridge_tb.UUT.trign_2
+@28
+etrig_bridge_tb.UUT.sel[1:0]
+@24
+etrig_bridge_tb.UUT.period[25:0]
+etrig_bridge_tb.UUT.delay[25:0]
+etrig_bridge_tb.etrig_pulse_cnt[15:0]
+@28
+etrig_bridge_tb.UUT.etrig_pulse
+etrig_bridge_tb.UUT.etrig_pulse_delayed
+[pattern_trace] 1
+[pattern_trace] 0

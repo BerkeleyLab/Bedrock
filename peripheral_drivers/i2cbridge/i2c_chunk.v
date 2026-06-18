@@ -159,6 +159,8 @@ always @(posedge clk) begin
 		trace_h <= trace;
 		trace_k <= 1;
 	end
+	// Close out a finished trace
+	if (~trace_run) trace_a <= 0;
 end
 
 // Special attention to support atomic buffer flip

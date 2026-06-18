@@ -1,11 +1,8 @@
 from time import sleep
 import sys
-import numpy as np
 bedrock_dir = "../../"
 sys.path.append(bedrock_dir + "peripheral_drivers/i2cbridge")
 sys.path.append(bedrock_dir + "badger")
-sys.path.append(bedrock_dir + "projects/common")
-import leep
 from c2vcd import produce_vcd
 from fmc_test_l import fmc_decode
 
@@ -14,7 +11,7 @@ from fmc_test_l import fmc_decode
 # return an n-long array of 16-bit values, still integer
 # constructed assuming 8-bit values are arranged in pairs, msb-first
 def merge_16(a):
-    aa = [x1*256+x2 for x1, x2 in zip(a[0::2], a[1::2])]
+    aa = [int(x1)*256 + int(x2) for x1, x2 in zip(a[0::2], a[1::2])]
     return aa
 
 
@@ -40,8 +37,8 @@ def wait_for_bit(dev, mask, equal, timeout=520, sim=False, progress=".", verbose
         else:
             sleep(0.02)
         updated = dev.reg_read(["twi_status"])[0]
-        if verbose:
-            print("%d updated? %d" % (ix, updated))
+        # if verbose:
+        #     print("%d updated? %d" % (ix, updated))
         if (updated & mask) == equal:
             if verbose:
                 sys.stdout.write("OK\n")
@@ -167,7 +164,7 @@ def print_ina219(title, a):
     shuntr = 0.02  # Ohm
     aa = merge_16(a)
     aa[0] = aa[0] if aa[0] < 32768 else aa[0]-65536  # only current is signed
-    current = float(aa[0])/32768.0*0.32/shuntr
+    current = abs(float(aa[0])/32768.0*0.32/shuntr)
     busv = float(aa[1] & 0xfff8)/65536.0*32.0
     print("%s:  current %6.3f A   voltage %7.3f V" % (title, current, busv))
 
@@ -178,20 +175,14 @@ def print_ina219_config(title, a):
     print("%s INA219 config: 0x%4.4X %s" % (title, x, suffix))
 
 
-def compute_si570(a):
+def compute_si570(freq_default, a):
     # DCO frequency range: 4850 - 5670MHz
     # HSDIV values: 4, 5, 6, 7, 9 or 11 (subtract 4 to store)
     # N1 values: 1, 2, 4, 6, 8...128
-    hs_div = (a[0] >> 5) + 4
-    n1 = (((a[0] & 0x1f) << 2) | (a[1] >> 6)) + 1
-    rfreq = np.uint64((((a[1] & 0x3f) << 32) | (a[2] << 24) | (a[3] << 16) | (a[4] << 8) | a[5])) / (2**28)
+    hs_div = int(a[0] >> 5) + 4
+    n1 = int(((a[0] & 0x1f) << 2) | (a[1] >> 6)) + 1
+    rfreq = float(int((a[1] & 0x3f) << 32 | a[2] << 24 | a[3] << 16 | a[4] << 8 | a[5])) / float(2**28)
 
-    import leep
-    leep_addr = "leep://" + str(args.addr) + str(":") + str(args.port)
-    print(leep_addr)
-
-    addr = leep.open(leep_addr, instance=[])
-    freq_default = addr.reg_read(["frequency_si570"])
     default = (freq_default[0]/2**24.0)*125
     fxtal = default * hs_div * n1 / rfreq
     fdco = default * n1 * hs_div
@@ -207,10 +198,10 @@ def compute_si570(a):
         print('SI570 output frequency: %4.3f MHz' % default)
 
 
-def print_result(result, args, poll_only=False):
+def print_result(result, args, board_type, si570_dfreq, poll_only=False):
     n_fmc = 2 if args.fmc else 0
     tester = 2 if args.fmc_tester else 0
-    transceiver = 2 if args.marble else 4
+    transceiver = 2 if board_type else 4
     if args.debug:
         for jx in range(16):
             p = result[jx*16:(jx+1)*16]
@@ -241,7 +232,7 @@ def print_result(result, args, poll_only=False):
             print("########################################################################")
             pitch = 6
             hx = ib + 1 + pitch
-            compute_si570(result[hx:hx+pitch])
+            compute_si570(si570_dfreq, result[hx:hx+pitch])
         if args.trx:
             for ix in range(transceiver):
                 print("########################################################################")
@@ -262,7 +253,7 @@ def print_result(result, args, poll_only=False):
             wp_bit = result[0] & 0x80
             ss = "Off" if wp_bit else "On"
             print("Write Protect switch is %s" % ss)
-            if args.marble:
+            if board_type:
                 qsfp_pp1 = [result[2], result[3]]
             else:
                 qsfp_pp = result[2]*256 + result[3]  # parallel SFP status via U34
@@ -274,14 +265,14 @@ def print_result(result, args, poll_only=False):
         if args.trx:
             for ix in range(transceiver):
                 print("########################################################################")
-                if args.marble:
-                    pitch = 28
+                if board_type:
+                    pitch = 29
                 else:
                     pitch = 10
                 hx = 16 + pitch*ix
                 a1 = result[hx:hx+pitch]
                 print("Status pin monitor Transceiver%d:  0x%X" % (ix+1, qsfp_pp1[ix]))
-                print_qsfp_z(a1) if args.marble else print_sfp_z(a1)
+                print_qsfp_z(a1) if board_type else print_sfp_z(a1)
             for ix in range(tester):
                 print("########################################################################")
                 pitch = 10
@@ -326,8 +317,8 @@ if __name__ == "__main__":
     # import importlib
     parser = argparse.ArgumentParser(
         description="Utility for working with i2cbridge attached to Packet Badger")
-    parser.add_argument('-a', '--addr', default='192.168.19.10', help='IP address')
-    parser.add_argument('-p', '--port', type=int, default=0, help='UDP Port number')
+    parser.add_argument('-a', '--addr', required=True, help='IP address (required)')
+    parser.add_argument('-p', '--port', type=int, default=803, help='UDP Port number (default 803)')
     parser.add_argument('-m', '--marble', type=int, default=1, help='Select the carrier board, Marble or Marble-Mini')
     parser.add_argument('--sim', action='store_true', help='simulation context')
     parser.add_argument('--ramtest', action='store_true', help='RAM test program')
@@ -341,7 +332,7 @@ if __name__ == "__main__":
     parser.add_argument('--vcd', type=str, help='VCD file to capture')
     parser.add_argument('--fmc', action='store_true', help='connect to Zest')
     parser.add_argument('--fmc_tester', action='store_true', help='connect to CERN FMC tester')
-    parser.add_argument('--rlen', type=int, default=359, help='result array length')
+    parser.add_argument('--rlen', type=int, default=361, help='result array length')
     parser.add_argument('--squelch', action='store_true', help='squelch non-LA FMC pins')
 
     args = parser.parse_args()
@@ -356,31 +347,39 @@ if __name__ == "__main__":
         if args.port == 0:
             port = 803
 
+    # OK, setup is finished, start the actual work
+    # dev = lbus_access.lbus_access(addr, port=port, timeout=3.0, allow_burst=False)
+    import leep
+    leep_addr = "leep://" + addr + ":" + str(port)
+    print(leep_addr)
+    dev = leep.open(leep_addr, timeout=5.0)
     # Consider importlib instead to give more flexibility at runtime
     # will require turning ramtest and poller into actual classes
     # Or, better, turning this inside out and encapsulating the
     # infrastructure part of this file as a class.
+    import config_si570
+    mbox = dev.reg_read(["spi_mbox"])[0]
+    board, si570_addr, si570_polarity, si570_start_addr, _ = config_si570.decode_settings(mbox, verbose=False)
+    # if mailbox is not updated, use args.marble user argument
+    # board values - simulation = 0, marble = 1, marble_mini = 2
+    # just some workaround to keep the functionality the same
+    board_type = args.marble if board == 0 else board-2 if board == 2 else board
+    si570_dfreq = dev.reg_read(["frequency_si570"])
     if args.ramtest:
         import ramtest
         prog = ramtest.ram_test_prog()
-    elif args.trx:
+    elif args.trx or args.si570:
         import read_trx
-        prog = read_trx.hw_test_prog(args.marble)
+        prog = read_trx.hw_test_prog(board_type, si570_addr, si570_start_addr, si570_polarity)
     else:
         import poller
         prog = poller.hw_test_prog()
 
-    # OK, setup is finished, start the actual work
-    # dev = lbus_access.lbus_access(addr, port=port, timeout=3.0, allow_burst=False)
-    leep_addr = "leep://" + addr + ":" + str(port)
-    print(leep_addr)
-    dev = leep.open(leep_addr, timeout=5.0)
     if args.poll:
         while True:
             wait_for_new(dev, sim=sim)
             result = read_result(dev, result_len=args.rlen)
-            print_result(result, args, poll_only=True)
-
+            print_result(result, args, board_type, si570_dfreq, poll_only=True)
     else:
         if args.debug:
             print(" ".join(["%2.2x" % p for p in prog]))
@@ -388,4 +387,4 @@ if __name__ == "__main__":
         result = run_testcase(dev, prog, sim=sim, result_len=args.rlen,
                               debug=args.debug,
                               stop=args.stop, capture=args.vcd)
-        print_result(result, args)
+        print_result(result, args, board_type, si570_dfreq)

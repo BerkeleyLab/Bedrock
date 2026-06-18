@@ -28,19 +28,23 @@
 
 `timescale 1ns / 1ns
 
-module adc_cells(clk, mux_data_in, adc0, adc1);
+module adc_cells(
+	input clk,
+	input [13:0] mux_data_in,
+	output [13:0] adc0,
+	output [13:0] adc1
+);
 
    parameter width = 14;
-   input         clk;
-   input [13:0]  mux_data_in;
-   output [13:0] adc0;
-   output [13:0] adc1;
 
    // interleave DDR output from AD9258
    wire        adc_iddr2_rst=1'b0;
    wire        adc_iddr2_set=1'b0;
    wire        adc_iddr2_ce=1'b1;
-   // IDDR2 primitive of sp6, refer to http://www.xilinx.com/support/documentation/sw_manuals/xilinx13_4/spartan6_hdl.pdf, page 56 for ddr_alignment
+   // IDDR2 primitive of Spartan-6
+   // Refer to UG615
+   // https://docs.amd.com/v/u/en-US/spartan6_hdl
+   // page 124 for ddr_alignment
    genvar ix;
    generate
       for (ix=0; ix<width; ix=ix+1) begin: in_cell

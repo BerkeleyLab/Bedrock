@@ -1,7 +1,15 @@
 // Pathetic model of Xilinx ODDR2 cell (Spartan-6) for simulation
 // Ignores set and reset inputs
-module ODDR2(output Q,
-	input C0, input C1, input CE, input D0, input D1, input R, input S);
+module ODDR2 (
+	output Q,
+	input C0,
+	input C1,
+	input CE,
+	input D0,
+	input D1,
+	input R,
+	input S
+);
 
 parameter DDR_ALIGNMENT = "NONE";
 parameter INIT = 1'b0;

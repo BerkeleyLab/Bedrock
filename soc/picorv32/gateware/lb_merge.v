@@ -12,28 +12,28 @@ module lb_merge #(
 ) (
 	input clk,
 	output collision,
-    output busy,
+	output busy,
 	// Controlling bus A (CPU)
 	input            lb_write_a,
 	input            lb_read_a,
 	input  [31:0]    lb_wdata_a,
 	input  [ADW-1:0] lb_addr_a,
 	output [31:0]    lb_rdata_a,
-    input            lb_rvalid_a,
+	input            lb_rvalid_a,
 	// Controlling bus B (LB)
 	input            lb_write_b,
 	input            lb_read_b,
 	input  [31:0]    lb_wdata_b,
 	input  [ADW-1:0] lb_addr_b,
 	output [31:0]    lb_rdata_b,
-    input            lb_rvalid_b,
+	input            lb_rvalid_b,
 	// Controlled bus
 	output           lb_merge_write,
 	output           lb_merge_read,
 	output [31:0]    lb_merge_wdata,
 	output [ADW-1:0] lb_merge_addr,
 	input  [31:0]    lb_merge_rdata,
-    output           lb_merge_rvalid
+	output           lb_merge_rvalid
 );
 
 assign lb_merge_read = lb_read_a | lb_read_b;

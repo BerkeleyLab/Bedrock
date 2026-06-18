@@ -56,6 +56,7 @@ module llrf_shell(
 
 	`AUTOMATIC_self
 );
+`undef AUTOMATIC_self
 
 `AUTOMATIC_decode
 
@@ -103,13 +104,12 @@ timestamp ts(.clk(clk), .aux_trig(1'b0), .slow_op(slow_op), .slow_snap(slow_snap
 // changing other controls. tag_now shows the value of tag at the end-time of
 // the buffer, tag_old shows it at the begin-time of the buffer.  Not perfect
 // because of non-boxcar filtering and sloppy pipelining.
-`define SLOW_SR_LEN 7*16
-`define SLOW_SR_DATA { adc1_min, adc1_max, adc2_min, adc2_max, adc3_min, adc3_max, tag_now, tag_old }
-parameter sr_length = `SLOW_SR_LEN;
-reg [sr_length-1:0] slow_read=0;
 reg [7:0] tag_old=0;
+parameter sr_length = 7*16;
+wire [sr_length-1:0] slow_sr_data = { adc1_min, adc1_max, adc2_min, adc2_max, adc3_min, adc3_max, tag_now, tag_old };
+reg [sr_length-1:0] slow_read=0;
 always @(posedge clk) if (slow_op) begin
-	slow_read <= slow_snap ? `SLOW_SR_DATA : {slow_read[sr_length-9:0],timestamp_out};
+	slow_read <= slow_snap ? slow_sr_data : {slow_read[sr_length-9:0],timestamp_out};
 	if (slow_snap) tag_old <= tag_now;
 end
 assign slow_out = slow_read[sr_length-1:sr_length-8];
