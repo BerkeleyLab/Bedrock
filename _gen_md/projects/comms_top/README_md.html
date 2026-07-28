@@ -134,10 +134,10 @@ regressions in the following Bedrock sub-systems and features:</p>
 <ul class="simple">
 <li><p>Ethernet to Local Bus bridge over fiber</p></li>
 <li><p>ChitChat serial protocol over fiber</p></li>
-<li><p>Generation of QF2PRE-compatible bitfiles</p></li>
-<li><p>Communication with QF2PRE over Ethernet/Local Bus</p></li>
+<li><p>Generation of QF2-Pre compatible bitfiles</p></li>
+<li><p>Communication with QF2-Pre over Ethernet/Local Bus</p></li>
 </ul>
-<p><strong>NOTE:</strong> While this project mainly focuses on exercising QF2PRE hardware and its
+<p><strong>NOTE:</strong> While this project mainly focuses on exercising QF2-Pre hardware and its
 GTX transceivers, a minimal example of Ethernet-over-fiber functionality using GTP
 transceivers can be found under <code class="docutils literal notranslate"><span class="pre">gige_eth/</span></code>, which targets an AC701 development board.</p>
 <blockquote>
@@ -158,7 +158,7 @@ transceivers can be found under <code class="docutils literal notranslate"><span
 <p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">hwtest</span></code></p>
 <section id="architecture">
 <h3>Architecture<a class="headerlink" href="#architecture" title="Permalink to this heading"></a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">comms_top.v</span></code> consists of an Ethernet to Local Bus bridge running over a Fiber link at 1.25 GBd
+<p><code class="docutils literal notranslate"><span class="pre">comms_top.v</span></code> consists of an Ethernet to Local Bus bridge running over a Fiber link at 1.25 GBd or 2.5 GBd
 and a ChitChat link also routed through a Fiber link at 2.5 GBd. Limited test-pattern
 generation is provided, with the Ethernet/Local Bus guaranteeing the interface with the Host.</p>
 </section>
@@ -167,10 +167,11 @@ generation is provided, with the Ethernet/Local Bus guaranteeing the interface w
 <h2>Ethernet and Local Bus<a class="headerlink" href="#ethernet-and-local-bus" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">eth_gtx_bridge.v</span></code> combines packet Badger with PCS/PMA logic and a GTX interface. This module
 performs its own 8b/10b line coding and, as such, outputs 20-bits of raw data to the GTX.</p>
-<p>Packet Badger is clocked at 125 MHz, while the GTX interface is clocked at 62.5 MHz.
+<p>Packet Badger is clocked at 125 MHz, while the transceiver interface can be either clocked at 62.5 MHz or 125 MHz.
+The selection between the two depends on variable <code class="docutils literal notranslate"><span class="pre">DOUBLEBIT</span></code>, which corresponds to line rates of 1.25 GBd and 2.5 GBd respectively.
 Data width/rate conversion is performed within <code class="docutils literal notranslate"><span class="pre">eth_gtx_bridge.v</span></code>.</p>
-<p>Two clock managers are used to convert the 125 MHz <code class="docutils literal notranslate"><span class="pre">{tx,rx}outclk_out</span></code> clock outputs from
-the TX and RX GTXs to half-rate, 62.5 MHz.</p>
+<p>Two clock managers are used to condition the 125 MHz <code class="docutils literal notranslate"><span class="pre">{tx,rx}outclk_out</span></code> clock outputs from the TX and RX GTXs.
+Depending again on the <code class="docutils literal notranslate"><span class="pre">DOUBLEBIT</span></code> variable, these managers output clocks at either half-rate 62.5 MHz or full-rate 125 MHz.</p>
 <p>The Local Bus interface is on the <code class="docutils literal notranslate"><span class="pre">gmii_tx_clk</span></code> domain and expects fixed-latency read responses.</p>
 <p>A bare-bones register bank, <code class="docutils literal notranslate"><span class="pre">comms_top_regbank.v</span></code>, decodes incoming Local Bus commands and writes
 and reads to a pre-defined set of registers which provide access to the ChitChat core.</p>
@@ -204,11 +205,11 @@ TCL configuration script, <code class="docutils literal notranslate"><span class
 <p><code class="docutils literal notranslate"><span class="pre">mgt_gen.tcl</span></code> implements two user-facing procedures:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">proc</span> <span class="pre">add_aux_ip</span> <span class="pre">{ipname</span> <span class="pre">config_file</span> <span class="pre">module_name}</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">proc</span> <span class="pre">add_gt_protocol</span> <span class="pre">{config_file</span> <span class="pre">quad_num</span> <span class="pre">gt_num</span> <span class="pre">en8b10b</span> <span class="pre">pll_type}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">proc</span> <span class="pre">add_gt_protocol</span> <span class="pre">{gt_type</span> <span class="pre">config_file</span> <span class="pre">quad_num</span> <span class="pre">gt_num</span> <span class="pre">en8b10b</span> <span class="pre">endrp</span> <span class="pre">pll_type}</span></code></p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">add_aux_ip</span></code> provides a convenient way of adding arbitrary IP, that would otherwise have to be
 generated manually through the GUI wizard.</p>
-<p><code class="docutils literal notranslate"><span class="pre">add_gt_protocol</span></code> can be used to configure up to 4 Quad MGTs at MGT granularity. <code class="docutils literal notranslate"><span class="pre">config_file</span></code> specifies
+<p><code class="docutils literal notranslate"><span class="pre">add_gt_protocol</span></code> can be used to configure either GTP or GTZ and up to 4 Quad MGTs at MGT granularity. <code class="docutils literal notranslate"><span class="pre">config_file</span></code> specifies
 a TCL file containing a dictionary with all configuration parameters for a specific MGT. The remaining
 arguments associate the configuration with a specific MGT in the chip and set options that are used in
 the generation of the final Verilog modules (<code class="docutils literal notranslate"><span class="pre">q0_gt_wrap</span></code>, <code class="docutils literal notranslate"><span class="pre">q1_gt_wrap</span></code>, <code class="docutils literal notranslate"><span class="pre">q2_gt_wrap</span></code>, <code class="docutils literal notranslate"><span class="pre">q3_gt_wrap</span></code>),
