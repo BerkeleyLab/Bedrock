@@ -3,7 +3,7 @@ include ../../../dir_list.mk
 
 # DOUBLEBIT sets the transceiver line rate and internal user logic clock rate
 # DOUBLEBIT = 0, standard 1.25 GBd GigE link with a 62.5 MHz clock
-# DOUBLEBIT = 1, faster 2.50 GBd GigE link with a 125 MHz clock
+# DOUBLEBIT = 1, 1.25 GBd GigE link faked with a 2.50 GBd MGT setup using a 125 MHz clock
 DOUBLEBIT ?= 0
 export DOUBLEBIT
 DOUBLEBIT ?= 0

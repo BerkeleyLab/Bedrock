@@ -34,7 +34,7 @@ TODO: Integrate into Makefile/CI
 
 # Architecture
 
-`comms_top.v` consists of an Ethernet to Local Bus bridge running over a Fiber link at 1.25 GBd or 2.5 GBd
+`comms_top.v` consists of an Ethernet to Local Bus bridge running over a Fiber link at 1.25 GBd
 and a ChitChat link also routed through a Fiber link at 2.5 GBd. Limited test-pattern
 generation is provided, with the Ethernet/Local Bus guaranteeing the interface with the Host.
 
@@ -44,7 +44,13 @@ generation is provided, with the Ethernet/Local Bus guaranteeing the interface w
 performs its own 8b/10b line coding and, as such, outputs 20-bits of raw data to the GTX.
 
 Packet Badger is clocked at 125 MHz, while the transceiver interface can be either clocked at 62.5 MHz or 125 MHz.
-The selection between the two depends on variable `DOUBLEBIT`, which corresponds to line rates of 1.25 GBd and 2.5 GBd respectively.
+Long story: back in the Spartan-6 days, the MGT hardware could "do" 10-bit serialization,
+but that got dropped in Xilinx's 7-series.  To get 1.25 GBd properly with 20-bit serialization,
+the MGT has to be clocked at 62.5 MHz.  That has been the default in this code base for production
+for many years, and means an extra clock domain and data movement.
+Now, there is also the option to set the variable `DOUBLEBIT`, which runs the MGT clock at 125 MHz,
+and uses the serdes at a bogus 2.5 GBd, with every bit doubled.  No need for a 62.5 MHz clock!
+Obviously correct for Tx, but with suitable programming of e.g. comma patterns, seems to work for Rx as well.
 Data width/rate conversion is performed within `eth_gtx_bridge.v`.
 
 Two clock managers are used to condition the 125 MHz `{tx,rx}outclk_out` clock outputs from the TX and RX GTXs.
