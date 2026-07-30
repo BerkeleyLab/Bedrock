@@ -6,7 +6,14 @@ all: $(TARGET)
 XILINX_TOOL := VIVADO
 APP_NAME = cmoc
 
-HARDWARE = marblemini
+ifdef CONFIG
+    HARDWARE = $(CONFIG)
+else
+    HARDWARE ?= marblemini
+endif
+ifeq ($(HARDWARE),marble)
+    MGT_TCL = $(TEST_MARBLE_FAMILY)/gtx_marble_top.tcl
+endif
 
 APP_DIR = $(TOP_DIR)/cmoc
 DSP_DIR = $(TOP_DIR)/dsp
@@ -23,8 +30,7 @@ include $(BS_HARDWARE_DIR)/rules.mk
 include $(APP_DIR)/rules.mk
 
 SYNTH_OPT += $(VERILOG_DEFINE_FLAGS)
-
-VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/pll -y. -y$(APP_DIR) -y$(HOMELESS_DIR) -y$(HOMELESS_DIR)/freq_demo -y$(BADGER_DIR) -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y$(SERIAL_IO_DIR) -y$(TEST_MARBLE_FAMILY) -I$(TEST_MARBLE_FAMILY) -y$(TEST_MARBLE_FAMILY)/pps_lock -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y../bmb7_cu
+VFLAGS_DEP += -y$(BS_HARDWARE_DIR) -y$(BOARD_SUPPORT_DIR)/marblemini -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR) -y$(FPGA_FAMILY_DIR)/xilinx -y$(FPGA_FAMILY_DIR)/pll -y$(FPGA_FAMILY_DIR)/mgt  -I$(FPGA_FAMILY_DIR)/mgt -y. -y$(APP_DIR) -y$(HOMELESS_DIR) -y$(HOMELESS_DIR)/freq_demo -y$(BADGER_DIR) -y$(BADGER_DIR)/tests -y$(BADGER_DIR)/tests/kc705 -y$(SERIAL_IO_DIR) -I$(SERIAL_IO_DIR) -y$(TEST_MARBLE_FAMILY) -I$(TEST_MARBLE_FAMILY) -y$(TEST_MARBLE_FAMILY)/pps_lock -y$(PERIPH_DRIVERS_DIR) -y$(PERIPH_DRIVERS_DIR)/i2cbridge -y../bmb7_cu
 
 VFLAGS += $(VERILOG_DEFINE_FLAGS)
 
@@ -32,11 +38,12 @@ system_top.xdc: $(BOARD_SUPPORT_DIR)/$(HARDWARE)/Marble.xdc $(BOARD_SUPPORT_DIR)
 	@echo "Building for $(HARDWARE); Use make HARDWARE=marble(mini) otherwise"
 	$(PYTHON) $(BADGER_DIR)/tests/meta-xdc.py $^ > $@
 
-CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.bin cmoc_top.prm cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json marble_features*.vh $(RTEFI_CLEAN)
+CLEAN += $(TARGET) $(AUTOGEN_DIR)/config_romx.v *~ system_top.xdc cmoc_top.prm cmoc_top.bin cmoc_top.bit $(APP_NAME)_regmap_long.json $(APP_NAME)_regmap.json marble_features*.vh $(RTEFI_CLEAN)
 CLEAN += *.log *.jou
 CLEAN_DIRS += _xilinx
 
-cmoc_top.bit: $(AUTOGEN_DIR)/config_romx.v
+# XXX doesn't support swap_gitid.tcl yet
+cmoc_top.bit: $(AUTOGEN_DIR)/config_romx.v $(MGT_TCL)
 cmoc_top.v: marble_features_defs.vh marble_features_params.vh $(AUTOGEN_DIR)/config_romx.v rtefi_blob.v construct_tx_table.v cryomodule_auto
 
 download: cmoc_top.bit

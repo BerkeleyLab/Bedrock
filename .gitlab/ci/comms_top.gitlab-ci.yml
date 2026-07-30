@@ -27,28 +27,43 @@ comms_top_run:
   environment: hw_qf2_pre
   resource_group: hw_qf2_pre
 
+.doublebit-targets:
+  parallel:
+    DOUBLEBIT: ["0", "1"]
+
+.gige-top-matrix:
+  extends:
+    - .build-images
+    - .doublebit-targets
+
+.gige-top-build-matrix:
+  variables: !reference [.build-matrix, variables]
+  parallel:
+    matrix:
+      - !reference [.gige-top-matrix, parallel]
+
 gige_sfp_ac701:
-  extends: .build-matrix
+  extends: .gige-top-build-matrix
   image: $IMAGE
+  stage: synthesis
   before_script:
     - cd projects/comms_top/gige_eth && ls /non-free
-  stage: synthesis
   script:
-    - PATH=$XILINX_VIVADO/bin:$PATH make HARDWARE=ac701 gige_top.bit
+    - PATH=$XILINX_VIVADO/bin:$PATH make HARDWARE=ac701 DOUBLEBIT=$DOUBLEBIT gige_top.bit
   artifacts:
-    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    name: "$CI_JOB_NAME-DB$DOUBLEBIT-$CI_COMMIT_REF_NAME"
     expire_in: 1 week
     paths:
       - projects/comms_top/gige_eth/gige_top.bit
 
 gige_sfp_ac701_run:
-  extends: .build-matrix
+  extends: .gige-top-build-matrix
   image: $IMAGE
   stage: program
   tags:
     - deploy
-  dependencies:
-    - gige_sfp_ac701
+  needs:
+    - job: gige_sfp_ac701
   script:
     - cd projects/comms_top/gige_eth && make hwload_ac701 SERIAL_NUM_OPT="-s 210203356870" && sleep 7 && make hwtest_ac701
   environment: hw_ac701

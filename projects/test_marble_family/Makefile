@@ -5,22 +5,21 @@ include $(I2CBRIDGE_DIR)/i2cbridge_rules.mk
 UNISIMS_DIR = broken
 
 APP_NAME = marble
-GTX_TCL :=
-# Select between marblemini, marble
-# XXX needs support for marble_fiber
+# Select between marblemini, marble, and marble_fiber
 CONFIG ?= marblemini
 ifeq ($(CONFIG),marblemini)
   BOARD_DIR     := marblemini
   BOARD_TOP_CSV := marble_mini_top.csv
   IP_ADDR       := 192.168.19.31
-else ifneq (,$(filter marble,$(CONFIG)))
+else ifneq (,$(filter marble marble_fiber,$(CONFIG)))
   BOARD_DIR     := marble
   BOARD_TOP_CSV := marble_top.csv
   SERIAL        ?= ""
   IP_ADDR       := 192.168.19.$(SERIAL)
   ZEST_SN       ?= "LBNL DIGITIZER V1.0 SN  024"
+  GTX_TCL       := gtx_marble_top.tcl
 else
-  $(error Unknown CONFIG '$(CONFIG)'. Please choose 'marblemini', or 'marble')
+  $(error Unknown CONFIG '$(CONFIG)'. Please choose 'marblemini', 'marble', or 'marble_fiber')
 endif
 
 # It seems like the variable VERILOG_TB from $(BUILD_DIR)/top_rules.mk is intended to be
@@ -176,9 +175,9 @@ Vmarble_base: $(MARBLE_BASE_V) fake_xadc.v marble_base_sim.cpp ethernet_model.c 
 
 # =====
 # bitfile
-MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_trx.dat ../../fpga_family/ds_clk_buf.v
+MARBLE_SYNTH_SOURCE = marble_top.v tmds_test.v marble/gmii_clock_handle.v $(FPGA_FAMILY_DIR)/xilinx/xilinx7_clocks.v gmii_to_rgmii.v $(MARBLE_BASE_V) read_trx.dat $(FPGA_FAMILY_DIR)/ds_clk_buf.v $(FPGA_FAMILY_DIR)/mgt/mgt_eth_clks.v $(SERIAL_IO_DIR)/eth_gtx_hook.v $(SERIAL_IO_DIR)/gmii_link.v $(SERIAL_IO_DIR)/negotiate.v $(SERIAL_IO_DIR)/dec_8b10b.v $(SERIAL_IO_DIR)/ep_rx_pcs.v $(SERIAL_IO_DIR)/enc_8b10b.v $(SERIAL_IO_DIR)/ep_tx_pcs.v $(SERIAL_IO_DIR)/ep_sync_detect.v $(SERIAL_IO_DIR)/crc16.v $(SERIAL_IO_DIR)/endpoint.vh $(FPGA_FAMILY_DIR)/mgt/qgt_wrap_pack.vh $(FPGA_FAMILY_DIR)/mgt/qgt_wrap_stub.vh $(FPGA_FAMILY_DIR)/mgt/qgt_wrap.v $(FPGA_FAMILY_DIR)/mgt/qgtp_common_wrap.v
 
-$(CONFIG).d: $(MARBLE_SYNTH_SOURCE) $(CONFIG).xdc
+$(CONFIG).d: $(MARBLE_SYNTH_SOURCE) $(GT_SOURCE) $(CONFIG).xdc
 	echo $^ | tr ' ' '\n' > $@
 
 # Target is now $(CONFIG).bit (e.g. marblemini.bit or marble.bit)
@@ -197,11 +196,11 @@ hwload:
 ifeq ($(CONFIG),marblemini)
 	openocd -f serial.cfg -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
 else
-	openocd -c "adapter driver ftdi; ftdi_serial 0000$(SERIAL);" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
+	openocd -c "adapter driver ftdi; ftdi_serial $$(printf '%06d' $(SERIAL));" -f marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 $(CONFIG).bit; exit"
 endif
 
 hwtest: udprtx
-	ping -c 2 $(IP_ADDR)
+	timeout 30 bash -c 'until ping -c 2 -W 1 $(IP_ADDR); do echo "Pinging $(IP_ADDR) failed, retrying..."; sleep 1; done'
 	test $$(PYTHONPATH=../common $(PYTHON) -m leep.cli leep://$(IP_ADDR):803 gitid) = $$(git rev-parse HEAD) && echo "gitid OK"
 	./udprtx $(IP_ADDR) 100000 8  # should take under 3 seconds
 ifeq ($(CONFIG),marblemini)
@@ -209,13 +208,14 @@ ifeq ($(CONFIG),marblemini)
 else
 	$(PYTHON) testcase.py -a $(IP_ADDR) --trx --si570
 	sn="$$($(PYTHON) zest_sn.py -a $(IP_ADDR) -p 803)" && echo "$$sn" && test "$$sn" = $(ZEST_SN)
+	$(PYTHON) peek_mailbox.py leep://$(IP_ADDR):803
 endif
 
 dna_tb: dna_tb.v dna.v
 
 clean:
 	rm -f $(RTEFI_CLEAN) *_tb *.d *.o *.vpi *.vcd *.pyc i2cbridge/*.pyc
-	rm -f pin_map_fmc.csv marble*.xdc marble*.bit marble_features*.vh marble*.json vivado*
+	rm -f pin_map_fmc.csv *$(APP_NAME)*.xdc *$(APP_NAME)*.bit marble_features*.vh marble*.json vivado*
 	rm -f scalar_marble_regmap.json marble_regmap.json config_romx.v
 	rm -f read_trx.dat Vmarble_base bit_stamp_mod udprtx marble_base_cdc.txt
 	rm -rf _xilinx .Xil obj_dir __pycache__

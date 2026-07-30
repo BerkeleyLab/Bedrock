@@ -25,7 +25,7 @@ set gt 0
 set en8b10b 0
 set endrp 0
 set pll_type "CPLL"
-add_gt_protocol $gt_type $MGT_CONFIG_DIR/gtx_ethernet.tcl $quad $gt $en8b10b $endrp $pll_type
+add_gt_protocol $gt_type $MGT_CONFIG_DIR/gtx_ethernet_1_25.tcl $quad $gt $en8b10b $endrp $pll_type
 
 set quad 0
 set gt 1

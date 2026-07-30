@@ -8,10 +8,10 @@ regressions in the following Bedrock sub-systems and features:
 
 * Ethernet to Local Bus bridge over fiber
 * ChitChat serial protocol over fiber
-* Generation of QF2PRE-compatible bitfiles
-* Communication with QF2PRE over Ethernet/Local Bus
+* Generation of QF2-Pre compatible bitfiles
+* Communication with QF2-Pre over Ethernet/Local Bus
 
-**NOTE:** While this project mainly focuses on exercising QF2PRE hardware and its
+**NOTE:** While this project mainly focuses on exercising QF2-Pre hardware and its
 GTX transceivers, a minimal example of Ethernet-over-fiber functionality using GTP
 transceivers can be found under `gige_eth/`, which targets an AC701 development board.
 
@@ -43,11 +43,18 @@ generation is provided, with the Ethernet/Local Bus guaranteeing the interface w
 `eth_gtx_bridge.v` combines packet Badger with PCS/PMA logic and a GTX interface. This module
 performs its own 8b/10b line coding and, as such, outputs 20-bits of raw data to the GTX.
 
-Packet Badger is clocked at 125 MHz, while the GTX interface is clocked at 62.5 MHz.
+Packet Badger is clocked at 125 MHz, while the transceiver interface can be either clocked at 62.5 MHz or 125 MHz.
+Long story: back in the Spartan-6 days, the MGT hardware could "do" 10-bit serialization,
+but that got dropped in Xilinx's 7-series.  To get 1.25 GBd properly with 20-bit serialization,
+the MGT has to be clocked at 62.5 MHz.  That has been the default in this code base for production
+for many years, and means an extra clock domain and data movement.
+Now, there is also the option to set the variable `DOUBLEBIT`, which runs the MGT clock at 125 MHz,
+and uses the serdes at a bogus 2.5 GBd, with every bit doubled.  No need for a 62.5 MHz clock!
+Obviously correct for Tx, but with suitable programming of e.g. comma patterns, seems to work for Rx as well.
 Data width/rate conversion is performed within `eth_gtx_bridge.v`.
 
-Two clock managers are used to convert the 125 MHz `{tx,rx}outclk_out` clock outputs from
-the TX and RX GTXs to half-rate, 62.5 MHz.
+Two clock managers are used to condition the 125 MHz `{tx,rx}outclk_out` clock outputs from the TX and RX GTXs.
+Depending again on the `DOUBLEBIT` variable, these managers output clocks at either half-rate 62.5 MHz or full-rate 125 MHz.
 
 The Local Bus interface is on the `gmii_tx_clk` domain and expects fixed-latency read responses.
 
@@ -85,12 +92,12 @@ TCL configuration script, `mgt_gen.tcl` and a QGT Verilog wrapper, `qgt_wrap.v`.
 `mgt_gen.tcl` implements two user-facing procedures:
 
 * `proc add_aux_ip {ipname config_file module_name}`
-* `proc add_gt_protocol {config_file quad_num gt_num en8b10b pll_type}`
+* `proc add_gt_protocol {gt_type config_file quad_num gt_num en8b10b endrp pll_type}`
 
 `add_aux_ip` provides a convenient way of adding arbitrary IP, that would otherwise have to be
 generated manually through the GUI wizard.
 
-`add_gt_protocol` can be used to configure up to 4 Quad MGTs at MGT granularity. `config_file` specifies
+`add_gt_protocol` can be used to configure either GTP or GTZ and up to 4 Quad MGTs at MGT granularity. `config_file` specifies
 a TCL file containing a dictionary with all configuration parameters for a specific MGT. The remaining
 arguments associate the configuration with a specific MGT in the chip and set options that are used in
 the generation of the final Verilog modules (`q0_gt_wrap`, `q1_gt_wrap`, `q2_gt_wrap`, `q3_gt_wrap`),

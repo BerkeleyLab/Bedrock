@@ -18,6 +18,18 @@ module marble_top(
 	input SIREFCLK_N,
 	`endif
 
+	// only for Marble, QSFP1 lane 3
+	// maybe there should be an option to select
+	// lane at synthesis time?
+`ifdef MARBLE_V2
+	`ifdef USE_FIBER
+	 input QSFP1_RX_3_N,
+	 input QSFP1_RX_3_P,
+	 output QSFP1_TX_3_N,
+	 output QSFP1_TX_3_P,
+	`endif
+`endif
+
 	// RGMII Tx port
 	output [3:0] RGMII_TXD,
 	output RGMII_TX_CTRL,
