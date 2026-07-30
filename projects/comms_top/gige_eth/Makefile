@@ -1,5 +1,14 @@
 include ../../../dir_list.mk
 
+
+# DOUBLEBIT sets the transceiver line rate and internal user logic clock rate
+# DOUBLEBIT = 0, standard 1.25 GBd GigE link with a 62.5 MHz clock
+# DOUBLEBIT = 1, 1.25 GBd GigE link faked with a 2.50 GBd MGT setup using a 125 MHz clock
+DOUBLEBIT ?= 0
+export DOUBLEBIT
+DOUBLEBIT ?= 0
+export DOUBLEBIT
+
 HARDWARE = ac701
 COMMUNICATION = gtp
 
@@ -13,7 +22,8 @@ BITFILE = $(APP_NAME).bit
 # Set auto-generated dependencies before including top_rules.mk
 VERILOG_AUTOGEN +=
 
-VERILOG_DEFINE_FLAGS =
+VERILOG_DEFINE_FLAGS = -DDOUBLEBIT=$(DOUBLEBIT)
+
 include $(COMMS_TOP_DIR)/rules.mk
 include $(BUILD_DIR)/top_rules.mk
 
