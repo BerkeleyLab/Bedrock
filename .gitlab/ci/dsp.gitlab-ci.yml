@@ -56,3 +56,4 @@ cic_simple_s_test:
   stage: test
   script:
     - make TESTBENCH=cic_simple_s_tb -f Makefile_cocotb
+    - make TESTBENCH=dds_tb -f Makefile_cocotb
