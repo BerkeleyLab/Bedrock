@@ -194,7 +194,7 @@ def erase_mem(s, ad, size):
         p = ERASE_BLOCK_64
     else:
         logging.error('Wrong buffer size to erase.')
-    print('Erasing {size} at address {ad:#x}...\r', end='', flush=True)
+    print(f'Erasing {size} at address {ad:#x}...\r', end='', flush=True)
     pp = p + three_bytes(ad) + 5 * READ_STATUS_1
     r, addr = do_message(s, pp)
     status_reg = r[-1]
