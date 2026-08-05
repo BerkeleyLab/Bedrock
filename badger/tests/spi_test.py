@@ -558,6 +558,7 @@ def main():
     # initialize a socket, think of it as a cable
     # SOCK_DGRAM specifies that this is UDP
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+    sock.settimeout(1.0)
     # connect the socket, think of it as connecting the cable to the address location
 
     sock.connect((IPADDR, PORTNUM))
