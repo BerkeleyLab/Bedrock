@@ -505,7 +505,7 @@ def reboot_7series(s, ad):
     s.send(MSG_PREFIX + cmdb)
 
 
-def main():
+def main(cmdline=None):
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
     import argparse
     parser = argparse.ArgumentParser(
@@ -548,7 +548,7 @@ def main():
                         help='Reboot chip using Xilinx Spartan6 ICAP primitive')
     parser.add_argument('--reboot7', action='store_true',
                         help='Reboot chip using Xilinx 7-Series ICAPE2 primitive')
-    args = parser.parse_args()
+    args = parser.parse_args(args=cmdline)
 
     # numeric_level = getattr(logging, "DEBUG", None)
     # logging.basicConfig(level=numeric_level)
@@ -655,4 +655,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
