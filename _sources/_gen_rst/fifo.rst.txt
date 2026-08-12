@@ -51,6 +51,9 @@ Ports
    * - clk
      - Input
      - 
+   * - rst
+     - Input
+     - 
    * - din[dw - 1: 0]
      - Input
      - 
