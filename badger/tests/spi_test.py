@@ -602,8 +602,10 @@ def main(cmdline=None):
         if args.verify:
             ok = remote_verify(sock, prog_file, ad, size)
             print("Verify result is %s" % ("GOOD" if ok else "BAD"))
-            if ok: return 0
-            else:  return -1
+            if ok:
+                return 0
+            else:
+                return -1
         else:
             remote_erase(sock, ad, size)
             remote_program(sock, prog_file, ad, size)
