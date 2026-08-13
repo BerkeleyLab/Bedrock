@@ -218,8 +218,7 @@ def write_enable(s, enable):
     logging.debug('From: %s \n Tx length: %d\n Rx length: %d\n' % (addr, len(pp), len(r)))
     logging.debug('Check Write Enable Status Reg: %x' % status_reg)
     if (status_reg & 0x60) != 0:
-        print("Aaaaugh!  Errors reported in write_enable status reg 0x%2.2x" % status_reg)
-        exit()
+        raise SystemExit("Aaaaugh!  Errors reported in write_enable status reg 0x%2.2x" % status_reg)
     return (status_reg & 0x3) == 0x2
 
 
@@ -469,8 +468,7 @@ def reboot_spartan6(s, ad):
     p = p1 + p2 + p3 + p4 + 113 * ICAP_NOOP
     print(hexfromba(p))
     if len(p) != 257:
-        print("internal error")
-        sys.exit()
+        raise SystemExit("internal error")
     s.send(MSG_PREFIX + p)
     # if the reboot succeeds, we don't get an answer.
     # could read with a timeout, as a way to report failure to reboot.
@@ -500,8 +498,7 @@ def reboot_7series(s, ad):
     print(cmds)
     cmdb = bafromhex(cmds + 56 * icape2_noop)
     if len(cmdb) != 257:
-        print("internal error")
-        sys.exit()
+        raise SystemExit("internal error")
     s.send(MSG_PREFIX + cmdb)
 
 
@@ -586,24 +583,27 @@ def main(cmdline=None):
         size = fileinfo.st_size
         print("file size %d" % size)
         if size > 7*1024*1024:
-            print("Too big!")
-            exit(1)
+            print(f'{prog_file} {size=}: too big!')
+            return -1
 
         prog_good, _, _ = prog_status(sock)
         if not prog_good:
-            exit(1)
+            print(f'Bad prog_status( ): {prog_good=}')
+            return -1
 
         if args.force_write_enable:
             if args.verify:
                 print("Don't force and verify at the same time")
-                exit(1)
+                return -1
             write_good = disable_wp(sock)
             if not write_good:
-                exit(1)
+                print(f'Bad disable_wp( ): {write_good=}')
+                return -1
         if args.verify:
             ok = remote_verify(sock, prog_file, ad, size)
             print("Verify result is %s" % ("GOOD" if ok else "BAD"))
-            exit(0 if ok else 1)
+            if ok: return 0
+            else:  return -1
         else:
             remote_erase(sock, ad, size)
             remote_program(sock, prog_file, ad, size)
@@ -638,7 +638,7 @@ def main(cmdline=None):
         status, cnf = read_status_config(sock, verbose=True)
         if (cnf != 0) and not EXPERT:
             print("Unexpected CONFIG, aborting")
-            exit(1)
+            return -1
         write_status(sock, default_sr1, config=0x24)
     elif EXPERT and args.status_write is not None:
         write_status(sock, args.status_write, config=args.config_write)
@@ -652,7 +652,9 @@ def main(cmdline=None):
 
     # close the socket
     sock.close()
+    return 0
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    # Returns -1 on error, 0 on success. Throws TimeoutError, SystemExit
+    sys.exit(main(sys.argv[1:]))
