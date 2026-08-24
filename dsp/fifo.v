@@ -6,6 +6,7 @@ module fifo #(
 	parameter dw = 8
 ) (
 	input clk,
+	input rst,
 
 	input [dw - 1: 0] din,
 	input we,
@@ -58,20 +59,27 @@ assign full = fill >= len;
 assign dout = last ? last_write : read;
 
 always @(posedge clk) begin
-	read <= mem[rd_addr_];
+	if (rst) begin
+		read <= 0;
+		last_write <= 0;
+		wr_addr <= 0;
+		rd_addr <= 0;
+	end else begin
+		read <= mem[rd_addr_];
 
-	if (we_) begin
-		last_write <= din;
-		mem[wr_addr_] <= din;
-		wr_addr <= wr_addr + 1;
-	end
+		if (we_) begin
+			last_write <= din;
+			mem[wr_addr_] <= din;
+			wr_addr <= wr_addr + 1;
+		end
 
-	if (re_) begin
-		rd_addr <= rd_addr + 1;
+		if (re_) begin
+			rd_addr <= rd_addr + 1;
 
-		// we need to look one cycle into the future to compensate the 2 cycle
-		// latency of the Xilinx block-ram
-		read <= mem[rd_addr_next_];
+			// we need to look one cycle into the future to compensate the 2 cycle
+			// latency of the Xilinx block-ram
+			read <= mem[rd_addr_next_];
+		end
 	end
 end
 
