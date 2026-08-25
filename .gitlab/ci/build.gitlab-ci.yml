@@ -46,6 +46,16 @@ check_exists:
   image: docker:stable
   stage: build
   variables:
+    # From Gitlab documentation:
+    # Configure a network with container links GitLab Runner before
+    # 18.7.0 uses the default Docker bridge along with legacy
+    # container links to link the job container with the services.
+    # Because Docker deprecated the links functionality, in GitLab
+    # Runner 18.7.0 and later, the legacy container link behavior
+    # is emulated by allowing service aliases to be resolved using
+    # Docker’s extra_hosts functionality. This network mode is the
+    # default if FF_NETWORK_PER_BUILD is disabled.
+    FF_NETWORK_PER_BUILD: "true"
   services:
     - name: mohs.dhcp.lbl.gov/docker:29.4.0-dind
       command: ["--insecure-registry", "mohs.dhcp.lbl.gov"]
