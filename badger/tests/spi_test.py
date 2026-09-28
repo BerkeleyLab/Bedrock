@@ -605,7 +605,7 @@ def main(cmdline=None):
             if ok:
                 return 0
             else:
-                return -1
+                return 1
         else:
             remote_erase(sock, ad, size)
             remote_program(sock, prog_file, ad, size)
