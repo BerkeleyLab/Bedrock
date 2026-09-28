@@ -504,9 +504,13 @@ def reboot_7series(s, ad):
 
 def main(cmdline=None):
     logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+
     import argparse
-    parser = argparse.ArgumentParser(
-        description="Utility for working with SPI Flash chips attached to Packet Badger")
+
+    D = 'Utility for working with SPI Flash chips attached to Packet Badger'
+    E = 'Returns 0 on success, 1 on bitfile-verify mismatch, -1 on error.'
+    parser = argparse.ArgumentParser(description=D, epilog=E)
+
     parser.add_argument('--ip', default='192.168.19.8', help='IP address')
     parser.add_argument('--udp', type=int, default=804, help='UDP Port number')
     if EXPERT:
