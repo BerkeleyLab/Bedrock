@@ -451,6 +451,7 @@ void init_zest_clocks(zest_init_data_t *p_data) {
 void reset_zest_bufr(uint8_t ch) {
     const uint8_t addr[] = {SFR_OUT_BIT_BUFR_A_RST, SFR_OUT_BIT_BUFR_B_RST};
     SET_SFR1(g_base_sfr, SFR_OUT_REG0, addr[ch], 1);
+    DELAY_MS(3);
     SET_SFR1(g_base_sfr, SFR_OUT_REG0, addr[ch], 0);
 }
 
