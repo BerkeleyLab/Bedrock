@@ -161,6 +161,14 @@ module cic_wave_recorder #(
          chan_stb_cnt <= 0;
          wr_gated_r <= 0;
       end
+
+      // Resync on the gap between bursts, the burst boundary fchan_subset
+      // uses too. reset leaves partial bursts, so counting n_chan beats
+      // alone would stay out of phase.
+      if (reset | ~cic_stb_out) begin
+         chan_stb_cnt <= 0;
+         wr_gated_r <= 0;
+      end
    end
 
    circle_buf_serial #(
