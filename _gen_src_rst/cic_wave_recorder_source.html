@@ -244,39 +244,47 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">161</span><span class="w">         </span><span class="n">chan_stb_cnt</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">162</span><span class="w">         </span><span class="n">wr_gated_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">163</span><span class="w">      </span><span class="k">end</span>
-<span class="linenos">164</span><span class="w">   </span><span class="k">end</span>
-<span class="linenos">165</span>
-<span class="linenos">166</span><span class="w">   </span><span class="n">circle_buf_serial</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos">167</span><span class="w">      </span><span class="p">.</span><span class="n">n_chan</span><span class="w">        </span><span class="p">(</span><span class="n">n_chan</span><span class="p">),</span>
-<span class="linenos">168</span><span class="w">      </span><span class="p">.</span><span class="n">lsb_mask</span><span class="w">      </span><span class="p">(</span><span class="n">lsb_mask</span><span class="p">),</span>
-<span class="linenos">169</span><span class="w">      </span><span class="p">.</span><span class="n">buf_aw</span><span class="w">        </span><span class="p">(</span><span class="n">buf_aw</span><span class="p">),</span>
-<span class="linenos">170</span><span class="w">      </span><span class="p">.</span><span class="n">buf_dw</span><span class="w">        </span><span class="p">(</span><span class="n">buf_dw</span><span class="p">),</span>
-<span class="linenos">171</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stat_w</span><span class="w">    </span><span class="p">(</span><span class="n">buf_stat_w</span><span class="p">),</span>
-<span class="linenos">172</span><span class="w">      </span><span class="p">.</span><span class="n">buf_auto_flip</span><span class="w"> </span><span class="p">(</span><span class="n">buf_auto_flip</span><span class="p">))</span>
-<span class="linenos">173</span><span class="w">   </span><span class="n">i_circle_buf_serial</span><span class="w"> </span><span class="p">(</span>
-<span class="linenos">174</span><span class="w">      </span><span class="p">.</span><span class="n">iclk</span><span class="w">            </span><span class="p">(</span><span class="n">iclk</span><span class="p">),</span>
-<span class="linenos">175</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">           </span><span class="p">(</span><span class="n">reset</span><span class="p">),</span>
-<span class="linenos">176</span><span class="w">      </span><span class="p">.</span><span class="n">sr_in</span><span class="w">           </span><span class="p">(</span><span class="n">wave_data_i</span><span class="p">),</span>
-<span class="linenos">177</span><span class="w">      </span><span class="p">.</span><span class="n">sr_stb</span><span class="w">          </span><span class="p">(</span><span class="n">cic_stb_out</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="o">~</span><span class="n">wr_gated</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">wr_gated_r</span><span class="p">)),</span>
-<span class="linenos">178</span><span class="w">      </span><span class="p">.</span><span class="n">chan_mask</span><span class="w">       </span><span class="p">(</span><span class="n">chan_mask</span><span class="p">),</span>
-<span class="linenos">179</span><span class="w">      </span><span class="p">.</span><span class="n">wave_data</span><span class="w">       </span><span class="p">(</span><span class="n">wave_data_out</span><span class="p">),</span>
-<span class="linenos">180</span><span class="w">      </span><span class="p">.</span><span class="n">wave_dval</span><span class="w">       </span><span class="p">(</span><span class="n">wave_dval_out</span><span class="p">),</span>
-<span class="linenos">181</span><span class="w">      </span><span class="p">.</span><span class="n">wave_gate</span><span class="w">       </span><span class="p">(</span><span class="n">wave_gate_out</span><span class="p">),</span>
-<span class="linenos">182</span><span class="w">      </span><span class="p">.</span><span class="n">oclk</span><span class="w">            </span><span class="p">(</span><span class="n">oclk</span><span class="p">),</span>
-<span class="linenos">183</span><span class="w">      </span><span class="p">.</span><span class="n">buf_sync</span><span class="w">        </span><span class="p">(</span><span class="n">buf_sync</span><span class="p">),</span>
-<span class="linenos">184</span><span class="w">      </span><span class="p">.</span><span class="n">buf_transferred</span><span class="w"> </span><span class="p">(</span><span class="n">buf_transferred</span><span class="p">),</span>
-<span class="linenos">185</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stop</span><span class="w">        </span><span class="p">(</span><span class="n">buf_stop</span><span class="p">),</span>
-<span class="linenos">186</span><span class="w">      </span><span class="p">.</span><span class="n">buf_count</span><span class="w">       </span><span class="p">(</span><span class="n">buf_count</span><span class="p">),</span>
-<span class="linenos">187</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stat2</span><span class="w">       </span><span class="p">(</span><span class="n">buf_stat2</span><span class="p">),</span>
-<span class="linenos">188</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stat</span><span class="w">        </span><span class="p">(</span><span class="n">buf_stat</span><span class="p">),</span>
-<span class="linenos">189</span><span class="w">      </span><span class="p">.</span><span class="n">debug_stat</span><span class="w">      </span><span class="p">(</span><span class="n">debug_stat</span><span class="p">),</span>
-<span class="linenos">190</span><span class="w">      </span><span class="p">.</span><span class="n">stb_out</span><span class="w">         </span><span class="p">(</span><span class="n">buf_stb</span><span class="p">),</span>
-<span class="linenos">191</span><span class="w">      </span><span class="p">.</span><span class="n">enable</span><span class="w">          </span><span class="p">(</span><span class="n">buf_enable</span><span class="p">),</span>
-<span class="linenos">192</span><span class="w">      </span><span class="p">.</span><span class="n">read_addr</span><span class="w">       </span><span class="p">(</span><span class="n">buf_read_addr</span><span class="p">),</span>
-<span class="linenos">193</span><span class="w">      </span><span class="p">.</span><span class="n">d_out</span><span class="w">           </span><span class="p">(</span><span class="n">buf_d_out</span><span class="p">)</span>
-<span class="linenos">194</span><span class="w">   </span><span class="p">);</span>
-<span class="linenos">195</span>
-<span class="linenos">196</span><span class="k">endmodule</span>
+<span class="linenos">164</span>
+<span class="linenos">165</span><span class="w">      </span><span class="c1">// Resync on the gap between bursts, the burst boundary fchan_subset</span>
+<span class="linenos">166</span><span class="w">      </span><span class="c1">// uses too. reset leaves partial bursts, so counting n_chan beats</span>
+<span class="linenos">167</span><span class="w">      </span><span class="c1">// alone would stay out of phase.</span>
+<span class="linenos">168</span><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">reset</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">~</span><span class="n">cic_stb_out</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">169</span><span class="w">         </span><span class="n">chan_stb_cnt</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">170</span><span class="w">         </span><span class="n">wr_gated_r</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
+<span class="linenos">171</span><span class="w">      </span><span class="k">end</span>
+<span class="linenos">172</span><span class="w">   </span><span class="k">end</span>
+<span class="linenos">173</span>
+<span class="linenos">174</span><span class="w">   </span><span class="n">circle_buf_serial</span><span class="w"> </span><span class="p">#(</span>
+<span class="linenos">175</span><span class="w">      </span><span class="p">.</span><span class="n">n_chan</span><span class="w">        </span><span class="p">(</span><span class="n">n_chan</span><span class="p">),</span>
+<span class="linenos">176</span><span class="w">      </span><span class="p">.</span><span class="n">lsb_mask</span><span class="w">      </span><span class="p">(</span><span class="n">lsb_mask</span><span class="p">),</span>
+<span class="linenos">177</span><span class="w">      </span><span class="p">.</span><span class="n">buf_aw</span><span class="w">        </span><span class="p">(</span><span class="n">buf_aw</span><span class="p">),</span>
+<span class="linenos">178</span><span class="w">      </span><span class="p">.</span><span class="n">buf_dw</span><span class="w">        </span><span class="p">(</span><span class="n">buf_dw</span><span class="p">),</span>
+<span class="linenos">179</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stat_w</span><span class="w">    </span><span class="p">(</span><span class="n">buf_stat_w</span><span class="p">),</span>
+<span class="linenos">180</span><span class="w">      </span><span class="p">.</span><span class="n">buf_auto_flip</span><span class="w"> </span><span class="p">(</span><span class="n">buf_auto_flip</span><span class="p">))</span>
+<span class="linenos">181</span><span class="w">   </span><span class="n">i_circle_buf_serial</span><span class="w"> </span><span class="p">(</span>
+<span class="linenos">182</span><span class="w">      </span><span class="p">.</span><span class="n">iclk</span><span class="w">            </span><span class="p">(</span><span class="n">iclk</span><span class="p">),</span>
+<span class="linenos">183</span><span class="w">      </span><span class="p">.</span><span class="n">reset</span><span class="w">           </span><span class="p">(</span><span class="n">reset</span><span class="p">),</span>
+<span class="linenos">184</span><span class="w">      </span><span class="p">.</span><span class="n">sr_in</span><span class="w">           </span><span class="p">(</span><span class="n">wave_data_i</span><span class="p">),</span>
+<span class="linenos">185</span><span class="w">      </span><span class="p">.</span><span class="n">sr_stb</span><span class="w">          </span><span class="p">(</span><span class="n">cic_stb_out</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="o">~</span><span class="n">wr_gated</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">wr_gated_r</span><span class="p">)),</span>
+<span class="linenos">186</span><span class="w">      </span><span class="p">.</span><span class="n">chan_mask</span><span class="w">       </span><span class="p">(</span><span class="n">chan_mask</span><span class="p">),</span>
+<span class="linenos">187</span><span class="w">      </span><span class="p">.</span><span class="n">wave_data</span><span class="w">       </span><span class="p">(</span><span class="n">wave_data_out</span><span class="p">),</span>
+<span class="linenos">188</span><span class="w">      </span><span class="p">.</span><span class="n">wave_dval</span><span class="w">       </span><span class="p">(</span><span class="n">wave_dval_out</span><span class="p">),</span>
+<span class="linenos">189</span><span class="w">      </span><span class="p">.</span><span class="n">wave_gate</span><span class="w">       </span><span class="p">(</span><span class="n">wave_gate_out</span><span class="p">),</span>
+<span class="linenos">190</span><span class="w">      </span><span class="p">.</span><span class="n">oclk</span><span class="w">            </span><span class="p">(</span><span class="n">oclk</span><span class="p">),</span>
+<span class="linenos">191</span><span class="w">      </span><span class="p">.</span><span class="n">buf_sync</span><span class="w">        </span><span class="p">(</span><span class="n">buf_sync</span><span class="p">),</span>
+<span class="linenos">192</span><span class="w">      </span><span class="p">.</span><span class="n">buf_transferred</span><span class="w"> </span><span class="p">(</span><span class="n">buf_transferred</span><span class="p">),</span>
+<span class="linenos">193</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stop</span><span class="w">        </span><span class="p">(</span><span class="n">buf_stop</span><span class="p">),</span>
+<span class="linenos">194</span><span class="w">      </span><span class="p">.</span><span class="n">buf_count</span><span class="w">       </span><span class="p">(</span><span class="n">buf_count</span><span class="p">),</span>
+<span class="linenos">195</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stat2</span><span class="w">       </span><span class="p">(</span><span class="n">buf_stat2</span><span class="p">),</span>
+<span class="linenos">196</span><span class="w">      </span><span class="p">.</span><span class="n">buf_stat</span><span class="w">        </span><span class="p">(</span><span class="n">buf_stat</span><span class="p">),</span>
+<span class="linenos">197</span><span class="w">      </span><span class="p">.</span><span class="n">debug_stat</span><span class="w">      </span><span class="p">(</span><span class="n">debug_stat</span><span class="p">),</span>
+<span class="linenos">198</span><span class="w">      </span><span class="p">.</span><span class="n">stb_out</span><span class="w">         </span><span class="p">(</span><span class="n">buf_stb</span><span class="p">),</span>
+<span class="linenos">199</span><span class="w">      </span><span class="p">.</span><span class="n">enable</span><span class="w">          </span><span class="p">(</span><span class="n">buf_enable</span><span class="p">),</span>
+<span class="linenos">200</span><span class="w">      </span><span class="p">.</span><span class="n">read_addr</span><span class="w">       </span><span class="p">(</span><span class="n">buf_read_addr</span><span class="p">),</span>
+<span class="linenos">201</span><span class="w">      </span><span class="p">.</span><span class="n">d_out</span><span class="w">           </span><span class="p">(</span><span class="n">buf_d_out</span><span class="p">)</span>
+<span class="linenos">202</span><span class="w">   </span><span class="p">);</span>
+<span class="linenos">203</span>
+<span class="linenos">204</span><span class="k">endmodule</span>
 </pre></div>
 </div>
 </section>
