@@ -99,11 +99,19 @@ wire mem_addr_hit = mem_valid && mem_addr[31:16]=={BASE_ADDR, BASE2_XADC};
 wire mem_write = &mem_wstrb && mem_addr_hit;
 wire mem_read = !(|mem_wstrb) && mem_addr_hit;
 reg drp_valid=0, drp_valid1=0;
+// One DRP access per bus transaction: the CPU sees mem_ready one cycle after
+// DRDY (registered return bus), so mem_addr_hit is still high in the cycle
+// after DRDY and must not start a second DRP access.
+reg drp_done=0;
+always @(posedge clk) begin
+    if (!mem_addr_hit) drp_done <= 1'b0;
+    else if (drdy_out) drp_done <= 1'b1;
+end
 // UG480 Figure 5-3
 always @(posedge clk) begin
     drp_valid <= 1'b0;
     drp_valid1 <= drp_valid;
-    if (!mem_ready && mem_addr_hit) begin // software handle busy_out
+    if (!mem_ready && mem_addr_hit && !drp_done) begin // software handle busy_out
         drp_valid <= 1'b1;
         di_in <= mem_wdata[15:0];
         daddr_in <= mem_addr[8:2];
