@@ -500,6 +500,13 @@ bool align_adc_clk_phase(uint8_t ch, int8_t center) {
             printf("  Phase %8s clk aligned. retry = %d.\n", zest_phdiff_names[ch], ix);
             return true;
         } else{
+            // The BUFR phase after CLR depends on where the release falls in
+            // the DCO period. A fixed retry period (N CPU cycles, stable
+            // f_DCO/f_CPU) steps the release by a constant phase and can
+            // revisit only some phases, so randomize each release.
+            static uint16_t lfsr = 0xACE1u;
+            lfsr = (lfsr >> 1) ^ (-(lfsr & 1u) & 0xB400u);
+            delayCycles(lfsr & 0x3ff);  // 0..1023 CPU cycles
             reset_zest_bufr(ch);
             DELAY_MS(3);
         }
