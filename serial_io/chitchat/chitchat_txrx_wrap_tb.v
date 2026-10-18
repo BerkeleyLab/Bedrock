@@ -99,6 +99,7 @@ module chitchat_txrx_wrap_tb;
       stim_start <= tx_transmit_en ? 1 : stim_start;
    end
 
+   wire [9:0] tx_status = 0;
    reg [2:0] tx_location = 0;
    integer valid_period = MIN_VALID_P;
    reg [5:0] val_cnt = 0;
@@ -168,6 +169,7 @@ module chitchat_txrx_wrap_tb;
 
       .tx_transmit_en    (tx_transmit_en),
       .tx_location       (tx_location),
+      .tx_status         (tx_status),
       .tx_valid0         (tx_valid0),
       .tx_valid1         (tx_valid1),
       .tx_data0          (tx_data0),

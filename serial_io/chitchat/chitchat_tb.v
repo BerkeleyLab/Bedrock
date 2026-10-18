@@ -123,8 +123,8 @@ module chitchat_tb;
    wire [15:0] rx_loopback_frame_counter;
 
    localparam REVID = 32'hdeadbeef;
-   localparam [2:0] TX_GATEW_TYPE = 2;
-   localparam [2:0] RX_GATEW_TYPE = 2;
+   localparam [2:0] TX_GATEW_TYPE = 1;
+   localparam [2:0] RX_GATEW_TYPE = 1;
 
    chitchat_tx #(
       .REV_ID           (REVID),
@@ -134,6 +134,7 @@ module chitchat_tb;
       .tx_transmit_en            (tx_transmit_en),
       .tx_send                   (tx_send),
       .tx_location               (tx_data0[2:0]),
+      .tx_status                 (10'b0),
       .tx_data0                  (tx_data0),
       .tx_data1                  (tx_data1),
       .tx_loopback_frame_counter (rx_frame_counter),

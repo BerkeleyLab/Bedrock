@@ -22,6 +22,7 @@ module chitchat_txrx_wrap #(
 
    input         tx_transmit_en,
    input  [2:0]  tx_location,
+   input  [9:0]  tx_status,
    input         tx_valid0, // Input data will be latched on tx_valid{0,1} and
                             // sent when tx_send_x_tgtx=1. If tx_valid rate is higher
                             // than tx_send_x_tgtx, data will be lost.
@@ -70,6 +71,7 @@ module chitchat_txrx_wrap #(
    wire                  tx_send_x_tgtx;
    reg                   tx_transmit_en_tgtx = 0;
    reg  [2:0]            tx_location_tgtx;
+   reg  [9:0]            tx_reserved_tgtx;
    wire [15:0]           rx_frame_counter_x_tgtx;
    wire [15:0]           tx_local_frame_counter_x_tgtx;
    reg  [15:0]           txrx_latency_x_tgtx, txrx_latency_r_lb;
@@ -150,6 +152,7 @@ module chitchat_txrx_wrap #(
    // Quasi-static signals; Just register in destination clk domain
    always @(posedge gtx_tx_clk) begin
       tx_location_tgtx    <= tx_location;
+      tx_reserved_tgtx    <= tx_status;
       tx_transmit_en_tgtx <= tx_transmit_en;
    end
 
@@ -161,6 +164,7 @@ module chitchat_txrx_wrap #(
       .tx_transmit_en            (tx_transmit_en_tgtx),
       .tx_send                   (tx_send_x_tgtx), // Testing only (not useful w/ CDC)
       .tx_location               (tx_location_tgtx),
+      .tx_status                 (tx_reserved_tgtx),
       .tx_data0                  (tx_data0_x_tgtx),
       .tx_data1                  (tx_data1_x_tgtx),
       .tx_loopback_frame_counter (rx_frame_counter_x_tgtx),

@@ -27,6 +27,7 @@ module chitchat_tx #(
                                  // transaction, as long as TX line is active
 
    input  [2:0]  tx_location, // ID of a particular transmitter
+   input  [9:0]  tx_status,  // send additional status bits (only when TX_GATEWARE_TYPE=2)
    input  [31:0] tx_data0,
    input  [31:0] tx_data1,
    input  [15:0] tx_loopback_frame_counter, // intended from chitchat_rx
@@ -64,7 +65,7 @@ module chitchat_tx #(
    wire [2:0]  gateware_type_fix = TX_GATEWARE_TYPE;
    wire [31:0] rev_id_fix        = REV_ID;
    wire [7:0]  comma_pad         = CC_K28_5; // K28.5
-   wire [9:0]  reserved          = 0;
+   wire [9:0]  reserved          = (TX_GATEWARE_TYPE == 3'd2) ? tx_status : 10'b0;
    wire [15:0] crc_pad           = 0;
 
    always @(posedge clk) begin
