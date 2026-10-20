@@ -108,8 +108,8 @@ proc project_create {platform_name project_name} {
         set project_part "xc7a100tcsg324-1"
     }
     if [regexp "obsidian" $platform_name] {
-        set platform "obsidian_a35"
-        set project_part "xc7a50tcsg325-1"
+        set platform "obsidian"
+        set project_part "xc7a35tcsg325-1"
     }
     # planahead
     #
