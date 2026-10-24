@@ -231,6 +231,9 @@ _picorv32_irq_timer:
 
 # IRQ stack
 .section .bss
+# sw/lw need word alignment, and the stack 16 bytes (RISC-V ABI); the .bss
+# offset depends on the objects linked before this one
+.balign 16
 irq_regs:
 	# registers are saved to this memory region during interrupt handling
 	# the program counter is saved as register 0
