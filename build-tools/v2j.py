@@ -8,13 +8,14 @@ import tempfile
 
 # Use Yosys to make a json file describing Verilog code.
 # Pass the Verilog file name, and the json string _is_ the return value.
-# If you need to debug this process, set delete_temps=False somehow,
-# otherwise the tempfile cleanup phase will get in the way.
-def v2j(vfile, *, yosys='yosys', quiet_flag='-q', delete_temps=True):
+# If you need to debug this process, add delete=False to the
+# tempfile.TemporaryDirectory() call, otherwise the tempfile cleanup
+# phase will get in the way.  Only valid on python 3.12 or later.
+def v2j(vfile, *, yosys='yosys', quiet_flag='-q'):
     basename = os.path.basename(vfile)
     base = os.path.splitext(basename)[0]
     assert (basename.endswith('.v') or basename.endswith('.sv'))
-    with tempfile.TemporaryDirectory(delete=delete_temps) as tdir:
+    with tempfile.TemporaryDirectory() as tdir:
         # print(f"v2j tdir {tdir}")
         # make a placeholder (empty) _auto.vh file
         # XXX uses Unix "/" instead of official filename building funcs
