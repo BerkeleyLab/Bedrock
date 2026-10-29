@@ -2,24 +2,32 @@
 
 import json
 import os
+import subprocess
+import tempfile
 
 
-def v2j(vfile):
+# Use Yosys to make a json file describing Verilog code.
+# Pass the Verilog file name, and the json string _is_ the return value.
+# If you need to debug this process, set delete_temps=False somehow,
+# otherwise the tempfile cleanup phase will get in the way.
+def v2j(vfile, *, yosys='yosys', quiet_flag='-q', delete_temps=True):
     basename = os.path.basename(vfile)
     base = os.path.splitext(basename)[0]
     assert (basename.endswith('.v') or basename.endswith('.sv'))
-    autofile = '/tmp/{}_auto.vh'.format(base)
-    with open(autofile, 'w') as f:
-        f.write('')
-    jfile = '/tmp/{}.json'.format(base)
-    yfile = '/tmp/yosys_v2j.ys'
-    with open(yfile, "w") as f:
-        f.write('read_verilog -sv -I/tmp {0}\n'
-                'proc\n'
-                'write_json {1}'.format(vfile, jfile))
-    os.system('yosys -q {}'.format(yfile))
-    with open(jfile, 'r') as f:
-        return json.load(f)
+    with tempfile.TemporaryDirectory(delete=delete_temps) as tdir:
+        # print(f"v2j tdir {tdir}")
+        # make a placeholder (empty) _auto.vh file
+        # XXX uses Unix "/" instead of official filename building funcs
+        with open(f'{tdir}/{base}_auto.vh', 'w') as f:
+            f.write('')
+        jfile = f'{tdir}/{base}.json'
+        ycmd = f'read_verilog -sv -I{tdir} {vfile}; proc; write_json {jfile}'
+        # print("v2j ycmd", ycmd)
+        retcode = subprocess.call([yosys, quiet_flag, "-p", ycmd])
+        if retcode != 0:
+            raise ValueError(f"yosys crashed ({retcode}) on {vfile}!  Fix the Verilog!")
+        with open(jfile, 'r') as f:
+            return json.load(f)
 
 
 if __name__ == "__main__":
