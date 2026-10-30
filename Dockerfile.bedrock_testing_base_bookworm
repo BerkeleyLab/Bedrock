@@ -142,13 +142,12 @@ RUN pip3 install \
     cocotb-bus==0.3.0
 
 # Install sv2v
-RUN apt-get update && \
-    apt-get install -y \
-        haskell-stack && \
-    rm -rf /var/lib/apt/lists/* && \
+# Debian haskell is old?
+RUN curl -sSL https://get.haskellstack.org/ | sh && \
     git clone https://github.com/zachjs/sv2v /sv2v && \
     cd /sv2v && \
     git checkout 7808819c48c167978aeb5ef34c6e5ed416e90875 && \
     make && \
-    rm -rf $HOME/.stack && \
-    cp bin/sv2v /usr/local/bin/
+    install bin/sv2v /usr/local/bin/ && \
+    cd / && \
+    rm -rf /sv2v /root/.stack /usr/local/bin/stack
