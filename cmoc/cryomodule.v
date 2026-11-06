@@ -98,6 +98,13 @@ wire [31:0] lb1_data[0:cavity_count];
 wire [16:0] lb1_addr[0:cavity_count];
 wire lb1_write[0:cavity_count];
 wire lb2_clk = clk1x;
+// See below for notes about we_tgen_0_delay_pc_XXX and newad.
+// This declaration fills in for newad during newad's preprocessing step,
+// to keep the Verilog parser (yosys) from crashing.
+`ifndef AUTOMATIC_decode_complete
+wire we_tgen_0_delay_pc_XXX;
+`endif
+//
 `AUTOMATIC_decode
 `AUTOMATIC_map
 `define SAT(x,old,new) ((~|x[old:new] | &x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})
@@ -265,10 +272,10 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
       .lb_data(clk1x_data), .lb_write(clk1x_write), .lb_addr(clk1x_addr),
       .addr_padding(1'b0),
       .lbo_data(lb1_data[cavity_n]), .lbo_write(lb1_write[cavity_n]), .lbo_addr(lb1_addr[cavity_n]),
-      // TODO: This is hard-coded to the tgen_0
+      // This logic for dests_write port is hard-coded to the tgen_0 decoder
       // .delay_pc_addr_hit(`ADDR_HIT_tgen_0_delay_pc_XXX & (cavity_n == 0)),
-      // Note: use of we_tgen_0_delay_pc_XXX triggers warnings under newad -y
-      // since it's so tightly coupled to operation of newad.  Actually harmless.
+      // use of we_tgen_0_delay_pc_XXX is tightly coupled to internal (undocumented)
+      // operation of newad.
       .dests_write(we_tgen_0_delay_pc_XXX & (cavity_n == 0)),
       `AUTOMATIC_tgen
       );
