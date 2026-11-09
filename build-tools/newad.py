@@ -255,6 +255,8 @@ def print_decode_header(fi, modname, fo, dir_list, lb_width, gen_mirror, use_yos
         " input %s_write, input [%d:0] %s_addr\n"
         % (clk_prefix, clk_prefix, clk_prefix, lb_width, clk_prefix)
     )
+    # enable rare use-cases where Verilog needs to know if decoder is present
+    obuf.write("`define AUTOMATIC_decode_complete\n")
     obuf.write("`define AUTOMATIC_decode\\\n" + "".join(vfile_parser.decodes))
     if gen_mirror:
         obuf.write(generate_mirror(32, 0))
