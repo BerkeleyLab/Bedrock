@@ -274,8 +274,8 @@ generate for (cavity_n=0; cavity_n < cavity_count; cavity_n=cavity_n+1) begin: c
       .lbo_data(lb1_data[cavity_n]), .lbo_write(lb1_write[cavity_n]), .lbo_addr(lb1_addr[cavity_n]),
       // This logic for dests_write port is hard-coded to the tgen_0 decoder
       // .delay_pc_addr_hit(`ADDR_HIT_tgen_0_delay_pc_XXX & (cavity_n == 0)),
-      // use of we_tgen_0_delay_pc_XXX is tightly coupled to internal (undocumented)
-      // operation of newad.
+      // use of we_tgen_0_delay_pc_XXX is tightly coupled to internal naming
+      // conventions of newad, which is not part of the documented API.
       .dests_write(we_tgen_0_delay_pc_XXX & (cavity_n == 0)),
       `AUTOMATIC_tgen
       );
