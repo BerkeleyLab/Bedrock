@@ -121,7 +121,8 @@ class detune_gdr(digaree_coeff):
         ev_list = list(zip(e_val, e_vec))
         ev_list.sort(key=lambda tup: tup[0], reverse=True)
         e_val, e_vec = zip(*ev_list)
-        fp0 = arctan2(e_vec[0][0], e_vec[0][1])
+        # as of numpy-2.5.0, results from np.linalg.eig() can come back complex
+        fp0 = arctan2(e_vec[0][0].real, e_vec[0][1].real)
         coeff = exp(-1j*fp0)
         fwdx = fwd * coeff
 

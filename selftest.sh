@@ -42,6 +42,7 @@ bash --version
 cc --version
 python3 --version
 python3 -c 'import numpy; print("numpy found", numpy.__version__)'
+python3 -c 'import scipy; print("scipy found", scipy.__version__)'
 python3 -c 'import cocotb; print("cocotb found", cocotb.__version__)'
 python3 -c 'import cocotb_bus; print("cocotb_bus found", cocotb_bus.__version__)'
 # version info in leep 1.0.2 is too crazy to use here
