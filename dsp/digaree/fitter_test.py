@@ -117,7 +117,6 @@ fdir = ""
 
 def r_init():
     # used when resizing the window
-    global dest
     axes_setup(axes, 0.06)
     dest["fitr"], = axes[0].plot([], [], label='Fit', animated=True)
     dest["fiti"], = axes[1].plot([], [], label='Fit', animated=True)

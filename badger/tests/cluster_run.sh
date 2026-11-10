@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Needs to be run from bash, to get the job control feature used in kill command
 # Tries to be robust, but be prepared to kill leftover jobs by hand.
 PYTHON=python3

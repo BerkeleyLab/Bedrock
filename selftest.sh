@@ -38,7 +38,8 @@
 # Print some system status and tool versions
 # When run with -e, will cause early failure if something is missing
 uname -s -r
-gcc --version
+bash --version
+cc --version
 python3 --version
 python3 -c 'import numpy; print("numpy found", numpy.__version__)'
 python3 -c 'import cocotb; print("cocotb found", cocotb.__version__)'
@@ -57,6 +58,8 @@ fi
 
 # Don't want any graphics coming out of this by accident
 unset DISPLAY
+# Try to sweet-talk matplotlib into not crashing in this no-display case
+export MPLBACKEND=Agg
 
 # The following tests are listed in the (alphabetical) order that they
 # appear on a gitlab pipeline status page
