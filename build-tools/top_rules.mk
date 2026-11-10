@@ -15,6 +15,7 @@ VFLAGS = ${VFLAGS_$@} -I$(AUTOGEN_DIR)
 VVP_FLAGS = ${VVP_FLAGS_$@}
 VVP = vvp$(ICARUS_SUFFIX) -N
 VERILATOR = verilator -Wall -Wno-fatal
+# VERILATOR += -Wno-PROCASSINIT
 GTKWAVE = gtkwave
 VPIEXT = vpi
 PYTHON = python3
@@ -39,7 +40,7 @@ CHECK_CLEAN = sh $(BUILD_DIR)/check_clean
 
 # Build tools
 #CC = $(BUILD_DIR)/ccd-gcc
-CC = gcc
+CC = cc
 INST = $(BUILD_DIR)/install
 COMP = $(CC) $(CF_ALL) $(CF_TGT) -o $@ -c $<
 LINK = $(CC) $(LF_ALL) $(LF_TGT) -o $@ $^ $(LL_TGT)

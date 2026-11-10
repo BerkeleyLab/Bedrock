@@ -39,7 +39,7 @@ class afunc:
         self.lhs = lhs
         self.op = op
         self.shift = shift
-        global n_count, max_pc, source, pipe_len
+        global n_count, max_pc
         n_count = n_count+1
         pc0 = 0
         source[lhs] = self

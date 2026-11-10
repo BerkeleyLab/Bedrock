@@ -7,7 +7,7 @@ all: ad5662_check ad9653_tb ad9653_lint spi_mon_check spi_master_check
 ad5662_tb: ad5662.v
 
 ad9653_lint: ad9653.v
-	$(VERILOG) -tnull -DSIMULATE $^ -y $(FPGA_FAMILY_DIR)/iserdes -y $(FPGA_FAMILY_DIR)/xilinx
+	$(VERILOG) -tnull -DSIMULATE -y $(FPGA_FAMILY_DIR)/iserdes -y $(FPGA_FAMILY_DIR)/xilinx $^
 
 spi_master_tb: spi_master.v
 
