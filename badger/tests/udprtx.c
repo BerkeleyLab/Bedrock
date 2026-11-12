@@ -4,6 +4,8 @@
 #include <string.h>
 #include <netdb.h>     /* gethostbyname */
 #include <errno.h>
+#include <sys/socket.h>
+#include <sys/select.h>
 #include <arpa/inet.h>
 
 #define PRINT_PER_TX_PACKET 0
