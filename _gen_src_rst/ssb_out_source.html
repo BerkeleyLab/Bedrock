@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ssb_out Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="ssb-out-source-file">
-<span id="ssb-out-source"></span><h1>ssb_out Source File<a class="headerlink" href="#ssb-out-source-file" title="Permalink to this heading"></a></h1>
+<span id="ssb-out-source"></span><h1>ssb_out Source File<a class="headerlink" href="#ssb-out-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 2</span><span class="c1">// SSB stands for Single Side Band.</span>
 <span class="linenos"> 3</span><span class="c1">// https://en.wikipedia.org/wiki/Single-sideband_modulation</span>
@@ -122,7 +120,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">39</span><span class="c1">// Bring input I and Q to full data rate</span>
 <span class="linenos">40</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">16</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">drive_i</span><span class="p">,</span><span class="w"> </span><span class="n">drive_q</span><span class="p">;</span>
 <span class="linenos">41</span><span class="n">fiq_interp</span><span class="w"> </span><span class="n">interp</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<span class="linenos">42</span><span class="w">     </span><span class="p">.</span><span class="n">a_data</span><span class="p">(</span><span class="n">drive</span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">2</span><span class="p">]),</span><span class="w"> </span><span class="p">.</span><span class="n">a_gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">a_trig</span><span class="p">(</span><span class="n">iq</span><span class="p">),</span>
+<span class="linenos">42</span><span class="w">     </span><span class="p">.</span><span class="n">a_data</span><span class="p">(</span><span class="n">drive</span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">2</span><span class="p">]),</span><span class="w"> </span><span class="p">.</span><span class="n">a_gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">a_trig</span><span class="p">(</span><span class="n">iq</span><span class="p">),</span>
 <span class="linenos">43</span><span class="w">     </span><span class="p">.</span><span class="n">i_data</span><span class="p">(</span><span class="n">drive_i</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">q_data</span><span class="p">(</span><span class="n">drive_q</span><span class="p">));</span>
 <span class="linenos">44</span>
 <span class="linenos">45</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">out1</span><span class="p">,</span><span class="w"> </span><span class="n">out2</span><span class="p">;</span>
@@ -133,15 +131,15 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">50</span><span class="c1">// In-phase portion of SSB drive signal</span>
 <span class="linenos">51</span><span class="n">flevel_set</span><span class="w"> </span><span class="n">level1</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
 <span class="linenos">52</span><span class="w">     </span><span class="p">.</span><span class="n">cosd</span><span class="p">(</span><span class="n">cosa</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">sind</span><span class="p">(</span><span class="n">sina</span><span class="p">),</span>
-<span class="linenos">53</span><span class="w">     </span><span class="p">.</span><span class="n">i_data</span><span class="p">(</span><span class="n">drive_i</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">i_gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">i_trig</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
-<span class="linenos">54</span><span class="w">     </span><span class="p">.</span><span class="n">q_data</span><span class="p">(</span><span class="n">drive_q</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">q_gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">q_trig</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
+<span class="linenos">53</span><span class="w">     </span><span class="p">.</span><span class="n">i_data</span><span class="p">(</span><span class="n">drive_i</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">i_gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">i_trig</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span>
+<span class="linenos">54</span><span class="w">     </span><span class="p">.</span><span class="n">q_data</span><span class="p">(</span><span class="n">drive_q</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">q_gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">q_trig</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span>
 <span class="linenos">55</span><span class="w">     </span><span class="p">.</span><span class="n">o_data</span><span class="p">(</span><span class="n">out1</span><span class="p">));</span>
 <span class="linenos">56</span>
 <span class="linenos">57</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">outk1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">enable</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">out1</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">58</span>
 <span class="linenos">59</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">dac1_ob0</span><span class="p">,</span><span class="w"> </span><span class="n">dac1_ob1</span><span class="p">;</span><span class="w">  </span><span class="c1">// offset binary outputs from afterburner</span>
 <span class="linenos">60</span><span class="n">afterburner</span><span class="w"> </span><span class="n">afterburner1</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<span class="linenos">61</span><span class="w">     </span><span class="p">.</span><span class="n">data</span><span class="p">({</span><span class="n">outk1</span><span class="p">,</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">}),</span><span class="w"> </span><span class="p">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">aftb_coeff</span><span class="p">),</span>
+<span class="linenos">61</span><span class="w">     </span><span class="p">.</span><span class="n">data</span><span class="p">({</span><span class="n">outk1</span><span class="p">,</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">}),</span><span class="w"> </span><span class="p">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">aftb_coeff</span><span class="p">),</span>
 <span class="linenos">62</span><span class="w">     </span><span class="p">.</span><span class="n">data_out0</span><span class="p">(</span><span class="n">dac1_ob0</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">data_out1</span><span class="p">(</span><span class="n">dac1_ob1</span><span class="p">));</span>
 <span class="linenos">63</span>
 <span class="linenos">64</span><span class="c1">// Second (optional) dot-product with 90deg-rotated drive IQ to obtain quadrature component</span>
@@ -149,8 +147,8 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">66</span><span class="c1">// Quadrature portion of SSB drive signal</span>
 <span class="linenos">67</span><span class="n">flevel_set</span><span class="w"> </span><span class="n">level2</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
 <span class="linenos">68</span><span class="w">     </span><span class="p">.</span><span class="n">cosd</span><span class="p">(</span><span class="n">cosa</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">sind</span><span class="p">(</span><span class="n">sina</span><span class="p">),</span>
-<span class="linenos">69</span><span class="w">     </span><span class="p">.</span><span class="n">i_data</span><span class="p">(</span><span class="o">~</span><span class="n">drive_q</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">i_gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">i_trig</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
-<span class="linenos">70</span><span class="w">     </span><span class="p">.</span><span class="n">q_data</span><span class="p">(</span><span class="n">drive_i</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">q_gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">q_trig</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
+<span class="linenos">69</span><span class="w">     </span><span class="p">.</span><span class="n">i_data</span><span class="p">(</span><span class="o">~</span><span class="n">drive_q</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">i_gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">i_trig</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span>
+<span class="linenos">70</span><span class="w">     </span><span class="p">.</span><span class="n">q_data</span><span class="p">(</span><span class="n">drive_i</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">q_gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">q_trig</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span>
 <span class="linenos">71</span><span class="w">     </span><span class="p">.</span><span class="n">o_data</span><span class="p">(</span><span class="n">out2</span><span class="p">));</span>
 <span class="linenos">72</span>
 <span class="linenos">73</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">outf2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ssb_flip</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="o">~</span><span class="n">out2</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">out2</span><span class="p">;</span>
@@ -158,7 +156,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">75</span>
 <span class="linenos">76</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">dac2_ob0</span><span class="p">,</span><span class="w"> </span><span class="n">dac2_ob1</span><span class="p">;</span><span class="w">  </span><span class="c1">// offset binary outputs from afterburner</span>
 <span class="linenos">77</span><span class="n">afterburner</span><span class="w"> </span><span class="n">afterburner2</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span>
-<span class="linenos">78</span><span class="w">     </span><span class="p">.</span><span class="n">data</span><span class="p">({</span><span class="n">outk2</span><span class="p">,</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">}),</span><span class="w"> </span><span class="p">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">aftb_coeff</span><span class="p">),</span>
+<span class="linenos">78</span><span class="w">     </span><span class="p">.</span><span class="n">data</span><span class="p">({</span><span class="n">outk2</span><span class="p">,</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">}),</span><span class="w"> </span><span class="p">.</span><span class="n">coeff</span><span class="p">(</span><span class="n">aftb_coeff</span><span class="p">),</span>
 <span class="linenos">79</span><span class="w">     </span><span class="p">.</span><span class="n">data_out0</span><span class="p">(</span><span class="n">dac2_ob0</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">data_out1</span><span class="p">(</span><span class="n">dac2_ob1</span><span class="p">));</span>
 <span class="linenos">80</span>
 <span class="linenos">81</span><span class="c1">// afterburner returns offset-binary DAC words, but this module uses signed</span>

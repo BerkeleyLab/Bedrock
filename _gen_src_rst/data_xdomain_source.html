@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>data_xdomain Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="data-xdomain-source-file">
-<span id="data-xdomain-source"></span><h1>data_xdomain Source File<a class="headerlink" href="#data-xdomain-source-file" title="Permalink to this heading"></a></h1>
+<span id="data-xdomain-source"></span><h1>data_xdomain Source File<a class="headerlink" href="#data-xdomain-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// clk_out must be more than twice as fast as the gate_in rate.</span>
 <span class="linenos"> 2</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 3</span><span class="k">module</span><span class="w"> </span><span class="n">data_xdomain</span><span class="w"> </span><span class="p">#(</span>
@@ -115,10 +113,10 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">32</span><span class="no">`endif</span>
 <span class="linenos">33</span>
 <span class="linenos">34</span><span class="c1">// CDC-15  Warning  Clock enable controlled CDC structure detected</span>
-<span class="linenos">35</span><span class="c1">// &quot;The CDC engine only checks that [CE] is [valid in clk_out].</span>
+<span class="linenos">35</span><span class="c1">// "The CDC engine only checks that [CE] is [valid in clk_out].</span>
 <span class="linenos">36</span><span class="c1">// Also, you are responsible for constraining the latency from the</span>
 <span class="linenos">37</span><span class="c1">// [clk_in] domain to [clk_out latch input], which is usually done</span>
-<span class="linenos">38</span><span class="c1">// by a set_max_delay -datapath_only constraint.&quot;</span>
+<span class="linenos">38</span><span class="c1">// by a set_max_delay -datapath_only constraint."</span>
 <span class="linenos">39</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">size</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">data_out_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">40</span><span class="kt">reg</span><span class="w"> </span><span class="n">gate_out_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">41</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk_out</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>

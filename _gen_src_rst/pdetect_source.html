@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>pdetect Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="pdetect-source-file">
-<span id="pdetect-source"></span><h1>pdetect Source File<a class="headerlink" href="#pdetect-source-file" title="Permalink to this heading"></a></h1>
+<span id="pdetect-source"></span><h1>pdetect Source File<a class="headerlink" href="#pdetect-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 2</span><span class="c1">// Synthesizes to 17 slices at 155 MHz in XC3Sxxx-4 using XST-10.1i</span>
 <span class="linenos"> 3</span>
@@ -92,7 +90,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 9</span><span class="c1">// Subtle API change from old pdetect: when strobe_in is not set,</span>
 <span class="linenos">10</span><span class="c1">// the output follows the input exactly.</span>
 <span class="linenos">11</span>
-<span class="linenos">12</span><span class="c1">// Yet another API change: new input &quot;reset&quot;, only used when strobe_in</span>
+<span class="linenos">12</span><span class="c1">// Yet another API change: new input "reset", only used when strobe_in</span>
 <span class="linenos">13</span><span class="c1">// is set, resets the state machine to unwound.</span>
 <span class="linenos">14</span>
 <span class="linenos">15</span><span class="k">module</span><span class="w"> </span><span class="n">pdetect</span><span class="w"> </span><span class="p">#(</span>
@@ -117,8 +115,8 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">34</span>
 <span class="linenos">35</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">prev_quad</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">36</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">quad</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ang_in</span><span class="p">[</span><span class="n">w</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="n">w</span><span class="o">-</span><span class="mh">2</span><span class="p">];</span>
-<span class="linenos">37</span><span class="kt">wire</span><span class="w"> </span><span class="n">trans_pn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prev_quad</span><span class="o">==</span><span class="mh">2</span><span class="mb">&#39;b01</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">quad</span><span class="o">==</span><span class="mh">2</span><span class="mb">&#39;b10</span><span class="p">);</span>
-<span class="linenos">38</span><span class="kt">wire</span><span class="w"> </span><span class="n">trans_np</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prev_quad</span><span class="o">==</span><span class="mh">2</span><span class="mb">&#39;b10</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">quad</span><span class="o">==</span><span class="mh">2</span><span class="mb">&#39;b01</span><span class="p">);</span>
+<span class="linenos">37</span><span class="kt">wire</span><span class="w"> </span><span class="n">trans_pn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prev_quad</span><span class="o">==</span><span class="mh">2</span><span class="mb">'b01</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">quad</span><span class="o">==</span><span class="mh">2</span><span class="mb">'b10</span><span class="p">);</span>
+<span class="linenos">38</span><span class="kt">wire</span><span class="w"> </span><span class="n">trans_np</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prev_quad</span><span class="o">==</span><span class="mh">2</span><span class="mb">'b10</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">quad</span><span class="o">==</span><span class="mh">2</span><span class="mb">'b01</span><span class="p">);</span>
 <span class="linenos">39</span>
 <span class="linenos">40</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">next</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">41</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>

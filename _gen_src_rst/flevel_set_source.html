@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>flevel_set Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="flevel-set-source-file">
-<span id="flevel-set-source"></span><h1>flevel_set Source File<a class="headerlink" href="#flevel-set-source-file" title="Permalink to this heading"></a></h1>
+<span id="flevel-set-source"></span><h1>flevel_set Source File<a class="headerlink" href="#flevel-set-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="c1">// Name: Set carrier level from I and Q</span>
@@ -88,9 +86,9 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 5</span><span class="c1">// Essentially a dot product of the LO signal [cosd, sind] with [i_data, q_data]</span>
 <span class="linenos"> 6</span><span class="c1">// N.B.: full-scale negative is an invalid LO value.</span>
 <span class="linenos"> 7</span><span class="k">module</span><span class="w"> </span><span class="n">flevel_set</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos"> 8</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">i_dw</span><span class="o">=</span><span class="mh">17</span><span class="p">,</span><span class="w"> </span><span class="c1">// XXX don&#39;t change this</span>
-<span class="linenos"> 9</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">q_dw</span><span class="o">=</span><span class="mh">17</span><span class="p">,</span><span class="w"> </span><span class="c1">// XXX don&#39;t change this</span>
-<span class="linenos">10</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">o_dw</span><span class="o">=</span><span class="mh">16</span><span class="w">  </span><span class="c1">// XXX don&#39;t change this</span>
+<span class="linenos"> 8</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">i_dw</span><span class="o">=</span><span class="mh">17</span><span class="p">,</span><span class="w"> </span><span class="c1">// XXX don't change this</span>
+<span class="linenos"> 9</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">q_dw</span><span class="o">=</span><span class="mh">17</span><span class="p">,</span><span class="w"> </span><span class="c1">// XXX don't change this</span>
+<span class="linenos">10</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">o_dw</span><span class="o">=</span><span class="mh">16</span><span class="w">  </span><span class="c1">// XXX don't change this</span>
 <span class="linenos">11</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
 <span class="linenos">12</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span>
 <span class="linenos">13</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">cosd</span><span class="p">,</span><span class="w">  </span><span class="c1">// LO input</span>
@@ -127,8 +125,8 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">44</span><span class="no">`undef</span><span class="w"> </span><span class="n">SAT</span>
 <span class="linenos">45</span>
 <span class="linenos">46</span><span class="k">assign</span><span class="w"> </span><span class="n">o_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum2</span><span class="p">[</span><span class="mh">16</span><span class="o">:</span><span class="mh">1</span><span class="p">];</span>
-<span class="linenos">47</span><span class="k">assign</span><span class="w"> </span><span class="n">o_gate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">;</span>
-<span class="linenos">48</span><span class="k">assign</span><span class="w"> </span><span class="n">o_trig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">;</span>
+<span class="linenos">47</span><span class="k">assign</span><span class="w"> </span><span class="n">o_gate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="mb">'b1</span><span class="p">;</span>
+<span class="linenos">48</span><span class="k">assign</span><span class="w"> </span><span class="n">o_trig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="mb">'b0</span><span class="p">;</span>
 <span class="linenos">49</span><span class="k">assign</span><span class="w"> </span><span class="n">time_err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time_err_r</span><span class="p">;</span>
 <span class="linenos">50</span>
 <span class="linenos">51</span><span class="k">endmodule</span>

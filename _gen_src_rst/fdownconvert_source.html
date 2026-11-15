@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>fdownconvert Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="fdownconvert-source-file">
-<span id="fdownconvert-source"></span><h1>fdownconvert Source File<a class="headerlink" href="#fdownconvert-source-file" title="Permalink to this heading"></a></h1>
+<span id="fdownconvert-source"></span><h1>fdownconvert Source File<a class="headerlink" href="#fdownconvert-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 2</span><span class="c1">// Synthesizes to 80 4-LUTs and 2 MULT18X18s at 150 MHz in XC3Sxxx-4 using XST-10.1i</span>
 <span class="linenos"> 3</span>
@@ -97,8 +95,8 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">14</span><span class="c1">// | Q |    | -cos[n + 1]\theta    cos n\theta |     | a_data[n+1] |</span>
 <span class="linenos">15</span><span class="c1">// Larry Doolittle, LBNL, 2014</span>
 <span class="linenos">16</span><span class="k">module</span><span class="w"> </span><span class="n">fdownconvert</span><span class="w"> </span><span class="p">#(</span>
-<span class="linenos">17</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">a_dw</span><span class="o">=</span><span class="mh">16</span><span class="p">,</span><span class="w">  </span><span class="c1">// XXX don&#39;t change this</span>
-<span class="linenos">18</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">o_dw</span><span class="o">=</span><span class="mh">16</span><span class="w">   </span><span class="c1">// XXX don&#39;t change this</span>
+<span class="linenos">17</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">a_dw</span><span class="o">=</span><span class="mh">16</span><span class="p">,</span><span class="w">  </span><span class="c1">// XXX don't change this</span>
+<span class="linenos">18</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">o_dw</span><span class="o">=</span><span class="mh">16</span><span class="w">   </span><span class="c1">// XXX don't change this</span>
 <span class="linenos">19</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
 <span class="linenos">20</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span><span class="w">  </span><span class="c1">// timespec 6.66 ns</span>
 <span class="linenos">21</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">mod2</span><span class="p">,</span>
@@ -159,7 +157,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">76</span><span class="no">`undef</span><span class="w"> </span><span class="n">SAT</span>
 <span class="linenos">77</span>
 <span class="linenos">78</span><span class="k">assign</span><span class="w"> </span><span class="n">o_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iq_out0</span><span class="p">;</span>
-<span class="linenos">79</span><span class="k">assign</span><span class="w"> </span><span class="n">o_gate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">;</span>
+<span class="linenos">79</span><span class="k">assign</span><span class="w"> </span><span class="n">o_gate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">1</span><span class="mb">'b1</span><span class="p">;</span>
 <span class="linenos">80</span><span class="k">assign</span><span class="w"> </span><span class="n">o_trig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mod2</span><span class="p">;</span>
 <span class="linenos">81</span><span class="k">assign</span><span class="w"> </span><span class="n">time_err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time_err_r</span><span class="p">;</span>
 <span class="linenos">82</span>

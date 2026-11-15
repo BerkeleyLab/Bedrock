@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>chitchat chitchat_txrx_wrap &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -124,10 +122,10 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="chitchat-chitchat-txrx-wrap">
-<span id="chitchat-txrx-wrap"></span><h1>chitchat chitchat_txrx_wrap<a class="headerlink" href="#chitchat-chitchat-txrx-wrap" title="Permalink to this heading"></a></h1>
+<span id="chitchat-txrx-wrap"></span><h1>chitchat chitchat_txrx_wrap<a class="headerlink" href="#chitchat-chitchat-txrx-wrap" title="Link to this heading"></a></h1>
 <p>This document provides an extended description of the chitchat_txrx_wrap module and its ports.</p>
 <section id="clocking">
-<h2>Clocking<a class="headerlink" href="#clocking" title="Permalink to this heading"></a></h2>
+<h2>Clocking<a class="headerlink" href="#clocking" title="Link to this heading"></a></h2>
 <p>A total of 5 independent clock domains are supported; crossing between these domains is handled
 by internal synchronizers. The user need not drive all of these independently.</p>
 <ul class="simple">
@@ -139,7 +137,7 @@ by internal synchronizers. The user need not drive all of these independently.</
 </ul>
 </section>
 <section id="transceiver-connection">
-<h2>Transceiver connection<a class="headerlink" href="#transceiver-connection" title="Permalink to this heading"></a></h2>
+<h2>Transceiver connection<a class="headerlink" href="#transceiver-connection" title="Link to this heading"></a></h2>
 <ul>
 <li><p>gtx_tx_d - Parallel data sent to the transmit side of the serial transceiver.</p></li>
 <li><p>gtx_tx_k - Comma flag sent to the transmit side of the serial transceiver. While this</p>
@@ -157,7 +155,7 @@ by internal synchronizers. The user need not drive all of these independently.</
 </ul>
 </section>
 <section id="data-flow">
-<h2>Data flow<a class="headerlink" href="#data-flow" title="Permalink to this heading"></a></h2>
+<h2>Data flow<a class="headerlink" href="#data-flow" title="Link to this heading"></a></h2>
 <p>The chitchat_txrx_wrap module cannot transmit data at full-rate, as it takes several cycles
 to assemble a transmit packet and send it over the link. As a result, the input data stream
 must be presented at a low enough rate, if dropped data elements are to be avoided.</p>
@@ -172,7 +170,7 @@ must be presented at a low enough rate, if dropped data elements are to be avoid
 </ul>
 </section>
 <section id="status-debug-signals">
-<h2>Status/Debug signals<a class="headerlink" href="#status-debug-signals" title="Permalink to this heading"></a></h2>
+<h2>Status/Debug signals<a class="headerlink" href="#status-debug-signals" title="Link to this heading"></a></h2>
 <p>All of the following qualify as status/debug signals and convey useful link information and statistics.</p>
 <ul class="simple">
 <li><p>txrx_latency</p></li>

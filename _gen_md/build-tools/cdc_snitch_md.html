@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>build-tools cdc_snitch &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -121,9 +119,9 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="build-tools-cdc-snitch">
-<span id="cdc-snitch"></span><h1>build-tools cdc_snitch<a class="headerlink" href="#build-tools-cdc-snitch" title="Permalink to this heading"></a></h1>
+<span id="cdc-snitch"></span><h1>build-tools cdc_snitch<a class="headerlink" href="#build-tools-cdc-snitch" title="Link to this heading"></a></h1>
 <section id="cdc-snitch-documentation">
-<h2>cdc_snitch Documentation<a class="headerlink" href="#cdc-snitch-documentation" title="Permalink to this heading"></a></h2>
+<h2>cdc_snitch Documentation<a class="headerlink" href="#cdc-snitch-documentation" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">cdc_snitch.py</span></code> is a python script which, combined with
 <a class="reference external" href="https://yosyshq.net/yosys/">yosys</a> processing of Verilog files,
 can detect anti-patterns of Clock-Domain-Crossing (CDC).</p>
@@ -132,15 +130,17 @@ combinational logic, and memories.  Using json as an intermediate
 file format, <code class="docutils literal notranslate"><span class="pre">cdc_snitch.py</span></code> categorizes each register by how its
 clock domain does or doesn’t match the clock domains of its data sources.</p>
 <section id="ok1">
-<h3>OK1<a class="headerlink" href="#ok1" title="Permalink to this heading"></a></h3>
-<a class="reference external image-reference" href="cdc_OK1.svg"><img alt="OK1 topology" src="../../_images/cdc_OK1.svg" /></a>
+<h3>OK1<a class="headerlink" href="#ok1" title="Link to this heading"></a></h3>
+<a class="reference external image-reference" href="cdc_OK1.svg"><img alt="OK1 topology" src="../../_images/cdc_OK1.svg" />
+</a>
 <p>If all inputs leading to a register are in the same domain as its own
 clock, that’s called “OK1”.  This should be the standard topology for all
 real computation and state-machines.</p>
 </section>
 <section id="okx-or-cdc">
-<h3>OKX or CDC<a class="headerlink" href="#okx-or-cdc" title="Permalink to this heading"></a></h3>
-<a class="reference external image-reference" href="cdc_OKX.svg"><img alt="OKX topology" src="../../_images/cdc_OKX.svg" /></a>
+<h3>OKX or CDC<a class="headerlink" href="#okx-or-cdc" title="Link to this heading"></a></h3>
+<a class="reference external image-reference" href="cdc_OKX.svg"><img alt="OKX topology" src="../../_images/cdc_OKX.svg" />
+</a>
 <p>If each input comes from a single register in another domain, so the
 combinational logic is a trivial ‘straight wire’, that’s called “OKX” or “CDC”.
 All real CDC circuits should be built with this topology at their core.
@@ -151,8 +151,9 @@ if such intentional CDC crossings are properly designed to avoid
 data corruption.</p>
 </section>
 <section id="bad">
-<h3>BAD<a class="headerlink" href="#bad" title="Permalink to this heading"></a></h3>
-<a class="reference external image-reference" href="cdc_BAD.svg"><img alt="BAD topology" src="../../_images/cdc_BAD.svg" /></a>
+<h3>BAD<a class="headerlink" href="#bad" title="Link to this heading"></a></h3>
+<a class="reference external image-reference" href="cdc_BAD.svg"><img alt="BAD topology" src="../../_images/cdc_BAD.svg" />
+</a>
 <p>Registers with combinational input, that get at least one input not from
 its own domain, are categorized as “BAD”.
 Maybe this rule could be relaxed some for an ASIC, but in an FPGA
@@ -162,7 +163,7 @@ when inputs change.</p>
 return with an error, as is relevant for a regression-testing makefile.</p>
 </section>
 <section id="memories">
-<h3>Memories<a class="headerlink" href="#memories" title="Permalink to this heading"></a></h3>
+<h3>Memories<a class="headerlink" href="#memories" title="Link to this heading"></a></h3>
 <p>Memories are a special case.  If used to cross clock domains,
 the general case would necessarily mark them as “BAD” because
 the inputs to the output register include the memory cells
@@ -172,7 +173,7 @@ at the same time.
 So <code class="docutils literal notranslate"><span class="pre">cdc_snitch</span></code> ignores what goes on inside dual-port memories.</p>
 </section>
 <section id="i-o">
-<h3>I/O<a class="headerlink" href="#i-o" title="Permalink to this heading"></a></h3>
+<h3>I/O<a class="headerlink" href="#i-o" title="Link to this heading"></a></h3>
 <p>Each top-level input port is placed in its own domain,
 and output ports are not checked for errors.
 This may or may not represent the demands of a specific use case.
@@ -184,7 +185,7 @@ the input in a simple register (placed by the synthesizer in the I/O cell),
 and that’s a valid “OKX” or (with attribute) “CDC”.</p>
 </section>
 <section id="verilog-input">
-<h3>Verilog input<a class="headerlink" href="#verilog-input" title="Permalink to this heading"></a></h3>
+<h3>Verilog input<a class="headerlink" href="#verilog-input" title="Link to this heading"></a></h3>
 <p>Because we call on yosys to process the source Verilog, that Verilog
 needs to be portable and synthesizable, and not instantiate (closed-source,
 non-synthesizable) vendor primitives.  For many reasons, we try to layer
@@ -195,10 +196,10 @@ You would then point <code class="docutils literal notranslate"><span class="pre
 you feed into yosys.  Verilog and a limited subset of SystemVerilog are OK with yosys-0.23.</p>
 </section>
 <section id="tool-flow">
-<h3>Tool flow<a class="headerlink" href="#tool-flow" title="Permalink to this heading"></a></h3>
+<h3>Tool flow<a class="headerlink" href="#tool-flow" title="Link to this heading"></a></h3>
 <p>Our makefiles specify rules based on the following</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>foo_yosys.json: foo_shell.v foo.v worker1.v worker2.v $(BUILD_DIR)/cdc_snitch_proc.ys
-    $(YOSYS) -p &quot;read_verilog  $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@&quot;
+    $(YOSYS) -p "read_verilog  $(filter %.v, $^); script $(filter %_proc.ys, $^); write_json $@"
 foo_cdc.txt: $(BUILD_DIR)/cdc_snitch.py foo_yosys.json
     $(PYTHON) $^ -o $@
 </pre></div>
@@ -214,7 +215,7 @@ If the design includes any such “BAD” registers, the makefile rule for
 <code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code> will fail, as would be used for a regression test.</p>
 </section>
 <section id="reading-the-output">
-<h3>Reading the output<a class="headerlink" href="#reading-the-output" title="Permalink to this heading"></a></h3>
+<h3>Reading the output<a class="headerlink" href="#reading-the-output" title="Link to this heading"></a></h3>
 <p>It’s recommended to save the output of <code class="docutils literal notranslate"><span class="pre">cdc_snitch.py</span></code> in a file by
 using the <code class="docutils literal notranslate"><span class="pre">-o</span></code> flag.
 Call the result <code class="docutils literal notranslate"><span class="pre">foo_cdc.txt</span></code>, consistent with the make rule above.
@@ -270,7 +271,7 @@ risk of data corruption.  <a class="reference external" href="https://en.wikiped
 are often helpful, as are digital logic design textbooks. Good luck!</p>
 </section>
 <section id="dependencies">
-<h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading"></a></h3>
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
 <p>Besides <a class="reference external" href="cdc_snitch.py">cdc_snitch.py</a> and its associated yosys command script
 <a class="reference external" href="cdc_snitch_proc.ys">cdc_snitch_proc.ys</a>, you need:</p>
 <ul class="simple">
@@ -280,7 +281,7 @@ are often helpful, as are digital logic design textbooks. Good luck!</p>
 </ul>
 </section>
 <section id="discussion">
-<h3>Discussion<a class="headerlink" href="#discussion" title="Permalink to this heading"></a></h3>
+<h3>Discussion<a class="headerlink" href="#discussion" title="Link to this heading"></a></h3>
 <p>See <a class="reference external" href="https://github.com/YosysHQ/yosys/discussions/3956">CDC detection with yosys</a>,
 a discussion started (with prototype code) on Sep 25, 2023.</p>
 <p>This utility is definitely useful in its current state, and is deployed

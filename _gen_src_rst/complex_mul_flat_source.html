@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>complex_mul_flat Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="complex-mul-flat-source-file">
-<span id="complex-mul-flat-source"></span><h1>complex_mul_flat Source File<a class="headerlink" href="#complex-mul-flat-source-file" title="Permalink to this heading"></a></h1>
+<span id="complex-mul-flat-source"></span><h1>complex_mul_flat Source File<a class="headerlink" href="#complex-mul-flat-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 2</span><span class="c1">// TODO:</span>
 <span class="linenos"> 3</span><span class="c1">// Could potentially save a cycle in the flip-flop, by combining Add and Saturate into 1 cycle</span>
@@ -108,7 +106,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">25</span><span class="cp">`define SAT(x,old,new) ((~|x[old:new] | &amp;x[old:new]) ? x[new:0] : {x[old],{new{~x[old]}}})</span>
 <span class="linenos">26</span>
 <span class="linenos">27</span><span class="c1">// Keep one guard bit through the addition step.  That, and the</span>
-<span class="linenos">28</span><span class="c1">// strange-looking &quot;+1&quot; below, reduces the average error offset</span>
+<span class="linenos">28</span><span class="c1">// strange-looking "+1" below, reduces the average error offset</span>
 <span class="linenos">29</span><span class="c1">// to -1/4 result bit.</span>
 <span class="linenos">30</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">19</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">z_I_sel</span><span class="o">=</span><span class="n">z_I_all_i</span><span class="p">[</span><span class="mh">35</span><span class="o">:</span><span class="mh">16</span><span class="p">],</span><span class="w"> </span><span class="n">z_Q_sel</span><span class="o">=</span><span class="n">z_Q_all_i</span><span class="p">[</span><span class="mh">35</span><span class="o">:</span><span class="mh">16</span><span class="p">];</span>
 <span class="linenos">31</span>
@@ -132,7 +130,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">49</span><span class="k">assign</span><span class="w"> </span><span class="n">z_Q</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Q_small</span><span class="p">[</span><span class="mh">18</span><span class="o">:</span><span class="mh">1</span><span class="p">];</span>
 <span class="linenos">50</span>
 <span class="linenos">51</span>
-<span class="linenos">52</span><span class="c1">// This gate input isn&#39;t really used, but describes the length of this</span>
+<span class="linenos">52</span><span class="c1">// This gate input isn't really used, but describes the length of this</span>
 <span class="linenos">53</span><span class="c1">// pipeline to let users keep track of the data flow.</span>
 <span class="linenos">54</span>
 <span class="linenos">55</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">gate_sr</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>

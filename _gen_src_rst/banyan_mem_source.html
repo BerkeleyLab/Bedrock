@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>banyan_mem Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="banyan-mem-source-file">
-<span id="banyan-mem-source"></span><h1>banyan_mem Source File<a class="headerlink" href="#banyan-mem-source-file" title="Permalink to this heading"></a></h1>
+<span id="banyan-mem-source"></span><h1>banyan_mem Source File<a class="headerlink" href="#banyan-mem-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos">  2</span>
 <span class="linenos">  3</span><span class="c1">// Single-buffered capture of raw ADC data</span>
@@ -118,13 +116,13 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 35</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">ro_data</span><span class="p">,</span>
 <span class="linenos"> 36</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">ro_data2</span>
 <span class="linenos"> 37</span><span class="w">     </span><span class="c1">// ro_data2 is based on ro_addr xored with 1&lt;&lt;aw</span>
-<span class="linenos"> 38</span><span class="w">     </span><span class="c1">// You don&#39;t have to use it, but if you have a 32 bit bus, 16-bit ADCs,</span>
-<span class="linenos"> 39</span><span class="w">     </span><span class="c1">// and are trying to pack things efficiently, it&#39;s yours for the taking.</span>
+<span class="linenos"> 38</span><span class="w">     </span><span class="c1">// You don't have to use it, but if you have a 32 bit bus, 16-bit ADCs,</span>
+<span class="linenos"> 39</span><span class="w">     </span><span class="c1">// and are trying to pack things efficiently, it's yours for the taking.</span>
 <span class="linenos"> 40</span><span class="p">);</span>
 <span class="linenos"> 41</span>
 <span class="linenos"> 42</span><span class="c1">// We expect banyan_mask to be set by software, and is therefore not</span>
 <span class="linenos"> 43</span><span class="c1">// time-critical.  Other uses should be aware of this extra cycle of latency,</span>
-<span class="linenos"> 44</span><span class="c1">// motivated by the &quot;long&quot; time needed to count the number of bits set.</span>
+<span class="linenos"> 44</span><span class="c1">// motivated by the "long" time needed to count the number of bits set.</span>
 <span class="linenos"> 45</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">7</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">mask_d</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos"> 46</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">3</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">bit_cnt</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos"> 47</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
@@ -155,10 +153,10 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 72</span><span class="c1">// for fault capture.</span>
 <span class="linenos"> 73</span><span class="c1">// No hidden state!</span>
 <span class="linenos"> 74</span><span class="c1">// No double-buffering/circular readout, sorry; this is meant for</span>
-<span class="linenos"> 75</span><span class="c1">// wideband snapshotting, where the software can&#39;t possibly keep up.</span>
+<span class="linenos"> 75</span><span class="c1">// wideband snapshotting, where the software can't possibly keep up.</span>
 <span class="linenos"> 76</span><span class="kt">reg</span><span class="w"> </span><span class="n">full_r</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos"> 77</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">aw</span><span class="o">+</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">addr_count</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos"> 78</span><span class="k">assign</span><span class="w"> </span><span class="n">rollover</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">&amp;</span><span class="p">(</span><span class="n">addr_count</span><span class="o">|</span><span class="p">{</span><span class="n">done_mask</span><span class="p">,{</span><span class="n">aw</span><span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">}}});</span>
+<span class="linenos"> 78</span><span class="k">assign</span><span class="w"> </span><span class="n">rollover</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">&amp;</span><span class="p">(</span><span class="n">addr_count</span><span class="o">|</span><span class="p">{</span><span class="n">done_mask</span><span class="p">,{</span><span class="n">aw</span><span class="p">{</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">}}});</span>
 <span class="linenos"> 79</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
 <span class="linenos"> 80</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">run</span><span class="p">)</span><span class="w"> </span><span class="n">addr_count</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">addr_count</span><span class="o">+</span><span class="mh">1</span><span class="p">;</span>
 <span class="linenos"> 81</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rollover</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">reset</span><span class="p">)</span><span class="w"> </span><span class="n">addr_count</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
@@ -170,10 +168,10 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 87</span><span class="c1">// Split and time-align write-side addresses</span>
 <span class="linenos"> 88</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">time_state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">addr_count</span><span class="p">[</span><span class="n">aw</span><span class="o">+</span><span class="mh">2</span><span class="o">:</span><span class="n">aw</span><span class="p">];</span>
 <span class="linenos"> 89</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">wr_addr</span><span class="p">;</span>
-<span class="linenos"> 90</span><span class="n">reg_delay</span><span class="w"> </span><span class="p">#(.</span><span class="n">dw</span><span class="p">(</span><span class="n">aw</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">len</span><span class="p">(</span><span class="mh">4</span><span class="p">))</span><span class="w"> </span><span class="n">addr_pipe</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
+<span class="linenos"> 90</span><span class="n">reg_delay</span><span class="w"> </span><span class="p">#(.</span><span class="n">dw</span><span class="p">(</span><span class="n">aw</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">len</span><span class="p">(</span><span class="mh">4</span><span class="p">))</span><span class="w"> </span><span class="n">addr_pipe</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span>
 <span class="linenos"> 91</span><span class="w">     </span><span class="p">.</span><span class="n">din</span><span class="p">(</span><span class="n">addr_count</span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]),</span><span class="w"> </span><span class="p">.</span><span class="n">dout</span><span class="p">(</span><span class="n">wr_addr</span><span class="p">));</span>
 <span class="linenos"> 92</span><span class="kt">wire</span><span class="w"> </span><span class="n">run_d</span><span class="p">;</span>
-<span class="linenos"> 93</span><span class="n">reg_delay</span><span class="w"> </span><span class="p">#(.</span><span class="n">dw</span><span class="p">(</span><span class="mh">1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">len</span><span class="p">(</span><span class="mh">3</span><span class="p">))</span><span class="w"> </span><span class="n">run_pipe</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span>
+<span class="linenos"> 93</span><span class="n">reg_delay</span><span class="w"> </span><span class="p">#(.</span><span class="n">dw</span><span class="p">(</span><span class="mh">1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">len</span><span class="p">(</span><span class="mh">3</span><span class="p">))</span><span class="w"> </span><span class="n">run_pipe</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span>
 <span class="linenos"> 94</span><span class="w">     </span><span class="p">.</span><span class="n">din</span><span class="p">(</span><span class="n">run</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">dout</span><span class="p">(</span><span class="n">run_d</span><span class="p">));</span>
 <span class="linenos"> 95</span>
 <span class="linenos"> 96</span><span class="c1">// Banyan switch itself</span>
@@ -203,7 +201,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">120</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">stage2_addr</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">121</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">ro_clk</span><span class="p">)</span><span class="w"> </span><span class="n">stage2_addr</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ro_addr</span><span class="p">[</span><span class="n">aw</span><span class="o">+</span><span class="mh">3</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="n">aw</span><span class="p">];</span>
 <span class="linenos">122</span><span class="k">assign</span><span class="w"> </span><span class="n">ro_data</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">ram_out</span><span class="p">[((</span><span class="n">stage2_addr</span><span class="w">       </span><span class="p">)</span><span class="o">+</span><span class="mh">1</span><span class="p">)</span><span class="o">*</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="w"> </span><span class="o">-:</span><span class="w"> </span><span class="n">dw</span><span class="p">];</span>
-<span class="linenos">123</span><span class="k">assign</span><span class="w"> </span><span class="n">ro_data2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ram_out</span><span class="p">[((</span><span class="n">stage2_addr</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="mh">3</span><span class="mb">&#39;b1</span><span class="p">)</span><span class="o">+</span><span class="mh">1</span><span class="p">)</span><span class="o">*</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="w"> </span><span class="o">-:</span><span class="w"> </span><span class="n">dw</span><span class="p">];</span>
+<span class="linenos">123</span><span class="k">assign</span><span class="w"> </span><span class="n">ro_data2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ram_out</span><span class="p">[((</span><span class="n">stage2_addr</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="mh">3</span><span class="mb">'b1</span><span class="p">)</span><span class="o">+</span><span class="mh">1</span><span class="p">)</span><span class="o">*</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="w"> </span><span class="o">-:</span><span class="w"> </span><span class="n">dw</span><span class="p">];</span>
 <span class="linenos">124</span><span class="c1">// So ro_data* are one cycle (plus some combinatorial time) delayed from the address provided</span>
 <span class="linenos">125</span><span class="c1">// Reads are purely passive, no side effects, hence no read-enable control is provided</span>
 <span class="linenos">126</span>

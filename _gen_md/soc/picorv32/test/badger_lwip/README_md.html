@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>badger_lwip README &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
-        <script src="../../../../../_static/jquery.js"></script>
-        <script src="../../../../../_static/underscore.js"></script>
-        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../../../_static/doctools.js"></script>
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -122,14 +120,14 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="badger-lwip-readme">
-<span id="readme"></span><h1>badger_lwip README<a class="headerlink" href="#badger-lwip-readme" title="Permalink to this heading"></a></h1>
+<span id="readme"></span><h1>badger_lwip README<a class="headerlink" href="#badger-lwip-readme" title="Link to this heading"></a></h1>
 <section id="badger-lwip">
-<h2>badger_lwip<a class="headerlink" href="#badger-lwip" title="Permalink to this heading"></a></h2>
+<h2>badger_lwip<a class="headerlink" href="#badger-lwip" title="Link to this heading"></a></h2>
 <p>Demonstrates the badger MAC with the <code class="docutils literal notranslate"><span class="pre">Lightweight</span> <span class="pre">TCP/IP</span> <span class="pre">stack</span></code> (lwIP).
 Verilator is used to build an emulator which connects to the real world through a virtual TAP network interface.</p>
 </section>
 <section id="instructions">
-<h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this heading"></a></h2>
+<h2>Instructions<a class="headerlink" href="#instructions" title="Link to this heading"></a></h2>
 <p>Clone the master branch of lwIP …</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://git.savannah.nongnu.org/git/lwip.git
 </pre></div>
@@ -139,7 +137,7 @@ Verilator is used to build an emulator which connects to the real world through 
 </pre></div>
 </div>
 <section id="setup-the-tap-interface">
-<h3>Setup the tap interface<a class="headerlink" href="#setup-the-tap-interface" title="Permalink to this heading"></a></h3>
+<h3>Setup the tap interface<a class="headerlink" href="#setup-the-tap-interface" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>tunctl<span class="w"> </span>-u<span class="w"> </span><span class="nv">$USER</span>
 sudo<span class="w"> </span>ip<span class="w"> </span>addr<span class="w"> </span>add<span class="w"> </span>dev<span class="w"> </span>tap0<span class="w"> </span><span class="m">192</span>.168.7.1/24
 sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>dev<span class="w"> </span>tap0<span class="w"> </span>up
@@ -147,7 +145,7 @@ sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </spa
 </div>
 </section>
 <section id="run-it">
-<h3>Run it<a class="headerlink" href="#run-it" title="Permalink to this heading"></a></h3>
+<h3>Run it<a class="headerlink" href="#run-it" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>run the code with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">all</span></code> or <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">badger_lwip.vcd</span></code> to debug hardware</p></li>
 <li><p>lwIP sends a UDP packet to 192.168.7.1:1234, receive it with <code class="docutils literal notranslate"><span class="pre">nc</span> <span class="pre">-u</span> <span class="pre">-l</span> <span class="pre">-p</span> <span class="pre">1234</span></code></p></li>
@@ -159,7 +157,7 @@ on the local TAP0 network</p></li>
 </ul>
 </section>
 <section id="bridging-https-wiki-archlinux-org-title-network-bridge-tap0">
-<h3>(Bridging)[<a class="reference external" href="https://wiki.archlinux.org/title/Network_bridge">https://wiki.archlinux.org/title/Network_bridge</a>] tap0<a class="headerlink" href="#bridging-https-wiki-archlinux-org-title-network-bridge-tap0" title="Permalink to this heading"></a></h3>
+<h3>(Bridging)[<a class="reference external" href="https://wiki.archlinux.org/title/Network_bridge">https://wiki.archlinux.org/title/Network_bridge</a>] tap0<a class="headerlink" href="#bridging-https-wiki-archlinux-org-title-network-bridge-tap0" title="Link to this heading"></a></h3>
 <p>A bridge is like a virtual network switch, connecting two or more links together (here tap0 and eth0). This allows the Verilog simulation to access the Internet.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span>add<span class="w"> </span>name<span class="w"> </span>br0<span class="w"> </span><span class="nb">type</span><span class="w"> </span>bridge
 sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>br0<span class="w"> </span>up

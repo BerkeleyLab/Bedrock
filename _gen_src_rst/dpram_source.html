@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>dpram Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,14 +78,14 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="dpram-source-file">
-<span id="dpram-source"></span><h1>dpram Source File<a class="headerlink" href="#dpram-source-file" title="Permalink to this heading"></a></h1>
+<span id="dpram-source"></span><h1>dpram Source File<a class="headerlink" href="#dpram-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 2</span><span class="c1">// Dual port memory with independent clocks, port B is read-only</span>
-<span class="linenos"> 3</span><span class="c1">// Altera and Xilinx synthesis tools successfully &quot;find&quot; this as block memory</span>
+<span class="linenos"> 3</span><span class="c1">// Altera and Xilinx synthesis tools successfully "find" this as block memory</span>
 <span class="linenos"> 4</span><span class="k">module</span><span class="w"> </span><span class="n">dpram</span><span class="w"> </span><span class="p">#(</span>
 <span class="linenos"> 5</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">aw</span><span class="o">=</span><span class="mh">8</span><span class="p">,</span>
 <span class="linenos"> 6</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">dw</span><span class="o">=</span><span class="mh">8</span><span class="p">,</span>
-<span class="linenos"> 7</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">initial_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="linenos"> 7</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">initial_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">""</span>
 <span class="linenos"> 8</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
 <span class="linenos"> 9</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clka</span><span class="p">,</span>
 <span class="linenos">10</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clkb</span><span class="p">,</span>
@@ -98,7 +96,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">15</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">addrb</span><span class="p">,</span>
 <span class="linenos">16</span><span class="w">     </span><span class="k">output</span><span class="w"> </span><span class="p">[</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">doutb</span>
 <span class="linenos">17</span><span class="p">);</span>
-<span class="linenos">18</span><span class="k">localparam</span><span class="w"> </span><span class="n">sz</span><span class="o">=</span><span class="mh">32</span><span class="mb">&#39;b1</span><span class="o">&lt;&lt;</span><span class="n">aw</span><span class="p">;</span>
+<span class="linenos">18</span><span class="k">localparam</span><span class="w"> </span><span class="n">sz</span><span class="o">=</span><span class="mh">32</span><span class="mb">'b1</span><span class="o">&lt;&lt;</span><span class="n">aw</span><span class="p">;</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="mh">0</span><span class="o">:</span><span class="n">sz</span><span class="o">-</span><span class="mh">1</span><span class="p">];</span>
 <span class="linenos">21</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">aw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">ala</span><span class="o">=</span><span class="mh">0</span><span class="p">,</span><span class="w"> </span><span class="n">alb</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
@@ -108,7 +106,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">25</span><span class="c1">// No known current tool needs it disabled.</span>
 <span class="linenos">26</span><span class="k">integer</span><span class="w"> </span><span class="n">k</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">27</span><span class="k">initial</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">28</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">initial_file</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">)</span><span class="w"> </span><span class="nb">$readmemh</span><span class="p">(</span><span class="n">initial_file</span><span class="p">,</span><span class="w"> </span><span class="n">mem</span><span class="p">);</span>
+<span class="linenos">28</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">initial_file</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">""</span><span class="p">)</span><span class="w"> </span><span class="nb">$readmemh</span><span class="p">(</span><span class="n">initial_file</span><span class="p">,</span><span class="w"> </span><span class="n">mem</span><span class="p">);</span>
 <span class="linenos">29</span><span class="no">`ifndef</span><span class="w"> </span><span class="n">BUGGY_FORLOOP</span>
 <span class="linenos">30</span><span class="w">     </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
 <span class="linenos">31</span><span class="w">             </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span><span class="n">k</span><span class="o">&lt;</span><span class="n">sz</span><span class="p">;</span><span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mh">1</span><span class="p">)</span><span class="w"> </span><span class="n">mem</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>

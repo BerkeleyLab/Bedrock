@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tgen Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,15 +78,15 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="tgen-source-file">
-<span id="tgen-source"></span><h1>tgen Source File<a class="headerlink" href="#tgen-source-file" title="Permalink to this heading"></a></h1>
+<span id="tgen-source"></span><h1>tgen Source File<a class="headerlink" href="#tgen-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos">  2</span>
 <span class="linenos">  3</span><span class="c1">// Timing generator</span>
 <span class="linenos">  4</span><span class="c1">// Interposes in and passes-through a local register write bus</span>
 <span class="linenos">  5</span><span class="c1">// One-cycle delay from input bus to output bus</span>
 <span class="linenos">  6</span><span class="c1">// Controlling bus has priority for access to the controlled bus.</span>
-<span class="linenos">  7</span><span class="c1">// Output &quot;collision&quot; when a function generator write gets lost.</span>
-<span class="linenos">  8</span><span class="c1">// That&#39;s a single-cycle output, which needs to be latched and/or</span>
+<span class="linenos">  7</span><span class="c1">// Output "collision" when a function generator write gets lost.</span>
+<span class="linenos">  8</span><span class="c1">// That's a single-cycle output, which needs to be latched and/or</span>
 <span class="linenos">  9</span><span class="c1">// counted by whoever instantiates this module.</span>
 <span class="linenos"> 10</span>
 <span class="linenos"> 11</span><span class="c1">// The dual-port ram holding the program is part of the local bus</span>
@@ -99,7 +97,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 16</span><span class="c1">// After filling the table, toggle bank_next to make it take effect.</span>
 <span class="linenos"> 17</span><span class="c1">// In theory, you should then wait for that new bank_next value to</span>
 <span class="linenos"> 18</span><span class="c1">// propagate to bank_stat before writing anything else to the table.</span>
-<span class="linenos"> 19</span><span class="c1">// That&#39;s only of real concern if trig inputs are rare.</span>
+<span class="linenos"> 19</span><span class="c1">// That's only of real concern if trig inputs are rare.</span>
 <span class="linenos"> 20</span>
 <span class="linenos"> 21</span><span class="c1">// Features:</span>
 <span class="linenos"> 22</span><span class="c1">// Each set of four addresses means:</span>
@@ -194,8 +192,8 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">111</span><span class="k">end</span>
 <span class="linenos">112</span><span class="k">assign</span><span class="w"> </span><span class="n">new_timer</span><span class="o">=</span><span class="n">mem_out</span><span class="p">;</span>
 <span class="linenos">113</span><span class="kt">reg</span><span class="w"> </span><span class="n">write_cycle</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">114</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">our_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">write_cycle</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="n">mem_out1</span><span class="p">,</span><span class="n">mem_out</span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">32</span><span class="mi">&#39;d0</span><span class="p">;</span>
-<span class="linenos">115</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">our_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">write_cycle</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">mem_out2</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">16</span><span class="mi">&#39;d0</span><span class="p">;</span>
+<span class="linenos">114</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">our_data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">write_cycle</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="n">mem_out1</span><span class="p">,</span><span class="n">mem_out</span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">32</span><span class="mi">'d0</span><span class="p">;</span>
+<span class="linenos">115</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">our_addr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">write_cycle</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">mem_out2</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">16</span><span class="mi">'d0</span><span class="p">;</span>
 <span class="linenos">116</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="n">write_cycle</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">subcycle</span><span class="o">==</span><span class="mh">3</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">mem_zero</span><span class="p">;</span>
 <span class="linenos">117</span>
 <span class="linenos">118</span><span class="c1">// Now merge the two streams</span>

@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>marble_family README &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -124,9 +122,9 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="marble-family-readme">
-<span id="readme"></span><h1>marble_family README<a class="headerlink" href="#marble-family-readme" title="Permalink to this heading"></a></h1>
+<span id="readme"></span><h1>marble_family README<a class="headerlink" href="#marble-family-readme" title="Link to this heading"></a></h1>
 <section id="context">
-<h2>Context<a class="headerlink" href="#context" title="Permalink to this heading"></a></h2>
+<h2>Context<a class="headerlink" href="#context" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>Marble-Mini is an Open Hardware FMC carrier board based on Xilinx Artix:</dt><dd><p>see <a class="reference external" href="https://github.com/BerkeleyLab/Marble-Mini">github</a></p>
 </dd>
@@ -135,7 +133,7 @@ Expect to see errors and unfinished things.</p>
 </dl>
 </section>
 <section id="firmware-related-info">
-<h2>Firmware related info<a class="headerlink" href="#firmware-related-info" title="Permalink to this heading"></a></h2>
+<h2>Firmware related info<a class="headerlink" href="#firmware-related-info" title="Link to this heading"></a></h2>
 <dl class="simple">
 <dt>prc_common.xdc</dt><dd><p>comes from gitlab.lbl.gov:llrf-projects/lcls2_llrf
 firmware/prc/prc_common.xdc</p>
@@ -168,10 +166,10 @@ bus_digitizer_U3[16]  LVDS_25          H23       FMC1_LA22_P  ADC_D0A_N_1</p>
 </dl>
 </section>
 <section id="build-fw-and-program-marble">
-<h2>Build FW and program Marble<a class="headerlink" href="#build-fw-and-program-marble" title="Permalink to this heading"></a></h2>
+<h2>Build FW and program Marble<a class="headerlink" href="#build-fw-and-program-marble" title="Link to this heading"></a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd $BEDROCK/projects/oscope/marble_family
 make clean &amp;&amp; make oscope_top.bit
-openocd -f ../../../board_support/marblemini/marble.cfg -c &quot;transport select jtag; init; xc7_program xc7.tap; pld load 0 oscope_top.bit; exit&quot;
+openocd -f ../../../board_support/marblemini/marble.cfg -c "transport select jtag; init; xc7_program xc7.tap; pld load 0 oscope_top.bit; exit"
 </pre></div>
 </div>
 <p>Check if it’s up</p>
@@ -180,9 +178,9 @@ openocd -f ../../../board_support/marblemini/marble.cfg -c &quot;transport selec
 </div>
 </section>
 <section id="zest-related-initialization">
-<h2>Zest related initialization<a class="headerlink" href="#zest-related-initialization" title="Permalink to this heading"></a></h2>
+<h2>Zest related initialization<a class="headerlink" href="#zest-related-initialization" title="Link to this heading"></a></h2>
 <section id="clock-frequency">
-<h3>Clock frequency<a class="headerlink" href="#clock-frequency" title="Permalink to this heading"></a></h3>
+<h3>Clock frequency<a class="headerlink" href="#clock-frequency" title="Link to this heading"></a></h3>
 <p>Currently OSCOPE lb/system clock works in 125MHz domain.</p>
 <p>With below ADC clock domain can be set to 100MHz</p>
 <p>LMK dividers in zest_setup.py for zest are set to divide the below 1400MHz down to 100MHz [This can be changed Inside zest_setup.py .. good luck]
@@ -193,7 +191,7 @@ For waveforms, using Si***_loader from:
 </div>
 </section>
 <section id="pythonpath-setup">
-<h3>PYTHONPATH setup<a class="headerlink" href="#pythonpath-setup" title="Permalink to this heading"></a></h3>
+<h3>PYTHONPATH setup<a class="headerlink" href="#pythonpath-setup" title="Link to this heading"></a></h3>
 <p>Setup the right python path for software dependencies sprayed around bedrock. And bmb7 programming tools are best to get from lcls2 as they keep them up-to-date, since they have no choice.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>cd $BEDROCK/projects/oscope/software
 export PYTHONPATH=../../../dsp/:../../common:../../../board_support/zest:/home/w/work/lbl/lcls2_llrf/software/bmb7
@@ -201,7 +199,7 @@ export PYTHONPATH=../../../dsp/:../../common:../../../board_support/zest:/home/w
 </div>
 </section>
 <section id="configure-zest-and-run-oscope">
-<h3>Configure zest and run oscope<a class="headerlink" href="#configure-zest-and-run-oscope" title="Permalink to this heading"></a></h3>
+<h3>Configure zest and run oscope<a class="headerlink" href="#configure-zest-and-run-oscope" title="Link to this heading"></a></h3>
 <p>Setup idelays etc on zest with zest_setup.py</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">../../../</span><span class="n">board_support</span><span class="o">/</span><span class="n">zest</span><span class="o">/</span><span class="n">zest_setup</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">a</span> <span class="mf">192.168.19.8</span><span class="p">:</span><span class="mi">803</span> <span class="o">-</span><span class="n">r</span> <span class="o">-</span><span class="n">f</span> <span class="mi">125</span>
 <span class="n">python</span> <span class="o">../</span><span class="n">software</span><span class="o">/</span><span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">a</span> <span class="mf">192.168.19.8</span><span class="p">:</span><span class="mi">803</span>

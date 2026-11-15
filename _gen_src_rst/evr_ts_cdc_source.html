@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>evr_ts_cdc Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,11 +78,11 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="evr-ts-cdc-source-file">
-<span id="evr-ts-cdc-source"></span><h1>evr_ts_cdc Source File<a class="headerlink" href="#evr-ts-cdc-source-file" title="Permalink to this heading"></a></h1>
-<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// Move tinyEVR&#39;s 64-bit timestamp to another clock domain</span>
+<span id="evr-ts-cdc-source"></span><h1>evr_ts_cdc Source File<a class="headerlink" href="#evr-ts-cdc-source-file" title="Link to this heading"></a></h1>
+<div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// Move tinyEVR's 64-bit timestamp to another clock domain</span>
 <span class="linenos"> 2</span><span class="c1">// Uses Gray codes to get (almost) ideal results.</span>
 <span class="linenos"> 3</span><span class="c1">// Time delay is one evr_clk plus one-to-two usr_clk cycles.</span>
-<span class="linenos"> 4</span><span class="c1">// Yes, that&#39;s the inevitable clock-domain-crossing jitter.</span>
+<span class="linenos"> 4</span><span class="c1">// Yes, that's the inevitable clock-domain-crossing jitter.</span>
 <span class="linenos"> 5</span><span class="c1">//</span>
 <span class="linenos"> 6</span><span class="c1">// The Gray code scheme fails at the time when ts_tcks gets reset to zero by the evr_pps event.</span>
 <span class="linenos"> 7</span><span class="c1">// As a workaround, the first _two_ values of the output usr_tcks are forced to zero, every time usr_secs is updated.</span>
@@ -103,7 +101,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">20</span>
 <span class="linenos">21</span><span class="c1">// binary to Gray</span>
 <span class="linenos">22</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">ts_tgray</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos">23</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">evr_clk</span><span class="p">)</span><span class="w"> </span><span class="n">ts_tgray</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ts_tcks</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">,</span><span class="w"> </span><span class="n">ts_tcks</span><span class="p">[</span><span class="mh">30</span><span class="o">:</span><span class="mh">1</span><span class="p">]};</span>
+<span class="linenos">23</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">evr_clk</span><span class="p">)</span><span class="w"> </span><span class="n">ts_tgray</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ts_tcks</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">,</span><span class="w"> </span><span class="n">ts_tcks</span><span class="p">[</span><span class="mh">30</span><span class="o">:</span><span class="mh">1</span><span class="p">]};</span>
 <span class="linenos">24</span>
 <span class="linenos">25</span><span class="c1">// CDC</span>
 <span class="linenos">26</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">usr_tgray</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
@@ -112,7 +110,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">29</span><span class="c1">// Gray to binary</span>
 <span class="linenos">30</span><span class="c1">// verilator lint_save</span>
 <span class="linenos">31</span><span class="c1">// verilator lint_off UNOPTFLAT</span>
-<span class="linenos">32</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">usr_bin1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">usr_tgray</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">,</span><span class="w"> </span><span class="n">usr_bin1</span><span class="p">[</span><span class="mh">30</span><span class="o">:</span><span class="mh">1</span><span class="p">]};</span>
+<span class="linenos">32</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">usr_bin1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">usr_tgray</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">,</span><span class="w"> </span><span class="n">usr_bin1</span><span class="p">[</span><span class="mh">30</span><span class="o">:</span><span class="mh">1</span><span class="p">]};</span>
 <span class="linenos">33</span><span class="c1">// verilator lint_restore</span>
 <span class="linenos">34</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">usr_bin</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">35</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">usr_clk</span><span class="p">)</span><span class="w"> </span><span class="n">usr_bin</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">usr_bin1</span><span class="p">;</span>
@@ -136,14 +134,14 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">53</span><span class="c1">// That means you can get usr_bin as 0 or 1 with the old value of usr_sec2</span>
 <span class="linenos">54</span><span class="c1">// for a cycle, or usr_sec2 updated to the new value a cycle before usr_bin jumps back to 0 or 1.</span>
 <span class="linenos">55</span><span class="c1">// My test bench is (sadly) not good enough to show the effect.</span>
-<span class="linenos">56</span><span class="c1">// Eliminating that potential glitch isn&#39;t easy, and seems guaranteed to have side effects.</span>
+<span class="linenos">56</span><span class="c1">// Eliminating that potential glitch isn't easy, and seems guaranteed to have side effects.</span>
 <span class="linenos">57</span><span class="c1">// The approach below zeros out the tcks data from _both_ possibly corrupt edges.</span>
 <span class="linenos">58</span><span class="kt">reg</span><span class="w"> </span><span class="n">pps_grab1</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">59</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">usr_bin2</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">60</span><span class="kt">wire</span><span class="w"> </span><span class="n">pps_zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pps_grab</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">pps_grab1</span><span class="p">;</span>
 <span class="linenos">61</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">usr_clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
 <span class="linenos">62</span><span class="w">    </span><span class="n">pps_grab1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">pps_grab</span><span class="p">;</span>
-<span class="linenos">63</span><span class="w">    </span><span class="n">usr_bin2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">pps_zero</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mh">32</span><span class="mb">&#39;b0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">usr_bin</span><span class="p">;</span>
+<span class="linenos">63</span><span class="w">    </span><span class="n">usr_bin2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">pps_zero</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mh">32</span><span class="mb">'b0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">usr_bin</span><span class="p">;</span>
 <span class="linenos">64</span><span class="k">end</span>
 <span class="linenos">65</span><span class="k">assign</span><span class="w"> </span><span class="n">usr_secs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">usr_sec2</span><span class="p">;</span>
 <span class="linenos">66</span><span class="k">assign</span><span class="w"> </span><span class="n">usr_tcks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">usr_bin2</span><span class="p">;</span>

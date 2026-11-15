@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>cim_12x Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="cim-12x-source-file">
-<span id="cim-12x-source"></span><h1>cim_12x Source File<a class="headerlink" href="#cim-12x-source-file" title="Permalink to this heading"></a></h1>
+<span id="cim-12x-source"></span><h1>cim_12x Source File<a class="headerlink" href="#cim-12x-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="c1">// Cascaded Integrator Multiplexor</span>
@@ -88,10 +86,10 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 5</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">dw</span><span class="o">=</span><span class="mh">32</span><span class="p">,</span><span class="w">  </span><span class="c1">// data width of mon_chan output</span>
 <span class="linenos"> 6</span><span class="w">     </span><span class="c1">// should be CIC input data width (18), plus 2 * log2(max sample period)</span>
 <span class="linenos"> 7</span><span class="w">     </span><span class="c1">// also should match width of sr_out port</span>
-<span class="linenos"> 8</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">scale</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">18</span><span class="mi">&#39;d65536</span><span class="w">  </span><span class="c1">// applies to non-downconverted channels</span>
+<span class="linenos"> 8</span><span class="w">     </span><span class="k">parameter</span><span class="w"> </span><span class="n">scale</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">18</span><span class="mi">'d65536</span><span class="w">  </span><span class="c1">// applies to non-downconverted channels</span>
 <span class="linenos"> 9</span><span class="w">     </span><span class="c1">// (inm and outm), opportunity to use values that trigger synthesis</span>
 <span class="linenos">10</span><span class="w">     </span><span class="c1">// of an actual multiplier to get scaling consistency with</span>
-<span class="linenos">11</span><span class="w">     </span><span class="c1">// downconverted channels, e.g., 18&#39;d61624 == floor((32/33)^2*2^16)</span>
+<span class="linenos">11</span><span class="w">     </span><span class="c1">// downconverted channels, e.g., 18'd61624 == floor((32/33)^2*2^16)</span>
 <span class="linenos">12</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
 <span class="linenos">13</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span>
 <span class="linenos">14</span><span class="w">     </span><span class="k">input</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">15</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">adca</span><span class="p">,</span>
@@ -114,13 +112,13 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">31</span><span class="p">);</span>
 <span class="linenos">32</span>
 <span class="linenos">33</span><span class="no">`ifdef</span><span class="w"> </span><span class="n">SIMULATE</span>
-<span class="linenos">34</span><span class="cp">`define FILL_BIT 1&#39;bx</span>
+<span class="linenos">34</span><span class="cp">`define FILL_BIT 1'bx</span>
 <span class="linenos">35</span><span class="no">`else</span>
-<span class="linenos">36</span><span class="cp">`define FILL_BIT 1&#39;b0</span>
+<span class="linenos">36</span><span class="cp">`define FILL_BIT 1'b0</span>
 <span class="linenos">37</span><span class="no">`endif</span>
 <span class="linenos">38</span>
 <span class="linenos">39</span><span class="c1">// Each mon_2chan instantiation includes (twice, one for cos, one for sin) the multiplier, double integrator, and sampling/shift-out register</span>
-<span class="linenos">40</span><span class="c1">// Snapshots double-integrator outputs at times flagged by &quot;sample&quot;, then shifts the results out on the next twelve cycles.</span>
+<span class="linenos">40</span><span class="c1">// Snapshots double-integrator outputs at times flagged by "sample", then shifts the results out on the next twelve cycles.</span>
 <span class="linenos">41</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">s01</span><span class="p">;</span><span class="w">  </span><span class="kt">wire</span><span class="w"> </span><span class="n">g01</span><span class="p">;</span>
 <span class="linenos">42</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="n">dw</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">s03</span><span class="p">;</span><span class="w">  </span><span class="kt">wire</span><span class="w"> </span><span class="n">g03</span><span class="p">;</span>
 <span class="linenos">43</span><span class="n">mon_2chan</span><span class="w"> </span><span class="p">#(.</span><span class="n">dwi</span><span class="p">(</span><span class="mh">16</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">rwi</span><span class="p">(</span><span class="n">dw</span><span class="p">))</span><span class="w"> </span><span class="n">mon01</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">adcf</span><span class="p">(</span><span class="n">adca</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">mcos</span><span class="p">(</span><span class="n">cosa</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">msin</span><span class="p">(</span><span class="n">sina</span><span class="p">),</span>

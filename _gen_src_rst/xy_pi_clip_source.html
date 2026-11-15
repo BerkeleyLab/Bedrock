@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>xy_pi_clip Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="xy-pi-clip-source-file">
-<span id="xy-pi-clip-source"></span><h1>xy_pi_clip Source File<a class="headerlink" href="#xy-pi-clip-source-file" title="Permalink to this heading"></a></h1>
+<span id="xy-pi-clip-source"></span><h1>xy_pi_clip Source File<a class="headerlink" href="#xy-pi-clip-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos">  2</span>
 <span class="linenos">  3</span><span class="c1">// Proportional-Integral gain for multiplexed X-Y data stream,</span>
@@ -149,9 +147,9 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 66</span>
 <span class="linenos"> 67</span><span class="kt">wire</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">in_xy1</span><span class="p">;</span>
 <span class="linenos"> 68</span><span class="n">reg_delay</span><span class="w"> </span><span class="p">#(.</span><span class="n">dw</span><span class="p">(</span><span class="mh">18</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">len</span><span class="p">(</span><span class="mh">2</span><span class="p">))</span>
-<span class="linenos"> 69</span><span class="w">     </span><span class="n">pi_match</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">din</span><span class="p">(</span><span class="n">in_xy</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">dout</span><span class="p">(</span><span class="n">in_xy1</span><span class="p">));</span>
+<span class="linenos"> 69</span><span class="w">     </span><span class="n">pi_match</span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">reset</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">gate</span><span class="p">(</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">din</span><span class="p">(</span><span class="n">in_xy</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">dout</span><span class="p">(</span><span class="n">in_xy1</span><span class="p">));</span>
 <span class="linenos"> 70</span>
-<span class="linenos"> 71</span><span class="c1">// FF ddrive to be sampled during &#39;integral&#39; cycles only. Phase tie-in still incomplete</span>
+<span class="linenos"> 71</span><span class="c1">// FF ddrive to be sampled during 'integral' cycles only. Phase tie-in still incomplete</span>
 <span class="linenos"> 72</span><span class="c1">// Pipelined to ease timing</span>
 <span class="linenos"> 73</span><span class="kt">reg</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">41</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">mr_scale</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos"> 74</span><span class="kt">reg</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="mh">42</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">mr_ff</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
@@ -171,10 +169,10 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 88</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
 <span class="linenos"> 89</span><span class="w">     </span><span class="n">ff_mp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos"> 90</span><span class="w">     </span><span class="k">case</span><span class="p">(</span><span class="n">stb</span><span class="p">[</span><span class="mh">4</span><span class="o">:</span><span class="mh">1</span><span class="p">])</span>
-<span class="linenos"> 91</span><span class="w">             </span><span class="mh">4</span><span class="mb">&#39;b0001</span><span class="o">:</span><span class="w"> </span><span class="n">ff_mp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ffd_en</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">ff_ddrive_l</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// ddrive I</span>
-<span class="linenos"> 92</span><span class="w">             </span><span class="mh">4</span><span class="mb">&#39;b0010</span><span class="o">:</span><span class="w"> </span><span class="n">ff_mp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w">           </span><span class="c1">// dphase I</span>
-<span class="linenos"> 93</span><span class="w">             </span><span class="mh">4</span><span class="mb">&#39;b0100</span><span class="o">:</span><span class="w"> </span><span class="n">ff_mp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ffp_en</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">ff_drive_l</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// drive P</span>
-<span class="linenos"> 94</span><span class="w">             </span><span class="mh">4</span><span class="mb">&#39;b1000</span><span class="o">:</span><span class="w"> </span><span class="n">ff_mp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ffp_en</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">ff_phase_l</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// phase P</span>
+<span class="linenos"> 91</span><span class="w">             </span><span class="mh">4</span><span class="mb">'b0001</span><span class="o">:</span><span class="w"> </span><span class="n">ff_mp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ffd_en</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">ff_ddrive_l</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// ddrive I</span>
+<span class="linenos"> 92</span><span class="w">             </span><span class="mh">4</span><span class="mb">'b0010</span><span class="o">:</span><span class="w"> </span><span class="n">ff_mp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w">           </span><span class="c1">// dphase I</span>
+<span class="linenos"> 93</span><span class="w">             </span><span class="mh">4</span><span class="mb">'b0100</span><span class="o">:</span><span class="w"> </span><span class="n">ff_mp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ffp_en</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">ff_drive_l</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// drive P</span>
+<span class="linenos"> 94</span><span class="w">             </span><span class="mh">4</span><span class="mb">'b1000</span><span class="o">:</span><span class="w"> </span><span class="n">ff_mp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ffp_en</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">ff_phase_l</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w">  </span><span class="c1">// phase P</span>
 <span class="linenos"> 95</span><span class="w">             </span><span class="k">default</span><span class="o">:</span><span class="w"> </span><span class="n">ff_mp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos"> 96</span><span class="w">     </span><span class="k">endcase</span>
 <span class="linenos"> 97</span><span class="w">     </span><span class="c1">// Avoid 3-way add by pre-computing mr_scale + ff_mp</span>
@@ -203,7 +201,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">120</span><span class="w">     </span><span class="n">accum1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">clip_recirc</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">accum4</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">mr_sat</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">p_term2</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">accum6</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">accum4</span><span class="p">));</span>
 <span class="linenos">121</span><span class="w">     </span><span class="n">accum2</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">accum1</span><span class="p">;</span>
 <span class="linenos">122</span><span class="w">     </span><span class="n">cmp</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">accum1_upper</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">lim</span><span class="p">;</span>
-<span class="linenos">123</span><span class="w">     </span><span class="n">lim1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">lim</span><span class="p">[</span><span class="mh">17</span><span class="p">],</span><span class="n">lim</span><span class="p">,</span><span class="mh">12</span><span class="mb">&#39;b0</span><span class="p">};</span>
+<span class="linenos">123</span><span class="w">     </span><span class="n">lim1</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">{</span><span class="n">lim</span><span class="p">[</span><span class="mh">17</span><span class="p">],</span><span class="n">lim</span><span class="p">,</span><span class="mh">12</span><span class="mb">'b0</span><span class="p">};</span>
 <span class="linenos">124</span><span class="w">     </span><span class="n">accum3</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">sat1</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">lim1</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">accum2</span><span class="p">;</span>
 <span class="linenos">125</span><span class="w">     </span><span class="n">accum4</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">accum3</span><span class="p">;</span>
 <span class="linenos">126</span><span class="w">     </span><span class="n">accum5</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">accum4</span><span class="p">;</span>

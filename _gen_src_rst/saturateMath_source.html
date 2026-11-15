@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>saturateMath Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,12 +78,12 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="saturatemath-source-file">
-<span id="saturatemath-source"></span><h1>saturateMath Source File<a class="headerlink" href="#saturatemath-source-file" title="Permalink to this heading"></a></h1>
+<span id="saturatemath-source"></span><h1>saturateMath Source File<a class="headerlink" href="#saturatemath-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">/////////////////////////////////////////////////////////</span>
 <span class="linenos"> 2</span><span class="c1">// Useful modules for performing saturating arithmetic //</span>
 <span class="linenos"> 3</span><span class="c1">/////////////////////////////////////////////////////////</span>
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="c1">// Expand a net&#39;s width</span>
+<span class="linenos"> 5</span><span class="c1">// Expand a net's width</span>
 <span class="linenos"> 6</span><span class="k">module</span><span class="w"> </span><span class="n">expandWidth</span><span class="w"> </span><span class="p">#(</span>
 <span class="linenos"> 7</span><span class="w">    </span><span class="k">parameter</span><span class="w"> </span><span class="n">IWIDTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">8</span><span class="p">,</span>
 <span class="linenos"> 8</span><span class="w">    </span><span class="k">parameter</span><span class="w"> </span><span class="n">OWIDTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">12</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
@@ -97,7 +95,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">14</span><span class="k">assign</span><span class="w"> </span><span class="n">O</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="n">OWIDTH</span><span class="o">-</span><span class="n">IWIDTH</span><span class="p">{</span><span class="n">signBit</span><span class="p">}},</span><span class="w"> </span><span class="n">I</span><span class="p">};</span>
 <span class="linenos">15</span><span class="k">endmodule</span>
 <span class="linenos">16</span>
-<span class="linenos">17</span><span class="c1">// Reduce a net&#39;s width</span>
+<span class="linenos">17</span><span class="c1">// Reduce a net's width</span>
 <span class="linenos">18</span><span class="k">module</span><span class="w"> </span><span class="n">reduceWidth</span><span class="w"> </span><span class="p">#(</span>
 <span class="linenos">19</span><span class="w">    </span><span class="k">parameter</span><span class="w"> </span><span class="n">IWIDTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">12</span><span class="p">,</span>
 <span class="linenos">20</span><span class="w">    </span><span class="k">parameter</span><span class="w"> </span><span class="n">OWIDTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">8</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
@@ -110,11 +108,11 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">27</span><span class="k">assign</span><span class="w"> </span><span class="n">checkBits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">I</span><span class="p">[</span><span class="n">IWIDTH</span><span class="o">-</span><span class="mh">2</span><span class="o">-:</span><span class="n">IWIDTH</span><span class="o">-</span><span class="n">OWIDTH</span><span class="p">];</span>
 <span class="linenos">28</span>
 <span class="linenos">29</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="n">I</span><span class="p">,</span><span class="w"> </span><span class="n">signBit</span><span class="p">,</span><span class="w"> </span><span class="n">checkBits</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">30</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">signBit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="o">|</span><span class="n">checkBits</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">))</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">31</span><span class="w">        </span><span class="n">O</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">OWIDTH</span><span class="o">-</span><span class="mh">1</span><span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">}}};</span>
+<span class="linenos">30</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">signBit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">1</span><span class="mb">'b0</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="o">|</span><span class="n">checkBits</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">1</span><span class="mb">'b1</span><span class="p">))</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">31</span><span class="w">        </span><span class="n">O</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">OWIDTH</span><span class="o">-</span><span class="mh">1</span><span class="p">{</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">}}};</span>
 <span class="linenos">32</span><span class="w">    </span><span class="k">end</span>
-<span class="linenos">33</span><span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">signBit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">checkBits</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">))</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">34</span><span class="w">        </span><span class="n">O</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b1</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">OWIDTH</span><span class="o">-</span><span class="mh">1</span><span class="p">{</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">}}};</span>
+<span class="linenos">33</span><span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">signBit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">1</span><span class="mb">'b1</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">checkBits</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mh">1</span><span class="mb">'b1</span><span class="p">))</span><span class="w"> </span><span class="k">begin</span>
+<span class="linenos">34</span><span class="w">        </span><span class="n">O</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="mb">'b1</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="n">OWIDTH</span><span class="o">-</span><span class="mh">1</span><span class="p">{</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">}}};</span>
 <span class="linenos">35</span><span class="w">    </span><span class="k">end</span>
 <span class="linenos">36</span><span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">begin</span>
 <span class="linenos">37</span><span class="w">        </span><span class="n">O</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">I</span><span class="p">[</span><span class="n">OWIDTH</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">];</span>

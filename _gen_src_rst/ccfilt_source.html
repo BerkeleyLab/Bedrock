@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ccfilt Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="ccfilt-source-file">
-<span id="ccfilt-source"></span><h1>ccfilt Source File<a class="headerlink" href="#ccfilt-source-file" title="Permalink to this heading"></a></h1>
+<span id="ccfilt-source"></span><h1>ccfilt Source File<a class="headerlink" href="#ccfilt-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos">  2</span><span class="c1">// Cascaded Differentiator and post-filter</span>
 <span class="linenos">  3</span><span class="c1">//  also includes a barrel shifter to adjust scale to compensate</span>
@@ -122,7 +120,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 39</span><span class="c1">// First get 21 bits, then see below</span>
 <span class="linenos"> 40</span><span class="kt">reg</span><span class="w"> </span><span class="k">signed</span><span class="w"> </span><span class="p">[</span><span class="nl">outw:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">d3</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos"> 41</span><span class="kt">reg</span><span class="w"> </span><span class="n">ovf</span><span class="o">=</span><span class="mh">0</span><span class="p">;</span>
-<span class="linenos"> 42</span><span class="cp">`define UNIFORM(x) ((~|(x)) | &amp;(x))  </span><span class="c1">// All 0&#39;s or all 1&#39;s</span>
+<span class="linenos"> 42</span><span class="cp">`define UNIFORM(x) ((~|(x)) | &amp;(x))  </span><span class="c1">// All 0's or all 1's</span>
 <span class="linenos"> 43</span><span class="c1">// Lowest supported filter is R=4 (for which we set shift=0), and N=2 always.</span>
 <span class="linenos"> 44</span><span class="c1">// Input to CIC is 18 bits, so maximum 22 bits come out.</span>
 <span class="linenos"> 45</span><span class="c1">// Check for overflow is a simulation-only feature to check for bugs.</span>
@@ -150,7 +148,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 67</span><span class="w">     </span><span class="n">ch_id</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">valid3</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">(</span><span class="n">ch_id</span><span class="o">+</span><span class="mh">1</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos"> 68</span><span class="w">     </span><span class="n">d2_prev</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">d2</span><span class="p">;</span>
 <span class="linenos"> 69</span><span class="k">end</span>
-<span class="linenos"> 70</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">negedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">print_overflow</span><span class="p">)</span><span class="w"> </span><span class="nb">$display</span><span class="p">(</span><span class="s">&quot;overflow %d %x %x %d %d&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">shift</span><span class="p">,</span><span class="w"> </span><span class="n">d2_prev</span><span class="p">,</span><span class="w"> </span><span class="n">d3</span><span class="p">,</span><span class="w"> </span><span class="n">ch_id</span><span class="p">,</span><span class="w"> </span><span class="nb">$time</span><span class="p">);</span>
+<span class="linenos"> 70</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">negedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">print_overflow</span><span class="p">)</span><span class="w"> </span><span class="nb">$display</span><span class="p">(</span><span class="s">"overflow %d %x %x %d %d"</span><span class="p">,</span><span class="w"> </span><span class="n">shift</span><span class="p">,</span><span class="w"> </span><span class="n">d2_prev</span><span class="p">,</span><span class="w"> </span><span class="n">d3</span><span class="p">,</span><span class="w"> </span><span class="n">ch_id</span><span class="p">,</span><span class="w"> </span><span class="nb">$time</span><span class="p">);</span>
 <span class="linenos"> 71</span><span class="no">`endif</span>
 <span class="linenos"> 72</span>
 <span class="linenos"> 73</span><span class="c1">// Universal definition; note: old and new are msb numbers, not bit widths.</span>

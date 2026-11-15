@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>rtsim README &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -121,11 +119,11 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="rtsim-readme">
-<span id="readme"></span><h1>rtsim README<a class="headerlink" href="#rtsim-readme" title="Permalink to this heading"></a></h1>
+<span id="readme"></span><h1>rtsim README<a class="headerlink" href="#rtsim-readme" title="Link to this heading"></a></h1>
 <section id="full-speed-full-featured-cavity-simulation-to-exercise-llrf-controls">
-<h2>full-speed full-featured cavity simulation, to exercise LLRF controls<a class="headerlink" href="#full-speed-full-featured-cavity-simulation-to-exercise-llrf-controls" title="Permalink to this heading"></a></h2>
+<h2>full-speed full-featured cavity simulation, to exercise LLRF controls<a class="headerlink" href="#full-speed-full-featured-cavity-simulation-to-exercise-llrf-controls" title="Link to this heading"></a></h2>
 <section id="larry-doolittle-lbnl-may-june-2014">
-<h3>Larry Doolittle, LBNL, May-June 2014<a class="headerlink" href="#larry-doolittle-lbnl-may-june-2014" title="Permalink to this heading"></a></h3>
+<h3>Larry Doolittle, LBNL, May-June 2014<a class="headerlink" href="#larry-doolittle-lbnl-may-june-2014" title="Link to this heading"></a></h3>
 <p><em>(work-in-progress)</em></p>
 <p>This code is supposed to be approachable.  There are 885 non-blank non-comment lines of <em>Verilog</em> (and references to a few other routines in <code class="docutils literal notranslate"><span class="pre">bedrock:</span> <span class="pre">cordicg</span> <span class="pre">complex_mul</span> <span class="pre">dpram</span> <span class="pre">reg_delay</span></code>), and 286 of those lines are in test benches.  That <em>Verilog</em> also has 432 lines with comments!</p>
 <p>There are waveforms to view, and most importantly, it comes with unit tests that exercise the code under realistic conditions – see below.</p>
@@ -146,7 +144,7 @@ Expect to see errors and unfinished things.</p>
 </div></blockquote>
 <p>You can see some of this visually in the doc directory’s <code class="docutils literal notranslate"><span class="pre">block.eps</span></code> and <code class="docutils literal notranslate"><span class="pre">block_mode.eps</span></code> (<em>xcircuit</em> files, that can be viewed with standard <em>PostScript</em> tools like <em>gv</em>).  The physical system that the Verilog attempts to model is described in <code class="docutils literal notranslate"><span class="pre">physics.tex</span></code>; convert that to PDF for viewing with “make physics.pdf”.</p>
 <section id="get-started">
-<h4>Get started<a class="headerlink" href="#get-started" title="Permalink to this heading"></a></h4>
+<h4>Get started<a class="headerlink" href="#get-started" title="Link to this heading"></a></h4>
 <p>Run the unit tests with</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">checks</span>
 </pre></div>

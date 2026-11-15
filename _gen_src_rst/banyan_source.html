@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>banyan Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,14 +78,14 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="banyan-source-file">
-<span id="banyan-source"></span><h1>banyan Source File<a class="headerlink" href="#banyan-source-file" title="Permalink to this heading"></a></h1>
+<span id="banyan-source"></span><h1>banyan Source File<a class="headerlink" href="#banyan-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="no">`timescale</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mh">1</span><span class="n">ns</span>
 <span class="linenos">  2</span>
 <span class="linenos">  3</span><span class="c1">// permute np ports, each dw bits wide, using rl levels of 2-way mux</span>
 <span class="linenos">  4</span><span class="c1">//  np must be 2**rl</span>
 <span class="linenos">  5</span><span class="c1">//</span>
 <span class="linenos">  6</span><span class="c1">// Networking equipment with similar topology is known as a Banyan switch,</span>
-<span class="linenos">  7</span><span class="c1">// so I&#39;ll use that name.  A non-folded Banyan switch actually has two</span>
+<span class="linenos">  7</span><span class="c1">// so I'll use that name.  A non-folded Banyan switch actually has two</span>
 <span class="linenos">  8</span><span class="c1">// switches of this type back-to-back; I can leave off the second half</span>
 <span class="linenos">  9</span><span class="c1">// because in my application the output channels are fungible.</span>
 <span class="linenos"> 10</span><span class="c1">//</span>
@@ -101,7 +99,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 18</span><span class="c1">//</span>
 <span class="linenos"> 19</span><span class="c1">// Represent the channel selection configuration with an 8-bit mask of</span>
 <span class="linenos"> 20</span><span class="c1">// which channels to look at.  Only 1+70+28+8 = 107 of 256 possible masks</span>
-<span class="linenos"> 21</span><span class="c1">// are valid, since it&#39;s invalid to have 0, 3, 5, 6, or 7 bits set.</span>
+<span class="linenos"> 21</span><span class="c1">// are valid, since it's invalid to have 0, 3, 5, 6, or 7 bits set.</span>
 <span class="linenos"> 22</span><span class="c1">// Configuration also includes 3 bits of time_state.</span>
 <span class="linenos"> 23</span><span class="c1">//</span>
 <span class="linenos"> 24</span><span class="c1">// time_state and mask_in are processed at full bandwidth.</span>
@@ -144,12 +142,12 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 61</span><span class="kt">wire</span><span class="w"> </span><span class="n">any_lower</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">mask_lower</span><span class="p">;</span>
 <span class="linenos"> 62</span>
 <span class="linenos"> 63</span><span class="c1">// The below statement creates a Ripple-Carry chain of xors with the initial</span>
-<span class="linenos"> 64</span><span class="c1">// bit being fed from the right (a 1&#39;b0). The in and out refer to the circuit</span>
+<span class="linenos"> 64</span><span class="c1">// bit being fed from the right (a 1'b0). The in and out refer to the circuit</span>
 <span class="linenos"> 65</span><span class="c1">// verilator lint_save</span>
 <span class="linenos"> 66</span><span class="c1">// verilator lint_off UNOPTFLAT</span>
 <span class="linenos"> 67</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="nl">M:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">imbalance_in</span><span class="p">;</span>
 <span class="linenos"> 68</span><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="n">M</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">imbalance_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">imbalance_in</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">mask_upper</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">mask_lower</span><span class="p">;</span>
-<span class="linenos"> 69</span><span class="k">assign</span><span class="w"> </span><span class="n">imbalance_in</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">imbalance_out</span><span class="p">,</span><span class="mh">1</span><span class="mb">&#39;b0</span><span class="p">};</span>
+<span class="linenos"> 69</span><span class="k">assign</span><span class="w"> </span><span class="n">imbalance_in</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">imbalance_out</span><span class="p">,</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">};</span>
 <span class="linenos"> 70</span><span class="c1">// verilator lint_restore</span>
 <span class="linenos"> 71</span>
 <span class="linenos"> 72</span><span class="c1">// Priority set sources to Lower sinks when in Balance.</span>

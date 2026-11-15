@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>iirFilter Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="iirfilter-source-file">
-<span id="iirfilter-source"></span><h1>iirFilter Source File<a class="headerlink" href="#iirfilter-source-file" title="Permalink to this heading"></a></h1>
+<span id="iirfilter-source"></span><h1>iirFilter Source File<a class="headerlink" href="#iirfilter-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// Infinite Impulse Response Filter</span>
 <span class="linenos"> 2</span><span class="c1">//</span>
 <span class="linenos"> 3</span><span class="c1">// Chain of biquad elements</span>
@@ -90,7 +88,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos"> 7</span><span class="w">    </span><span class="k">parameter</span><span class="w"> </span><span class="n">DATA_WIDTH</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mh">1</span><span class="p">,</span>
 <span class="linenos"> 8</span><span class="w">    </span><span class="k">parameter</span><span class="w"> </span><span class="n">DATA_COUNT</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mh">1</span><span class="p">,</span>
 <span class="linenos"> 9</span><span class="w">    </span><span class="k">parameter</span><span class="w"> </span><span class="n">COEFFICIENT_WIDTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="mh">1</span><span class="p">,</span>
-<span class="linenos">10</span><span class="w">    </span><span class="k">parameter</span><span class="w"> </span><span class="n">DEBUG</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;false&quot;</span>
+<span class="linenos">10</span><span class="w">    </span><span class="k">parameter</span><span class="w"> </span><span class="n">DEBUG</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="s">"false"</span>
 <span class="linenos">11</span><span class="p">)</span><span class="w"> </span><span class="p">(</span>
 <span class="linenos">12</span><span class="w">    </span><span class="k">input</span><span class="w">        </span><span class="n">sysClk</span><span class="p">,</span>
 <span class="linenos">13</span><span class="w">    </span><span class="k">input</span><span class="w">        </span><span class="n">sysGPIO_Strobe</span><span class="p">,</span>
@@ -105,7 +103,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">22</span><span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">mark_debug</span><span class="o">=</span><span class="n">DEBUG</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">input</span><span class="w">                                     </span><span class="n">M_TREADY</span>
 <span class="linenos">23</span><span class="p">);</span>
 <span class="linenos">24</span>
-<span class="linenos">25</span><span class="c1">// Can&#39;t use $clog2 in localparam expression with this version of the tools.</span>
+<span class="linenos">25</span><span class="c1">// Can't use $clog2 in localparam expression with this version of the tools.</span>
 <span class="linenos">26</span><span class="k">parameter</span><span class="w"> </span><span class="n">STAGE_ADDRESS_WIDTH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">$clog2</span><span class="p">(</span><span class="n">STAGES</span><span class="p">);</span>
 <span class="linenos">27</span>
 <span class="linenos">28</span><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="n">STAGES</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="n">sysStageSelect</span><span class="p">;</span>

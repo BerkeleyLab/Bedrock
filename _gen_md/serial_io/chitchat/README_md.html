@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>chitchat README &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -121,9 +119,9 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="chitchat-readme">
-<span id="readme"></span><h1>chitchat README<a class="headerlink" href="#chitchat-readme" title="Permalink to this heading"></a></h1>
+<span id="readme"></span><h1>chitchat README<a class="headerlink" href="#chitchat-readme" title="Link to this heading"></a></h1>
 <section id="chitchat-serial-protocol">
-<h2>ChitChat Serial Protocol<a class="headerlink" href="#chitchat-serial-protocol" title="Permalink to this heading"></a></h2>
+<h2>ChitChat Serial Protocol<a class="headerlink" href="#chitchat-serial-protocol" title="Link to this heading"></a></h2>
 <p>ChitChat is a simple, point-to-point, generic communication protocol, designed
 to transmit non timing critical data between two FPGAs over a serial link. Side-band
 information such as frame numbers, protocol identifiers and loop-back latency are
@@ -136,7 +134,7 @@ always sent in the lower byte of the transmitted data.</p>
 at a rate of 2.5 GBd (16-bit data + 4-bit 8b/10b overhead) * 125 MHz), it could
 conceivably be run at different rates or over a different medium.</p>
 <section id="packet-format">
-<h3>Packet format<a class="headerlink" href="#packet-format" title="Permalink to this heading"></a></h3>
+<h3>Packet format<a class="headerlink" href="#packet-format" title="Link to this heading"></a></h3>
 <p>Each packet consists of 11x 16-bit words, 4 of which contain the 64-bit of payload.</p>
 <table class="docutils align-default">
 <thead>
@@ -182,7 +180,7 @@ conceivably be run at different rates or over a different medium.</p>
 </table>
 </section>
 <section id="link-up-detection">
-<h3>Link Up detection<a class="headerlink" href="#link-up-detection" title="Permalink to this heading"></a></h3>
+<h3>Link Up detection<a class="headerlink" href="#link-up-detection" title="Link to this heading"></a></h3>
 <p>The receiver will only consider the link to be up after successfully decoding 4
 consecutive frames without errors. This value is held in a package constant
 which can be modified at compile time.</p>
@@ -192,7 +190,7 @@ expected time-frame.</p>
 register <code class="docutils literal notranslate"><span class="pre">ccrx_los</span></code>.</p>
 </section>
 <section id="error-detection">
-<h3>Error detection<a class="headerlink" href="#error-detection" title="Permalink to this heading"></a></h3>
+<h3>Error detection<a class="headerlink" href="#error-detection" title="Link to this heading"></a></h3>
 <p>The receiver will check and report the following error conditions during decoding:</p>
 <ul class="simple">
 <li><p>Failed CRC check</p></li>
@@ -203,7 +201,7 @@ register <code class="docutils literal notranslate"><span class="pre">ccrx_los</
 and the type of error to be reported in the <code class="docutils literal notranslate"><span class="pre">ccrx_fault</span></code> register.</p>
 </section>
 <section id="throughput-and-latency">
-<h3>Throughput and latency<a class="headerlink" href="#throughput-and-latency" title="Permalink to this heading"></a></h3>
+<h3>Throughput and latency<a class="headerlink" href="#throughput-and-latency" title="Link to this heading"></a></h3>
 <p>As a result of the packet size, the TX and RX data throughput is 64-bit/11 clock-cycles.
 Additionally, as the receiver must receive a full packet to be able to check the CRC, there
 will necessarily be a full-frame latency (11 clock-cycles) before data is presented to the

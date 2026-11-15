@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>localbus jit_rad &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -122,9 +120,9 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="localbus-jit-rad">
-<span id="jit-rad"></span><h1>localbus jit_rad<a class="headerlink" href="#localbus-jit-rad" title="Permalink to this heading"></a></h1>
+<span id="jit-rad"></span><h1>localbus jit_rad<a class="headerlink" href="#localbus-jit-rad" title="Link to this heading"></a></h1>
 <section id="jit-rad-just-in-time-readback-across-domains">
-<h2>jit_rad: Just In Time Readback Across Domains<a class="headerlink" href="#jit-rad-just-in-time-readback-across-domains" title="Permalink to this heading"></a></h2>
+<h2>jit_rad: Just In Time Readback Across Domains<a class="headerlink" href="#jit-rad-just-in-time-readback-across-domains" title="Link to this heading"></a></h2>
 <p>A module for efficiently making data from another clock domain
 available to local bus readout, without violating CDC rules</p>
 <p>The simple localbus used in bedrock and lcls2_llrf makes a lot of things
@@ -163,7 +161,7 @@ do that.  See the demo code, described below.</p>
 generated requests from e.g., a soft core.  That could get messy, if
 the soft core and network both need access to the cross-domain registers.</p>
 <section id="code">
-<h3>Code<a class="headerlink" href="#code" title="Permalink to this heading"></a></h3>
+<h3>Code<a class="headerlink" href="#code" title="Link to this heading"></a></h3>
 <p>jit_rad_gateway.v is the primary module of interest.
 It attaches to the main localbus with traditional signals:</p>
 <ul class="simple">
@@ -202,7 +200,7 @@ as listed in the Makefile: dpram.v flag_xdomain.v reg_tech_cdc.v.
 The testbench additionally depends on files from Packet Badger.</p>
 </section>
 <section id="prerequisites-and-usage">
-<h3>Prerequisites and usage<a class="headerlink" href="#prerequisites-and-usage" title="Permalink to this heading"></a></h3>
+<h3>Prerequisites and usage<a class="headerlink" href="#prerequisites-and-usage" title="Link to this heading"></a></h3>
 <p>Assume for the moment you’re running on a full-featured Linux development box,
 with modern copies of iverilog, verilator, and yosys installed.  I tested
 on Debian Stable (12.5) with stock copies of those programs.  Then a basic
@@ -237,7 +235,7 @@ This can be followed by</p>
 </section>
 </section>
 <section id="to-do">
-<h2>To do:<a class="headerlink" href="#to-do" title="Permalink to this heading"></a></h2>
+<h2>To do:<a class="headerlink" href="#to-do" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>expand and clean up this documentation</p></li>
 <li><p>document acceptable relationship between lb_clk and app_clk</p></li>

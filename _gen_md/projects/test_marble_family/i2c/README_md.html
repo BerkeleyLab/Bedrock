@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>i2c README &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -121,11 +119,11 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="i2c-readme">
-<span id="readme"></span><h1>i2c README<a class="headerlink" href="#i2c-readme" title="Permalink to this heading"></a></h1>
+<span id="readme"></span><h1>i2c README<a class="headerlink" href="#i2c-readme" title="Link to this heading"></a></h1>
 <section id="marble-platform-support-for-i2cbridge-programming">
-<h2>Marble Platform Support for I2CBridge Programming<a class="headerlink" href="#marble-platform-support-for-i2cbridge-programming" title="Permalink to this heading"></a></h2>
+<h2>Marble Platform Support for I2CBridge Programming<a class="headerlink" href="#marble-platform-support-for-i2cbridge-programming" title="Link to this heading"></a></h2>
 <section id="one-shot-i2c-transactions">
-<h3>One-shot I2C transactions<a class="headerlink" href="#one-shot-i2c-transactions" title="Permalink to this heading"></a></h3>
+<h3>One-shot I2C transactions<a class="headerlink" href="#one-shot-i2c-transactions" title="Link to this heading"></a></h3>
 <p>The script <code class="docutils literal notranslate"><span class="pre">oneshot.py</span></code> is included here to allow composing and running single-transaction
 <code class="docutils literal notranslate"><span class="pre">i2cbridge</span></code> programs to a live target with a (hopefully) user-friendly interface.  Without
 worrying about the I2C tree on the Marble board or chip addresses, you can simply read from
@@ -149,7 +147,7 @@ if we aren’t very careful to ensure we always keep bit 7 asserted when writing
 <p>We can also read more than 1 byte (very much dependent on the specifics of the IC’s I2C implementation).
 Example: read shunt voltage (addr 1, 16 bits) from INA219 U57</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>oneshot.py<span class="w"> </span>leep://<span class="nv">$IP</span>:<span class="nv">$PORT</span><span class="w"> </span>U57.1:2
-<span class="c1"># Note the &#39;:&#39; instead of a &#39;=&#39; (the latter indicates a write!)</span>
+<span class="c1"># Note the ':' instead of a '=' (the latter indicates a write!)</span>
 </pre></div>
 </div>
 <p>Note that you can perform many transactions in one “one shot” program, including adding pauses between
@@ -164,7 +162,7 @@ This demo makes LD13 continually blink.</p>
 </div>
 </section>
 <section id="usage">
-<h3>Usage:<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h3>
+<h3>Usage:<a class="headerlink" href="#usage" title="Link to this heading"></a></h3>
 <p>These tools assume usage of the i2cbridge modules in <code class="docutils literal notranslate"><span class="pre">bedrock/peripheral_drivers/i2cbridge</span></code>.
 See the readme there for documentation on i2cbridge (‘i2c_chunk’).
 While <code class="docutils literal notranslate"><span class="pre">i2cbridge</span></code> is a generic (platform-independent) tool, there is a lot of benefit to
@@ -177,13 +175,13 @@ be gained by wrapping the generic tool in a platform-specific interface such as 
 </div>
 </section>
 <section id="demos">
-<h3>Demos:<a class="headerlink" href="#demos" title="Permalink to this heading"></a></h3>
+<h3>Demos:<a class="headerlink" href="#demos" title="Link to this heading"></a></h3>
 <p>See the file <code class="docutils literal notranslate"><span class="pre">demo_marble_i2c.py</span></code>.  This is a demonstration application-specific I2C program
 generator.  The function <code class="docutils literal notranslate"><span class="pre">build_prog</span></code> contains the full program instructions and is easy to
 read and (hopefully) understand.  This program can generate four different output files which
 can all be made my simply running <code class="docutils literal notranslate"><span class="pre">make</span></code>.</p>
 <section id="generate-program-and-memory-maps">
-<h4>Generate program and memory maps<a class="headerlink" href="#generate-program-and-memory-maps" title="Permalink to this heading"></a></h4>
+<h4>Generate program and memory maps<a class="headerlink" href="#generate-program-and-memory-maps" title="Link to this heading"></a></h4>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Generated File</p></th>
@@ -210,20 +208,20 @@ can all be made my simply running <code class="docutils literal notranslate"><sp
 </table>
 </section>
 <section id="test-1-decode-the-program">
-<h4>Test 1: Decode the program<a class="headerlink" href="#test-1-decode-the-program" title="Permalink to this heading"></a></h4>
+<h4>Test 1: Decode the program<a class="headerlink" href="#test-1-decode-the-program" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">decode</span></code></p>
 <p>A handy tool included here is a decoder that is “platform-aware”.  This decoder attempts to recognize
 reads and writes to various ICs based on their I2C address.  If it is known to the Marble I2C map, it
 replaces the address with the IC name in the output, making it easier to read.</p>
 </section>
 <section id="test-2-decode-the-program-without-platform-awareness">
-<h4>Test 2: Decode the program without platform awareness<a class="headerlink" href="#test-2-decode-the-program-without-platform-awareness" title="Permalink to this heading"></a></h4>
+<h4>Test 2: Decode the program without platform awareness<a class="headerlink" href="#test-2-decode-the-program-without-platform-awareness" title="Link to this heading"></a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">generic_decode</span></code></p>
 <p>As a contrast to the above, the program can also be decoded with the generic decoder included with the
 i2cbridge tools.  Note the difference in readability from the application perspective.</p>
 </section>
 <section id="test-3-test-assembler-violations">
-<h4>Test 3: Test assembler violations<a class="headerlink" href="#test-3-test-assembler-violations" title="Permalink to this heading"></a></h4>
+<h4>Test 3: Test assembler violations<a class="headerlink" href="#test-3-test-assembler-violations" title="Link to this heading"></a></h4>
 <p>This last test is not truly platform-specific but shows various violations of the I2C assembler rules
 using the Marble platform-aware interface.  None of the rules violated are specific to the platform.</p>
 <p><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">violations</span></code></p>

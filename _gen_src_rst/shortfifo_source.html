@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>shortfifo Source File &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../_static/doctools.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -80,7 +78,7 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="shortfifo-source-file">
-<span id="shortfifo-source"></span><h1>shortfifo Source File<a class="headerlink" href="#shortfifo-source-file" title="Permalink to this heading"></a></h1>
+<span id="shortfifo-source"></span><h1>shortfifo Source File<a class="headerlink" href="#shortfifo-source-file" title="Link to this heading"></a></h1>
 <div class="highlight-verilog notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1">// Short (2-32 long) FIFO meant to be efficiently implemented with</span>
 <span class="linenos">  2</span><span class="c1">// Xilinx SRL16E or similar</span>
 <span class="linenos">  3</span><span class="c1">// Except for the unified clock and the count output port,</span>
@@ -228,7 +226,7 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">145</span><span class="kt">reg</span><span class="w"> </span><span class="n">f_was_full</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span>
 <span class="linenos">146</span><span class="kt">reg</span><span class="w"> </span><span class="n">f_both</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// show what happens when both are high</span>
 <span class="linenos">147</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
-<span class="linenos">148</span><span class="w">     </span><span class="c1">// assume(din == $past(din) + 8&#39;h1);</span>
+<span class="linenos">148</span><span class="w">     </span><span class="c1">// assume(din == $past(din) + 8'h1);</span>
 <span class="linenos">149</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">full</span><span class="p">)</span>
 <span class="linenos">150</span><span class="w">             </span><span class="n">f_was_full</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span>
 <span class="linenos">151</span><span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">we</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">re</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">empty</span><span class="p">)</span>
@@ -238,23 +236,23 @@ Expect to see errors and unfinished things.</p>
 <span class="linenos">155</span>
 <span class="linenos">156</span><span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span>
 <span class="linenos">157</span><span class="w">     </span><span class="n">assert</span><span class="p">(</span><span class="n">f_fill</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">);</span>
-<span class="linenos">158</span><span class="w">     </span><span class="n">assert</span><span class="p">(</span><span class="n">raddr</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">f_fill</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">aw</span><span class="mi">&#39;d1</span><span class="p">));</span>
+<span class="linenos">158</span><span class="w">     </span><span class="n">assert</span><span class="p">(</span><span class="n">raddr</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">f_fill</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="n">aw</span><span class="mi">'d1</span><span class="p">));</span>
 <span class="linenos">159</span>
 <span class="linenos">160</span><span class="w">     </span><span class="n">assert</span><span class="p">(</span><span class="n">empty</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="n">f_fill</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0</span><span class="p">));</span>
 <span class="linenos">161</span><span class="w">     </span><span class="n">assert</span><span class="p">(</span><span class="n">last</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="n">f_fill</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">1</span><span class="p">));</span>
 <span class="linenos">162</span><span class="w">     </span><span class="n">assert</span><span class="p">(</span><span class="n">full</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="n">f_fill</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">len</span><span class="p">));</span>
 <span class="linenos">163</span>
-<span class="linenos">164</span><span class="w">     </span><span class="c1">// Can&#39;t have more items than the memory holds</span>
+<span class="linenos">164</span><span class="w">     </span><span class="c1">// Can't have more items than the memory holds</span>
 <span class="linenos">165</span><span class="w">     </span><span class="n">assert</span><span class="p">(</span><span class="n">f_fill</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">len</span><span class="p">);</span>
 <span class="linenos">166</span>
-<span class="linenos">167</span><span class="w">     </span><span class="c1">// Can&#39;t be full and empty at the same time</span>
+<span class="linenos">167</span><span class="w">     </span><span class="c1">// Can't be full and empty at the same time</span>
 <span class="linenos">168</span><span class="w">     </span><span class="n">assert</span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">full</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">empty</span><span class="p">));</span>
 <span class="linenos">169</span><span class="k">end</span>
 <span class="linenos">170</span><span class="no">`endif</span>
 <span class="linenos">171</span><span class="k">endmodule</span>
 <span class="linenos">172</span>
 <span class="linenos">173</span><span class="c1">// should infer as a single SRL16E, SRL32E, ...</span>
-<span class="linenos">174</span><span class="c1">// See &quot;Dynamic Shift Registers Verilog Coding Example&quot; in UG687</span>
+<span class="linenos">174</span><span class="c1">// See "Dynamic Shift Registers Verilog Coding Example" in UG687</span>
 <span class="linenos">175</span><span class="cm">/* verilator lint_save */</span>
 <span class="linenos">176</span><span class="cm">/* verilator lint_off DECLFILENAME */</span>
 <span class="linenos">177</span><span class="k">module</span><span class="w"> </span><span class="n">abstract_dsr</span><span class="w"> </span><span class="p">#(</span>

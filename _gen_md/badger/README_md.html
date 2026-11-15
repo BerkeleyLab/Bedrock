@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>badger README &mdash; Bedrock  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -121,11 +119,11 @@
 Expect to see errors and unfinished things.</p>
 </div>
 <section id="badger-readme">
-<span id="readme"></span><h1>badger README<a class="headerlink" href="#badger-readme" title="Permalink to this heading"></a></h1>
+<span id="readme"></span><h1>badger README<a class="headerlink" href="#badger-readme" title="Link to this heading"></a></h1>
 <section id="packet-badger">
-<h2>Packet Badger<a class="headerlink" href="#packet-badger" title="Permalink to this heading"></a></h2>
+<h2>Packet Badger<a class="headerlink" href="#packet-badger" title="Link to this heading"></a></h2>
 <section id="introduction">
-<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h3>
+<h3>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h3>
 <p>Packet Badger is a digital logic design, implemented on an FPGA, that
 digs through Ethernet packets to construct a response.  Its intended
 application is to let workstations and servers communicate with FPGA-based
@@ -168,11 +166,12 @@ squirreled away in the tests/ directory.  Projects that instantiate this
 code are expected to accomplish the build step by including rules.mk.</p>
 </section>
 <section id="block-diagram">
-<h3>Block Diagram<a class="headerlink" href="#block-diagram" title="Permalink to this heading"></a></h3>
-<a class="reference external image-reference" href="doc/rtefi.svg"><img alt="block diagram" src="../../_images/rtefi.svg" /></a>
+<h3>Block Diagram<a class="headerlink" href="#block-diagram" title="Link to this heading"></a></h3>
+<a class="reference external image-reference" href="doc/rtefi.svg"><img alt="block diagram" src="../../_images/rtefi.svg" />
+</a>
 </section>
 <section id="self-tests">
-<h3>Self-tests<a class="headerlink" href="#self-tests" title="Permalink to this heading"></a></h3>
+<h3>Self-tests<a class="headerlink" href="#self-tests" title="Link to this heading"></a></h3>
 <p>An extensive set of self-tests and demonstrations are programmed up in
 the tests subdirectory.  These range from simple exercises for the
 input packet scanner to running a TFTP server that uses the MAC feature.
@@ -181,7 +180,7 @@ Some of these tests attach the simulated logic to the host network.</p>
 You can also run them on your workstation with a simple “cd tests; make”.</p>
 </section>
 <section id="functionality">
-<h3>Functionality<a class="headerlink" href="#functionality" title="Permalink to this heading"></a></h3>
+<h3>Functionality<a class="headerlink" href="#functionality" title="Link to this heading"></a></h3>
 <p>Input packets are checked according to the following.
 Failures are not reported, just dropped.</p>
 <p>All packets:</p>
@@ -247,7 +246,7 @@ in 2024, and assigned CVE-2024-2169: Loop DoS.  Separating “services”
 listed in the Loop DoS advisory.</p>
 </section>
 <section id="example-live-test-run">
-<h3>Example “live” test run<a class="headerlink" href="#example-live-test-run" title="Permalink to this heading"></a></h3>
+<h3>Example “live” test run<a class="headerlink" href="#example-live-test-run" title="Link to this heading"></a></h3>
 <p>Demonstrating both Packet Badger functionality, and the test framework’s
 ability to attach the simulation to the host’s Ethernet subsystem.</p>
 <p>Your development machine needs to provide a traditional unix-y environment,
@@ -260,7 +259,7 @@ make tap_start
 </div>
 <p>In another terminal, try the following to pull contents from <code class="docutils literal notranslate"><span class="pre">fake_config_romx.v</span></code>
 through <code class="docutils literal notranslate"><span class="pre">mem_gateway.v</span></code> at IP address <code class="docutils literal notranslate"><span class="pre">192.168.7.4</span></code>, localbus UDP port 803:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">printf</span> <span class="s2">&quot;sillyoneT\x1\x0\x0yyyyT\x1\x0\x1yyyyT\x1\x0\x2yyyyT\x1\x0\x3yyyy&quot;</span> <span class="o">|</span> <span class="n">nc</span> <span class="o">-</span><span class="n">q</span> <span class="mi">1</span> <span class="o">-</span><span class="n">u</span> <span class="mf">192.168.7.4</span> <span class="mi">803</span> <span class="o">|</span> <span class="n">hexdump</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;8/1 &quot;</span><span class="si">%2.2x</span><span class="s1"> &quot; &quot;  &quot;&#39;</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;8/1 &quot;%_p&quot; &quot;</span><span class="se">\n</span><span class="s1">&quot;&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">printf</span> <span class="s2">"sillyoneT\x1\x0\x0yyyyT\x1\x0\x1yyyyT\x1\x0\x2yyyyT\x1\x0\x3yyyy"</span> <span class="o">|</span> <span class="n">nc</span> <span class="o">-</span><span class="n">q</span> <span class="mi">1</span> <span class="o">-</span><span class="n">u</span> <span class="mf">192.168.7.4</span> <span class="mi">803</span> <span class="o">|</span> <span class="n">hexdump</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">e</span> <span class="s1">'8/1 "</span><span class="si">%2.2x</span><span class="s1"> " "  "'</span> <span class="o">-</span><span class="n">e</span> <span class="s1">'8/1 "%_p" "</span><span class="se">\n</span><span class="s1">"'</span>
 </pre></div>
 </div>
 <p>Expected result:</p>
@@ -276,13 +275,14 @@ have left behind a rtefi_pipe.vcd file that can be viewed with gtkwave;
 a pre-configured gtkwave pane can be brought up with “make rtefi_pipe_view”.</p>
 </section>
 <section id="attachment-of-clients">
-<h3>Attachment of clients:<a class="headerlink" href="#attachment-of-clients" title="Permalink to this heading"></a></h3>
-<a class="reference external image-reference" href="doc/clients.svg"><img alt="client interface timing diagram" src="../../_images/clients.svg" /></a>
+<h3>Attachment of clients:<a class="headerlink" href="#attachment-of-clients" title="Link to this heading"></a></h3>
+<a class="reference external image-reference" href="doc/clients.svg"><img alt="client interface timing diagram" src="../../_images/clients.svg" />
+</a>
 <p>Each client handles one UDP port.
 Up to eight clients can be attached to a Packet Badger instance.</p>
 </section>
 <section id="other-documentation">
-<h3>Other documentation<a class="headerlink" href="#other-documentation" title="Permalink to this heading"></a></h3>
+<h3>Other documentation<a class="headerlink" href="#other-documentation" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Design notes: <a class="reference external" href="rtefi_notes.txt">rtefi_notes.txt</a></p></li>
 <li><p>Memory addressing figure: <a class="reference external" href="doc/memory.svg">memory access diagram</a></p></li>
