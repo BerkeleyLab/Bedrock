@@ -8,11 +8,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <net/if.h>  /* IFNAMSIZ */
 #include "tap_alloc.h"
 
-#ifdef __APPLE__
+#ifndef __linux__
 /*
- * OS X drive has no auto-allocate, so get name from environment.
+ * BSDs like OS X have no auto-allocate, so get name from environment.
  * The driver disables the 4-byte header by default, which what we want.
  * It does provide ioctls, though, so maybe this could be made explicit.
  */

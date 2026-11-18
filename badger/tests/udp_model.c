@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
+#include <netinet/in.h>  /* sockaddr_in etc. */
 #include <string.h>   /* strspn() */
 #include <stdlib.h>   /* exit() */
 #include <stdio.h>    /* snprintf() */
